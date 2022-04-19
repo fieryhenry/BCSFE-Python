@@ -1,1 +1,4 @@
 *SAVE_DATA*
+dist/
+*.egg*
+*__pychache__*

@@ -1,5 +1,5 @@
 import hashlib
-from . import helper
+from BCSFE_Python import helper
 
 def get_md5_sum(save_data, game_version):
     if game_version == "jp":

@@ -2,9 +2,9 @@ import datetime
 import json
 import os
 import traceback
-from . import helper
+from BCSFE_Python import helper
 import dateutil.parser
-from . import parse_save
+from BCSFE_Python import parse_save
 
 
 def write(save_data, number, bytes=None):
@@ -386,10 +386,6 @@ def export_json(save_stats, path):
     helper.coloured_text(f"Successfully wrote json to &{os.path.abspath(path)}&")
 
 def exit_serialiser(save_data, save_stats):
-    ordered_data = parse_save.re_order(save_stats)
-
-    f = open("save_data.json", "w")
-    f.write(json.dumps(ordered_data, indent=4))
     return serialise_utf8_string(save_data, save_stats["hash"], write_length=False)
 
 

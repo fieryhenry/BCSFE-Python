@@ -1,16 +1,36 @@
-from . import helper
-from . import patcher
-from . import serialise_save
-from .edits.basic_items import basic, talent_orbs, meow_medals, play_time
-from .edits.gamototo import gamatoto_xp, ototo_cat_cannon, helpers
-from .edits.cats import evolve_cats, get_remove_cats, upgrade_blue, upgrade_cats, talents
-from .edits.levels import aku, event_stages, gauntlet, itf_timed_scores, main_story, outbreaks, towers, treasures, uncanny
+from BCSFE_Python import helper
+from BCSFE_Python import patcher
+from BCSFE_Python import serialise_save
+from BCSFE_Python.edits.basic_items import basic, talent_orbs, meow_medals, play_time
+from BCSFE_Python.edits.gamototo import gamatoto_xp, ototo_cat_cannon, helpers
+from BCSFE_Python.edits.cats import evolve_cats, get_remove_cats, upgrade_blue, upgrade_cats, talents
+from BCSFE_Python.edits.levels import aku, event_stages, gauntlet, itf_timed_scores, main_story, outbreaks, towers, treasures, uncanny
 
 path = ""
 
 def save_and_exit(save_stats):
     save_data = serialise_save.start_serialize(save_stats)
     helper.write_save_data(save_data, save_stats["version"], path)
+
+def fix_elsewhere(save_stats):
+    main_token = save_stats["token"]
+    main_iq = save_stats["inquiry_code"]
+    print("Select a save file that is currently loaded in-game that doesn't have the elsehere error and is not banned\nPress enter to continue")
+    new_path = helper.sel_save()
+    if not new_path:
+        print("Please select a save file")
+        return
+    
+    data = helper.load_save_file(new_path)
+    new_stats = data["save_stats"]
+    new_token = new_stats["token"]
+    new_iq = new_stats["inquiry_code"]
+    save_stats["token"] = new_token
+    save_stats["inquiry_code"] = new_iq
+    
+    helper.coloured_text(f"Replaced inquiry code: &{main_iq}& with &{new_iq}&")
+    helper.coloured_text(f"Replaced token: &{main_token}& with &{new_token}&")
+    return save_stats
 
 def save_and_push(save_stats):
     save_data = serialise_save.start_serialize(save_stats)
@@ -102,6 +122,7 @@ features = {
         {
             "Inquiry Code": basic.edit_inquiry_code,
             "Token": basic.edit_token,
+            "Fix elsewhere error / Unban account" : fix_elsewhere,
         },
     "Other":
         {

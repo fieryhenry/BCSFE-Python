@@ -1,11 +1,12 @@
-from . import patcher
+from BCSFE_Python import patcher
 import json
 import os
 import secrets
 import subprocess
 import colored
 import requests
-from . import serialise_save
+from BCSFE_Python import serialise_save
+from BCSFE_Python import parse_save
 import tkinter
 from tkinter import filedialog
 
@@ -23,6 +24,15 @@ def to_little(number, bytes):
 def chunks(lst, n):
     for i in range(0, len(lst), n):
         yield lst[i:i + n]
+
+def load_save_file(path):
+    save_data = open_file_b(path)
+    game_version_c = get_game_version(save_data)
+    save_stats = parse_save.start_parse(save_data, game_version_c)
+    write_file(save_data, path + "_backup", False)
+    coloured_text(f"Backup successfully created at &{os.path.abspath(path) + '_backup'}", new=green)
+    coloured_text(f"Game version: &{game_version_c}")
+    return {"save_data" : save_data, "save_stats" : save_stats, "game_version" : game_version_c}
 
 def load_json_handler(json_path):
     save_stats = load_json(json_path)
@@ -70,33 +80,41 @@ def adb_pull(game_version):
     path = f"/data/data/jp.co.ponos.battlecats{game_version}/files/SAVE_DATA"
     coloured_text(f"Pulling save data from &{path}", new=green)
     data = subprocess.run(f"adb pull {path}", capture_output=True)
-    return_code = data.returncode
-    error_msg = bytes.decode(data.stderr, "utf-8")
-    return {"return_code" : return_code, "error" : error_msg}
+    return data
 
+def adb_error_handler(output, game_version, success="SAVE_DATA"):
+    return_code = output.returncode
+    error = bytes.decode(output.stderr, "utf-8")
+
+    if return_code == 0:
+        coloured_text(f"Success", new=green)
+        return success
+        
+    elif "device '(null)' not found" in error:
+        coloured_text(f"Error: No device with an adb connection can be found, please connect one and try again.", base=red)
+        return
+    elif "does not exist" in error:
+        coloured_text(f"Error: You don't seem to have game version: &\"{game_version}\"& installed on this device please try again.", base=red)
+        return
+    else:
+        coloured_text(f"Error: an unknown error has occurred: {error}")
+        return
 
 def adb_pull_handler():
     game_version = input("Enter your game version (en, jp, kr, tw):")
         
     output = adb_pull(game_version)
-    if output["return_code"] == 0:
-        coloured_text(f"Successfully got save data from game version &{game_version}&", new=green)
-        return "SAVE_DATA"
-        
-    elif "device '(null)' not found" in output["error"]:
-        coloured_text(f"Error: No device with an adb connection can be found, please connect one and try again.", base=red)
-        return
-    elif "does not exist" in output["error"]:
-        coloured_text(f"Error: You don't seem to have game version: &\"{game_version}\"& installed on this device please try again.", base=red)
-        return
-    print()
+    return adb_error_handler(output, game_version)
 
 def adb_clear(game_version):
     if game_version == "jp": game_version = ""
     package_name = f"jp.co.ponos.battlecats{game_version}"
     path = f"/data/data/{package_name}"
-    subprocess.run(f"adb shell rm {path}/shared_prefs -r -f")
-    subprocess.run(f"adb shell rm {path}/files/*SAVE_DATA*")
+    data = subprocess.run(f"adb shell rm {path}/shared_prefs -r -f", capture_output=True)
+    success = adb_error_handler(data, game_version, True)
+    if not success:
+        return
+    subprocess.run(f"adb shell rm {path}/files/*SAVE_DATA*", capture_output=True)
     adb_rerun(package_name)
 
 def validate_int(string):
@@ -132,9 +150,14 @@ def edit_item_str(item, name):
     coloured_text(f"Successfully set {name} to &{item}&")
     return item
 
-def get_files_path(path):
+def get_real_path(path):
     base_path = os.path.dirname(os.path.realpath(__file__))
-    path = os.path.join(base_path, "files/", path)
+    path = os.path.join(base_path, path)
+    return path
+
+def get_files_path(path):
+    base_path = get_real_path("files/")
+    path = os.path.join(base_path, path)
     return path
 def create_list(list, index=True, extra_values=None, offset=None, color=True):
     output = ""
@@ -171,6 +194,8 @@ def selection_list(names, mode, index_flag, include_at_once=False):
     return ids
 def edit_array_user(names, data, maxes, name, type_name="level", range=False, length=None, item_name=None, offset=0):
     individual = True
+    if type(maxes) != list:
+        maxes = [maxes] * len(data)
     if range:
         ids = get_range_input(coloured_text(f"Enter {name} ids(You can enter &all& to get all, a range e.g &1&-&50&, or ids separate by spaces e.g &5 4 7&):", is_input=True), length)
         if len(ids) > 1:
@@ -303,11 +328,15 @@ def adb_rerun(package_name):
     subprocess.run(f"adb shell monkey -p {package_name} -v 1", stdout=subprocess.DEVNULL)
 
 def adb_push(game_version, save_data_path, rerun):
-    if game_version == "jp": game_version = ""
-    package_name = f"jp.co.ponos.battlecats{game_version}"
+    version = game_version
+    if version == "jp": version = ""
+    package_name = f"jp.co.ponos.battlecats{version}"
     path = f"/data/data/{package_name}/files/SAVE_DATA"
     coloured_text(f"Pushing save data to &{path}&", new=green)
-    subprocess.run(f"adb push \"{save_data_path}\" \"{path}\"")
+    data = subprocess.run(f"adb push \"{save_data_path}\" \"{path}\"", capture_output=True)
+    success = adb_error_handler(data, game_version, True)
+    if not success:
+        return
     if rerun: adb_rerun(package_name)
 
 def open_file_b(path):

@@ -1,9 +1,9 @@
-from . import feature_handler
-from . import serialise_save
-from . import parse_save
-from . import helper
+from BCSFE_Python import feature_handler
+from BCSFE_Python import serialise_save
+from BCSFE_Python import parse_save
+from BCSFE_Python import helper
 import argparse
-from . import patcher
+from BCSFE_Python import patcher
 import sys
 
 def main():
@@ -53,12 +53,10 @@ def arg_handler(args):
     if not path:
         return
 
-    save_data = helper.open_file_b(path)
-    game_version_c = helper.get_game_version(save_data)
-    save_stats = parse_save.start_parse(save_data, game_version_c)
-    helper.write_file(save_data, path + "_backup", False)
-    helper.coloured_text(f"Backup successfully created at &{path + '_backup'}", new=helper.green)
-    helper.coloured_text(f"Game version: &{game_version_c}")
+    data = helper.load_save_file(path)
+    save_stats = data["save_stats"]
+    save_data = data["save_data"]
+    game_version_c = data["game_version"]
 
     if args_dict["export_json"]:
         serialise_save.export_json(save_stats, args_dict["export_json"])

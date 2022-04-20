@@ -2,7 +2,7 @@ import collections
 import datetime
 import json
 import traceback
-from . import helper
+from BCSFE_Python import helper
 
 address = 0
 save_data_g = None

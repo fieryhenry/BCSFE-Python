@@ -1,7 +1,7 @@
-from BCSFE_Python import helper
+from BCSFE_Python import helper as helper_module
 
 def get_gamatoto_helpers():
-    f = open(helper.get_files_path("game_data/gamatoto/GamatotoExpedition_Members_name_en.csv"), "r").readlines()
+    f = open(helper_module.get_files_path("game_data/gamatoto/GamatotoExpedition_Members_name_en.csv"), "r").readlines()
     helpers = {}
     for line in f:
         line_data = line.split("|")
@@ -34,7 +34,7 @@ def edit_helpers(save_stats):
         current_helpers[helper] = helper_data[str(helper)]
         helper_count[current_helpers[helper]["Rarity_name"]] += 1
 
-    helpers_counts_input = helper.edit_items_list(list(helper_count.keys()), list(helper_count.values()), "Gamatoto Helpers", 10, "amount")
+    helpers_counts_input = helper_module.edit_items_list(list(helper_count.keys()), list(helper_count.values()), "Gamatoto Helpers", 10, "amount")
 
     final_helpers = generate_helpers(helpers_counts_input, helper_data)
     extra_ls = [0xffffffff] * (len(helpers) - len(final_helpers))

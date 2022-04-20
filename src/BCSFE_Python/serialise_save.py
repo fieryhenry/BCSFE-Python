@@ -2,9 +2,9 @@ import datetime
 import json
 import os
 import traceback
-from BCSFE_Python import helper
+from . import helper
 import dateutil.parser
-from BCSFE_Python import parse_save
+from . import parse_save
 
 
 def write(save_data, number, bytes=None):

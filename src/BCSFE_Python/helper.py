@@ -1,12 +1,12 @@
-from BCSFE_Python import patcher
+from . import patcher
 import json
 import os
 import secrets
 import subprocess
 import colored
 import requests
-from BCSFE_Python import serialise_save
-from BCSFE_Python import parse_save
+from . import serialise_save
+from . import parse_save
 import tkinter
 from tkinter import filedialog
 

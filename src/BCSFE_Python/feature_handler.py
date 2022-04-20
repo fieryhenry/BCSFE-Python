@@ -1,10 +1,10 @@
-from BCSFE_Python import helper
-from BCSFE_Python import patcher
-from BCSFE_Python import serialise_save
-from BCSFE_Python.edits.basic_items import basic, talent_orbs, meow_medals, play_time
-from BCSFE_Python.edits.gamototo import gamatoto_xp, ototo_cat_cannon, helpers
-from BCSFE_Python.edits.cats import evolve_cats, get_remove_cats, upgrade_blue, upgrade_cats, talents
-from BCSFE_Python.edits.levels import aku, event_stages, gauntlet, itf_timed_scores, main_story, outbreaks, towers, treasures, uncanny
+from . import helper
+from . import patcher
+from . import serialise_save
+from .edits.basic_items import basic, talent_orbs, meow_medals, play_time
+from .edits.gamototo import gamatoto_xp, ototo_cat_cannon, helpers
+from .edits.cats import evolve_cats, get_remove_cats, upgrade_blue, upgrade_cats, talents
+from .edits.levels import aku, event_stages, gauntlet, itf_timed_scores, main_story, outbreaks, towers, treasures, uncanny
 
 path = ""
 

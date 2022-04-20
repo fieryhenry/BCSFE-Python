@@ -1,9 +1,9 @@
-from BCSFE_Python import feature_handler
-from BCSFE_Python import serialise_save
-from BCSFE_Python import parse_save
-from BCSFE_Python import helper
+from . import feature_handler
+from . import serialise_save
+from . import parse_save
+from . import helper
 import argparse
-from BCSFE_Python import patcher
+from . import patcher
 import sys
 
 def main():

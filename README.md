@@ -4,7 +4,7 @@ A python save editor for the mobile game The Battle Cats that requires a rooted 
 
 It is sort of based on my [C# save editor](https://github.com/fieryhenry/Battle-Cats-Save-File-Editor) but it works in a completely different way and should be more reliable since it works in a similar way to how the game actually parses the save data. But the downside is that if there is one error/bug in the parser code, you can't edit anything and the program crashes.
 
-Join the [Discord Server](https://discord.gg/DvmMgvn5ZB) if you want to suggest new features, report bugs or get help on how to use it (not a substitute for the latest tutorial video).
+Join the [discord server](https://discord.gg/DvmMgvn5ZB) if you want to suggest new features, report bugs or get help on how to use the editor (not a substitute for the latest tutorial video).
 
 If you want to support me then consider gifting me some ko-fi here: https://ko-fi.com/fieryhenry
 
@@ -22,7 +22,7 @@ At the moment you will need either a rooted device or a rooted android emulator.
 
 1. Install python (If you haven't already) https://www.python.org/downloads/
 
-2. Enter the command: `python -m pip install` into cmd or another terminal to install the editor
+2. Enter the command: `python -m pip install battle-cats-save-editor` into cmd or another terminal to install the editor
 
 3. Connect your rooted device to your pc or start up your emulator
 
@@ -36,7 +36,7 @@ At the moment you will need either a rooted device or a rooted android emulator.
 
 8. Your edits won't be saved automatically so you'll need to go into the `Save Management` option and choose one of the first 3 options.
 
-If you want a video to follow instead then look watch a tutorial video [here]() (WIP)
+If you want a video to follow instead then watch the tutorial video [here]() (WIP)
 
 ### How to fix "This save data is currently acitve elsewhere"
 

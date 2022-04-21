@@ -14,8 +14,42 @@ def upgrade_current_cats(save_stats):
     save_stats = upgrade_cats_ids(save_stats, cat_ids)
 
     return save_stats
-    
 
+def get_rarities():
+    path = helper.get_files_path("game_data/rarity/unitbuy.csv")
+    data = helper.open_file_s(path).splitlines()
+
+    rarity_ids = []
+    for cat in data:
+        line = cat.split(",")
+        if len(line) < 3: continue
+        rarity = line[13]
+        rarity_ids.append(rarity)
+    return rarity_ids
+
+def get_rarity(ids):
+    rarities = get_rarities()
+    cat_ids = []
+    for id in ids:
+        id = helper.validate_int(id)
+        if not id:
+            print("Please input a valid number")
+            continue
+        id -= 1
+        for i in range(len(rarities)):
+            if int(rarities[i]) == id:
+                cat_ids.append(i)
+    return cat_ids
+
+types = ["Normal", "Special", "Rare", "Super Rare", "Uber Super Rare", "Legend Rare"]
+def upgrade_cat_rarity(save_stats):
+    ids = helper.selection_list(types, "upgrade", True)
+    
+    cat_ids = get_rarity(ids)
+
+    save_stats = upgrade_cats_ids(save_stats, cat_ids)
+    
+    return save_stats
 
 def upgrade_cats_ids(save_stats, ids):
     cats = save_stats["cat_upgrades"]

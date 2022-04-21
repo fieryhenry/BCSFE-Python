@@ -1,5 +1,5 @@
 import helper
-
+from edits.cats import upgrade_cats
 def get_evolve(save_stats):
     return evolve_handler(save_stats, 2, "set", False)
 
@@ -17,6 +17,11 @@ def get_evolve_current(save_stats):
             current_cats.append(id)
     return evolve_handler_ids(save_stats, 2, "set", current_cats, False)
 
+def evolve_cat_rarity(save_stats):
+    ids = helper.selection_list(upgrade_cats.types, "true form", True)
+    cat_ids = upgrade_cats.get_rarity(ids)
+    save_stats = evolve_handler_ids(save_stats, 2, "set", cat_ids, False)
+    return save_stats
 
 def get_evolve_data():
     f = open(helper.get_files_path("game_data/true_forms/nyankoPictureBookData.csv"), "r").readlines()

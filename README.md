@@ -34,7 +34,9 @@ At the moment you will need either a rooted device or a rooted android emulator.
 
 7. If you get a parsing error, or nothing seems to happen then please join the [discord server]((https://discord.gg/DvmMgvn5ZB)) and report it to me directly or in #bug-reports
 
-8. Your edits won't be saved automatically so you'll need to go into the `Save Management` option and choose one of the first 3 options.
+8. Then edit what you want. You can either enter the numbers asigned to each feature, or a word to search for a feature e.g entering catfood will run the Cat Food feature and entering cats will show you all the features that have cats in their name.
+
+9. Your edits won't be saved automatically so you'll need to go into the `Save Management` option and choose one of the first 3 options. A shortcut for re-launching the game is to enter `(r` into the the editor.
 
 If you want a video to follow instead then watch the tutorial video [here]() (WIP)
 

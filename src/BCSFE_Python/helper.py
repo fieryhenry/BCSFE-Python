@@ -155,6 +155,9 @@ def get_real_path(path):
     path = os.path.join(base_path, path)
     return path
 
+def open_file_s(path):
+    return open(path, "r", encoding="utf-8").read()
+
 def get_files_path(path):
     base_path = get_real_path("files/")
     path = os.path.join(base_path, path)

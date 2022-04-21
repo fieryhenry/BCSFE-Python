@@ -94,12 +94,15 @@ features = {
     "Cats / Special Skills":
         {
             "Get Cats": get_remove_cats.get_cat,
+            "Get Cats Based On Rarity" : get_remove_cats.get_cat_rarity,
             "Remove Cats": get_remove_cats.remove_cats,
             "Upgrade Cats": upgrade_cats.upgrade_cats,
             "Upgrade Current Cats": upgrade_cats.upgrade_current_cats,
+            "Upgrade Cats Based On Rarity" : upgrade_cats.upgrade_cat_rarity,
             "Upgrade Special Skills / Base upgrades (The ones that are blue)": upgrade_blue.upgrade_blue,
             "True Form Current Cats": evolve_cats.get_evolve_current,
             "True Form Cats": evolve_cats.get_evolve,
+            "True Form Cats Based On Rarity" : evolve_cats.evolve_cat_rarity,
             "Force True Form Cats": evolve_cats.get_evolve_forced,
             "Remove True Forms": evolve_cats.remove_evolve,
             "Talents" : talents.edit_talents,

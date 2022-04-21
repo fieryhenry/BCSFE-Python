@@ -3,9 +3,12 @@ import setuptools
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
+with open("src/BCSFE_Python/files/version.txt", "r", encoding="utf-8") as fh:
+    version = fh.read()
+
 setuptools.setup(
     name="battle-cats-save-editor",
-    version="1.3.0",
+    version=version,
     author="fieryhenry",
     description="A battle cats save file editor",
     long_description=long_description,

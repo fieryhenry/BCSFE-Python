@@ -16,6 +16,7 @@ root.withdraw()
 green = "#008000"
 dark_yellow = "#d7c32a"
 red = "#ff0000"
+cyan = "#00ffff"
 
 def to_little(number, bytes):
     val_b = int.to_bytes(number, bytes, "little")
@@ -123,6 +124,30 @@ def validate_int(string):
         return int(string)
     else:
         return None
+
+def get_version():
+    path = get_files_path("version.txt")
+    version = open_file_s(path)
+    return version
+
+def get_latest_version():
+    package_name = "battle-cats-save-editor"
+    r = requests.get(f"https://pypi.org/pypi/{package_name}/json")
+    if not r.ok:
+        coloured_text("An error has occurred while checking for a new version", base=red)
+        return
+    return r.json()["info"]["version"]
+
+def check_update():
+    installed_version = get_version()
+    coloured_text(f"\nYou currently have version &{installed_version}& installed", new=green)
+    latest_version = get_latest_version()
+    if not latest_version:
+        return
+    coloured_text(f"The latest version available is &{latest_version}&", new=green)
+    if installed_version != latest_version:
+        coloured_text(f"\n&A new version is available!&\n&Please run &python -m pip install -U battle-cats-save-editor& to install it\n",base=cyan, new=green)
+
 def get_range_input(input, length=None, min=0):
     ids = []
     if length != None and input.lower() == "all":

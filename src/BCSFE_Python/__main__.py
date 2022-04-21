@@ -10,6 +10,7 @@ import argparse
 import patcher
 
 def main():
+    helper.check_update()
     arg_handler(sys.argv[1:])
 
 def normal_start_up():

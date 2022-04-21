@@ -1,9 +1,10 @@
 import helper
 import patcher
 import serialise_save
-from edits.basic_items import basic, talent_orbs, meow_medals, play_time
+from edits.basic_items import basic, talent_orbs
+from edits.other import meow_medals, play_time, unlock_enemy_guide
 from edits.gamototo import gamatoto_xp, ototo_cat_cannon, helpers
-from edits.cats import evolve_cats, get_remove_cats, upgrade_blue, upgrade_cats, talents
+from edits.cats import evolve_cats, get_remove_cats, upgrade_blue, upgrade_cats, talents, clear_cat_guide
 from edits.levels import aku, event_stages, gauntlet, itf_timed_scores, main_story, outbreaks, towers, treasures, uncanny, clear_tutorial
 
 path = ""
@@ -106,6 +107,8 @@ features = {
             "Force True Form Cats": evolve_cats.get_evolve_forced,
             "Remove True Forms": evolve_cats.remove_evolve,
             "Talents" : talents.edit_talents,
+            "Collect Cat Guide" : clear_cat_guide.clear_cat_guide,
+            "Collect Cat Guide Based On Rarity" : clear_cat_guide.clear_cat_guide_rarity,
         },
     "Levels / Treasures" :
         {
@@ -135,6 +138,7 @@ features = {
             "Restart Pack" : basic.edit_restart_pack,
             "Meow Medals" : meow_medals.medals,
             "Play Time" : play_time.edit_play_time,
+            "Unlock Enemy Guide" : unlock_enemy_guide.enemy_guide,
         }
 }
 def search_dict(dictionary, item, results=[]):
@@ -157,7 +161,7 @@ def show_options(user_input, save_stats, feature_dict):
             results.append(
                 {"Name": result, "Function": feature_dict[name][result]})
     else:
-        to_search = to_search.replace(" ", "")
+        to_search = to_search.replace(" ", "").replace("_", "")
         results = search_dict(feature_dict, to_search, [])
     if len(results) == 1:
         save_stats = results[0]["Function"](save_stats)

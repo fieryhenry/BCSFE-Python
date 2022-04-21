@@ -24,7 +24,7 @@ At the moment you will need either a rooted device or a rooted android emulator.
 
 2. Enter the command: `python -m pip install -U battle-cats-save-editor` into cmd or another terminal to install the editor. If that doesn't work then use `py` instead of `python` in the command
 
-3. Connect your rooted device to your pc or start up your emulator
+3. Connect your rooted device to your pc or start up your rooted emulator
 
 4. Then enter the command: `python -m BCSFE_Python` to run the editor. If that doesn't work then use `py` instead of `python` in the command
 
@@ -38,7 +38,7 @@ At the moment you will need either a rooted device or a rooted android emulator.
 
 9. Your edits won't be saved automatically so you'll need to go into the `Save Management` option and choose one of the first 3 options. A shortcut for re-launching the game is to enter `(r` into the the editor.
 
-If you want a video to follow instead then watch the tutorial video [here]() (WIP)
+If you want a video to follow instead then watch the tutorial video [here](https://www.youtube.com/watch?v=xBnGR1A3A-U)
 
 ### How to fix "This save data is currently acitve elsewhere"
 

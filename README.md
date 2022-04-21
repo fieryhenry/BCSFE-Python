@@ -14,7 +14,7 @@ Lethal's editor for giving me inspiration to start the
 project and it helped me work out how to patch the save data and edit
 cf/xp: https://www.reddit.com/r/BattleCatsCheats/comments/djehhn/editoren/
 
-Beeven and csehydrogen's open source code, which helped me figure out how to patch save data: [GitHub - beeven/battlecats](https://github.com/beeven/battlecats), [GitHub - csehydrogen/BattleCatsHacker](https://github.com/csehydrogen/BattleCatsHacker)
+Beeven and csehydrogen's open source code, which helped me figure out how to patch save data: [beeven/battlecats](https://github.com/beeven/battlecats), [csehydrogen/BattleCatsHacker](https://github.com/csehydrogen/BattleCatsHacker)
 
 ## How to use:
 
@@ -48,7 +48,7 @@ I don't really know how this error occurs because I've gotten it even with an un
 
 2. Open the editor, select any save and then run the feature in `Save Management` to `Clear save data`
 
-3. Open the game, select a langauge and accept all of the agreements.
+3. Then open the game, select a langauge and accept all of the agreements.
 
 4. Open the editor and get the save data using adb
 

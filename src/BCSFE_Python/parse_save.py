@@ -557,6 +557,20 @@ def get_ht_it_data():
             data.append(next(4, True))
     return {"data" : data, "current" : current_data, "progress" : progress_data}
 
+def get_mission_loop(missions):
+    length = next(4)
+    for i in range(length):
+        mission_id = next(4)
+        mission_value = next(4)
+        missions[mission_id] = mission_value
+    return missions
+def get_mission_data():
+    missions = {}
+    for i in range(1):
+        missions = get_mission_loop(missions)
+    print(address)
+    print(missions)
+
 
 def get_looped_data():
     data = []
@@ -573,7 +587,6 @@ def get_looped_data():
 
         val_118 = next(4, True)
         data.append(val_118)
-
     
     val_114 = next(4, True)
     data.append(val_114)
@@ -1451,7 +1464,6 @@ def parse_save(save_data, game_version_country):
 
     save_stats["other_cat_data"] = get_length_data()
     save_stats["unknown_12"] = get_length_data(length=10)
-
     length = next(2)
     save_stats["cat_storage_id"] = get_length_data(2, 4, length)
     save_stats["cat_storage_type"] = get_length_data(2, 4, length)

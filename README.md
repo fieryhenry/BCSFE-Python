@@ -22,11 +22,11 @@ At the moment you will need either a rooted device or a rooted android emulator.
 
 1. Install python (If you haven't already) https://www.python.org/downloads/
 
-2. Enter the command: `python -m pip install battle-cats-save-editor` into cmd or another terminal to install the editor
+2. Enter the command: `python -m pip install -U battle-cats-save-editor` into cmd or another terminal to install the editor. If that doesn't work then use `py` instead of `python` in the command
 
 3. Connect your rooted device to your pc or start up your emulator
 
-4. Then enter the command: `python -m BCSFE_Python` to run the editor
+4. Then enter the command: `python -m BCSFE_Python` to run the editor. If that doesn't work then use `py` instead of `python` in the command
 
 5. Choose the option to `Get the save data from the game automatically using adb` and enter the game version that you are using.
 

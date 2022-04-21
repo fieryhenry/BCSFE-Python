@@ -183,7 +183,7 @@ def menu(save_stats, path_save):
     path = path_save
     display_features()
     user_input = input(
-        "What do you want to edit (some options contain other features within them)\nYou can enter a number to run a feature or a word to search for that feature (e.g entering catfood will run the Cat Food feature, and entering tickets will show you all the features that edit tickets)\nYou can press enter to see all of the features:\n")
+        "What do you want to edit (some options contain other features within them)\nYou can enter a number to run a feature or a word to search for that feature (e.g entering catfood will run the Cat Food feature, and entering tickets will show you all the features that edit tickets)\nYou can press enter to see a list of all of the features:\n")
     save_stats = show_options(user_input, save_stats, features)
 
     return save_stats

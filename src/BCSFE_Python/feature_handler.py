@@ -4,7 +4,7 @@ import serialise_save
 from edits.basic_items import basic, talent_orbs, meow_medals, play_time
 from edits.gamototo import gamatoto_xp, ototo_cat_cannon, helpers
 from edits.cats import evolve_cats, get_remove_cats, upgrade_blue, upgrade_cats, talents
-from edits.levels import aku, event_stages, gauntlet, itf_timed_scores, main_story, outbreaks, towers, treasures, uncanny
+from edits.levels import aku, event_stages, gauntlet, itf_timed_scores, main_story, outbreaks, towers, treasures, uncanny, clear_tutorial
 
 path = ""
 
@@ -120,6 +120,7 @@ features = {
             "Into the Future Timed Scores" : itf_timed_scores.timed_scores,
             "Challenge Battle" : basic.edit_challenge_battle,
             "Towers" : towers.edit_tower,
+            "Clear Tutorial" : clear_tutorial.clear_tutorial,
         },
     "Inquiry Code / Token":
         {

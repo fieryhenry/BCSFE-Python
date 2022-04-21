@@ -6,6 +6,8 @@ It is sort of based on my [C# save editor](https://github.com/fieryhenry/Battle-
 
 Join the [discord server](https://discord.gg/DvmMgvn5ZB) if you want to suggest new features, report bugs or get help on how to use the editor (not a substitute for the latest tutorial video).
 
+PyPi: https://pypi.org/project/battle-cats-save-editor/
+
 If you want to support me then consider gifting me some ko-fi here: https://ko-fi.com/fieryhenry
 
 ## Thanks to:

@@ -1,4 +1,4 @@
-from BCSFE_Python import helper
+import helper
 
 def get_evolve(save_stats):
     return evolve_handler(save_stats, 2, "set", False)

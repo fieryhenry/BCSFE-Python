@@ -1,4 +1,4 @@
-from BCSFE_Python import helper
+import helper
 
 def get_boundaries():
     boundaries = open(helper.get_files_path("game_data/gamatoto/GamatotoExpedition.csv"), "r").readlines()

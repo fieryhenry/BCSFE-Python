@@ -2,9 +2,9 @@ import datetime
 import json
 import os
 import traceback
-from . import helper
+import helper
 import dateutil.parser
-from . import parse_save
+import parse_save
 
 
 def write(save_data, number, bytes=None):

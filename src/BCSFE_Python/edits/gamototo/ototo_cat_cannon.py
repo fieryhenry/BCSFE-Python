@@ -1,4 +1,4 @@
-from BCSFE_Python import helper
+import helper
 
 def edit_cat_cannon(save_stats):
     types = ["Base", "Slow Beam", "Iron Wall", "Thunderbolt", "Waterblast", "Holy Blast", "Breakerblast", "Curseblast"]

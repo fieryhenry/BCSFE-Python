@@ -1,4 +1,4 @@
-from BCSFE_Python import helper
+import helper
 
 def get_medal_names():
     medal_names = open(helper.get_files_path("game_data/medals/medalname.tsv"), "r").readlines()

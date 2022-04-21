@@ -1,4 +1,4 @@
-from BCSFE_Python import helper
+import helper
 
 
 def get_cat(save_stats):

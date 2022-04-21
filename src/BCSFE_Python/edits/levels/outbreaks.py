@@ -1,5 +1,5 @@
-from BCSFE_Python import helper
-from BCSFE_Python.edits.levels import main_story
+import helper
+from edits.levels import main_story
 
 
 def edit_outbreaks(save_stats):

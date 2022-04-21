@@ -1,4 +1,4 @@
-from BCSFE_Python import helper as helper_module
+import helper as helper_module
 
 def get_gamatoto_helpers():
     f = open(helper_module.get_files_path("game_data/gamatoto/GamatotoExpedition_Members_name_en.csv"), "r").readlines()

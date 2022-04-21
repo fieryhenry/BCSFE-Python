@@ -1,5 +1,5 @@
-from BCSFE_Python.edits.levels import main_story
-from BCSFE_Python import helper
+from edits.levels import main_story
+import helper
 
 def treasures(save_stats):
     treasures = save_stats["treasures"]

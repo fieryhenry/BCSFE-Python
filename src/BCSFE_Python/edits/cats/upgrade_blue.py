@@ -1,6 +1,5 @@
-from BCSFE_Python import helper
-
-from BCSFE_Python.edits.cats import upgrade_cats
+import helper
+from edits.cats import upgrade_cats
 types = ["Power", "Range", "Charge", "Efficiency", "Wallet", "Health", "Research", "Accounting", "Study", "Energy"]
 
 

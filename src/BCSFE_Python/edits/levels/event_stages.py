@@ -1,4 +1,4 @@
-from BCSFE_Python import helper
+import helper
 
 def stage_handler(stage_data, ids, offset, unlock_next=True):
     lengths = stage_data["Lengths"]

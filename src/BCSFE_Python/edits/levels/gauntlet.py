@@ -1,5 +1,5 @@
-from BCSFE_Python import helper
-from BCSFE_Python.edits.levels import event_stages
+import helper
+from edits.levels import event_stages
 
 def edit_gauntlet(save_stats):
     stage_data = save_stats["gauntlets"]

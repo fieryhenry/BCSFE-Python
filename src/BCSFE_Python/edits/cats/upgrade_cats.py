@@ -1,4 +1,4 @@
-from BCSFE_Python import helper
+import helper
 
 def upgrade_cats(save_stats):
     cats = save_stats["cat_upgrades"]

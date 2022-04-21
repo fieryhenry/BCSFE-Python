@@ -1,4 +1,4 @@
-from BCSFE_Python import helper
+import helper
 
 def create_orb_list(attributes, effects, grades, incl_metal):
     orb_list = []

@@ -1,4 +1,4 @@
-from BCSFE_Python import helper
+import helper
 
 
 chapters = ["Empire of Cats 1", "Empire of Cats 2", "Empire of Cats 3",

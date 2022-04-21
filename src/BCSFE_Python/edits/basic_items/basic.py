@@ -1,4 +1,4 @@
-from BCSFE_Python import helper
+import helper
 def edit_cat_food(save_stats):
     save_stats["cat_food"] = helper.edit_item(save_stats["cat_food"], 45000, "Cat Food", True)
     return save_stats

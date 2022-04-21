@@ -1,10 +1,13 @@
-from . import feature_handler
-from . import serialise_save
-from . import parse_save
-from . import helper
+import sys, os
+dir_path = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(dir_path)
+
+import feature_handler
+import serialise_save
+import parse_save
+import helper
 import argparse
-from . import patcher
-import sys
+import patcher
 
 def main():
     arg_handler(sys.argv[1:])

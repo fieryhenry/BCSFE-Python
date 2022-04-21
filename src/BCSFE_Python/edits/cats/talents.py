@@ -1,4 +1,4 @@
-from BCSFE_Python import helper
+import helper
 
 def get_talent_data():
     talent_data_raw = open(helper.get_files_path("game_data/talents/SkillAcquisition.csv"), "r").readlines()

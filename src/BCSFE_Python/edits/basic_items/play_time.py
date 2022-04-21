@@ -1,5 +1,5 @@
 import datetime
-from BCSFE_Python import helper
+import helper
 
 def edit_play_time(save_stats):
     play_time = save_stats["play_time"]

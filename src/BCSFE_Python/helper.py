@@ -1,12 +1,12 @@
-from . import patcher
+import patcher
 import json
 import os
 import secrets
 import subprocess
 import colored
 import requests
-from . import serialise_save
-from . import parse_save
+import serialise_save
+import parse_save
 import tkinter
 from tkinter import filedialog
 

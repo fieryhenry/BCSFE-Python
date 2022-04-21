@@ -144,9 +144,9 @@ def check_update():
     latest_version = get_latest_version()
     if not latest_version:
         return
-    coloured_text(f"The latest version available is &{latest_version}&", new=green)
+    coloured_text(f"The latest version available is &{latest_version}&\n", new=green)
     if installed_version != latest_version:
-        coloured_text(f"\n&A new version is available!&\n&Please run &python -m pip install -U battle-cats-save-editor& to install it\n",base=cyan, new=green)
+        coloured_text(f"&A new version is available!&\n&Please run &python -m pip install -U battle-cats-save-editor& to install it\n",base=cyan, new=green)
 
 def get_range_input(input, length=None, min=0):
     ids = []

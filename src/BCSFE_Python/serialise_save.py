@@ -536,8 +536,13 @@ def serialize_save(save_stats):
     save_data = serialise_time_data(
         save_data, save_stats["second_time"], save_stats["dst"], save_stats["dst_val"])
 
-    save_data = write(
-        save_data, save_stats["unknown_19"], save_stats["unknown_19"]["Length"])
+    save_data = write(save_data, save_stats["unknown_105"])
+    save_data = write_length_data(save_data, save_stats["unknown_106"], 4, 4, False, 4)
+    save_data = write(save_data, save_stats["unknown_107"])
+    save_data = write(save_data, len(save_stats["unknown_108"]), 4)
+    for i in range(len(save_stats["unknown_108"])):
+        save_data = serialise_utf8_string(save_data, save_stats["unknown_108"][i])
+    save_data = write(save_data, save_stats["unknown_109"])
 
     save_data = write(save_data, save_stats["unlocked_slots"])
 

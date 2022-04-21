@@ -163,13 +163,12 @@ def get_utf8_string(length=None):
 
 
 def skip_some_data(save_data, total_cats):
-    pos = save_data.find(total_cats.to_bytes(2, "little"), address)
+    pos = save_data.find(total_cats.to_bytes(4, "little"), address)
     if pos > address:
          pos -= 24
 
     length = pos - address
     return {"Value" : next(length), "Length" : length}
-    #Set_address(pos)
 
 
 def skip_some_data_two():
@@ -1480,11 +1479,14 @@ def parse_save(save_data, game_version_country):
     save_stats["unknown_18"] = next(4, True)
 
     save_stats["second_time"] = get_time_data(save_stats["dst"])
-
-    if save_stats["dst"]:
-        save_stats["unknown_19"] = next(68, True)
-    else:
-        save_stats["unknown_19"] = next(31, True)
+    save_stats["unknown_105"] = next(4, True)
+    save_stats["unknown_106"] = get_length_data(length=4)
+    save_stats["unknown_107"] = next(7, True)
+    total_strs = next(4)
+    save_stats["unknown_108"] = []
+    for i in range(total_strs):
+        save_stats["unknown_108"].append(get_utf8_string())
+    save_stats["unknown_109"] = next(37, True)
 
     save_stats["unlocked_slots"] = next(1, True)
     length_1 = next(4)

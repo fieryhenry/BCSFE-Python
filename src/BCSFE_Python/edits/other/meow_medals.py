@@ -15,13 +15,15 @@ def medals(save_stats):
     names = get_medal_names()
     helper.create_list(names)
 
-    ids = helper.get_range_input(helper.coloured_text("Enter medal ids (You can enter all to get &all&, a range e.g &1&-&50&, or ids separate by spaces e.g &5 4 7&):", is_input=True), len(names))
+    ids = helper.get_range_input(helper.coloured_text("Enter medal ids (You can enter all to get &all&, a range e.g &1&-&50&, or ids separate by spaces e.g &5 4 7&):", is_input=True), len(names)+1)
+    
     for id in ids:
         if id == 0: continue
         id -= 1
         if id not in medals["medal_data_1"]:
-            medals["medal_data_1"].append(id)
-            medals["medal_data_2"][id] = 1
+            if id not in medals["medal_data_2"]:
+                medals["medal_data_1"].append(id)
+            medals["medal_data_2"][id] = 0
     save_stats["medals"] = medals
     print("Successfully gave medals")
     return save_stats

@@ -1,5 +1,11 @@
 # Changelog
 
+### [1.4.7] - 2021-04-22
+
+#### Changed
+
+- It seems like the adb included in the editor doesn't work, and so I've removed it, you now need to have adb in your Path environment variable. Tutorial in the help videos's description
+
 ## [1.4.6] - 2021-04-22
 
 #### Changed

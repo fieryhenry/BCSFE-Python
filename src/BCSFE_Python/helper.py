@@ -76,11 +76,14 @@ def write_file(data, path, prompt):
         coloured_text(f"Successfully wrote save data to: &{path}&", new=green)
     return path
 
+def get_adb_path():
+    return get_files_path("adb.exe")
+
 def adb_pull(game_version):
     if game_version == "jp": game_version = ""
     path = f"/data/data/jp.co.ponos.battlecats{game_version}/files/SAVE_DATA"
     coloured_text(f"Pulling save data from &{path}", new=green)
-    data = subprocess.run(f"adb pull {path}", capture_output=True)
+    data = subprocess.run(f"{get_adb_path()} pull {path}", capture_output=True)
     return data
 
 def adb_error_handler(output, game_version, success="SAVE_DATA"):
@@ -97,25 +100,34 @@ def adb_error_handler(output, game_version, success="SAVE_DATA"):
     elif "does not exist" in error:
         coloured_text(f"Error: You don't seem to have game version: &\"{game_version}\"& installed on this device please try again.", base=red)
         return
+    elif "daemon not running;" in error:
+        coloured_text(f"Adb daemon has now started, re-trying")
+        return "retry"
     else:
         coloured_text(f"Error: an unknown error has occurred: {error}")
         return
 
-def adb_pull_handler():
-    game_version = input("Enter your game version (en, jp, kr, tw):")
+def adb_pull_handler(game_version=None):
+    if not game_version:
+        game_version = input("Enter your game version (en, jp, kr, tw):")
         
     output = adb_pull(game_version)
-    return adb_error_handler(output, game_version)
+    success = adb_error_handler(output, game_version)
+    if success == "retry":
+        return adb_pull_handler(game_version)
+    return success
 
 def adb_clear(game_version):
     if game_version == "jp": game_version = ""
     package_name = f"jp.co.ponos.battlecats{game_version}"
     path = f"/data/data/{package_name}"
-    data = subprocess.run(f"adb shell rm {path}/shared_prefs -r -f", capture_output=True)
+    data = subprocess.run(f"{get_adb_path()} shell rm {path}/shared_prefs -r -f", capture_output=True)
     success = adb_error_handler(data, game_version, True)
     if not success:
         return
-    subprocess.run(f"adb shell rm {path}/files/*SAVE_DATA*", capture_output=True)
+    if success == "retry":
+        adb_clear(game_version)
+    subprocess.run(f"{get_adb_path()} shell rm {path}/files/*SAVE_DATA*", capture_output=True)
     adb_rerun(package_name)
 
 def validate_int(string):
@@ -222,7 +234,7 @@ def selection_list(names, mode, index_flag, include_at_once=False):
     return ids
 def edit_array_user(names, data, maxes, name, type_name="level", range=False, length=None, item_name=None, offset=0):
     individual = True
-    if type(maxes) != list:
+    if type(maxes) == int:
         maxes = [maxes] * len(data)
     if range:
         ids = get_range_input(coloured_text(f"Enter {name} ids(You can enter &all& to get all, a range e.g &1&-&50&, or ids separate by spaces e.g &5 4 7&):", is_input=True), length)
@@ -352,8 +364,8 @@ def write_save_data(save_data, game_version, path, prompt=True):
 
 def adb_rerun(package_name):
     print("Re-opening game...")
-    subprocess.run(f"adb shell am force-stop {package_name}")
-    subprocess.run(f"adb shell monkey -p {package_name} -v 1", stdout=subprocess.DEVNULL)
+    subprocess.run(f"{get_adb_path()} shell am force-stop {package_name}")
+    subprocess.run(f"{get_adb_path()} shell monkey -p {package_name} -v 1", stdout=subprocess.DEVNULL)
 
 def adb_push(game_version, save_data_path, rerun):
     version = game_version
@@ -361,10 +373,12 @@ def adb_push(game_version, save_data_path, rerun):
     package_name = f"jp.co.ponos.battlecats{version}"
     path = f"/data/data/{package_name}/files/SAVE_DATA"
     coloured_text(f"Pushing save data to &{path}&", new=green)
-    data = subprocess.run(f"adb push \"{save_data_path}\" \"{path}\"", capture_output=True)
+    data = subprocess.run(f"{get_adb_path()} push \"{save_data_path}\" \"{path}\"", capture_output=True)
     success = adb_error_handler(data, game_version, True)
     if not success:
         return
+    if success == "retry":
+        return adb_push(game_version, save_data_path, rerun)
     if rerun: adb_rerun(package_name)
 
 def open_file_b(path):

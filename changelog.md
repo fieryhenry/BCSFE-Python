@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.4.6] - 2021-04-22
+
+#### Changed
+
+- When the editor detects a new version, it will display where to see the changelog
+
+#### Fixed
+
+- A small issue releating to meow medals
+
+- Fix for some more parsing errors
+
 ## [1.4.5] - 2021-04-22
 
 #### Changed

@@ -1481,7 +1481,8 @@ def parse_save(save_data, game_version_country):
     save_stats["second_time"] = get_time_data(save_stats["dst"])
     save_stats["unknown_105"] = next(4, True)
     save_stats["unknown_106"] = get_length_data(length=4)
-    save_stats["unknown_107"] = next(7, True)
+    save_stats["unknown_107"] = next(3, True)
+    save_stats["unknown_110"] = get_utf8_string()
     total_strs = next(4)
     save_stats["unknown_108"] = []
     for i in range(total_strs):

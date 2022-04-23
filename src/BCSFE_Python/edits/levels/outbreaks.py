@@ -1,6 +1,11 @@
 import helper
 from edits.levels import main_story
 
+def encode_ls(list):
+    out_dict = {}
+    for i in range(len(list)):
+        out_dict[i] = list[i]
+    return out_dict
 
 def edit_outbreaks(save_stats):
     outbreaks = save_stats["outbreaks"]["outbreaks"]
@@ -20,7 +25,7 @@ def edit_outbreaks(save_stats):
         id = helper.clamp(id, 1, len(available_chapters))
         id -= 1
         if id > 2: id+=1
-        outbreaks[id] = [1] * len(outbreaks[id])
+        outbreaks[id] = encode_ls([1] * len(outbreaks[id]))
     save_stats["outbreaks"]["outbreaks"] = outbreaks
     print("Successfully set outbreaks")
     return save_stats

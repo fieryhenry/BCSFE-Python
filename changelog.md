@@ -1,6 +1,13 @@
 # Changelog
 
-### [1.4.7] - 2021-04-22
+## [1.4.8] - 2021-04-22
+
+#### Fixed
+
+- More save parsing issues
+- Event stages, uncanny, gauntlets not unlocking the next subchapter
+
+## [1.4.7] - 2021-04-22
 
 #### Changed
 
@@ -16,7 +23,7 @@
 
 - A small issue releating to meow medals
 
-- Fix for some more parsing errors
+- Some more parsing errors
 
 ## [1.4.5] - 2021-04-22
 

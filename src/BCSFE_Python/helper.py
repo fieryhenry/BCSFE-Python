@@ -29,10 +29,10 @@ def chunks(lst, n):
 def load_save_file(path):
     save_data = open_file_b(path)
     game_version_c = get_game_version(save_data)
+    coloured_text(f"Game version: &{game_version_c}&")
     save_stats = parse_save.start_parse(save_data, game_version_c)
     write_file(save_data, path + "_backup", False)
     coloured_text(f"Backup successfully created at &{os.path.abspath(path) + '_backup'}", new=green)
-    coloured_text(f"Game version: &{game_version_c}")
     return {"save_data" : save_data, "save_stats" : save_stats, "game_version" : game_version_c}
 
 def load_json_handler(json_path):
@@ -371,6 +371,7 @@ def adb_rerun(package_name):
     print("Re-opening game...")
     subprocess.run(f"adb shell am force-stop {package_name}")
     subprocess.run(f"adb shell monkey -p {package_name} -v 1", stdout=subprocess.DEVNULL)
+
 
 def adb_push(game_version, save_data_path, rerun):
     version = game_version

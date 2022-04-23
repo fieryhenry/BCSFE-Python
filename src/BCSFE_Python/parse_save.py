@@ -1210,12 +1210,15 @@ def get_data_after_orbs():
 
     data.append(next(8*3, True))
     data.append(next(4, True)) # 90900
-    for i in range(15):
-        data.append(next(4, True))
-    
-    data.append(next(4, True)) # 91000
     return data
+    
+    
 
+def get_slot_names(total_slots):
+    names = []
+    for i in range(total_slots):
+        names.append(get_utf8_string())
+    return names
 def get_talent_orbs(game_version):
     talent_orb_data = {}
 
@@ -1442,8 +1445,7 @@ def parse_save(save_data, game_version_country):
 
     save_stats["battle_items"] = get_length_data(4, 4, 6)
     save_stats["new_dialogs"] = get_length_data()
-
-    save_stats["unknown_6"] = get_length_data()
+    save_stats["unknown_6"] = next(4, True)
     save_stats["unknown_7"] = get_length_data(length=21)
 
     save_stats["lock_item"] = next(1, True)
@@ -1719,6 +1721,8 @@ def parse_save(save_data, game_version_country):
     save_stats["talent_orbs"] = get_talent_orbs(save_stats["game_version"])
 
     save_stats["unknown_86"] = get_data_after_orbs()
+    save_stats["slot_names"] = get_slot_names(len(save_stats["slots"]))
+    save_stats["gv_91000"] = next(4, True)
     save_stats["legend_tickets"] = next(4, True)
     save_stats["unknown_87"] = get_length_data(1, 5)
     save_stats["unknown_88"] = next(2, True)

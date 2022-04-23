@@ -481,7 +481,7 @@ def serialize_save(save_stats):
         save_data, save_stats["battle_items"], 4, 4, False, 6)
     save_data = write_length_data(save_data, save_stats["new_dialogs"])
 
-    save_data = write_length_data(save_data, save_stats["unknown_6"])
+    save_data = write(save_data, save_stats["unknown_6"])
     save_data = write_length_data(
         save_data, save_stats["unknown_7"], write_length=False)
 
@@ -775,6 +775,11 @@ def serialize_save(save_stats):
         save_data, save_stats["talent_orbs"], save_stats["game_version"])
 
     save_data = serialise_dumped_data(save_data, save_stats["unknown_86"])
+
+    for slot_name in save_stats["slot_names"]:
+        save_data = serialise_utf8_string(save_data, slot_name)
+    
+    save_data = write(save_data, save_stats["gv_91000"])
 
     save_data = write(save_data, save_stats["legend_tickets"])
 

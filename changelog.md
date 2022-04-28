@@ -2,7 +2,7 @@
 
 ## [1.5.0] - 2022-04-28
 
-### Added
+#### Added
 
 - When exporting to json, the current editor version will be included and so if json data from a different editor version is being imported a warning message will show.
 
@@ -10,7 +10,7 @@
 
 - Option to remove enemy guide entries
 
-### Fixed
+#### Fixed
 
 - More save parsing issues
 

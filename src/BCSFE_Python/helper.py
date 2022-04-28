@@ -162,7 +162,7 @@ def check_update():
         return
     coloured_text(f"The latest version available is &{latest_version}&\n", new=green)
     if installed_version != latest_version:
-        coloured_text(f"&A new version is available!&\n&Please run &python -m pip install -U battle-cats-save-editor& to install it&",base=cyan, new=green)
+        coloured_text(f"&A new version is available!&\n&Please run &py -m pip install -U battle-cats-save-editor& to install it&",base=cyan, new=green)
         coloured_text(f"&See the changelog here: &https://github.com/fieryhenry/BCSFE-Python/blob/master/changelog.md\n", base=cyan, new=green)
 
 def get_range_input(input, length=None, min=0):

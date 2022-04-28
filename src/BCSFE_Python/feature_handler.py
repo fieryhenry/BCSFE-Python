@@ -112,7 +112,7 @@ features = {
         },
     "Levels / Treasures" :
         {
-            "Main Story Chapters Clear" : main_story.main_story,
+            "Main Story Chapters Clear / Remove" : main_story.main_story,
             "Main Story Chapters Treasures" : treasures.treasures,
             "Zombie Stages / Outbreaks" : outbreaks.edit_outbreaks,
             "Event Stages" : event_stages.event_stages,
@@ -138,7 +138,7 @@ features = {
             "Restart Pack" : basic.edit_restart_pack,
             "Meow Medals" : meow_medals.medals,
             "Play Time" : play_time.edit_play_time,
-            "Unlock Enemy Guide" : unlock_enemy_guide.enemy_guide,
+            "Unlock / Remove Enemy Guide Entries" : unlock_enemy_guide.enemy_guide,
         }
 }
 def search_dict(dictionary, item, results=[]):

@@ -1,5 +1,6 @@
 [
     "game_version",
+    "editor_version",
     "version",
     "inquiry_code",
     "token",

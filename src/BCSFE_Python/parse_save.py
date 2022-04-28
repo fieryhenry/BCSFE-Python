@@ -567,8 +567,6 @@ def get_mission_data():
     missions = {}
     for i in range(1):
         missions = get_mission_loop(missions)
-    print(address)
-    print(missions)
 
 
 def get_looped_data():
@@ -841,7 +839,6 @@ def get_uncanny_current():
     return {"Clear": clear_progress, "total": total_subchapters, "stages": stages_per_subchapter, "stars": stars}
 
 def get_uncanny_progress(lengths):
-    offset = address
     total = lengths["total"]
     stars = lengths["stars"]
     stages = lengths["stages"]
@@ -918,8 +915,8 @@ def get_medals():
     medals = {}
 
     for i in range(total_medals):
-        medal_flag = next(1)
         medal_id = next(2)
+        medal_flag = next(1)
         medals[medal_id] = medal_flag
     return {"medal_data_1" : medal_data_1, "medal_data_2" : medals}
 
@@ -1396,6 +1393,7 @@ def parse_save(save_data, game_version_country):
     global save_data_g
     save_data_g = save_data
     save_stats = {}
+    save_stats["editor_version"] = helper.get_version()
 
     save_stats["game_version"] = next(4, True)
     save_stats["version"] = game_version_country
@@ -1431,9 +1429,7 @@ def parse_save(save_data, game_version_country):
 
     save_stats["story_chapters"] = get_main_story_levels()
     save_stats["treasures"] = get_treasures()
-
     save_stats["enemy_guide"] = get_length_data()
-
     save_stats["cats"] = get_length_data()
     save_stats["cat_upgrades"] = get_cat_upgrades()
     save_stats["current_forms"] = get_length_data()
@@ -1483,13 +1479,22 @@ def parse_save(save_data, game_version_country):
     save_stats["second_time"] = get_time_data(save_stats["dst"])
     save_stats["unknown_105"] = next(4, True)
     save_stats["unknown_106"] = get_length_data(length=4)
-    save_stats["unknown_107"] = next(3, True)
+    save_stats["unknown_107"] = next(1, True)
+
+    save_stats["unknown_108"] = {}
+    save_stats["unknown_108"]["flag"] = next(1, True)
+    save_stats["unknown_111"] = next(1, True)
     save_stats["unknown_110"] = get_utf8_string()
-    total_strs = next(4)
-    save_stats["unknown_108"] = []
-    for i in range(total_strs):
-        save_stats["unknown_108"].append(get_utf8_string())
-    save_stats["unknown_109"] = next(37, True)
+    save_stats["unknown_108"]["length"] = next(4, True)
+    save_stats["unknown_108"]["Value"] = []
+    if save_stats["unknown_108"]["flag"]["Value"] == 1:
+        for i in range(save_stats["unknown_108"]["length"]["Value"]):
+            save_stats["unknown_108"]["Value"].append(get_utf8_string())
+
+    if save_stats["dst"]:
+        save_stats["unknown_109"] = next(37, True)
+    else:
+        save_stats["unknown_109"] = next(0, True)
 
     save_stats["unlocked_slots"] = next(1, True)
     length_1 = next(4)
@@ -1736,7 +1741,7 @@ def parse_save(save_data, game_version_country):
     if save_stats["exit"]: return save_stats
     save_stats["gv_100000"] = next(4, True) # 100000
 
-    save_stats["unknown_92"] = next(4, True)
+    save_stats["date_int"] = next(4, True)
 
     save_stats = check_gv(save_stats, 100100)
     if save_stats["exit"]: return save_stats

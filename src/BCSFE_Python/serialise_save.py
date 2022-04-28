@@ -402,8 +402,8 @@ def serialise_medals(save_data, medals):
     medal_data_2 = medals["medal_data_2"]
     save_data = write(save_data, len(medal_data_2), 2)
     for medal_id in medal_data_2:
-        save_data = write(save_data, medal_data_2[medal_id], 1)
         save_data = write(save_data, medal_id, 2)
+        save_data = write(save_data, medal_data_2[medal_id], 1)
     return save_data
 
 
@@ -420,6 +420,8 @@ def serialise_play_time(save_data, play_time):
 
 def start_serialize(save_stats):
     try:
+        if save_stats["editor_version"] != helper.get_version():
+            print("WARNING: this json data was created in an older editor version and may not work")
         save_data = serialize_save(save_stats)
     except Exception:
         helper.coloured_text(
@@ -539,10 +541,14 @@ def serialize_save(save_stats):
     save_data = write(save_data, save_stats["unknown_105"])
     save_data = write_length_data(save_data, save_stats["unknown_106"], 4, 4, False, 4)
     save_data = write(save_data, save_stats["unknown_107"])
+
+    save_data = write(save_data, save_stats["unknown_108"]["flag"])
+    save_data = write(save_data, save_stats["unknown_111"])
     save_data = serialise_utf8_string(save_data, save_stats["unknown_110"])
-    save_data = write(save_data, len(save_stats["unknown_108"]), 4)
-    for i in range(len(save_stats["unknown_108"])):
-        save_data = serialise_utf8_string(save_data, save_stats["unknown_108"][i])
+    save_data = write(save_data, save_stats["unknown_108"]["length"])
+    for i in range(len(save_stats["unknown_108"]["Value"])):
+        save_data = serialise_utf8_string(save_data, save_stats["unknown_108"]["Value"][i])
+    
     save_data = write(save_data, save_stats["unknown_109"])
 
     save_data = write(save_data, save_stats["unlocked_slots"])
@@ -798,7 +804,7 @@ def serialize_save(save_stats):
         return save_data
     save_data = write(save_data, save_stats["gv_100000"])
 
-    save_data = write(save_data, save_stats["unknown_92"])
+    save_data = write(save_data, save_stats["date_int"])
 
     data = check_gv(save_data, save_stats, 100100)
     save_data = data["save_data"]

@@ -103,11 +103,11 @@ def copy_first_n(list, number):
         new_list.append(item[number])
     return new_list
 
-def ls_int(ls):
+def ls_int(ls, offset=0):
     data = []
     for item in ls:
         try:
-            data.append(int(item))
+            data.append(int(item) + offset)
         except:
             data.append(item)
     return data

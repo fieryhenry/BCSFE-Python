@@ -17,7 +17,7 @@ def adb_error_handler(output : subprocess.CompletedProcess, game_version, succes
         helper.coloured_text(f"Success", new=helper.green)
         return success
         
-    elif "device '(null)' not found" in error:
+    elif "device '(null)' not found" in error or "device not found" in error:
         helper.coloured_text(f"Error: No device with an adb connection can be found, please connect one and try again.", base=helper.red)
         return
     elif "does not exist" in error:

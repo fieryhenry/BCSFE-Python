@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.6.2] - 2022-05-03
+
+#### Fixed
+
+- Upgrade cats and upgrade blue upgrades crashing the editor
+
 ## [1.6.1] - 2022-05-03
 
 #### Fixed

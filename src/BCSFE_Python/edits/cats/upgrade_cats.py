@@ -86,7 +86,7 @@ def set_user_popups(save_stats):
 
 def upgrade_cats_ids(save_stats, ids):
     save_stats["cat_upgrades"] = upgrade_handler(save_stats["cat_upgrades"], ids, "cat")
-    save_stats = set_user_popups()
+    save_stats = set_user_popups(save_stats)
     print("Successfully set cat levels")
     return save_stats
     

@@ -5,7 +5,7 @@ types = ["Power", "Range", "Charge", "Efficiency", "Wallet", "Health", "Research
 
 def upgrade_blue_ids(save_stats, ids):
     save_stats["blue_upgrades"] = upgrade_cats.upgrade_handler(save_stats["blue_upgrades"], ids, "upgrade")
-    save_stats = upgrade_cats.set_user_popups()
+    save_stats = upgrade_cats.set_user_popups(save_stats)
     print("Successfully set special skills")
     return save_stats
 

@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.6.1] - 2022-05-03
+
+#### Fixed
+
+- Gauntlets from crashing the editor
+
 ## [1.6.0] - 2022-05-03
 
 #### Added

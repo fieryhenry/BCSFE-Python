@@ -32,7 +32,7 @@ def get_rarity(ids):
     cat_ids = []
     for id in ids:
         id = helper.validate_int(id)
-        if not id:
+        if id == None:
             print("Please input a valid number")
             continue
         id -= 1
@@ -51,13 +51,12 @@ def upgrade_cat_rarity(save_stats):
     
     return save_stats
 
-def upgrade_cats_ids(save_stats, ids):
-    cats = save_stats["cat_upgrades"]
-    base = cats["Base"]
-    plus = cats["Plus"]
+def upgrade_handler(data, ids, item_name):
+    base = data["Base"]
+    plus = data["Plus"]
     individual = "1"
     if len(ids) > 1:
-        individual = helper.coloured_text("Do you want to upgrade each cat individually(&1&), or all at once(&2&):", is_input=True)
+        individual = helper.coloured_text(f"Do you want to upgrade each {item_name} individually(&1&), or all at once(&2&):", is_input=True)
     first = True
     base_lvl = None
     plus_lvl = None
@@ -68,7 +67,7 @@ def upgrade_cats_ids(save_stats, ids):
             plus_lvl = levels[1]
             first = False
         elif individual == "1":
-            levels = get_plus_base(helper.coloured_text(f"Enter the base level for cat: &{id}& followed by a \"&+&\" then the plus level, e.g 5&+&12. If you want to ignore the base level do &+&12, if you want to ignore the plus level do 5&+&:\n", is_input=True))
+            levels = get_plus_base(helper.coloured_text(f"Enter the base level for {item_name}: &{id}& followed by a \"&+&\" then the plus level, e.g 5&+&12. If you want to ignore the base level do &+&12, if you want to ignore the plus level do 5&+&:\n", is_input=True))
             base_lvl = levels[0]
             plus_lvl = levels[1]
         if base_lvl != None:
@@ -76,11 +75,18 @@ def upgrade_cats_ids(save_stats, ids):
         if plus_lvl != None:
             plus[id] = plus_lvl
     
-    cats["Base"] = base
-    cats["Plus"] = plus
+    data["Base"] = base
+    data["Plus"] = plus
 
-    save_stats["cat_upgrades"] = cats
+    return data
+
+def set_user_popups(save_stats):
     save_stats["user_rank_popups"]["Value"] = 0xffffff
+    return save_stats
+
+def upgrade_cats_ids(save_stats, ids):
+    save_stats["cat_upgrades"] = upgrade_handler(save_stats["cat_upgrades"], ids, "cat")
+    save_stats = set_user_popups()
     print("Successfully set cat levels")
     return save_stats
     

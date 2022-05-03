@@ -24,10 +24,10 @@ def stage_handler(stage_data, ids, offset, unlock_next=True):
             stars = helper.clamp(stars, 0, lengths['stars'])
 
         id += offset
-
         stage_data_edit = stage_data
+        if id >= len(stage_data_edit["Value"]["clear_progress"]): continue
         stage_data_edit["Value"]["clear_progress"][id] = ([lengths["stages"]] * stars) + ([0] * (lengths["stars"] - stars))
-        if unlock_next:
+        if unlock_next and id+1 < len(stage_data_edit["Value"]["clear_progress"]):
             stage_data_edit["Value"]["unlock_next"][id+1] = ([lengths["stars"]-1] * stars) + ([0] * (lengths["stars"] - stars))
         stage_data_edit["Value"]["clear_amount"][id] = ([[1]*lengths["stages"]] * stars) + ([[0]*lengths["stages"]] * (lengths["stars"] - stars))
 

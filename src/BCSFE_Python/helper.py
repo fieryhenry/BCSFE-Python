@@ -2,7 +2,6 @@ import patcher
 import json
 import os
 import secrets
-import subprocess
 import colored
 import requests
 import serialise_save
@@ -76,63 +75,58 @@ def write_file(data, path, prompt):
         coloured_text(f"Successfully wrote save data to: &{path}&", new=green)
     return path
 
-def adb_pull(game_version):
-    if game_version == "jp": game_version = ""
-    path = f"/data/data/jp.co.ponos.battlecats{game_version}/files/SAVE_DATA"
-    coloured_text(f"Pulling save data from &{path}", new=green)
-    try:
-        data = subprocess.run(f"adb pull {path}", capture_output=True)
-    except FileNotFoundError:
-        coloured_text("Error, please put adb into your Path environment variable\nTutorial in the help video's description", base=red)
-        exit()
+
+def frames_hmsf(frames):
+    ss, frames = divmod(frames, 30)
+    mm, ss = divmod(ss, 60)
+    hh, mm = divmod(mm, 60)
+    return {"hh" : hh, "mm" : mm, "ss" : ss, "frames" : frames}
+
+def parse_csv_file(path, lines=None, min_length=0, black_list=None, parse=False, separator=","):
+    if not lines:
+        lines = open(path, "r", encoding="utf-8").readlines()
+    data = []
+    for line in lines:
+        line_data = line.split(separator)
+        if len(line_data) < min_length:
+            continue
+        if black_list:
+            line_data = filter_list(line_data, black_list)
+        if parse:
+            line_data = ls_int(line_data)
+        data.append(line_data)
     return data
 
-def adb_error_handler(output : subprocess.CompletedProcess, game_version, success="SAVE_DATA"):
-    return_code = output.returncode
-    error = bytes.decode(output.stderr, "utf-8")
-    if return_code == 0:
-        coloured_text(f"Success", new=green)
-        return success
-        
-    elif "device '(null)' not found" in error:
-        coloured_text(f"Error: No device with an adb connection can be found, please connect one and try again.", base=red)
-        return
-    elif "does not exist" in error:
-        coloured_text(f"Error: You don't seem to have game version: &\"{game_version}\"& installed on this device please try again.", base=red)
-        return
-    elif "daemon started successfully;" in error:
-        coloured_text(f"Adb daemon has now started, re-trying")
-        return "retry"
-    else:
-        coloured_text(f"Error: an unknown error has occurred: {error}")
-        return
+def copy_first_n(list, number):
+    new_list = []
+    for item in list:
+        new_list.append(item[number])
+    return new_list
 
-def adb_pull_handler(game_version=None):
-    if not game_version:
-        game_version = input("Enter your game version (en, jp, kr, tw):")
-        
-    output = adb_pull(game_version)
-    success = adb_error_handler(output, game_version)
-    if success == "retry":
-        return adb_pull_handler(game_version)
-    return success
+def ls_int(ls):
+    data = []
+    for item in ls:
+        try:
+            data.append(int(item))
+        except:
+            data.append(item)
+    return data
 
-def adb_clear(game_version):
-    if game_version == "jp": game_version = ""
-    package_name = f"jp.co.ponos.battlecats{game_version}"
-    path = f"/data/data/{package_name}"
-    try:
-        data = subprocess.run(f"adb shell rm {path}/shared_prefs -r -f", capture_output=True)
-    except FileNotFoundError:
-        coloured_text("Error, please put adb into your Path environment variable\nTutorial in the help video's description", base=red)
-        exit()
-    success = adb_error_handler(data, game_version, True)
-    if not success:
-        return
-    if success == "retry":
-        adb_clear(game_version)
-    subprocess.run(f"adb shell rm {path}/files/*SAVE_DATA*", capture_output=True)
-    adb_rerun(package_name)
+def filter_list(list_1, list_2):
+    for item in list_1.copy():
+        for banned in list_2:
+            if banned in item:
+                try:
+                    list_1 = list_1[:list_1.index(item)]
+                except:
+                    pass
+    return list_1
+def hmsf_seconds(hmsf):
+    total_frames = hmsf["frames"]
+    total_frames += hmsf["ss"] * 30
+    total_frames += hmsf["mm"] * 60 * 30
+    total_frames += hmsf["hh"] * 60 * 60 * 30
+    return total_frames
 
 def validate_int(string):
     string = string.strip(" ")
@@ -237,7 +231,43 @@ def selection_list(names, mode, index_flag, include_at_once=False):
     if include_at_once:
         return {"ids" : ids, "individual" : individual}
     return ids
-def edit_array_user(names, data, maxes, name, type_name="level", range=False, length=None, item_name=None, offset=0):
+
+def handle_all_at_once(ids, all_at_once, data, names, item_name, group_name, explain_text=""):
+    first = True
+    value = 0
+    for id in ids:
+        if all_at_once and first:
+            value = validate_int(coloured_text(f"Enter {item_name} {explain_text}:", is_input=True))
+            first = False
+        elif not all_at_once:
+            value = validate_int(coloured_text(f"Enter {item_name} for {group_name} &{names[id]}& {explain_text}:", is_input=True))
+        if value == None: continue
+        data[id] = value
+    return data
+
+def validate_clamp(values, max, min=0, offset=-1):
+    if type(values) == str: values = [values]
+    int_vals = []
+    for value in values:
+        value = f"{value}"
+        value = validate_int(value)
+        if value == None: continue
+        value = clamp(value, min, max)
+        value += offset
+        int_vals.append(value)
+    return int_vals
+
+def create_all_list(ids, max_val, include_all_at_once=False):
+    all_at_once = False
+    if f"{max_val}" in ids:
+        ids = range(1, max_val)
+        ids = [format(x, '02d') for x in ids]
+        all_at_once = True
+    if include_all_at_once:
+        return {"ids" : ids, "at_once" : all_at_once}
+    else:
+        return ids
+def edit_array_user(names, data, maxes, name, type_name="level", range=False, length=None, item_name=None, offset=0, custom_text=""):
     individual = True
     if type(maxes) == int:
         maxes = [maxes] * len(data)
@@ -265,13 +295,19 @@ def edit_array_user(names, data, maxes, name, type_name="level", range=False, le
                 max_str = f" (Max &{maxes[id]+offset}&)"
 
         if not individual and first:
-            val = validate_int(coloured_text(f"What {type_name} do you want to set your &{name}& to?{max_str}:", is_input=True))
+            if custom_text:
+                val = validate_int(coloured_text(f"{custom_text}", is_input=True))
+            else:
+                val = validate_int(coloured_text(f"What {type_name} do you want to set your &{name}& to?{max_str}:", is_input=True))
             if val == None:
                 print("Please enter a valid number")
                 continue
             first = False
         if individual:
-            val = validate_int(coloured_text(f"What &{type_name}& do you want to set your &{names[id]}& to?{max_str}:", is_input=True))
+            if custom_text:
+                val = validate_int(coloured_text(f"{custom_text} : {names[id]}:", is_input=True))
+            else:
+                val = validate_int(coloured_text(f"What &{type_name}& do you want to set your &{names[id]}& to?{max_str}:", is_input=True))
             if val == None:
                 print("Please enter a valid number")
                 continue
@@ -279,6 +315,12 @@ def edit_array_user(names, data, maxes, name, type_name="level", range=False, le
             val = clamp(val, 0, maxes[id]+offset)
         data[id] = val - offset
     return data
+
+def valdiate_bool(value, true_text):
+    if value.lower() == true_text.lower():
+        return True
+    else:
+        return False
 
 def edit_items_list(names, item, name, maxes, type_name="level", offset=0):
     item = edit_array_user(names, item, maxes, name, type_name, offset=offset)
@@ -367,29 +409,6 @@ def write_save_data(save_data, game_version, path, prompt=True):
     write_file(save_data, path, prompt)
     exit()
 
-def adb_rerun(package_name):
-    print("Re-opening game...")
-    subprocess.run(f"adb shell am force-stop {package_name}")
-    subprocess.run(f"adb shell monkey -p {package_name} -v 1", stdout=subprocess.DEVNULL)
-
-
-def adb_push(game_version, save_data_path, rerun):
-    version = game_version
-    if version == "jp": version = ""
-    package_name = f"jp.co.ponos.battlecats{version}"
-    path = f"/data/data/{package_name}/files/SAVE_DATA"
-    coloured_text(f"Pushing save data to &{path}&", new=green)
-    try:
-        data = subprocess.run(f"adb push \"{save_data_path}\" \"{path}\"", capture_output=True)
-    except FileNotFoundError:
-        coloured_text("Error, please put adb into your Path environment variable\nTutorial in the help video's description", base=red)
-        exit()
-    success = adb_error_handler(data, game_version, True)
-    if not success:
-        return
-    if success == "retry":
-        return adb_push(game_version, save_data_path, rerun)
-    if rerun: adb_rerun(package_name)
 
 def open_file_b(path):
     f = open(path, "rb").read()

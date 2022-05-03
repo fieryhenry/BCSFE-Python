@@ -20,6 +20,39 @@ Beeven and csehydrogen's open source code, which helped me figure out how to pat
 
 ## How to use:
 
+### Put adb in path
+
+To use the options in the editor to get and push your save data to the game, you will need to have adb in your path system environment variable. The editor will try to do this automatically, but it may not work. So do this if it doesn't (If you're not using windows look up how to do this):
+
+1. If you are using an emulator: Go to your emulator's install directory, if you're
+   using LDPlayer it will most likely be in `C:/LDPlayer/LDPlayer4.0`.
+   Then find `adb` in that folder (other emulators might have it in the `bin`
+    directory)
+
+2. If you aren't using an emulator [Download the Android SDK Platform Tools ZIP file for Windows](https://dl.google.com/android/repository/platform-tools-latest-windows.zip), and unzip it.
+
+3. Copy the path to the directory that you are in
+
+4. Then open the windows start menu and search: `edit the system environment 
+   variables` and press enter.
+
+5. Then click on the `Environment Variables` button.
+
+6. Then in the `System variables` box find the variable named `Path`, then 
+   click on the `edit` button.
+
+7. Then click `New` and paste the path into it.
+
+8. Click `Ok` then `Ok` again then `Ok` again.
+
+9. Relaunch powershell and maybe restart your whole pc, and try the command
+    again.
+   If this method is too dificult, just use a root file explorer instead 
+   and manually get the files that you want. The path that you will need is:
+   `/data/data/jp.co.ponos.battlecatsen/files/SAVE_DATA`
+
+### Main tutorial
+
 At the moment you will need either a rooted device or a rooted android emulator. I recommed LDPlayer, Nox, or MEmu. Bluestacks is also an option but is more difficult to root as it doesn't have a built in option. If you are using an emulator you can transfer your save data from your main device to it using the in-game transfer menu and then transfer back to your device after editing your save.
 
 1. Install python (If you haven't already) https://www.python.org/downloads/

@@ -2,6 +2,7 @@ import collections
 import datetime
 import json
 import traceback
+
 import helper
 
 address = 0
@@ -25,7 +26,7 @@ def Set_address(val):
 
 def next(number, Length=False):
     if number > len(save_data_g):
-        raise Exception("Length too large")
+        raise Exception("Byte length is greater than the length of the save data")
     val = ConvertLittle(save_data_g[address:address+number])
     data = {}
     Set_address(address + number)
@@ -223,15 +224,23 @@ def get_event_stages(lengths):
     return {"Value": {"clear_progress": clear_progress, "clear_amount": clear_amount, "unlock_next": unlock_next},"Lengths" : lengths}
 
 
-def get_wierd_plat_ticket_data():
-    total_strs = next(4, True)
-    data = {"Value" : [], "total" : total_strs}
+def get_purchase_receipts():
+    total_strs = next(4)
+    data = []
     
-    for i in range(total_strs["Value"]):
-        data_dict = {"unknown_48" : next(8, True)}
-        data_dict["string"] = get_utf8_string()
-        data_dict["unknown_49"] = next(1, True)
-        data["Value"].append(data_dict)
+    for i in range(total_strs):
+        data_dict = {"unknown_4" : next(4)}
+
+        strings = next(4)
+        data_dict["item_packs"] = []
+        for j in range(strings):
+            strings_dict = {}
+
+            strings_dict["Value"] = get_utf8_string()
+            strings_dict["unknown_1"] = next(1)
+            data_dict["item_packs"].append(strings_dict)
+
+        data.append(data_dict)
     return data
 
 
@@ -1370,23 +1379,24 @@ def check_gv(save_stats, game_version):
 
 def get_play_time():
     raw_val = next(4, True)
-    seconds = raw_val["Value"] // 30
+    frames = raw_val["Value"]
 
-    mm, ss = divmod(seconds, 60)
-    hh, mm= divmod(mm, 60)
+    play_time_data = helper.frames_hmsf(frames)
 
-    play_time = f"{round(hh)}:{str(round(mm)).zfill(2)}:{round(ss)}"
-    return play_time
+    return play_time_data
 
 def start_parse(save_data, game_version_country):
     try:
         save_stats = parse_save(save_data, game_version_country)
     except Exception:
-        helper.coloured_text("\nError: An error has occurred while parsing your save data:", base=helper.red)
+        helper.coloured_text(f"\nError: An error has occurred while parsing your save data ({address=}):", base=helper.red)
         traceback.print_exc()
         helper.coloured_text("\nPlease report this to &#bug-reports&, and/or &dm me your save& on discord.\nPress enter to exit:", is_input=True)
         exit()
     return save_stats
+
+def get_game_version(save_data):
+    return ConvertLittle(save_data[0:3])
 
 def parse_save(save_data, game_version_country):
     Set_address(0)
@@ -1407,7 +1417,6 @@ def parse_save(save_data, game_version_country):
         save_stats["dst"] = True
     elif save_data[132] == 15:
         save_stats["dst"] = False  # Offset in jp due to no dst
-
     data = get_time_data_skip(save_stats["dst"])
     save_stats["time"] = data["time"]
     save_stats["dst_val"] = data["dst"]
@@ -1458,10 +1467,15 @@ def parse_save(save_data, game_version_country):
     save_stats["unknown_11"] = get_length_data(length=4)
     save_stats["normal_tickets"] = next(4, True)
     save_stats["rare_tickets"] = next(4, True)
-
     save_stats["other_cat_data"] = get_length_data()
     save_stats["unknown_12"] = get_length_data(length=10)
     length = next(2)
+    save_stats["cat_storage_len"] = True
+    if length != 128: 
+        skip(-2)
+        save_stats["cat_storage_len"] = False
+        length = 100
+
     save_stats["cat_storage_id"] = get_length_data(2, 4, length)
     save_stats["cat_storage_type"] = get_length_data(2, 4, length)
 
@@ -1479,17 +1493,14 @@ def parse_save(save_data, game_version_country):
     save_stats["second_time"] = get_time_data(save_stats["dst"])
     save_stats["unknown_105"] = next(4, True)
     save_stats["unknown_106"] = get_length_data(length=4)
-    save_stats["unknown_107"] = next(1, True)
 
     save_stats["unknown_108"] = {}
-    save_stats["unknown_108"]["flag"] = next(1, True)
-    save_stats["unknown_111"] = next(1, True)
+    save_stats["unknown_107"] = next(3, True)
     save_stats["unknown_110"] = get_utf8_string()
-    save_stats["unknown_108"]["length"] = next(4, True)
-    save_stats["unknown_108"]["Value"] = []
-    if save_stats["unknown_108"]["flag"]["Value"] == 1:
-        for i in range(save_stats["unknown_108"]["length"]["Value"]):
-            save_stats["unknown_108"]["Value"].append(get_utf8_string())
+    total_strs = next(4)
+    save_stats["unknown_108"] = []
+    for i in range(total_strs):
+        save_stats["unknown_108"].append(get_utf8_string())
 
     if save_stats["dst"]:
         save_stats["unknown_109"] = next(37, True)
@@ -1596,7 +1607,8 @@ def parse_save(save_data, game_version_country):
     save_stats["helpers"] = get_length_data()
     save_stats["unknown_47"] = next(1, True)
     save_stats["gv_54"] = next(4, True)
-    save_stats["wierd_plat_ticket_data"] = get_wierd_plat_ticket_data()
+
+    save_stats["purchases"] = get_purchase_receipts()
     save_stats["gv_54"] = next(4, True)
     save_stats["gamatoto_skin"] = next(4, True)
     save_stats["platinum_tickets"] = next(4, True)

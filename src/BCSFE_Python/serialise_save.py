@@ -188,12 +188,14 @@ def serialise_event_stages(save_data, event_stages):
     return save_data
 
 
-def serialise_wierd_plat_ticket_data(save_data, data):
-    save_data = write(save_data, data["total"])
-    for dict in data["Value"]:
-        save_data = write(save_data, dict["unknown_48"])
-        save_data = serialise_utf8_string(save_data, dict["string"])
-        save_data = write(save_data, dict["unknown_49"])
+def serialse_purchase_receipts(save_data, data):
+    save_data = write(save_data, len(data), 4)
+    for dict in data:
+        save_data = write(save_data, dict["unknown_4"], 4)
+        save_data = write(save_data, len(dict["item_packs"]), 4)
+        for string_dict in dict["item_packs"]:
+            save_data = serialise_utf8_string(save_data, string_dict["Value"])
+            save_data = write(save_data, string_dict["unknown_1"], 1)
     return save_data
 
 
@@ -408,13 +410,8 @@ def serialise_medals(save_data, medals):
 
 
 def serialise_play_time(save_data, play_time):
-    time_data = play_time.split(":")
-    hours = int(time_data[0])
-    minutes = int(time_data[1])
-    seconds = int(time_data[2])
-    delta = datetime.timedelta(hours=hours, minutes=minutes, seconds=seconds)
-    value = delta.total_seconds() * 30
-    save_data = write(save_data, value, 4)
+    frames = helper.hmsf_seconds(play_time)
+    save_data = write(save_data, frames, 4)
     return save_data
 
 
@@ -517,10 +514,11 @@ def serialize_save(save_stats):
     save_data = write_length_data(
         save_data, save_stats["unknown_12"], write_length=False)
 
-    save_data = write_length_data(
-        save_data, save_stats["cat_storage_id"], 2, 4)
-    save_data = write_length_data(
-        save_data, save_stats["cat_storage_type"], 2, 4, False)
+    if save_stats["cat_storage_len"]:
+        save_data = write(save_data, len(save_stats["cat_storage_id"]), 2)
+
+    save_data = write_length_data(save_data, save_stats["cat_storage_id"], 2, 4, False)
+    save_data = write_length_data(save_data, save_stats["cat_storage_type"], 2, 4, False)
 
     save_data = serialise_event_stages_current(
         save_data, save_stats["event_current"])
@@ -540,14 +538,14 @@ def serialize_save(save_stats):
 
     save_data = write(save_data, save_stats["unknown_105"])
     save_data = write_length_data(save_data, save_stats["unknown_106"], 4, 4, False, 4)
+    
     save_data = write(save_data, save_stats["unknown_107"])
 
-    save_data = write(save_data, save_stats["unknown_108"]["flag"])
-    save_data = write(save_data, save_stats["unknown_111"])
     save_data = serialise_utf8_string(save_data, save_stats["unknown_110"])
-    save_data = write(save_data, save_stats["unknown_108"]["length"])
-    for i in range(len(save_stats["unknown_108"]["Value"])):
-        save_data = serialise_utf8_string(save_data, save_stats["unknown_108"]["Value"][i])
+
+    save_data = write(save_data, len(save_stats["unknown_108"]), 4)
+    for i in range(len(save_stats["unknown_108"])):
+        save_data = serialise_utf8_string(save_data, save_stats["unknown_108"][i])
     
     save_data = write(save_data, save_stats["unknown_109"])
 
@@ -651,8 +649,8 @@ def serialize_save(save_stats):
     save_data = write(save_data, save_stats["unknown_47"])
 
     save_data = write(save_data, save_stats["gv_54"])
-    save_data = serialise_wierd_plat_ticket_data(
-        save_data, save_stats["wierd_plat_ticket_data"])
+    save_data = serialse_purchase_receipts(
+        save_data, save_stats["purchases"])
     save_data = write(save_data, save_stats["gv_54"])
     save_data = write(save_data, save_stats["gamatoto_skin"])
     save_data = write(save_data, save_stats["platinum_tickets"])

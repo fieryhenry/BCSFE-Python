@@ -7,6 +7,7 @@ import serialise_save
 import parse_save
 import helper
 import argparse
+import adb_handler
 import patcher
 
 def main():
@@ -21,7 +22,7 @@ def normal_start_up():
     if option == "1":
         path = helper.sel_save()
     elif option == "2":
-        path = helper.adb_pull_handler()
+        path = adb_handler.adb_pull_handler()
     elif option == "3":
         print("Select save data json file")
         js_path = helper.sel_file("Select save data json file", [("Json", "*.json")])
@@ -49,7 +50,7 @@ def arg_handler(args):
         if args_dict["download"]:
             path = helper.download_save()
         elif args_dict["pull"]:
-            path = helper.adb_pull_handler()
+            path = adb_handler.adb_pull_handler()
         elif args_dict["load_json"]:
             path = helper.load_json_handler(args_dict["load_json"])
         else:
@@ -65,7 +66,8 @@ def arg_handler(args):
     if args_dict["export_json"]:
         serialise_save.export_json(save_stats, args_dict["export_json"])
         return
-    
+    if path.endswith(".json"):
+        input("Your save data seems to be in json format. Please use to import json option if you want to load json data.\nPress enter to continue...:")
     while True:
         save_stats = parse_save.start_parse(save_data, game_version_c)
         save_data = patcher.patch_save_data(save_data, game_version_c)

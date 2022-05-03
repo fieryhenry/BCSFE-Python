@@ -1,5 +1,8 @@
 *SAVE_DATA*
-dist/
-*.egg*
-*__pychache__*
-*.pyc*
+/dist
+*.egg
+*.egg-info
+__pychache__
+*.pyc
+/tests/saves/*
+/.vscode

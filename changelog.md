@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.6.0] - 2022-05-03
+
+#### Added
+
+- The ability to edit specific treasures for each stage
+
+- The ability to edit groups of treasures (e.g energy drink, aqua crystal)
+
+#### Fixed
+
+- More save parsing issues
+- Event stages crashing when selecting `all` for the stage ids
+
 ## [1.5.0] - 2022-04-28
 
 #### Added

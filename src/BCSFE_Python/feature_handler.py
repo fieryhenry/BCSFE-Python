@@ -1,6 +1,7 @@
 import helper
 import patcher
 import serialise_save
+import adb_handler
 from edits.basic_items import basic, talent_orbs
 from edits.other import meow_medals, play_time, unlock_enemy_guide
 from edits.gamototo import gamatoto_xp, ototo_cat_cannon, helpers
@@ -11,7 +12,7 @@ path = ""
 
 def save_and_exit(save_stats):
     save_data = serialise_save.start_serialize(save_stats)
-    helper.write_save_data(save_data, save_stats["version"], path)
+    helper.write_save_data(save_data, save_stats["version"], path, True)
 
 def fix_elsewhere(save_stats):
     main_token = save_stats["token"]
@@ -37,14 +38,14 @@ def save_and_push(save_stats):
     save_data = serialise_save.start_serialize(save_stats)
     save_data = patcher.patch_save_data(save_data, save_stats["version"])
     helper.write_file(save_data, path, False)
-    helper.adb_push(save_stats["version"], path, False)
+    adb_handler.adb_push(save_stats["version"], path, False)
     exit()
 
 def save_and_push_rerun(save_stats):
     save_data = serialise_save.start_serialize(save_stats)
     save_data = patcher.patch_save_data(save_data, save_stats["version"])
     helper.write_file(save_data, path, False)
-    helper.adb_push(save_stats["version"], path, True)
+    adb_handler.adb_push(save_stats["version"], path, True)
     exit()
 
 
@@ -55,7 +56,7 @@ def export(save_stats):
 def clear_data(save_stats):
     confirm = input("Do want to clear your data (y/n)?:").lower()
     if confirm == "y":
-        helper.adb_clear(save_stats["version"])
+        adb_handler.adb_clear(save_stats["version"])
         print("Data cleared")
     exit()
 features = {
@@ -113,7 +114,8 @@ features = {
     "Levels / Treasures" :
         {
             "Main Story Chapters Clear / Remove" : main_story.main_story,
-            "Main Story Chapters Treasures" : treasures.treasures,
+            "Whole Chapter Main Story Treasures" : treasures.treasures,
+            "Individual Treasures Per Stage / Treasure Groups (e.g energy drink, aqua crystal)" : treasures.specific_treasures,
             "Zombie Stages / Outbreaks" : outbreaks.edit_outbreaks,
             "Event Stages" : event_stages.event_stages,
             "Stories of Legend" : event_stages.stories_of_legend,
@@ -121,7 +123,7 @@ features = {
             "Aku Realm/Gates" : aku.edit_aku,
             "Gauntlets" : gauntlet.edit_gauntlet,
             "Into the Future Timed Scores" : itf_timed_scores.timed_scores,
-            "Challenge Battle" : basic.edit_challenge_battle,
+            "Challenge Battle Score" : basic.edit_challenge_battle,
             "Towers" : towers.edit_tower,
             "Clear Tutorial" : clear_tutorial.clear_tutorial,
         },

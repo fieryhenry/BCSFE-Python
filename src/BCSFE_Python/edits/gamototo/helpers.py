@@ -1,7 +1,7 @@
 import helper as helper_module
 
 def get_gamatoto_helpers():
-    f = open(helper_module.get_files_path("game_data/gamatoto/GamatotoExpedition_Members_name_en.csv"), "r").readlines()
+    f = open(helper_module.get_files_path("game_data/gamatoto/GamatotoExpedition_Members_name_en.csv"), "r", encoding="utf-8").readlines()
     helpers = {}
     for line in f:
         line_data = line.split("|")

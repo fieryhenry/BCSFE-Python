@@ -1,8 +1,8 @@
 import helper
 
 def get_talent_data():
-    talent_data_raw = open(helper.get_files_path("game_data/talents/SkillAcquisition.csv"), "r").readlines()
-    talent_names = open(helper.get_files_path("game_data/talents/SkillDescriptions.csv"), "r").readlines()
+    talent_data_raw = open(helper.get_files_path("game_data/talents/SkillAcquisition.csv"), "r", encoding="utf-8").readlines()
+    talent_names = open(helper.get_files_path("game_data/talents/SkillDescriptions.csv"), "r", encoding="utf-8").readlines()
 
     columns = talent_data_raw[0].split(",")
     talent_data = {}
@@ -99,4 +99,5 @@ def edit_talents(save_stats):
             cat_talents[i+1]["level"] = cat_talents_levels[i]
         talents[cat_id] = cat_talents
         save_stats["talents"] = talents
+    print("Successfully set talents")
     return save_stats

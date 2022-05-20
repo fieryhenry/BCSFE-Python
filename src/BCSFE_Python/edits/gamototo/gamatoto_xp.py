@@ -1,7 +1,7 @@
 import helper
 
 def get_boundaries():
-    boundaries = open(helper.get_files_path("game_data/gamatoto/GamatotoExpedition.csv"), "r").readlines()
+    boundaries = open(helper.get_files_path("game_data/gamatoto/GamatotoExpedition.csv"), "r", encoding="utf-8").readlines()
     previous = 0
     xp_requirements = []
     previous = 0

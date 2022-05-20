@@ -1,7 +1,7 @@
 import helper
 
 def get_medal_names():
-    medal_names = open(helper.get_files_path("game_data/medals/medalname.tsv"), "r").readlines()
+    medal_names = open(helper.get_files_path("game_data/medals/medalname.tsv"), "r", encoding="utf-8").readlines()
     names = []
     for line in medal_names:
         line_split = line.split("\t")

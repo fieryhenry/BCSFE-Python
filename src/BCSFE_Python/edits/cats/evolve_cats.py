@@ -24,7 +24,7 @@ def evolve_cat_rarity(save_stats):
     return save_stats
 
 def get_evolve_data():
-    f = open(helper.get_files_path("game_data/true_forms/nyankoPictureBookData.csv"), "r").readlines()
+    f = open(helper.get_files_path("game_data/true_forms/nyankoPictureBookData.csv"), "r", encoding="utf-8").readlines()
     forms = []
     for line in f:
         if len(line.split(',')) < 3: break

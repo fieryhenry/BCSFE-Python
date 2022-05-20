@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.7.0] - 2022-05-18
+
+#### Added
+
+- The ability to clear catnip challenges / missions
+- The ability to complete cat cannons to certain stages (e.g foundation, style, cannon)
+- The ability to set the Catclaw dojo score (only `Hall of Initiates` atm - don't know if ranked stuff can be save edited)
+- The ability to remove the `Clear "{stage_name}" for a chance to get the Special unit {cat_name}` stage clear rewards when entering Legend Stages
+- The ability to set the `maxed upgrades --> rare tickets` conversion thing to allow for unbannable rare tickets to be generated. Run the `trade progress` feature, enter the number of rare tickets you want, go into game and press the `Use All` button in cat storage and then press `Trade for Ticket` . There appears to be nothing in your storage because there is an unobtainable blue upgrade / special skill between `power` and `range` and the editor adds that to your storage to allow you to use the `trade` thing, although any other blue upgrade also works, as long as it is max level.               
+
+#### Fixed
+
+- More save parsing issues
+
 ## [1.6.2] - 2022-05-03
 
 #### Fixed

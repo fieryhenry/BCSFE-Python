@@ -2,7 +2,7 @@
 
 A python save editor for the mobile game The Battle Cats that requires a rooted device/emulator.
 
-It is sort of based on my [C# save editor](https://github.com/fieryhenry/Battle-Cats-Save-File-Editor) but it works in a completely different way and should be more reliable since it works in a similar way to how the game actually parses the save data. But the downside is that if there is one error/bug in the parser code, you can't edit anything and the program crashes.
+It is sort of based on my old [C# save editor](https://github.com/fieryhenry/Battle-Cats-Save-File-Editor) but it works in a completely different way and should be more reliable since it works in a similar way to how the game actually parses the save data. But the downside is that if there is one error/bug in the parser code, you can't edit anything and the program crashes.
 
 Join the [discord server](https://discord.gg/DvmMgvn5ZB) if you want to suggest new features, report bugs or get help on how to use the editor (not a substitute for the latest tutorial video).
 
@@ -57,17 +57,17 @@ At the moment you will need either a rooted device or a rooted android emulator.
 
 1. Install python (If you haven't already) https://www.python.org/downloads/
 
-2. Enter the command: `python -m pip install -U battle-cats-save-editor` into cmd or another terminal to install the editor. If that doesn't work then use `py` instead of `python` in the command
+2. Enter the command: `py -m pip install -U battle-cats-save-editor` into cmd or another terminal to install the editor. If that doesn't work then use `python` instead of `py` in the command
 
 3. Connect your rooted device to your pc or start up your rooted emulator
 
-4. Then enter the command: `python -m BCSFE_Python` to run the editor. If that doesn't work then use `py` instead of `python` in the command
+4. Then enter the command: `py -m BCSFE_Python` to run the editor. If that doesn't work then use `python` instead of `py` in the command
 
 5. Choose the option to `Get the save data from the game automatically using adb` and enter the game version that you are using.
 
 6. If you get the `No device with an adb connection can be found, please connect one and try again.` error message then you haven't setup your adb correctly, so you may need to go into the settings in your emulator (If using one) and make sure adb is enabled.
 
-7. If you get a parsing error, or nothing seems to happen then please join the [discord server]((https://discord.gg/DvmMgvn5ZB)) and report it to me directly or in #bug-reports
+7. If you get a parsing error, or nothing seems to happen then please join the [discord server](https://discord.gg/DvmMgvn5ZB) and report it to me directly or in #bug-reports
 
 8. Then edit what you want. You can either enter the numbers asigned to each feature, or a word to search for a feature e.g entering catfood will run the Cat Food feature and entering cats will show you all the features that have cats in their name.
 

@@ -205,9 +205,7 @@ def serialise_dumped_data(save_data, data):
 
 
 def serialise_outbreaks(save_data, outbreaks):
-    data = outbreaks["data"]
     outbreak_data = outbreaks["outbreaks"]
-    save_data = serialise_dumped_data(save_data, data)
 
     save_data = write(save_data, len(outbreak_data), 4)
     for chapter_id in outbreak_data:
@@ -382,7 +380,7 @@ def export_json(save_stats, path):
     ordered_data = parse_save.re_order(save_stats)
     if os.path.isdir(path):
         path = os.path.join(path, "save_data.json")
-    f = open(path, "w")
+    f = open(path, "w", encoding="utf-8")
     f.write(json.dumps(ordered_data, indent=4))
     helper.coloured_text(f"Successfully wrote json to &{os.path.abspath(path)}&")
 
@@ -413,6 +411,32 @@ def serialise_play_time(save_data, play_time):
     save_data = write(save_data, frames, 4)
     return save_data
 
+def serialise_mission_segment(save_data, data):
+    save_data = write(save_data, len(data), 4)
+    for mission in data:
+        save_data = write(save_data, mission, 4)
+        save_data = write(save_data, data[mission], 4)
+    return save_data
+
+def serialise_missions(save_data, missions):
+    save_data = serialise_mission_segment(save_data, missions["flags"])
+    save_data = serialise_mission_segment(save_data, missions["values"])
+    return save_data
+
+def serialise_dojo(save_data, dojo_data):
+    save_data = write(save_data, len(dojo_data), 4)
+    for subchapter_id in dojo_data:
+        subchapter_data = dojo_data[subchapter_id]
+
+        save_data = write(save_data, subchapter_id, 4)
+        save_data = write(save_data, len(subchapter_data), 4)
+
+        for stage_id in subchapter_data:
+            score = subchapter_data[stage_id]
+            
+            save_data = write(save_data, stage_id, 4)
+            save_data = write(save_data, score, 4)
+    return save_data
 
 def start_serialize(save_stats):
     try:
@@ -513,11 +537,10 @@ def serialize_save(save_stats):
     save_data = write_length_data(
         save_data, save_stats["unknown_12"], write_length=False)
 
-    if save_stats["cat_storage_len"]:
-        save_data = write(save_data, len(save_stats["cat_storage_id"]), 2)
-
-    save_data = write_length_data(save_data, save_stats["cat_storage_id"], 2, 4, False)
-    save_data = write_length_data(save_data, save_stats["cat_storage_type"], 2, 4, False)
+    if save_stats["cat_storage"]["len"]:
+        save_data = write(save_data, len(save_stats["cat_storage"]["ids"]), 2)
+    save_data = write_length_data(save_data, save_stats["cat_storage"]["ids"], 2, 4, False)
+    save_data = write_length_data(save_data, save_stats["cat_storage"]["types"], 2, 4, False)
 
     save_data = serialise_event_stages_current(
         save_data, save_stats["event_current"])
@@ -525,8 +548,8 @@ def serialize_save(save_stats):
 
     save_data = write_length_data(
         save_data, save_stats["unknown_15"], write_length=False)
-    save_data = write_length_data(save_data, save_stats["unknown_16"])
 
+    save_data = write_length_data(save_data, save_stats["unit_drops"])
     save_data = write(save_data, save_stats["rare_gacha_seed"])
 
     save_data = write(save_data, save_stats["unknown_17"])
@@ -535,19 +558,24 @@ def serialize_save(save_stats):
     save_data = serialise_time_data(
         save_data, save_stats["second_time"], save_stats["dst"], save_stats["dst_val"])
 
-    save_data = write(save_data, save_stats["unknown_105"])
-    save_data = write_length_data(save_data, save_stats["unknown_106"], 4, 4, False, 4)
+    save_data = write_length_data(save_data, save_stats["unknown_105"], 4, 4, False)
     
     save_data = write(save_data, save_stats["unknown_107"])
-
-    save_data = serialise_utf8_string(save_data, save_stats["unknown_110"])
-
+    if save_stats["game_version"]["Value"] < 110500:
+        save_data = serialise_utf8_string(save_data, save_stats["unknown_110"])
     save_data = write(save_data, len(save_stats["unknown_108"]), 4)
     for i in range(len(save_stats["unknown_108"])):
         save_data = serialise_utf8_string(save_data, save_stats["unknown_108"][i])
     
-    save_data = write(save_data, save_stats["unknown_109"])
+    if save_stats["dst"]:
+        unknown_112 = save_stats["unknown_112"]
+        for float in unknown_112["floats"]:
+            save_data = write(save_data, float)
+        save_data = write(save_data, len(unknown_112["strs"]), 4)
+        save_data = serialise_dumped_data(save_data, unknown_112["data"])
 
+    if save_stats["game_version"]["Value"] >= 110500:
+        save_data = write(save_data, save_stats["unknown_111"])
     save_data = write(save_data, save_stats["unlocked_slots"])
 
     save_data = write(save_data, save_stats["unknown_20"]["Length_1"], 4)
@@ -556,6 +584,13 @@ def serialize_save(save_stats):
         save_data, save_stats["unknown_20"], write_length=False)
     save_data = write_length_data(
         save_data, save_stats["unknown_21"], write_length=False)
+
+
+    save_data = write(save_data, save_stats["trade_progress"])
+
+    save_data = write_length_data(
+        save_data, save_stats["unknown_24"], write_length=False)
+
 
     save_data = write_length_data(
         save_data, save_stats["catseye_related_data"])
@@ -581,11 +616,11 @@ def serialize_save(save_stats):
     save_data = write_length_data(
         save_data, save_stats["stage_data_related_1"], 4, 1, False, length)
 
-    lengths = save_stats["stage_data_related_2"]["Lengths"]
+    lengths = save_stats["event_timed_scores"]["Lengths"]
     length = lengths[0] * lengths[1] * lengths[2]
     save_data = write_length_data(save_data, lengths, write_length=False)
     save_data = write_length_data(
-        save_data, save_stats["stage_data_related_2"], 4, 4, False, length)
+        save_data, save_stats["event_timed_scores"], 4, 4, False, length)
 
     save_data = serialise_utf8_string(save_data, save_stats["inquiry_code"])
     save_data = serialise_play_time(save_data, save_stats["play_time"])
@@ -662,6 +697,15 @@ def serialize_save(save_stats):
     save_data = write(save_data, save_stats["gv_55"])
 
     save_data = write(save_data, save_stats["unknown_51"])
+    save_data = serialise_dumped_data(save_data, save_stats["unknown_113"])
+
+    save_data = serialise_dojo(save_data, save_stats["dojo_data"])
+
+    save_data = write(save_data, save_stats["unknown_114"])
+
+    save_data = write(save_data, save_stats["gv_58"])
+
+    save_data = write(save_data, save_stats["unknown_115"])
 
     save_data = serialise_outbreaks(save_data, save_stats["outbreaks"])
 
@@ -682,6 +726,7 @@ def serialize_save(save_stats):
 
     save_data = serialise_dumped_data(save_data, save_stats["unknown_59"])
     save_data = serialise_tower(save_data, save_stats["tower"])
+    save_data = serialise_missions(save_data, save_stats["missions"])
     save_data = serialise_dumped_data(save_data, save_stats["unknown_60"])
     save_data = serialise_dumped_data(save_data, save_stats["unknown_61"])
     save_data = write(save_data, save_stats["challenge"]["Score"])
@@ -743,8 +788,11 @@ def serialize_save(save_stats):
     save_data = serialise_dumped_data(save_data, save_stats["unknown_76"])
 
     save_data = write(save_data, save_stats["gv_80700"])
+    if save_stats["dst"]:
+        if save_stats["gv_100600"]["Value"] == 100600:
+            save_data = write(save_data, save_stats["unknown_104"])
+            save_data = write(save_data, save_stats["gv_100600"])
 
-    save_data = write(save_data, save_stats["unknown_104"])
 
     save_data = write(save_data, save_stats["restart_pack"])
     save_data = serialise_dumped_data(save_data, save_stats["unknown_101"])

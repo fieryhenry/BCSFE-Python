@@ -1,6 +1,7 @@
 import collections
 import datetime
 import json
+from tkinter import E
 import traceback
 
 import helper
@@ -9,7 +10,7 @@ address = 0
 save_data_g = None
 
 def re_order(class_data):
-        priority = json.loads(open(helper.get_files_path("order.json"), "r").read())
+        priority = json.loads(open(helper.get_files_path("order.json"), "r", encoding="utf-8").read())
         ordered_data = collections.OrderedDict(class_data)
         
         for item in ordered_data.copy():
@@ -243,13 +244,28 @@ def get_purchase_receipts():
         data.append(data_dict)
     return data
 
+def get_dojo_data_maybe():
+    # everything here is speculative and might not be correct
+    dojo_data = {}
+    total_subchapters = next(4)
+    for i in range(total_subchapters):
+        subchapter_id = next(4)
+        subchapter_data = {}
 
-def get_outbreaks():
+        total_stages = next(4)
+        for j in range(total_stages):
+            stage_id = next(4)
+
+            score = next(4)
+            subchapter_data[stage_id] = score
+        dojo_data[subchapter_id] = subchapter_data
+    return dojo_data
+
+def get_data_before_outbreaks():
     data = []
 
     length = next(4, True)
     data.append(length)
-
     for i in range(length["Value"]):
         length_2 = next(4, True)
         data.append(length_2)
@@ -317,33 +333,10 @@ def get_outbreaks():
         val_4 = next(4, True)
         data.append(val_4)
 
-    length = next(4, True)
-    data.append(length)
+    return data
 
-    for i in range(length["Value"]):
-        val_1 = next(4, True)
-        data.append(val_1)
 
-        length_2 = next(4, True)
-        data.append(length_2)
-
-        for j in range(length_2["Value"]):
-            val_2 = next(4, True)
-            data.append(val_2)
-
-            val_3 = next(4, True)
-            data.append(val_3)
-
-    unknown_val = next(1*7, True)
-    data.append(unknown_val)
-
-    gv_58 = next(4, True) # 0x3a
-    data.append(gv_58)
-    
-    unknown_val_2 = next(8, True)
-    data.append(unknown_val_2)
-
-    #outbreaks block:
+def get_outbreaks():
     chapters_count = next(4)
     outbreaks = {}
     stages_counts = {}
@@ -357,7 +350,7 @@ def get_outbreaks():
             outbreak_cleared_flag = next(1)
             chapter[stage_id] = outbreak_cleared_flag
         outbreaks[chapter_id] = chapter
-    return {"outbreaks" : outbreaks, "data" : data, "stages_counts" : stages_counts}
+    return {"outbreaks" : outbreaks, "stages_counts" : stages_counts}
 
 def get_mission_data_maybe():
     data = []
@@ -565,43 +558,25 @@ def get_ht_it_data():
             data.append(next(4, True))
     return {"data" : data, "current" : current_data, "progress" : progress_data}
 
-def get_mission_loop(missions):
+def get_mission_segment():
+    missions = {}
     length = next(4)
     for i in range(length):
         mission_id = next(4)
         mission_value = next(4)
         missions[mission_id] = mission_value
     return missions
+
 def get_mission_data():
     missions = {}
-    for i in range(1):
-        missions = get_mission_loop(missions)
-
+    missions["flags"] = get_mission_segment() # 4 = claimed, 3 = unlocked, 2 = completed 0/1 = not unlocked
+    missions["values"] = get_mission_segment() # e.g number of gamatoto expeditions, stages cleared etc
+    return missions
 
 def get_looped_data():
     data = []
-
-    length_4114 = next(4, True)
-    data.append(length_4114)
-
-    val_118 = next(4, True)
-    data.append(val_118)
-
-    for i in range(length_4114["Value"]):
-        val_22 = next(4, True)
-        data.append(val_22)
-
-        val_118 = next(4, True)
-        data.append(val_118)
-    
     val_114 = next(4, True)
     data.append(val_114)
-    for i in range(val_118["Value"]):
-        val_22 = next(4, True)
-        data.append(val_22)
-
-        val_114 = next(4, True)
-        data.append(val_114)
 
     
     val_118 = next(4, True)
@@ -1015,7 +990,7 @@ def get_data_after_after_leadership(dst):
         data.append(next(7, True))
     return data
 
-def get_data_after_leadership(dst):
+def get_data_after_leadership():
     data = []
     val_16 = next(1, True)
     data.append(val_16)
@@ -1391,7 +1366,12 @@ def start_parse(save_data, game_version_country):
     except Exception:
         helper.coloured_text(f"\nError: An error has occurred while parsing your save data ({address=}):", base=helper.red)
         traceback.print_exc()
-        helper.coloured_text("\nPlease report this to &#bug-reports&, and/or &dm me your save& on discord.\nPress enter to exit:", is_input=True)
+        game_version = get_game_version(save_data)
+        if game_version < 110000:
+            helper.coloured_text(f"\nThis save is from before &11.0.0& (current save version is &{helper.gv_to_str(game_version)}&), so this is likely the cause for the issue. &The save editor is not designed to work with saves from before 11.0.0&")
+        else:
+            helper.coloured_text("\nPlease report this to &#bug-reports&, and/or &dm me your save& on discord")
+        helper.coloured_text("Press enter to exit:", is_input=True)
         exit()
     return save_stats
 
@@ -1470,43 +1450,56 @@ def parse_save(save_data, game_version_country):
     save_stats["other_cat_data"] = get_length_data()
     save_stats["unknown_12"] = get_length_data(length=10)
     length = next(2)
-    save_stats["cat_storage_len"] = True
+    cat_storage_len = True
     if length != 128: 
         skip(-2)
-        save_stats["cat_storage_len"] = False
+        cat_storage_len = False
         length = 100
 
-    save_stats["cat_storage_id"] = get_length_data(2, 4, length)
-    save_stats["cat_storage_type"] = get_length_data(2, 4, length)
-
+    cat_storage_id = get_length_data(2, 4, length)
+    cat_storage_type = get_length_data(2, 4, length)
+    save_stats["cat_storage"] = {"ids" : cat_storage_id, "types" : cat_storage_type, "len" : cat_storage_len}
     current_sel = get_event_stages_current()
     save_stats["event_current"] = current_sel
 
     save_stats["event_stages"] = get_event_stages(current_sel)
 
     save_stats["unknown_15"] = get_length_data(length=38)
-    save_stats["unknown_16"] = get_length_data()
+    save_stats["unit_drops"] = get_length_data()
     save_stats["rare_gacha_seed"] = next(4, True)
     save_stats["unknown_17"] = next(12, True)
     save_stats["unknown_18"] = next(4, True)
 
     save_stats["second_time"] = get_time_data(save_stats["dst"])
-    save_stats["unknown_105"] = next(4, True)
-    save_stats["unknown_106"] = get_length_data(length=4)
-
+    save_stats["unknown_105"] = get_length_data(length=5)
     save_stats["unknown_108"] = {}
     save_stats["unknown_107"] = next(3, True)
-    save_stats["unknown_110"] = get_utf8_string()
+    if save_stats["game_version"]["Value"] < 110500:
+        save_stats["unknown_110"] = get_utf8_string()
     total_strs = next(4)
     save_stats["unknown_108"] = []
     for i in range(total_strs):
         save_stats["unknown_108"].append(get_utf8_string())
-
     if save_stats["dst"]:
-        save_stats["unknown_109"] = next(37, True)
-    else:
-        save_stats["unknown_109"] = next(0, True)
+        save_stats["unknown_112"] = {}
+        floats = []
+        floats.append(next(8, True))
+        floats.append(next(8, True))
+        floats.append(next(8, True))
+        save_stats["unknown_112"]["floats"] = floats
 
+        length = next(4)
+        strs = []
+        for i in range(length):
+            strs.append(get_utf8_string())
+        save_stats["unknown_112"]["strs"] = strs
+        data = []
+        data.append(next(1, True))
+        data.append(next(4, True))
+        data.append(next(4, True))
+        save_stats["unknown_112"]["data"] = data
+    if save_stats["game_version"]["Value"] >= 110500:
+        save_stats["unknown_111"] = next(4, True)
     save_stats["unlocked_slots"] = next(1, True)
     length_1 = next(4)
     length_2 = next(4)
@@ -1514,10 +1507,13 @@ def parse_save(save_data, game_version_country):
     save_stats["unknown_20"]["Length_1"] = length_1
     save_stats["unknown_20"]["Length_2"] = length_2
 
+    save_stats["unknown_21"] = get_length_data(length=8)
+    save_stats["trade_progress"] = next(4, True)
+    
     if save_stats["dst"]:
-        save_stats["unknown_21"] = get_length_data(length=11)
+        save_stats["unknown_24"] = get_length_data(length=2)
     else:
-        save_stats["unknown_21"] = get_length_data(length=10)
+        save_stats["unknown_24"] = get_length_data(length=1)
 
     save_stats["catseye_related_data"] = get_length_data()
     save_stats["unknown_22"] = get_length_data(length=11)
@@ -1541,7 +1537,7 @@ def parse_save(save_data, game_version_country):
     lengths = [next(4), next(4), next(4)]
     length = lengths[0] * lengths[1] * lengths[2]
 
-    save_stats["stage_data_related_2"] = {"Value": get_length_data(4, 4, length), "Lengths" : lengths}
+    save_stats["event_timed_scores"] = {"Value": get_length_data(4, 4, length), "Lengths" : lengths}
 
     save_stats["inquiry_code"] = get_utf8_string()
     save_stats["play_time"] = get_play_time()
@@ -1621,6 +1617,15 @@ def parse_save(save_data, game_version_country):
 
     save_stats["unknown_51"] = next(1, True)
 
+    save_stats["unknown_113"] = get_data_before_outbreaks()
+    
+    save_stats["dojo_data"] = get_dojo_data_maybe()
+
+    save_stats["unknown_114"] = next(7, True)
+
+    save_stats["gv_58"] = next(4, True) # 0x3a
+    
+    save_stats["unknown_115"] = next(8, True)
     save_stats["outbreaks"] = get_outbreaks()
 
     save_stats["unknown_52"] = next(8, True)
@@ -1639,10 +1644,15 @@ def parse_save(save_data, game_version_country):
     save_stats["ototo_cannon"] = get_cat_cannon_data()
 
     save_stats["unknown_59"] = get_data_near_ht()
+
     save_stats["tower"] = get_ht_it_data()
+    save_stats["missions"] = get_mission_data()
+
     save_stats["unknown_60"] = get_looped_data()
     save_stats["unknown_61"] = get_data_after_tower()
+
     save_stats["challenge"] = {"Score" : next(4, True), "Cleared" : next(1, True)}
+
     save_stats["unknown_102"] = get_data_after_challenge()
 
     lengths = get_uncanny_current()
@@ -1669,11 +1679,13 @@ def parse_save(save_data, game_version_country):
         val_54 = val_61
 
     save_stats["lucky_tickets_2"] = get_length_data(length=val_54["Value"])
+
     save_stats["unknown_67"] = []
     if 0x37 < val_61["Value"]:
         save_stats["unknown_67"] = get_length_data(4, 4, val_61)
 
     save_stats["unknown_68"] = next(1, True)
+
     save_stats["gv_77"] = next(4, True) # 0x4d
 
     data = get_talent_data()
@@ -1683,33 +1695,39 @@ def parse_save(save_data, game_version_country):
     save_stats["np"] = next(4, True)
 
     save_stats["unknown_70"] = next(1, True)
+
     save_stats["gv_80000"] = next(4, True) # 80000
+
     save_stats["unknown_71"] = next(1, True)
 
     save_stats["leadership"] = next(2, True)
 
-
     save_stats["unknown_72"] = next(4, True)
+
     save_stats["gv_80200"] = next(4, True) # 80200
 
     save_stats["unknown_73"] = next(2, True)
+
     save_stats["gv_80300"] = next(4, True) # 80300
 
     save_stats["unknown_74"] = get_length_data()
+
     save_stats["gv_80500"] = next(4, True) # 80500
     
     save_stats["unknown_75"] = get_length_data(2, 4)
-    save_stats["unknown_76"] = get_data_after_leadership(save_stats["dst"])
-
+    save_stats["unknown_76"] = get_data_after_leadership()
     save_stats["gv_80700"] = next(4, True) # 80700
     if save_stats["dst"]:
-        save_stats["unknown_104"] = next(5, True)
-    else:
-        save_stats["unknown_104"] = next(0, True)
-       
+        save_stats["unknown_104"] = next(1, True)
+        save_stats["gv_100600"] = next(4, True)
+        if save_stats["gv_100600"]["Value"] != 100600:
+            skip(-5)
     save_stats["restart_pack"] = next(1, True)
+
     save_stats["unknown_101"] = get_data_after_after_leadership(save_stats["dst"])
+
     save_stats["medals"] = get_medals()
+
     save_stats["unknown_103"] = get_data_after_medals()
 
     lengths = get_gauntlet_current()
@@ -1735,14 +1753,18 @@ def parse_save(save_data, game_version_country):
 
 
     save_stats["unknown_85"] = data_after_after_gauntlets()
+
     save_stats["talent_orbs"] = get_talent_orbs(save_stats["game_version"])
 
     save_stats["unknown_86"] = get_data_after_orbs()
+
     save_stats["slot_names"] = get_slot_names(len(save_stats["slots"]))
     save_stats["gv_91000"] = next(4, True)
     save_stats["legend_tickets"] = next(4, True)
+
     save_stats["unknown_87"] = get_length_data(1, 5)
     save_stats["unknown_88"] = next(2, True)
+
     save_stats["token"] = get_utf8_string()
 
     save_stats["unknown_89"] = next(1*3, True)
@@ -1766,7 +1788,9 @@ def parse_save(save_data, game_version_country):
     save_stats["gv_100300"] = next(4, True) # 100300
 
     save_stats["unknown_94"] = get_data_near_end()
+
     save_stats["platinum_shards"] = next(4, True)
+
     save_stats["unknown_100"] = get_data_near_end_after_shards()
 
     save_stats = check_gv(save_stats, 100700)
@@ -1776,7 +1800,6 @@ def parse_save(save_data, game_version_country):
     save_stats["aku"] = get_aku()
 
     save_stats["unknown_95"] = next(1*2, True)
-
     save_stats["unknown_96"] = get_data_after_aku()
 
     save_stats = check_gv(save_stats, 100900)

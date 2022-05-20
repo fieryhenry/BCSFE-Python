@@ -17,6 +17,15 @@ dark_yellow = "#d7c32a"
 red = "#ff0000"
 cyan = "#00ffff"
 
+def gv_to_str(game_version):
+    gv = str(game_version)
+    gv_formatted = ""
+    for i in range(0, len(gv), 2):
+        val = int(gv[i:i+2])
+        gv_formatted += (str(val)) + "."
+        
+    return gv_formatted.strip(".")
+
 def to_little(number, bytes):
     val_b = int.to_bytes(number, bytes, "little")
     return val_b
@@ -45,7 +54,7 @@ def load_json_handler(json_path):
         print("Please select a place to write the save data to")
     return path
 def load_json(json_path):
-    data = open(json_path, "r").read()
+    data = open(json_path, "r", encoding="utf-8").read()
     save_stats = json.loads(data)
     return save_stats
 
@@ -112,15 +121,17 @@ def ls_int(ls, offset=0):
             data.append(item)
     return data
 
-def filter_list(list_1, list_2):
-    for item in list_1.copy():
-        for banned in list_2:
+def filter_list(data : list, black_list : list):
+    trimmed_data = data
+    for i in range(len(data)):
+        item = data[i]
+        for banned in black_list:
             if banned in item:
-                try:
-                    list_1 = list_1[:list_1.index(item)]
-                except:
-                    pass
-    return list_1
+                index = item.index(banned)
+                item = item[:index]
+                trimmed_data[i] = item
+    return trimmed_data
+    
 def hmsf_seconds(hmsf):
     total_frames = hmsf["frames"]
     total_frames += hmsf["ss"] * 30
@@ -159,10 +170,14 @@ def check_update():
         coloured_text(f"&A new version is available!&\n&Please run &py -m pip install -U battle-cats-save-editor& to install it&",base=cyan, new=green)
         coloured_text(f"&See the changelog here: &https://github.com/fieryhenry/BCSFE-Python/blob/master/changelog.md\n", base=cyan, new=green)
 
-def get_range_input(input, length=None, min=0):
+def get_range_input(input, length=None, min=0, all_ids=None):
     ids = []
-    if length != None and input.lower() == "all":
-        return range(min, length)
+    flag = length != None or all_ids != None
+    if flag and input.lower() == "all":
+        if all_ids:
+            return all_ids
+        else:
+            return range(min, length)
     if "-" in input:
         content = input.split('-')
         first = validate_int(content[0])
@@ -249,7 +264,7 @@ def validate_clamp(values, max, min=0, offset=-1):
     if type(values) == str: values = [values]
     int_vals = []
     for value in values:
-        value = f"{value}"
+        value = f"{value}".strip(" ")
         value = validate_int(value)
         if value == None: continue
         value = clamp(value, min, max)
@@ -329,7 +344,9 @@ def edit_items_list(names, item, name, maxes, type_name="level", offset=0):
     return item   
 def edit_item(item, max, name, warning=False, add_plural=False, custom_text=None):
     plural = ""
-    if type(item) == dict: item_val = item["Value"]
+    if type(item) == dict:
+        item = item.copy()
+        item_val = item["Value"]
     else: item_val = item
     if warning:
         coloured_text(f"&WARNING: Editing in catfood, rare tickets, platinum tickets or legend tickets will most likely lead to a ban!", new=red)
@@ -345,6 +362,8 @@ def edit_item(item, max, name, warning=False, add_plural=False, custom_text=None
     if not max: max_str = ""
     text = f"Enter amount of {name}{plural} to set{max_str}:"
     if custom_text:
+        if max_str:
+            max_str += ":"
         text = f"{custom_text[1]}{max_str}"
     val = validate_int(coloured_text(text, is_input=True))
     if val == None:
@@ -385,7 +404,7 @@ def download_save():
     json_text = json.dumps(data).encode("utf-8")
     response = requests.post(url, data=json_text, headers={"content-type" : "application/json", "accept-encoding" : "gzip"})
     content = response.content
-    if len(content) > 50000:
+    if len(content) > 50:
         print("Successfully downloaded save data")
     else:
         print("Incorrect transfer code / confirmation code / game version")

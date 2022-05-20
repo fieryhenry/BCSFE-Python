@@ -51,7 +51,7 @@ def treasure_groups(save_stats):
         if chapter_id > 2: chapter_id+=1
         names = treasure_groups["names"][type_id]
         treasure_levels = [-1] * len(names)
-        treasure_levels = helper.edit_array_user(names, treasure_levels, None, "treasures", "treasure level", custom_text="What do you want to set your treasure level to? (&0& = none, &1&=inferior, &2&=normal, &3&=superior)")
+        treasure_levels = helper.edit_array_user(names, treasure_levels, None, "treasures", "treasure level", custom_text="What do you want to set your treasure level to? (&0&=none, &1&=inferior, &2&=normal, &3&=superior)")
         
         for i in range(len(treasure_levels)):
             treasure_level = treasure_levels[i]
@@ -83,7 +83,7 @@ def specific_treasures(save_stats):
         all_at_once = stage_ids_data["at_once"]
 
         treasure_data = [-1] * 49
-        treasure_data = helper.handle_all_at_once(stage_ids, all_at_once, treasure_data, range(1, 50), "treasure level", "stage", "(&0& = none, &1&=inferior, &2&=normal, &3&=superior)")
+        treasure_data = helper.handle_all_at_once(stage_ids, all_at_once, treasure_data, range(1, 50), "treasure level", "stage", "(&0&=none, &1&=inferior, &2&=normal, &3&=superior)")
         if chapter_id > 2: chapter_id+=1
         for i in range(len(treasure_data)):
             stage = treasure_data[i]
@@ -109,7 +109,7 @@ def treasures(save_stats):
     ids = helper.validate_clamp(ids, 10, 1, -1)
     all_at_once = data["at_once"]
     usr_levels = [-1] * 9
-    usr_levels = helper.handle_all_at_once(ids, all_at_once, usr_levels, main_story.chapters, "treasure level", "chapter", "(&0& = none, &1&=inferior, &2&=normal, &3&=superior)")
+    usr_levels = helper.handle_all_at_once(ids, all_at_once, usr_levels, main_story.chapters, "treasure level", "chapter", "(&0&=none, &1&=inferior, &2&=normal, &3&=superior)")
     for i in range(len(usr_levels)):
         level = usr_levels[i]
         if level == -1: continue

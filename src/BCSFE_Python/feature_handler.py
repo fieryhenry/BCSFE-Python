@@ -3,9 +3,9 @@ import patcher
 import serialise_save
 import adb_handler
 from edits.basic_items import basic, talent_orbs
-from edits.other import meow_medals, play_time, unlock_enemy_guide
+from edits.other import meow_medals, play_time, unlock_enemy_guide, missions, trade_progress
 from edits.gamototo import gamatoto_xp, ototo_cat_cannon, helpers
-from edits.cats import evolve_cats, get_remove_cats, upgrade_blue, upgrade_cats, talents, clear_cat_guide
+from edits.cats import evolve_cats, get_remove_cats, upgrade_blue, upgrade_cats, talents, clear_cat_guide, chara_drop
 from edits.levels import aku, event_stages, gauntlet, itf_timed_scores, main_story, outbreaks, towers, treasures, uncanny, clear_tutorial
 
 path = ""
@@ -17,7 +17,7 @@ def save_and_exit(save_stats):
 def fix_elsewhere(save_stats):
     main_token = save_stats["token"]
     main_iq = save_stats["inquiry_code"]
-    print("Select a save file that is currently loaded in-game that doesn't have the elsehere error and is not banned\nPress enter to continue")
+    input("Select a save file that is currently loaded in-game that doesn't have the elsehere error and is not banned\nPress enter to continue:")
     new_path = helper.sel_save()
     if not new_path:
         print("Please select a save file")
@@ -110,6 +110,7 @@ features = {
             "Talents" : talents.edit_talents,
             "Collect Cat Guide" : clear_cat_guide.clear_cat_guide,
             "Collect Cat Guide Based On Rarity" : clear_cat_guide.clear_cat_guide_rarity,
+            "Get stage unit drops" : chara_drop.get_character_drops,
         },
     "Levels / Treasures" :
         {
@@ -126,6 +127,7 @@ features = {
             "Challenge Battle Score" : basic.edit_challenge_battle,
             "Towers" : towers.edit_tower,
             "Clear Tutorial" : clear_tutorial.clear_tutorial,
+            "Catclaw Dojo Score (Hall of Initiates)" : basic.edit_dojo_score,
         },
     "Inquiry Code / Token":
         {
@@ -141,6 +143,8 @@ features = {
             "Meow Medals" : meow_medals.medals,
             "Play Time" : play_time.edit_play_time,
             "Unlock / Remove Enemy Guide Entries" : unlock_enemy_guide.enemy_guide,
+            "Catnip Challenges / Missions" : missions.edit_missions,
+            "Normal Ticket Max Trade Progress (allows for unbannable rare tickets)" : trade_progress.set_trade_progress,
         }
 }
 def search_dict(dictionary, item, results=[]):

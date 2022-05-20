@@ -1,4 +1,5 @@
 import helper
+
 def edit_cat_food(save_stats):
     save_stats["cat_food"] = helper.edit_item(save_stats["cat_food"], 45000, "Cat Food", True)
     return save_stats
@@ -10,9 +11,11 @@ def edit_xp(save_stats):
 def edit_normal_tickets(save_stats):
     save_stats["normal_tickets"] = helper.edit_item(save_stats["normal_tickets"], 2999, "Normal Tickets")
     return save_stats
+
 def edit_rare_tickets(save_stats):
     save_stats["rare_tickets"] = helper.edit_item(save_stats["rare_tickets"], 299, "Rare Tickets", True)
     return save_stats
+
 def edit_platinum_tickets(save_stats):
     save_stats["platinum_tickets"] = helper.edit_item(save_stats["platinum_tickets"], 9, "Platinum Tickets", True)
     return save_stats
@@ -24,6 +27,7 @@ def edit_platinum_shards(save_stats):
 def edit_np(save_stats):
     save_stats["np"] = helper.edit_item(save_stats["np"], 9999, "NP")
     return save_stats
+
 def edit_leadership(save_stats):
     save_stats["leadership"] = helper.edit_item(save_stats["leadership"], 9999, "Leadership")
     return save_stats
@@ -85,4 +89,8 @@ def edit_challenge_battle(save_stats):
 
 def edit_legend_tickets(save_stats):
     save_stats["legend_tickets"] = helper.edit_item(save_stats["legend_tickets"], 4, "Legend Tickets")
+    return save_stats
+
+def edit_dojo_score(save_stats):
+    save_stats["dojo_data"][0][0] = helper.edit_item(save_stats["dojo_data"][0][0], None, "Catclaw Dojo Score", custom_text=["Your current score is:", "Enter a new score:"])
     return save_stats

@@ -41,11 +41,11 @@ def find_adb_path():
 def add_to_path():
     adb_path = find_adb_path()
     if not adb_path:
-        adb_path = input("Please enter the path to the folder than contains adb:")
+        adb_path = input("Please enter the path to the folder than contains adb: download link here: https://dl.google.com/android/repository/platform-tools-latest-windows.zip:")
         if os.path.isfile(adb_path):
             adb_path = os.path.dirname(adb_path)
-    subprocess.run(f"setx PATH \"%PATH%{adb_path}\"")
-    subprocess.run(f"set PATH=%PATH%{adb_path}", shell=True)
+    subprocess.run(f"setx PATH \"%PATH%;{adb_path}\"")
+    subprocess.run(f"set PATH=%PATH%;{adb_path}", shell=True)
     print("Successfully added adb to path")
 
 def adb_pull_handler(game_version=None):

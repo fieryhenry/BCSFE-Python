@@ -9,6 +9,7 @@ import helper
 address = 0
 save_data_g = None
 
+# move all unknown vals to the bottom of the json
 def re_order(class_data):
         priority = json.loads(open(helper.get_files_path("order.json"), "r", encoding="utf-8").read())
         ordered_data = collections.OrderedDict(class_data)
@@ -20,6 +21,7 @@ def re_order(class_data):
         for i in range(len(priority)):
             ordered_data.move_to_end(priority[len(priority)-1-i], False)
         return ordered_data
+    
 def Set_address(val):
     global address
     address = val
@@ -113,12 +115,10 @@ def get_equip_slots():
 
 
 def get_main_story_levels():
-    pos = address
     chapter_progress = []
     for i in range(10):
         chapter_progress.append(next(4))
     chapter_progress_dict = chapter_progress
-    pos = address
     times_cleared = []
     for i in range(10):
         chapter_times = []
@@ -193,7 +193,6 @@ def get_event_stages_current():
 
 
 def get_event_stages(lengths):
-    offset = address
     total_sub_chapters = lengths["total"]
     stars_per_sub_chapter = lengths["stars"]
     stages_per_sub_chapter = lengths["stages"]
@@ -1474,7 +1473,7 @@ def parse_save(save_data, game_version_country):
     save_stats["unknown_105"] = get_length_data(length=5)
     save_stats["unknown_108"] = {}
     save_stats["unknown_107"] = next(3, True)
-    if save_stats["game_version"]["Value"] < 110500:
+    if save_stats["game_version"]["Value"] < 110500 or save_stats["dst"]:
         save_stats["unknown_110"] = get_utf8_string()
     total_strs = next(4)
     save_stats["unknown_108"] = []
@@ -1498,7 +1497,7 @@ def parse_save(save_data, game_version_country):
         data.append(next(4, True))
         data.append(next(4, True))
         save_stats["unknown_112"]["data"] = data
-    if save_stats["game_version"]["Value"] >= 110500:
+    if not save_stats["dst"]:
         save_stats["unknown_111"] = next(4, True)
     save_stats["unlocked_slots"] = next(1, True)
     length_1 = next(4)

@@ -19,7 +19,7 @@ for save in save_files:
     if gv < 110000:
         continue
     gv_c = patcher.detect_game_version(data)
-    print(f"{path=}\t{gv_c=}")
+    print(f"{path=}\t{gv_c=}\t{gv=}")
     if gv:
         save_stats = parse_save.start_parse(data, gv_c)
         save_data_1 = serialise_save.start_serialize(save_stats)

@@ -561,7 +561,7 @@ def serialize_save(save_stats):
     save_data = write_length_data(save_data, save_stats["unknown_105"], 4, 4, False)
     
     save_data = write(save_data, save_stats["unknown_107"])
-    if save_stats["game_version"]["Value"] < 110500:
+    if save_stats["game_version"]["Value"] < 110500 or save_stats["dst"]:
         save_data = serialise_utf8_string(save_data, save_stats["unknown_110"])
     save_data = write(save_data, len(save_stats["unknown_108"]), 4)
     for i in range(len(save_stats["unknown_108"])):
@@ -574,7 +574,7 @@ def serialize_save(save_stats):
         save_data = write(save_data, len(unknown_112["strs"]), 4)
         save_data = serialise_dumped_data(save_data, unknown_112["data"])
 
-    if save_stats["game_version"]["Value"] >= 110500:
+    if not save_stats["dst"]:
         save_data = write(save_data, save_stats["unknown_111"])
     save_data = write(save_data, save_stats["unlocked_slots"])
 

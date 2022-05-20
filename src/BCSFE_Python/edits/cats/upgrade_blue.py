@@ -22,6 +22,7 @@ def upgrade_blue(save_stats):
 
     total = len(types)+1
     ids = helper.coloured_text(f"{total}. &All at once&\nEnter a number from 1 to {total} (You can enter multiple values separated by spaces to edit multiple at once):", is_input=True).split(" ")
+    ids = helper.create_all_list(ids, 11)
     ids = helper.ls_int(ids, -1)
     new_ids = []
     for id in ids:

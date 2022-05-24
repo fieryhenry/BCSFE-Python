@@ -44,7 +44,7 @@ def edit_catfruit(save_stats):
     max_cf = 128
     if save_stats["game_version"]["Value"] >= 110400:
         max_cf = None
-    save_stats["cat_fruit"] = helper.edit_items_list(["Purple Seeds", "Red Seeds", "Blue Seeds", "Green Seeds", "Yellow Seeds", "Purple Fruit", "Red Fruit", "Blue Fruit", "Green Fruit", "Yellow Fruit", "Epic Fruit", "Elder Seeds", "Elder Fruit", "Epic Seeds", "Gold Fruit", "Aku Seeds", "Aku Fruit", "Gold Seeds"], save_stats["cat_fruit"], "Catfruit", max_cf, "amount")
+    save_stats["cat_fruit"] = helper.edit_items_list(["Purple Seeds", "Red Seeds", "Blue Seeds", "Green Seeds", "Yellow Seeds", "Purple Fruit", "Red Fruit", "Blue Fruit", "Green Fruit", "Yellow Fruit", "Epic Fruit", "Elder Seeds", "Elder Fruit", "Epic Seeds", "Gold Fruit", "Aku Seeds", "Aku Fruit", "Gold Seeds", "Purple Behemoth Stone", "Red Behemoth Stone", "Blue Behemoth Stone", "Green Behemoth Stone", "Yellow Behemoth Stone"], save_stats["cat_fruit"], "Catfruit", max_cf, "amount")
     return save_stats
 
 def edit_engineers(save_stats):

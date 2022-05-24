@@ -4,7 +4,7 @@ import serialise_save
 import adb_handler
 from edits.basic_items import basic, talent_orbs
 from edits.other import meow_medals, play_time, unlock_enemy_guide, missions, trade_progress
-from edits.gamototo import gamatoto_xp, ototo_cat_cannon, helpers
+from edits.gamototo import gamatoto_xp, ototo_cat_cannon, helpers, fix_gamatoto
 from edits.cats import evolve_cats, get_remove_cats, upgrade_blue, upgrade_cats, talents, clear_cat_guide, chara_drop
 from edits.levels import aku, event_stages, gauntlet, itf_timed_scores, main_story, outbreaks, towers, treasures, uncanny, clear_tutorial
 
@@ -81,7 +81,7 @@ features = {
             "Leadership": basic.edit_leadership,
             "Battle Items": basic.edit_battle_items,
             "Catseyes": basic.edit_catseyes,
-            "Cat Fruit": basic.edit_catfruit,
+            "Cat Fruit / Behemoth Stones": basic.edit_catfruit,
             "Talent Orbs": talent_orbs.edit_talent_orbs,
     },
     "Gamatoto / Ototo":
@@ -92,6 +92,7 @@ features = {
             "Gamatoto XP / Level": gamatoto_xp.edit_gamatoto_xp,
             "Ototo Cat Cannon": ototo_cat_cannon.edit_cat_cannon,
             "Gamatoto Helpers": helpers.edit_helpers,
+            "Fix gamatoto from crashing the game" : fix_gamatoto.fix_gamatoto,
     },
     "Cats / Special Skills":
         {
@@ -110,7 +111,7 @@ features = {
             "Talents" : talents.edit_talents,
             "Collect Cat Guide" : clear_cat_guide.clear_cat_guide,
             "Collect Cat Guide Based On Rarity" : clear_cat_guide.clear_cat_guide_rarity,
-            "Get stage unit drops" : chara_drop.get_character_drops,
+            "Get stage unit drops - removes the \"Clear this stage to get special cat\" dialog" : chara_drop.get_character_drops,
         },
     "Levels / Treasures" :
         {

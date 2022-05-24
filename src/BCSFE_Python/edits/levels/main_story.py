@@ -63,5 +63,5 @@ def edit_story(ids, data, chapter_progress):
     ids = format_story_ids(ids)
     for id in ids:
         data["Chapter Progress"][id] = chapter_progress
-        data["Times Cleared"][id] = ([2] * chapter_progress) + ([0] * (48 - chapter_progress)) + ([0] * 3)
+        data["Times Cleared"][id] = ([1] * chapter_progress) + ([0] * (48 - chapter_progress)) + ([0] * 3)
     return data

@@ -7,7 +7,7 @@ def adb_pull(game_version):
     if game_version == "jp": game_version = ""
     path = f"/data/data/jp.co.ponos.battlecats{game_version}/files/SAVE_DATA"
     helper.coloured_text(f"Pulling save data from &{path}", new=helper.green)
-    data = subprocess.run(f"adb pull {path}", capture_output=True)
+    data = subprocess.run(f"adb pull {path}", capture_output=True, shell=True)
     return data
 
 def adb_error_handler(output : subprocess.CompletedProcess, game_version, success="SAVE_DATA"):
@@ -44,7 +44,7 @@ def add_to_path():
         adb_path = input("Please enter the path to the folder than contains adb: download link here: https://dl.google.com/android/repository/platform-tools-latest-windows.zip:")
         if os.path.isfile(adb_path):
             adb_path = os.path.dirname(adb_path)
-    subprocess.run(f"setx PATH \"%PATH%;{adb_path}\"")
+    subprocess.run(f"setx PATH \"%PATH%;{adb_path}\"", shell=True)
     subprocess.run(f"set PATH=%PATH%;{adb_path}", shell=True)
     print("Successfully added adb to path")
 
@@ -60,7 +60,7 @@ def adb_pull_handler(game_version=None):
 
 def detect_adb():
     try:
-        subprocess.run(f"adb", capture_output=True)
+        subprocess.run(f"adb", capture_output=True, shell=True)
     except FileNotFoundError:
         add_adb = helper.valdiate_bool(helper.coloured_text("Error, adb is not in your Path environment variable. There is a tutorial in the github's readme. Would you like to try to add adb to your path now?(&y&/&n&):", is_input=True), "y")
         if add_adb:
@@ -74,20 +74,20 @@ def adb_clear(game_version):
     path = f"/data/data/{package_name}"
     detect_adb()
 
-    data = subprocess.run(f"adb shell rm {path}/shared_prefs -r -f", capture_output=True)
+    data = subprocess.run(f"adb shell rm {path}/shared_prefs -r -f", capture_output=True, shell=True)
 
     success = adb_error_handler(data, game_version, True)
     if not success:
         return
     if success == "retry":
         adb_clear(game_version)
-    subprocess.run(f"adb shell rm {path}/files/*SAVE_DATA*", capture_output=True)
+    subprocess.run(f"adb shell rm {path}/files/*SAVE_DATA*", capture_output=True, shell=True)
     adb_rerun(package_name)
 
 def adb_rerun(package_name):
     print("Re-opening game...")
-    subprocess.run(f"adb shell am force-stop {package_name}")
-    subprocess.run(f"adb shell monkey -p {package_name} -v 1", stdout=subprocess.DEVNULL)
+    subprocess.run(f"adb shell am force-stop {package_name}", shell=True)
+    subprocess.run(f"adb shell monkey -p {package_name} -v 1", stdout=subprocess.DEVNULL, shell=True)
 
 def adb_push(game_version, save_data_path, rerun):
     detect_adb()
@@ -97,7 +97,7 @@ def adb_push(game_version, save_data_path, rerun):
     path = f"/data/data/{package_name}/files/SAVE_DATA"
     helper.coloured_text(f"Pushing save data to &{path}&", new=helper.green)
     
-    data = subprocess.run(f"adb push \"{save_data_path}\" \"{path}\"", capture_output=True)
+    data = subprocess.run(f"adb push \"{save_data_path}\" \"{path}\"", capture_output=True, shell=True)
 
     success = adb_error_handler(data, game_version, True)
     if not success:

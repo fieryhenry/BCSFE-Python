@@ -284,6 +284,9 @@ def create_all_list(ids, max_val, include_all_at_once=False):
         return ids
 def edit_array_user(names, data, maxes, name, type_name="level", range=False, length=None, item_name=None, offset=0, custom_text=""):
     individual = True
+    min_length = min(len(names), len(data))
+    names = names[0:min_length]
+    data = data[0:min_length]
     if type(maxes) == int:
         maxes = [maxes] * len(data)
     if range:
@@ -351,6 +354,8 @@ def edit_item(item, max, name, warning=False, add_plural=False, custom_text=None
     if warning:
         coloured_text(f"&WARNING: Editing in catfood, rare tickets, platinum tickets or legend tickets will most likely lead to a ban!", new=red)
         if name == "Platinum Tickets": coloured_text("&Instead of editing platinum tickets, edit platinum shards instead! They are much more safe. 10 platinum shards = 1 platinum ticket", new=red)
+        elif name == "Rare Tickets": coloured_text("&Instead of editing rare tickets directly, use the \"Normal Ticket Max Trade Progress\" conversion feature instead! It is much more safe.", new=red)
+        input("Press enter to accept the risk:")
     if add_plural:
         plural = "s"
 

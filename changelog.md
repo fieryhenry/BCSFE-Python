@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.8.0] - 2022-05-24
+
+#### Added
+
+- New behemoth stones to get catfruit feature
+- The ability to fix gamatoto from crashing the game
+
+#### Fixed
+
+- Some adb issues thanks to [!j0](https://github.com/j0912345)
+- More save parsing issues
+
 ## [1.7.1] - 2022-05-20
 
 #### Fixed

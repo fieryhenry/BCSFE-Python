@@ -4,6 +4,8 @@ import json
 from tkinter import E
 import traceback
 
+from itsdangerous import NoneAlgorithm
+
 import helper
 
 address = 0
@@ -24,10 +26,14 @@ def re_order(class_data):
     
 def Set_address(val):
     global address
+    if address == None:
+        raise Exception("Invalid address")
     address = val
 
 
 def next(number, Length=False):
+    if number < 0:
+        return skip(number)
     if number > len(save_data_g):
         raise Exception("Byte length is greater than the length of the save data")
     val = ConvertLittle(save_data_g[address:address+number])
@@ -51,11 +57,13 @@ def ConvertLittle(bytes):
 
 def get_time_data_skip(dst_flag):
     year = next(4)
-    skip(4)
+    year_2 = next(4)
+
     month = next(4)
-    skip(4)
+    month_2 = next(4)
+
     day = next(4)
-    skip(4)
+    day_2 = next(4)
     float_val = next(8)
     hour = next(4)
     minute = next(4)
@@ -65,7 +73,7 @@ def get_time_data_skip(dst_flag):
         dst = next(1)
 
     time = datetime.datetime(year, month, day, hour, minute, second)
-    return {"time" : time.isoformat(), "float" : float_val, "dst" : dst}
+    return {"time" : time.isoformat(), "float" : float_val, "dst" : dst, "duplicate" : {"yy" : year_2, "mm" : month_2, "dd" : day_2}}
 
 
 def get_time_data(dst_flag):
@@ -1377,6 +1385,22 @@ def start_parse(save_data, game_version_country):
 def get_game_version(save_data):
     return ConvertLittle(save_data[0:3])
 
+def find_date():
+    for i in range(100):
+        val = next(4)
+        if val >= 2000 and val <= 3000:
+            return address - 4
+    return None
+
+def get_dst(save_data, address):
+    dst = False
+    if save_data[address] == 15:
+        dst = True
+    elif save_data[address-1] == 15:
+        dst = False  # Offset in jp due to no dst
+    return dst
+
+
 def parse_save(save_data, game_version_country):
     Set_address(0)
     global save_data_g
@@ -1392,24 +1416,29 @@ def parse_save(save_data, game_version_country):
     save_stats["cat_food"] = next(4, True)
     save_stats["current_energy"] = next(4, True)
 
-    if save_data[133] == 15:
-        save_stats["dst"] = True
-    elif save_data[132] == 15:
-        save_stats["dst"] = False  # Offset in jp due to no dst
+    old_address = address
+    new_address = find_date()
+    Set_address(old_address)
+    extra = new_address-old_address
+    save_stats["extra_time_data"] = next(extra, True)
+    
+    dst = get_dst(save_data, address+118)
+    save_stats["dst"] = dst
     data = get_time_data_skip(save_stats["dst"])
+
     save_stats["time"] = data["time"]
     save_stats["dst_val"] = data["dst"]
     save_stats["float_val_1"] = data["float"]
+    save_stats["duplicate_time"] = data["duplicate"]
 
     save_stats["unknown_flags_1"] = get_length_data(length=4)
-
     save_stats["xp"] = next(4, True)
 
     save_stats["tutorial_cleared"] = next(4, True)
     save_stats["unknown_flags_2"] = get_length_data(length=12)
     save_stats["unknown_flag_1"] = next(1, True)
-
     save_stats["slots"] = get_equip_slots()
+
     save_stats["cat_stamp_current"] = next(4, True)
 
     save_stats["cat_stamp_collected"] = get_length_data(length=30)
@@ -1437,7 +1466,7 @@ def parse_save(save_data, game_version_country):
     save_stats["second_time"] = get_time_data(save_stats["dst"])
 
     save_stats["unknown_8"] = get_length_data(length=50)
-    get_time_data(save_stats["dst"])
+    save_stats["third_time"] = get_time_data(save_stats["dst"])
     
     save_stats["unknown_9"] = next(6*4, True)
 
@@ -1469,7 +1498,7 @@ def parse_save(save_data, game_version_country):
     save_stats["unknown_17"] = next(12, True)
     save_stats["unknown_18"] = next(4, True)
 
-    save_stats["second_time"] = get_time_data(save_stats["dst"])
+    save_stats["fourth_time"] = get_time_data(save_stats["dst"])
     save_stats["unknown_105"] = get_length_data(length=5)
     save_stats["unknown_108"] = {}
     save_stats["unknown_107"] = next(3, True)

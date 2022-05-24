@@ -44,16 +44,16 @@ def write_length_data(save_data, data, length_bytes=4, bytes=4, write_length=Tru
     return save_data
 
 
-def serialise_time_data_skip(save_data, time, float_val, dst_flag, dst=0):
-    time = dateutil.parser.parse(time)
+def serialise_time_data_skip(save_data, time_data, float_val, dst_flag, duplicate, dst=0):
+    time = dateutil.parser.parse(time_data)
     save_data = write(save_data, time.year, 4)
-    save_data = write(save_data, time.year, 4)
+    save_data = write(save_data, duplicate["yy"], 4)
 
     save_data = write(save_data, time.month, 4)
-    save_data = write(save_data, time.month, 4)
+    save_data = write(save_data, duplicate["mm"], 4)
 
     save_data = write(save_data, time.day, 4)
-    save_data = write(save_data, time.day, 4)
+    save_data = write(save_data, duplicate["dd"], 4)
 
     save_data = write(save_data, float_val, 8)
 
@@ -462,9 +462,10 @@ def serialize_save(save_stats):
 
     save_data = write(save_data, save_stats["cat_food"])
     save_data = write(save_data, save_stats["current_energy"])
-
+    if save_stats["extra_time_data"]:
+        save_data = write(save_data, save_stats["extra_time_data"])
     save_data = serialise_time_data_skip(
-        save_data, save_stats["time"], save_stats["float_val_1"], save_stats["dst"], save_stats["dst_val"])
+        save_data, save_stats["time"], save_stats["float_val_1"], save_stats["dst"], save_stats["duplicate_time"], save_stats["dst_val"])
 
     save_data = write_length_data(
         save_data, save_stats["unknown_flags_1"], write_length=False)
@@ -518,7 +519,7 @@ def serialize_save(save_stats):
         save_data, save_stats["unknown_8"], write_length=False)
 
     save_data = serialise_time_data(
-        save_data, save_stats["second_time"], save_stats["dst"], save_stats["dst_val"])
+        save_data, save_stats["third_time"], save_stats["dst"], save_stats["dst_val"])
 
     save_data = write(save_data, save_stats["unknown_9"])
 
@@ -556,7 +557,7 @@ def serialize_save(save_stats):
     save_data = write(save_data, save_stats["unknown_18"])
 
     save_data = serialise_time_data(
-        save_data, save_stats["second_time"], save_stats["dst"], save_stats["dst_val"])
+        save_data, save_stats["fourth_time"], save_stats["dst"], save_stats["dst_val"])
 
     save_data = write_length_data(save_data, save_stats["unknown_105"], 4, 4, False)
     

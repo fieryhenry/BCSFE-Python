@@ -22,8 +22,12 @@ for save in save_files:
     print(f"{path=}\t{gv_c=}\t{gv=}")
     if gv:
         save_stats = parse_save.start_parse(data, gv_c)
+
         save_data_1 = serialise_save.start_serialize(save_stats)
+
         save_stats = parse_save.start_parse(save_data_1, gv_c)
+
         save_data_2 = serialise_save.start_serialize(save_stats)
-        if save_data_1 != save_data_2:
+
+        if not (save_data_1 == save_data_2 and save_data_1 == data):
             print("DIFFERENT")

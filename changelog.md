@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.8.0.1] - 2022-05-24
+
+#### Removed
+
+- import from random module that got imported automatically by vscode
+
 ## [1.8.0] - 2022-05-24
 
 #### Added

@@ -4,8 +4,6 @@ import json
 from tkinter import E
 import traceback
 
-from itsdangerous import NoneAlgorithm
-
 import helper
 
 address = 0

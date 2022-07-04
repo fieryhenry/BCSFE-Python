@@ -1,24 +1,98 @@
 # Battle Cats Save File Editor
 
-A python save editor for the mobile game The Battle Cats that requires a rooted device/emulator.
+A python save editor for the mobile game The Battle Cats
 
-It is sort of based on my old [C# save editor](https://github.com/fieryhenry/Battle-Cats-Save-File-Editor) but it works in a completely different way and should be more reliable since it works in a similar way to how the game actually parses the save data. But the downside is that if there is one error/bug in the parser code, you can't edit anything and the program crashes.
-
-Join the [discord server](https://discord.gg/DvmMgvn5ZB) if you want to suggest new features, report bugs or get help on how to use the editor (not a substitute for the latest tutorial video).
-
-PyPi: https://pypi.org/project/battle-cats-save-editor/
+Join the [discord server](https://discord.gg/DvmMgvn5ZB) if you want to suggest new features, report bugs or get help on how to use the editor (please read the below tutorials / watch the latest [tutorial video](https://www.youtube.com/watch?v=Kr6VaLTXOSY) first before asking for help).
 
 If you want to support me then consider gifting me some ko-fi here: https://ko-fi.com/fieryhenry
 
 ## Thanks to:
 
-Lethal's editor for giving me inspiration to start the
-project and it helped me work out how to patch the save data and edit
-cf/xp: https://www.reddit.com/r/BattleCatsCheats/comments/djehhn/editoren/
+Lethal's editor for giving me inspiration to start the project and it helped me work out how to patch the save data and edit cf/xp: https://www.reddit.com/r/BattleCatsCheats/comments/djehhn/editoren/
 
 Beeven and csehydrogen's open source code, which helped me figure out how to patch save data: [beeven/battlecats](https://github.com/beeven/battlecats), [csehydrogen/BattleCatsHacker](https://github.com/csehydrogen/BattleCatsHacker)
 
+Everyone who's given me saves, which helped to test save parsing/serialising and to test/develop new features
+
 ## How to use:
+
+[Tutorial video](https://www.youtube.com/watch?v=Kr6VaLTXOSY) here, or scroll down for a text tutorial
+
+### Main tutorial
+
+You no longer need a rooted device nor a rooted android emulator.
+
+Although if you want to get unbanned / fix the elsewhere error you will still need one. I recommend LDPlayer, Nox, or MEmu if needed. Bluestacks is also an option but is more difficult to root as it doesn't have a built in option.
+
+---
+
+1. Install python (You'll need version 3.8 and up) https://www.python.org/downloads/
+
+2. Enter the command: `py -m pip install -U battle-cats-save-editor` into command prompt or another terminal to install the editor. If that doesn't work then use `python` instead of `py` in the command
+
+3. Enter the command: `py -m BCSFE_Python` to run the editor. If that doesn't work then use `python` instead of `py` in the command
+
+4. Look below for the tutorial that you need, or watch [here](https://www.youtube.com/watch?v=Kr6VaLTXOSY) for a video
+
+#### Using Transfer Codes
+
+If you don't have a rooted device or an emulator setup then do this:
+
+5. Go into the game and look in the top right of the screen and record / remember the game version
+
+6. Go into the in-game transfer system in `Settings-> Data Transfer` and click `Begin Data Transfer`
+
+7. In the editor use the option called `Download save data from the game using transfer and confirmation codes` (enter the corresponding number, not the name itself)
+
+8. Enter the game version that you are using, `en`=english, `kr`=korean, `ja`=japanese, `tw`=taiwan.
+
+9. Enter your transfer code
+
+10. Enter your confirmation code
+
+11. Enter the game version that you recorded earlier in step 5. If you entered everything in correctly it should work and you should be able to select a place to put the save
+
+12. If you get a parsing error please join the [discord server](https://discord.gg/DvmMgvn5ZB) and report it in #bug-reports and / or dm me your save file (preferably <b>not</b> transfer codes)
+
+13. Edit what you want
+
+14. Go into the `Save Management` option and select `Save changes and upload to game servers (get transfer and confirmation codes)`. It may take some time
+
+15. Enter those codes into the game's transfer system (click on `Resume Data Transfer`) (You may need to `Cancel Data Transfer` in-game before doing so)
+
+16. If you press play you may get a `The current Save Data is in violation` message, if so press ok and try again and it should go away, if it doesn't look at the tutorial [below](../../#how-to-fix-this-save-data-is-currently-acitve-elsewhere-or-the-current-save-data-is-in-violation)
+
+#### Using a rooted device
+
+If you can't upload your save data using the in-game system because your are banned or the `This save data is currently active elsewhere` message appears, you will need direct access to the save data:
+
+If you don't have a rooted device:
+
+5. You will need to get one of the emulators listed earlier, I recommend LD Player because I know that it works with this method. If you change the default install location, make sure to keep a note of it for it later
+   
+   1. Enable `root permission` in the settings and under `ADB Debugging` select `Open local connection`. You will need to restart LD Player for the changes to work
+   
+   2. Open the editor and select the option named `Use adb to pull the save from a rooted device` and enter your game version
+
+6. If you get the option to add adb to your path, select enter `y`.
+
+7. The editor will look for adb in default install directories of common emulators and add it automatically
+
+8. If it fails, then you will need to either
+   
+   1. Enter the path to your emulator's install directory, it might look like `C:\LDPlayer\LDPlayer4.0`
+   
+   2. Download adb with from [here](https://dl.google.com/android/repository/platform-tools-latest-windows.zip). Extract the zip and copy the folder path (not adb.exe itself) into the editor
+
+9. Now rerun the editor and try the option again. If it still doesn't work you'll need to manually do it, using the tutorial below.
+
+10. If you get a parsing issue please join the [discord server](https://discord.gg/DvmMgvn5ZB) and report it in #bug-reports and / or dm me your save file (preferably not transfer codes)
+
+11. Edit what you want
+
+12. Go into save management and select an option to push save data to the game
+
+13. Enter the game and you should see changes
 
 ### Put adb in path
 
@@ -26,15 +100,13 @@ To use the options in the editor to get and push your save data to the game, you
 
 1. If you are using an emulator: Go to your emulator's install directory, if you're
    using LDPlayer it will most likely be in `C:/LDPlayer/LDPlayer4.0`.
-   Then find `adb` in that folder (other emulators might have it in the `bin`
-    directory)
+   Then find `adb` in that folder (other emulators might have it in the `bin` directory)
 
 2. If you aren't using an emulator [Download the Android SDK Platform Tools ZIP file for Windows](https://dl.google.com/android/repository/platform-tools-latest-windows.zip), and unzip it.
 
-3. Copy the path to the directory that you are in
+3. Copy the path to the folder that you are in (not adb.exe itself)
 
-4. Then open the windows start menu and search: `edit the system environment 
-   variables` and press enter.
+4. Then open the windows start menu and search: `edit the system environment variables` and press enter.
 
 5. Then click on the `Environment Variables` button.
 
@@ -46,71 +118,33 @@ To use the options in the editor to get and push your save data to the game, you
 8. Click `Ok` then `Ok` again then `Ok` again.
 
 9. Relaunch powershell and maybe restart your whole pc, and try the command
-    again.
-   If this method is too dificult, just use a root file explorer instead 
-   and manually get the files that you want. The path that you will need is:
-   `/data/data/jp.co.ponos.battlecatsen/files/SAVE_DATA`
+   again.
 
-### Main tutorial
+If this method is too difficult, just use a root file explorer instead 
+    and manually get the files that you want. The path that you will need is: `/data/data/jp.co.ponos.battlecatsen/files/SAVE_DATA`
 
-At the moment you will need either a rooted device or a rooted android emulator. I recommed LDPlayer, Nox, or MEmu. Bluestacks is also an option but is more difficult to root as it doesn't have a built in option. If you are using an emulator you can transfer your save data from your main device to it using the in-game transfer menu and then transfer back to your device after editing your save.
+### How to fix "This save data is currently active elsewhere" or "The current Save Data is in violation"
 
-1. Install python (If you haven't already) https://www.python.org/downloads/
+1. You will need to get access to save data so you will need a rooted device / emulator, so look at the first part of the `Using a rooted device` tutorial.
 
-2. Enter the command: `py -m pip install -U battle-cats-save-editor` into cmd or another terminal to install the editor. If that doesn't work then use `python` instead of `py` in the command
+2. Select the option in `Inquiry Code / Token` to `Fix elsewhere error / Unban account`
 
-3. Connect your rooted device to your pc or start up your rooted emulator
+3. It may take some time but after, you should be able to choose one of the options in save management to push the save data to the game.
 
-4. Then enter the command: `py -m BCSFE_Python` to run the editor. If that doesn't work then use `python` instead of `py` in the command
-
-5. Choose the option to `Get the save data from the game automatically using adb` and enter the game version that you are using.
-
-6. If you get the `No device with an adb connection can be found, please connect one and try again.` error message then you haven't setup your adb correctly, so you may need to go into the settings in your emulator (If using one) and make sure adb is enabled.
-
-7. If you get a parsing error, or nothing seems to happen then please join the [discord server](https://discord.gg/DvmMgvn5ZB) and report it to me directly or in #bug-reports
-
-8. Then edit what you want. You can either enter the numbers asigned to each feature, or a word to search for a feature e.g entering catfood will run the Cat Food feature and entering cats will show you all the features that have cats in their name.
-
-9. Your edits won't be saved automatically so you'll need to go into the `Save Management` option and choose one of the first 3 options. A shortcut for re-launching the game is to enter `(r` into the the editor.
-
-If you want a video to follow instead then watch the tutorial video [here](https://www.youtube.com/watch?v=xBnGR1A3A-U)
-
-### How to fix "This save data is currently acitve elsewhere"
-
-I don't really know how this error occurs because I've gotten it even with an untouched account after repeatedly `Save Data to Server` and then `Cancel Save Data Transfer` but anyway here's how to fix it:
-
-1. Rename your current save to something like `SAVE_DATA_main` to keep track easily
-
-2. Open the editor, select any save and then run the feature in `Save Management` to `Clear save data`
-
-3. Then open the game, select a langauge and accept all of the agreements.
-
-4. Open the editor and get the save data using adb
-
-5. Close the editor
-
-6. Rename the new save data to `SAVE_DATA_new` to keep track easily
-
-7. Open the editor and select the `SAVE_DATA_main` save file.
-
-8. Go into the `Inquiry Code / Token` menu and run the feature to `Fix elsewhere error / Unban account` 
-
-9. Select `SAVE_DATA_new`
-
-10. Then go into `Save Management` and pick one of the first 3 options
-
-11. Open the game and you should be able to play (You may need to press `Play` a few times)
-
-12. I recommed you remove all cat food, rare tickets, platinum tickets, and legend tickets from your save file to avoid getting banned. Although it might not make a difference.
+4. If you press play you may get a `The current Save Data is in violation` message, if so press ok and try again and it should go away, if it doesn't then either you've done something wrong or the process didn't work. You may need to follow the tutorial in the second part of the old help video [here](https://www.youtube.com/watch?v=xBnGR1A3A-U) (3:40) and use the `Old Fix elsewhere error / Unban account (needs 2 save files)` feature instead
 
 ### How to unban an account
 
-You can get banned for editing in any amount of cat food, rare tickets, platinum tickets  (not platinum shards), or legend tickets.
+You can get banned for editing in any amount of cat food, rare tickets, platinum tickets or legend tickets.
 
 The way you fix it is the same method as the elsewhere fix, so just follow that.
 
-To avoid getting banned in the future instead of hacking in cat food, just edit everything in that you can buy with cat food, e.g battle items, catamins, xp, leadership for energy, etc and just hack in the cats/upgrades you want instead of editing in rare tickets, platinum tickets or legend tickets.
+##### How to prevent a ban in the future
 
-### Why can't I upload save data to the game servers?
+- Instead of editing in platinum tickets use the `Platinum Shards` feature
 
-Since 10.4 the transfer system has been secured better, so it is much more difficult to do anything. The difference between downloading and uploading save data is that there is a signature (Nyanko-Signature) that is generated. (There are other things too such as authorization but you can get that by doing other different requests to the servers anyway). So until I know how that signature is generated root is still required.
+- Instead of editing in rare tickets use the `Normal Ticket Max Trade Progress (allows for unbannable rare tickets)` feature
+
+- Instead of hacking in cat food, just edit everything in that you can buy with cat food, e.g battle items, catamins, xp, energy refills (leaderships), etc. If you really want catfood then you can clear and unclear catnip missions with the feature `Catnip Challenges / Missions` then entering 1 when asked. You'll need to collect the catfood in-game after each clear though
+
+- Instead of hacking in tickets, just hack in the cats/upgrades you want directly

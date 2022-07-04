@@ -1,7 +1,12 @@
-import hashlib
-import helper
+"""Handler for patching save data"""
 
-def get_md5_sum(save_data, game_version):
+import hashlib
+from typing import Union
+from . import helper
+
+def get_md5_sum(save_data: bytes, game_version: str) -> str:
+    """Get the md5 sum of the save data"""
+
     if game_version == "jp":
         game_version = ""
     salt = bytes("battlecats" + game_version, "utf-8")
@@ -10,7 +15,9 @@ def get_md5_sum(save_data, game_version):
     return hashlib.md5(data_to_hash).hexdigest()
 
 
-def detect_game_version(save_data):
+def detect_game_version(save_data: bytes) -> Union[None, str]:
+    """Detect the game version of the save file"""
+
     game_versions = ["jp", "en", "kr", "tw"]
     curr_hash = save_data[-32::]
     curr_hash_str = str(curr_hash, "utf-8")
@@ -22,8 +29,10 @@ def detect_game_version(save_data):
     return None
 
 
-def patch_save_data(save_data, game_version):
-    hash = get_md5_sum(save_data, game_version)
-    hash_bytes = bytes(hash, "utf-8")
-    
-    return helper.set_range(save_data, hash_bytes, len(save_data) -32)
+def patch_save_data(save_data: bytes, game_version: str) -> bytes:
+    """Set the md5 sum of the save data"""
+
+    save_hash = get_md5_sum(save_data, game_version)
+    hash_bytes = bytes(save_hash, "utf-8")
+
+    return helper.set_range(save_data, hash_bytes, len(save_data) - 32)

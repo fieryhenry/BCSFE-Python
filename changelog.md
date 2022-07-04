@@ -1,10 +1,46 @@
 # Changelog
 
+## [2.0.0] - 2022-07-04
+
+#### Added
+
+- The ability to upload your save data to the ponos servers and get transfer and confirmation codes. (The editor's root requirement is now gone). Although, you'll still need root access if you get banned / elsewhere popup. I haven't tested the feature too much so it could lead to bans
+
+- An option to go back in the feature menu
+
+- An automatic updater, if there is a new update, it will ask if you want to update and if you say yes then it'll try to update automatically
+
+- A way to select `all` talent orbs to edit all at once
+
+- A new tutorial video that shows you how to use the transfer system stuff and unban an account [here](https://www.youtube.com/watch?v=Kr6VaLTXOSY)
+
+#### Changed
+
+- The fix elsewhere / unban feature, it no longer needs another account. You can still use the old one, now named `Old Fix elsewhere error / Unban account (needs 2 save files)` if you want
+
+- A bunch of the source code. You should now be able to import BCSFE_Python in another python file and access the parser, serialiser, etc. Due to the rewrite, some stuff may be broken. This, and testing, is where the majority of the time went to
+
+- The order of few options, to make the server stuff closer to the top as that's what most people will be selecting now that no root is needed
+
+#### Fixed
+
+- Some adb issues
+
+- More save parsing issues
+
+- Edit dojo score crashing if you haven't been to the dojo yet
+
+- Adding adb to path issue
+
+- Ototo cat cannon not setting the correct value when editing all at once
+
+- Individual treasures feature giving you 49/48 treasures
+
 ## [1.8.0.1] - 2022-05-24
 
 #### Removed
 
-- import from random module that got imported automatically by vscode
+- Import from a random module that got imported automatically by vscode
 
 ## [1.8.0] - 2022-05-24
 
@@ -103,7 +139,7 @@
 
 #### Fixed
 
-- A small issue releating to meow medals
+- A small issue relating to meow medals
 
 - Some more parsing errors
 
@@ -111,7 +147,7 @@
 
 #### Changed
 
-- `adb.exe` is now included in the project, so you sould be able to auto-pull and push saves without adding it to your `PATH`
+- `adb.exe` is now included in the project, so you should be able to auto-pull and push saves without adding it to your `PATH`
 
 #### Fixed
 

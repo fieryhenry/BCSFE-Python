@@ -60,7 +60,7 @@ If you don't have a rooted device or an emulator setup then do this:
 
 15. Enter those codes into the game's transfer system (click on `Resume Data Transfer`) (You may need to `Cancel Data Transfer` in-game before doing so)
 
-16. If you press play you may get a `The current Save Data is in violation` message, if so press ok and try again and it should go away, if it doesn't look at the tutorial [below](../../#how-to-fix-this-save-data-is-currently-acitve-elsewhere-or-the-current-save-data-is-in-violation)
+16. If you press play you may get a `The current Save Data is in violation` message, if so press ok and try again and it should go away, if it doesn't look at the tutorial below
 
 #### Using a rooted device
 

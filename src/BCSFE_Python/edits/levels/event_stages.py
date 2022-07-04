@@ -9,15 +9,15 @@ def stage_handler(
 
     lengths = stage_data["Lengths"]
 
-    individual = "1"
+    individual = True
     if len(ids) > 1:
         individual = user_input_handler.colored_input(
             "Do you want to set the stars/crowns for each subchapter individually(&1&), or all at once(&2&):"
-        )
+        ) == "1"
     first = True
     stars = None
     for stage_id in ids:
-        if individual == "2" and first:
+        if not individual and first:
             stars = helper.check_int(
                 user_input_handler.colored_input(
                     f"Enter the number of stars/cowns (max &{lengths['stars']}&):"
@@ -28,7 +28,7 @@ def stage_handler(
                 continue
             stars = helper.clamp(stars, 0, lengths["stars"])
             first = False
-        elif individual == "1":
+        elif individual:
             stars = helper.check_int(
                 user_input_handler.colored_input(
                     f"Enter the number of stars/cowns for subchapter &{stage_id}& (max &{lengths['stars']}&):"
@@ -38,8 +38,6 @@ def stage_handler(
                 print("Please enter a valid number")
                 continue
             stars = helper.clamp(stars, 0, lengths["stars"])
-        else:
-            return stage_data
         stage_id += offset
         stage_data_edit = stage_data
         if stage_id >= len(stage_data_edit["Value"]["clear_progress"]):

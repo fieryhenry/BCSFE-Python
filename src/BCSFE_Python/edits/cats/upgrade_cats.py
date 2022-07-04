@@ -87,16 +87,16 @@ def upgrade_handler(data: dict, ids: list, item_name: str, save_stats: dict) -> 
 
     base = data["Base"]
     plus = data["Plus"]
-    individual = "1"
+    individual = True
     if len(ids) > 1:
         individual = user_input_handler.colored_input(
             f"Do you want to upgrade each {item_name} individually(&1&), or all at once(&2&):"
-        )
+        ) == "1"
     first = True
     base_lvl = None
     plus_lvl = None
     for cat_id in ids:
-        if individual == "2" and first:
+        if not individual and first:
             levels = get_plus_base(
                 user_input_handler.colored_input(
                     'Enter the base level followed by a "&+&" then the plus level, e.g 5&+&12. If you want to ignore the base level do &+&12, if you want to ignore the plus level do 5&+&:\n'
@@ -105,7 +105,7 @@ def upgrade_handler(data: dict, ids: list, item_name: str, save_stats: dict) -> 
             base_lvl = levels[0]
             plus_lvl = levels[1]
             first = False
-        elif individual == "1":
+        elif individual:
             helper.colored_text(f"The current upgrade level of id &{cat_id}& is &{base[cat_id]+1}&+&{plus[cat_id]}&")
             levels = get_plus_base(
                 user_input_handler.colored_input(
@@ -114,13 +114,10 @@ def upgrade_handler(data: dict, ids: list, item_name: str, save_stats: dict) -> 
             )
             base_lvl = levels[0]
             plus_lvl = levels[1]
-        else:
-            return data
         if base_lvl is not None:
             base[cat_id] = base_lvl - 1
         if plus_lvl is not None:
             plus[cat_id] = plus_lvl
-
     data["Base"] = base
     data["Plus"] = plus
 

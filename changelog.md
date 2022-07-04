@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.0.1] - 2022-07-04
+
+#### Fixed
+
+- Upgrade cats and unlock event stages not working properly when editing all at once
+
 ## [2.0.0] - 2022-07-04
 
 #### Added

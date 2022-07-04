@@ -1,3 +1,5 @@
+"""Setup for installing the package."""
+
 import setuptools
 
 with open("README.md", "r", encoding="utf-8") as fh:
@@ -19,11 +21,9 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    package_dir={"" : "src"},
+    package_dir={"": "src"},
     packages=setuptools.find_packages(where="src"),
-    python_requires=">=3.6",
-    install_requires=[
-        "colored", "tk", "python-dateutil", "requests"
-    ],
-    include_package_data=True
+    python_requires=">=3.8",
+    install_requires=["colored", "tk", "python-dateutil", "requests"],
+    include_package_data=True,
 )

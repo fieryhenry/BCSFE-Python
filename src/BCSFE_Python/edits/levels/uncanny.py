@@ -1,11 +1,20 @@
-import helper
-from edits.levels import event_stages
+"""Handler for editting uncanny legends"""
 
-def edit_uncanny(save_stats):
+from ..levels import event_stages
+from ... import user_input_handler
+
+
+def edit_uncanny(save_stats: dict) -> dict:
+    """Handler for editting uncanny legends"""
     stage_data = save_stats["uncanny"]
     lengths = stage_data["Lengths"]
 
     ids = []
-    ids = helper.get_range_input(helper.coloured_text("Enter stage ids (e.g &1& = a new legend, &2& = here be dragons)(You can enter &all& to get all, a range e.g &1&-&49&, or ids separate by spaces e.g &5 4 7&):", is_input=True), lengths["total"])
+    ids = user_input_handler.get_range(
+        user_input_handler.colored_input(
+            "Enter stage ids (e.g &1& = a new legend, &2& = here be dragons)(You can enter &all& to get all, a range e.g &1&-&49&, or ids separate by spaces e.g &5 4 7&):"
+        ),
+        lengths["total"],
+    )
     save_stats["uncanny"] = event_stages.stage_handler(stage_data, ids, -1)
     return save_stats

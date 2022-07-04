@@ -1,4 +1,8 @@
-def edit_aku(save_stats):
+"""Handler for editing the aku realm"""
+
+
+def edit_aku(save_stats: dict) -> dict:
+    """Handler for editing the aku realm"""
     aku = save_stats["aku"]
     count = aku["Lengths"]["stages"]
     aku["Value"]["clear_amount"][0][0] = [1] * count

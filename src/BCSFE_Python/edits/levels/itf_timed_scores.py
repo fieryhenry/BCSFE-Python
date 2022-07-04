@@ -1,16 +1,26 @@
-from edits.levels import main_story
-import helper
+"""Handler for setting into the future timed scores"""
 
-def timed_scores(save_stats):
+from ..levels import main_story
+from ... import item
+
+
+def timed_scores(save_stats: dict) -> dict:
+    """Handler for setting into the future timed scores"""
+
     scores = save_stats["itf_timed_scores"]
 
-    usr_scores = [-1] * len(scores)
-    usr_scores = helper.edit_array_user(main_story.chapters[3:6], usr_scores, 9999, "Into The Future Timed Scores", "score")
-    for i in range(len(usr_scores)):
-        if usr_scores[i] != -1:
-            scores[i] = ([usr_scores[i]] * 48) + ([0] * 3)
+    usr_scores = item.create_item_group(
+        names=main_story.chapters[3:6],
+        values=None,
+        maxes=9999,
+        edit_name="score",
+        group_name="Into The Future Timed Scores",
+    )
+    usr_scores.edit()
+    for i, usr_score in enumerate(usr_scores.values):
+        if usr_score is not None:
+            scores[i] = ([usr_score] * 48) + ([0] * 3)
     save_stats["itf_timed_scores"] = scores
-    
+
     print("Successfully set timed scores")
     return save_stats
-

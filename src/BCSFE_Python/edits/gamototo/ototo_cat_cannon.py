@@ -1,41 +1,79 @@
-import helper
+"""Handler for editing the ototo cat cannon"""
 
-types = ["Base", "Slow Beam", "Iron Wall", "Thunderbolt", "Waterblast", "Holy Blast", "Breakerblast", "Curseblast"]
+from ... import user_input_handler, item
 
-def set_level(save_stats, levels):
+types = [
+    "Base",
+    "Slow Beam",
+    "Iron Wall",
+    "Thunderbolt",
+    "Waterblast",
+    "Holy Blast",
+    "Breakerblast",
+    "Curseblast",
+]
+
+
+def set_level(save_stats: dict, levels: list) -> dict:
+    """Set the upgrade level of the cannon"""
+
     cannons = save_stats["ototo_cannon"]
 
-    levels = helper.edit_items_list(types, levels, "Ototo Cat Cannons", [19, 29, 29, 29, 29, 29, 29, 29], offset=1)
-    for i in range(len(cannons)):
-        cannons[i]["unlock_flag"] = 3
-        if levels[i] < 0: cannons[i]["unlock_flag"] = 0
+    ot_levels = item.create_item_group(
+        names=types,
+        values=levels,
+        maxes=[19, 29, 29, 29, 29, 29, 29, 29],
+        edit_name="level",
+        group_name="Cannon Level",
+        offset=1,
+    )
+    ot_levels.edit()
 
-        if levels[i] < 0: levels[i] = 0
-        cannons[i]["level"] = levels[i]
+    for i, level in enumerate(ot_levels.values):
+        if level > 0:
+            cannons[i]["unlock_flag"] = 3
+        cannons[i]["level"] = level
     save_stats["ototo_cannon"] = cannons
     return save_stats
 
-def set_stage(save_stats, stages):
+
+def set_stage(save_stats: dict, stages: list) -> dict:
+    """Set the stage of the cannon development"""
+
     cannons = save_stats["ototo_cannon"]
 
-    stages = helper.edit_items_list(types[1:], stages[1:], "Ototo Cat Cannons", 3, type_name="stage")
-    for i in range(len(cannons)-1):
-        cannons[i+1]["unlock_flag"] = stages[i]
+    ot_stages = item.create_item_group(
+        names=types[1:],
+        values=stages[1:],
+        maxes=3,
+        edit_name="stage",
+        group_name="Ototo Cat Cannon Stage",
+    )
+    ot_stages.edit()
+    for i in range(len(cannons) - 1):
+        cannons[i + 1]["unlock_flag"] = ot_stages.values[i]
 
     save_stats["ototo_cannon"] = cannons
     return save_stats
-def edit_cat_cannon(save_stats):
+
+
+def edit_cat_cannon(save_stats: dict) -> dict:
+    """Handler for ototo cat cannon upgrades"""
+
     cannons = save_stats["ototo_cannon"]
     levels = []
     stages = []
     for cannon in cannons:
         level = cannons[cannon]["level"]
         stage = cannons[cannon]["unlock_flag"]
-        if cannons[cannon]["unlock_flag"] == 0:
-            level -= 1
         levels.append(level)
         stages.append(stage)
-    stage = helper.valdiate_bool(helper.coloured_text("Do you want to set the level of the cannon &(1)& or the level of construction &(2)& (e.g foundation, style, cannon):", is_input=True), "2")
+    stage = (
+        user_input_handler.colored_input(
+            "Do you want to set the level of the cannon &(1)& or the level of construction &(2)& (e.g foundation, style, cannon):"
+        )
+        == "2"
+    )
     if stage:
         save_stats = set_stage(save_stats, stages)
     else:

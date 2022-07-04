@@ -94,11 +94,11 @@ def edit_talents(save_stats: dict) -> dict:
         ),
         length,
     )
-    individual = "1"
+    individual = True
     if len(ids) > 1:
         individual = user_input_handler.colored_input(
             "Do you want to set the talents for each cat individually(&1&), or max them all at once(&2&):"
-        )
+        ) == "1"
 
     talent_data = get_talent_data()
     cat_talents_levels = []
@@ -108,7 +108,7 @@ def edit_talents(save_stats: dict) -> dict:
             if len(ids) < 20:
                 print(f"Error cat {cat_id} does not have any talents")
             continue
-        if individual == "2":
+        if not individual:
             cat_talent_data = talent_data[cat_id]
             cat_talents = talents[cat_id]
             cat_talent_data_formatted = get_cat_talents(cat_talents, cat_talent_data)
@@ -119,7 +119,7 @@ def edit_talents(save_stats: dict) -> dict:
                 max_val = talent_formatted["max"]
                 cat_talents_levels.append(max_val)
 
-        elif individual == "1":
+        elif individual:
             cat_talent_data = talent_data[cat_id]
             cat_talents = talents[cat_id]
             cat_talent_data_formatted = get_cat_talents(cat_talents, cat_talent_data)
@@ -140,8 +140,6 @@ def edit_talents(save_stats: dict) -> dict:
             )
             cat_talents_levels.edit()
             cat_talents_levels = cat_talents_levels.values
-        else:
-            return save_stats
 
         for i, cat_talent_level in enumerate(cat_talents_levels):
             cat_talents[i + 1]["level"] = cat_talent_level

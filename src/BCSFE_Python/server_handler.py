@@ -125,6 +125,8 @@ def get_password_refresh(
 def get_client_info(country_code: str, game_version: str) -> dict:
     """Returns the client info for the given country_code and game_version"""
 
+    country_code = country_code.replace("jp", "ja")
+
     data = {
         "clientInfo": {
             "client": {"countryCode": country_code, "version": game_version},

@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.0.2] - 2022-07-08
+
+#### Fixed
+
+- Jp not being able to upload save data
+
 ## [2.0.1] - 2022-07-04
 
 #### Fixed

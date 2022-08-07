@@ -26,7 +26,7 @@ Although if you want to get unbanned / fix the elsewhere error you will still ne
 
 ---
 
-1. Install python (You'll need version 3.8 and up) https://www.python.org/downloads/
+1. Install python (You'll need version 3.9 and up) https://www.python.org/downloads/
 
 2. Enter the command: `py -m pip install -U battle-cats-save-editor` into command prompt or another terminal to install the editor. If that doesn't work then use `python` instead of `py` in the command
 

@@ -2,29 +2,45 @@
 
 import hashlib
 from typing import Union
-from . import helper
 
-def get_md5_sum(save_data: bytes, game_version: str) -> str:
-    """Get the md5 sum of the save data"""
 
-    if game_version == "jp":
+def get_md5_sum(data: bytes) -> str:
+    """Get MD5 sum of data."""
+
+    return hashlib.md5(data).hexdigest()
+
+
+def get_save_data_sum(save_data: bytes, game_version: str) -> str:
+    """Get MD5 sum of save data."""
+
+    if game_version in ("jp", "ja"):
         game_version = ""
-    salt = bytes("battlecats" + game_version, "utf-8")
+
+    salt = f"battlecats{game_version}".encode("utf-8")
     data_to_hash = salt + save_data[:-32]
 
-    return hashlib.md5(data_to_hash).hexdigest()
+    return get_md5_sum(data_to_hash)
 
 
-def detect_game_version(save_data: bytes) -> Union[None, str]:
+def detect_game_version(save_data: bytes) -> Union[str, None]:
     """Detect the game version of the save file"""
 
-    game_versions = ["jp", "en", "kr", "tw"]
-    curr_hash = save_data[-32::]
-    curr_hash_str = str(curr_hash, "utf-8")
+    if not save_data:
+        return None
+
+    game_versions = [
+        "jp",
+        "en",
+        "kr",
+        "tw",
+    ]
+    try:
+        curr_hash = save_data[-32:].decode("utf-8")
+    except UnicodeDecodeError as err:
+        raise Exception("Invalid save hash") from err
 
     for game_version in game_versions:
-        hash_str = get_md5_sum(save_data, game_version)
-        if hash_str == curr_hash_str:
+        if curr_hash == get_save_data_sum(save_data, game_version):
             return game_version
     return None
 
@@ -32,7 +48,6 @@ def detect_game_version(save_data: bytes) -> Union[None, str]:
 def patch_save_data(save_data: bytes, game_version: str) -> bytes:
     """Set the md5 sum of the save data"""
 
-    save_hash = get_md5_sum(save_data, game_version)
-    hash_bytes = bytes(save_hash, "utf-8")
-
-    return helper.set_range(save_data, hash_bytes, len(save_data) - 32)
+    save_hash = get_save_data_sum(save_data, game_version)
+    save_data = save_data[:-32] + save_hash.encode("utf-8")
+    return save_data

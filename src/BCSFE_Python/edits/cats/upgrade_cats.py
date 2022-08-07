@@ -1,62 +1,31 @@
 """Handler for cat upgrades"""
+from typing import Any, Union
 
-from ... import helper, user_input_handler, csv_file_handler
+from ... import helper, user_input_handler, game_data_getter, csv_handler
+from . import cat_id_selector
 
-
-def upgrade_cats(save_stats: dict) -> dict:
-    """Upgrade specific cats"""
-
-    cats = save_stats["cat_upgrades"]
-    base = cats["Base"]
-    ids = user_input_handler.get_range(
-        user_input_handler.colored_input(
-            "Enter cat ids (Look up cro battle cats to find ids)(You can enter &all& to get all, a range e.g &1&-&50&, or ids separate by spaces e.g &5 4 7&):"
-        ),
-        len(base),
-    )
-    return upgrade_cats_ids(save_stats, ids)
-
-
-def upgrade_current_cats(save_stats: dict) -> dict:
-    """Upgrade current cats"""
-
-    cats = save_stats["cats"]
-    cat_ids = []
-    for i, cat_val in enumerate(cats):
-        if cat_val == 1:
-            cat_ids.append(i)
-    save_stats = upgrade_cats_ids(save_stats, cat_ids)
-
-    return save_stats
-
-
-def get_rarities() -> list:
+def get_rarities(is_jp: bool) -> list[int]:
     """Get all cat ids of each rarity"""
 
-    path = helper.get_file("game_data/rarity/unitbuy.csv")
-    data = csv_file_handler.parse_csv(path)
+    file_data = game_data_getter.get_file_latest("DataLocal", "unitbuy.csv", is_jp).decode("utf-8")
+    data = helper.parse_int_list_list(csv_handler.parse_csv(file_data))
     rarity_ids = helper.copy_first_n(data, 13)
     return rarity_ids
 
 
-def get_rarity(rarity_ids: list) -> list:
+def get_rarity(rarity_ids: list[int], is_jp: bool) -> list[int]:
     """Get all cat ids of a certain rarity"""
 
-    rarities = get_rarities()
-    cat_ids = []
+    rarities = get_rarities(is_jp)
+    cat_ids: list[int] = []
     for rarity_id in rarity_ids:
-        rarity_id = helper.check_int(rarity_id)
-        if rarity_id is None:
-            print("Please input a valid number")
-            continue
-        rarity_id -= 1
         for i, rarity_val in enumerate(rarities):
             if int(rarity_val) == rarity_id:
                 cat_ids.append(i)
     return cat_ids
 
 
-types = [
+TYPES = [
     "Normal",
     "Special",
     "Rare",
@@ -66,21 +35,38 @@ types = [
 ]
 
 
-def upgrade_cat_rarity(save_stats: dict) -> dict:
-    """Upgrade all cats of a certain rarity"""
+def set_user_popups(save_stats: dict[str, Any]) -> dict[str, Any]:
+    """Set user popups, stops the user rank popups from spamming up the screen"""
 
-    ids = user_input_handler.select_options(
-        options=types,
-        mode="upgrade",
-    )
-
-    cat_ids = get_rarity(ids)
-    save_stats = upgrade_cats_ids(save_stats, cat_ids)
-
+    save_stats["user_rank_popups"]["Value"] = 0xFFFFFF
     return save_stats
 
 
-def upgrade_handler(data: dict, ids: list, item_name: str, save_stats: dict) -> dict:
+def get_plus_base(usr_input: str) -> tuple[Union[int, None], Union[int, None]]:
+    """Get the base and plus level of an input"""
+
+    split = usr_input.split("+")
+    base = None
+    plus = None
+    if len(split) == 2:
+        if split[0]:
+            base = helper.check_int(split[0])
+        if split[1]:
+            plus = helper.check_int(split[1])
+    return base, plus
+
+
+def upgrade_cats(save_stats: dict[str, Any]) -> dict[str, Any]:
+    """Upgrade specific cats"""
+
+    ids = cat_id_selector.select_cats(save_stats)
+
+    return upgrade_cats_ids(save_stats, ids)
+
+
+def upgrade_handler(
+    data: dict[str, Any], ids: list[int], item_name: str, save_stats: dict[str, Any]
+) -> dict[str, Any]:
     """Handler for cat upgrades"""
 
     ids = helper.check_cat_ids(ids, save_stats)
@@ -89,9 +75,12 @@ def upgrade_handler(data: dict, ids: list, item_name: str, save_stats: dict) -> 
     plus = data["Plus"]
     individual = True
     if len(ids) > 1:
-        individual = user_input_handler.colored_input(
-            f"Do you want to upgrade each {item_name} individually(&1&), or all at once(&2&):"
-        ) == "1"
+        individual = (
+            user_input_handler.colored_input(
+                f"Do you want to upgrade each {item_name} individually(&1&), or all at once(&2&):"
+            )
+            == "1"
+        )
     first = True
     base_lvl = None
     plus_lvl = None
@@ -106,7 +95,9 @@ def upgrade_handler(data: dict, ids: list, item_name: str, save_stats: dict) -> 
             plus_lvl = levels[1]
             first = False
         elif individual:
-            helper.colored_text(f"The current upgrade level of id &{cat_id}& is &{base[cat_id]+1}&+&{plus[cat_id]}&")
+            helper.colored_text(
+                f"The current upgrade level of id &{cat_id}& is &{base[cat_id]+1}&+&{plus[cat_id]}&"
+            )
             levels = get_plus_base(
                 user_input_handler.colored_input(
                     f'Enter the base level for {item_name}: &{cat_id}& followed by a "&+&" then the plus level, e.g 5&+&12. If you want to ignore the base level do &+&12, if you want to ignore the plus level do 5&+&:\n'
@@ -124,14 +115,7 @@ def upgrade_handler(data: dict, ids: list, item_name: str, save_stats: dict) -> 
     return data
 
 
-def set_user_popups(save_stats: dict) -> dict:
-    """Set user popups, stops the user rank popups from spamming up the screen"""
-
-    save_stats["user_rank_popups"]["Value"] = 0xFFFFFF
-    return save_stats
-
-
-def upgrade_cats_ids(save_stats: dict, ids: list) -> dict:
+def upgrade_cats_ids(save_stats: dict[str, Any], ids: list[int]) -> dict[str, Any]:
     """Upgrade cats by ids"""
 
     save_stats["cat_upgrades"] = upgrade_handler(
@@ -143,16 +127,3 @@ def upgrade_cats_ids(save_stats: dict, ids: list) -> dict:
     save_stats = set_user_popups(save_stats)
     print("Successfully set cat levels")
     return save_stats
-
-
-def get_plus_base(usr_input: str) -> tuple:
-    """Get the base and plus level of an input"""
-
-    split = usr_input.split("+")
-    base = None
-    plus = None
-    if split[0]:
-        base = helper.check_int(split[0])
-    if split[1]:
-        plus = helper.check_int(split[1])
-    return base, plus

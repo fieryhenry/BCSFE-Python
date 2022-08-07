@@ -6,6 +6,7 @@ from typing import Any
 
 from ... import helper, adb_handler, server_handler, tracker
 
+
 def edit_cache(password: str, token: str, save_stats: dict[str, Any]) -> bool:
     """Edit the cache file in /data/data/jp.co.ponos.battlecats/files/cache/ to add the token and password"""
 
@@ -41,16 +42,16 @@ def fix_elsewhere(save_stats: dict[str, Any], force_mi: bool = False) -> dict[st
     if token is None:
         helper.colored_text("Failed to get auth token", helper.RED)
         return save_stats
-    if edit_cache(
-        password_refresh_data["password"], token, save_stats
-    ):
-        helper.colored_text(
-            "Done!\nYou may get a ban message when pressing play. If you do, just press play again and it should go away\nPress enter to continue...(You still need to save your changes)",
-            helper.DARK_YELLOW,
-        )
-        input()
+    edit_cache(password_refresh_data["password"], token, save_stats)
     if original_iq != inquiry_code or force_mi:
         item_tracker = tracker.Tracker()
         item_tracker.reset_tracker()
-        server_handler.update_managed_items(save_stats["inquiry_code"], token, save_stats)
+        server_handler.update_managed_items(
+            save_stats["inquiry_code"], token, save_stats
+        )
+    helper.colored_text(
+        "Done!\nYou may get a ban message when pressing play. If you do, just press play again and it should go away\nPress enter to continue...(You still need to save your changes)",
+        helper.DARK_YELLOW,
+    )
+    input()
     return save_stats

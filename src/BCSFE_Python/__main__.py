@@ -124,8 +124,8 @@ def normal_start_up(default_op: bool = True) -> None:
         option = str(default_start_option)
     else:
         print()
-        helper.print_line_seperator(helper.WHITE)
-
+        if not default_op:
+            helper.print_line_seperator(helper.WHITE)
         options = [
             "Download save data from the game using transfer and confirmation codes",
             "Select a save file from file",

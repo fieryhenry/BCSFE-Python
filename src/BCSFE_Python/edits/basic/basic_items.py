@@ -2,6 +2,7 @@
 from typing import Any
 from ... import helper, item, managed_item
 
+
 def edit_cat_food(save_stats: dict[str, Any]) -> dict[str, Any]:
     """Handler for editing cat food"""
 

@@ -1,3 +1,5 @@
+"""Test cat id selector"""
+
 from pytest import MonkeyPatch
 from BCSFE_Python.edits.cats import cat_id_selector
 
@@ -20,6 +22,7 @@ def test_select_range(monkeypatch: MonkeyPatch):
     actual_ids = [1, 2, 3, 4, 5]
     assert ids == actual_ids
 
+
 def test_select_current():
     """Test that the ids are correct"""
 
@@ -28,6 +31,7 @@ def test_select_current():
     ids = cat_id_selector.select_current_cats(save_stats)
     actual_ids = [0, 1, 2, 4]
     assert ids == actual_ids
+
 
 def test_select_rarity(monkeypatch: MonkeyPatch):
     """Test that the ids are correct"""
@@ -38,6 +42,7 @@ def test_select_rarity(monkeypatch: MonkeyPatch):
     ids = cat_id_selector.select_cats_rarity(False)
     actual_ids = [0, 1, 2, 3, 4, 5, 6, 7, 8, 643]
     assert ids == actual_ids
+
 
 def test_select_range_reverse(monkeypatch: MonkeyPatch):
     """Test that the ids are correct"""
@@ -50,6 +55,7 @@ def test_select_range_reverse(monkeypatch: MonkeyPatch):
     actual_ids = [1, 2, 3, 4, 5]
     assert ids == actual_ids
 
+
 def test_select_range_mult(monkeypatch: MonkeyPatch):
     """Test that the ids are correct"""
 
@@ -60,6 +66,7 @@ def test_select_range_mult(monkeypatch: MonkeyPatch):
     ids = cat_id_selector.select_cats_range(save_stats)
     actual_ids = [1, 2, 3, 4, 5, 7, 8, 9, 10]
     assert ids == actual_ids
+
 
 def test_select_range_spaces(monkeypatch: MonkeyPatch):
     """Test that the ids are correct"""
@@ -72,6 +79,7 @@ def test_select_range_spaces(monkeypatch: MonkeyPatch):
     actual_ids = [1, 4, 7, 2]
     assert ids == actual_ids
 
+
 def test_select_range_comb(monkeypatch: MonkeyPatch):
     """Test that the ids are correct"""
 
@@ -82,6 +90,7 @@ def test_select_range_comb(monkeypatch: MonkeyPatch):
     ids = cat_id_selector.select_cats_range(save_stats)
     actual_ids = [1, 4, 7, 2, 8, 9, 10]
     assert ids == actual_ids
+
 
 def test_select_range_all(monkeypatch: MonkeyPatch):
     """Test that the ids are correct"""

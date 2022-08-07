@@ -4,23 +4,30 @@ from typing import Any
 from ... import helper, user_input_handler, item, csv_handler, game_data_getter
 from . import story_level_id_selector, main_story
 
+
 def get_stages(is_jp: bool) -> list[list[list[int]]]:
     """Get what stages belong to which treasure group"""
 
     treasures_values: list[list[list[int]]] = []
     eoc_treasures = helper.parse_int_list_list(
         csv_handler.parse_csv(
-            game_data_getter.get_file_latest("DataLocal", "treasureData0.csv", is_jp).decode("utf-8"),
+            game_data_getter.get_file_latest(
+                "DataLocal", "treasureData0.csv", is_jp
+            ).decode("utf-8"),
         )
     )[11:22]
     itf_treasures = helper.parse_int_list_list(
         csv_handler.parse_csv(
-            game_data_getter.get_file_latest("DataLocal", "treasureData1.csv", is_jp).decode("utf-8"),
+            game_data_getter.get_file_latest(
+                "DataLocal", "treasureData1.csv", is_jp
+            ).decode("utf-8"),
         )
     )[11:22]
     cotc_treasures = helper.parse_int_list_list(
         csv_handler.parse_csv(
-            game_data_getter.get_file_latest("DataLocal", "treasureData2_0.csv", is_jp).decode("utf-8"),
+            game_data_getter.get_file_latest(
+                "DataLocal", "treasureData2_0.csv", is_jp
+            ).decode("utf-8"),
         )
     )[11:22]
 
@@ -45,16 +52,22 @@ def get_names(is_jp: bool) -> list[list[list[str]]]:
 
     names: list[list[list[str]]] = []
     eoc_names = csv_handler.parse_csv(
-        game_data_getter.get_file_latest("resLocal", "Treasure3_0_en.csv", is_jp).decode("utf-8"),
-        delimeter="|"
+        game_data_getter.get_file_latest(
+            "resLocal", "Treasure3_0_en.csv", is_jp
+        ).decode("utf-8"),
+        delimeter="|",
     )[:11]
     itf_names = csv_handler.parse_csv(
-        game_data_getter.get_file_latest("resLocal", "Treasure3_1_AfterFirstEncounter_en.csv", is_jp).decode("utf-8"),
+        game_data_getter.get_file_latest(
+            "resLocal", "Treasure3_1_AfterFirstEncounter_en.csv", is_jp
+        ).decode("utf-8"),
         delimeter="|",
     )[:11]
     cotc_names = csv_handler.parse_csv(
-        game_data_getter.get_file_latest("resLocal", "Treasure3_2_0_en.csv", is_jp).decode("utf-8"),
-        delimeter="|"
+        game_data_getter.get_file_latest(
+            "resLocal", "Treasure3_2_0_en.csv", is_jp
+        ).decode("utf-8"),
+        delimeter="|",
     )[:11]
 
     names.append(helper.copy_first_n(eoc_names, 0))
@@ -110,7 +123,7 @@ def set_treasure_groups(
     chapter_id: int,
 ) -> list[list[int]]:
     """Set the treasure stats of a group of treasures"""
-    
+
     for i, treasure_level in enumerate(treasure_levels):
         if treasure_level is None:
             continue

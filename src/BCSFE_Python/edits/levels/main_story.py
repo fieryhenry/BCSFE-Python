@@ -53,6 +53,7 @@ def format_story_ids(ids: list[int]) -> list[int]:
         formatted_ids.append(format_story_id(story_id))
     return formatted_ids
 
+
 def format_story_id(chapter_id: int) -> int:
     """For some reason there is a gap after EoC 3. This adds that"""
 

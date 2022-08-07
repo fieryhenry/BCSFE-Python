@@ -11,12 +11,18 @@ def set_t_ids(save_stats: dict[str, Any]) -> dict[str, Any]:
     unit_drops_stats = save_stats["unit_drops"]
     data = get_data(helper.is_jp(save_stats))
 
-    usr_t_ids = user_input_handler.get_range(user_input_handler.colored_input("Enter treasures ids (Look up item drop cats battle cats to find ids)(You can enter &all& to get all, a range e.g &1&-&50&, or ids separate by spaces e.g &5 4 7&):"), all_ids=data["t_ids"])
+    usr_t_ids = user_input_handler.get_range(
+        user_input_handler.colored_input(
+            "Enter treasures ids (Look up item drop cats battle cats to find ids)(You can enter &all& to get all, a range e.g &1&-&50&, or ids separate by spaces e.g &5 4 7&):"
+        ),
+        all_ids=data["t_ids"],
+    )
 
     unit_drops_stats = set_t_ids_val(unit_drops_stats, data, usr_t_ids)
 
     save_stats["unit_drops"] = unit_drops_stats
     return save_stats
+
 
 def set_c_ids(save_stats: dict[str, Any]) -> dict[str, Any]:
     """handler for editing cat ids"""
@@ -24,17 +30,28 @@ def set_c_ids(save_stats: dict[str, Any]) -> dict[str, Any]:
     unit_drops_stats = save_stats["unit_drops"]
     data = get_data(helper.is_jp(save_stats))
 
-    usr_c_ids = user_input_handler.get_range(user_input_handler.colored_input("Enter cat ids (Look up cro battle cats to find ids)(You can enter &all& to get all, a range e.g &1&-&50&, or ids separate by spaces e.g &5 4 7&):"), all_ids=data["c_ids"])
+    usr_c_ids = user_input_handler.get_range(
+        user_input_handler.colored_input(
+            "Enter cat ids (Look up cro battle cats to find ids)(You can enter &all& to get all, a range e.g &1&-&50&, or ids separate by spaces e.g &5 4 7&):"
+        ),
+        all_ids=data["c_ids"],
+    )
     usr_c_ids = helper.check_cat_ids(usr_c_ids, save_stats)
     unit_drops_stats = set_c_ids_val(unit_drops_stats, data, usr_c_ids)
 
     save_stats["unit_drops"] = unit_drops_stats
     return save_stats
 
+
 def get_character_drops(save_stats: dict[str, Any]) -> dict[str, Any]:
     """handler for getting character drops"""
 
-    flag_t_ids = user_input_handler.colored_input("Do you want to select treasure ids &(1)&, or cat ids? &(2)&:") == "1"
+    flag_t_ids = (
+        user_input_handler.colored_input(
+            "Do you want to select treasure ids &(1)&, or cat ids? &(2)&:"
+        )
+        == "1"
+    )
 
     if flag_t_ids:
         save_stats = set_t_ids(save_stats)
@@ -43,6 +60,7 @@ def get_character_drops(save_stats: dict[str, Any]) -> dict[str, Any]:
     print("Successfully set unit drops")
 
     return save_stats
+
 
 def get_data(is_jp: bool) -> dict[str, Any]:
     """gets all of the cat ids and treasure ids that can be dropped"""

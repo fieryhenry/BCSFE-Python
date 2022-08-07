@@ -194,7 +194,7 @@ def start(path: str) -> None:
         if config_manager.get_config_value_category(
             "SAVE_CHANGES", "ALWAYS_EXPORT_JSON"
         ):
-            helper.export_json(save_stats, path)
+            helper.export_json(save_stats, path + ".json")
 
 
 if __name__ == "__main__":

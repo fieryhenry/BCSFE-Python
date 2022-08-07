@@ -437,13 +437,12 @@ def get_mission_data_maybe() -> list[dict[str, int]]:
 
         val_2 = next_int_len(1)
         data.append(val_2)
+    return data
 
-    unknown_val_1 = next_int_len(8)  # timestamp
-    data.append(unknown_val_1)
 
-    gv_60 = next_int_len(4)  # 0x3c
-    data.append(gv_60)
 
+def get_unknown_data():
+    data: list[dict[str, int]] = []
     length = next_int_len(4)
     data.append(length)
 
@@ -1821,6 +1820,11 @@ def parse_save(save_data: bytes, country_code: Union[str, None]) -> dict[str, An
 
     save_stats["current_outbreaks"] = get_outbreaks()
     save_stats["unknown_55"] = get_mission_data_maybe()
+
+    save_stats["time_stamp_4"] = get_double()  # timestamp
+    save_stats["gv_60"] = next_int_len(4)
+
+    save_stats["unknown_117"] = get_unknown_data()
 
     save_stats["base_materials"] = get_length_data()
     save_stats["unknown_56"] = next_int_len(8)

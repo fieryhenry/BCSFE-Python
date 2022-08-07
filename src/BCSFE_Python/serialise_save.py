@@ -904,6 +904,11 @@ def serialize_save(save_stats: dict[str, Any]) -> bytes:
 
     save_data = serialise_dumped_data(save_data, save_stats["unknown_55"])
 
+    save_data = write_double(save_data, save_stats["time_stamp_4"])
+    save_data = write(save_data, save_stats["gv_60"])
+
+    save_data = serialise_dumped_data(save_data, save_stats["unknown_117"])
+
     save_data = write_length_data(save_data, save_stats["base_materials"])
 
     save_data = write(save_data, save_stats["unknown_56"])

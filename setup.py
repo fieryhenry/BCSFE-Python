@@ -24,7 +24,7 @@ setuptools.setup(
     package_dir={"": "src"},
     packages=setuptools.find_packages(where="src"),
     python_requires=">=3.9",
-    install_requires=["colored", "tk", "python-dateutil", "requests"],
+    install_requires=["colored", "tk", "python-dateutil", "requests", "pyyaml"],
     include_package_data=True,
     extras_require={
         "testing": [

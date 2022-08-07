@@ -57,7 +57,8 @@ def get_latest_prerelease_version() -> str:
             f"https://pypi.python.org/pypi/{package_name}/json"
         )
         response.raise_for_status()
-        releases = response.json()["releases"]
+        releases = list(response.json()["releases"])
+        releases.reverse()
         for release in releases:
             if "b" in release:
                 return release

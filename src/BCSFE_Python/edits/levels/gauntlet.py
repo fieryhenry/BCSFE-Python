@@ -1,10 +1,11 @@
 """Handler for clearing gauntlets"""
+from typing import Any
 
 from ..levels import event_stages
-from ... import user_input_handler
+from ... import user_input_handler, helper
+from ..other import meow_medals
 
-
-def edit_gauntlet(save_stats: dict) -> dict:
+def edit_gauntlet(save_stats: dict[str, Any]) -> dict[str, Any]:
     """Handler for clearing gauntlets"""
 
     stage_data = save_stats["gauntlets"]
@@ -18,4 +19,15 @@ def edit_gauntlet(save_stats: dict) -> dict:
         lengths["total"],
     )
     save_stats["gauntlets"] = event_stages.stage_handler(stage_data, ids, 0)
+    base_addr = meow_medals.BaseMapIds.GAUNTLETS.value
+    (
+        save_stats["gauntlets"],
+        save_stats["medals"],
+    ) = event_stages.set_medals(
+        save_stats["gauntlets"],
+        save_stats["medals"],
+        (base_addr, base_addr + len(save_stats["gauntlets"]["Value"]["unlock_next"])),
+        -base_addr,
+        helper.is_jp(save_stats),
+    )
     return save_stats

@@ -1,6 +1,7 @@
 """Module that runs when the module is run directly"""
 
 import sys
+
 from . import (
     helper,
     game_data_getter,
@@ -11,6 +12,7 @@ from . import (
     serialise_save,
     config_manager,
     feature_handler,
+    tracker,
     adb_handler,
 )
 
@@ -84,10 +86,12 @@ def check_update():
 def main():
     """Main function"""
 
+    item_tracker = tracker.Tracker()
+
     if config_manager.get_config_value_category(
         "SERVER", "WIPE_TRACKED_ITEMS_ON_START"
     ):
-        helper.reset_tracker()
+        item_tracker.reset_tracker()
     game_data_getter.check_remove_handler()
 
     check_updates = config_manager.get_config_value_category(

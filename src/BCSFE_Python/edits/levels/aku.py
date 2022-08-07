@@ -1,11 +1,35 @@
 """Handler for editing the aku realm"""
+from typing import Any
+from . import story_level_id_selector
+from ... import helper, user_input_handler
 
 
-def edit_aku(save_stats: dict) -> dict:
-    """Handler for editing the aku realm"""
-    aku = save_stats["aku"]
-    count = aku["Lengths"]["stages"]
-    aku["Value"]["clear_amount"][0][0] = [1] * count
-    save_stats["aku"] = aku
-    print("Successfully cleared the aku realm")
+def edit_aku(save_stats: dict[str, Any]) -> dict[str, Any]:
+    """Clear whole chapters"""
+
+    options = ["Clear aku stages", "Wipe aku data"]
+    option = user_input_handler.select_single(options, "select")
+    if option == 2:
+        return wipe_aku(save_stats)
+
+    aku = save_stats["aku"]["Value"]
+
+    ids = story_level_id_selector.select_levels(None, total=49)
+    aku["clear_progress"][0][0] = max(ids)
+
+    for level_id in ids:
+        aku["clear_amount"][0][0][level_id] = 1
+    save_stats["aku"]["Value"] = aku
+    helper.colored_text("Successfully cleared aku stages")
+    return save_stats
+
+
+def wipe_aku(save_stats: dict[str, Any]) -> dict[str, Any]:
+    """Reset aku data"""
+
+    aku = save_stats["aku"]["Value"]
+    aku["clear_progress"][0][0] = 0
+    aku["clear_amount"][0][0] = [0] * len(aku["clear_amount"][0][0])
+    save_stats["aku"]["Value"] = aku
+    helper.colored_text("Successfully wiped aku data")
     return save_stats

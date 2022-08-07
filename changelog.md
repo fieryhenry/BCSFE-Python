@@ -6,8 +6,6 @@
 
 - The ability to unlock the equip menu 
 
-- A feature to generate a new account (new iq and token)
-
 - The ability to upload catfood and other bannable item changes to the ponos servers - this is done automatically whenever your save data is saved / uploaded. This should in theory prevent bans from catfood and other items, but it seems a bit unreliable so I've kept the warning in the editor
 
 - A feature to claim all user rank rewards (Doesn't give any items)

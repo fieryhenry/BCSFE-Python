@@ -2024,6 +2024,7 @@ def parse_save(save_data: bytes, country_code: Union[str, None]) -> dict[str, An
         return save_stats
     save_stats["gv_110000"] = next_int_len(4)  # 110000
 
+    print(address)
     length = len(save_data) - address - 32
     save_stats["extra_data"] = next_int_len(length)
 

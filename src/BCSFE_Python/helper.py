@@ -243,17 +243,17 @@ def encode_ls(lst: list[int]) -> dict[int, Any]:
     return {i: lst[i] for i in range(len(lst))}
 
 
-def parse_int_list_list(list_of_lists: list[list[str]]) -> list[list[int]]:
+def parse_int_list_list(list_of_lists: list[list[str]]) -> list[list[Any]]:
     """Turn list of list of strings into list of list of ints"""
-    new_lists: list[list[int]] = []
+    new_lists: list[list[Any]] = []
 
     for lst in list_of_lists:
-        new_list: list[int] = []
+        new_list: list[Any] = []
         for item in lst:
             try:
                 new_list.append(int(item))
             except ValueError:
-                continue
+                new_list.append(item)
         new_lists.append(new_list)
     new_lists = [line for line in new_lists if line != []]
     return new_lists

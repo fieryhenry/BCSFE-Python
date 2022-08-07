@@ -47,7 +47,7 @@ def replace_name(
     """Replace the text ids with the corresponding names"""
 
     new_data[cat_id][column] = data
-    if "textID" in column:
+    if "textID" in column or "tFxtID_F" in column: # ponos made a typo, should be textID_F
         new_data[cat_id][column] = talent_names[data][1]
         stop_at = "<br>"
         if stop_at in new_data[cat_id][column]:
@@ -91,7 +91,11 @@ def get_cat_talents(
     letter_order = find_order(cat_talents, cat_talent_data)
     for i in range(len(cat_talents) - 1):
         cat_data = {}
-        cat_data["name"] = cat_talent_data[f"textID_{letter_order[i]}"].strip("\n")
+        if letter_order[i] == "F":
+            text_id_str = "tFxtID_F" # ponos made a typo, should be textID_F
+        else:
+            text_id_str = f"textID_{letter_order[i]}"
+        cat_data["name"] = cat_talent_data[text_id_str].strip("\n")
         cat_data["max"] = int(cat_talent_data[f"MAXLv_{letter_order[i]}"])
         if cat_data["max"] == 0:
             cat_data["max"] = 1

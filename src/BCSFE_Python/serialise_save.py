@@ -1,23 +1,25 @@
 """Handler for serialising save data from dict"""
 
-import json
-import os
 import struct
-import sys
-import traceback
-from typing import Union
+from typing import Any, Union
 
 import dateutil.parser
 
-from . import helper, parse_save, updater, user_input_handler
+from . import helper, updater
 
 
-def write(save_data: bytes, number: int, length: int = None) -> bytes:
+def write(
+    save_data: list[int],
+    number: Union[dict[str, int], int],
+    length: Union[int, None] = None,
+) -> list[int]:
     """Writes a little endian number to the save data"""
-    if length is None:
+    if length is None and isinstance(number, dict):
         length = number["Length"]
     if isinstance(number, dict):
         number = number["Value"]
+    if length is None:
+        raise ValueError("Length is None")
     number = int(number)
     data = list(helper.num_to_bytes(number, length))
 
@@ -26,20 +28,20 @@ def write(save_data: bytes, number: int, length: int = None) -> bytes:
     return save_data
 
 
-def create_list_separated(data: list, length: int) -> list:
+def create_list_separated(data: list[int], length: int) -> list[int]:
     """Creates a list of bytes from a list of numbers"""
 
-    lst = []
+    lst: list[int] = []
     for item in data:
         byte_data = list(helper.num_to_bytes(item, length))
         lst += byte_data
     return lst
 
 
-def create_list_double(data: list) -> list:
+def create_list_double(data: list[float]) -> list[int]:
     """Creates a list of bytes from a list of doubles"""
 
-    lst = []
+    lst: list[int] = []
     for item in data:
         byte_data = list(struct.pack("d", item))
         lst += byte_data
@@ -47,13 +49,13 @@ def create_list_double(data: list) -> list:
 
 
 def write_length_data(
-    save_data: bytes,
-    data: Union[list, dict],
+    save_data: list[int],
+    data: Union[list[int], dict[str, list[int]]],
     length_bytes: int = 4,
     bytes_per_val: int = 4,
     write_length: bool = True,
-    length: int = None,
-) -> bytes:
+    length: Union[int, None] = None,
+) -> list[int]:
     """Writes a list of ints to the save data"""
 
     if write_length is False and length is None:
@@ -73,12 +75,12 @@ def write_length_data(
 
 
 def write_length_doubles(
-    save_data: bytes,
-    data: Union[list, dict],
+    save_data: list[int],
+    data: Union[list[float], dict[str, list[float]]],
     length_bytes: int = 4,
     write_length: bool = True,
-    length: int = None,
-) -> bytes:
+    length: Union[None, int] = None,
+) -> list[int]:
     """Writes a list of doubles to the save data"""
 
     if write_length is False and length is None:
@@ -98,13 +100,13 @@ def write_length_doubles(
 
 
 def serialise_time_data_skip(
-    save_data: bytes,
+    save_data: list[int],
     time_data: str,
     time_stamp: float,
     dst_flag: bool,
-    duplicate: dict,
+    duplicate: dict[str, Any],
     dst: int = 0,
-) -> bytes:
+) -> list[int]:
     time = dateutil.parser.parse(time_data)
     save_data = write(save_data, time.year, 4)
     save_data = write(save_data, duplicate["yy"], 4)
@@ -128,30 +130,34 @@ def serialise_time_data_skip(
 
 
 def serialise_time_data(
-    save_data: bytes, time: str, dst_flag: bool, dst: int = 0
-) -> bytes:
-    time = dateutil.parser.parse(time)
+    save_data: list[int], time: str, dst_flag: bool, dst: int = 0
+) -> list[int]:
+    time_d = dateutil.parser.parse(time)
     if dst_flag:
         save_data = write(save_data, dst, 1)
 
-    save_data = write(save_data, time.year, 4)
-    save_data = write(save_data, time.month, 4)
-    save_data = write(save_data, time.day, 4)
-    save_data = write(save_data, time.hour, 4)
-    save_data = write(save_data, time.minute, 4)
-    save_data = write(save_data, time.second, 4)
+    save_data = write(save_data, time_d.year, 4)
+    save_data = write(save_data, time_d.month, 4)
+    save_data = write(save_data, time_d.day, 4)
+    save_data = write(save_data, time_d.hour, 4)
+    save_data = write(save_data, time_d.minute, 4)
+    save_data = write(save_data, time_d.second, 4)
 
     return save_data
 
 
-def serialise_equip_slots(save_data: bytes, equip_slots: list) -> bytes:
+def serialise_equip_slots(
+    save_data: list[int], equip_slots: list[list[int]]
+) -> list[int]:
     save_data = write(save_data, len(equip_slots), 1)
     for slot in equip_slots:
         save_data = write_length_data(save_data, slot, 0, 4, False)
     return save_data
 
 
-def serialise_main_story(save_data: bytes, story_chapters: dict) -> bytes:
+def serialise_main_story(
+    save_data: list[int], story_chapters: dict[str, list[Any]]
+) -> list[int]:
     save_data = write_length_data(
         save_data, story_chapters["Chapter Progress"], write_length=False
     )
@@ -160,14 +166,16 @@ def serialise_main_story(save_data: bytes, story_chapters: dict) -> bytes:
     return save_data
 
 
-def serialise_treasures(save_data: bytes, treasures: list) -> bytes:
+def serialise_treasures(save_data: list[int], treasures: list[list[int]]) -> list[int]:
     for chapter in treasures:
         save_data = write_length_data(save_data, chapter, write_length=False)
     return save_data
 
 
-def serialise_cat_upgrades(save_data: bytes, cat_upgrades: dict) -> bytes:
-    data = []
+def serialise_cat_upgrades(
+    save_data: list[int], cat_upgrades: dict[str, list[int]]
+) -> list[int]:
+    data: list[int] = []
     length = len(cat_upgrades["Base"])
     for cat_id in range(length):
         data.append(cat_upgrades["Plus"][cat_id])
@@ -176,8 +184,10 @@ def serialise_cat_upgrades(save_data: bytes, cat_upgrades: dict) -> bytes:
     return save_data
 
 
-def serialise_blue_upgrades(save_data: bytes, blue_upgrades: dict) -> bytes:
-    data = []
+def serialise_blue_upgrades(
+    save_data: list[int], blue_upgrades: dict[str, list[int]]
+) -> list[int]:
+    data: list[int] = []
     length = len(blue_upgrades["Base"])
     for blue_id in range(length):
         data.append(blue_upgrades["Plus"][blue_id])
@@ -187,17 +197,17 @@ def serialise_blue_upgrades(save_data: bytes, blue_upgrades: dict) -> bytes:
 
 
 def serialise_utf8_string(
-    save_data: bytes,
-    string: Union[dict, str],
+    save_data: list[int],
+    string: Union[dict[str, str], str],
     length_bytes: int = 4,
     write_length: bool = True,
-    length: int = None,
-) -> bytes:
+    length: Union[int, None] = None,
+) -> list[int]:
     """Writes a string to the save data"""
 
     if isinstance(string, dict):
         string = string["Value"]
-    data = string.encode("utf-8")
+    data = list(string.encode("utf-8"))
 
     save_data = write_length_data(
         save_data, data, length_bytes, 1, write_length, length
@@ -205,7 +215,9 @@ def serialise_utf8_string(
     return save_data
 
 
-def serialise_event_stages_current(save_data: bytes, event_current: dict) -> bytes:
+def serialise_event_stages_current(
+    save_data: list[int], event_current: dict[str, Any]
+) -> list[int]:
     unknown_val = event_current["unknown"]
     total_sub_chapters = event_current["total"] // unknown_val
     stars_per_sub_chapter = event_current["stars"]
@@ -222,8 +234,8 @@ def serialise_event_stages_current(save_data: bytes, event_current: dict) -> byt
     return save_data
 
 
-def flatten_list(_2d_list) -> list:
-    flat_list = []
+def flatten_list(_2d_list: Union[list[list[Any]], list[Any]]) -> list[Any]:
+    flat_list: list[Any] = []
     # Iterate through the outer list
     for element in _2d_list:
         if isinstance(element, list):
@@ -235,7 +247,9 @@ def flatten_list(_2d_list) -> list:
     return flat_list
 
 
-def serialise_event_stages(save_data: bytes, event_stages: dict) -> bytes:
+def serialise_event_stages(
+    save_data: list[int], event_stages: dict[str, Any]
+) -> list[int]:
     lengths = event_stages["Lengths"]
     total = lengths["total"]
     stars = lengths["stars"]
@@ -260,7 +274,7 @@ def serialise_event_stages(save_data: bytes, event_stages: dict) -> bytes:
     return save_data
 
 
-def serialse_purchase_receipts(save_data: bytes, data: dict) -> bytes:
+def serialse_purchase_receipts(save_data: list[int], data: dict[Any, Any]) -> list[int]:
     save_data = write(save_data, len(data), 4)
     for item in data:
         save_data = write(save_data, item["unknown_4"], 4)
@@ -271,13 +285,15 @@ def serialse_purchase_receipts(save_data: bytes, data: dict) -> bytes:
     return save_data
 
 
-def serialise_dumped_data(save_data: bytes, data: list) -> bytes:
+def serialise_dumped_data(
+    save_data: list[int], data: list[dict[str, int]]
+) -> list[int]:
     for item in data:
         save_data = write(save_data, item)
     return save_data
 
 
-def serialise_outbreaks(save_data: bytes, outbreaks: dict) -> bytes:
+def serialise_outbreaks(save_data: list[int], outbreaks: dict[Any, Any]) -> list[int]:
     outbreak_data = outbreaks["outbreaks"]
 
     save_data = write(save_data, len(outbreak_data), 4)
@@ -291,7 +307,9 @@ def serialise_outbreaks(save_data: bytes, outbreaks: dict) -> bytes:
     return save_data
 
 
-def serialise_ototo_cat_cannon(save_data: bytes, ototo_cannon: dict) -> bytes:
+def serialise_ototo_cat_cannon(
+    save_data: list[int], ototo_cannon: dict[int, Any]
+) -> list[int]:
     save_data = write(save_data, len(ototo_cannon), 4)
     for cannon_id in ototo_cannon:
         cannon = ototo_cannon[cannon_id]
@@ -303,7 +321,9 @@ def serialise_ototo_cat_cannon(save_data: bytes, ototo_cannon: dict) -> bytes:
     return save_data
 
 
-def serialise_uncanny_current(save_data: bytes, uncanny_current: dict) -> bytes:
+def serialise_uncanny_current(
+    save_data: list[int], uncanny_current: dict[str, Any]
+) -> list[int]:
     total_sub_chapters = uncanny_current["total"]
     stars_per_sub_chapter = uncanny_current["stars"]
     stages_per_sub_chapter = uncanny_current["stages"]
@@ -320,7 +340,9 @@ def serialise_uncanny_current(save_data: bytes, uncanny_current: dict) -> bytes:
     return save_data
 
 
-def serialise_uncanny_progress(save_data: bytes, uncanny: dict) -> bytes:
+def serialise_uncanny_progress(
+    save_data: list[int], uncanny: dict[str, Any]
+) -> list[int]:
     lengths = uncanny["Lengths"]
     total = lengths["total"]
     stars = lengths["stars"]
@@ -345,7 +367,7 @@ def serialise_uncanny_progress(save_data: bytes, uncanny: dict) -> bytes:
     return save_data
 
 
-def serialise_talent_data(save_data: bytes, talents: dict) -> bytes:
+def serialise_talent_data(save_data: list[int], talents: dict[str, Any]) -> list[int]:
     save_data = write(save_data, len(talents), 4)
     for cat_id in talents:
         cat_talent_data = talents[cat_id]
@@ -357,7 +379,9 @@ def serialise_talent_data(save_data: bytes, talents: dict) -> bytes:
     return save_data
 
 
-def serialise_gauntlet_current(save_data: bytes, gauntlet_current: dict) -> bytes:
+def serialise_gauntlet_current(
+    save_data: list[int], gauntlet_current: dict[str, Any]
+) -> list[int]:
     save_data = write(save_data, gauntlet_current["total"], 2)
     save_data = write(save_data, gauntlet_current["stages"], 1)
     save_data = write(save_data, gauntlet_current["stars"], 1)
@@ -370,7 +394,9 @@ def serialise_gauntlet_current(save_data: bytes, gauntlet_current: dict) -> byte
     return save_data
 
 
-def serialise_gauntlet_progress(save_data: bytes, gauntlets: dict) -> bytes:
+def serialise_gauntlet_progress(
+    save_data: list[int], gauntlets: dict[str, Any]
+) -> list[int]:
     lengths = gauntlets["Lengths"]
     total = lengths["total"]
     stars = lengths["stars"]
@@ -396,8 +422,8 @@ def serialise_gauntlet_progress(save_data: bytes, gauntlets: dict) -> bytes:
 
 
 def serialise_talent_orbs(
-    save_data: bytes, talent_orbs: dict, game_verison: dict
-) -> bytes:
+    save_data: list[int], talent_orbs: dict[str, int], game_verison: dict[str, int]
+) -> list[int]:
     save_data = write(save_data, len(talent_orbs), 2)
     for orb_id in talent_orbs:
         save_data = write(save_data, int(orb_id), 2)
@@ -408,7 +434,7 @@ def serialise_talent_orbs(
     return save_data
 
 
-def serialise_aku(save_data: bytes, aku: dict) -> bytes:
+def serialise_aku(save_data: list[int], aku: dict[str, Any]) -> list[int]:
     lengths = aku["Lengths"]
     save_data = write(save_data, lengths["total"], 2)
     save_data = write(save_data, lengths["stages"], 1)
@@ -417,7 +443,7 @@ def serialise_aku(save_data: bytes, aku: dict) -> bytes:
     return save_data
 
 
-def serialise_tower(save_data: bytes, tower: dict) -> bytes:
+def serialise_tower(save_data: list[int], tower: dict[str, Any]) -> list[int]:
     save_data = write(save_data, tower["current"]["total"], 4)
     save_data = write(save_data, tower["current"]["stars"], 4)
 
@@ -458,19 +484,13 @@ def serialise_tower(save_data: bytes, tower: dict) -> bytes:
     return save_data
 
 
-def export_json(save_stats: dict, path: str):
-    ordered_data = parse_save.re_order(save_stats)
-    if os.path.isdir(path):
-        path = os.path.join(path, "save_data.json")
-    helper.write_file_string(path, json.dumps(ordered_data, indent=4))
-    helper.colored_text(f"Successfully wrote json to &{os.path.abspath(path)}&")
-
-
-def exit_serialiser(save_data: bytes, save_stats) -> bytes:
+def exit_serialiser(save_data: list[int], save_stats: dict[str, Any]) -> list[int]:
     return serialise_utf8_string(save_data, save_stats["hash"], write_length=False)
 
 
-def check_gv(save_data: bytes, save_stats: dict, game_version: int) -> dict:
+def check_gv(
+    save_data: list[int], save_stats: dict[str, Any], game_version: int
+) -> dict[str, Any]:
     if save_stats["game_version"]["Value"] < game_version:
         save_data = exit_serialiser(save_data, save_stats)
         return {"save_data": save_data, "exit": True}
@@ -478,7 +498,7 @@ def check_gv(save_data: bytes, save_stats: dict, game_version: int) -> dict:
         return {"save_data": save_data, "exit": False}
 
 
-def serialise_medals(save_data: bytes, medals: dict) -> bytes:
+def serialise_medals(save_data: list[int], medals: dict[str, Any]) -> list[int]:
     save_data = write_length_data(save_data, medals["medal_data_1"], 2, 2)
     medal_data_2 = medals["medal_data_2"]
     save_data = write(save_data, len(medal_data_2), 2)
@@ -488,13 +508,13 @@ def serialise_medals(save_data: bytes, medals: dict) -> bytes:
     return save_data
 
 
-def serialise_play_time(save_data: bytes, play_time: dict) -> bytes:
+def serialise_play_time(save_data: list[int], play_time: dict[str, Any]) -> list[int]:
     frames = helper.time_to_frames(play_time)
     save_data = write(save_data, frames, 4)
     return save_data
 
 
-def serialise_mission_segment(save_data: bytes, data: dict) -> bytes:
+def serialise_mission_segment(save_data: list[int], data: dict[int, Any]) -> list[int]:
     save_data = write(save_data, len(data), 4)
     for mission in data:
         save_data = write(save_data, mission, 4)
@@ -502,13 +522,13 @@ def serialise_mission_segment(save_data: bytes, data: dict) -> bytes:
     return save_data
 
 
-def serialise_missions(save_data: bytes, missions: dict) -> bytes:
+def serialise_missions(save_data: list[int], missions: dict[str, Any]) -> list[int]:
     save_data = serialise_mission_segment(save_data, missions["flags"])
     save_data = serialise_mission_segment(save_data, missions["values"])
     return save_data
 
 
-def serialise_dojo(save_data: bytes, dojo_data: dict) -> bytes:
+def serialise_dojo(save_data: list[int], dojo_data: dict[int, Any]) -> list[int]:
     save_data = write(save_data, len(dojo_data), 4)
     for subchapter_id in dojo_data:
         subchapter_data = dojo_data[subchapter_id]
@@ -524,7 +544,7 @@ def serialise_dojo(save_data: bytes, dojo_data: dict) -> bytes:
     return save_data
 
 
-def write_double(save_data: bytes, number: float) -> bytes:
+def write_double(save_data: list[int], number: float) -> list[int]:
     """Writes a double to the save data"""
 
     if isinstance(number, dict):
@@ -537,34 +557,41 @@ def write_double(save_data: bytes, number: float) -> bytes:
     return save_data
 
 
-def start_serialize(save_stats: dict) -> dict:
+def start_serialize(save_stats: dict[str, Any]) -> bytes:
     """Starts the serialisation process"""
+
     if "editor_version" not in save_stats:
-        helper.colored_text("An invalid save file / json file has been provided")
-        sys.exit(1)
+        raise Exception("No editor version found")
     try:
         if save_stats["editor_version"] != updater.get_local_version():
-            print(
-                "WARNING: this json data was created in an older editor version and may not work"
-            )
+            raise Exception("Editor version mismatch")
         save_data = serialize_save(save_stats)
-    except Exception:
-        helper.colored_text(
-            "\nError: An error has occurred while writing your save stats:",
-            base=helper.RED,
-        )
-        traceback.print_exc()
-        user_input_handler.colored_input(
-            "\nPlease report this to &#bug-reports&, and/or &dm me your save& on discord.\nPress enter to exit:"
-        )
-        sys.exit(1)
+    except Exception as err:
+        raise Exception(f"Error serialising save: {err}") from err
     return save_data
 
 
-def serialize_save(save_stats: dict) -> dict:
+def serialise_gold_pass(save_data: list[int], gold_pass: dict[str, Any]) -> list[int]:
+    """Serialises the gold pass data"""
+
+    save_data = write(save_data, gold_pass["officer_id"])
+    save_data = write(save_data, gold_pass["flag"])
+    save_data = write_double(save_data, gold_pass["start_date"])
+    save_data = write_double(save_data, gold_pass["expiry_date"])
+    save_data = write_length_doubles(save_data, gold_pass["unknown_2"], write_length=False)
+    save_data = write_double(save_data, gold_pass["start_date_2"])
+    save_data = write_double(save_data, gold_pass["expiry_date_2"])
+    save_data = write_double(save_data, gold_pass["unknown_3"])
+    save_data = write(save_data, gold_pass["flag_2"])
+    save_data = write_double(save_data, gold_pass["expiry_date_3"])
+
+    return save_data
+
+
+def serialize_save(save_stats: dict[str, Any]) -> bytes:
     """Serialises the save stats"""
 
-    save_data = []
+    save_data: list[int] = []
 
     save_data = write(save_data, save_stats["game_version"])
 
@@ -576,7 +603,8 @@ def serialize_save(save_stats: dict) -> dict:
     save_data = write(save_data, save_stats["cat_food"])
     save_data = write(save_data, save_stats["current_energy"])
     if save_stats["extra_time_data"]:
-        save_data = write(save_data, save_stats["extra_time_data"])
+        if save_stats["extra_time_data"]["Value"] != 0:
+            save_data = write(save_data, save_stats["extra_time_data"])
     save_data = serialise_time_data_skip(
         save_data,
         save_stats["time"],
@@ -605,8 +633,10 @@ def serialize_save(save_stats: dict) -> dict:
     save_data = write_length_data(
         save_data, save_stats["cat_stamp_collected"], write_length=False
     )
+    save_data = write(save_data, save_stats["unknown_2"])
+    save_data = write(save_data, save_stats["daily_reward_flag"])
     save_data = write_length_data(
-        save_data, save_stats["unknown_2"], write_length=False
+        save_data, save_stats["unknown_116"], write_length=False
     )
 
     save_data = serialise_main_story(save_data, save_stats["story_chapters"])
@@ -621,10 +651,10 @@ def serialize_save(save_stats: dict) -> dict:
     save_data = serialise_blue_upgrades(save_data, save_stats["blue_upgrades"])
 
     save_data = write_length_data(save_data, save_stats["menu_unlocks"])
-    save_data = write_length_data(save_data, save_stats["unknown_5"])
+    save_data = write_length_data(save_data, save_stats["new_dialogs_1"])
 
     save_data = write_length_data(save_data, save_stats["battle_items"], 4, 4, False, 6)
-    save_data = write_length_data(save_data, save_stats["new_dialogs"])
+    save_data = write_length_data(save_data, save_stats["new_dialogs_2"])
 
     save_data = write(save_data, save_stats["unknown_6"])
     save_data = write_length_data(
@@ -869,6 +899,9 @@ def serialize_save(save_stats: dict) -> dict:
     save_data = write_double(save_data, save_stats["unknown_52"])
     save_data = write_length_data(save_data, save_stats["unknown_53"])
     save_data = write_length_data(save_data, save_stats["unknown_54"])
+
+    save_data = serialise_outbreaks(save_data, save_stats["current_outbreaks"])
+
     save_data = serialise_dumped_data(save_data, save_stats["unknown_55"])
 
     save_data = write_length_data(save_data, save_stats["base_materials"])
@@ -918,6 +951,8 @@ def serialize_save(save_stats: dict) -> dict:
     save_data = write(save_data, save_stats["unknown_68"])
 
     save_data = write(save_data, save_stats["gv_77"])
+
+    save_data = serialise_gold_pass(save_data, save_stats["gold_pass"])
 
     save_data = serialise_dumped_data(save_data, save_stats["unknown_69"])
 
@@ -1008,7 +1043,7 @@ def serialize_save(save_stats: dict) -> dict:
     data = check_gv(save_data, save_stats, 100000)
     save_data = data["save_data"]
     if data["exit"]:
-        return save_data
+        return bytes(save_data)
     save_data = write(save_data, save_stats["gv_100000"])
 
     save_data = write(save_data, save_stats["date_int"])
@@ -1016,7 +1051,7 @@ def serialize_save(save_stats: dict) -> dict:
     data = check_gv(save_data, save_stats, 100100)
     save_data = data["save_data"]
     if data["exit"]:
-        return save_data
+        return bytes(save_data)
     save_data = write(save_data, save_stats["gv_100100"])
 
     save_data = write_length_data(
@@ -1026,7 +1061,7 @@ def serialize_save(save_stats: dict) -> dict:
     data = check_gv(save_data, save_stats, 100300)
     save_data = data["save_data"]
     if data["exit"]:
-        return save_data
+        return bytes(save_data)
     save_data = write(save_data, save_stats["gv_100300"])
 
     save_data = serialise_dumped_data(save_data, save_stats["unknown_94"])
@@ -1036,7 +1071,7 @@ def serialize_save(save_stats: dict) -> dict:
     data = check_gv(save_data, save_stats, 100700)
     save_data = data["save_data"]
     if data["exit"]:
-        return save_data
+        return bytes(save_data)
     save_data = write(save_data, save_stats["gv_100700"])
 
     save_data = serialise_aku(save_data, save_stats["aku"])
@@ -1047,7 +1082,7 @@ def serialize_save(save_stats: dict) -> dict:
     data = check_gv(save_data, save_stats, 100900)
     save_data = data["save_data"]
     if data["exit"]:
-        return save_data
+        return bytes(save_data)
     save_data = write(save_data, save_stats["gv_100900"])
 
     save_data = write(save_data, save_stats["unknown_97"])
@@ -1055,7 +1090,7 @@ def serialize_save(save_stats: dict) -> dict:
     data = check_gv(save_data, save_stats, 101000)
     save_data = data["save_data"]
     if data["exit"]:
-        return save_data
+        return bytes(save_data)
     save_data = write(save_data, save_stats["gv_101000"])
 
     save_data = serialise_dumped_data(save_data, save_stats["unknown_98"])
@@ -1063,7 +1098,7 @@ def serialize_save(save_stats: dict) -> dict:
     data = check_gv(save_data, save_stats, 110000)
     save_data = data["save_data"]
     if data["exit"]:
-        return save_data
+        return bytes(save_data)
     save_data = write(save_data, save_stats["gv_110000"])
 
     save_data = write(save_data, save_stats["extra_data"])

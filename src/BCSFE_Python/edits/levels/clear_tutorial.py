@@ -1,7 +1,8 @@
 """Handler for clearing the tutorial"""
+from typing import Any
 
 
-def clear_tutorial(save_stats: dict) -> dict:
+def clear_tutorial(save_stats: dict[str, Any]) -> dict[str, Any]:
     """Handler for clearing the tutorial"""
 
     save_stats["tutorial_cleared"]["Value"] = 1

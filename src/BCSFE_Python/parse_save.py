@@ -230,8 +230,8 @@ def get_some_data():
 
 def skip_some_data(save_data: bytes, total_cats: int) -> dict[str, int]:
     pos = save_data.find(total_cats.to_bytes(4, "little"), address)
-    pos_2 = save_data.find(total_cats.to_bytes(4, "little"), pos+1)
-    pos_3 = save_data.find(total_cats.to_bytes(4, "little"), pos_2+1)
+    pos_2 = save_data.find(total_cats.to_bytes(4, "little"), pos + 1)
+    pos_3 = save_data.find(total_cats.to_bytes(4, "little"), pos_2 + 1)
     if max(pos, pos_2, pos_3) - min(pos, pos_2, pos_3) < 20:
         pos = max(pos, pos_2, pos_3)
     if pos > address:
@@ -440,6 +440,19 @@ def get_mission_data_maybe() -> list[dict[str, int]]:
     return data
 
 
+def get_unlock_popups() -> tuple[dict[int, int], dict[str, int]]:
+    length = next_int_len(4)
+    val_1 = next_int_len(4)
+
+    data: dict[int, int] = {}
+
+    for _ in range(length["Value"]):
+        flag = next_int(1)
+
+        popup_id = next_int(4)
+        data[popup_id] = flag
+    return data, val_1
+
 
 def get_unknown_data():
     data: list[dict[str, int]] = []
@@ -466,21 +479,6 @@ def get_unknown_data():
         val_2 = next_int_len(1)
         data.append(val_2)
 
-    gv_61 = next_int_len(4)  # 0x3d
-    data.append(gv_61)
-
-    length = next_int_len(4)
-    data.append(length)
-
-    val_1 = next_int_len(4)
-    data.append(val_1)
-
-    for _ in range(length["Value"]):
-        val_2 = next_int_len(1)
-        data.append(val_2)
-
-        val_3 = next_int_len(4)
-        data.append(val_3)
     return data
 
 
@@ -1826,7 +1824,14 @@ def parse_save(save_data: bytes, country_code: Union[str, None]) -> dict[str, An
 
     save_stats["unknown_117"] = get_unknown_data()
 
+    save_stats["gv_61"] = next_int_len(4)
+    data = get_unlock_popups()
+    save_stats["unlock_popups"] = data[0]
+
+    save_stats["unknown_118"] = data[1]
+
     save_stats["base_materials"] = get_length_data()
+
     save_stats["unknown_56"] = next_int_len(8)
     save_stats["unknown_57"] = next_int_len(1)
     save_stats["unknown_58"] = next_int_len(4)

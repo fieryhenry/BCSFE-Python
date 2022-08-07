@@ -213,6 +213,7 @@ features: dict[str, Any] = {
         "Unlock the Equip Menu": other.unlock_equip_menu.unlock_equip,
         "Get Gold Pass": other.get_gold_pass.get_gold_pass,
         "Claim all user rank rewards (does not give any items)": other.claim_user_rank_rewards.claim,
+        "Remove all unlock popup messages from the opening screen": other.remove_popups.remove_popups,
     },
 }
 

@@ -578,13 +578,26 @@ def serialise_gold_pass(save_data: list[int], gold_pass: dict[str, Any]) -> list
     save_data = write(save_data, gold_pass["flag"])
     save_data = write_double(save_data, gold_pass["start_date"])
     save_data = write_double(save_data, gold_pass["expiry_date"])
-    save_data = write_length_doubles(save_data, gold_pass["unknown_2"], write_length=False)
+    save_data = write_length_doubles(
+        save_data, gold_pass["unknown_2"], write_length=False
+    )
     save_data = write_double(save_data, gold_pass["start_date_2"])
     save_data = write_double(save_data, gold_pass["expiry_date_2"])
     save_data = write_double(save_data, gold_pass["unknown_3"])
     save_data = write(save_data, gold_pass["flag_2"])
     save_data = write_double(save_data, gold_pass["expiry_date_3"])
 
+    return save_data
+
+
+def serialise_unlock_popups(save_data: list[int], unlock_popups: dict[int, int], unknown_118: dict[str, int]):
+    """Serialises the unlock popups"""
+
+    save_data = write(save_data, len(unlock_popups), 4)
+    save_data = write(save_data, unknown_118)
+    for popup_id in unlock_popups:
+        save_data = write(save_data, unlock_popups[popup_id], 1)
+        save_data = write(save_data, popup_id, 4)
     return save_data
 
 
@@ -908,6 +921,11 @@ def serialize_save(save_stats: dict[str, Any]) -> bytes:
     save_data = write(save_data, save_stats["gv_60"])
 
     save_data = serialise_dumped_data(save_data, save_stats["unknown_117"])
+
+    save_data = write(save_data, save_stats["gv_61"])
+
+
+    save_data = serialise_unlock_popups(save_data, save_stats["unlock_popups"], save_stats["unknown_118"])
 
     save_data = write_length_data(save_data, save_stats["base_materials"])
 

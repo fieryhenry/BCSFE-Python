@@ -18,7 +18,7 @@
 
 - A way to clear specific aku stages
 
-- Some configuration options , e.g removing max limits, automatically saving changes after each edit
+- Some configuration options , e.g options to remove max limits, automatically save changes after each edit, etc, the path to the config file is shown at the top of the editor
 
 #### Changed
 

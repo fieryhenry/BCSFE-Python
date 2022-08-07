@@ -4,6 +4,7 @@ from typing import Any
 
 from ... import user_input_handler, helper
 from . import story_level_id_selector
+from ..other import remove_popups
 
 CHAPTERS = [
     "Empire of Cats 1",
@@ -112,4 +113,5 @@ def edit_main_story(save_stats: dict[str, Any]) -> dict[str, Any]:
                 save_stats["story_chapters"], chapter_id, len(ids), 1
             )
     helper.colored_text("Successfully cleared main story chapters")
+    save_stats = remove_popups.remove_popups(save_stats, False)
     return save_stats

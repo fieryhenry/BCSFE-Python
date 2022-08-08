@@ -34,7 +34,9 @@ def get_mission_names(is_jp: bool) -> dict[int, Any]:
     mission_name_list = mission_name.split("\n")
     mission_names: dict[Any, Any] = {}
     for mission_name in mission_name_list:
-        line_data = mission_name.split("|")
+        line_data = mission_name.split(helper.get_text_splitter(is_jp))
+        if not helper.check_int(line_data[0]):
+            continue
         mission_id = int(line_data[0])
         mission_names[mission_id] = line_data[1]
     return mission_names

@@ -3,19 +3,25 @@ from typing import Any
 
 from ... import item, game_data_getter, helper
 
+
 def get_gamatoto_helpers(is_jp: bool) -> dict[str, Any]:
     """Get the rarities of all gamatoto helpers"""
 
+    if is_jp:
+        country_code = "ja"
+    else:
+        country_code = "en"
+
     data = (
         game_data_getter.get_file_latest(
-            "resLocal", "GamatotoExpedition_Members_name_en.csv", is_jp
+            "resLocal", f"GamatotoExpedition_Members_name_{country_code}.csv", is_jp
         )
         .decode("utf-8")
         .splitlines()
-    )
+    )[1:]
     helpers: dict[str, Any] = {}
     for line in data:
-        line_data = line.split("|")
+        line_data = line.split(helper.get_text_splitter(is_jp))
         if len(line_data) < 5:
             break
 
@@ -39,17 +45,26 @@ def generate_helpers(user_input: list[int], helper_data: dict[str, Any]) -> list
     return final_helpers
 
 
+def get_helper_rarities(helper_data: dict[str, Any]) -> list[str]:
+    """Get the rarities of all gamatoto helpers"""
+
+    rarities: list[str] = []
+    for helpers in helper_data.values():
+        if helpers["Rarity_name"] not in rarities:
+            rarities.append(helpers["Rarity_name"])
+    return rarities
+
+
 def get_helpers(helpers: list[int], helper_data: dict[str, Any]) -> dict[str, Any]:
     """Get the amount of each type of helper"""
 
     current_helpers: dict[int, Any] = {}
-    helper_count = {
-        "Intern": 0,
-        "Lackey": 0,
-        "Underling": 0,
-        "Assistant": 0,
-        "Legend": 0,
-    }
+
+    rarities = get_helper_rarities(helper_data)
+    helper_count: dict[str, int] = {}
+    for rarity in rarities:
+        helper_count[rarity] = 0
+
     for helper_id in helpers:
         if helper_id == 0xFFFFFFFF:
             break
@@ -83,11 +98,7 @@ def edit_helpers(save_stats: dict[str, Any]) -> dict[str, Any]:
         maxes=10,
     )
     helpers_counts_input.edit()
-    final_helpers = generate_helpers(
-        helpers_counts_input.values, helper_data
-    )
-    helpers = add_empty_helper_slots(
-        helpers, final_helpers
-    )
+    final_helpers = generate_helpers(helpers_counts_input.values, helper_data)
+    helpers = add_empty_helper_slots(helpers, final_helpers)
     save_stats["helpers"] = helpers
     return save_stats

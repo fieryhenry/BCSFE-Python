@@ -51,23 +51,27 @@ def get_names(is_jp: bool) -> list[list[list[str]]]:
     """Get the names of all of the treasure groups"""
 
     names: list[list[list[str]]] = []
+    if is_jp:
+        country_code = "ja"
+    else:
+        country_code = "en"
     eoc_names = csv_handler.parse_csv(
         game_data_getter.get_file_latest(
-            "resLocal", "Treasure3_0_en.csv", is_jp
+            "resLocal", f"Treasure3_0_{country_code}.csv", is_jp
         ).decode("utf-8"),
-        delimeter="|",
+        delimeter=helper.get_text_splitter(is_jp),
     )[:11]
     itf_names = csv_handler.parse_csv(
         game_data_getter.get_file_latest(
-            "resLocal", "Treasure3_1_AfterFirstEncounter_en.csv", is_jp
+            "resLocal", f"Treasure3_1_AfterFirstEncounter_{country_code}.csv", is_jp
         ).decode("utf-8"),
-        delimeter="|",
+        delimeter=helper.get_text_splitter(is_jp),
     )[:11]
     cotc_names = csv_handler.parse_csv(
         game_data_getter.get_file_latest(
-            "resLocal", "Treasure3_2_0_en.csv", is_jp
+            "resLocal", f"Treasure3_2_0_{country_code}.csv", is_jp
         ).decode("utf-8"),
-        delimeter="|",
+        delimeter=helper.get_text_splitter(is_jp),
     )[:11]
 
     names.append(helper.copy_first_n(eoc_names, 0))

@@ -198,6 +198,12 @@ def write_file_bytes(file_path: str, data: bytes) -> bytes:
         raise Exception("Permission denied: " + file_path) from err
     return data
 
+def get_text_splitter(isjp: bool):
+    """Get the text splitter for the current save stats"""
+
+    if isjp:
+        return ","
+    return "|"
 
 def get_save_file_filetype() -> list[tuple[str, str]]:
     """Get the file types for the save file"""

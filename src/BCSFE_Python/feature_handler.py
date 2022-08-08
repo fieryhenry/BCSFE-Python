@@ -3,44 +3,11 @@
 from typing import Any, Union
 
 from . import (
-    adb_handler,
     helper,
-    server_handler,
     user_input_handler,
-    serialise_save,
-    patcher,
     config_manager,
 )
-from .edits import basic, cats, gamototo, levels, other
-
-path = ""
-
-
-def save_and_exit(save_stats: dict[str, Any]) -> None:
-    """Serialise the save data and exit"""
-
-    save_data = serialise_save.start_serialize(save_stats)
-    helper.write_save_data(save_data, save_stats["version"], path, True)
-    helper.check_tracker(save_stats, path)
-    helper.exit_editor()
-
-
-def save_and_upload(save_stats: dict[str, Any]) -> None:
-    """Serialise the save data, and upload it to the game server"""
-
-    save_data = serialise_save.start_serialize(save_stats)
-    save_data = helper.write_save_data(save_data, save_stats["version"], path, False)
-    upload_data = server_handler.upload_handler(save_stats, path)
-    if upload_data is None:
-        helper.exit_editor()
-    if not upload_data["transferCode"]:
-        helper.colored_text(
-            "Error uploading save data\nPlease report this in #bug-reports"
-        )
-    else:
-        helper.colored_text(f"Transfer code : &{upload_data['transferCode']}&")
-        helper.colored_text(f"Confirmation Code : &{upload_data['pin']}&")
-    helper.exit_editor()
+from .edits import basic, cats, gamototo, levels, other, save_management
 
 
 def fix_elsewhere_old(save_stats: dict[str, Any]) -> dict[str, Any]:
@@ -52,7 +19,9 @@ def fix_elsewhere_old(save_stats: dict[str, Any]) -> dict[str, Any]:
         "Select a save file that is currently loaded in-game that doesn't have the elsehere error and is not banned\nPress enter to continue:"
     )
     new_path = helper.select_file(
-        "Select a clean save file", helper.get_save_file_filetype(), path
+        "Select a clean save file",
+        helper.get_save_file_filetype(),
+        helper.get_save_path(),
     )
     if not new_path:
         print("Please select a save file")
@@ -70,75 +39,15 @@ def fix_elsewhere_old(save_stats: dict[str, Any]) -> dict[str, Any]:
     return save_stats
 
 
-def save_and_push(save_stats: dict[str, Any]) -> None:
-    """Serialise the save data and and push it to the game"""
-
-    save_data = serialise_save.start_serialize(save_stats)
-    save_data = patcher.patch_save_data(save_data, save_stats["version"])
-    helper.write_file_bytes(path, save_data)
-    helper.check_tracker(save_stats, path)
-    adb_handler.adb_push_save_data(save_stats["version"], path)
-    helper.exit_editor()
-
-
-def save_and_push_rerun(save_stats: dict[str, Any]) -> None:
-    """Serialise the save data and push it to the game and restart the game"""
-
-    save_data = serialise_save.start_serialize(save_stats)
-    save_data = patcher.patch_save_data(save_data, save_stats["version"])
-    helper.write_file_bytes(path, save_data)
-    helper.check_tracker(save_stats, path)
-    adb_handler.adb_push_save_data(save_stats["version"], path)
-    adb_handler.rerun_game(save_stats["version"])
-    helper.exit_editor()
-
-
-def export(save_stats: dict[str, Any]) -> None:
-    """Export the save stats to a json file"""
-
-    helper.export_json(save_stats, path + ".json")
-    helper.exit_editor()
-
-
-def clear_data(save_stats: dict[str, Any]) -> None:
-    """Clear data wrapper for the clear_data function"""
-
-    confirm = input("Do want to clear your data (y/n)?:").lower()
-    if confirm == "y":
-        adb_handler.adb_clear_save_data(save_stats["version"])
-        print("Data cleared")
-    helper.exit_editor()
-
-
-def upload_metadata(save_stats: dict[str, Any]) -> dict[str, Any]:
-    """Upload the metadata to the game server"""
-
-    _, save_stats = server_handler.meta_data_upload_handler(save_stats, path)
-    return save_stats
-
-
-def set_managed_items(save_stats: dict[str, Any]) -> dict[str, Any]:
-    """Set the managed items for the save stats"""
-
-    data = server_handler.check_gen_token(save_stats)
-    token = data["token"]
-    save_stats = data["save_stats"]
-    if token is None:
-        helper.colored_text("Error generating token")
-        return save_stats
-    server_handler.update_managed_items(save_stats["inquiry_code"], token, save_stats)
-    return save_stats
-
-
-features: dict[str, Any] = {
+FEATURES: dict[str, Any] = {
     "Save Management": {
-        "Save changes and upload to game servers (get transfer and confirmation codes)": save_and_upload,
-        "Save changes and exit": save_and_exit,
-        "Save changes and push save data to the game (don't re-open game)": save_and_push,
-        "Save changes and push save data to the game (re-open game)": save_and_push_rerun,
-        "Export save data as json (not desinged to be that readable)": export,
-        "Clear save data (used to generate a new account without re-installing the game)": clear_data,
-        "Upload tracked bannable items (This is done automatically when saving and exiting)": upload_metadata,
+        "Save changes and upload to game servers (get transfer and confirmation codes)": save_management.server_upload.save_and_upload,
+        "Save changes and exit": save_management.save_and_exit.save_and_exit,
+        "Save changes and push save data to the game (don't re-open game)": save_management.save_and_exit.save_and_push,
+        "Save changes and push save data to the game (re-open game)": save_management.save_and_exit.save_and_push_rerun,
+        "Export save data as json": save_management.other.export,
+        "Clear save data (used to generate a new account without re-installing the game)": save_management.other.clear_data,
+        "Upload tracked bannable items (This is done automatically when saving and exiting)": save_management.server_upload.upload_metadata,
     },
     "Items": {
         "Cat Food": basic.basic_items.edit_cat_food,
@@ -173,8 +82,7 @@ features: dict[str, Any] = {
         "Force True Form Cats (will lead to blank cats for cats without a true form)": cats.evolve_cats.get_evolve_forced,
         "Remove True Forms": cats.evolve_cats.remove_evolve,
         "Talents": cats.talents.edit_talents,
-        "Collect Cat Guide": cats.clear_cat_guide.clear_cat_guide,
-        "Remove Cat Guide": cats.clear_cat_guide.remove_cat_guide,
+        "Collect / Remove Cat Guide": cats.clear_cat_guide.set_cat_guide,
         'Get stage unit drops - removes the "Clear this stage to get special cat" dialog': cats.chara_drop.get_character_drops,
         "Upgrade special skills / abilities": cats.upgrade_blue.upgrade_blue,
     },
@@ -237,7 +145,7 @@ def show_options(
 
     if (
         not config_manager.get_config_value_category("EDITOR", "SHOW_CATEGORIES")
-        and features == features_to_use
+        and FEATURES == features_to_use
     ):
         user_input = ""
     else:
@@ -257,7 +165,7 @@ def show_options(
         if user_int < 1 or user_int > len(features_to_use) + 1:
             helper.colored_text("Value out of range", helper.RED)
             return show_options(save_stats, features_to_use)
-        if features != features_to_use:
+        if FEATURES != features_to_use:
             if user_int - 2 < 0:
                 return menu(save_stats)
             results = features_to_use[list(features_to_use)[user_int - 2]]
@@ -279,23 +187,11 @@ def menu(
     save_stats: dict[str, Any], path_save: Union[str, None] = None
 ) -> dict[str, Any]:
     """Show the menu and allow the user to select a feature to edit"""
-    global features
-
-    actual_features = features
-
-    if config_manager.get_config_value_category("EDITOR", "HIDE_BANNABLE_ITEMS"):
-        bannables = ["Cat Food", "Rare Tickets", "Platinum Tickets", "Legend Tickets"]
-        for bannable in bannables:
-            if bannable in actual_features["Items"]:
-                del features["Items"][bannable]
-        helper.colored_text("&Banned items are now hidden")
 
     if path_save:
-        global path
-        path = path_save
+        helper.set_save_path(path_save)
     if config_manager.get_config_value_category("EDITOR", "SHOW_CATEGORIES"):
-        helper.colored_list(list(features))
-    save_stats = show_options(save_stats, features)
-    features = actual_features
+        helper.colored_list(list(FEATURES))
+    save_stats = show_options(save_stats, FEATURES)
 
     return save_stats

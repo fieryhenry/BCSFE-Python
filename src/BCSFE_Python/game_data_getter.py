@@ -39,17 +39,24 @@ def download_file(
     return response.content
 
 
-def get_latest_version(is_jp: bool) -> str:
+def get_latest_versions() -> list[str]:
     """
     Gets the latest version of the game data.
     :return: The latest version of the game data.
     """
     response = requests.get(URL + "latest.txt")
     versions = response.text.splitlines()
-    if is_jp and len(versions) > 1:
-        return versions[1]
-    return versions[0]
+    return versions
 
+def get_latest_version(is_jp: bool) -> str:
+    """
+    Gets the latest version of the game data.
+    :return: The latest version of the game data.
+    """
+    if is_jp:
+        return get_latest_versions()[1]
+    else:
+        return get_latest_versions()[0]
 
 def get_file_latest(pack_name: str, file_name: str, is_jp: bool) -> bytes:
     """
@@ -79,8 +86,6 @@ def check_remove(new_version: str, is_jp: bool):
 def check_remove_handler():
     """Checks if older game data is downloaded, and deletes if out of date."""
 
-    new_version = get_latest_version(is_jp=False)
-    check_remove(new_version, is_jp=False)
-
-    new_version = get_latest_version(is_jp=True)
-    check_remove(new_version, is_jp=True)
+    versions = get_latest_versions()
+    check_remove(versions[0], is_jp=False)
+    check_remove(versions[1], is_jp=True)

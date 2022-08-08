@@ -4,7 +4,6 @@ DEFAULT_SAVE_FILE_PATH: "SAVE_DATA" # The default file path for your save data w
 EDITOR:
   DISABLE_MAXES: False # Allows you to edit the level / amount of items past the max amount.
   SHOW_BAN_WARNING: True # Show a warning when editing bannable items.
-  HIDE_BANNABLE_ITEMS: False # Hide the bannable items from the feature list.
   SHOW_CATEGORIES: True # Show the categories in the feature list, instead of a long list.
   SHOW_FEATURE_SELECT_EXPLAINATION: True # Show an explanation of how to select a feature.
 

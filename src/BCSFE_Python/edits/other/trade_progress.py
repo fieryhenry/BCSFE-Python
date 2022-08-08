@@ -28,16 +28,14 @@ def set_trade_progress(save_stats: dict[str, Any]) -> dict[str, Any]:
         max_value=299,
         value=save_stats["rare_tickets"]["Value"],
         edit_name="amount",
-        set_name="gain",
+        set_name="increased",
     )
     tickets.edit()
     trade_progress["Value"] = tickets.value * 5
 
-    space = False
+    storage, has_space = set_trade_progress_val(storage)
 
-    storage, space = set_trade_progress_val(storage)
-
-    if not space:
+    if not has_space:
         helper.colored_text("Your cat storage is full, please free 1 space!")
         return save_stats
 

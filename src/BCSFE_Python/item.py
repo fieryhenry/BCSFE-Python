@@ -34,6 +34,8 @@ class Item:
         offset: int = 0,
         length: int = 4,
         set_name: str = "set",
+        success_message: str = "",
+        to: str = "to",
     ) -> None:
         self.name = name
         self.value = value
@@ -43,6 +45,11 @@ class Item:
         self.bannable = bannable
         self.length = length
         self.set_name = set_name
+        if success_message:
+            self.success_message = success_message
+        else:
+            self.success_message = set_name
+        self.to = to
 
         if config_manager.get_config_value_category("EDITOR", "DISABLE_MAXES"):
             self.max_value = None
@@ -105,7 +112,7 @@ class Item:
         self.value = user_input_handler.get_int(text) - self.offset
         self.clamp()
         helper.colored_text(
-            f"Successfully {self.set_name} the {self.edit_name} of {self.name} to &{self.value+self.offset}&"
+            f"Successfully {self.success_message} the {self.edit_name} of {self.name} {self.to} &{self.value+self.offset}&"
         )
 
     def edit_str(self) -> None:
@@ -117,7 +124,7 @@ class Item:
         text = f"Enter the {self.edit_name} of {self.name} you want to {self.set_name}:"
         self.value = user_input_handler.colored_input(text)
         helper.colored_text(
-            f"Successfully {self.set_name} the {self.edit_name} of {self.name} to &{self.value}&"
+            f"Successfully {self.success_message} the {self.edit_name} of {self.name} {self.to} &{self.value}&"
         )
 
     def edit(self) -> None:
@@ -240,7 +247,7 @@ class ItemGroup:
                 display_val = item.value
 
         helper.colored_text(
-            f"Successfully set the {self.selected_items[0].edit_name} of {self.name} to &{display_val + self.selected_items[0].offset}&"
+            f"Successfully set the {self.selected_items[0].success_message} of {self.name} to &{display_val + self.selected_items[0].offset}&"
         )
 
 

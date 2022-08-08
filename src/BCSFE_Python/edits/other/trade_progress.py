@@ -28,7 +28,9 @@ def set_trade_progress(save_stats: dict[str, Any]) -> dict[str, Any]:
         max_value=299,
         value=save_stats["rare_tickets"]["Value"],
         edit_name="amount",
-        set_name="increased",
+        set_name="gain",
+        success_message="increased",
+        to="by",
     )
     tickets.edit()
     trade_progress["Value"] = tickets.value * 5

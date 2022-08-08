@@ -139,7 +139,6 @@ features: dict[str, Any] = {
         "Export save data as json (not desinged to be that readable)": export,
         "Clear save data (used to generate a new account without re-installing the game)": clear_data,
         "Upload tracked bannable items (This is done automatically when saving and exiting)": upload_metadata,
-        # "Set managed items (This is done automatically when saving and exiting)": set_managed_items,
     },
     "Items": {
         "Cat Food": basic.basic_items.edit_cat_food,

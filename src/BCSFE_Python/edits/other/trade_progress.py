@@ -3,6 +3,7 @@ from typing import Any
 
 from ... import helper, item
 
+
 def set_trade_progress_val(storage: dict[str, Any]) -> tuple[dict[str, Any], bool]:
     """Handler for editting trade progress to allow for unbannable rare tickets"""
 
@@ -34,7 +35,7 @@ def set_trade_progress(save_stats: dict[str, Any]) -> dict[str, Any]:
 
     space = False
 
-    storage, space = set_trade_progress(storage)
+    storage, space = set_trade_progress_val(storage)
 
     if not space:
         helper.colored_text("Your cat storage is full, please free 1 space!")

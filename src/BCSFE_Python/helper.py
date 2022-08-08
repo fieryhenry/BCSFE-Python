@@ -198,6 +198,19 @@ def write_file_bytes(file_path: str, data: bytes) -> bytes:
         raise Exception("Permission denied: " + file_path) from err
     return data
 
+def get_save_path() -> str:
+    """Get the save path from the env variable"""
+
+    save_path = os.environ.get("BC_SAVE_PATH")
+    if save_path is None:
+        raise Exception("BC_SAVE_PATH not set")
+    return save_path
+
+def set_save_path(path: str) -> None:
+    """Set the save path in the env variable"""
+
+    os.environ["BC_SAVE_PATH"] = path
+
 def get_text_splitter(isjp: bool):
     """Get the text splitter for the current save stats"""
 

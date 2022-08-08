@@ -440,17 +440,19 @@ def get_mission_data_maybe() -> list[dict[str, int]]:
     return data
 
 
-def get_unlock_popups() -> tuple[dict[int, int], dict[str, int]]:
+def get_unlock_popups() -> tuple[list[tuple[int, int]], dict[str, int]]:
+    """Get unlock popups and unlock flags"""
+
     length = next_int_len(4)
     val_1 = next_int_len(4)
 
-    data: dict[int, int] = {}
+    data: list[tuple[int, int]] = []
 
     for _ in range(length["Value"]):
         flag = next_int(1)
 
         popup_id = next_int(4)
-        data[popup_id] = flag
+        data.append((popup_id, flag))
     return data, val_1
 
 
@@ -1720,7 +1722,16 @@ def parse_save(save_data: bytes, country_code: Union[str, None]) -> dict[str, An
     }
     save_stats["inquiry_code"] = get_utf8_string()
     save_stats["play_time"] = get_play_time()
-    save_stats["unknown_25"] = next_int_len(14)
+
+    save_stats["unknown_25"] = next_int_len(1)
+
+    save_stats["check_ban_state_succeeded"] = next_int_len(4)
+
+    save_stats["unknown_119"] = next_int_len(1)
+
+    save_stats["gv_44"] = next_int_len(4)
+
+    save_stats["unknown_120"] = next_int_len(4)
 
     save_stats["itf_timed_scores"] = list(
         helper.chunks(get_length_data(4, 4, 51 * 3), 51)
@@ -1825,6 +1836,7 @@ def parse_save(save_data: bytes, country_code: Union[str, None]) -> dict[str, An
     save_stats["unknown_117"] = get_unknown_data()
 
     save_stats["gv_61"] = next_int_len(4)
+
     data = get_unlock_popups()
     save_stats["unlock_popups"] = data[0]
 

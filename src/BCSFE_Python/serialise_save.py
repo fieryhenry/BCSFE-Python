@@ -590,14 +590,14 @@ def serialise_gold_pass(save_data: list[int], gold_pass: dict[str, Any]) -> list
     return save_data
 
 
-def serialise_unlock_popups(save_data: list[int], unlock_popups: dict[int, int], unknown_118: dict[str, int]):
+def serialise_unlock_popups(save_data: list[int], unlock_popups: list[tuple[int, int]], unknown_118: dict[str, int]):
     """Serialises the unlock popups"""
 
     save_data = write(save_data, len(unlock_popups), 4)
     save_data = write(save_data, unknown_118)
     for popup_id in unlock_popups:
-        save_data = write(save_data, unlock_popups[popup_id], 1)
-        save_data = write(save_data, popup_id, 4)
+        save_data = write(save_data, popup_id[1], 1)
+        save_data = write(save_data, popup_id[0], 4)
     return save_data
 
 
@@ -808,7 +808,13 @@ def serialize_save(save_stats: dict[str, Any]) -> bytes:
 
     save_data = serialise_utf8_string(save_data, save_stats["inquiry_code"])
     save_data = serialise_play_time(save_data, save_stats["play_time"])
+
     save_data = write(save_data, save_stats["unknown_25"])
+    save_data = write(save_data, save_stats["check_ban_state_succeeded"])
+    save_data = write(save_data, save_stats["unknown_119"])
+    save_data = write(save_data, save_stats["gv_44"])
+    save_data = write(save_data, save_stats["unknown_120"])
+
     save_data = write_length_data(
         save_data,
         flatten_list(save_stats["itf_timed_scores"]),
@@ -923,7 +929,6 @@ def serialize_save(save_stats: dict[str, Any]) -> bytes:
     save_data = serialise_dumped_data(save_data, save_stats["unknown_117"])
 
     save_data = write(save_data, save_stats["gv_61"])
-
 
     save_data = serialise_unlock_popups(save_data, save_stats["unlock_popups"], save_stats["unknown_118"])
 

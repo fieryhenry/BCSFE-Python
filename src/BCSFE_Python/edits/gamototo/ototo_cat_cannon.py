@@ -33,12 +33,12 @@ def set_stage_val(cannons: list[dict[str, Any]], stages: list[int]) -> list[dict
     return cannons
 
 
-def get_data(cannons: list[dict[str, Any]]) -> tuple[list[int], list[int]]:
+def get_data(cannons: dict[int, dict[str, int]]) -> tuple[list[int], list[int]]:
     """Get the data of the cannon"""
 
     levels: list[int] = []
     stages: list[int] = []
-    for cannon in cannons:
+    for cannon in cannons.values():
         level = cannon["level"]
         stage = cannon["unlock_flag"]
         levels.append(level)

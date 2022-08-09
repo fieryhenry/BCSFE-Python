@@ -369,6 +369,7 @@ def update_managed_items(
     inquiry_code: str, authorization: str, save_stats: dict[str, Any]
 ):
     """Updates the managed items"""
+    # game should do this automatically, but eh why not just in case it doesn't
 
     data = {
         "catfoodAmount": save_stats["cat_food"]["Value"],

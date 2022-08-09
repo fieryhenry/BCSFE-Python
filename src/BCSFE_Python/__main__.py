@@ -3,18 +3,19 @@
 import sys
 
 from . import (
-    helper,
+    adb_handler,
+    config_manager,
+    feature_handler,
     game_data_getter,
-    updater,
-    server_handler,
+    helper,
     parse_save,
     patcher,
     serialise_save,
-    config_manager,
-    feature_handler,
+    server_handler,
     tracker,
-    adb_handler,
+    updater,
 )
+from .edits.levels import clear_tutorial
 
 
 def print_start_up():
@@ -49,7 +50,7 @@ def print_start_up():
     )
 
 
-def check_update():
+def check_update() -> None:
     """Check if there is an update available and if so, ask the user if they want to update"""
 
     local_version = updater.get_local_version()
@@ -69,8 +70,8 @@ def check_update():
             end="",
         )
     print()
-
-    if updater.check_update():
+    update_data = updater.check_update()
+    if update_data[0]:
         helper.colored_text(
             "\nAn update is available, would you like to update? (&y&/&n&):",
             base=helper.GREEN,
@@ -78,7 +79,7 @@ def check_update():
             end="",
         )
         if input().lower() == "y":
-            updater.update()
+            updater.update(update_data[1])
             helper.colored_text("Update successful", base=helper.GREEN)
             helper.exit_editor()
 
@@ -178,6 +179,8 @@ def start(path: str) -> None:
         input(
             "Your save data seems to be in json format. Please use to import json option if you want to load json data.\nPress enter to continue...:"
         )
+    if not clear_tutorial.is_tutorial_cleared(save_stats):
+        clear_tutorial.clear_tutorial(save_stats)
     while True:
         save_stats = parse_save.start_parse(save_data, country_code)
         save_data = patcher.patch_save_data(save_data, country_code)

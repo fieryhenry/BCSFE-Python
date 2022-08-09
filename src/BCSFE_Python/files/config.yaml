@@ -10,6 +10,7 @@ EDITOR:
 
 START_UP:
   CHECK_FOR_UPDATES: True # Check for updates on startup
+  UPDATE_TO_BETAS: False # Check for beta versions of the editor and update to them if found
   HIDE_START_TEXT: False # Hide the start up text - the credits, version info, other links, etc.
   DEFAULT_START_OPTION: -1 # The default save selection option when the editor starts, -1 gives you the option to do any option.
   CREATE_BACKUP: True # Create a backup of the save file when you start the editor.

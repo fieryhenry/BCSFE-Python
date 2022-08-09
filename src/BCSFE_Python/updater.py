@@ -4,16 +4,17 @@ import subprocess
 
 import requests
 
-from . import helper
+from . import config_manager, helper
 
 
-def update(command: str = "py") -> None:
+def update(latest_version: str, command: str = "py") -> None:
     """Update pypi package testing for py and python"""
 
     helper.colored_text("Updating...", base=helper.GREEN)
     try:
+        full_cmd = f"{command} -m pip install --upgrade battle-cats-save-editor=={latest_version}"
         subprocess.run(
-            f"{command} -m pip install --upgrade battle-cats-save-editor",
+            full_cmd,
             shell=True,
             capture_output=True,
             check=True,
@@ -23,7 +24,7 @@ def update(command: str = "py") -> None:
         helper.colored_text("Update failed", base=helper.RED)
         if command == "py":
             helper.colored_text("Trying with python instead", base=helper.RED)
-            update("python")
+            update(latest_version, "python")
         else:
             helper.colored_text(
                 f"Error: {err.stderr.decode('utf-8')}\nYou may need to manually update with py -m pip install -U battle-cats-save-editor",
@@ -41,21 +42,18 @@ def get_pypi_version():
     """Get latest pypi version of the program"""
     package_name = "battle-cats-save-editor"
     try:
-        response = requests.get(
-            f"https://pypi.python.org/pypi/{package_name}/json"
-        )
+        response = requests.get(f"https://pypi.python.org/pypi/{package_name}/json")
         response.raise_for_status()
         return response.json()["info"]["version"]
     except requests.exceptions.RequestException as err:
         raise Exception("Error getting pypi version") from err
 
+
 def get_latest_prerelease_version() -> str:
     """Get latest prerelease version of the program"""
     package_name = "battle-cats-save-editor"
     try:
-        response = requests.get(
-            f"https://pypi.python.org/pypi/{package_name}/json"
-        )
+        response = requests.get(f"https://pypi.python.org/pypi/{package_name}/json")
         response.raise_for_status()
         releases = list(response.json()["releases"])
         releases.reverse()
@@ -66,11 +64,37 @@ def get_latest_prerelease_version() -> str:
     except requests.exceptions.RequestException as err:
         raise Exception("Error getting pypi version") from err
 
-def check_update() -> bool:
+
+def pypi_is_newer(local_version: str, pypi_version: str, remove_b: bool = True) -> bool:
+    """Checks if the local version is newer than the pypi version"""
+    if remove_b:
+        if "b" in pypi_version:
+            pypi_version = pypi_version.split("b")[0]
+        if "b" in local_version:
+            local_version = local_version.split("b")[0]
+
+    return pypi_version > local_version
+
+
+def check_update() -> tuple[bool, str]:
     """Checks if the editor is updated"""
 
     local_version = get_local_version()
     pypi_version = get_pypi_version()
-    if local_version < pypi_version:
-        return True
-    return False
+    latest_prerelease_version = get_latest_prerelease_version()
+
+    check_pre = "b" in local_version or config_manager.get_config_value_category(
+        "START_UP", "UPDATE_TO_BETAS"
+    )
+    if check_pre and pypi_is_newer(
+        local_version, latest_prerelease_version, remove_b=False
+    ):
+        helper.colored_text("Prerelease update available", base=helper.GREEN)
+        return True, latest_prerelease_version
+
+    if pypi_is_newer(local_version, pypi_version):
+        helper.colored_text("Stable update available", base=helper.GREEN)
+        return True, pypi_version
+
+    helper.colored_text("No update available", base=helper.GREEN)
+    return False, local_version

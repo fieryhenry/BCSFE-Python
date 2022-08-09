@@ -1,21 +1,49 @@
 """Handler for editing the ototo cat cannon"""
 from typing import Any
 
-from ... import user_input_handler, item
-
-TYPES = [
-    "Base",
-    "Slow Beam",
-    "Iron Wall",
-    "Thunderbolt",
-    "Waterblast",
-    "Holy Blast",
-    "Breakerblast",
-    "Curseblast",
-]
+from ... import user_input_handler, item, game_data_getter, csv_handler, helper
 
 
-def set_level_val(cannons: list[dict[str, Any]], levels: list[int]) -> list[dict[str, Any]]:
+def get_canon_types(is_jp: bool):
+    """Get the cannon types"""
+
+    data = csv_handler.parse_csv(
+        game_data_getter.get_file_latest(
+            "resLocal", "CastleRecipeDescriptions.csv", is_jp
+        ).decode("utf-8"),
+        delimeter=helper.get_text_splitter(is_jp),
+    )
+    types: list[str] = []
+    for cannon in data:
+        types.append(cannon[1])
+    return types
+
+
+def get_cannon_maxes(is_jp: bool) -> list[int]:
+    """Get the cannon maxes"""
+
+    data = helper.parse_int_list_list(
+        csv_handler.parse_csv(
+            game_data_getter.get_file_latest(
+                "DataLocal", "CastleRecipeUnlock.csv", is_jp
+            ).decode("utf-8")
+        )
+    )
+    maxes: list[int] = []
+    for cannon in data:
+        cannon_id = cannon[0]
+        max_val = cannon[3] - 1
+        if cannon_id == len(maxes):
+            maxes.append(max_val)
+        else:
+            if maxes[cannon_id] < max_val:
+                maxes[cannon_id] = max_val
+    return maxes
+
+
+def set_level_val(
+    cannons: list[dict[str, Any]], levels: list[int]
+) -> list[dict[str, Any]]:
     """Set the upgrade level of the cannon"""
 
     for i, level in enumerate(levels):
@@ -25,7 +53,9 @@ def set_level_val(cannons: list[dict[str, Any]], levels: list[int]) -> list[dict
     return cannons
 
 
-def set_stage_val(cannons: list[dict[str, Any]], stages: list[int]) -> list[dict[str, Any]]:
+def set_stage_val(
+    cannons: list[dict[str, Any]], stages: list[int]
+) -> list[dict[str, Any]]:
     """Set the stage of the cannon development"""
 
     for i, stage in enumerate(stages):
@@ -52,18 +82,16 @@ def set_level(save_stats: dict[str, Any], levels: list[int]) -> dict[str, Any]:
     cannons = save_stats["ototo_cannon"]
 
     ot_levels = item.create_item_group(
-        names=TYPES,
+        names=get_canon_types(helper.is_jp(save_stats)),
         values=levels,
-        maxes=[19, 29, 29, 29, 29, 29, 29, 29],
+        maxes=get_cannon_maxes(helper.is_jp(save_stats)),
         edit_name="level",
         group_name="Cannon Level",
         offset=1,
     )
     ot_levels.edit()
 
-    save_stats["ototo_cannon"] = set_level_val(
-        cannons, ot_levels.values
-    )
+    save_stats["ototo_cannon"] = set_level_val(cannons, ot_levels.values)
     return save_stats
 
 
@@ -73,16 +101,14 @@ def set_stage(save_stats: dict[str, Any], stages: list[int]) -> dict[str, Any]:
     cannons = save_stats["ototo_cannon"]
 
     ot_stages = item.create_item_group(
-        names=TYPES[1:],
+        names=get_canon_types(helper.is_jp(save_stats))[1:],
         values=stages[1:],
         maxes=3,
         edit_name="stage",
         group_name="Ototo Cat Cannon Stage",
     )
     ot_stages.edit()
-    save_stats["ototo_cannon"] = set_stage_val(
-        cannons, ot_stages.values
-    )
+    save_stats["ototo_cannon"] = set_stage_val(cannons, ot_stages.values)
     return save_stats
 
 

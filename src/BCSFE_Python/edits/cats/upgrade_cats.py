@@ -76,12 +76,7 @@ def upgrade_handler(
     plus = data["Plus"]
     individual = True
     if len(ids) > 1:
-        individual = (
-            user_input_handler.colored_input(
-                f"Do you want to upgrade each {item_name} individually(&1&), or all at once(&2&):"
-            )
-            == "1"
-        )
+        individual = user_input_handler.ask_if_individual(f"upgrades for each {item_name}")
     first = True
     base_lvl = None
     plus_lvl = None

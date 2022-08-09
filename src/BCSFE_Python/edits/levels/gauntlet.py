@@ -1,7 +1,7 @@
 """Handler for clearing gauntlets"""
 from typing import Any
 
-from ..levels import event_stages
+from . import event_stages
 from ... import user_input_handler, helper
 from ..other import meow_medals
 

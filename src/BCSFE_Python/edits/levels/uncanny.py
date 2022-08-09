@@ -1,7 +1,7 @@
 """Handler for editting uncanny legends"""
 from typing import Any
 
-from ..levels import event_stages
+from . import event_stages
 from ... import user_input_handler
 
 def edit_uncanny(save_stats: dict[str, Any]) -> dict[str, Any]:

@@ -102,12 +102,7 @@ def stage_handler(
 
     individual = True
     if len(ids) > 1:
-        individual = (
-            user_input_handler.colored_input(
-                "Do you want to set the stars/crowns for each subchapter individually(&1&), or all at once(&2&):"
-            )
-            == "1"
-        )
+        individual = user_input_handler.ask_if_individual("stars / crowns for each stage")
     first = True
     stars = 0
     stage_data_edit = stage_data

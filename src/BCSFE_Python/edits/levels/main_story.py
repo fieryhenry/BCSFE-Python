@@ -88,12 +88,7 @@ def edit_main_story(save_stats: dict[str, Any]) -> dict[str, Any]:
     chapter_ids = story_level_id_selector.select_specific_chapters()
 
     if len(chapter_ids) > 1:
-        individual = (
-            user_input_handler.colored_input(
-                "Do you want to select each stage in each chapter individually, or do you want to select a set of stages to applly to all chapters at once? (&1&=individual, &2&=all at once):"
-            )
-            == "1"
-        )
+        individual = user_input_handler.ask_if_individual("each stage in every chapter")
     else:
         individual = False
 

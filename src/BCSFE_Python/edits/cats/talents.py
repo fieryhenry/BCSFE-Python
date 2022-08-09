@@ -131,12 +131,7 @@ def edit_talents(save_stats: dict[str, Any]) -> dict[str, Any]:
     )
     individual = True
     if len(ids) > 1:
-        individual = (
-            user_input_handler.colored_input(
-                "Do you want to set the talents for each cat individually(&1&), or max them all at once(&2&):"
-            )
-            == "1"
-        )
+        individual = user_input_handler.ask_if_individual("talents for each cat")
 
     talent_data = get_talent_data(save_stats)
     cat_talents_levels: list[int] = []

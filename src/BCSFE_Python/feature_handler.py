@@ -119,7 +119,7 @@ FEATURES: dict[str, Any] = {
         "Normal Ticket Max Trade Progress (allows for unbannable rare tickets)": other.trade_progress.set_trade_progress,
         "Unlock the Equip Menu": other.unlock_equip_menu.unlock_equip,
         "Get Gold Pass": other.get_gold_pass.get_gold_pass,
-        "Claim all user rank rewards (does not give any items)": other.claim_user_rank_rewards.claim,
+        "Claim / Remove all user rank rewards (does not give any items)": other.claim_user_rank_rewards.edit_rewards,
     },
 }
 

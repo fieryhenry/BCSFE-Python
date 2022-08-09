@@ -142,7 +142,7 @@ def select_options(
         ids = list(range(1, total + 1))
         individual = False
         ids_s = helper.int_to_str_ls(ids)
-    
+
     ids = helper.parse_int_list(ids_s, -1)
     return ids, individual
 
@@ -191,3 +191,15 @@ def get_int(dialog: str) -> int:
             helper.colored_text(
                 "Invalid input. Please enter a valid integer.", helper.RED
             )
+
+
+def ask_if_individual(item_name: str) -> bool:
+    """Ask if the user wants to edit an individual item"""
+
+    is_individual = (
+        colored_input(
+            f"Do you want to edit {item_name} individually (&1&), or all at once (&2&):"
+        )
+        == "1"
+    )
+    return is_individual

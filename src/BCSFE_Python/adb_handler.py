@@ -62,6 +62,11 @@ def adb_run_process(package_name: str):
 
     run_adb_command(f"shell monkey -p {package_name} -v 1")
 
+def adb_reboot():
+    """Reboot adb server"""
+
+    adb_kill_server()
+    is_adb_installed()
 
 def adb_root():
     """Start adb server as root"""
@@ -88,7 +93,7 @@ def is_adb_installed():
 def run_adb_command(command: str) -> bool:
     """Run an ADB command"""
 
-    command = f"adb {command}"  # ldplayer 9 issue fix
+    command = f"adb {command}"
     if not is_adb_installed():
         raise ADBException(ADBExceptionTypes.ADB_NOT_INSTALLED)
     try:
@@ -102,7 +107,10 @@ def run_adb_command(command: str) -> bool:
 def adb_kill_server():
     """Kill ADB server"""
 
-    run_adb_command("kill-server")
+    try:
+        subprocess.run("adb kill-server", shell=True, check=True, text=True, capture_output=True)
+    except subprocess.CalledProcessError as err:
+        adb_error_handler(err)
 
 
 def adb_error_handler(err: subprocess.CalledProcessError):
@@ -140,9 +148,21 @@ def find_adb_path() -> Union[str, None]:
 
     return None
 
+def if_windows() -> bool:
+    """Check if windows"""
+
+    return os.name == "nt"
 
 def add_to_path() -> None:
     """Try to add adb to path environment variable automatically"""
+
+    if not if_windows():
+        helper.colored_text(
+            "ADB path not added to PATH environment variable.\n"
+            "Please add it manually to your system PATH variable.",
+            helper.RED,
+        )
+        return
 
     adb_path = find_adb_path()
     if not adb_path:
@@ -151,6 +171,7 @@ def add_to_path() -> None:
         )
         if os.path.isfile(adb_path):
             adb_path = os.path.dirname(adb_path)
+
     print(f"Adding {adb_path} to your path environment variable")
     subprocess.run(f"set PATH={adb_path};%PATH%", shell=True, check=True)
     subprocess.run(f"setx PATH {adb_path};%PATH%", shell=True, check=True)
@@ -164,9 +185,10 @@ def adb_err_handler(err: ADBException):
         ADBExceptionTypes.DEVICE_OFFLINE,
     ):
         helper.colored_text(
-            "Error: No device with an adb connection can be found, please connect one and try again.",
+            "Error: No device with an adb connection can be found, please connect one and try again. (You may have to wait aprox 1min for the device to be detected)",
             base=helper.RED,
         )
+        adb_reboot()
     elif err.exception_type == ADBExceptionTypes.PATH_NOT_FOUND:
         helper.colored_text(
             "Error: You don't seem to have this game version installed on this device / no root access / SAVE_DATA couldn't be located, please make sure you have loaded into the game and clicked \"START\" and try again.",
@@ -184,10 +206,10 @@ def adb_err_handler(err: ADBException):
             print("Please re-run the editor to try again")
     elif err.exception_type == ADBExceptionTypes.MORE_THAN_ONE_DEVICE:
         helper.colored_text(
-            "Error: More than one device with an adb connection can be found, please make sure that only 1 device is connected.",
+            "Error: More than one device with an adb connection can be found, please make sure that only 1 device is connected. (You may have to wait aprox 1min for the device to be detected)",
             base=helper.RED,
         )
-        adb_kill_server()
+        adb_reboot()
     else:
         helper.colored_text(
             "Error: " + str(err.message),

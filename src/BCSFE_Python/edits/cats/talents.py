@@ -3,21 +3,21 @@ from typing import Any
 
 from ... import helper, item, user_input_handler, csv_handler, game_data_getter
 
-def get_talent_data(is_jp: bool) -> dict[Any, Any]:
+def get_talent_data(save_stats: dict[str, Any]) -> dict[Any, Any]:
     """Get talent data for all cats"""
 
     talent_data_raw = helper.parse_int_list_list(
         csv_handler.parse_csv(
             game_data_getter.get_file_latest(
-                "DataLocal", "SkillAcquisition.csv", is_jp
+                "DataLocal", "SkillAcquisition.csv", helper.check_data_is_jp(save_stats)
             ).decode("utf-8"),
         )
     )
     talent_names = csv_handler.parse_csv(
         game_data_getter.get_file_latest(
-            "resLocal", "SkillDescriptions.csv", is_jp
+            "resLocal", "SkillDescriptions.csv", helper.check_data_is_jp(save_stats)
         ).decode("utf-8"),
-        "|",
+        helper.get_text_splitter(helper.check_data_is_jp(save_stats)),
     )
     columns = helper.int_to_str_ls(talent_data_raw[0])
     new_talent_data: dict[Any, Any] = {}
@@ -138,7 +138,7 @@ def edit_talents(save_stats: dict[str, Any]) -> dict[str, Any]:
             == "1"
         )
 
-    talent_data = get_talent_data(helper.is_jp(save_stats))
+    talent_data = get_talent_data(save_stats)
     cat_talents_levels: list[int] = []
     for cat_id in ids:
         if cat_id not in talents or cat_id not in talent_data:

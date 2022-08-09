@@ -157,7 +157,7 @@ def stories_of_legend(save_stats: dict[str, Any]) -> dict[str, Any]:
     )
     offset = -1
     save_stats["event_stages"] = stage_handler(stage_data, ids, offset)
-    save_stats["event_stages"], save_stats["medals"] = set_medals(save_stats["event_stages"], save_stats["medals"], (0, 50), 0, helper.is_jp(save_stats))
+    save_stats["event_stages"], save_stats["medals"] = set_medals(save_stats["event_stages"], save_stats["medals"], (0, 50), 0, helper.check_data_is_jp(save_stats))
     return save_stats
 
 
@@ -175,5 +175,5 @@ def event_stages(save_stats: dict[str, Any]) -> dict[str, Any]:
     )
     offset = 400
     save_stats["event_stages"] = stage_handler(stage_data, ids, offset)
-    save_stats["event_stages"], save_stats["medals"] = set_medals(save_stats["event_stages"], save_stats["medals"], (0, len(save_stats["event_stages"]["Value"]["unlock_next"])), -600, helper.is_jp(save_stats))
+    save_stats["event_stages"], save_stats["medals"] = set_medals(save_stats["event_stages"], save_stats["medals"], (0, len(save_stats["event_stages"]["Value"]["unlock_next"])), -600, helper.check_data_is_jp(save_stats))
     return save_stats

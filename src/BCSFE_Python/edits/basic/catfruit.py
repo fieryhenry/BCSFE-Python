@@ -34,7 +34,7 @@ def edit_catfruit(save_stats: dict[str, Any]) -> dict[str, Any]:
         max_cf = None
 
     catfruit = item.create_item_group(
-        names=get_fruit_names(helper.is_jp(save_stats)),
+        names=get_fruit_names(helper.check_data_is_jp(save_stats)),
         values=save_stats["cat_fruit"],
         maxes=max_cf,
         edit_name="value",

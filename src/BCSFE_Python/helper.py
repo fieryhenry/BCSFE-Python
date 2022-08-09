@@ -333,6 +333,13 @@ def is_jp(save_stats: dict[str, Any]) -> bool:
     return save_stats["version"] == "jp"
 
 
+def check_data_is_jp(save_stats: dict[str, Any]) -> bool:
+    """Check if the save data is a Japanese save, checking the config file"""
+
+    if config_manager.get_config_value_category("EDITOR", "ONLY_GET_EN_DATA"):
+        return False
+    return is_jp(save_stats)
+
 def check_tracker(save_stats: dict[str, Any], path: str) -> None:
     """Check if the tracker is enabled"""
     item_tracker = tracker.Tracker()

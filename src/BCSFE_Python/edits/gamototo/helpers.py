@@ -86,7 +86,7 @@ def edit_helpers(save_stats: dict[str, Any]) -> dict[str, Any]:
     """Handler for gamatoto helpers"""
 
     helpers = save_stats["helpers"]
-    helper_data = get_gamatoto_helpers(helper.is_jp(save_stats))
+    helper_data = get_gamatoto_helpers(helper.check_data_is_jp(save_stats))
 
     helper_count = get_helpers(helpers, helper_data)
 

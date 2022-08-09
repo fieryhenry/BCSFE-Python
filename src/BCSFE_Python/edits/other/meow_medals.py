@@ -217,7 +217,7 @@ def medals(save_stats: dict[str, Any]) -> dict[str, Any]:
 
     medal_stats = save_stats["medals"]
 
-    names = get_medal_names(helper.is_jp(save_stats))
+    names = get_medal_names(helper.check_data_is_jp(save_stats))
     helper.colored_list(names)
 
     ids = user_input_handler.get_range(

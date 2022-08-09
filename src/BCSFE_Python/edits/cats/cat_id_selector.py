@@ -17,11 +17,11 @@ def select_cats_not_current(save_stats: dict[str, Any]) -> list[int]:
     ]
     choice = user_input_handler.select_single(options, "select")
     if choice == 1:
-        return select_cats_rarity(helper.is_jp(save_stats))
+        return select_cats_rarity(helper.check_data_is_jp(save_stats))
     if choice == 2:
         return select_cats_range(save_stats)
     if choice == 3:
-        return select_cats_gatya_banner(helper.is_jp(save_stats))
+        return select_cats_gatya_banner(helper.check_data_is_jp(save_stats))
     if choice == 4:
         return get_all_cats(save_stats)
     return []
@@ -43,11 +43,11 @@ def select_cats(save_stats: dict[str, Any], current: bool = True) -> list[int]:
     if choice == 1:
         return select_current_cats(save_stats)
     if choice == 2:
-        return select_cats_rarity(helper.is_jp(save_stats))
+        return select_cats_rarity(helper.check_data_is_jp(save_stats))
     if choice == 3:
         return select_cats_range(save_stats)
     if choice == 4:
-        return select_cats_gatya_banner(helper.is_jp(save_stats))
+        return select_cats_gatya_banner(helper.check_data_is_jp(save_stats))
     if choice == 5:
         return get_all_cats(save_stats)
     return []

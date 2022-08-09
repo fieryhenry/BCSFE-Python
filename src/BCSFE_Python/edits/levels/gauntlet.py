@@ -28,6 +28,6 @@ def edit_gauntlet(save_stats: dict[str, Any]) -> dict[str, Any]:
         save_stats["medals"],
         (base_addr, base_addr + len(save_stats["gauntlets"]["Value"]["unlock_next"])),
         -base_addr,
-        helper.is_jp(save_stats),
+        helper.check_data_is_jp(save_stats),
     )
     return save_stats

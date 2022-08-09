@@ -52,7 +52,7 @@ def edit_gamatoto_xp(save_stats: dict[str, Any]) -> dict[str, Any]:
 
     gamatoto_xp = save_stats["gamatoto_xp"]
 
-    data = get_level_from_xp(gamatoto_xp["Value"], helper.is_jp(save_stats))
+    data = get_level_from_xp(gamatoto_xp["Value"], helper.check_data_is_jp(save_stats))
     level = data["level"]
 
     helper.colored_text(f"Gamatoto xp: &{gamatoto_xp['Value']}&\nLevel: &{level}&")
@@ -77,7 +77,7 @@ def edit_gamatoto_xp(save_stats: dict[str, Any]) -> dict[str, Any]:
             edit_name="level",
         )
         gam_level.edit()
-        gamatoto_xp["Value"] = get_xp_from_level(int(gam_level.value), helper.is_jp(save_stats))
+        gamatoto_xp["Value"] = get_xp_from_level(int(gam_level.value), helper.check_data_is_jp(save_stats))
 
     save_stats["gamatoto_xp"] = gamatoto_xp
     return save_stats

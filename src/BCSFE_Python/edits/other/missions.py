@@ -97,8 +97,8 @@ def edit_missions(save_stats: dict[str, Any]) -> dict[str, Any]:
 
     missions = save_stats["missions"]
 
-    names = get_mission_names(helper.is_jp(save_stats))
-    conditions = get_mission_conditions(helper.is_jp(save_stats))
+    names = get_mission_names(helper.check_data_is_jp(save_stats))
+    conditions = get_mission_conditions(helper.check_data_is_jp(save_stats))
 
     mission_ids_to_use, names_to_use = get_mission_ids(
         missions, conditions, names

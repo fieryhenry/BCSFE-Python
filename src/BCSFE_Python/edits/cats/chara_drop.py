@@ -9,7 +9,7 @@ def set_t_ids(save_stats: dict[str, Any]) -> dict[str, Any]:
     """handler for editing treasure ids"""
 
     unit_drops_stats = save_stats["unit_drops"]
-    data = get_data(helper.is_jp(save_stats))
+    data = get_data(helper.check_data_is_jp(save_stats))
 
     usr_t_ids = user_input_handler.get_range(
         user_input_handler.colored_input(
@@ -28,7 +28,7 @@ def set_c_ids(save_stats: dict[str, Any]) -> dict[str, Any]:
     """handler for editing cat ids"""
 
     unit_drops_stats = save_stats["unit_drops"]
-    data = get_data(helper.is_jp(save_stats))
+    data = get_data(helper.check_data_is_jp(save_stats))
 
     usr_c_ids = user_input_handler.get_range(
         user_input_handler.colored_input(

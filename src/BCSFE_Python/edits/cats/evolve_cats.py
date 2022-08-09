@@ -81,7 +81,7 @@ def evolve_handler_ids(
     ids = helper.check_cat_ids(ids, save_stats)
     evolves = save_stats["unlocked_forms"]
     if not forced:
-        form_data = get_evolve_data(helper.is_jp(save_stats))
+        form_data = get_evolve_data(helper.check_data_is_jp(save_stats))
         length = min([len(ids), len(form_data)])
         for i in range(length):
             evolves[ids[i]] = form_data[i]

@@ -140,7 +140,7 @@ def set_treasure_groups(
 def treasure_groups(save_stats: dict[str, Any]) -> dict[str, Any]:
     """Handler for editing treasure groups"""
 
-    treasure_grps = get_treasure_groups(helper.is_jp(save_stats))
+    treasure_grps = get_treasure_groups(helper.check_data_is_jp(save_stats))
     treasures_stats = save_stats["treasures"]
 
     helper.colored_list(main_story.CHAPTERS)

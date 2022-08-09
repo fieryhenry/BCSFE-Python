@@ -176,49 +176,6 @@ def edit_catseyes(save_stats: dict[str, Any]) -> dict[str, Any]:
     return save_stats
 
 
-def edit_catfruit(save_stats: dict[str, Any]) -> dict[str, Any]:
-    """Handler for editing catruit"""
-
-    max_cf = 128
-    if save_stats["game_version"]["Value"] >= 110400:
-        max_cf = None
-
-    catfruit = item.create_item_group(
-        names=[
-            "Purple Seeds",
-            "Red Seeds",
-            "Blue Seeds",
-            "Green Seeds",
-            "Yellow Seeds",
-            "Purple Fruit",
-            "Red Fruit",
-            "Blue Fruit",
-            "Green Fruit",
-            "Yellow Fruit",
-            "Epic Fruit",
-            "Elder Seeds",
-            "Elder Fruit",
-            "Epic Seeds",
-            "Gold Fruit",
-            "Aku Seeds",
-            "Aku Fruit",
-            "Gold Seeds",
-            "Purple Behemoth Stone",
-            "Red Behemoth Stone",
-            "Blue Behemoth Stone",
-            "Green Behemoth Stone",
-            "Yellow Behemoth Stone",
-        ],
-        values=save_stats["cat_fruit"],
-        maxes=max_cf,
-        edit_name="value",
-        group_name="Catfruit",
-    )
-    catfruit.edit()
-    save_stats["cat_fruit"] = catfruit.values
-    return save_stats
-
-
 def edit_engineers(save_stats: dict[str, Any]) -> dict[str, Any]:
     """Handler for editing ototo engineers"""
 

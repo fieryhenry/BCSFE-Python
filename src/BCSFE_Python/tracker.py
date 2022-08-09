@@ -22,28 +22,13 @@ class TrackerItems:
     """Tracker items"""
 
     def __init__(self, tracker_data: dict[str, int]) -> None:
-        self.catfood = TrackerItem(
-            tracker_data["catfood"], managed_item.ManagedItemType.CATFOOD
-        )
-        self.rare_ticket = TrackerItem(
-            tracker_data["rareTicket"], managed_item.ManagedItemType.RARE_TICKET
-        )
-        self.platinum_ticket = TrackerItem(
-            tracker_data["platinumTicket"], managed_item.ManagedItemType.PLATINUM_TICKET
-        )
-        self.legend_ticket = TrackerItem(
-            tracker_data["legendTicket"], managed_item.ManagedItemType.LEGEND_TICKET
-        )
+        for item in managed_item.ManagedItemType:
+            self.__dict__[item.value] = tracker_data[item.value]
 
     def to_dict(self):
         """Convert to dict"""
 
-        return {
-            "catfood": self.catfood.value,
-            "rareTicket": self.rare_ticket.value,
-            "platinumTicket": self.platinum_ticket.value,
-            "legendTicket": self.legend_ticket.value,
-        }
+        return {item.value: self.__dict__[item.value] for item in managed_item.ManagedItemType}
 
 
 class Tracker:
@@ -66,8 +51,7 @@ class Tracker:
 
     def update_tracker(self, amount: int, item_type: managed_item.ManagedItemType):
         """Update the item tracker"""
-
-        self.items.__dict__[item_type.value].value += amount
+        self.items.__dict__[item_type.value] += amount
 
         self.write_tracker()
 
@@ -97,13 +81,13 @@ class Tracker:
         self.write_tracker()
 
     def has_data(self) -> bool:
-        """Check if any of the items in the tracker are greater than 0"""
+        """Check if any of the items in the tracker aren't 0"""
 
         if not config_manager.get_config_value_category("SERVER", "UPLOAD_METADATA"):
             return False
 
         for item in self.items.__dict__.values():
-            if item.value > 0:
+            if item != 0:
                 return True
         return False
 

@@ -48,11 +48,12 @@ def get_plus_base(usr_input: str) -> tuple[Union[int, None], Union[int, None]]:
     split = usr_input.split("+")
     base = None
     plus = None
-    if len(split) == 2:
-        if split[0]:
-            base = helper.check_int(split[0])
-        if split[1]:
-            plus = helper.check_int(split[1])
+    if split[0]:
+        base = helper.check_int(split[0])
+    if len(split) == 2 and split[1]:
+        plus = helper.check_int(split[1])
+    if len(split) == 1:
+        plus = 0
     return base, plus
 
 

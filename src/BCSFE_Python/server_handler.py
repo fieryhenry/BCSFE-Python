@@ -447,31 +447,35 @@ def check_gen_password(
 
 
 def prepare_upload(
-    save_stats: dict[str, Any], path: str
+    save_stats: dict[str, Any], path: str, print_text: bool = True, managed_items: Optional[list[managed_item.ManagedItem]] = None
 ) -> Optional[tuple[str, Any, bytes, int, list[managed_item.ManagedItem]]]:
     """Handles the pre-upload of the save data"""
 
     original_iq = save_stats["inquiry_code"]
-    helper.colored_text("Getting account password...", helper.GREEN)
+    if print_text:
+        helper.colored_text("Getting account password...", helper.GREEN)
     data = check_gen_token(save_stats, path)
     token = data["token"]
     inquiry_code = data["inquiry_code"]
     save_data = data["save_data"]
     if token is None:
-        helper.colored_text(
-            "Error getting account auth token",
-            helper.RED,
-        )
+        if print_text:
+            helper.colored_text(
+                "Error getting account auth token",
+                helper.RED,
+            )
         return None
-
     item_tracker = tracker.Tracker()
     if original_iq != inquiry_code:
         item_tracker.reset_tracker()
         update_managed_items(save_stats["inquiry_code"], token, save_stats)
 
-    helper.colored_text("Adding meta data...", helper.GREEN)
-    managed_items = item_tracker.parse_tracker_managed()
+    if print_text:
+        helper.colored_text("Adding meta data...", helper.GREEN)
+    if managed_items is None:
+        managed_items = item_tracker.parse_tracker_managed()
     playtime = helper.time_to_frames(save_stats["play_time"])
+    tracker.Tracker().reset_tracker()
 
     return token, inquiry_code, save_data, playtime, managed_items
 
@@ -526,6 +530,15 @@ def meta_data_upload_handler(
 
     return upload_data, save_stats
 
+def test_is_save_data(save_data: bytes) -> bool:
+    """Test if the save data is a valid save data"""
+
+    try:
+        save_data = json.loads(save_data)
+    except (json.decoder.JSONDecodeError, UnicodeDecodeError):
+        return True
+    else:
+        return False
 
 def download_handler():
     """Handles the download of the save data"""
@@ -556,10 +569,7 @@ def download_handler():
     save_data = download_save(
         country_code, transfer_code, confirmation_code, game_version
     )
-
-    try:
-        save_data = json.loads(save_data)
-    except (json.decoder.JSONDecodeError, UnicodeDecodeError):
+    if test_is_save_data(save_data):
         helper.colored_text("Successfully downloaded save data\n", base=helper.GREEN)
     else:
         helper.colored_text(

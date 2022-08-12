@@ -59,6 +59,7 @@ def evolve_handler(
     )
     return evolve_handler_ids(save_stats, val, string, ids, forced)
 
+
 def get_evolve_data(is_jp: bool) -> list[int]:
     """Get max form of cats"""
 
@@ -84,11 +85,14 @@ def evolve_handler_ids(
         form_data = get_evolve_data(helper.check_data_is_jp(save_stats))
         length = min([len(ids), len(form_data)])
         for i in range(length):
-            evolves[ids[i]] = form_data[i]
+            evolves[ids[i]] = form_data[ids[i]]
     else:
         for cat_id in ids:
             evolves[cat_id] = val
-    save_stats["current_forms"] = evolves
+    for cat_id, (unlocked_flag, current_flag) in enumerate(
+        zip(evolves, save_stats["current_forms"])
+    ):
+        save_stats["current_forms"][cat_id] = max(unlocked_flag, current_flag)
 
     flags_evolved = [0 if form == 1 else form for form in evolves]
     save_stats["unlocked_forms"] = flags_evolved

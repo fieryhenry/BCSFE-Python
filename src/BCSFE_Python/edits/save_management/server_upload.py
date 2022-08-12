@@ -26,7 +26,7 @@ def set_managed_items(save_stats: dict[str, Any]) -> dict[str, Any]:
     return save_stats
 
 
-def save_and_upload(save_stats: dict[str, Any]) -> None:
+def save_and_upload(save_stats: dict[str, Any]) -> dict[str, Any]:
     """Serialise the save data, and upload it to the game server"""
 
     save_data = serialise_save.start_serialize(save_stats)
@@ -43,4 +43,6 @@ def save_and_upload(save_stats: dict[str, Any]) -> None:
     else:
         helper.colored_text(f"Transfer code : &{upload_data['transferCode']}&")
         helper.colored_text(f"Confirmation Code : &{upload_data['pin']}&")
-    helper.exit_editor()
+    helper.ask_exit_editor()
+
+    return save_stats

@@ -15,7 +15,7 @@ from . import (
     serialise_save,
     parse_save,
     tracker,
-    config_manager
+    config_manager,
 )
 
 GREEN = "#008000"
@@ -25,12 +25,14 @@ BLACK = "#000000"
 WHITE = "#FFFFFF"
 CYAN = "#00FFFF"
 
+
 def print_line_seperator(base: str, char: str = "-", length: int = 80):
     """Print a line of a char"""
     width = shutil.get_terminal_size().columns
     if width < length:
         length = width
     colored_text(char * length, base)
+
 
 def get_dirs(path: str) -> list[str]:
     """Get all directories in a path"""
@@ -198,6 +200,7 @@ def write_file_bytes(file_path: str, data: bytes) -> bytes:
         raise Exception("Permission denied: " + file_path) from err
     return data
 
+
 def get_save_path() -> str:
     """Get the save path from the env variable"""
 
@@ -206,10 +209,12 @@ def get_save_path() -> str:
         raise Exception("BC_SAVE_PATH not set")
     return save_path
 
+
 def set_save_path(path: str) -> None:
     """Set the save path in the env variable"""
 
     os.environ["BC_SAVE_PATH"] = path
+
 
 def get_text_splitter(isjp: bool):
     """Get the text splitter for the current save stats"""
@@ -217,6 +222,7 @@ def get_text_splitter(isjp: bool):
     if isjp:
         return ","
     return "|"
+
 
 def get_save_file_filetype() -> list[tuple[str, str]]:
     """Get the file types for the save file"""
@@ -309,7 +315,7 @@ def str_to_gv(game_version: str) -> str:
     final = ""
     for split in split_gv:
         final += split.zfill(2)
-    
+
     return final.lstrip("0")
 
 
@@ -340,6 +346,7 @@ def check_data_is_jp(save_stats: dict[str, Any]) -> bool:
         return False
     return is_jp(save_stats)
 
+
 def check_tracker(save_stats: dict[str, Any], path: str) -> None:
     """Check if the tracker is enabled"""
     item_tracker = tracker.Tracker()
@@ -356,10 +363,20 @@ def check_tracker(save_stats: dict[str, Any], path: str) -> None:
             colored_text("Uploaded meta data", new=GREEN)
 
 
+def ask_exit_editor():
+    """Exit the editor"""
+
+    is_exit = (
+        user_input_handler.colored_input("Do you want to exit the editor? (&y&/&n&):")
+        == "y"
+    )
+    if is_exit:
+        exit_editor()
+
+
 def exit_editor():
     """Exit the editor"""
 
-    input("Press enter to exit:")
     sys.exit(0)
 
 
@@ -421,7 +438,7 @@ def colored_list(
 def calculate_user_rank(save_stats: dict[str, Any]):
     """Calculate the user rank"""
 
-    user_rank = 10 # blue upgrade base level (1 each)
+    user_rank = 10  # blue upgrade base level (1 each)
     user_rank += sum(save_stats["cats"])
     user_rank += sum(save_stats["cat_upgrades"]["Base"])
     user_rank += sum(save_stats["cat_upgrades"]["Plus"])
@@ -479,19 +496,27 @@ def save_file(title: str, file_types: list[tuple[str, str]], path: str) -> str:
 
 
 def select_file(
-    title: str, file_types: list[tuple[str, str]], default_dir: str = "", initial_file: str = ""
+    title: str,
+    file_types: list[tuple[str, str]],
+    default_dir: str = "",
+    initial_file: str = "",
 ) -> str:
     """Select a file with tkinter"""
     setup_tk()
     file_path = filedialog.askopenfilename(
-        initialdir=default_dir, title=title, filetypes=file_types, initialfile=initial_file
+        initialdir=default_dir,
+        title=title,
+        filetypes=file_types,
+        initialfile=initial_file,
     )
     return file_path
+
 
 def get_default_save_name() -> str:
     """Get the default save name"""
 
     return config_manager.get_config_value("DEFAULT_SAVE_FILE_PATH")
+
 
 def load_save_file(path: str) -> dict[str, Any]:
     """Load a save file, get the country code, create a backup and parse the save data"""
@@ -502,7 +527,9 @@ def load_save_file(path: str) -> dict[str, Any]:
     save_stats = parse_save.start_parse(save_data, country_code)
     if config_manager.get_config_value_category("START_UP", "CREATE_BACKUP"):
         write_file_bytes(path + "_backup", save_data)
-        colored_text(f"Backup created at: &{os.path.abspath(path + '_backup')}&", new=GREEN)
+        colored_text(
+            f"Backup created at: &{os.path.abspath(path + '_backup')}&", new=GREEN
+        )
     return {
         "save_data": save_data,
         "country_code": country_code,

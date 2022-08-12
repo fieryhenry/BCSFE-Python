@@ -26,6 +26,7 @@ def print_start_up():
         + "Made by &fieryhenry&\n\n"
         + "GitHub: &https://github.com/fieryhenry/BCSFE-Python&\n"
         + "Discord: &https://discord.gg/DvmMgvn5ZB& - Please report any bugs to &#bug-reports&, or any suggestions to &#suggestions&\n"
+        + "Donate: &https://ko-fi.com/fieryhenry&\n"
         + f"Config file path: &{helper.get_file('config.yaml')}&",
         base=helper.CYAN,
         new=helper.WHITE,
@@ -180,7 +181,8 @@ def start(path: str) -> None:
             "Your save data seems to be in json format. Please use to import json option if you want to load json data.\nPress enter to continue...:"
         )
     if not clear_tutorial.is_tutorial_cleared(save_stats):
-        clear_tutorial.clear_tutorial(save_stats)
+        save_stats = clear_tutorial.clear_tutorial(save_stats)
+        save_data = serialise_save.start_serialize(save_stats)
     while True:
         save_stats = parse_save.start_parse(save_data, country_code)
         save_data = patcher.patch_save_data(save_data, country_code)

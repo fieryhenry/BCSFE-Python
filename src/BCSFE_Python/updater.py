@@ -42,7 +42,7 @@ def get_pypi_version():
     """Get latest pypi version of the program"""
     package_name = "battle-cats-save-editor"
     try:
-        response = requests.get(f"https://pypi.python.org/pypi/{package_name}/json")
+        response = requests.get(f"https://pypi.org/pypi/{package_name}/json")
         response.raise_for_status()
         return response.json()["info"]["version"]
     except requests.exceptions.RequestException as err:
@@ -53,7 +53,7 @@ def get_latest_prerelease_version() -> str:
     """Get latest prerelease version of the program"""
     package_name = "battle-cats-save-editor"
     try:
-        response = requests.get(f"https://pypi.python.org/pypi/{package_name}/json")
+        response = requests.get(f"https://pypi.org/pypi/{package_name}/json")
         response.raise_for_status()
         releases = list(response.json()["releases"])
         releases.reverse()
@@ -89,12 +89,12 @@ def check_update() -> tuple[bool, str]:
     if check_pre and pypi_is_newer(
         local_version, latest_prerelease_version, remove_b=False
     ):
-        helper.colored_text("Prerelease update available", base=helper.GREEN)
+        helper.colored_text("Prerelease update available\n", base=helper.GREEN)
         return True, latest_prerelease_version
 
     if pypi_is_newer(local_version, pypi_version):
-        helper.colored_text("Stable update available", base=helper.GREEN)
+        helper.colored_text("Stable update available\n", base=helper.GREEN)
         return True, pypi_version
 
-    helper.colored_text("No update available", base=helper.GREEN)
+    helper.colored_text("No update available\n", base=helper.GREEN)
     return False, local_version

@@ -1,6 +1,7 @@
 """Update the editor"""
 
 import subprocess
+from typing import Any
 
 import requests
 
@@ -38,31 +39,37 @@ def get_local_version() -> str:
     return helper.read_file_string(helper.get_file("version.txt"))
 
 
-def get_pypi_version():
+def get_version_info() -> tuple[str, str]:
+    """Gets the latest version of the program"""
+
+    package_name = "battle-cats-save-editor"
+    try:
+        response = requests.get(f"https://pypi.org/pypi/{package_name}/json")
+        response.raise_for_status()
+        data = response.json()
+    except requests.exceptions.RequestException as err:
+        raise Exception("Error getting pypi version") from err
+
+    info = (
+        get_pypi_version(data),
+        get_latest_prerelease_version(data),
+    )
+    return info
+
+
+def get_pypi_version(data: dict[str, Any]) -> str:
     """Get latest pypi version of the program"""
-    package_name = "battle-cats-save-editor"
-    try:
-        response = requests.get(f"https://pypi.org/pypi/{package_name}/json")
-        response.raise_for_status()
-        return response.json()["info"]["version"]
-    except requests.exceptions.RequestException as err:
-        raise Exception("Error getting pypi version") from err
+    return data["info"]["version"]
 
 
-def get_latest_prerelease_version() -> str:
+def get_latest_prerelease_version(data: dict[str, Any]) -> str:
     """Get latest prerelease version of the program"""
-    package_name = "battle-cats-save-editor"
-    try:
-        response = requests.get(f"https://pypi.org/pypi/{package_name}/json")
-        response.raise_for_status()
-        releases = list(response.json()["releases"])
-        releases.reverse()
-        for release in releases:
-            if "b" in release:
-                return release
-        return ""
-    except requests.exceptions.RequestException as err:
-        raise Exception("Error getting pypi version") from err
+    releases = list(data["releases"])
+    releases.reverse()
+    for release in releases:
+        if "b" in release:
+            return release
+    return ""
 
 
 def pypi_is_newer(local_version: str, pypi_version: str, remove_b: bool = True) -> bool:
@@ -76,12 +83,11 @@ def pypi_is_newer(local_version: str, pypi_version: str, remove_b: bool = True) 
     return pypi_version > local_version
 
 
-def check_update() -> tuple[bool, str]:
+def check_update(version_info: tuple[str, str]) -> tuple[bool, str]:
     """Checks if the editor is updated"""
 
     local_version = get_local_version()
-    pypi_version = get_pypi_version()
-    latest_prerelease_version = get_latest_prerelease_version()
+    pypi_version, latest_prerelease_version = version_info
 
     check_pre = "b" in local_version or config_manager.get_config_value_category(
         "START_UP", "UPDATE_TO_BETAS"

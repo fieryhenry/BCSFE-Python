@@ -53,10 +53,11 @@ def print_start_up():
 
 def check_update() -> None:
     """Check if there is an update available and if so, ask the user if they want to update"""
+    version_info = updater.get_version_info()
+    stable_ver, pre_release_ver = version_info
 
     local_version = updater.get_local_version()
-    pre_release_ver = updater.get_latest_prerelease_version()
-    stable_ver = updater.get_pypi_version()
+
     helper.colored_text(
         f"Local version: &{local_version} | &Latest stable version: &{stable_ver}",
         base=helper.CYAN,
@@ -71,7 +72,7 @@ def check_update() -> None:
             end="",
         )
     print()
-    update_data = updater.check_update()
+    update_data = updater.check_update(version_info)
     if update_data[0]:
         helper.colored_text(
             "\nAn update is available, would you like to update? (&y&/&n&):",

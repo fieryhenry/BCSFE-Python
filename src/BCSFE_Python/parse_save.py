@@ -104,7 +104,7 @@ def get_time_data_skip(dst_flag: bool) -> dict[str, Any]:
 
 def get_time_data(dst_flag: bool) -> str:
     if dst_flag:
-        dst = next_int(1)
+        _ = next_int(1)
     year = next_int(4)
     month = next_int(4)
     day = next_int(4)
@@ -214,12 +214,12 @@ def get_utf8_string(length: Union[int, None] = None) -> str:
 
 def get_some_data():
     skip(80)
-    ...
+    # unknown
     skip(9)
     skip(40)
     skip(41)
     skip(35)
-    ...
+    # unknown
     skip(80)
     skip(9)
     skip(40)
@@ -1546,7 +1546,7 @@ def parse_save(save_data: bytes, country_code: Union[str, None]) -> dict[str, An
     set_address(0)
     global save_data_g
     save_data_g = save_data
-    save_stats = {}
+    save_stats: dict[str, Any] = {}
     save_stats["editor_version"] = updater.get_local_version()
 
     save_stats["game_version"] = next_int_len(4)

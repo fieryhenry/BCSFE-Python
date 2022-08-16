@@ -1,234 +1,296 @@
 """Handler for server requests"""
 
+import datetime
 import hashlib
 import hmac
-import random
 import json
+from random import randint
 import time
-from typing import Union
+from typing import Any, Optional, Union
+
 import requests
-from . import serialise_save, helper, patcher
+
+from . import helper, managed_item, serialise_save, patcher, config_manager, tracker
 
 
-def get_current_time_stamp() -> int:
-    """Returns the current time stamp in seconds"""
+def get_current_time() -> int:
+    """Get current time."""
 
     return int(time.time())
 
 
-def random_hex(length: int) -> str:
-    """Returns a random hex string of length n"""
+def random_hex_string(length: int) -> str:
+    """Generate a random hex string."""
 
-    return "".join(random.choice("0123456789abcdef") for i in range(length))
+    return "".join([hex(randint(0, 15))[2:] for _ in range(length)])
 
 
-def random_digits(length: int) -> str:
-    """Returns a random string of digits of length n"""
+def random_digit_string(length: int) -> str:
+    """Generate a random digit string."""
 
-    return "".join(random.choice("0123456789") for i in range(length))
+    return "".join([str(randint(0, 9)) for _ in range(length)])
 
 
 def get_nyanko_auth_url() -> str:
-    """Returns the url for the nyanko auth server"""
+    """Get nyanko auth URL."""
 
     return "https://nyanko-auth.ponosgames.com"
 
 
 def generate_nyanko_signature(inquiry_code: str, data: str) -> str:
-    """Generates a signature for the given data with the given inquiry_code"""
+    """Generate nyanko signature."""
 
-    inquiry_code = inquiry_code.encode("utf-8")
-    data = data.encode("utf-8")
-    random_data = random_hex(64).encode("utf-8")
-    input_rand = inquiry_code + random_data
-    hmac_data = hmac.new(input_rand, data, hashlib.sha256).hexdigest()
+    inquiry_code_bytes = inquiry_code.encode("utf-8")
+    data_bytes = data.encode("utf-8")
+    random_data = random_hex_string(64).encode("utf-8")
+    input_rand = inquiry_code_bytes + random_data
+    hmac_data = hmac.new(input_rand, data_bytes, digestmod=hashlib.sha256).hexdigest()
+
     final_signature = random_data.decode("utf-8") + hmac_data
+
     return final_signature
 
 
-def confirm_nyanko_signature(signature: str, json_data: str, inquiry_code: str) -> bool:
-    """Checks to see if a given signature is valid"""
+def generate_nyanko_signature_v1(inquiry_code: str, data: str) -> str:
+    """Generate nyanko signature."""
 
-    random_data = signature[:64]
-    hmac_data = signature[64:]
-    input_rand = inquiry_code.encode("utf-8") + random_data.encode("utf-8")
-    new_hmac = hmac.new(
-        input_rand, json_data.encode("utf-8"), hashlib.sha256
+    data += data
+
+    inquiry_code_bytes = inquiry_code.encode("utf-8")
+    data_bytes = data.encode("utf-8")
+    random_data = random_hex_string(40).encode("utf-8")
+    input_rand = inquiry_code_bytes + random_data
+    hmac_data = hmac.new(input_rand, data_bytes, digestmod=hashlib.sha1).hexdigest()
+
+    final_signature = random_data.decode("utf-8") + hmac_data
+
+    return final_signature
+
+
+def check_nyanko_signature(signature: str, data: str, inquiry_code: str) -> bool:
+    """Check nyanko signature is correct"""
+
+    curr_hmac_data = signature[64:]
+    curr_random_data = signature[:64]
+    curr_input_rand = inquiry_code.encode("utf-8") + curr_random_data.encode("utf-8")
+
+    hmac_data = hmac.new(
+        curr_input_rand, data.encode("utf-8"), digestmod=hashlib.sha256
     ).hexdigest()
-    return new_hmac == hmac_data
+    return hmac_data == curr_hmac_data
 
 
-def get_headers(inquiry_code: str, data: str) -> dict:
-    """Returns the headers for the given inquiry_code and data"""
+def create_backup_metadata(
+    items: list[managed_item.ManagedItem],
+    play_time: int,
+    inquiry_code: str,
+    user_rank: int,
+) -> dict[str, Any]:
+    """Create backup metadata."""
+    managed_items: list[dict[str, Any]] = []
+    for item in items:
+        managed_items.append(item.to_dict())
 
-    headers = {
+    managed_items_s = json.dumps(managed_items)
+    managed_items_s = managed_items_s.replace(" ", "")
+
+    backup_metadata: dict[str, Any] = {
+        "managedItemDetails": managed_items,
+        "nonce": random_hex_string(32),
+        "playTime": play_time,
+        "rank": user_rank,
+        "receiptLogIds": [],
+        "signature_v1": generate_nyanko_signature_v1(inquiry_code, managed_items_s),
+    }
+    return backup_metadata
+
+
+def check_nyanko_signature_v1(signature: str, data: str, inquiry_code: str) -> bool:
+    """Check nyanko signature is correct"""
+
+    data += data
+
+    curr_hmac_data = signature[40:]
+    curr_random_data = signature[:40]
+    curr_input_rand = inquiry_code.encode("utf-8") + curr_random_data.encode("utf-8")
+
+    hmac_data = hmac.new(
+        curr_input_rand, data.encode("utf-8"), digestmod=hashlib.sha1
+    ).hexdigest()
+    return hmac_data == curr_hmac_data
+
+
+def get_headers(inquiry_code: str, data: str) -> dict[str, Any]:
+    """Get headers for a request."""
+
+    return {
         "accept-encoding": "gzip",
         "connection": "keep-alive",
         "content-type": "application/json",
         "nyanko-signature": generate_nyanko_signature(inquiry_code, data),
-        "nyanko-signature-algorithm": "HMACSHA256",
+        "nyanko-timestamp": str(get_current_time()),
         "nyanko-signature-version": "1",
-        "nyanko-timestamp": str(get_current_time_stamp()),
+        "nyanko-signature-algorithm": "HMACSHA256",
+        "user-agent": "Dalvik/2.1.0 (Linux; U; Android 9; SM-G955F Build/N2G48B)",
     }
-    return headers
 
 
-def get_password(inquiry_code: str) -> Union[dict, None]:
-    """Returns the password for the given inquiry_code"""
+def handle_request(
+    url: str, data: Union[str, bytes], headers: dict[str, Any]
+) -> Union[dict[str, Any], None]:
+    """Handle a request."""
+
+    try:
+        response = requests.post(url, data=data, headers=headers)
+    except requests.exceptions.RequestException as err:
+        raise Exception("Error getting password: " + str(err)) from err
+
+    try:
+        response_data = response.json()
+    except json.decoder.JSONDecodeError as err:
+        raise Exception("Error getting password: " + str(err)) from err
+
+    if "statusCode" in response_data:
+        if response_data["statusCode"] != 1:
+            return None
+        else:
+            return response_data["payload"]
+    else:
+        return None
+
+
+def get_password(inquiry_code: str) -> Union[dict[str, Any], None]:
+    """Returns the account password for the given inquiry code."""
 
     url = get_nyanko_auth_url() + "/v1/users"
     data = {
         "accountCode": inquiry_code,
-        "accountCreatedAt": str(get_current_time_stamp() - 5),
-        "nonce": random_hex(32),
+        "accountCreatedAt": str(
+            get_current_time() - datetime.timedelta(days=1).seconds
+        ),
+        "nonce": random_hex_string(32),
     }
-    data = json.dumps(data)
-    data = data.replace(" ", "")
-    headers = get_headers(inquiry_code, data)
-    response = requests.post(url, data=data, headers=headers)
-    data = response.json()
-    if data["statusCode"] != 1:
-        return None
-    payload = data["payload"]
-    return payload
+
+    data_s = json.dumps(data)
+    data_s = data_s.replace(" ", "")
+    headers = get_headers(inquiry_code, data_s)
+
+    return handle_request(url, data_s, headers)
 
 
 def get_password_refresh(
     inquiry_code: str, password_refresh_token: str
-) -> Union[dict, None]:
-    """Returns the password for the given inquiry_code"""
+) -> Union[dict[str, Any], None]:
+    """Returns the password for the given inquiry code"""
 
     url = get_nyanko_auth_url() + "/v1/user/password"
     data = {
         "accountCode": inquiry_code,
-        "nonce": random_hex(32),
         "passwordRefreshToken": password_refresh_token,
+        "nonce": random_hex_string(32),
     }
-    data = json.dumps(data)
-    data = data.replace(" ", "")
-    headers = get_headers(inquiry_code, data)
-    try:
-        response = requests.post(url, data=data, headers=headers)
-    except requests.exceptions.RequestException:
-        helper.colored_text(
-            "Error couldn't get account password token.\nCheck your internet connection",
-            helper.RED,
-        )
-        return False
-    data = response.json()
-    if data["statusCode"] != 1:
-        return None
-    payload = data["payload"]
-    return payload
+    data_s = json.dumps(data)
+    data_s = data_s.replace(" ", "")
+    headers = get_headers(inquiry_code, data_s)
+
+    return handle_request(url, data_s, headers)
 
 
-def get_client_info(country_code: str, game_version: str) -> dict:
+def get_client_info(country_code: str, game_version: str) -> dict[str, Any]:
     """Returns the client info for the given country_code and game_version"""
 
     country_code = country_code.replace("jp", "ja")
 
     data = {
         "clientInfo": {
-            "client": {"countryCode": country_code, "version": game_version},
-            "device": {"model": "SM-G973N"},
-            "os": {"type": "android", "version": "7.1.2"},
+            "client": {
+                "countryCode": country_code,
+                "version": game_version,
+            },
+            "device": {
+                "model": "SM-G955F",
+            },
+            "os": {
+                "type": "android",
+                "version": "9",
+            },
         },
-        "nonce": random_hex(32),
+        "nonce": random_hex_string(32),
     }
     return data
 
 
-def get_token(inquiry_code: str, password: str, save_stats: dict) -> Union[None, str]:
+def get_token(
+    inquiry_code: str, password: str, country_code: str, game_version: str
+) -> Union[None, str]:
     """Returns the token for the given inquiry_code and password"""
 
     url = get_nyanko_auth_url() + "/v1/tokens"
-    data = get_client_info(save_stats["version"], save_stats["game_version"])
+    data = get_client_info(country_code, game_version)
     data["password"] = password
     data["accountCode"] = inquiry_code
-    data = json.dumps(data)
-    data = data.replace(" ", "")
-    headers = get_headers(inquiry_code, data)
-    response = requests.post(url, data=data, headers=headers)
-    data = response.json()
-    if data["statusCode"] != 1:
-        return None
-    payload = data["payload"]
-    return payload["token"]
+    data_s = json.dumps(data)
+    data_s = data_s.replace(" ", "")
+    headers = get_headers(inquiry_code, data_s)
+
+    payload = handle_request(url, data_s, headers)
+    if payload is not None:
+        return payload["token"]
+    return None
+
+
+def get_nyanko_save_url() -> str:
+    """Get nyanko save URL."""
+
+    return "https://nyanko-save.ponosgames.com"
 
 
 def download_save(
-    country_code: str, transfer_code: str, confirmation_code: str, game_version: str
-) -> Union[None, bytes]:
-    """Downloads the save for the given country_code, transfer_code, confirmation_code and game_version"""
+    country_code: str,
+    transfer_code: str,
+    confirmation_code: str,
+    game_version: str,
+) -> bytes:
+    """Downloads the save for the given country_code, transfer_code, confirmation_code
+    and game_version"""
 
-    if country_code == "jp":
-        country_code = "ja"
-    url = f"https://nyanko-save.ponosgames.com/v1/transfers/{transfer_code}/reception"
+    country_code = country_code.replace("ja", "jp")
+    url = get_nyanko_save_url() + "/v1/transfers/" + transfer_code + "/reception"
     data = get_client_info(country_code, game_version)
     data["pin"] = confirmation_code
-    data = json.dumps(data)
-    data = data.replace(" ", "")
-    headers = headers = {"content-type": "application/json", "accept-encoding": "gzip"}
+    # data["isPasswordRefresh"] = True
+    data_s = json.dumps(data)
+    data_s = data_s.replace(" ", "")
+    headers = {
+        "content-type": "application/json",
+        "accept-encoding": "gzip",
+        "connection": "keep-alive",
+        "user-agent": "Dalvik/2.1.0 (Linux; U; Android 9; SM-G955F Build/N2G48B)",
+    }
     try:
-        response = requests.post(url, data=data, headers=headers)
-    except requests.exceptions.RequestException:
-        helper.colored_text(
-            "Unable to download save data\nCheck your internet connection",
-            base=helper.RED,
-        )
-        return
+        response = requests.post(url, data=data_s, headers=headers)
+    except requests.exceptions.RequestException as err:
+        raise Exception("Error getting save: " + str(err)) from err
     return response.content
 
 
-def download_save_handler() -> Union[None, str]:
-    """Handler for the download_save function"""
+def upload_save_data_body(
+    managed_item_details: dict[str, Any],
+    inquiry_code: str,
+    token: str,
+    save_data: bytes,
+) -> tuple[bytes, dict[str, Any]]:
+    """Gets the headers and body for uploading a save."""
 
-    country_code = input("Enter your game version (en, ja, kr, tw):")
-    if country_code == "jp":
-        country_code = "ja"
-    transfer_code = input("Enter transfer code:")
-    confirmation_code = input("Enter confirmation code:")
-    game_version = input("Enter current game version (e.g 11.3, 9.6, 10.4.0):")
-    game_version = helper.str_to_gv(game_version)
-    save_data = download_save(
-        country_code, transfer_code, confirmation_code, game_version
-    )
-    if not save_data:
-        return None
-    try:
-        save_data = json.loads(save_data)
-    except (json.decoder.JSONDecodeError, UnicodeDecodeError):
-        helper.colored_text("Successfully downloaded save data\n", base=helper.GREEN)
-    else:
-        helper.colored_text(
-            "Incorrect transfer code / confirmation code / game version",
-            base=helper.RED,
-        )
-        return None
-    path = helper.save_file(
-        "Save save data", helper.get_save_file_filetype(), "SAVE_DATA"
-    )
-    helper.write_file_bytes(path, save_data)
-    return path
-
-
-def upload_save_data(
-    token: str, inquiry_code: str, save_data: bytes, save_stats: dict
-) -> Union[None, dict]:
-    """Uploads the save data for the given token, inquiry_code and save_data"""
-
-    managed_item_details = {
-        "managedItemDetails": [],
-        "nonce": random_hex(32),
-        "playTime": helper.time_to_frames(save_stats["play_time"]),
-        "rank": 11,
-        "receiptLogIds": [],
-    }
-    managed_item_details = json.dumps(managed_item_details)
-    managed_item_details = managed_item_details.replace(" ", "")
-    headers = get_headers(inquiry_code, managed_item_details)
+    managed_item_details_str = json.dumps(managed_item_details)
+    managed_item_details_str = managed_item_details_str.replace(" ", "")
+    headers = get_headers(inquiry_code, managed_item_details_str)
     headers["authorization"] = "Bearer " + token
-    boundary = f"__-----------------------{random_digits(9)}-2147483648".encode("utf-8")
+
+    boundary = f"__-----------------------{random_digit_string(9)}-2147483648".encode(
+        "utf-8"
+    )
+
     headers["content-type"] = "multipart/form-data; boundary=" + boundary.decode(
         "utf-8"
     )
@@ -239,100 +301,204 @@ def upload_save_data(
     body += save_data + b"\r\n"
     body += b"--" + boundary + b"\r\n"
     body += b'Content-Disposition: form-data; name="metaData"\r\n\r\n'
-    body += managed_item_details.encode("utf-8") + b"\r\n"
+    body += managed_item_details_str.encode("utf-8") + b"\r\n"
     body += b"--" + boundary + b"--\r\n"
 
-    url = "https://nyanko-save.ponosgames.com/v1/transfers"
-    response = requests.post(url, data=body, headers=headers)
-    data = response.json()
-    if data["statusCode"] != 1:
-        print("Error: " + response.text)
-        return None
-    return data["payload"]
+    return body, headers
+
+
+def upload_save_data(
+    token: str,
+    inquiry_code: str,
+    save_data: bytes,
+    play_time: int,
+    items: list[managed_item.ManagedItem],
+    user_rank: int,
+):
+    """Uploads the save data for the given token, inquiry_code and save_data"""
+
+    if not config_manager.get_config_value_category("SERVER", "UPLOAD_METADATA"):
+        items = []
+
+    metadata = create_backup_metadata(items, play_time, inquiry_code, user_rank)
+    body, headers = upload_save_data_body(metadata, inquiry_code, token, save_data)
+
+    url = get_nyanko_save_url() + "/v1/transfers"
+    return handle_request(url, body, headers)
+
+
+def upload_metadata(
+    token: str,
+    inquiry_code: str,
+    save_data: bytes,
+    play_time: int,
+    items: list[managed_item.ManagedItem],
+    user_rank: int,
+):
+    """Uploads the metadata for the given token, inquiry_code and save_data"""
+
+    metadata = create_backup_metadata(items, play_time, inquiry_code, user_rank)
+    body, headers = upload_save_data_body(metadata, inquiry_code, token, save_data)
+
+    url = get_nyanko_save_url() + "/v1/backups"
+    return handle_request(url, body, headers)
+
+
+def get_nyanko_backups_url() -> str:
+    """Get nyanko backups URL."""
+
+    return "https://nyanko-backups.ponosgames.com"
+
+
+def get_nyanko_managed_items_url() -> str:
+    """Get nyanko managed items URL."""
+
+    return "https://nyanko-managed-item.ponosgames.com"
 
 
 def get_inquiry_code() -> str:
     """Returns a new inquiry code"""
 
-    url = "https://nyanko-backups.ponosgames.com/?action=createAccount&referenceId="
+    url = get_nyanko_backups_url() + "/?action=createAccount&referenceId="
     response = requests.get(url)
     data = response.json()
     return data["accountId"]
 
 
-def check_password(
-    save_stats: dict, get_pass: bool = False
-) -> Union[dict, tuple[dict, dict]]:
+def update_managed_items(
+    inquiry_code: str, authorization: str, save_stats: dict[str, Any]
+):
+    """Updates the managed items"""
+    # game should do this automatically, but eh why not just in case it doesn't
+
+    data = {
+        "catfoodAmount": save_stats["cat_food"]["Value"],
+        "isPaid": False,
+        "legendTicketAmount": save_stats["legend_tickets"]["Value"],
+        "nonce": random_hex_string(32),
+        "platinumTicketAmount": save_stats["platinum_tickets"]["Value"],
+        "rareTicketAmount": save_stats["rare_tickets"]["Value"],
+    }
+    data_s = json.dumps(data)
+    data_s = data_s.replace(" ", "")
+
+    url = get_nyanko_managed_items_url() + "/v1/managed-items"
+    headers = get_headers(inquiry_code, data_s)
+    headers["authorization"] = "Bearer " + authorization
+    return handle_request(url, data_s, headers)
+
+
+def check_gen_token(
+    save_stats: dict[str, Any], path: Optional[str] = None
+) -> dict[str, Any]:
+    """Gets the account auth token"""
+
+    save_stats, password_refresh_data = check_gen_password(save_stats)
+    inquiry_code = save_stats["inquiry_code"]
+
+    save_data = None
+
+    if path is not None:
+        save_data = serialise_save.start_serialize(save_stats)
+        save_data = patcher.patch_save_data(save_data, save_stats["version"])
+        save_data = helper.write_file_bytes(path, save_data)
+
+    token = get_token(
+        inquiry_code,
+        password_refresh_data["password"],
+        save_stats["version"],
+        save_stats["game_version"]["Value"],
+    )
+
+    return {
+        "token": token,
+        "save_data": save_data,
+        "inquiry_code": inquiry_code,
+        "password_refresh_data": password_refresh_data,
+        "save_stats": save_stats,
+    }
+
+
+def check_gen_password(
+    save_stats: dict[str, Any]
+) -> tuple[dict[str, Any], dict[str, str]]:
     """Checks the password for the given save_stats and generates new if stuff is invalid"""
 
     inquiry_code = save_stats["inquiry_code"]
     password_refresh_token = save_stats["token"]
 
-    helper.colored_text("Getting your account password token...", helper.GREEN)
     password_refresh_data = get_password_refresh(inquiry_code, password_refresh_token)
+    if password_refresh_data is not None:
+        return save_stats, password_refresh_data
 
-    if password_refresh_data is False:
-        return save_stats
-
+    password_refresh_data = get_password(inquiry_code)
     if password_refresh_data is None:
-        helper.colored_text(
-            "Error getting your account password token, Generating a new one...",
-            helper.RED,
-        )
-        password_refresh_data = get_password(inquiry_code)
+        inquiry_code = get_inquiry_code()
+        save_stats["inquiry_code"] = inquiry_code
 
-        if password_refresh_data is None:
+        return check_gen_password(save_stats)
+
+    if "accountCode" in password_refresh_data:
+        save_stats["inquiry_code"] = password_refresh_data["accountCode"]
+
+    password_refresh_token = password_refresh_data["passwordRefreshToken"]
+    save_stats["token"] = password_refresh_token
+    return save_stats, password_refresh_data
+
+
+def prepare_upload(
+    save_stats: dict[str, Any], path: str, print_text: bool = True, managed_items: Optional[list[managed_item.ManagedItem]] = None
+) -> Optional[tuple[str, Any, bytes, int, list[managed_item.ManagedItem]]]:
+    """Handles the pre-upload of the save data"""
+
+    original_iq = save_stats["inquiry_code"]
+    if print_text:
+        helper.colored_text("Getting account password...", helper.GREEN)
+    data = check_gen_token(save_stats, path)
+    token = data["token"]
+    inquiry_code = data["inquiry_code"]
+    save_data = data["save_data"]
+    if token is None:
+        if print_text:
             helper.colored_text(
-                "Your inquiry code seems to be invalid. Generating a new one...",
+                "Error getting account auth token",
                 helper.RED,
             )
-            inquiry_code = get_inquiry_code()
+        return None
+    item_tracker = tracker.Tracker()
+    if original_iq != inquiry_code:
+        item_tracker.reset_tracker()
+        update_managed_items(save_stats["inquiry_code"], token, save_stats)
 
-            save_stats["inquiry_code"] = inquiry_code
-            helper.colored_text(
-                f"A new account code has been generated for your account: &{inquiry_code}&",
-                helper.GREEN,
-                new=helper.WHITE,
-            )
+    if print_text:
+        helper.colored_text("Adding meta data...", helper.GREEN)
+    if managed_items is None:
+        managed_items = item_tracker.parse_tracker_managed()
+    playtime = helper.time_to_frames(save_stats["play_time"])
+    tracker.Tracker().reset_tracker()
 
-            return check_password(save_stats, get_pass)
-        if "accountCode" in password_refresh_data:
-            inquiry_code = password_refresh_data["accountCode"]
-            save_stats["inquiry_code"] = inquiry_code
-
-            helper.colored_text(
-                f"A new account code has been generated for your account: &{inquiry_code}&",
-                helper.GREEN,
-                new=helper.WHITE,
-            )
-
-        password_refresh_token = password_refresh_data["passwordRefreshToken"]
-        save_stats["token"] = password_refresh_token
-        helper.colored_text(
-            f"A new account password token has been generated for your account : &{password_refresh_token}&",
-            helper.GREEN,
-            helper.WHITE,
-        )
-    if get_pass:
-        return save_stats, password_refresh_data
-    return save_stats
+    return token, inquiry_code, save_data, playtime, managed_items
 
 
-def upload_handler(save_stats: dict, path: str) -> dict:
+def upload_handler(
+    save_stats: dict[str, Any], path: str
+) -> Union[None, dict[str, Any]]:
     """Handles the upload of the save data"""
 
-    save_stats, password_refresh_data = check_password(save_stats, True)
-    inquiry_code = save_stats["inquiry_code"]
-
-    save_data = serialise_save.start_serialize(save_stats)
-    save_data = patcher.patch_save_data(save_data, save_stats["version"])
-    save_data = helper.write_file_bytes(path, save_data)
-
-    helper.colored_text("Getting account auth token...", helper.GREEN)
-    token = get_token(inquiry_code, password_refresh_data["password"], save_stats)
+    data = prepare_upload(save_stats, path)
+    if data is None:
+        return None
+    token, inquiry_code, save_data, playtime, managed_items = data
 
     helper.colored_text("Uploading save data...", helper.GREEN)
-    upload_data = upload_save_data(token, inquiry_code, save_data, save_stats)
+    upload_data = upload_save_data(
+        token,
+        inquiry_code,
+        save_data,
+        playtime,
+        managed_items,
+        helper.calculate_user_rank(save_stats),
+    )
 
     helper.colored_text(
         "After entering these codes in game, you may get a ban message when pressing play. If you do, just press play again and it should go away.\nPress enter to get your codes...",
@@ -340,3 +506,81 @@ def upload_handler(save_stats: dict, path: str) -> dict:
     )
     input()
     return upload_data
+
+
+def meta_data_upload_handler(
+    save_stats: dict[str, Any], path: str
+) -> tuple[Union[None, dict[str, Any]], dict[str, Any]]:
+    """Handles the upload of the meta data"""
+
+    data = prepare_upload(save_stats, path)
+    if data is None:
+        return None, save_stats
+    token, inquiry_code, save_data, playtime, managed_items = data
+
+    helper.colored_text("Uploading meta data...", helper.GREEN)
+    upload_data = upload_metadata(
+        token,
+        inquiry_code,
+        save_data,
+        playtime,
+        managed_items,
+        helper.calculate_user_rank(save_stats),
+    )
+
+    return upload_data, save_stats
+
+def test_is_save_data(save_data: bytes) -> bool:
+    """Test if the save data is a valid save data"""
+
+    try:
+        save_data = json.loads(save_data)
+    except (json.decoder.JSONDecodeError, UnicodeDecodeError):
+        return True
+    else:
+        return False
+
+def download_handler():
+    """Handles the download of the save data"""
+
+    country_code = helper.ask_cc()
+    if country_code == "jp":
+        country_code = "ja"
+    transfer_code = helper.check_hex(
+        input("Enter transfer code:").lower().replace("o", "0")
+    )
+    if transfer_code is None:
+        helper.colored_text(
+            "Transfer code must only be made up of numbers 0-9 and letters a-f",
+            helper.RED,
+        )
+        return None
+    confirmation_code = helper.check_dec(
+        input("Enter confirmation code:").lower().replace("o", "0")
+    )
+    if confirmation_code is None:
+        helper.colored_text(
+            "Confirmation code must only be made up of numbers 0-9",
+            helper.RED,
+        )
+        return None
+    game_version = input("Enter current game version (e.g 11.3, 9.6, 10.4.0):")
+    game_version = helper.str_to_gv(game_version)
+    save_data = download_save(
+        country_code, transfer_code, confirmation_code, game_version
+    )
+    if test_is_save_data(save_data):
+        helper.colored_text("Successfully downloaded save data\n", base=helper.GREEN)
+    else:
+        helper.colored_text(
+            "Incorrect transfer code / confirmation code",
+            base=helper.RED,
+        )
+        return None
+    path = helper.save_file(
+        "Save save data",
+        helper.get_save_file_filetype(),
+        helper.get_default_save_name(),
+    )
+    helper.write_file_bytes(path, save_data)
+    return path

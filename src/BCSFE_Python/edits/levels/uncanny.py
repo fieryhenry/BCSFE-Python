@@ -1,10 +1,10 @@
 """Handler for editting uncanny legends"""
+from typing import Any
 
-from ..levels import event_stages
+from . import event_stages
 from ... import user_input_handler
 
-
-def edit_uncanny(save_stats: dict) -> dict:
+def edit_uncanny(save_stats: dict[str, Any]) -> dict[str, Any]:
     """Handler for editting uncanny legends"""
     stage_data = save_stats["uncanny"]
     lengths = stage_data["Lengths"]
@@ -17,4 +17,5 @@ def edit_uncanny(save_stats: dict) -> dict:
         lengths["total"],
     )
     save_stats["uncanny"] = event_stages.stage_handler(stage_data, ids, -1)
+
     return save_stats

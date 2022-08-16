@@ -1,9 +1,8 @@
 """Item object"""
 
-from dataclasses import field
-from typing import Union
+from typing import Any, Union
 
-from . import helper, user_input_handler
+from . import helper, user_input_handler, managed_item, config_manager, tracker
 
 
 class BannableItem:
@@ -14,10 +13,12 @@ class BannableItem:
         is_bannable: bool = False,
         has_workaround: bool = False,
         work_around_text: str = "",
+        managed_item_type: Union[None, managed_item.ManagedItemType] = None,
     ) -> None:
         self.is_bannable = is_bannable
         self.has_workaround = has_workaround
         self.work_around_text = work_around_text
+        self.managed_item_type = managed_item_type
 
 
 class Item:
@@ -33,6 +34,8 @@ class Item:
         offset: int = 0,
         length: int = 4,
         set_name: str = "set",
+        success_message: str = "",
+        to: str = "to",
     ) -> None:
         self.name = name
         self.value = value
@@ -42,25 +45,37 @@ class Item:
         self.bannable = bannable
         self.length = length
         self.set_name = set_name
+        if success_message:
+            self.success_message = success_message
+        else:
+            self.success_message = set_name
+        self.to = to
+
+        if config_manager.get_config_value_category("EDITOR", "DISABLE_MAXES"):
+            self.max_value = None
 
     def clamp(self) -> None:
         """Clamp the value to the max value"""
+
         if self.max_value is not None:
             self.value = helper.clamp(
-                value=self.value,
+                value=int(self.value),
                 min_value=0,
                 max_value=self.max_value,
             )
         else:
             # Make sure the value is not negative and fits in the byte length
             self.value = helper.clamp(
-                value=self.value,
+                value=int(self.value),
                 min_value=0,
                 max_value=256**self.length - 1,
             )
 
-    def ban_warning(self) -> None:
+    def ban_warning(self) -> bool:
         """Warning for editing a bannable item"""
+
+        if not config_manager.get_config_value_category("EDITOR", "SHOW_BAN_WARNING"):
+            return False
 
         helper.colored_text(
             text=f"WARNING: Editing in {self.name} will most likely lead to a ban!",
@@ -71,16 +86,22 @@ class Item:
                 text=self.bannable.work_around_text,
                 new=helper.RED,
             )
-        input("Press enter to accept the risk:")
+        leave = (
+            user_input_handler.colored_input("Do you want to continue? (&y&/&n&):")
+            == "n"
+        )
+        return leave
 
     def edit_int(self) -> None:
         """Handler for editing an integer value"""
 
         if self.bannable.is_bannable:
-            self.ban_warning()
+            leave = self.ban_warning()
+            if leave:
+                return
         if self.value is not None:
             helper.colored_text(
-                f"The current {self.edit_name} of {self.name} is : &{self.value+self.offset}&"
+                f"The current {self.edit_name} of {self.name} is : &{int(self.value)+self.offset}&"
             )
         if self.max_value is None:
             max_str = "(max &None&)"
@@ -91,7 +112,7 @@ class Item:
         self.value = user_input_handler.get_int(text) - self.offset
         self.clamp()
         helper.colored_text(
-            f"Successfully {self.set_name} the {self.edit_name} of {self.name} to &{self.value+self.offset}&"
+            f"Successfully {self.success_message} the {self.edit_name} of {self.name} {self.to} &{self.value+self.offset}&"
         )
 
     def edit_str(self) -> None:
@@ -103,20 +124,30 @@ class Item:
         text = f"Enter the {self.edit_name} of {self.name} you want to {self.set_name}:"
         self.value = user_input_handler.colored_input(text)
         helper.colored_text(
-            f"Successfully {self.set_name} the {self.edit_name} of {self.name} to &{self.value}&"
+            f"Successfully {self.success_message} the {self.edit_name} of {self.name} {self.to} &{self.value}&"
         )
 
     def edit(self) -> None:
         """Handler for editing an item"""
 
+        original_val = self.value
+
         if isinstance(self.value, int):
             self.edit_int()
-        elif isinstance(self.value, str):
-            self.edit_str()
         elif self.value is None:
             self.edit_int()
         else:
-            raise TypeError(f"Unknown type {type(self.value)}")
+            self.edit_str()
+            return
+
+        if self.bannable.is_bannable and original_val != self.value:
+            new_val = self.value
+            if not self.bannable.managed_item_type or isinstance(original_val, str):
+                return
+            item_tracker = tracker.Tracker()
+            item_tracker.update_tracker(
+                new_val - original_val, self.bannable.managed_item_type
+            )
 
 
 class ItemGroup:
@@ -125,13 +156,21 @@ class ItemGroup:
     def __init__(self, name: str, items: list[Item]):
         self.name = name
         self.items = items
-        self.selected_items = field(default_factory=list[Item])
+        self.selected_items: list[Item] = []
 
     @property
     def max_value(self) -> Union[int, None]:
         """Get the maximum value of the selected items"""
+        if config_manager.get_config_value_category("EDITOR", "DISABLE_MAXES"):
+            return None
         try:
-            return max([item.max_value for item in self.selected_items])
+            return max(
+                [
+                    item.max_value
+                    for item in self.selected_items
+                    if item.max_value is not None
+                ]
+            )
         except (ValueError, TypeError):
             return None
 
@@ -146,12 +185,12 @@ class ItemGroup:
         return [item.name for item in self.items]
 
     @property
-    def selected_values(self) -> list[int]:
+    def selected_values(self) -> list[Union[int, str]]:
         """Get the values of the selected items"""
         return [item.value for item in self.selected_items]
 
     @property
-    def values(self) -> list[int]:
+    def values(self) -> list[Any]:
         """Get the values of the items"""
         return [item.value for item in self.items]
 
@@ -159,13 +198,11 @@ class ItemGroup:
         """Select items from the group"""
 
         helper.colored_text(f"What &{self.name}& do you want to set?")
-        ids = user_input_handler.select_options(
+        ids = user_input_handler.select_inc(
             self.names,
-            include=True,
             offset=self.items[0].offset,
             extra_data=self.values,
         )
-        self.selected_items = []
         for option_id in ids[0]:
             if option_id < 0:
                 helper.colored_text(
@@ -210,14 +247,14 @@ class ItemGroup:
                 display_val = item.value
 
         helper.colored_text(
-            f"Successfully set the {self.selected_items[0].edit_name} of {self.name} to &{display_val + self.selected_items[0].offset}&"
+            f"Successfully set the {self.selected_items[0].success_message} of {self.name} to &{display_val + self.selected_items[0].offset}&"
         )
 
 
 def create_item_group(
     names: list[str],
-    values: Union[list[Union[int, str]], None],
-    maxes: Union[list[int], int, None],
+    values: Any,
+    maxes: Any,
     edit_name: str,
     group_name: str,
     offset: int = 0,

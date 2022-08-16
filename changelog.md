@@ -1,5 +1,41 @@
 # Changelog
 
+## [2.1.0] - 2022-08-07
+
+#### Added
+
+- The ability to unlock the equip menu 
+
+- The ability to upload catfood and other bannable item changes to the ponos servers - this is done automatically whenever your save data is saved / uploaded. This should in theory prevent bans from catfood and other items, but it seems a bit unreliable so I've kept the warning in the editor
+
+- A feature to claim all user rank rewards (Doesn't give any items)
+
+- A way to select specific gacha banner cats - you need to go to the wiki for the banner you want, and look at the name of the image e.g royal fest = 602
+
+- The ability to get the gold pass
+
+- A feature to create a new account - new iq and token
+
+- A way to clear specific aku stages
+
+- Some configuration options , e.g options to remove max limits, automatically save changes after each edit, etc, the path to the config file is shown at the top of the editor
+
+#### Changed
+
+- You can now exit, catfood, rare, plat, and legend tickets after the warning is shown
+
+- The editor will now display "Press enter to exit" when exiting
+
+- Whenever your inquiry code changes, the editor will upload your catfood and other bannable item amounts to the servers - this should prevent bans
+
+- When entering a transfer code, the editor will check for a hex number and when entering a confirmation code it will check for a dec number. This should prevent people confusing 0 for O
+
+- Game data will now be downloaded from [here](https://github.com/fieryhenry/BCData) when needed so that if I want to update the data in the editor, I don't have to do a new release
+
+#### Fixed
+
+- Select cats based on rarity being off by 1
+
 ## [2.0.2] - 2022-07-08
 
 #### Fixed

@@ -1,10 +1,10 @@
 """Handler for editing tower stages"""
+from typing import Any
 
-from ..levels import event_stages
+from . import event_stages
 from ... import user_input_handler
 
-
-def edit_tower(save_stats: dict) -> dict:
+def edit_tower(save_stats: dict[str, Any]) -> dict[str, Any]:
     """Handler for editing tower stages"""
 
     stage_data = save_stats["tower"]["progress"]
@@ -26,4 +26,5 @@ def edit_tower(save_stats: dict) -> dict:
     save_stats["tower"]["progress"]["total"] = stage_data["Value"]["total"]
     save_stats["tower"]["progress"]["stars"] = stage_data["Lengths"]["stars"]
     save_stats["tower"]["progress"]["stages"] = stage_data["Lengths"]["stages"]
+
     return save_stats

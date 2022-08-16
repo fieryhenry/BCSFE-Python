@@ -1,8 +1,11 @@
 *SAVE_DATA*
 /dist
-*.egg
-*.egg-info
 __pychache__
 *.pyc
 /tests/saves/*
-/.vscode
+.*
+*.egg*
+*BACKUP_META_DATA*
+tests.txt
+src/BCSFE_Python/files/item_tracker.json
+src/BCSFE_Python/files/game_data

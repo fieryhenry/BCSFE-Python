@@ -1,8 +1,11 @@
 """Handler for clearing main story chapters"""
+from typing import Any
 
-from ... import helper, user_input_handler
 
-chapters = [
+from ... import user_input_handler, helper
+from . import story_level_id_selector
+
+CHAPTERS = [
     "Empire of Cats 1",
     "Empire of Cats 2",
     "Empire of Cats 3",
@@ -15,89 +18,93 @@ chapters = [
 ]
 
 
-def specific_levels(save_stats: dict) -> dict:
-    """Clear whole chapters"""
-
-    story_chapters = save_stats["story_chapters"]
-
-    print("What chapters do you want to select?")
-    helper.colored_list(chapters)
-    ids = user_input_handler.colored_input(
-        "10. &All at once&\nEnter a number from 1 to 10 (You can enter multiple values separated by spaces to edit multiple at once):"
-    ).split(" ")
-    ids = helper.check_clamp(ids, 10, 1, -1)
-    story_chapters = specific_handler(ids, story_chapters)
-    save_stats["story_chapters"] = story_chapters
-
-    print("Successfully cleared story levels")
-
-    return save_stats
-
-
-def specific_handler(ids: list, data: dict) -> dict:
+def clear_specific_levels(
+    story_chapters: dict[str, Any],
+    chapter_id: int,
+    max_level: int,
+    val: int,
+) -> dict[str, Any]:
     """Clear specific stages in a chapter"""
 
-    for chapter_id in ids:
-        max_level = user_input_handler.colored_input(
-            "Enter the stage id that you want to clear up to (and including) (e.g &1&=korea cleared, &2&=korea &and& mongolia cleared)?:"
-        )
-        max_level = helper.check_int(max_level)
-        if max_level is None:
-            print("Please input a number")
-            return data
-        max_level = helper.clamp(max_level, 1, 48)
-        data["Chapter Progress"][chapter_id] = max_level
-        data["Times Cleared"][chapter_id] = (
-            ([1] * max_level) + ([0] * (48 - max_level)) + ([0] * 3)
-        )
-
-    return data
-
-
-def main_story(save_stats: dict) -> dict:
-    """Handler for editing story chapters"""
-
-    whole = user_input_handler.colored_input(
-        "Do you want to edit whole chapters at once &(1)& or specific stages &(2)&?:"
+    story_chapters["Chapter Progress"][chapter_id] = max_level
+    story_chapters["Times Cleared"][chapter_id] = (
+        ([val] * max_level) + ([0] * (48 - max_level)) + ([0] * 3)
     )
-    if whole == "2":
-        return specific_levels(save_stats)
-    story_chapters = save_stats["story_chapters"]
-
-    print("What chapters do you want to beat completely?")
-    helper.colored_list(chapters)
-
-    ids = user_input_handler.colored_input(
-        "10. &All at once&\nEnter a number from 1 to 10 (You can enter multiple values separated by spaces to edit multiple at once):"
-    ).split(" ")
-    ids = user_input_handler.create_all_list(ids, 10)
-    ids = helper.check_clamp(ids, 10, 1, -1)
-
-    story_chapters = edit_story(ids, story_chapters, 48)
-    save_stats["story_chapters"] = story_chapters
-
-    print("Successfully cleared story chapters")
-    return save_stats
+    return story_chapters
 
 
-def format_story_ids(ids: list) -> list:
+def clear_specific_level_ids(
+    story_chapters: dict[str, Any], chapter_id: int, ids: list[int], val: int
+) -> dict[str, Any]:
+    """Clear specific levels in a chapter"""
+
+    story_chapters["Chapter Progress"][chapter_id] = max(ids)
+
+    for level_id in ids:
+        story_chapters["Times Cleared"][chapter_id][level_id] = val
+    return story_chapters
+
+
+def format_story_ids(ids: list[int]) -> list[int]:
     """For some reason there is a gap after EoC 3. This adds that"""
 
-    formatted_ids = []
+    formatted_ids: list[int] = []
     for story_id in ids:
-        if story_id > 2:
-            story_id += 1
-        formatted_ids.append(story_id)
+        formatted_ids.append(format_story_id(story_id))
     return formatted_ids
 
 
-def edit_story(ids: list, data: dict, chapter_progress: int) -> dict:
-    """Edit story chapters for a set of ids"""
+def format_story_id(chapter_id: int) -> int:
+    """For some reason there is a gap after EoC 3. This adds that"""
 
-    ids = format_story_ids(ids)
+    if chapter_id > 2:
+        chapter_id += 1
+    return chapter_id
+
+
+def clear_levels(
+    story_chapters: dict[str, Any],
+    treasures: list[list[int]],
+    ids: list[int],
+    val: int,
+    chapter_progress: int,
+    clear: bool,
+) -> tuple[dict[str, Any], list[list[int]]]:
+    """Clear levels in a chapter"""
+
     for chapter_id in ids:
-        data["Chapter Progress"][chapter_id] = chapter_progress
-        data["Times Cleared"][chapter_id] = (
-            ([1] * chapter_progress) + ([0] * (48 - chapter_progress)) + ([0] * 3)
+        story_chapters["Chapter Progress"][chapter_id] = chapter_progress
+        story_chapters["Times Cleared"][chapter_id] = (
+            ([val] * chapter_progress) + ([0] * (48 - chapter_progress)) + ([0] * 3)
         )
-    return data
+        if not clear:
+            treasures[chapter_id] = [0] * 49
+    return story_chapters, treasures
+
+
+def edit_main_story(save_stats: dict[str, Any]) -> dict[str, Any]:
+    """Clear whole chapters"""
+
+    chapter_ids = story_level_id_selector.select_specific_chapters()
+
+    if len(chapter_ids) > 1:
+        individual = user_input_handler.ask_if_individual("each stage in every chapter")
+    else:
+        individual = False
+
+    if individual:
+        for chapter_id in chapter_ids:
+            ids = story_level_id_selector.select_levels(chapter_id)
+            chapter_id = format_story_id(chapter_id)
+            save_stats["story_chapters"] = clear_specific_level_ids(
+                save_stats["story_chapters"], chapter_id, ids, 1
+            )
+    else:
+        ids = story_level_id_selector.select_levels(None)
+        for chapter_id in chapter_ids:
+            chapter_id = format_story_id(chapter_id)
+            save_stats["story_chapters"] = clear_specific_levels(
+                save_stats["story_chapters"], chapter_id, len(ids), 1
+            )
+    helper.colored_text("Successfully cleared main story chapters")
+    return save_stats

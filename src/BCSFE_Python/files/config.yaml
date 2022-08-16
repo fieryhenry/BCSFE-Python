@@ -1,0 +1,24 @@
+DEFAULT_GAME_VERSION: "" # The default game version when downloading / pulling / loading save data. E.g en, jp, kr, tw. Empty means the game version is not specified and will be asked for when needed.
+DEFAULT_SAVE_FILE_PATH: "SAVE_DATA" # The default file path for your save data when saving changes / downloading save data / pulling etc
+
+EDITOR:
+  DISABLE_MAXES: False # Allows you to edit the level / amount of items past the max amount.
+  SHOW_BAN_WARNING: True # Show a warning when editing bannable items.
+  SHOW_CATEGORIES: True # Show the categories in the feature list, instead of a long list.
+  SHOW_FEATURE_SELECT_EXPLAINATION: True # Show an explanation of how to select a feature.
+  ONLY_GET_EN_DATA: False # Only get the en version of the game data even if the save is jp, use if you can't read japanese
+
+START_UP:
+  CHECK_FOR_UPDATES: True # Check for updates on startup
+  UPDATE_TO_BETAS: False # Check for beta versions of the editor and update to them if found
+  HIDE_START_TEXT: False # Hide the start up text - the credits, version info, other links, etc.
+  DEFAULT_START_OPTION: -1 # The default save selection option when the editor starts, -1 gives you the option to do any option.
+  CREATE_BACKUP: True # Create a backup of the save file when you start the editor.
+
+SAVE_CHANGES:
+  SAVE_CHANGES_ON_EDIT: False # Automatically save changes to your save data after using a feature.
+  ALWAYS_EXPORT_JSON: False # Always export your save data as json when saving changes.
+
+SERVER:
+  UPLOAD_METADATA: True # Upload metadata (catfood, rare ticket, platinum ticket, and legend ticket changes) to the ponos servers when uploading and saving your save data - prevents bans.
+  WIPE_TRACKED_ITEMS_ON_START: True # Wipe all tracked items stored when the editor starts up - if disabled, it allows you to upload metadata changes after you exit and re-enter the editor.

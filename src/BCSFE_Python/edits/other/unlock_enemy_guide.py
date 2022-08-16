@@ -1,16 +1,20 @@
 """Handler for unlocking the enemy guide"""
+from typing import Any
 
 from ... import user_input_handler
 
 
-def enemy_guide(save_stats: dict) -> dict:
+def enemy_guide(save_stats: dict[str, Any]) -> dict[str, Any]:
     """Handler for unlocking the enemy guide"""
 
     enemy_guide_stats = save_stats["enemy_guide"]
     total = len(enemy_guide_stats)
-    unlock = user_input_handler.colored_input(
-        "Do you want to remove enemy guide entries &(1)& or unlock them &(2)&:"
-    ) == "2"
+    unlock = (
+        user_input_handler.colored_input(
+            "Do you want to remove enemy guide entries &(1)& or unlock them &(2)&:"
+        )
+        == "2"
+    )
     set_val = 1
     if not unlock:
         set_val = 0

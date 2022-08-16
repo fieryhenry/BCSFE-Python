@@ -1,9 +1,9 @@
 """Handler for editting play time"""
+from typing import Any
 
 from ... import helper, user_input_handler
 
-
-def edit_play_time(save_stats: dict) -> dict:
+def edit_play_time(save_stats: dict[str, Any]) -> dict[str, Any]:
     """Handler for editting play time"""
     play_time = save_stats["play_time"]
 

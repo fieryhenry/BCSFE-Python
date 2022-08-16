@@ -4,7 +4,7 @@ A python save editor for the mobile game The Battle Cats
 
 Join the [discord server](https://discord.gg/DvmMgvn5ZB) if you want to suggest new features, report bugs or get help on how to use the editor (please read the below tutorials / watch the latest [tutorial video](https://www.youtube.com/watch?v=Kr6VaLTXOSY) first before asking for help).
 
-If you want to support me then consider gifting me some ko-fi here: https://ko-fi.com/fieryhenry
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/M4M53M4MN)
 
 ## Thanks to:
 
@@ -26,7 +26,7 @@ Although if you want to get unbanned / fix the elsewhere error you will still ne
 
 ---
 
-1. Install python (You'll need version 3.8 and up) https://www.python.org/downloads/
+1. Install python (You'll need version 3.9 and up) https://www.python.org/downloads/
 
 2. Enter the command: `py -m pip install -U battle-cats-save-editor` into command prompt or another terminal to install the editor. If that doesn't work then use `python` instead of `py` in the command
 

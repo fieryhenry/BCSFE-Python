@@ -45,7 +45,8 @@ def print_start_up():
         "Thanks To:\n"
         + "&Lethal's editor& for giving me inspiration to start the project and it helped me work out how to patch the save data and edit cf/xp: &https://www.reddit.com/r/BattleCatsCheats/comments/djehhn/editoren&\n"
         + "&Beeven& and &csehydrogen's& code, which helped me figure out how to patch save data: &https://github.com/beeven/battlecats& and &https://github.com/csehydrogen/BattleCatsHacker&\n"
-        + "Everyone who's given me saves, which helped to test save parsing/serialising and to test/develop new features",
+        + "Anyone who has supported my work for giving me motivation to keep working on this project: &https://ko-fi.com/fieryhenry&\n"
+        + "Everyone in the discord for giving me saves, reporting bugs, suggesting new features, and for being an amazing community: &https://discord.gg/DvmMgvn5ZB&",
         base=helper.GREEN,
         new=helper.WHITE,
     )

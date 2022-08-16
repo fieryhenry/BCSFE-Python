@@ -4,7 +4,7 @@ A python save editor for the mobile game The Battle Cats
 
 Join the [discord server](https://discord.gg/DvmMgvn5ZB) if you want to suggest new features, report bugs or get help on how to use the editor (please read the below tutorials / watch the latest [tutorial video](https://www.youtube.com/watch?v=Kr6VaLTXOSY) first before asking for help).
 
-If you want to support me then consider gifting me some ko-fi here: https://ko-fi.com/fieryhenry
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/M4M53M4MN)
 
 ## Thanks to:
 

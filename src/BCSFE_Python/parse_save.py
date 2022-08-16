@@ -1902,8 +1902,8 @@ def parse_save(save_data: bytes, country_code: Union[str, None]) -> dict[str, An
 
     data = get_talent_data()
     save_stats["unknown_69"] = data["dump"]
-    save_stats["talents"] = data["talents"]
 
+    save_stats["talents"] = data["talents"]
     save_stats["np"] = next_int_len(4)
 
     save_stats["unknown_70"] = next_int_len(1)
@@ -1913,8 +1913,8 @@ def parse_save(save_data: bytes, country_code: Union[str, None]) -> dict[str, An
     save_stats["unknown_71"] = next_int_len(1)
 
     save_stats["leadership"] = next_int_len(2)
-
-    save_stats["unknown_72"] = next_int_len(4)
+    save_stats["officer_pass_cat_id"] = next_int_len(2)
+    save_stats["officer_pass_cat_form"] = next_int_len(2)
 
     save_stats["gv_80200"] = next_int_len(4)  # 80200
 

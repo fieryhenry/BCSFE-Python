@@ -995,7 +995,8 @@ def serialize_save(save_stats: dict[str, Any]) -> bytes:
 
     save_data = write(save_data, save_stats["leadership"])
 
-    save_data = write(save_data, save_stats["unknown_72"])
+    save_data = write(save_data, save_stats["officer_pass_cat_id"])
+    save_data = write(save_data, save_stats["officer_pass_cat_form"])
 
     save_data = write(save_data, save_stats["gv_80200"])
 

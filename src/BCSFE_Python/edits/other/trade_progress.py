@@ -10,7 +10,7 @@ def set_trade_progress_val(storage: dict[str, Any]) -> tuple[dict[str, Any], boo
     space = False
     for i in range(len(storage["types"])):
         storage_item = storage["types"][i]
-        if storage_item == 0:
+        if storage_item == 0 or (storage["ids"][i] == 1 and storage_item == 2):
             storage["ids"][i] = 1
             storage["types"][i] = 2
             space = True
@@ -22,10 +22,11 @@ def set_trade_progress(save_stats: dict[str, Any]) -> dict[str, Any]:
     """Handler for editting trade progress to allow for unbannable rare tickets"""
 
     trade_progress = save_stats["trade_progress"]
+    max_value = helper.clamp(299 - save_stats["rare_tickets"]["Value"], 0, 299)
     storage = save_stats["cat_storage"]
     tickets = item.Item(
         name="Rare Tickets",
-        max_value=299,
+        max_value=max_value,
         value=save_stats["rare_tickets"]["Value"],
         edit_name="amount",
         set_name="gain",

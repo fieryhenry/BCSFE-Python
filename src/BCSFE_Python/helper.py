@@ -466,7 +466,7 @@ def setup_tk():
 
     root = Tk()
     root.withdraw()
-    root.wm_attributes("-topmost", 1)
+    root.wm_attributes("-topmost", 1) # type: ignore
 
 
 def save_file(title: str, file_types: list[tuple[str, str]], path: str) -> str:

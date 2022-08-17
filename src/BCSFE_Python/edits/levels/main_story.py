@@ -2,7 +2,7 @@
 from typing import Any
 
 
-from ... import user_input_handler, helper
+from ... import helper
 from . import story_level_id_selector
 
 CHAPTERS = [
@@ -82,29 +82,32 @@ def clear_levels(
     return story_chapters, treasures
 
 
-def edit_main_story(save_stats: dict[str, Any]) -> dict[str, Any]:
+def clear_each(save_stats: dict[str, Any]):
+    """Clear stages for each chapter"""
+
+    chapter_ids = story_level_id_selector.select_specific_chapters()
+
+    for chapter_id in chapter_ids:
+        helper.colored_text(f"Clearing chapter {CHAPTERS[chapter_id]}")
+        ids = story_level_id_selector.select_levels(chapter_id)
+        chapter_id = format_story_id(chapter_id)
+        save_stats["story_chapters"] = clear_specific_level_ids(
+            save_stats["story_chapters"], chapter_id, ids, 1
+        )
+    helper.colored_text("Successfully cleared main story chapters")
+    return save_stats
+
+
+def clear_all(save_stats: dict[str, Any]) -> dict[str, Any]:
     """Clear whole chapters"""
 
     chapter_ids = story_level_id_selector.select_specific_chapters()
 
-    if len(chapter_ids) > 1:
-        individual = user_input_handler.ask_if_individual("each stage in every chapter")
-    else:
-        individual = False
-
-    if individual:
-        for chapter_id in chapter_ids:
-            ids = story_level_id_selector.select_levels(chapter_id)
-            chapter_id = format_story_id(chapter_id)
-            save_stats["story_chapters"] = clear_specific_level_ids(
-                save_stats["story_chapters"], chapter_id, ids, 1
-            )
-    else:
-        ids = story_level_id_selector.select_levels(None)
-        for chapter_id in chapter_ids:
-            chapter_id = format_story_id(chapter_id)
-            save_stats["story_chapters"] = clear_specific_levels(
-                save_stats["story_chapters"], chapter_id, len(ids), 1
-            )
+    ids = story_level_id_selector.select_levels(None)
+    for chapter_id in chapter_ids:
+        chapter_id = format_story_id(chapter_id)
+        save_stats["story_chapters"] = clear_specific_levels(
+            save_stats["story_chapters"], chapter_id, len(ids), 1
+        )
     helper.colored_text("Successfully cleared main story chapters")
     return save_stats

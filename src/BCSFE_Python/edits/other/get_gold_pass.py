@@ -13,7 +13,7 @@ def get_gold_pass_val(save_stats: dict[str, Any], total_days: int) -> dict[str, 
 
     start_date = time.time()
     expiry_date = start_date + datetime.timedelta(days=total_days).total_seconds()
-
+    gold_pass["officer_id"]["Value"] = 1
     gold_pass["flag"]["Value"] = 1
     gold_pass["start_date"] = start_date
     gold_pass["expiry_date"] = expiry_date

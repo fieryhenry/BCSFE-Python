@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.1.1] - 2022-08-17
+
+#### Changed
+
+- Split up some features into subcategories e.g Treasures / Levels -> Treasures -> Treasure groups. Or Items -> Tickets -> Normal Tickets
+
+#### Fixed
+
+- Gamatoto helpers
+
 ## [2.1.0] - 2022-08-16
 
 #### Added
@@ -35,7 +45,7 @@
 #### Fixed
 
 - Select cats based on rarity being off by 1
-- Evolve cats setting some cat to the first form
+- Evolve cats setting some cats to the first form
 
 ## [2.0.2] - 2022-07-08
 

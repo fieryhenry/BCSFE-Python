@@ -2,25 +2,26 @@
 
 from typing import Any
 
-from ... import helper, user_input_handler
+from ... import helper
 from . import cat_id_selector
 
 
-def set_cat_guide(save_stats: dict[str, Any]) -> dict[str, Any]:
-    """clear cat guide for specific cats"""
+def collect_cat_guide(save_stats: dict[str, Any]) -> dict[str, Any]:
+    """Collect cat guide for cats"""
+
     ids = cat_id_selector.select_cats(save_stats)
-    claim = (
-        user_input_handler.colored_input(
-            "Do you want to claim or unclaim the cat guide? (&1&=claim, &2&=unclaim):"
-        )
-        == "1"
-    )
-    if claim:
-        save_stats = cat_guide_ids(save_stats, ids, 1, "collected")
-    else:
-        save_stats = cat_guide_ids(save_stats, ids, 0, "removed")
+
+    save_stats = cat_guide_ids(save_stats, ids, 1, "collected")
     return save_stats
 
+
+def remove_cat_guide(save_stats: dict[str, Any]) -> dict[str, Any]:
+    """Remove cat guide for cats"""
+
+    ids = cat_id_selector.select_cats(save_stats)
+
+    save_stats = cat_guide_ids(save_stats, ids, 0, "removed")
+    return save_stats
 
 
 def cat_guide_ids(

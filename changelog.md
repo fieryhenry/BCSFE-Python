@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.1.1] - 2022-08-17
+
+#### Changed
+
+- Split up some features into subcategories e.g Treasures / Levels -> Treasures -> Treasure groups. Or Items -> Tickets -> Normal Tickets
+
+#### Fixed
+
+- Gamatoto helpers
+
 ## [2.1.0] - 2022-08-16
 
 #### Added

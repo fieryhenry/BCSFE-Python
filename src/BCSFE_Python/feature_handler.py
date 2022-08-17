@@ -92,7 +92,7 @@ FEATURES: dict[str, Any] = {
             "Max / Remove all selected cat talents": cats.talents.max_all_talents,
         },
         "Collect / Remove Cat Guide": {
-            "Set Cat Guide Entries (does not give catfood)": cats.clear_cat_guide.collect_cat_guide,
+            "Set Cat Guide Entries (does not give cf)": cats.clear_cat_guide.collect_cat_guide,
             "Unclaim Cat Guide Entries": cats.clear_cat_guide.remove_cat_guide,
         },
         'Get stage unit drops - removes the "Clear this stage to get special cat" dialog': cats.chara_drop.get_character_drops,

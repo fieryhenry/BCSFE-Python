@@ -175,68 +175,57 @@ def treasure_groups(save_stats: dict[str, Any]) -> dict[str, Any]:
     return save_stats
 
 
-def specific_treasures(save_stats: dict[str, Any]) -> dict[str, Any]:
-    """Handler for editing treasure levels"""
+def specific_stages(save_stats: dict[str, Any]):
+    """Handler for editing specific stages"""
 
-    individual = (
-        user_input_handler.colored_input(
-            "Do you want to edit the treasures for individual levels &(1)&, or groups of treasures (e.g energy drink, aqua crystal) &(2)&?:"
+    treasure_stats = save_stats["treasures"]
+    chapter_ids = story_level_id_selector.select_specific_chapters()
+
+    choice = story_level_id_selector.get_option()
+    for chapter_id in chapter_ids:
+        chapter_id = main_story.format_story_id(chapter_id)
+        stage_ids = story_level_id_selector.select_levels(chapter_id, choice)
+        treasure_data = [-1] * 48
+        treasure_data = user_input_handler.handle_all_at_once(
+            stage_ids,
+            False,
+            treasure_data,
+            list(range(1, 49)),
+            "treasure level",
+            "stage",
+            "(&0&=none, &1&=inferior, &2&=normal, &3&=superior)",
         )
-        == "1"
-    )
-    if not individual:
-        return treasure_groups(save_stats)
+        treasure_stats = set_specific_treasures(
+            treasure_stats, treasure_data, chapter_id
+        )
+    save_stats["treasures"] = treasure_stats
+    print("Successfully set treasures")
+    return save_stats
+
+def specific_stages_all_chapters(save_stats: dict[str, Any]) -> dict[str, Any]:
+    """Handler for editing treasure levels"""
 
     chapter_ids = story_level_id_selector.select_specific_chapters()
 
     treasure_stats = save_stats["treasures"]
 
-    if len(chapter_ids) > 1:
-        individual_chapter = (
-            user_input_handler.colored_input(
-                "Do you want to set the treasure level for each stage in each chapter individually, or do you want to select a single treasure level to applly to all chapters at once? (&1&=individual, &2&=all at once):"
-            )
-            == "1"
-        )
-    else:
-        individual_chapter = False
-
-    if individual_chapter:
-        choice = story_level_id_selector.get_option()
-        for chapter_id in chapter_ids:
-            chapter_id = main_story.format_story_id(chapter_id)
-            stage_ids = story_level_id_selector.select_levels(chapter_id, choice)
-            treasure_data = [-1] * 48
+    stage_ids = story_level_id_selector.select_levels(None)
+    treasure_data = [-1] * 48
+    for i, chapter_id in enumerate(chapter_ids):
+        chapter_id = main_story.format_story_id(chapter_id)
+        if i == 0:
             treasure_data = user_input_handler.handle_all_at_once(
                 stage_ids,
-                False,
+                True,
                 treasure_data,
-                list(range(1, 49)),
+                list(range(0, 48)),
                 "treasure level",
                 "stage",
                 "(&0&=none, &1&=inferior, &2&=normal, &3&=superior)",
             )
-            treasure_stats = set_specific_treasures(
-                treasure_stats, treasure_data, chapter_id
-            )
-    else:
-        stage_ids = story_level_id_selector.select_levels(None)
-        treasure_data = [-1] * 48
-        for i, chapter_id in enumerate(chapter_ids):
-            chapter_id = main_story.format_story_id(chapter_id)
-            if i == 0:
-                treasure_data = user_input_handler.handle_all_at_once(
-                    stage_ids,
-                    True,
-                    treasure_data,
-                    list(range(0, 48)),
-                    "treasure level",
-                    "stage",
-                    "(&0&=none, &1&=inferior, &2&=normal, &3&=superior)",
-                )
-            treasure_stats = set_specific_treasures(
-                treasure_stats, treasure_data, chapter_id
-            )
+        treasure_stats = set_specific_treasures(
+            treasure_stats, treasure_data, chapter_id
+        )
     save_stats["treasures"] = treasure_stats
     print("Successfully set treasures")
     return save_stats

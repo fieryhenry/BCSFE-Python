@@ -3,6 +3,7 @@ from typing import Any
 
 from ... import helper, item, user_input_handler, csv_handler, game_data_getter
 
+
 def get_talent_data(save_stats: dict[str, Any]) -> dict[Any, Any]:
     """Get talent data for all cats"""
 
@@ -47,7 +48,9 @@ def replace_name(
     """Replace the text ids with the corresponding names"""
 
     new_data[cat_id][column] = data
-    if "textID" in column or "tFxtID_F" in column: # ponos made a typo, should be textID_F
+    if (
+        "textID" in column or "tFxtID_F" in column
+    ):  # ponos made a typo, should be textID_F
         new_data[cat_id][column] = talent_names[data][1]
         stop_at = "<br>"
         if stop_at in new_data[cat_id][column]:
@@ -92,7 +95,7 @@ def get_cat_talents(
     for i in range(len(cat_talents) - 1):
         cat_data = {}
         if letter_order[i] == "F":
-            text_id_str = "tFxtID_F" # ponos made a typo, should be textID_F
+            text_id_str = "tFxtID_F"  # ponos made a typo, should be textID_F
         else:
             text_id_str = f"textID_{letter_order[i]}"
         cat_data["name"] = cat_talent_data[text_id_str].strip("\n")
@@ -118,7 +121,32 @@ def get_talent_levels(
     return cat_talents_levels
 
 
-def edit_talents(save_stats: dict[str, Any]) -> dict[str, Any]:
+def max_all_talents(save_stats: dict[str, Any]):
+    """Max all talents for all cats"""
+    length = len(save_stats["cats"])
+    talents = save_stats["talents"]
+    ids = user_input_handler.get_range(
+        user_input_handler.colored_input(
+            "Enter cat ids (Look up cro battle cats to find ids)(You can enter &all& to get all, a range e.g &1&-&50&, or ids separate by spaces e.g &5 4 7&):"
+        ),
+        length,
+    )
+    talent_data = get_talent_data(save_stats)
+    cat_talents_levels: list[int] = []
+    for cat_id in ids:
+        if cat_id not in talents or cat_id not in talent_data:
+            continue
+        cat_talents = talents[cat_id]
+        cat_talents_levels = get_talent_levels(talent_data, talents, cat_id)
+        for i, cat_talent_level in enumerate(cat_talents_levels):
+            cat_talents[i + 1]["level"] = cat_talent_level
+        save_stats["talents"] = talents
+
+    print("Successfully set talents")
+    return save_stats
+
+
+def edit_talents_individual(save_stats: dict[str, Any]) -> dict[str, Any]:
     """Handler for editing talents"""
 
     length = len(save_stats["cats"])
@@ -129,10 +157,6 @@ def edit_talents(save_stats: dict[str, Any]) -> dict[str, Any]:
         ),
         length,
     )
-    individual = True
-    if len(ids) > 1:
-        individual = user_input_handler.ask_if_individual("talents for each cat")
-
     talent_data = get_talent_data(save_stats)
     cat_talents_levels: list[int] = []
     for cat_id in ids:
@@ -143,32 +167,23 @@ def edit_talents(save_stats: dict[str, Any]) -> dict[str, Any]:
             continue
         cat_talent_data = talent_data[cat_id]
         cat_talents = talents[cat_id]
-        if not individual:
-            cat_talents_levels = get_talent_levels(
-                talent_data, talents, cat_id
-            )
-        else:
-            cat_talent_data_formatted = get_cat_talents(
-                cat_talents, cat_talent_data
-            )
-            names: list[str] = []
-            maxes: list[int] = []
-            for talent_index, cat_talent_formatted in cat_talent_data_formatted.items():
-                names.append(cat_talent_formatted["name"])
-                cat_talents_levels.append(cat_talents[talent_index + 1]["level"])
-                maxes.append(cat_talent_formatted["max"])
-            helper.colored_text(f"Cat &{cat_id}& is slected:")
-            cat_talents_levels_g = item.create_item_group(
-                names=names,
-                values=cat_talents_levels,
-                maxes=maxes,
-                edit_name="talents",
-                group_name="Talents",
-            )
-            cat_talents_levels_g.edit()
-            cat_talents_levels = helper.parse_int_list(
-                cat_talents_levels_g.values, 0
-            )
+        cat_talent_data_formatted = get_cat_talents(cat_talents, cat_talent_data)
+        names: list[str] = []
+        maxes: list[int] = []
+        for talent_index, cat_talent_formatted in cat_talent_data_formatted.items():
+            names.append(cat_talent_formatted["name"])
+            cat_talents_levels.append(cat_talents[talent_index + 1]["level"])
+            maxes.append(cat_talent_formatted["max"])
+        helper.colored_text(f"Cat &{cat_id}& is slected:")
+        cat_talents_levels_g = item.create_item_group(
+            names=names,
+            values=cat_talents_levels,
+            maxes=maxes,
+            edit_name="talents",
+            group_name="Talents",
+        )
+        cat_talents_levels_g.edit()
+        cat_talents_levels = helper.parse_int_list(cat_talents_levels_g.values, 0)
         for i, cat_talent_level in enumerate(cat_talents_levels):
             cat_talents[i + 1]["level"] = cat_talent_level
         save_stats["talents"] = talents

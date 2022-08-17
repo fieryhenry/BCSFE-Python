@@ -45,7 +45,7 @@
 #### Fixed
 
 - Select cats based on rarity being off by 1
-- Evolve cats setting some cat to the first form
+- Evolve cats setting some cats to the first form
 
 ## [2.0.2] - 2022-07-08
 

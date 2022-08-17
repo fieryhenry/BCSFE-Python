@@ -76,10 +76,10 @@ def get_helpers(helpers: list[int], helper_data: dict[str, Any]) -> dict[str, An
 def add_empty_helper_slots(helpers: list[int], final_helpers: list[int]):
     """Add empty helper slots to the end of the list"""
 
-    empty_slots = len(final_helpers) - len(helpers)
+    empty_slots = len(helpers) - len(final_helpers)
     if empty_slots > 0:
-        helpers += [0xFFFFFFFF] * empty_slots
-    return helpers
+        final_helpers += [0xFFFFFFFF] * empty_slots
+    return final_helpers
 
 
 def edit_helpers(save_stats: dict[str, Any]) -> dict[str, Any]:

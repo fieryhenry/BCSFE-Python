@@ -3,7 +3,7 @@
 from typing import Any
 
 from ... import helper, user_input_handler, csv_handler, game_data_getter
-
+from . import cat_id_selector
 
 def set_t_ids(save_stats: dict[str, Any]) -> dict[str, Any]:
     """handler for editing treasure ids"""
@@ -30,13 +30,9 @@ def set_c_ids(save_stats: dict[str, Any]) -> dict[str, Any]:
     unit_drops_stats = save_stats["unit_drops"]
     data = get_data(helper.check_data_is_jp(save_stats))
 
-    usr_c_ids = user_input_handler.get_range(
-        user_input_handler.colored_input(
-            "Enter cat ids (Look up cro battle cats to find ids)(You can enter &all& to get all, a range e.g &1&-&50&, or ids separate by spaces e.g &5 4 7&):"
-        ),
-        all_ids=data["c_ids"],
-    )
-    usr_c_ids = helper.check_cat_ids(usr_c_ids, save_stats)
+    ids = cat_id_selector.select_cats(save_stats)
+
+    usr_c_ids = helper.check_cat_ids(ids, save_stats)
     unit_drops_stats = set_c_ids_val(unit_drops_stats, data, usr_c_ids)
 
     save_stats["unit_drops"] = unit_drops_stats

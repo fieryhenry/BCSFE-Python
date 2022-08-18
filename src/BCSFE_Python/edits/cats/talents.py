@@ -1,7 +1,8 @@
 """Handler to edit cat talents"""
 from typing import Any
 
-from ... import helper, item, user_input_handler, csv_handler, game_data_getter
+from ... import helper, item, csv_handler, game_data_getter
+from . import cat_id_selector
 
 
 def get_talent_data(save_stats: dict[str, Any]) -> dict[Any, Any]:
@@ -123,14 +124,10 @@ def get_talent_levels(
 
 def max_all_talents(save_stats: dict[str, Any]):
     """Max all talents for all cats"""
-    length = len(save_stats["cats"])
     talents = save_stats["talents"]
-    ids = user_input_handler.get_range(
-        user_input_handler.colored_input(
-            "Enter cat ids (Look up cro battle cats to find ids)(You can enter &all& to get all, a range e.g &1&-&50&, or ids separate by spaces e.g &5 4 7&):"
-        ),
-        length,
-    )
+
+    ids = cat_id_selector.select_cats(save_stats)
+
     talent_data = get_talent_data(save_stats)
     cat_talents_levels: list[int] = []
     for cat_id in ids:
@@ -149,21 +146,16 @@ def max_all_talents(save_stats: dict[str, Any]):
 def edit_talents_individual(save_stats: dict[str, Any]) -> dict[str, Any]:
     """Handler for editing talents"""
 
-    length = len(save_stats["cats"])
     talents = save_stats["talents"]
-    ids = user_input_handler.get_range(
-        user_input_handler.colored_input(
-            "Enter cat ids (Look up cro battle cats to find ids)(You can enter &all& to get all, a range e.g &1&-&50&, or ids separate by spaces e.g &5 4 7&):"
-        ),
-        length,
-    )
+    ids = cat_id_selector.select_cats(save_stats)
+
     talent_data = get_talent_data(save_stats)
     cat_talents_levels: list[int] = []
     for cat_id in ids:
         if cat_id not in talents or cat_id not in talent_data:
             # don't spam the user with messages if they selected alot of ids at once
             if len(ids) < 20:
-                print(f"Error cat {cat_id} does not have any talents")
+                helper.colored_text(f"Error cat &{cat_id}& does not have any talents", helper.RED, helper.WHITE)
             continue
         cat_talent_data = talent_data[cat_id]
         cat_talents = talents[cat_id]

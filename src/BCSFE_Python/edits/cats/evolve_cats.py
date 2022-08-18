@@ -1,7 +1,7 @@
 """Handler for evolving cats"""
 from typing import Any
 
-from ... import user_input_handler, helper, csv_handler, game_data_getter
+from ... import helper, csv_handler, game_data_getter
 from . import cat_id_selector
 
 
@@ -49,14 +49,7 @@ def evolve_handler(
 ) -> dict[str, Any]:
     """Evolve specific cats"""
 
-    evolves = save_stats["unlocked_forms"]
-    flags = evolves
-    ids = user_input_handler.get_range(
-        user_input_handler.colored_input(
-            "Enter cat ids (Look up cro battle cats to find ids)(You can enter &all& to get all, a range e.g &1&-&50&, or ids separate by spaces e.g &5 4 7&):"
-        ),
-        len(flags),
-    )
+    ids = cat_id_selector.select_cats(save_stats)
     return evolve_handler_ids(save_stats, val, string, ids, forced)
 
 
@@ -73,6 +66,21 @@ def get_evolve_data(is_jp: bool) -> list[int]:
     forms = helper.copy_first_n(data, 2)
     forms = helper.offset_list(forms, -1)
     return forms
+
+
+def get_total_forms(is_jp: bool, cat_id: int) -> int:
+    """
+    Get total forms of cat
+
+    Args:
+        is_jp (bool): Whether the game is JP or not
+        cat_id (int): The cat id
+
+    Returns:
+        int: The total forms of the cat
+    """
+    data = get_evolve_data(is_jp)
+    return data[cat_id]
 
 
 def evolve_handler_ids(

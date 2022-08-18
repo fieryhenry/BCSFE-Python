@@ -1,6 +1,7 @@
 """Helper script for usefull functions"""
 
 import json
+from multiprocessing import Process
 import os
 import shutil
 import sys
@@ -85,6 +86,14 @@ def get_file(file_name: str) -> str:
     file_path = os.path.join(get_local_files_path(), file_name)
     return file_path
 
+def find_files_in_dir(dir_path: str, file_name: str) -> list[str]:
+    """Find all files in a directory with a certain name"""
+
+    files: list[str] = []
+    for file in os.listdir(dir_path):
+        if file_name in file:
+            files.append(file)
+    return files
 
 def get_local_files_path() -> str:
     """Get the local files path"""
@@ -468,6 +477,26 @@ def setup_tk():
     root.withdraw()
     root.wm_attributes("-topmost", 1) # type: ignore
 
+def run_in_parallel(fns: list[Process]) -> None:
+    """
+    Run a list of functions in parallel
+
+    Args:
+        fns (list[Process]): List of functions to run in parallel
+    """
+    proc: list[Process] = []
+    for fn in fns:
+        fn.start()
+        proc.append(fn)
+    for p in proc:
+        p.join()
+
+def get_cc(save_stats: dict[str, Any]) -> str:
+    """Get the country code"""
+
+    if is_jp(save_stats):
+        return "jp"
+    return "en"
 
 def save_file(title: str, file_types: list[tuple[str, str]], path: str) -> str:
     """Save a file with tkinter"""

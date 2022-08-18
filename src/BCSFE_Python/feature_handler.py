@@ -195,6 +195,8 @@ def show_options(
     if len(results) == 0:
         helper.colored_text("No feature found with that name.", helper.RED)
         return menu(save_stats)
+    if len(results) == 1 and isinstance(list(results.values())[0], dict):
+        results = results[list(results)[0]]
     if len(results) == 1:
         return results[list(results)[0]](save_stats)
 

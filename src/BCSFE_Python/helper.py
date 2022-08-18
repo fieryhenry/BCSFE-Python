@@ -411,7 +411,7 @@ def colored_text(
     color_base = colored.fg(base)  # type: ignore
     color_reset = colored.fg(WHITE)  # type: ignore
 
-    text_split = text.split(split_char)
+    text_split: list[str] = split_text(text, split_char)
     for i, text_section in enumerate(text_split):
         if i % 2:
             print(f"{color_new}{text_section}{color_base}", end="")
@@ -419,6 +419,29 @@ def colored_text(
             print(f"{color_base}{text_section}{color_base}", end="")
     print(color_reset, end=end)
 
+
+def split_text(text: str, split_char: str = "&") -> list[str]:
+    """Split text on split_char, allowing for escaped split chars"""
+
+    text_split: list[str] = []
+    current_string = ""
+    skip = 0
+    for i, char in enumerate(text):
+        if skip > 0:
+            skip -= 1
+            continue
+        if char == "\\":
+            if text[i+1] == split_char:
+                current_string += split_char
+                skip = 1
+                continue
+        if char == split_char:
+            text_split.append(current_string)
+            current_string = ""
+        else:
+            current_string += char
+    text_split.append(current_string)
+    return text_split
 
 def colored_list(
     items: list[str],

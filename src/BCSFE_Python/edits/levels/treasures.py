@@ -143,21 +143,18 @@ def treasure_groups(save_stats: dict[str, Any]) -> dict[str, Any]:
     treasure_grps = get_treasure_groups(helper.check_data_is_jp(save_stats))
     treasures_stats = save_stats["treasures"]
 
-    helper.colored_list(main_story.CHAPTERS)
-    ids = user_input_handler.colored_input(
-        "Enter a number from 1 to 9 (You can enter multiple values separated by spaces to edit multiple at once):"
-    ).split(" ")
+    ids = user_input_handler.select_not_inc(main_story.CHAPTERS, "select")
 
     ids = helper.check_clamp(ids, 9, 1, -1)
 
     for chapter_id in ids:
-        print(f"Chapter: {main_story.CHAPTERS[chapter_id]}")
+        helper.colored_text(f"Chapter: &{main_story.CHAPTERS[chapter_id]}&")
         type_id = chapter_id // 3
         if chapter_id > 2:
             chapter_id += 1
         names = treasure_grps["names"][type_id]
         treasure_levels = [-1] * len(names)
-        print("0 = None, 1 = Inferior, 2 = Normal, 3 = Superior")
+        helper.colored_text("&0& = None, &1& = Inferior, &2& = Normal, &3& = Superior")
         treasure_levels = item.create_item_group(
             names=names,
             values=None,

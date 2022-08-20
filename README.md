@@ -28,9 +28,9 @@ Although if you want to get unbanned / fix the elsewhere error you will still ne
 
 1. Install python (You'll need version 3.9 and up) https://www.python.org/downloads/
 
-2. Enter the command: `py -m pip install -U battle-cats-save-editor` into command prompt or another terminal to install the editor. If that doesn't work then use `python` instead of `py` in the command
+2. Enter the command: `py -m pip install -U battle-cats-save-editor` into command prompt or another terminal to install the editor. If that doesn't work then use `python3` or `python` instead of `py` in the command
 
-3. Enter the command: `py -m BCSFE_Python` to run the editor. If that doesn't work then use `python` instead of `py` in the command
+3. Enter the command: `py -m BCSFE_Python` to run the editor. If that doesn't work then use `python3` or `python` instead of `py` in the command
 
 4. Look below for the tutorial that you need, or watch [here](https://www.youtube.com/watch?v=Kr6VaLTXOSY) for a video
 

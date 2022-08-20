@@ -140,7 +140,15 @@ FEATURES: dict[str, Any] = {
         "Get Gold Pass": other.get_gold_pass.get_gold_pass,
         "Claim / Remove all user rank rewards (does not give any items)": other.claim_user_rank_rewards.edit_rewards,
     },
-}
+    "Edit Config" : {
+        "Edit DEFAULT_GAME_VERSION" : config_manager.edit_default_gv,
+        "Edit DEFAULT_SAVE_PATH" : config_manager.edit_default_save_file_path,
+        "Edit EDITOR settings" : config_manager.edit_editor_settings,
+        "Edit START_UP settings" : config_manager.edit_start_up_settings,
+        "Edit SAVE_CHANGES settings" : config_manager.edit_save_changes_settings,
+        "Edit SERVER settings" : config_manager.edit_server_settings,
+    }
+} 
 
 
 def get_feature(
@@ -172,7 +180,7 @@ def show_options(
             "What do you want to edit (some options contain other features within them)"
         )
         if config_manager.get_config_value_category(
-            "EDITOR", "SHOW_FEATURE_SELECT_EXPLAINATION"
+            "EDITOR", "SHOW_FEATURE_SELECT_EXPLANATION"
         ):
             prompt += "\nYou can enter a number to run a feature or a word to search for that feature (e.g entering catfood will run the Cat Food feature, and entering tickets will show you all the features that edit tickets)\nYou can press enter to see a list of all of the features"
         user_input = user_input_handler.colored_input(f"{prompt}:\n")
@@ -191,14 +199,20 @@ def show_options(
         else:
             results = features_to_use[list(features_to_use)[user_int - 1]]
     if not isinstance(results, dict):
-        return results(save_stats)
+        save_stats_return = results(save_stats)
+        if save_stats_return is None:
+            return save_stats
+        return save_stats_return
     if len(results) == 0:
         helper.colored_text("No feature found with that name.", helper.RED)
         return menu(save_stats)
     if len(results) == 1 and isinstance(list(results.values())[0], dict):
         results = results[list(results)[0]]
     if len(results) == 1:
-        return results[list(results)[0]](save_stats)
+        save_stats_return = results[list(results)[0]](save_stats)
+        if save_stats_return is None:
+            return save_stats
+        return save_stats_return
 
     helper.colored_list(["Go Back"] + list(results))
     return show_options(save_stats, results)

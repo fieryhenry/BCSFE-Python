@@ -1,5 +1,6 @@
 """Module that runs when the module is run directly"""
 
+import os
 import sys
 
 from . import (
@@ -27,7 +28,7 @@ def print_start_up():
         + "GitHub: &https://github.com/fieryhenry/BCSFE-Python&\n"
         + "Discord: &https://discord.gg/DvmMgvn5ZB& - Please report any bugs to &#bug-reports&, or any suggestions to &#suggestions&\n"
         + "Donate: &https://ko-fi.com/fieryhenry&\n"
-        + f"Config file path: &{helper.get_file('config.yaml')}&",
+        + f"Config file path: &{os.path.join(config_manager.get_app_data_folder(), 'config.yaml')}&",
         base=helper.CYAN,
         new=helper.WHITE,
     )

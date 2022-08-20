@@ -86,6 +86,7 @@ def get_file(file_name: str) -> str:
     file_path = os.path.join(get_local_files_path(), file_name)
     return file_path
 
+
 def find_files_in_dir(dir_path: str, file_name: str) -> list[str]:
     """Find all files in a directory with a certain name"""
 
@@ -94,6 +95,7 @@ def find_files_in_dir(dir_path: str, file_name: str) -> list[str]:
         if file_name in file:
             files.append(file)
     return files
+
 
 def get_local_files_path() -> str:
     """Get the local files path"""
@@ -431,7 +433,7 @@ def split_text(text: str, split_char: str = "&") -> list[str]:
             skip -= 1
             continue
         if char == "\\":
-            if text[i+1] == split_char:
+            if text[i + 1] == split_char:
                 current_string += split_char
                 skip = 1
                 continue
@@ -442,6 +444,7 @@ def split_text(text: str, split_char: str = "&") -> list[str]:
             current_string += char
     text_split.append(current_string)
     return text_split
+
 
 def colored_list(
     items: list[str],
@@ -493,12 +496,34 @@ def write_save_data(save_data: bytes, country_code: str, path: str, prompt: bool
     return save_data
 
 
-def setup_tk():
-    """Setup tkinter"""
+def select_dir(title: str, default_dir: str) -> str:
+    """
+    Select a directory from the user
 
+    Args:
+        title (str): Title of the dialog
+        default_dir (str): Default directory to select
+
+    Returns:
+        str: Selected directory
+    """
+    root = setup_tk()
+    dir_path = filedialog.askdirectory(title=title, initialdir=default_dir, parent=root)
+    return dir_path
+
+
+def setup_tk() -> Tk:
+    """
+    Setup the tkinter window
+
+    Returns:
+        Tk: Tkinter window
+    """
     root = Tk()
     root.withdraw()
-    root.wm_attributes("-topmost", 1) # type: ignore
+    root.wm_attributes("-topmost", 1)  # type: ignore
+    return root
+
 
 def run_in_parallel(fns: list[Process]) -> None:
     """
@@ -514,12 +539,14 @@ def run_in_parallel(fns: list[Process]) -> None:
     for p in proc:
         p.join()
 
+
 def get_cc(save_stats: dict[str, Any]) -> str:
     """Get the country code"""
 
     if is_jp(save_stats):
         return "jp"
     return "en"
+
 
 def save_file(title: str, file_types: list[tuple[str, str]], path: str) -> str:
     """Save a file with tkinter"""

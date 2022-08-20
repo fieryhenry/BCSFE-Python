@@ -241,6 +241,16 @@ def search_cat_names(
             found_names.append((cat_name, cat_id, form_id))
     return found_names
 
+def download_10_files(game_version: str, file_names: list[str]) -> None:
+    """
+    Download 10 files
+
+    Args:
+        game_version (str): game version
+        file_names (list[str]): file names
+    """
+    for file_name in file_names:
+        game_data_getter.download_file(game_version, "resLocal", file_name, False)
 
 def get_cat_names(save_stats: dict[str, Any]) -> list[tuple[str, int, int]]:
     """
@@ -258,6 +268,7 @@ def get_cat_names(save_stats: dict[str, Any]) -> list[tuple[str, int, int]]:
     file_path_dir = os.path.dirname(
         helper.get_file(game_data_getter.get_path("resLocal", "", is_jp))
     )
+    helper.create_dirs(file_path_dir)
     if len(helper.find_files_in_dir(file_path_dir, "Unit_Explanation")) < len(
         save_stats["cats"]
     ):
@@ -267,12 +278,16 @@ def get_cat_names(save_stats: dict[str, Any]) -> list[tuple[str, int, int]]:
         )
         funcs: list[Process] = []
         version = game_data_getter.get_latest_version(is_jp)
+        all_file_names: list[str] = []
         for cat_id, _ in enumerate(save_stats["cats"]):
             file_name = f"Unit_Explanation{cat_id+1}_{helper.get_cc(save_stats)}.csv"
+            all_file_names.append(file_name)
+        file_names_split = helper.chunks(all_file_names, 10)
+        for file_names in file_names_split:
             funcs.append(
                 Process(
-                    target=game_data_getter.download_file,
-                    args=(version, "resLocal", file_name, False),
+                    target=download_10_files,
+                    args=(version, file_names),
                 )
             )
         helper.run_in_parallel(funcs)

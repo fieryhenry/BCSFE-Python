@@ -131,6 +131,9 @@ def select_options(
 ) -> Tuple[list[int], bool]:
     """Select an option or multiple options from a list"""
 
+    if len(options) == 1:
+        return [0], True
+
     helper.colored_list(options, extra_data=extra_data, offset=offset)
     total = len(options)
     helper.colored_text(f"{total+1}. &Select all&")

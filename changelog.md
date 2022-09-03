@@ -1,5 +1,25 @@
 # Changelog
 
+## [2.2.0] - 2022-09-03
+
+#### Added
+
+- Option when selecting cats to only get obtainable cats (Only the cats that show up in the cat guide)
+
+- Option to select cats by name when selecting cats
+
+#### Changed
+
+- Config file will now be located in the app data folder / home folder
+
+- Character drop, evolve cats and talents will now be able to use the normal cat selecting menu
+
+#### Fixed
+
+- Wrong chapter being shown when selecting levels
+
+- Editor crashing when entering the name of a category when selecting a feature
+
 ## [2.1.1] - 2022-08-17
 
 #### Changed

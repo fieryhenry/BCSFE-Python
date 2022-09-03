@@ -14,6 +14,8 @@
 
 - Character drop, evolve cats and talents will now be able to use the normal cat selecting menu
 
+- You can now select all chapters at once when editing treasure groups
+
 #### Fixed
 
 - Wrong chapter being shown when selecting levels

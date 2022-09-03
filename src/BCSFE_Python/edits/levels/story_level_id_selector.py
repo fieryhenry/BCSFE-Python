@@ -49,9 +49,9 @@ def select_specific_levels(chapter_id: Union[int, None], total: int) -> list[int
     print("What levels do you want to select?")
     if chapter_id is not None:
         helper.colored_text(
-            f"Chapter: &{chapter_id}& : &{main_story.CHAPTERS[chapter_id-1]}&"
+            f"Chapter: &{chapter_id+1}& : &{main_story.CHAPTERS[chapter_id]}&"
         )
-    ids = user_input_handler.get_range_ids("Level ids", total)
+    ids = user_input_handler.get_range_ids("Level ids (e.g &1&=korea, &2&=mongolia)", total)
     ids = helper.check_clamp(ids, total, 1, -1)
     return ids
 
@@ -62,7 +62,7 @@ def select_levels_up_to(chapter_id: Union[int, None], total: int) -> list[int]:
     print("What levels do you want to select?")
     if chapter_id is not None:
         helper.colored_text(
-            f"Chapter: &{chapter_id}& : &{main_story.CHAPTERS[chapter_id-1]}&"
+            f"Chapter: &{chapter_id+1}& : &{main_story.CHAPTERS[chapter_id]}&"
         )
     stage_id = user_input_handler.get_int(
         f"Enter the stage id that you want to clear/unclear up to (and including) (e.g &1&=korea cleared, &2&=korea &and& mongolia cleared, &{total}&=all)?:"

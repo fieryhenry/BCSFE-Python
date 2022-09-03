@@ -2,66 +2,42 @@
 
 from multiprocessing import Process
 import os
-from typing import Any, Optional
+from typing import Any, Callable, Optional
 
 from ... import user_input_handler, helper, game_data_getter, csv_handler
 from . import upgrade_cats
 from ..levels import treasures
 
 
-def select_cats_not_current(save_stats: dict[str, Any]) -> list[int]:
-    """Select cats not currently unlocked"""
-
-    options = [
-        "Select cats of a certain rarity",
-        "Select specific cat ids",
-        "Select cats of a specific gacha banner",
-        "Select all cats",
-        "Search by cat name",
-    ]
-    choice = user_input_handler.select_single(options, "select")
-    if choice == 1:
-        return select_cats_rarity(helper.check_data_is_jp(save_stats))
-    if choice == 2:
-        return select_cats_range(save_stats)
-    if choice == 3:
-        return select_cats_gatya_banner(helper.check_data_is_jp(save_stats))
-    if choice == 4:
-        return get_all_cats(save_stats)
-    if choice == 5:
-        return select_cat_names(save_stats)
-    return []
-
-
 def select_cats(save_stats: dict[str, Any], current: bool = True) -> list[int]:
     """Select cats"""
 
+    options: dict[str, Callable[[dict[str, Any]], list[int]]] = {
+        "Select currently unlocked cats" : select_current_cats,
+        "Select cats of a certain rarity" : select_cats_rarity,
+        "Select specific cat ids" : select_cats_range,
+        "Select cats of a specific gacha banner": select_cats_gatya_banner,
+        "Select all cats": get_all_cats,
+        "Search by cat name": select_cat_names,
+        "Select all obtainable cats": select_cats_obtainable,
+    }
     if not current:
-        return select_cats_not_current(save_stats)
+        del options["Select currently unlocked cats"]
+    choice = user_input_handler.select_single(list(options), "select") - 1
+    cat_ids = options[list(options)[choice]](save_stats)
+    return cat_ids
 
-    options = [
-        "Select currently unlocked cats",
-        "Select cats of a certain rarity",
-        "Select specific cat ids",
-        "Select cats of a specific gacha banner",
-        "Select all cats",
-        "Search by cat name",
-    ]
-    choice = user_input_handler.select_single(options, "select")
-    if choice == 1:
-        return select_current_cats(save_stats)
-    if choice == 2:
-        return select_cats_rarity(helper.check_data_is_jp(save_stats))
-    if choice == 3:
-        return select_cats_range(save_stats)
-    if choice == 4:
-        return select_cats_gatya_banner(helper.check_data_is_jp(save_stats))
-    if choice == 5:
-        return get_all_cats(save_stats)
-    if choice == 6:
-        return select_cat_names(save_stats)
-    return []
+def select_cats_obtainable(save_stats: dict[str, Any]) -> list[int]:
+    """
+    Select cats that can be obtained
 
+    Args:
+        save_stats (dict[str, Any]): Save stats
+
+    Returns:
+        list[int]: Cat ids
+    """
+    return filter_obtainable_cats(save_stats, get_all_cats(save_stats))
 
 def select_current_cats(save_stats: dict[str, Any]) -> list[int]:
     """Select current cats"""
@@ -74,13 +50,14 @@ def select_current_cats(save_stats: dict[str, Any]) -> list[int]:
     return cat_ids
 
 
-def select_cats_rarity(is_jp: bool) -> list[int]:
+def select_cats_rarity(save_stats: dict[str, Any]) -> list[int]:
     """Select cats of a certain rarity"""
 
     ids = user_input_handler.select_not_inc(
         options=upgrade_cats.TYPES,
         mode="upgrade",
     )
+    is_jp = helper.is_jp(save_stats)
 
     cat_ids = upgrade_cats.get_rarity(ids, is_jp)
     return cat_ids
@@ -98,9 +75,9 @@ def select_cats_range(save_stats: dict[str, Any]) -> list[int]:
     return ids
 
 
-def select_cats_gatya_banner(is_jp: bool) -> list[int]:
+def select_cats_gatya_banner(save_stats: dict[str, Any]) -> list[int]:
     """Select cats for a specific gacha banner"""
-
+    is_jp = helper.is_jp(save_stats)
     data = helper.parse_int_list_list(
         csv_handler.parse_csv(
             game_data_getter.get_file_latest(
@@ -157,6 +134,7 @@ def select_cat_names(save_stats: dict[str, Any]) -> list[int]:
     )
     cat_ids = [cat_ids[i] for i in indexes]
     return cat_ids
+
 
 def get_cat_by_form_and_id(
     all_names: list[tuple[str, int, int]], cat_id: int, form_id: int
@@ -241,6 +219,7 @@ def search_cat_names(
             found_names.append((cat_name, cat_id, form_id))
     return found_names
 
+
 def download_10_files(game_version: str, file_names: list[str]) -> None:
     """
     Download 10 files
@@ -251,6 +230,7 @@ def download_10_files(game_version: str, file_names: list[str]) -> None:
     """
     for file_name in file_names:
         game_data_getter.download_file(game_version, "resLocal", file_name, False)
+
 
 def get_cat_names(save_stats: dict[str, Any]) -> list[tuple[str, int, int]]:
     """
@@ -305,3 +285,53 @@ def get_cat_names(save_stats: dict[str, Any]) -> list[tuple[str, int, int]]:
             name = form[0]
             names.append((name, cat_id, form_id))
     return names
+
+
+def get_obtainability(save_stats: dict[str, Any]) -> list[int]:
+    """
+    Get obtainability of cats
+
+    Args:
+        save_stats (dict[str, Any]): save stats
+
+    Returns:
+        list[int]: obtainability of cats (0 = not obtainable, 1 = obtainable)
+    """
+    data = helper.parse_int_list_list(
+        csv_handler.parse_csv(
+            game_data_getter.get_file_latest(
+                "DataLocal", "nyankoPictureBookData.csv", helper.is_jp(save_stats)
+            ).decode("utf-8")
+        )
+    )
+    is_obtainable = helper.copy_first_n(data, 0)
+    return is_obtainable
+
+
+def get_obtainable_cats(save_stats: dict[str, Any]) -> list[int]:
+    """
+    Get obtainable cats
+
+    Args:
+        save_stats (dict[str, Any]): save stats
+
+    Returns:
+        list[int]: obtainable cats
+    """
+    obtainability = get_obtainability(save_stats)
+    return [i for i, x in enumerate(obtainability) if x == 1]
+
+
+def filter_obtainable_cats(save_stats: dict[str, Any], cat_ids: list[int]) -> list[int]:
+    """
+    Filter obtainable cats in a list of cat ids
+
+    Args:
+        save_stats (dict[str, Any]): save stats
+        cat_ids (list[int]): cat ids
+
+    Returns:
+        list[int]: obtainable cats
+    """
+    obtainable_cats = get_obtainable_cats(save_stats)
+    return [i for i in cat_ids if i in obtainable_cats]

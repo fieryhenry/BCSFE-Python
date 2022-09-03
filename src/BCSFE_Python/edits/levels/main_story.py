@@ -88,7 +88,7 @@ def clear_each(save_stats: dict[str, Any]):
     chapter_ids = story_level_id_selector.select_specific_chapters()
 
     for chapter_id in chapter_ids:
-        helper.colored_text(f"Clearing chapter {CHAPTERS[chapter_id]}")
+        helper.colored_text(f"Chapter: &{chapter_id+1}& : &{CHAPTERS[chapter_id]}&")
         ids = story_level_id_selector.select_levels(chapter_id)
         chapter_id = format_story_id(chapter_id)
         save_stats["story_chapters"] = clear_specific_level_ids(
@@ -102,7 +102,10 @@ def clear_all(save_stats: dict[str, Any]) -> dict[str, Any]:
     """Clear whole chapters"""
 
     chapter_ids = story_level_id_selector.select_specific_chapters()
-
+    text = ""
+    for chapter_id in chapter_ids:
+        text += f"Chapter: &{chapter_id+1}& : &{CHAPTERS[chapter_id]}&\n"
+    helper.colored_text(text.strip("\n"))
     ids = story_level_id_selector.select_levels(None)
     for chapter_id in chapter_ids:
         chapter_id = format_story_id(chapter_id)

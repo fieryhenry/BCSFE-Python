@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.2.1] - 2022-09-04
+
+#### Fixed
+
+- Editor sometimes crashing when saving a file when the file dialog
+
 ## [2.2.0] - 2022-09-03
 
 #### Added

@@ -540,7 +540,7 @@ def test_is_save_data(save_data: bytes) -> bool:
     else:
         return False
 
-def download_handler():
+def download_handler() -> Optional[str]:
     """Handles the download of the save data"""
 
     country_code = helper.ask_cc()
@@ -582,5 +582,7 @@ def download_handler():
         helper.get_save_file_filetype(),
         helper.get_default_save_name(),
     )
+    if path is None:
+        return None
     helper.write_file_bytes(path, save_data)
     return path

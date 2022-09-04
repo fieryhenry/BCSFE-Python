@@ -6,7 +6,7 @@ import os
 import shutil
 import sys
 from tkinter import Tk, filedialog
-from typing import Any, Generator, Union
+from typing import Any, Generator, Optional, Union
 import colored  # type: ignore
 
 from . import (
@@ -487,10 +487,11 @@ def write_save_data(save_data: bytes, country_code: str, path: str, prompt: bool
 
     save_data = patcher.patch_save_data(save_data, country_code)
     if prompt:
-        path = save_file("Save File", get_save_file_filetype(), path)
-        if not path:
+        new_path = save_file("Save File", get_save_file_filetype(), path)
+        if new_path is None:
             colored_text("Save cancelled", new=RED)
             return
+        path = new_path
     write_file_bytes(path, save_data)
     colored_text(f"Saved to: &{os.path.abspath(path)}&", new=GREEN)
     return save_data
@@ -548,7 +549,7 @@ def get_cc(save_stats: dict[str, Any]) -> str:
     return "en"
 
 
-def save_file(title: str, file_types: list[tuple[str, str]], path: str) -> str:
+def save_file(title: str, file_types: list[tuple[str, str]], path: str) -> Optional[str]:
     """Save a file with tkinter"""
     setup_tk()
 
@@ -561,7 +562,7 @@ def save_file(title: str, file_types: list[tuple[str, str]], path: str) -> str:
             title=title,
         )
         if not path_d:
-            return ""
+            return None
     except PermissionError:
         print(
             colored_text(
@@ -569,8 +570,6 @@ def save_file(title: str, file_types: list[tuple[str, str]], path: str) -> str:
             )
         )
         exit_editor()
-    if not path:
-        return ""
     return path_d.name
 
 
@@ -659,7 +658,7 @@ def load_json_handler(json_path: str) -> Union[None, str]:
         get_save_file_filetype(),
         os.path.join(os.path.dirname(json_path), get_default_save_name()),
     )
-    if not path:
+    if path is None:
         return None
     write_file_bytes(path, save_data)
     return path

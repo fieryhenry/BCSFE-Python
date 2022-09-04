@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.2.2] - 2022-09-04
+
+#### Fixed
+
+- Default save path being empty, causing the editor to not be able to pull saves unless changed
+
 ## [2.2.1] - 2022-09-04
 
 #### Fixed

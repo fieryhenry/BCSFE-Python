@@ -2,6 +2,10 @@
 
 ## [2.2.2] - 2022-09-04
 
+#### Added
+
+- A new config option to select options with the arrow keys or j and k to select some options. `EDITOR` -> `USE_ARROW_KEYS_FOR_FEATURE_SELECT`
+
 #### Fixed
 
 - Default save path being empty, causing the editor to not be able to pull saves unless changed

@@ -77,7 +77,7 @@ FEATURES: dict[str, Any] = {
         "Fix gamatoto from crashing the game": gamototo.fix_gamatoto.fix_gamatoto,
     },
     "Cats / Special Skills": {
-        "Get / Remve Cats": {
+        "Get / Remove Cats": {
             "Get Cats": cats.get_remove_cats.get_cat,
             "Remove Cats": cats.get_remove_cats.remove_cats,
         },

@@ -1,4 +1,5 @@
 colored==1.4.3
+pick==2.0.0
 python_dateutil==2.8.2
 PyYAML==6.0
 requests==2.25.1

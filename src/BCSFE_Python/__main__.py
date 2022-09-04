@@ -15,6 +15,7 @@ from . import (
     server_handler,
     tracker,
     updater,
+    user_input_handler,
 )
 from .edits.levels import clear_tutorial
 
@@ -126,7 +127,7 @@ def normal_start_up(default_op: bool = True) -> None:
     )
 
     if default_start_option != -1 and default_op:
-        option = str(default_start_option)
+        index = default_start_option - 1
     else:
         print()
         if not default_op:
@@ -137,24 +138,23 @@ def normal_start_up(default_op: bool = True) -> None:
             "Use adb to pull the save from a rooted device",
             "Load save data from json",
         ]
-        helper.colored_list(options)
-        option = input(f"Enter an option (1 to {len(options)}):")
+        index = user_input_handler.select_single(options, title="Select an option to get save data:") - 1
     path = None
-    if option == "1":
+    if index == 0:
         print("Enter details for data transfer:")
         path = server_handler.download_handler()
-    elif option == "2":
+    elif index == 1:
         print("Select save file:")
         path = helper.select_file(
             "Select a save file:",
             helper.get_save_file_filetype(),
             initial_file=helper.get_default_save_name(),
         )
-    elif option == "3":
+    elif index == 2:
         print("Enter details for save pulling:")
         game_version = helper.ask_cc()
         path = adb_handler.adb_pull_save_data(game_version)
-    elif option == "4":
+    elif index == 3:
         print("Select save data json file")
         js_path = helper.select_file(
             "Select save data json file",

@@ -1,21 +1,27 @@
 """Handler for selecting cat ids"""
 
-from multiprocessing import Process
 import os
+from multiprocessing import Process
 from typing import Any, Callable, Optional
 
-from ... import user_input_handler, helper, game_data_getter, csv_handler
-from . import upgrade_cats
+
+from ... import (
+    csv_handler,
+    game_data_getter,
+    helper,
+    user_input_handler,
+)
 from ..levels import treasures
+from . import upgrade_cats
 
 
 def select_cats(save_stats: dict[str, Any], current: bool = True) -> list[int]:
     """Select cats"""
 
     options: dict[str, Callable[[dict[str, Any]], list[int]]] = {
-        "Select currently unlocked cats" : select_current_cats,
-        "Select cats of a certain rarity" : select_cats_rarity,
-        "Select specific cat ids" : select_cats_range,
+        "Select currently unlocked cats": select_current_cats,
+        "Select cats of a certain rarity": select_cats_rarity,
+        "Select specific cat ids": select_cats_range,
         "Select cats of a specific gacha banner": select_cats_gatya_banner,
         "Select all cats": get_all_cats,
         "Search by cat name": select_cat_names,
@@ -23,9 +29,11 @@ def select_cats(save_stats: dict[str, Any], current: bool = True) -> list[int]:
     }
     if not current:
         del options["Select currently unlocked cats"]
-    choice = user_input_handler.select_single(list(options), "select") - 1
-    cat_ids = options[list(options)[choice]](save_stats)
+
+    choice_index = user_input_handler.select_single(list(options.keys()), title="Select cats:") - 1
+    cat_ids = options[list(options)[choice_index]](save_stats)
     return cat_ids
+
 
 def select_cats_obtainable(save_stats: dict[str, Any]) -> list[int]:
     """
@@ -38,6 +46,7 @@ def select_cats_obtainable(save_stats: dict[str, Any]) -> list[int]:
         list[int]: Cat ids
     """
     return filter_obtainable_cats(save_stats, get_all_cats(save_stats))
+
 
 def select_current_cats(save_stats: dict[str, Any]) -> list[int]:
     """Select current cats"""
@@ -55,7 +64,7 @@ def select_cats_rarity(save_stats: dict[str, Any]) -> list[int]:
 
     ids = user_input_handler.select_not_inc(
         options=upgrade_cats.TYPES,
-        mode="upgrade",
+        mode="select",
     )
     is_jp = helper.is_jp(save_stats)
 

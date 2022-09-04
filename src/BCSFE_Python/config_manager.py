@@ -2,7 +2,7 @@
 Manager for config settings
 """
 import os
-from typing import Any
+from typing import Any, Optional
 
 import yaml
 
@@ -14,7 +14,15 @@ def get_config_value_category(category: str, key: str) -> Any:
     Returns the value of the given key in the config file.
     """
     config = get_config_file()
-    return config[category][key]
+    category_data: Optional[dict[str, Any]] = config.get(category)
+    if category_data is None:
+        create_config_file()
+        return get_config_value_category(category, key)
+    key_data = category_data.get(key)
+    if key_data is None:
+        create_config_file()
+        return get_config_value_category(category, key)
+    return key_data
 
 
 def get_config_file() -> dict[str, Any]:
@@ -97,6 +105,7 @@ EDITOR:
   SHOW_CATEGORIES: True # Show the categories in the feature list, instead of a long list.
   SHOW_FEATURE_SELECT_EXPLANATION: True # Show an explanation of how to select a feature.
   ONLY_GET_EN_DATA: False # Only get the en version of the game data even if the save is jp, use if you can't read japanese
+  USE_ARROW_KEYS_FOR_FEATURE_SELECT: False # Use the arrow keys to select a feature instead of typing the number
 
 START_UP:
   CHECK_FOR_UPDATES: True # Check for updates on startup
@@ -114,8 +123,8 @@ SERVER:
   WIPE_TRACKED_ITEMS_ON_START: True # Wipe all tracked items stored when the editor starts up - if disabled, it allows you to upload metadata changes after you exit and re-enter the editor.
 """
 
-    if not os.path.exists(config_file):
-        helper.write_file_string(config_file, file_data)
+    
+    helper.write_file_string(config_file, file_data)
 
 
 def get_app_data_folder() -> str:
@@ -175,6 +184,7 @@ def edit_editor_settings(_: Any) -> None:
         "SHOW_CATEGORIES",
         "SHOW_FEATURE_SELECT_EXPLANATION",
         "ONLY_GET_EN_DATA",
+        "USE_ARROW_KEYS_FOR_FEATURE_SELECT",
     ]
     option_values = [get_config_value_category("EDITOR", option) for option in options]
     ids = user_input_handler.select_not_inc(options, "select", option_values)

@@ -2,7 +2,9 @@
 
 from typing import Any, Tuple, Union
 
-from . import helper
+from pick import pick
+
+from . import helper, config_manager
 
 
 def handle_all_at_once(
@@ -134,6 +136,22 @@ def select_options(
     if len(options) == 1:
         return [0], True
 
+    if config_manager.get_config_value_category(
+        "EDITOR", "USE_ARROW_KEYS_FOR_FEATURE_SELECT"
+    ):
+        options.append("Select all")
+        choice_data: list[tuple[str, int]] = pick(
+            options,
+            f"Select options to {mode} (Use the arrow keys, or j and k to move the cursor. Press space to select, then enter to confirm)",
+            indicator="->",
+            multiselect=True,
+            min_selection_count=1,
+        )
+        ids = [x[1] for x in choice_data]
+        if len(options) - 1 in ids:
+            return list(range(len(options) - 1)), False
+        return ids, True
+
     helper.colored_list(options, extra_data=extra_data, offset=offset)
     total = len(options)
     helper.colored_text(f"{total+1}. &Select all&")
@@ -174,11 +192,18 @@ def select_not_inc(
 def select_single(
     options: list[str],
     mode: str = "edit",
+    title: str = "",
 ) -> int:
     "Select a single option from a list"
-
+    if config_manager.get_config_value_category(
+        "EDITOR", "USE_ARROW_KEYS_FOR_FEATURE_SELECT"
+    ):
+        option_data: tuple[str, int] = pick(options, title + "\nMove cursor with arrow keys, or j and k. Press enter to select an option", indicator="->")  # type: ignore
+        return option_data[1] + 1
     helper.colored_list(options)
-    return get_int(f"What do you want to {mode}:")
+    if not title:
+        title = f"Select an option to {mode}:"
+    return get_int(title)
 
 
 def get_int(dialog: str) -> int:

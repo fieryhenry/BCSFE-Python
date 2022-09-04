@@ -24,7 +24,14 @@ setuptools.setup(
     package_dir={"": "src"},
     packages=setuptools.find_packages(where="src"),
     python_requires=">=3.9",
-    install_requires=["colored", "tk", "python-dateutil", "requests", "pyyaml"],
+    install_requires=[
+        "colored",
+        "tk",
+        "python-dateutil",
+        "requests",
+        "pyyaml",
+        "pick",
+    ],
     include_package_data=True,
     extras_require={
         "testing": [
@@ -33,5 +40,5 @@ setuptools.setup(
         ],
     },
     package_data={"BCSFE_Python": ["py.typed"]},
-    flake8 = {"max-line-length": 160},
+    flake8={"max-line-length": 160},
 )

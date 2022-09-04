@@ -89,7 +89,7 @@ def create_config_file() -> None:
     file_data += "# You can also edit the settings in the program\n#\n"
     file_data += "# The following settings are available:\n#\n"
     file_data += """DEFAULT_GAME_VERSION: "" # The default game version when downloading / pulling / loading save data. E.g en, jp, kr, tw. Empty means the game version is not specified and will be asked for when needed.
-DEFAULT_SAVE_FILE_PATH: "" # The default file path for your save data when saving changes / downloading save data / pulling etc
+DEFAULT_SAVE_FILE_PATH: "SAVE_DATA" # The default file path for your save data when saving changes / downloading save data / pulling etc
 
 EDITOR:
   DISABLE_MAXES: False # Allows you to edit the level / amount of items past the max amount.

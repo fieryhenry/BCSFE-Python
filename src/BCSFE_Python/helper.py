@@ -549,7 +549,9 @@ def get_cc(save_stats: dict[str, Any]) -> str:
     return "en"
 
 
-def save_file(title: str, file_types: list[tuple[str, str]], path: str) -> Optional[str]:
+def save_file(
+    title: str, file_types: list[tuple[str, str]], path: str
+) -> Optional[str]:
     """Save a file with tkinter"""
     setup_tk()
 
@@ -591,9 +593,17 @@ def select_file(
 
 
 def get_default_save_name() -> str:
-    """Get the default save name"""
+    """
+    Get the default save name
 
-    return config_manager.get_config_value("DEFAULT_SAVE_FILE_PATH")
+    Returns:
+        str: Default save name
+    """
+
+    save_name = config_manager.get_config_value("DEFAULT_SAVE_FILE_PATH")
+    if not save_name:
+        save_name = "SAVE_DATA"
+    return save_name
 
 
 def load_save_file(path: str) -> dict[str, Any]:

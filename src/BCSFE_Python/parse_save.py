@@ -1206,6 +1206,178 @@ def get_gauntlet_progress(
     }
 
 
+class ClearedSlots:
+    class Slot:
+        class Cat:
+            def __init__(self, cat_id: int, cat_form: int):
+                self.cat_id = cat_id
+                self.cat_form = cat_form
+
+            def to_dict(self) -> dict[str, Any]:
+                return {
+                    "cat_id": self.cat_id,
+                    "cat_form": self.cat_form,
+                }
+
+            @staticmethod
+            def from_dict(data: dict[str, Any]) -> "ClearedSlots.Slot.Cat":
+                return ClearedSlots.Slot.Cat(data["cat_id"], data["cat_form"])
+
+        def __init__(self, cats: list[Cat], slot_index: int, separator: int):
+            self.cats = cats
+            self.slot_index = slot_index
+            self.separator = separator
+
+        def to_dict(self) -> dict[str, Any]:
+            return {
+                "cats": [cat.to_dict() for cat in self.cats],
+                "slot_index": self.slot_index,
+                "separator": self.separator,
+            }
+
+        @staticmethod
+        def from_dict(data: dict[str, Any]):
+            return ClearedSlots.Slot(
+                [ClearedSlots.Slot.Cat.from_dict(cat) for cat in data["cats"]],
+                data["slot_index"],
+                data["separator"],
+            )
+
+    class StageSlot:
+        class Stage:
+            def __init__(self, stage_id: int):
+                self.stage_id = stage_id
+
+            def to_dict(self) -> dict[str, Any]:
+                return {
+                    "stage_id": self.stage_id,
+                }
+
+            @staticmethod
+            def from_dict(data: dict[str, Any]) -> "ClearedSlots.StageSlot.Stage":
+                return ClearedSlots.StageSlot.Stage(data["stage_id"])
+
+        def __init__(self, slot_index: int, stages: list[Stage]):
+            self.slot_index = slot_index
+            self.stages = stages
+
+        def to_dict(self) -> dict[str, Any]:
+            return {
+                "slot_index": self.slot_index,
+                "stages": [stage.to_dict() for stage in self.stages],
+            }
+
+        @staticmethod
+        def from_dict(data: dict[str, Any]) -> "ClearedSlots.StageSlot":
+            return ClearedSlots.StageSlot(
+                data["slot_index"],
+                [
+                    ClearedSlots.StageSlot.Stage.from_dict(stage)
+                    for stage in data["stages"]
+                ],
+            )
+
+    def __init__(self, slots: list[Slot], slot_stages: list[StageSlot], end_index: int):
+        self.slots = slots
+        self.slot_stages = slot_stages
+        self.end_index = end_index
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "slots": [slot.to_dict() for slot in self.slots],
+            "slot_stages": [stage.to_dict() for stage in self.slot_stages],
+            "end_index": self.end_index,
+        }
+
+    @staticmethod
+    def from_dict(data: dict[str, Any]) -> "ClearedSlots":
+        return ClearedSlots(
+            [ClearedSlots.Slot.from_dict(slot) for slot in data["slots"]],
+            [ClearedSlots.StageSlot.from_dict(stage) for stage in data["slot_stages"]],
+            data["end_index"],
+        )
+
+
+def get_enigma_stages() -> dict[str, Any]:
+    """
+    Gets the enigma stages
+
+    Returns:
+        dict[str, Any]: The enigma stages
+    """
+    enigma_data: dict[str, Any] = {}
+    enigma_data["energy_since_1"] = next_int(4)
+    enigma_data["energy_since_2"] = next_int(4)
+    enigma_data["enigma_level"] = next_int(1)
+    enigma_data["unknown_2"] = next_int(1)
+    enigma_data["unknown_3"] = next_int(1)
+
+    total_stages = next_int(1)
+    stages: list[dict[str, Any]] = []
+    for _ in range(total_stages):
+        data = {}
+        data["level"] = next_int(4) # 0 = inferior, 1 = normal, 2 = superior
+        data["stage_id"] = next_int(4)
+        data["decoding_status"] = next_int(
+            1
+        )  # 0 = not decoded, 1 = decoded, 2 = revealed
+        data["start_time"] = get_double()
+        stages.append(data)
+    enigma_data["stages"] = stages
+    return enigma_data
+
+
+def get_cleared_slots() -> tuple[dict[str, Any], list[dict[str, int]]]:
+    """
+    Returns the line ups of the cleared stages
+
+    Returns:
+        dict[str, Any]: The line ups of the cleared stages
+    """
+    total_slots = next_int(2)
+    index = next_int(2)
+    slots: list[ClearedSlots.Slot] = []
+
+    for _ in range(total_slots):
+        cats: list[ClearedSlots.Slot.Cat] = []
+        for _ in range(10):
+            cat_id = next_int(2)
+            cat_form = next_int(1)
+            cat_data = ClearedSlots.Slot.Cat(cat_id, cat_form)
+            cats.append(cat_data)
+        separator = next_int(3)
+        slot = ClearedSlots.Slot(cats, index, separator)
+        index = next_int(2)
+        slots.append(slot)
+
+    cleared_slot_data: list[ClearedSlots.StageSlot] = []
+    index_2 = next_int(2)
+    for _ in range(index):
+        total_stages = next_int(2)
+        stages: list[ClearedSlots.StageSlot.Stage] = []
+        for _ in range(total_stages):
+            stage_id = next_int(4)
+            stage = ClearedSlots.StageSlot.Stage(stage_id)
+            stages.append(stage)
+        stages_data = ClearedSlots.StageSlot(index_2, stages)
+        index_2 = next_int(2)
+        cleared_slot_data.append(stages_data)
+
+    data_2: list[dict[str, int]] = []
+    data_2.append({"Value": index_2, "Length": 2})
+    for _ in range(index_2):
+        val_18 = next_int_len(2)
+        data_2.append(val_18)
+
+        val_4 = next_int_len(1)
+        data_2.append(val_4)
+    data_2.append(next_int_len(4))  # 90400
+
+    cleared_slots = ClearedSlots(slots, cleared_slot_data, index)
+
+    return cleared_slots.to_dict(), data_2
+
+
 def get_data_after_gauntlets() -> list[dict[str, int]]:
     data: list[dict[str, int]] = []
 
@@ -1220,40 +1392,6 @@ def get_data_after_gauntlets() -> list[dict[str, int]]:
         data.append(next_int_len(1))
         data.append(next_int_len(8))
 
-    val_20 = next_int_len(2)
-    data.append(val_20)
-
-    val_18 = next_int_len(2)
-    data.append(val_18)
-
-    for _ in range(val_20["Value"]):
-        data.append(next_int_len((2 + 1) * 10))
-        data.append(next_int_len(3))
-        val_18 = next_int_len(2)
-        data.append(val_18)
-
-    val_20 = next_int_len(2)
-    data.append(val_20)
-
-    for _ in range(val_18["Value"]):
-        val_30 = next_int_len(2)
-        data.append(val_30)
-
-        for _ in range(val_30["Value"]):
-            val_33 = next_int_len(4)
-            data.append(val_33)
-
-        val_20 = next_int_len(2)
-        data.append(val_20)
-
-    for _ in range(val_20["Value"]):
-        val_18 = next_int_len(2)
-        data.append(val_18)
-
-        val_4 = next_int_len(1)
-        data.append(val_4)
-
-    data.append(next_int_len(4))  # 90400
     return data
 
 
@@ -1956,7 +2094,11 @@ def parse_save(save_data: bytes, country_code: Union[str, None]) -> dict[str, An
 
     save_stats["unknown_80"] = get_length_data(4, 1, lengths["total"])
 
-    save_stats["unknown_81"] = get_data_after_gauntlets()
+    save_stats["enigma_data"] = get_enigma_stages()
+    data = get_cleared_slots()
+    save_stats["cleared_slot_data"] = data[0]
+
+    save_stats["unknown_121"] = data[1]
 
     lengths = get_gauntlet_current()
     save_stats["unknown_82"] = lengths

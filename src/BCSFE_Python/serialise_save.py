@@ -5,7 +5,7 @@ from typing import Any, Union
 
 import dateutil.parser
 
-from . import helper, updater
+from . import helper, updater, parse_save
 
 
 def write(
@@ -600,7 +600,56 @@ def serialise_unlock_popups(save_data: list[int], unlock_popups: list[tuple[int,
         save_data = write(save_data, popup_id[0], 4)
     return save_data
 
+def serialise_cleared_slots(save_data: list[int], cleared_slots: dict[str, Any]) -> list[int]:
+    """
+    Serialises the cleared slots
 
+    Args:
+        save_data (list[int]): The save data
+        cleared_slots (dict[str, Any]): The cleared slots
+
+    Returns:
+        list[int]: The save data
+    """
+    cleared_slot_data = parse_save.ClearedSlots.from_dict(cleared_slots)
+    save_data = write(save_data, len(cleared_slot_data.slots), 2)
+    for slot in cleared_slot_data.slots:
+        save_data = write(save_data, slot.slot_index, 2)
+        for cat in slot.cats:
+            save_data = write(save_data, cat.cat_id, 2)
+            save_data = write(save_data, cat.cat_form, 1)
+        save_data = write(save_data, slot.separator, 3)
+    save_data = write(save_data, cleared_slot_data.end_index, 2)
+    
+    for stages_slot in cleared_slot_data.slot_stages:
+        save_data = write(save_data, stages_slot.slot_index, 2)
+        save_data = write(save_data, len(stages_slot.stages), 2)
+        for stage in stages_slot.stages:
+            save_data = write(save_data, stage.stage_id, 4)
+    return save_data
+
+def serialise_enigma_data(save_data: list[int], enigma_data: dict[str, Any]):
+    """
+    Serialises the enigma data
+
+    Args:
+        save_data (list[int]): The save data
+        enigma_data (dict[str, Any]): The enigma data
+    """
+    save_data = write(save_data, enigma_data["energy_since_1"], 4)
+    save_data = write(save_data, enigma_data["energy_since_2"], 4)
+    save_data = write(save_data, enigma_data["enigma_level"], 1)
+    save_data = write(save_data, enigma_data["unknown_2"], 1)
+    save_data = write(save_data, enigma_data["unknown_3"], 1)
+
+    save_data = write(save_data, len(enigma_data["stages"]), 1)
+    for stage in enigma_data["stages"]:
+        save_data = write(save_data, stage["level"], 4)
+        save_data = write(save_data, stage["stage_id"], 4)
+        save_data = write(save_data, stage["decoding_status"], 1)
+        save_data = write_double(save_data, stage["start_time"])
+
+    return save_data
 def serialize_save(save_stats: dict[str, Any]) -> bytes:
     """Serialises the save stats"""
 
@@ -1036,7 +1085,10 @@ def serialize_save(save_stats: dict[str, Any]) -> bytes:
     save_data = write_length_data(
         save_data, save_stats["unknown_80"], bytes_per_val=1, write_length=False
     )
-    save_data = serialise_dumped_data(save_data, save_stats["unknown_81"])
+    save_data = serialise_enigma_data(save_data, save_stats["enigma_data"])
+    save_data = serialise_cleared_slots(save_data, save_stats["cleared_slot_data"])
+
+    save_data = serialise_dumped_data(save_data, save_stats["unknown_121"])
     save_data = serialise_gauntlet_current(save_data, save_stats["unknown_82"])
     save_data = serialise_gauntlet_progress(save_data, save_stats["unknown_83"])
     save_data = write_length_data(

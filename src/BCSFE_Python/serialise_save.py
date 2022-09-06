@@ -650,6 +650,21 @@ def serialise_enigma_data(save_data: list[int], enigma_data: dict[str, Any]):
         save_data = write_double(save_data, stage["start_time"])
 
     return save_data
+
+def serialise_cat_shrine(save_data: list[int], shrine_data: dict[str, Any]) -> list[int]:
+    """
+    Serialises the cat shrine data
+
+    Args:
+        save_data (list[int]): The save data
+        shrine_data (dict[str, Any]): The shrine data
+
+    Returns:
+        list[int]: The save data
+    """
+    save_data = write_length_data(save_data, shrine_data["flags"], 1, 1)
+    save_data = write(save_data, shrine_data["xp_offering"], 4)
+    return save_data
 def serialize_save(save_stats: dict[str, Any]) -> bytes:
     """Serialises the save stats"""
 
@@ -1102,6 +1117,13 @@ def serialize_save(save_stats: dict[str, Any]) -> bytes:
     )
 
     save_data = serialise_dumped_data(save_data, save_stats["unknown_86"])
+
+    save_data = serialise_cat_shrine(save_data, save_stats["cat_shrine"])
+
+    save_data = write(save_data, save_stats["unknown_130"])
+
+    save_data = write(save_data, save_stats["gv_90900"])
+
     if save_stats["game_version"]["Value"] >= 110600:
         save_data = write(save_data, len(save_stats["slot_names"]), 1)
     for slot_name in save_stats["slot_names"]:

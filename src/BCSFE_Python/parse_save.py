@@ -1426,15 +1426,18 @@ def get_data_after_orbs() -> list[dict[str, int]]:
     data.append(next_int_len(1))
     data.append(next_int_len(8 * 2))
     data.append(next_int_len(1))
-
-    length = next_int_len(1)
-    data.append(length)
-    for _ in range(length["Value"]):
-        data.append(next_int_len(1))
-
-    data.append(next_int_len(8 * 3))
-    data.append(next_int_len(4))  # 90900
     return data
+
+def get_cat_shrine_data() -> dict[str, Any]:
+    """
+    Gets the cat shrine data
+
+    Returns:
+        dict[str, Any]: The cat shrine data
+    """
+    flags: list[int] = get_length_data(1, 1)
+    xp_offering = next_int(4)
+    return {"flags": flags, "xp_offering": xp_offering}
 
 
 def get_slot_names(save_stats: dict[str, Any]) -> list[str]:
@@ -2161,6 +2164,12 @@ def parse_save(save_data: bytes, country_code: Union[str, None]) -> dict[str, An
     save_stats["talent_orbs"] = get_talent_orbs(save_stats["game_version"])
 
     save_stats["unknown_86"] = get_data_after_orbs()
+
+    save_stats["cat_shrine"] = get_cat_shrine_data()
+
+    save_stats["unknown_130"] = next_int_len(4 * 5)
+
+    save_stats["gv_90900"] = next_int_len(4)  # 90900
 
     save_stats["slot_names"] = get_slot_names(save_stats)
     save_stats["gv_91000"] = next_int_len(4)

@@ -1603,6 +1603,7 @@ def check_gv(save_stats: dict[str, Any], game_version: int) -> dict[str, Any]:
     if save_stats["game_version"]["Value"] < game_version:
         save_stats = exit_parser(save_stats)
         save_stats["exit"] = True
+        save_stats["extra_data"] = next_int_len(0)
     else:
         save_stats["exit"] = False
     return save_stats
@@ -1676,6 +1677,56 @@ def get_double() -> float:
     val = struct.unpack("d", data)[0]
     set_address(address + 8)
     return val
+
+def get_110700_data() -> list[dict[str, int]]:
+    """
+    Get the data from 11.7.0
+
+    Returns:
+        list[dict[str, int]]: The data
+    """
+    data: list[dict[str, int]] = []
+
+    u_var_38 = next_int_len(4)
+    data.append(u_var_38)
+
+    u_var_38 = next_int_len(1)
+    data.append(u_var_38)
+
+    u_var_38 = next_int_len(1)
+    data.append(u_var_38)
+
+    u_var_38 = next_int_len(1)
+    data.append(u_var_38)
+
+    u_var_38 = next_int_len(1)
+    data.append(u_var_38)
+
+    return data
+
+def get_110600_data() -> list[dict[str, int]]:
+    """
+    Get the data from 110600
+
+    Returns:
+        list[dict[str, int]]: The data
+    """    
+    data: list[dict[str, int]] = []
+
+    i_var_32 = next_int_len(4)
+    data.append(i_var_32)
+
+    for _ in range(i_var_32["Value"]):
+        pi_var_33 = next_int_len(4)
+        data.append(pi_var_33)
+
+        f_var_54 = next_int_len(8)
+        data.append(f_var_54)
+
+        f_var_54 = next_int_len(8)
+        data.append(f_var_54)
+    
+    return data
 
 
 def parse_save(save_data: bytes, country_code: Union[str, None]) -> dict[str, Any]:
@@ -2124,24 +2175,24 @@ def parse_save(save_data: bytes, country_code: Union[str, None]) -> dict[str, An
     save_stats["unknown_90"] = next_int_len(8)
     save_stats["unknown_91"] = next_int_len(8)
 
-    save_stats = check_gv(save_stats, 100000)
-    if save_stats["exit"]:
-        return save_stats
     save_stats["gv_100000"] = next_int_len(4)  # 100000
-
-    save_stats["date_int"] = next_int_len(4)
-
     save_stats = check_gv(save_stats, 100100)
     if save_stats["exit"]:
         return save_stats
+
+    save_stats["date_int"] = next_int_len(4)
+
     save_stats["gv_100100"] = next_int_len(4)  # 100100
-
-    save_stats["unknown_93"] = get_length_data(4, 19, 6)
-
     save_stats = check_gv(save_stats, 100300)
     if save_stats["exit"]:
         return save_stats
+
+    save_stats["unknown_93"] = get_length_data(4, 19, 6)
+    
     save_stats["gv_100300"] = next_int_len(4)  # 100300
+    save_stats = check_gv(save_stats, 100700)
+    if save_stats["exit"]:
+        return save_stats
 
     save_stats["unknown_94"] = get_data_near_end()
 
@@ -2149,34 +2200,70 @@ def parse_save(save_data: bytes, country_code: Union[str, None]) -> dict[str, An
 
     save_stats["unknown_100"] = get_data_near_end_after_shards()
 
-    save_stats = check_gv(save_stats, 100700)
+    save_stats["gv_100700"] = next_int_len(4)  # 100700
+    save_stats = check_gv(save_stats, 100900)
     if save_stats["exit"]:
         return save_stats
-    save_stats["gv_100700"] = next_int_len(4)  # 100700
 
     save_stats["aku"] = get_aku()
 
     save_stats["unknown_95"] = next_int_len(1 * 2)
     save_stats["unknown_96"] = get_data_after_aku()
 
-    save_stats = check_gv(save_stats, 100900)
-    if save_stats["exit"]:
-        return save_stats
     save_stats["gv_100900"] = next_int_len(4)  # 100900
-
-    save_stats["unknown_97"] = next_int_len(1)
-
     save_stats = check_gv(save_stats, 101000)
     if save_stats["exit"]:
         return save_stats
+
+    save_stats["unknown_97"] = next_int_len(1)
+
     save_stats["gv_101000"] = next_int_len(4)  # 101000
-
-    save_stats["unknown_98"] = get_data_near_end_after_aku()
-
     save_stats = check_gv(save_stats, 110000)
     if save_stats["exit"]:
         return save_stats
+
+    save_stats["unknown_98"] = get_data_near_end_after_aku()
+
     save_stats["gv_110000"] = next_int_len(4)  # 110000
+    save_stats = check_gv(save_stats, 110500)
+    if save_stats["exit"]:
+        return save_stats
+
+    data = get_gauntlet_current()
+    save_stats["unknown_122"] = data
+    save_stats["unknown_123"] = get_gauntlet_progress(data)
+    save_stats["unknown_124"] = get_length_data(4, 1, data["total"])
+
+    save_stats["unknown_125"] = next_int_len(1)
+
+    save_stats["gv_110500"] = next_int_len(4)  # 110500
+    save_stats = check_gv(save_stats, 110600)
+    if save_stats["exit"]:
+        return save_stats
+
+    save_stats["unknown_126"] = next_int_len(1)
+
+    save_stats["gv_110600"] = next_int_len(4)  # 110600
+    save_stats = check_gv(save_stats, 110700)
+    if save_stats["exit"]:
+        return save_stats
+
+    save_stats["unknown_127"] = get_110600_data()
+
+    if save_stats["dst"]:
+        save_stats["unknown_128"] = next_int_len(1)
+
+    save_stats["gv_110700"] = next_int_len(4)  # 110700
+    save_stats = check_gv(save_stats, 110800)
+    if save_stats["exit"]:
+        return save_stats
+    
+    save_stats["unknown_129"] = get_110700_data()
+
+    save_stats["gv_110800"] = next_int_len(4)  # 110800
+    save_stats = check_gv(save_stats, 110800)
+    if save_stats["exit"]:
+        return save_stats
 
     length = len(save_data) - address - 32
     save_stats["extra_data"] = next_int_len(length)

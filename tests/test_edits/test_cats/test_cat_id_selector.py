@@ -39,7 +39,8 @@ def test_select_rarity(monkeypatch: MonkeyPatch):
     inputs = ["1"]
     monkeypatch.setattr("builtins.input", lambda: inputs.pop(0))
 
-    ids = cat_id_selector.select_cats_rarity(False)
+    save_stats = {"version": "en"}
+    ids = cat_id_selector.select_cats_rarity(save_stats)
     actual_ids = [0, 1, 2, 3, 4, 5, 6, 7, 8, 643]
     assert ids == actual_ids
 
@@ -110,7 +111,8 @@ def test_gatya_banner(monkeypatch: MonkeyPatch):
     inputs = ["602"]
     monkeypatch.setattr("builtins.input", lambda: inputs.pop(0))
 
-    ids = cat_id_selector.select_cats_gatya_banner(False)
+    save_stats = {"version": "en"}
+    ids = cat_id_selector.select_cats_gatya_banner(save_stats)
     ids.sort()
     actual_ids = [
         448,

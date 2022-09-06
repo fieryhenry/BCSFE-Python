@@ -1,5 +1,5 @@
 import os
-from BCSFE_Python import parse_save, patcher
+from BCSFE_Python import parse_save, patcher, serialise_save
 
 
 def test_parse():
@@ -21,11 +21,14 @@ def test_parse():
 
 def run_testparse(file: str):
     """Run test parse save data"""
-    data = open(file, "rb").read()
-    gv = parse_save.get_game_version(data)
+    data_1 = open(file, "rb").read()
+    gv = parse_save.get_game_version(data_1)
     if gv < 110000:
         return
-    gv_c = patcher.detect_game_version(data)
-    parse_save.parse_save(data, gv_c)
-    print(f"Parsed {file}")
-        
+    gv_c = patcher.detect_game_version(data_1)
+    print(f"Parsing {file} - {gv} - {gv_c}")
+    save_stats = parse_save.parse_save(data_1, gv_c)
+    data_2 = serialise_save.serialize_save(save_stats)
+    save_stats = parse_save.parse_save(data_2, gv_c)
+    data_3 = serialise_save.serialize_save(save_stats)
+    assert data_2 == data_3 == data_1 and save_stats["extra_data"]["Length"] == 0

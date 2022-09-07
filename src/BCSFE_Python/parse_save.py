@@ -212,33 +212,45 @@ def get_utf8_string(length: Union[int, None] = None) -> str:
     return data
 
 
-def get_some_data():
-    skip(80)
-    # unknown
-    skip(9)
-    skip(40)
-    skip(41)
-    skip(35)
-    # unknown
-    skip(80)
-    skip(9)
-    skip(40)
-    skip(41)
-    skip(35)
-    print(address)
+def read_variable_length_int() -> int:
+    """
+    Read a variable length int from the save file
+
+    Returns:
+        int: The value of the variable length int
+    """
+    i = 0
+    for _ in range(4):
+        i_3 = i << 7
+        read = next_int(1)
+        i = i_3 | (read & 127)
+        if (read & 128) == 0:
+            return i
+    return i
 
 
-def skip_some_data(save_data: bytes, total_cats: int) -> dict[str, int]:
-    pos = save_data.find(total_cats.to_bytes(4, "little"), address)
-    pos_2 = save_data.find(total_cats.to_bytes(4, "little"), pos + 1)
-    pos_3 = save_data.find(total_cats.to_bytes(4, "little"), pos_2 + 1)
-    if max(pos, pos_2, pos_3) - min(pos, pos_2, pos_3) < 20:
-        pos = max(pos, pos_2, pos_3)
-    if pos > address:
-        pos -= 24
+def get_variable_data() -> tuple[dict[int, int], dict[int, int]]:
+    """
+    Get the variable data from the save file
 
-    length = pos - address
-    return {"Value": next_int(length), "Length": length}
+    Returns:
+        tuple[dict[int, int], dict[int, int]]: The variable data
+    """
+    length_1 = read_variable_length_int()
+    data_1: dict[int, int] = {}
+    for _ in range(length_1):
+        key = read_variable_length_int()
+        val = read_variable_length_int()
+        data_1[key] = val
+
+    length_2 = read_variable_length_int()
+    data_2: dict[int, int] = {}
+    for _ in range(length_2):
+        key = read_variable_length_int()
+        val = next_int(1)
+        data_2[key] = val
+
+    return (data_1, data_2)
 
 
 def get_event_stages_current() -> dict[str, Any]:
@@ -1316,7 +1328,7 @@ def get_enigma_stages() -> dict[str, Any]:
     stages: list[dict[str, Any]] = []
     for _ in range(total_stages):
         data = {}
-        data["level"] = next_int(4) # 0 = inferior, 1 = normal, 2 = superior
+        data["level"] = next_int(4)  # 0 = inferior, 1 = normal, 2 = superior
         data["stage_id"] = next_int(4)
         data["decoding_status"] = next_int(
             1
@@ -1427,6 +1439,7 @@ def get_data_after_orbs() -> list[dict[str, int]]:
     data.append(next_int_len(8 * 2))
     data.append(next_int_len(1))
     return data
+
 
 def get_cat_shrine_data() -> dict[str, Any]:
     """
@@ -1681,6 +1694,7 @@ def get_double() -> float:
     set_address(address + 8)
     return val
 
+
 def get_110700_data() -> list[dict[str, int]]:
     """
     Get the data from 11.7.0
@@ -1707,13 +1721,14 @@ def get_110700_data() -> list[dict[str, int]]:
 
     return data
 
+
 def get_110600_data() -> list[dict[str, int]]:
     """
     Get the data from 110600
 
     Returns:
         list[dict[str, int]]: The data
-    """    
+    """
     data: list[dict[str, int]] = []
 
     i_var_32 = next_int_len(4)
@@ -1728,7 +1743,7 @@ def get_110600_data() -> list[dict[str, int]]:
 
         f_var_54 = next_int_len(8)
         data.append(f_var_54)
-    
+
     return data
 
 
@@ -1746,8 +1761,8 @@ def parse_save(save_data: bytes, country_code: Union[str, None]) -> dict[str, An
 
     save_stats["unknown_1"] = next_int_len(1)
 
-    save_stats["sound_effects"] = next_int_len(1)
-    save_stats["music"] = next_int_len(1)
+    save_stats["mute_music"] = next_int_len(1)
+    save_stats["mute_sound_effects"] = next_int_len(1)
 
     save_stats["cat_food"] = next_int_len(4)
     save_stats["current_energy"] = next_int_len(4)
@@ -1809,7 +1824,7 @@ def parse_save(save_data: bytes, country_code: Union[str, None]) -> dict[str, An
     save_stats["unknown_9"] = next_int_len(6 * 4)
 
     save_stats["thirty2_code"] = get_utf8_string()
-    save_stats["unknown_10"] = skip_some_data(save_data, len(save_stats["cats"]))
+    save_stats["unknown_10"] = get_variable_data()
     save_stats["unknown_11"] = get_length_data(length=4)
     save_stats["normal_tickets"] = next_int_len(4)
     save_stats["rare_tickets"] = next_int_len(4)
@@ -1917,7 +1932,7 @@ def parse_save(save_data: bytes, country_code: Union[str, None]) -> dict[str, An
 
     save_stats["unknown_25"] = next_int_len(1)
 
-    save_stats["check_ban_state_succeeded"] = next_int_len(4)
+    save_stats["backup_state"] = next_int_len(4)
 
     save_stats["unknown_119"] = next_int_len(1)
 
@@ -1999,8 +2014,11 @@ def parse_save(save_data: bytes, country_code: Union[str, None]) -> dict[str, An
 
     save_stats["unknown_48"] = get_length_data(4, 8)
     save_stats["unknown_49"] = next_int_len(16)
-    save_stats["unknown_50"] = get_length_data(length=36)
+    save_stats["announcment"] = get_length_data(length=32)
 
+    save_stats["backup_counter"] = next_int_len(4)
+
+    save_stats["unknown_131"] = get_length_data(length=3)
     save_stats["gv_55"] = next_int_len(4)
 
     save_stats["unknown_51"] = next_int_len(1)
@@ -2197,7 +2215,7 @@ def parse_save(save_data: bytes, country_code: Union[str, None]) -> dict[str, An
         return save_stats
 
     save_stats["unknown_93"] = get_length_data(4, 19, 6)
-    
+
     save_stats["gv_100300"] = next_int_len(4)  # 100300
     save_stats = check_gv(save_stats, 100700)
     if save_stats["exit"]:
@@ -2266,7 +2284,7 @@ def parse_save(save_data: bytes, country_code: Union[str, None]) -> dict[str, An
     save_stats = check_gv(save_stats, 110800)
     if save_stats["exit"]:
         return save_stats
-    
+
     save_stats["unknown_129"] = get_110700_data()
 
     save_stats["gv_110800"] = next_int_len(4)  # 110800

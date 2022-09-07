@@ -1,11 +1,12 @@
 """Handler for serialising save data from dict"""
 
 import struct
+import traceback
 from typing import Any, Union
 
 import dateutil.parser
 
-from . import helper, updater, parse_save
+from . import helper, parse_save
 
 
 def write(
@@ -560,14 +561,24 @@ def write_double(save_data: list[int], number: float) -> list[int]:
 def start_serialize(save_stats: dict[str, Any]) -> bytes:
     """Starts the serialisation process"""
 
-    if "editor_version" not in save_stats:
-        raise Exception("No editor version found")
     try:
-        if save_stats["editor_version"] != updater.get_local_version():
-            raise Exception("Editor version mismatch")
         save_data = serialize_save(save_stats)
-    except Exception as err:
-        raise Exception(f"Error serialising save: {err}") from err
+    except Exception:  # pylint: disable=broad-except
+        helper.colored_text(
+            "\nError: An error has occurred while serializing your save data:",
+            base=helper.RED,
+        )
+        traceback.print_exc()
+        game_version = save_stats["game_version"]["Value"]
+        if game_version < 110000:
+            helper.colored_text(
+                f"\nThis save is from before &11.0.0& (current save version is &{helper.gv_to_str(game_version)}&), so this is likely the cause for the issue. &The save editor is not designed to work with saves from before 11.0.0&"
+            )
+        else:
+            helper.colored_text(
+                "\nPlease report this to &#bug-reports&, and/or &dm me your save& on discord"
+            )
+        helper.exit_editor()
     return save_data
 
 
@@ -590,7 +601,11 @@ def serialise_gold_pass(save_data: list[int], gold_pass: dict[str, Any]) -> list
     return save_data
 
 
-def serialise_unlock_popups(save_data: list[int], unlock_popups: list[tuple[int, int]], unknown_118: dict[str, int]):
+def serialise_unlock_popups(
+    save_data: list[int],
+    unlock_popups: list[tuple[int, int]],
+    unknown_118: dict[str, int],
+):
     """Serialises the unlock popups"""
 
     save_data = write(save_data, len(unlock_popups), 4)
@@ -600,7 +615,10 @@ def serialise_unlock_popups(save_data: list[int], unlock_popups: list[tuple[int,
         save_data = write(save_data, popup_id[0], 4)
     return save_data
 
-def serialise_cleared_slots(save_data: list[int], cleared_slots: dict[str, Any]) -> list[int]:
+
+def serialise_cleared_slots(
+    save_data: list[int], cleared_slots: dict[str, Any]
+) -> list[int]:
     """
     Serialises the cleared slots
 
@@ -620,13 +638,14 @@ def serialise_cleared_slots(save_data: list[int], cleared_slots: dict[str, Any])
             save_data = write(save_data, cat.cat_form, 1)
         save_data = write(save_data, slot.separator, 3)
     save_data = write(save_data, cleared_slot_data.end_index, 2)
-    
+
     for stages_slot in cleared_slot_data.slot_stages:
         save_data = write(save_data, stages_slot.slot_index, 2)
         save_data = write(save_data, len(stages_slot.stages), 2)
         for stage in stages_slot.stages:
             save_data = write(save_data, stage.stage_id, 4)
     return save_data
+
 
 def serialise_enigma_data(save_data: list[int], enigma_data: dict[str, Any]):
     """
@@ -651,7 +670,10 @@ def serialise_enigma_data(save_data: list[int], enigma_data: dict[str, Any]):
 
     return save_data
 
-def serialise_cat_shrine(save_data: list[int], shrine_data: dict[str, Any]) -> list[int]:
+
+def serialise_cat_shrine(
+    save_data: list[int], shrine_data: dict[str, Any]
+) -> list[int]:
     """
     Serialises the cat shrine data
 
@@ -665,6 +687,57 @@ def serialise_cat_shrine(save_data: list[int], shrine_data: dict[str, Any]) -> l
     save_data = write_length_data(save_data, shrine_data["flags"], 1, 1)
     save_data = write(save_data, shrine_data["xp_offering"], 4)
     return save_data
+
+
+def write_variable_length_int(save_data: list[int], i: int) -> list[int]:
+    """
+    Writes a variable length integer to the save data (I have no idea how this works and what this does)
+
+    Args:
+        save_data (list[int]): The save data
+        i (int): The integer to write
+
+    Returns:
+        list[int]: The save data
+    """
+    i_2 = 0
+    i_3 = 0
+    while i >= 128:
+        i_2 |= ((i & 127) | 32768) << (i_3 * 8)
+        i_3 += 1
+        i >>= 7
+    i_4 = i_2 | (i << (i_3 * 8))
+    i_5 = i_3 + 1
+    for i_6 in range(i_5):
+        i_7 = (i_4 >> (((i_5 - i_6) - 1) * 8)) & 255
+        save_data = write(save_data, i_7, 1)
+    return save_data
+
+
+def set_variable_data(
+    save_data: list[int], data: tuple[dict[int, int], dict[int, int]]
+) -> list[int]:
+    """
+    Sets the variable data
+
+    Args:
+        save_data (list[int]): The save data
+        data (tuple[dict[int, int], dict[int, int]]): The variable data
+
+    Returns:
+        list[int]: The save data
+    """
+    save_data = write_variable_length_int(save_data, len(data[0]))
+    for key, value in data[0].items():
+        save_data = write_variable_length_int(save_data, key)
+        save_data = write_variable_length_int(save_data, value)
+    save_data = write_variable_length_int(save_data, len(data[1]))
+    for key, value in data[1].items():
+        save_data = write_variable_length_int(save_data, key)
+        save_data = write(save_data, value, 1)
+    return save_data
+
+
 def serialize_save(save_stats: dict[str, Any]) -> bytes:
     """Serialises the save stats"""
 
@@ -674,8 +747,8 @@ def serialize_save(save_stats: dict[str, Any]) -> bytes:
 
     save_data = write(save_data, save_stats["unknown_1"])
 
-    save_data = write(save_data, save_stats["sound_effects"])
-    save_data = write(save_data, save_stats["music"])
+    save_data = write(save_data, save_stats["mute_music"])
+    save_data = write(save_data, save_stats["mute_sound_effects"])
 
     save_data = write(save_data, save_stats["cat_food"])
     save_data = write(save_data, save_stats["current_energy"])
@@ -757,9 +830,8 @@ def serialize_save(save_stats: dict[str, Any]) -> bytes:
 
     save_data = serialise_utf8_string(save_data, save_stats["thirty2_code"])
 
-    save_data = write(
-        save_data, save_stats["unknown_10"], save_stats["unknown_10"]["Length"]
-    )
+    save_data = set_variable_data(save_data, save_stats["unknown_10"])
+
     save_data = write_length_data(
         save_data, save_stats["unknown_11"], write_length=False
     )
@@ -874,7 +946,7 @@ def serialize_save(save_stats: dict[str, Any]) -> bytes:
     save_data = serialise_play_time(save_data, save_stats["play_time"])
 
     save_data = write(save_data, save_stats["unknown_25"])
-    save_data = write(save_data, save_stats["check_ban_state_succeeded"])
+    save_data = write(save_data, save_stats["backup_state"])
     save_data = write(save_data, save_stats["unknown_119"])
     save_data = write(save_data, save_stats["gv_44"])
     save_data = write(save_data, save_stats["unknown_120"])
@@ -961,7 +1033,12 @@ def serialize_save(save_stats: dict[str, Any]) -> bytes:
     save_data = write_length_data(save_data, save_stats["unknown_48"], bytes_per_val=8)
     save_data = write(save_data, save_stats["unknown_49"])
     save_data = write_length_data(
-        save_data, save_stats["unknown_50"], write_length=False
+        save_data, save_stats["announcment"], write_length=False
+    )
+    save_data = write(save_data, save_stats["backup_counter"])
+
+    save_data = write_length_data(
+        save_data, save_stats["unknown_131"], write_length=False
     )
 
     save_data = write(save_data, save_stats["gv_55"])
@@ -994,7 +1071,9 @@ def serialize_save(save_stats: dict[str, Any]) -> bytes:
 
     save_data = write(save_data, save_stats["gv_61"])
 
-    save_data = serialise_unlock_popups(save_data, save_stats["unlock_popups"], save_stats["unknown_118"])
+    save_data = serialise_unlock_popups(
+        save_data, save_stats["unlock_popups"], save_stats["unknown_118"]
+    )
 
     save_data = write_length_data(save_data, save_stats["base_materials"])
 
@@ -1209,7 +1288,7 @@ def serialize_save(save_stats: dict[str, Any]) -> bytes:
     save_data = write_length_data(
         save_data, save_stats["unknown_124"], bytes_per_val=1, write_length=False
     )
-    
+
     save_data = write(save_data, save_stats["unknown_125"])
 
     save_data = write(save_data, save_stats["gv_110500"])

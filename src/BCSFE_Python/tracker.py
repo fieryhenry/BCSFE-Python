@@ -1,6 +1,7 @@
 """Update, edit and parse item tracker"""
 
 import json
+import os
 from typing import Any
 
 from . import config_manager, helper, managed_item
@@ -40,13 +41,15 @@ class Tracker:
     def read_tracker(self) -> dict[str, int]:
         """Read the item tracker"""
 
+        if not os.path.exists(helper.get_file("tracker.json")):
+            self.reset_tracker()
         data = helper.read_file_string(helper.get_file("item_tracker.json"))
         return json.loads(data)
 
     def write_tracker(self):
         """Write the item tracker"""
 
-        data = json.dumps(self.items.to_dict())
+        data = json.dumps(self.items.to_dict(), indent=4)
         helper.write_file_string(helper.get_file("item_tracker.json"), data)
 
     def update_tracker(self, amount: int, item_type: managed_item.ManagedItemType):

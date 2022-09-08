@@ -702,6 +702,7 @@ def write_variable_length_int(save_data: list[int], i: int) -> list[int]:
     """
     i_2 = 0
     i_3 = 0
+    i = int(i)
     while i >= 128:
         i_2 |= ((i & 127) | 32768) << (i_3 * 8)
         i_3 += 1

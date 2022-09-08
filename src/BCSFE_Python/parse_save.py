@@ -650,7 +650,7 @@ def get_mission_data() -> dict[str, Any]:
         "flags"
     ] = (
         get_mission_segment()
-    )  # 4 = claimed, 3 = unlocked, 2 = completed 0/1 = not unlocked
+    )  # 0 = prepare, 1 = locked, 2 = achieved, 3 = progress, 4 = received, 5 = invalid
     missions[
         "values"
     ] = get_mission_segment()  # e.g number of gamatoto expeditions, stages cleared etc

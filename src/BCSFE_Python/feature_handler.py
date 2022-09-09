@@ -139,6 +139,7 @@ FEATURES: dict[str, Any] = {
         "Unlock the Equip Menu": other.unlock_equip_menu.unlock_equip,
         "Get Gold Pass": other.get_gold_pass.get_gold_pass,
         "Claim / Remove all user rank rewards (does not give any items)": other.claim_user_rank_rewards.edit_rewards,
+        "Cat Shrine Level / XP": other.cat_shrine.edit_shrine_xp,
     },
     "Edit Config" : {
         "Edit DEFAULT_GAME_VERSION" : config_manager.edit_default_gv,

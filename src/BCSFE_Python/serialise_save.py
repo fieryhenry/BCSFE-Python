@@ -586,7 +586,7 @@ def serialise_gold_pass(save_data: list[int], gold_pass: dict[str, Any]) -> list
     """Serialises the gold pass data"""
 
     save_data = write(save_data, gold_pass["officer_id"])
-    save_data = write(save_data, gold_pass["flag"])
+    save_data = write(save_data, gold_pass["renewal_times"])
     save_data = write_double(save_data, gold_pass["start_date"])
     save_data = write_double(save_data, gold_pass["expiry_date"])
     save_data = write_length_doubles(
@@ -597,6 +597,15 @@ def serialise_gold_pass(save_data: list[int], gold_pass: dict[str, Any]) -> list
     save_data = write_double(save_data, gold_pass["unknown_3"])
     save_data = write(save_data, gold_pass["flag_2"])
     save_data = write_double(save_data, gold_pass["expiry_date_3"])
+
+    save_data = write(save_data, len(gold_pass["claimed_rewards"]), 4)
+    for item_id, amount in gold_pass["claimed_rewards"].items():
+        save_data = write(save_data, item_id, 4)
+        save_data = write(save_data, amount, 4)
+    
+    save_data = write(save_data, gold_pass["unknown_4"])
+    save_data = write(save_data, gold_pass["unknown_5"])
+    save_data = write(save_data, gold_pass["unknown_6"])
 
     return save_data
 
@@ -738,6 +747,19 @@ def set_variable_data(
         save_data = write(save_data, value, 1)
     return save_data
 
+def serialise_login_bonuses(save_data: list[int], login_bonuses: dict[int, int]):
+    """
+    Serialises the login bonuses
+
+    Args:
+        save_data (list[int]): The save data
+        login_bonuses (dict[int, int]): The login bonuses
+    """
+    save_data = write(save_data, len(login_bonuses), 4)
+    for key, value in login_bonuses.items():
+        save_data = write(save_data, key, 4)
+        save_data = write(save_data, value, 4)
+    return save_data
 
 def serialize_save(save_stats: dict[str, Any]) -> bytes:
     """Serialises the save stats"""
@@ -1031,7 +1053,7 @@ def serialize_save(save_stats: dict[str, Any]) -> bytes:
     save_data = write(save_data, save_stats["gamatoto_skin"])
     save_data = write(save_data, save_stats["platinum_tickets"])
 
-    save_data = write_length_data(save_data, save_stats["unknown_48"], bytes_per_val=8)
+    save_data = serialise_login_bonuses(save_data, save_stats["login_bonuses"])
     save_data = write(save_data, save_stats["unknown_49"])
     save_data = write_length_data(
         save_data, save_stats["announcment"], write_length=False
@@ -1048,6 +1070,10 @@ def serialize_save(save_stats: dict[str, Any]) -> bytes:
     save_data = serialise_dumped_data(save_data, save_stats["unknown_113"])
 
     save_data = serialise_dojo(save_data, save_stats["dojo_data"])
+    save_data = write(save_data, save_stats["dojo_item_lock"])
+    save_data = write_length_data(
+        save_data, save_stats["dojo_locks"], write_length=False, bytes_per_val=1
+    )
 
     save_data = write(save_data, save_stats["unknown_114"])
 
@@ -1125,8 +1151,6 @@ def serialize_save(save_stats: dict[str, Any]) -> bytes:
     save_data = write(save_data, save_stats["gv_77"])
 
     save_data = serialise_gold_pass(save_data, save_stats["gold_pass"])
-
-    save_data = serialise_dumped_data(save_data, save_stats["unknown_69"])
 
     save_data = serialise_talent_data(save_data, save_stats["talents"])
     save_data = write(save_data, save_stats["np"])
@@ -1318,6 +1342,10 @@ def serialize_save(save_stats: dict[str, Any]) -> bytes:
         return bytes(save_data)
 
     save_data = serialise_dumped_data(save_data, save_stats["unknown_129"])
+
+    save_data = write(save_data, save_stats["dojo_3x_speed"])
+
+    save_data = serialise_dumped_data(save_data, save_stats["unknown_132"])
 
     save_data = write(save_data, save_stats["gv_110800"])
     data = check_gv(save_data, save_stats, 110800)

@@ -951,7 +951,7 @@ def get_gold_pass_data() -> dict[str, Any]:
 
     data: dict[str, Any] = {}
     data["officer_id"] = next_int_len(4)
-    data["flag"] = next_int_len(4)
+    data["renewal_times"] = next_int_len(4)
     data["start_date"] = get_double()
     data["expiry_date"] = get_double()
     data["unknown_2"] = get_length_doubles(length=2)
@@ -961,24 +961,22 @@ def get_gold_pass_data() -> dict[str, Any]:
     data["flag_2"] = next_int_len(4)
     data["expiry_date_3"] = get_double()
 
+    number_of_rewards = next_int(4)
+    claimed_rewards: dict[int, int] = {}
+    for _ in range(number_of_rewards):
+        item_id = next_int(4)
+        amount = next_int(4)
+        claimed_rewards[item_id] = amount
+
+    data["claimed_rewards"] = claimed_rewards
+    data["unknown_4"] = next_int_len(8)
+    data["unknown_5"] = next_int_len(1)
+    data["unknown_6"] = next_int_len(1)
+
     return data
 
 
-def get_talent_data() -> dict[str, Any]:
-    data: list[dict[str, int]] = []
-
-    val_4 = next_int_len(4)
-    data.append(val_4)
-    for _ in range(val_4["Value"]):
-        val_7 = next_int_len(4)
-        data.append(val_7)
-        val_3 = next_int_len(4)
-        data.append(val_3)
-
-    data.append(next_int_len(8))
-    data.append(next_int_len(1))
-    data.append(next_int_len(1))
-
+def get_talent_data() -> dict[int, list[dict[str, int]]]:
     total_cats = next_int(4)
 
     talents: dict[int, list[dict[str, int]]] = {}
@@ -994,7 +992,7 @@ def get_talent_data() -> dict[str, Any]:
             talent = {"id": talent_id, "level": talent_level}
             cat_data.append(talent)
         talents[cat_id] = cat_data
-    return {"talents": talents, "dump": data}
+    return talents
 
 
 def get_medals() -> dict[str, Any]:
@@ -1695,7 +1693,7 @@ def get_double() -> float:
     return val
 
 
-def get_110700_data() -> list[dict[str, int]]:
+def get_110800_data() -> list[dict[str, int]]:
     """
     Get the data from 11.7.0
 
@@ -1710,8 +1708,17 @@ def get_110700_data() -> list[dict[str, int]]:
     u_var_38 = next_int_len(1)
     data.append(u_var_38)
 
-    u_var_38 = next_int_len(1)
-    data.append(u_var_38)
+    return data
+
+
+def get_110800_data_2() -> list[dict[str, int]]:
+    """
+    Get the data from 11.7.0
+
+    Returns:
+        list[dict[str, int]]: The data
+    """
+    data: list[dict[str, int]] = []
 
     u_var_38 = next_int_len(1)
     data.append(u_var_38)
@@ -1722,7 +1729,7 @@ def get_110700_data() -> list[dict[str, int]]:
     return data
 
 
-def get_110600_data() -> list[dict[str, int]]:
+def get_110700_data() -> list[dict[str, int]]:
     """
     Get the data from 110600
 
@@ -1744,6 +1751,21 @@ def get_110600_data() -> list[dict[str, int]]:
         f_var_54 = next_int_len(8)
         data.append(f_var_54)
 
+    return data
+
+
+def get_login_bonuses() -> dict[int, int]:
+    """
+    Get the login bonuses
+
+    Returns:
+        dict[int, int]: The login bonuses
+    """
+    length = next_int(4)
+    data: dict[int, int] = {}
+    for _ in range(length):
+        id = next_int(4)
+        data[id] = next_int(4)
     return data
 
 
@@ -2012,7 +2034,7 @@ def parse_save(save_data: bytes, country_code: Union[str, None]) -> dict[str, An
     save_stats["gamatoto_skin"] = next_int_len(4)
     save_stats["platinum_tickets"] = next_int_len(4)
 
-    save_stats["unknown_48"] = get_length_data(4, 8)
+    save_stats["login_bonuses"] = get_login_bonuses()
     save_stats["unknown_49"] = next_int_len(16)
     save_stats["announcment"] = get_length_data(length=32)
 
@@ -2026,8 +2048,10 @@ def parse_save(save_data: bytes, country_code: Union[str, None]) -> dict[str, An
     save_stats["unknown_113"] = get_data_before_outbreaks()
 
     save_stats["dojo_data"] = get_dojo_data_maybe()
+    save_stats["dojo_item_lock"] = next_int_len(1)
+    save_stats["dojo_locks"] = get_length_data(1, 1, 2)
 
-    save_stats["unknown_114"] = next_int_len(7)
+    save_stats["unknown_114"] = next_int_len(4)
     save_stats["gv_58"] = next_int_len(4)  # 0x3a
     save_stats["unknown_115"] = next_int_len(8)
 
@@ -2046,7 +2070,6 @@ def parse_save(save_data: bytes, country_code: Union[str, None]) -> dict[str, An
     save_stats["unknown_117"] = get_unknown_data()
 
     save_stats["gv_61"] = next_int_len(4)
-
     data = get_unlock_popups()
     save_stats["unlock_popups"] = data[0]
 
@@ -2065,7 +2088,6 @@ def parse_save(save_data: bytes, country_code: Union[str, None]) -> dict[str, An
 
     save_stats["tower"] = get_ht_it_data()
     save_stats["missions"] = get_mission_data()
-
     save_stats["unknown_60"] = get_looped_data()
     save_stats["unknown_61"] = get_data_after_tower()
 
@@ -2110,10 +2132,7 @@ def parse_save(save_data: bytes, country_code: Union[str, None]) -> dict[str, An
 
     save_stats["gold_pass"] = get_gold_pass_data()
 
-    data = get_talent_data()
-    save_stats["unknown_69"] = data["dump"]
-
-    save_stats["talents"] = data["talents"]
+    save_stats["talents"] = get_talent_data()
     save_stats["np"] = next_int_len(4)
 
     save_stats["unknown_70"] = next_int_len(1)
@@ -2275,7 +2294,7 @@ def parse_save(save_data: bytes, country_code: Union[str, None]) -> dict[str, An
     if save_stats["exit"]:
         return save_stats
 
-    save_stats["unknown_127"] = get_110600_data()
+    save_stats["unknown_127"] = get_110700_data()
 
     if save_stats["dst"]:
         save_stats["unknown_128"] = next_int_len(1)
@@ -2285,7 +2304,9 @@ def parse_save(save_data: bytes, country_code: Union[str, None]) -> dict[str, An
     if save_stats["exit"]:
         return save_stats
 
-    save_stats["unknown_129"] = get_110700_data()
+    save_stats["unknown_129"] = get_110800_data()
+    save_stats["dojo_3x_speed"] = next_int_len(1)
+    save_stats["unknown_132"] = get_110800_data_2()
 
     save_stats["gv_110800"] = next_int_len(4)  # 110800
     save_stats = check_gv(save_stats, 110800)

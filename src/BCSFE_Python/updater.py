@@ -24,8 +24,8 @@ def update(latest_version: str, command: str = "py") -> None:
     except subprocess.CalledProcessError as err:
         helper.colored_text("Update failed", base=helper.RED)
         if command == "py":
-            helper.colored_text("Trying with python instead", base=helper.RED)
-            update(latest_version, "python")
+            helper.colored_text("Trying with python3 instead", base=helper.RED)
+            update(latest_version, "python3")
         else:
             helper.colored_text(
                 f"Error: {err.stderr.decode('utf-8')}\nYou may need to manually update with py -m pip install -U battle-cats-save-editor",

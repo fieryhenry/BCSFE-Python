@@ -142,7 +142,7 @@ FEATURES: dict[str, Any] = {
         "Cat Shrine Level / XP": other.cat_shrine.edit_shrine_xp,
     },
     "Edit Config" : {
-        "Edit DEFAULT_GAME_VERSION" : config_manager.edit_default_gv,
+        "Edit DEFAULT_COUNTRY_CODE" : config_manager.edit_default_gv,
         "Edit DEFAULT_SAVE_PATH" : config_manager.edit_default_save_file_path,
         "Edit EDITOR settings" : config_manager.edit_editor_settings,
         "Edit START_UP settings" : config_manager.edit_start_up_settings,

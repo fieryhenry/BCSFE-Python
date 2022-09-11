@@ -636,7 +636,7 @@ def get_country_code(save_data: bytes) -> str:
 
 def ask_cc():
     """Ask the user for their country code"""
-    default_gv = config_manager.get_config_value("DEFAULT_GAME_VERSION")
+    default_gv = config_manager.get_config_value("DEFAULT_COUNTRY_CODE")
     if default_gv:
         colored_text(f"Using default game version: &{default_gv}&")
         return default_gv

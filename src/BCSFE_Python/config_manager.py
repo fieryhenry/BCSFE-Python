@@ -51,7 +51,11 @@ def get_config_value(setting: str) -> Any:
         Any: Value of setting
     """
     config = get_config_file()
-    return config[setting]
+    setting_data = config.get(setting)
+    if setting_data is None:
+        create_config_file()
+        return get_config_value(setting)
+    return setting_data
 
 
 def set_config_setting_category(category: str, key: str, value: Any) -> None:
@@ -96,7 +100,7 @@ def create_config_file() -> None:
     file_data += "# You can edit this file to change the settings\n"
     file_data += "# You can also edit the settings in the program\n#\n"
     file_data += "# The following settings are available:\n#\n"
-    file_data += """DEFAULT_GAME_VERSION: "" # The default game version when downloading / pulling / loading save data. E.g en, jp, kr, tw. Empty means the game version is not specified and will be asked for when needed.
+    file_data += """DEFAULT_COUNTRY_CODE: "" # The default game version when downloading / pulling / loading save data. E.g en, jp, kr, tw. Empty means the game version is not specified and will be asked for when needed.
 DEFAULT_SAVE_FILE_PATH: "SAVE_DATA" # The default file path for your save data when saving changes / downloading save data / pulling etc
 
 EDITOR:
@@ -123,7 +127,6 @@ SERVER:
   WIPE_TRACKED_ITEMS_ON_START: True # Wipe all tracked items stored when the editor starts up - if disabled, it allows you to upload metadata changes after you exit and re-enter the editor.
 """
 
-    
     helper.write_file_string(config_file, file_data)
 
 
@@ -154,11 +157,11 @@ def edit_default_gv(_: Any) -> None:
     """
     Edit the default game version
     """
-    default_gv = get_config_value("DEFAULT_GAME_VERSION")
+    default_gv = get_config_value("DEFAULT_COUNTRY_CODE")
     default_gv = user_input_handler.colored_input(
         f"Enter the default game version. Current value: {default_gv} Leave blank to not specify a default game version:",
     )
-    set_config_setting("DEFAULT_GAME_VERSION", default_gv)
+    set_config_setting("DEFAULT_COUNTRY_CODE", default_gv)
 
 
 def edit_default_save_file_path(_: Any) -> None:
@@ -238,6 +241,7 @@ def edit_start_up_settings(_: Any) -> None:
         else:
             raise Exception(f"Unsupported option type {option_type}")
 
+
 def edit_save_changes_settings(_: Any) -> None:
     """
     Edit the save changes settings
@@ -246,10 +250,10 @@ def edit_save_changes_settings(_: Any) -> None:
         "SAVE_CHANGES_ON_EDIT",
         "ALWAYS_EXPORT_JSON",
     ]
-    option_values = [get_config_value_category("SAVE_CHANGES", option) for option in options]
-    ids = user_input_handler.select_not_inc(
-        options, "select", option_values
-    )
+    option_values = [
+        get_config_value_category("SAVE_CHANGES", option) for option in options
+    ]
+    ids = user_input_handler.select_not_inc(options, "select", option_values)
     for option_id in ids:
         option_name = options[option_id]
         enable = (
@@ -260,6 +264,7 @@ def edit_save_changes_settings(_: Any) -> None:
         )
         set_config_setting_category("SAVE_CHANGES", option_name, enable)
 
+
 def edit_server_settings(_: Any) -> None:
     """
     Edit the server settings
@@ -269,9 +274,7 @@ def edit_server_settings(_: Any) -> None:
         "WIPE_TRACKED_ITEMS_ON_START",
     ]
     option_values = [get_config_value_category("SERVER", option) for option in options]
-    ids = user_input_handler.select_not_inc(
-        options, "select", option_values
-    )
+    ids = user_input_handler.select_not_inc(options, "select", option_values)
     for option_id in ids:
         option_name = options[option_id]
         enable = (

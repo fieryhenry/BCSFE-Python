@@ -119,6 +119,7 @@ FEATURES: dict[str, Any] = {
         "Towers": levels.towers.edit_tower,
         "Clear Tutorial": levels.clear_tutorial.clear_tutorial,
         "Catclaw Dojo Score (Hall of Initiates)": basic.basic_items.edit_dojo_score,
+        "Add Enigma Stages": levels.enigma_stages.edit_enigma_stages,
     },
     "Inquiry Code / Token / Account": {
         "Inquiry Code": basic.basic_items.edit_inquiry_code,
@@ -149,7 +150,7 @@ FEATURES: dict[str, Any] = {
         "Edit SAVE_CHANGES settings" : config_manager.edit_save_changes_settings,
         "Edit SERVER settings" : config_manager.edit_server_settings,
     }
-} 
+}
 
 
 def get_feature(

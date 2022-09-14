@@ -88,7 +88,7 @@ def get_file_latest(pack_name: str, file_name: str, is_jp: bool) -> bytes:
 
     Returns:
         bytes: The data of the file.
-    """    
+    """
     version = get_latest_version(is_jp)
     return download_file(version, pack_name, file_name)
 
@@ -116,7 +116,7 @@ def check_remove(new_version: str, is_jp: bool):
     Args:
         new_version (str): The new version.
         is_jp (bool): Whether to get the japanese version.
-    """    
+    """
     all_versions = helper.get_dirs(helper.get_file("game_data"))
     for version in all_versions:
         if is_jp:
@@ -134,7 +134,7 @@ def check_remove(new_version: str, is_jp: bool):
 def check_remove_handler():
     """
     Checks if older game data is downloaded, and deletes if out of date.
-    """    
+    """
 
     versions = get_latest_versions()
     check_remove(versions[0], is_jp=False)

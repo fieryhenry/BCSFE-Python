@@ -17,11 +17,13 @@ def edit_enigma_stages(save_stats: dict[str, Any]) -> dict[str, Any]:
     """
     enigma_stages = save_stats["enigma_data"]
 
-    enigma_names = helper.read_file_string(helper.get_file("enigma_names.txt")).splitlines()
+    if helper.check_data_is_jp(save_stats):
+        file_name = "enigma_names_jp.txt"
+    else:
+        file_name = "enigma_names_en.txt"
+    enigma_names = helper.read_file_string(helper.get_file(file_name)).splitlines()
     ids = user_input_handler.select_not_inc(enigma_names, "select")
-    level = user_input_handler.get_int(
-        "Enter engima level (&1&=inferior, &2&=normal, &3&=superior):"
-    )
+    level = 3
 
     base_level = 25000
     for enigma_id in ids:

@@ -1,5 +1,23 @@
 # Changelog
 
+## [2.3.0] - 2022-09-14
+
+#### Added
+
+- Feature to add enigma stages
+
+- Feature to edit Gamatoto shrine xp / level
+
+- Replaced some unknown values in the save stats + updated parsing for 11.3.0 and up
+
+#### Changed
+
+- Get gold pass will now give the paid version instead of the free trial and each subsequent use of the feature will increase the total renewal times by 1 and wipe the daily catfood stamp count
+
+#### Fixed
+
+- File not found error if item_tracker.json is not present
+
 ## [2.2.2] - 2022-09-04
 
 #### Added

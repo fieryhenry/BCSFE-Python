@@ -1435,7 +1435,6 @@ def get_data_after_orbs() -> list[dict[str, int]]:
 
     data.append(next_int_len(1))
     data.append(next_int_len(8 * 2))
-    data.append(next_int_len(1))
     return data
 
 
@@ -1446,9 +1445,10 @@ def get_cat_shrine_data() -> dict[str, Any]:
     Returns:
         dict[str, Any]: The cat shrine data
     """
+    shrine_gone = next_int(1)
     flags: list[int] = get_length_data(1, 1)
     xp_offering = next_int(4)
-    return {"flags": flags, "xp_offering": xp_offering}
+    return {"flags": flags, "xp_offering": xp_offering, "shrine_gone": shrine_gone}
 
 
 def get_slot_names(save_stats: dict[str, Any]) -> list[str]:
@@ -1701,9 +1701,6 @@ def get_110800_data() -> list[dict[str, int]]:
         list[dict[str, int]]: The data
     """
     data: list[dict[str, int]] = []
-
-    u_var_38 = next_int_len(4)
-    data.append(u_var_38)
 
     u_var_38 = next_int_len(1)
     data.append(u_var_38)
@@ -2304,8 +2301,12 @@ def parse_save(save_data: bytes, country_code: Union[str, None]) -> dict[str, An
     if save_stats["exit"]:
         return save_stats
 
+    save_stats["shrine_dialogs"] = next_int_len(4)
+
     save_stats["unknown_129"] = get_110800_data()
+
     save_stats["dojo_3x_speed"] = next_int_len(1)
+
     save_stats["unknown_132"] = get_110800_data_2()
 
     save_stats["gv_110800"] = next_int_len(4)  # 110800

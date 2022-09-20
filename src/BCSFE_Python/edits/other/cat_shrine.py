@@ -44,6 +44,8 @@ def get_level_from_xp(shrine_xp: int, is_jp: bool) -> dict[str, Any]:
     for requirement in xp_requirements:
         if shrine_xp >= requirement:
             level += 1
+    if level > len(xp_requirements):
+        level = len(xp_requirements)
     return {
         "level": level,
         "max_level": len(xp_requirements),
@@ -98,7 +100,7 @@ def edit_shrine_xp(save_stats: dict[str, Any]) -> dict[str, Any]:
             edit_name="value",
         )
         cat_shrine_xp.edit()
-        shrine_xp = cat_shrine_xp.value
+        shrine_xp = int(cat_shrine_xp.value)
     else:
         shrine_level = item.Item(
             name="Shrine Level",
@@ -110,6 +112,11 @@ def edit_shrine_xp(save_stats: dict[str, Any]) -> dict[str, Any]:
         shrine_xp = get_xp_from_level(
             int(shrine_level.value), helper.check_data_is_jp(save_stats)
         )
+    shrine_level = get_level_from_xp(shrine_xp, helper.check_data_is_jp(save_stats))["level"]
+    if shrine_level > data["max_level"]:
+        shrine_level = data["max_level"]
+    save_stats["shrine_dialogs"]["Value"] = shrine_level - 1 # Level up dialog
+    save_stats["shrine_gone"] = 0 # Make the shrine appear
 
     save_stats["cat_shrine"]["xp_offering"] = shrine_xp
     return save_stats

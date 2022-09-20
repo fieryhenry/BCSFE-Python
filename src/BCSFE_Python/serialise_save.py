@@ -693,6 +693,7 @@ def serialise_cat_shrine(
     Returns:
         list[int]: The save data
     """
+    save_data = write(save_data, shrine_data["shrine_gone"], 1)
     save_data = write_length_data(save_data, shrine_data["flags"], 1, 1)
     save_data = write(save_data, shrine_data["xp_offering"], 4)
     return save_data
@@ -1340,6 +1341,8 @@ def serialize_save(save_stats: dict[str, Any]) -> bytes:
     save_data = data["save_data"]
     if data["exit"]:
         return bytes(save_data)
+
+    save_data = write(save_data, save_stats["shrine_dialogs"])
 
     save_data = serialise_dumped_data(save_data, save_stats["unknown_129"])
 

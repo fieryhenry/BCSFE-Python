@@ -93,10 +93,12 @@ def edit_platinum_tickets(save_stats: dict[str, Any]) -> dict[str, Any]:
 def edit_platinum_shards(save_stats: dict[str, Any]) -> dict[str, Any]:
     """Handler for editing platinum shards"""
 
+    ticket_amount = save_stats["platinum_tickets"]["Value"]
+    max_value = 99 - (ticket_amount * 10)
     platinum_shards = item.Item(
         name="Platinum Shards",
         value=save_stats["platinum_shards"]["Value"],
-        max_value=99,
+        max_value=max_value,
         edit_name="value",
     )
     platinum_shards.edit()

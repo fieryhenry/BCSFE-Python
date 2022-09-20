@@ -30,7 +30,9 @@ def select_cats(save_stats: dict[str, Any], current: bool = True) -> list[int]:
     if not current:
         del options["Select currently unlocked cats"]
 
-    choice_index = user_input_handler.select_single(list(options.keys()), title="Select cats:") - 1
+    choice_index = (
+        user_input_handler.select_single(list(options.keys()), title="Select cats:") - 1
+    )
     cat_ids = options[list(options)[choice_index]](save_stats)
     return cat_ids
 
@@ -96,7 +98,7 @@ def select_cats_gatya_banner(save_stats: dict[str, Any]) -> list[int]:
     )
     ids = user_input_handler.get_range(
         user_input_handler.colored_input(
-            "Enter gacha banner id (Look up the gacha banners you want, then click on the image at the top, and look for the last digits of the file name (e.g royal fest = 602)):"
+            "Enter gacha banner id (Look up the gacha banners you want, then click on the image at the top, and look for the last digits of the file name (e.g royal fest = 602))(You can enter &all& to get all, a range e.g &1&-&50&, or ids separate by spaces e.g &5 4 7&):"
         ),
         length=len(data),
     )

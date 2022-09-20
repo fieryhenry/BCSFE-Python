@@ -1,13 +1,26 @@
 """Handler for getting the gold pass"""
 
 import datetime
+import random
 import time
 from typing import Any
-from ... import helper
+from ... import helper, user_input_handler
 
 
-def get_gold_pass_val(save_stats: dict[str, Any], total_days: int) -> dict[str, Any]:
-    """Give the gold pass"""
+def get_gold_pass_val(
+    save_stats: dict[str, Any], total_days: int, officer_id: int
+) -> dict[str, Any]:
+    """
+    Give the gold pass
+
+    Args:
+        save_stats (dict[str, Any]): The save stats
+        total_days (int): The total days
+        officer_id (int): The officer ID
+
+    Returns:
+        dict[str, Any]: The save stats
+    """
 
     gold_pass = save_stats["gold_pass"]
 
@@ -15,7 +28,7 @@ def get_gold_pass_val(save_stats: dict[str, Any], total_days: int) -> dict[str, 
     expiry_date = start_date + datetime.timedelta(days=total_days).total_seconds()
     expiry_date_2 = start_date + datetime.timedelta(days=total_days * 2).total_seconds()
 
-    gold_pass["officer_id"]["Value"] = 1
+    gold_pass["officer_id"]["Value"] = officer_id
     if gold_pass["renewal_times"]["Value"] == 0:
         gold_pass["renewal_times"]["Value"] = 1
     gold_pass["renewal_times"]["Value"] += 1
@@ -38,10 +51,30 @@ def get_gold_pass_val(save_stats: dict[str, Any], total_days: int) -> dict[str, 
 
     return save_stats
 
+
+def get_random_officer_id() -> int:
+    """Get a random officer ID"""
+
+    return random.randint(1, 2**32 - 1)
+
+
 def get_gold_pass(save_stats: dict[str, Any]) -> dict[str, Any]:
     """Give the gold pass"""
 
-    save_stats = get_gold_pass_val(save_stats, 30)
+    officer_id = user_input_handler.colored_input(
+        "Enter the officer ID you want (Press enter for a random id):"
+    )
+    if officer_id == "":
+        officer_id = get_random_officer_id()
+    else:
+        officer_id = helper.check_int(officer_id)
+
+    if officer_id is None:
+        officer_id = 0
+
+    helper.colored_text(f"Officer ID: &{officer_id}&", helper.GREEN, helper.WHITE)
+
+    save_stats = get_gold_pass_val(save_stats, 30, officer_id)
 
     helper.colored_text("Successfully gave the gold pass", helper.GREEN)
 

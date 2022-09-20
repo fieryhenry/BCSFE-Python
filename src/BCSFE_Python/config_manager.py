@@ -32,12 +32,42 @@ def get_config_file() -> dict[str, Any]:
     Returns:
         dict: Config file
     """
-    config_file = os.path.join(get_app_data_folder(), "config.yaml")
-    if not os.path.exists(config_file):
-        create_config_file()
+    config_file = get_config_path()
     with open(config_file, "r", encoding="utf-8") as file:
         config = yaml.safe_load(file)
     return config
+
+
+def get_config_path() -> str:
+    """
+    Get the path to the config file
+
+    Returns:
+        str: Path to config file
+    """
+    config_path_path = helper.get_file("config_path.txt")
+    helper.create_dirs(os.path.dirname(config_path_path))
+    if not os.path.exists(config_path_path):
+        helper.write_file_string(config_path_path, "")
+
+    config_path = helper.read_file_string(config_path_path)
+    if config_path == "":
+        config_path = os.path.join(get_app_data_folder(), "config.yaml")
+    if not os.path.exists(config_path):
+        create_config_file(config_path)
+    return config_path
+
+
+def set_config_path(path: str):
+    """
+    Set the path to the config file
+
+    Args:
+        path (str): Path to config file
+    """
+    helper.write_file_string(helper.get_file("config_path.txt"), path)
+    if not os.path.exists(path):
+        create_config_file()
 
 
 def get_config_value(setting: str) -> Any:
@@ -68,9 +98,7 @@ def set_config_setting_category(category: str, key: str, value: Any) -> None:
     """
     config = get_config_file()
     config[category][key] = value
-    with open(
-        os.path.join(get_app_data_folder(), "config.yaml"), "w", encoding="utf-8"
-    ) as file:
+    with open(get_config_path(), "w", encoding="utf-8") as file:
         yaml.safe_dump(config, file)
 
 
@@ -84,17 +112,18 @@ def set_config_setting(setting: str, value: Any) -> None:
     """
     config = get_config_file()
     config[setting] = value
-    with open(
-        os.path.join(get_app_data_folder(), "config.yaml"), "w", encoding="utf-8"
-    ) as file:
+    with open(get_config_path(), "w", encoding="utf-8") as file:
         yaml.safe_dump(config, file)
 
 
-def create_config_file() -> None:
+def create_config_file(config_path: Optional[str] = None) -> None:
     """
     Create the config file if it doesn't exist
     """
-    config_file = os.path.join(get_app_data_folder(), "config.yaml")
+    if config_path is None:
+        config_file = get_config_path()
+    else:
+        config_file = config_path
     file_data = "# Configuration file for BCSFE\n"
     file_data += "# This file is automatically created when the program is run for the first time\n"
     file_data += "# You can edit this file to change the settings\n"
@@ -284,3 +313,13 @@ def edit_server_settings(_: Any) -> None:
             == "1"
         )
         set_config_setting_category("SERVER", option_name, enable)
+
+
+def edit_config_path(_: Any) -> None:
+    """
+    Edit the config path
+    """
+    config_path = os.path.dirname(get_config_path())
+    config_path = helper.select_dir("Select the config path", config_path)
+    config_path = os.path.join(config_path, "config.yaml")
+    set_config_path(config_path)

@@ -1,6 +1,4 @@
 """Module that runs when the module is run directly"""
-
-import os
 import sys
 
 from . import (
@@ -29,7 +27,7 @@ def print_start_up():
         + "GitHub: &https://github.com/fieryhenry/BCSFE-Python&\n"
         + "Discord: &https://discord.gg/DvmMgvn5ZB& - Please report any bugs to &#bug-reports&, or any suggestions to &#suggestions&\n"
         + "Donate: &https://ko-fi.com/fieryhenry&\n"
-        + f"Config file path: &{os.path.join(config_manager.get_app_data_folder(), 'config.yaml')}&",
+        + f"Config file path: &{config_manager.get_config_path()}&",
         base=helper.CYAN,
         new=helper.WHITE,
     )
@@ -138,7 +136,12 @@ def normal_start_up(default_op: bool = True) -> None:
             "Use adb to pull the save from a rooted device",
             "Load save data from json",
         ]
-        index = user_input_handler.select_single(options, title="Select an option to get save data:") - 1
+        index = (
+            user_input_handler.select_single(
+                options, title="Select an option to get save data:"
+            )
+            - 1
+        )
     path = None
     if index == 0:
         print("Enter details for data transfer:")

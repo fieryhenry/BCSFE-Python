@@ -149,6 +149,7 @@ FEATURES: dict[str, Any] = {
         "Edit START_UP settings" : config_manager.edit_start_up_settings,
         "Edit SAVE_CHANGES settings" : config_manager.edit_save_changes_settings,
         "Edit SERVER settings" : config_manager.edit_server_settings,
+        "Edit config path" : config_manager.edit_config_path,
     }
 }
 

@@ -138,19 +138,19 @@ FEATURES: dict[str, Any] = {
         "Catnip Challenges / Missions": other.missions.edit_missions,
         "Normal Ticket Max Trade Progress (allows for unbannable rare tickets)": other.trade_progress.set_trade_progress,
         "Unlock the Equip Menu": other.unlock_equip_menu.unlock_equip,
-        "Get Gold Pass": other.get_gold_pass.get_gold_pass,
+        "Get / Remove Gold Pass": other.get_gold_pass.get_gold_pass,
         "Claim / Remove all user rank rewards (does not give any items)": other.claim_user_rank_rewards.edit_rewards,
         "Cat Shrine Level / XP": other.cat_shrine.edit_shrine_xp,
     },
-    "Edit Config" : {
-        "Edit DEFAULT_COUNTRY_CODE" : config_manager.edit_default_gv,
-        "Edit DEFAULT_SAVE_PATH" : config_manager.edit_default_save_file_path,
-        "Edit EDITOR settings" : config_manager.edit_editor_settings,
-        "Edit START_UP settings" : config_manager.edit_start_up_settings,
-        "Edit SAVE_CHANGES settings" : config_manager.edit_save_changes_settings,
-        "Edit SERVER settings" : config_manager.edit_server_settings,
-        "Edit config path" : config_manager.edit_config_path,
-    }
+    "Edit Config": {
+        "Edit DEFAULT_COUNTRY_CODE": config_manager.edit_default_gv,
+        "Edit DEFAULT_SAVE_PATH": config_manager.edit_default_save_file_path,
+        "Edit EDITOR settings": config_manager.edit_editor_settings,
+        "Edit START_UP settings": config_manager.edit_start_up_settings,
+        "Edit SAVE_CHANGES settings": config_manager.edit_save_changes_settings,
+        "Edit SERVER settings": config_manager.edit_server_settings,
+        "Edit config path": config_manager.edit_config_path,
+    },
 }
 
 

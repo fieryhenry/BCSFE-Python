@@ -461,7 +461,7 @@ def colored_list(
         final += f"&{item}&"
         if extra_data:
             if extra_data[i] is not None:
-                if isinstance(offset, int):
+                if isinstance(offset, int) and isinstance(extra_data[i], int):
                     final += f" &:& {extra_data[i]+offset}"
                 else:
                     final += f" &:& {extra_data[i]}"

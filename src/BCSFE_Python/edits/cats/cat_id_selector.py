@@ -134,16 +134,27 @@ def select_cat_names(save_stats: dict[str, Any]) -> list[int]:
         return []
 
     cat_ids: list[int] = []
+    cat_ids_str: list[str] = []
     cat_names: list[str] = []
     for cat_name, cat_id, _ in found_names:
         cat_ids.append(cat_id)
         cat_name = cat_name.replace("&", "\\&")
         cat_names.append(cat_name)
+        cat_ids_str.append(f"Cat id: &{cat_id}&")
 
+    print("Select indexes of cats to select (Not the cat id itself):")
     indexes = user_input_handler.select_not_inc(
-        cat_names, mode="select", extra_data=cat_ids
+        cat_names, mode="select", extra_data=cat_ids_str
     )
-    cat_ids = [cat_ids[i] for i in indexes]
+    cat_ids: list[int] = []
+    for index in indexes:
+        try:
+            cat_ids.append(cat_ids[index])
+        except IndexError:
+            helper.colored_text(
+                f"Option is too high: {index} - Make sure to select the index on the left rather than the cat id",
+                helper.RED,
+            )
     return cat_ids
 
 

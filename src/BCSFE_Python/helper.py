@@ -652,7 +652,7 @@ def ask_cc():
             return default_gv
 
     country_code = user_input_handler.colored_input(
-        "Enter your game version (&en&, &jp&, &kr&, &tw&):"
+        "Enter your country code (&en&, &jp&, &kr&, &tw&):"
     )
     return country_code
 

@@ -254,7 +254,7 @@ def download_save(
     """Downloads the save for the given country_code, transfer_code, confirmation_code
     and game_version"""
 
-    country_code = country_code.replace("ja", "jp")
+    country_code = country_code.replace("jp", "ja")
     url = get_nyanko_save_url() + "/v1/transfers/" + transfer_code + "/reception"
     data = get_client_info(country_code, game_version)
     data["pin"] = confirmation_code

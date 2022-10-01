@@ -2,8 +2,10 @@
 
 import enum
 import os
+import re
 import subprocess
 from typing import Union
+
 from . import helper, user_input_handler
 
 
@@ -37,6 +39,34 @@ def adb_pull(package_name: str, device_file_path: str, local_file_path: str):
     run_adb_command(f'pull "{path}" {local_file_path}')
 
 
+def find_game_versions() -> list[str]:
+    """
+    Find installed game versions
+
+    Returns:
+        list[str]: List of game versions
+    """
+    package_name = "jp.co.ponos.battlecats"
+    try:
+        run_adb_command("devices")
+    except ADBException as exception:
+        return adb_err_handler(exception)
+    try:
+        output = str(
+            subprocess.run(
+                "adb shell ls /data/data/", capture_output=True, check=True
+            ).stdout
+        )
+    except subprocess.CalledProcessError:
+        return []
+    package_names: list[str] = re.findall(f"{package_name}..", output)
+    for i, package_name in enumerate(package_names):
+        package_names[i] = package_name.replace("  ", "jp").replace(
+            "jp.co.ponos.battlecats", ""
+        )
+    return package_names
+
+
 def adb_push(package_name: str, local_file_path: str, device_file_path: str):
     """Push a file to a device"""
 
@@ -62,11 +92,20 @@ def adb_run_process(package_name: str):
 
     run_adb_command(f"shell monkey -p {package_name} -v 1")
 
+
 def adb_reboot():
     """Reboot adb server"""
 
+    helper.run_in_background(adb_reboot_background)
+
+
+def adb_reboot_background():
+    """
+    Reboot adb server in background
+    """
     adb_kill_server()
     is_adb_installed()
+
 
 def adb_root():
     """Start adb server as root"""
@@ -108,7 +147,9 @@ def adb_kill_server():
     """Kill ADB server"""
 
     try:
-        subprocess.run("adb kill-server", shell=True, check=True, text=True, capture_output=True)
+        subprocess.run(
+            "adb kill-server", shell=True, check=True, text=True, capture_output=True
+        )
     except subprocess.CalledProcessError as err:
         adb_error_handler(err)
 
@@ -148,10 +189,12 @@ def find_adb_path() -> Union[str, None]:
 
     return None
 
+
 def if_windows() -> bool:
     """Check if windows"""
 
     return os.name == "nt"
+
 
 def add_to_path() -> None:
     """Try to add adb to path environment variable automatically"""

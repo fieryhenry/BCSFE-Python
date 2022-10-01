@@ -155,7 +155,17 @@ def normal_start_up(default_op: bool = True) -> None:
         )
     elif index == 2:
         print("Enter details for save pulling:")
-        game_version = helper.ask_cc()
+        game_versions = adb_handler.find_game_versions()
+        if not game_versions:
+            game_version = helper.ask_cc()
+        else:
+            index = (
+                user_input_handler.select_single(
+                    game_versions, "Select", "Select a game version to pull from:"
+                )
+                - 1
+            )
+            game_version = game_versions[index]
         path = adb_handler.adb_pull_save_data(game_version)
     elif index == 3:
         print("Select save data json file")

@@ -6,7 +6,7 @@ import os
 import shutil
 import sys
 from tkinter import Tk, filedialog
-from typing import Any, Generator, Optional, Union
+from typing import Any, Callable, Generator, Optional, Union
 import colored  # type: ignore
 
 from . import (
@@ -540,6 +540,15 @@ def run_in_parallel(fns: list[Process]) -> None:
     for p in proc:
         p.join()
 
+def run_in_background(func: Callable[..., Any]) -> None:
+    """
+    Run a function in the background
+
+    Args:
+        fn (Callable[..., Any]): Function to run in the background
+    """
+    Process(target=func).start()
+
 
 def get_cc(save_stats: dict[str, Any]) -> str:
     """Get the country code"""
@@ -638,8 +647,9 @@ def ask_cc():
     """Ask the user for their country code"""
     default_gv = config_manager.get_config_value("DEFAULT_COUNTRY_CODE")
     if default_gv:
-        colored_text(f"Using default game version: &{default_gv}&")
-        return default_gv
+        if len(default_gv) == 2:
+            colored_text(f"Using default country code: &{default_gv}&")
+            return default_gv
 
     country_code = user_input_handler.colored_input(
         "Enter your game version (&en&, &jp&, &kr&, &tw&):"

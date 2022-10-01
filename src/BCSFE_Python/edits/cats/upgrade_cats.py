@@ -103,8 +103,10 @@ def upgrade_handler(
             plus_lvl = levels[1]
         if base_lvl is not None:
             if base_lvl > 0:
+                base_lvl = helper.clamp(base_lvl, 0, 50000)
                 base[cat_id] = base_lvl - 1
         if plus_lvl is not None:
+            plus_lvl = helper.clamp(plus_lvl, 0, 50000)
             plus[cat_id] = plus_lvl
     data["Base"] = base
     data["Plus"] = plus

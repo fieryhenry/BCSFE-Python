@@ -195,6 +195,8 @@ def select_single(
     title: str = "",
 ) -> int:
     "Select a single option from a list"
+    if len(options) == 1:
+        return 1
     if config_manager.get_config_value_category(
         "EDITOR", "USE_ARROW_KEYS_FOR_FEATURE_SELECT"
     ):

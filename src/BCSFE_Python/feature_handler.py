@@ -41,6 +41,7 @@ def fix_elsewhere_old(save_stats: dict[str, Any]) -> dict[str, Any]:
 
 FEATURES: dict[str, Any] = {
     "Save Management": {
+        "Save Save" : save_management.save_and_exit.save_save,
         "Save changes and upload to game servers (get transfer and confirmation codes)": save_management.server_upload.save_and_upload,
         "Save changes and exit": save_management.save_and_exit.save_and_exit,
         "Save changes and push save data to the game (don't re-open game)": save_management.save_and_exit.save_and_push,
@@ -48,6 +49,7 @@ FEATURES: dict[str, Any] = {
         "Export save data as json": save_management.other.export,
         "Clear save data (used to generate a new account without re-installing the game)": save_management.other.clear_data,
         "Upload tracked bannable items (This is done automatically when saving and exiting)": save_management.server_upload.upload_metadata,
+        #"Manage Presets": preset_handler.preset_manager,
     },
     "Items": {
         "Cat Food": basic.basic_items.edit_cat_food,

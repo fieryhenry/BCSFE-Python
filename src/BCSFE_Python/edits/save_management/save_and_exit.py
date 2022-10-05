@@ -18,6 +18,18 @@ def save_and_exit(save_stats: dict[str, Any]) -> dict[str, Any]:
 
     return save_stats
 
+def save_save(save_stats: dict[str, Any]) -> dict[str, Any]:
+    """Serialise the save data"""
+
+    save_data = serialise_save.start_serialize(save_stats)
+    helper.write_save_data(
+        save_data, save_stats["version"], helper.get_save_path(), False
+    )
+
+    helper.check_tracker(save_stats, helper.get_save_path())
+
+    return save_stats
+
 
 def save_and_push(save_stats: dict[str, Any]) -> dict[str, Any]:
     """Serialise the save data and and push it to the game"""

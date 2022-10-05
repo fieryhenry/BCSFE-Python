@@ -1,5 +1,33 @@
 # Changelog
 
+## [2.4.0] - 2022-10-05
+
+#### Added
+
+- An option in save management to save the save data without opening the file selection dialog
+
+- Option to edit where the config file is located
+
+- A way to enter an officer id or generate a random one when getting the gold pass. Entering -1 for the officer id will remove the gold pass
+
+#### Changed
+
+- Platinum shards max amounts now takes into account your current platinum ticket amount to make sure you can't go over 9 tickets
+
+- Made catshrine appear when using the edit catshrine level feature and the level up dialogs are now skipped
+
+- When pulling using adb the editor will automatically detect currently installed game versions and let you select one to pull. If only 1 game version is installed it will just default to that one.
+
+#### Fixed
+
+- Selecting cats based on name crashing if entering a cat id too large
+
+- Upgrade cats / special skills crashing the editor if setting the base level to 0 or a level to be larger than 65535
+
+- Being unable to download a save / pull saves if your default country code is longer than 2 characters. The editor will just ask you to manually enter it
+
+- Treasure groups chapter selection ids being off by 1
+
 ## [2.3.0] - 2022-09-14
 
 #### Added

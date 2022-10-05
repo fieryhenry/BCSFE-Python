@@ -161,7 +161,7 @@ def normal_start_up(default_op: bool = True) -> None:
         else:
             index = (
                 user_input_handler.select_single(
-                    game_versions, "Select", "Select a game version to pull from:"
+                    game_versions, "Select", "Select a game version to pull from:", True
                 )
                 - 1
             )

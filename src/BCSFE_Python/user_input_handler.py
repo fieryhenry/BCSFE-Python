@@ -193,8 +193,11 @@ def select_single(
     options: list[str],
     mode: str = "edit",
     title: str = "",
+    allow_text: bool = False,
 ) -> int:
     "Select a single option from a list"
+    if not options:
+        raise ValueError("No options to select from")
     if len(options) == 1:
         return 1
     if config_manager.get_config_value_category(
@@ -205,7 +208,21 @@ def select_single(
     helper.colored_list(options)
     if not title:
         title = f"Select an option to {mode}:"
-    return get_int(title)
+    val = colored_input(title)
+    if allow_text:
+        if val in options:
+            return options.index(val) + 1
+    val = helper.check_int(val)
+    if val is None:
+        helper.colored_text("Invalid input. Please enter a valid integer.", helper.RED)
+        return select_single(options, mode, title, allow_text)
+    if val < 1 or val > len(options):
+        helper.colored_text(
+            f"Invalid input. Please enter an integer between 1 and {len(options)}.",
+            helper.RED,
+        )
+        return select_single(options, mode, title, allow_text)
+    return val
 
 
 def get_int(dialog: str) -> int:

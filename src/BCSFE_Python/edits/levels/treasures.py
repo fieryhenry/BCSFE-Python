@@ -145,8 +145,6 @@ def treasure_groups(save_stats: dict[str, Any]) -> dict[str, Any]:
 
     ids = user_input_handler.select_not_inc(main_story.CHAPTERS, "select")
 
-    ids = helper.check_clamp(ids, 9, 1, -1)
-
     for chapter_id in ids:
         helper.colored_text(f"Chapter: &{main_story.CHAPTERS[chapter_id]}&")
         type_id = chapter_id // 3

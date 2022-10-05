@@ -86,6 +86,15 @@ def get_file(file_name: str) -> str:
     file_path = os.path.join(get_local_files_path(), file_name)
     return file_path
 
+def get_files_in_dir(dir_path: str) -> list[str]:
+    """Get all files in a directory"""
+
+    files: list[str] = []
+    for file in os.listdir(dir_path):
+        if os.path.isfile(os.path.join(dir_path, file)):
+            file_path = os.path.join(dir_path, file)
+            files.append(file_path)
+    return files
 
 def find_files_in_dir(dir_path: str, file_name: str) -> list[str]:
     """Find all files in a directory with a certain name"""

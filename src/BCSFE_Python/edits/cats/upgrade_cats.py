@@ -4,10 +4,13 @@ from typing import Any, Union
 from ... import helper, user_input_handler, game_data_getter, csv_handler
 from . import cat_id_selector
 
+
 def get_rarities(is_jp: bool) -> list[int]:
     """Get all cat ids of each rarity"""
 
-    file_data = game_data_getter.get_file_latest("DataLocal", "unitbuy.csv", is_jp).decode("utf-8")
+    file_data = game_data_getter.get_file_latest(
+        "DataLocal", "unitbuy.csv", is_jp
+    ).decode("utf-8")
     data = helper.parse_int_list_list(csv_handler.parse_csv(file_data))
     rarity_ids = helper.copy_first_n(data, 13)
     return rarity_ids
@@ -76,7 +79,9 @@ def upgrade_handler(
     plus = data["Plus"]
     individual = True
     if len(ids) > 1:
-        individual = user_input_handler.ask_if_individual(f"upgrades for each {item_name}")
+        individual = user_input_handler.ask_if_individual(
+            f"upgrades for each {item_name}"
+        )
     first = True
     base_lvl = None
     plus_lvl = None

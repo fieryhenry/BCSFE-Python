@@ -8,7 +8,7 @@ import requests
 from . import config_manager, helper
 
 
-def update(latest_version: str, command: str = "py") -> None:
+def update(latest_version: str, command: str = "py") -> bool:
     """Update pypi package testing for py and python"""
 
     helper.colored_text("Updating...", base=helper.GREEN)
@@ -21,16 +21,28 @@ def update(latest_version: str, command: str = "py") -> None:
             check=True,
         )
         helper.colored_text("Update successful", base=helper.GREEN)
-    except subprocess.CalledProcessError as err:
-        helper.colored_text("Update failed", base=helper.RED)
-        if command == "py":
-            helper.colored_text("Trying with python3 instead", base=helper.RED)
-            update(latest_version, "python3")
-        else:
-            helper.colored_text(
-                f"Error: {err.stderr.decode('utf-8')}\nYou may need to manually update with py -m pip install -U battle-cats-save-editor",
-                base=helper.RED,
-            )
+        return True
+    except subprocess.CalledProcessError:
+        return False
+
+def try_update(latest_version: str):
+    """
+    Try to update the editor
+
+    Args:
+        latest_version (str): The latest version of the editor
+    """ 
+    success = update(latest_version, "py")
+    if success:
+        return
+    success = update(latest_version, "python3")
+    if success:
+        return
+    success = update(latest_version, "python")
+    if success:
+        return
+    helper.colored_text("Update failed\nYou may need to manually update with py -m pip install -U battle-cats-save-editor", base=helper.RED)
+
 
 
 def get_local_version() -> str:

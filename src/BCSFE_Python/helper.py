@@ -483,7 +483,9 @@ def calculate_user_rank(save_stats: dict[str, Any]):
     """Calculate the user rank"""
 
     user_rank = 10  # blue upgrade base level (1 each)
-    user_rank += sum(save_stats["cats"])
+    for cat_flag in save_stats["cats"]:
+        if cat_flag == 1:
+            user_rank += 1
     user_rank += sum(save_stats["cat_upgrades"]["Base"])
     user_rank += sum(save_stats["cat_upgrades"]["Plus"])
     user_rank += sum(save_stats["blue_upgrades"]["Base"])

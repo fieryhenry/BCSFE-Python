@@ -35,7 +35,10 @@ def save_and_upload(save_stats: dict[str, Any]) -> dict[str, Any]:
     )
     upload_data = server_handler.upload_handler(save_stats, helper.get_save_path())
     if upload_data is None:
-        helper.exit_editor()
+        helper.colored_text(
+            "Error uploading save data\nPlease report this in #bug-reports"
+        )
+        return save_stats
     if "transferCode" not in upload_data:
         helper.colored_text(
             "Error uploading save data\nPlease report this in #bug-reports"

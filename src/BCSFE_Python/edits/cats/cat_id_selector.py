@@ -146,16 +146,16 @@ def select_cat_names(save_stats: dict[str, Any]) -> list[int]:
     indexes = user_input_handler.select_not_inc(
         cat_names, mode="select", extra_data=cat_ids_str
     )
-    cat_ids: list[int] = []
+    selected_ids: list[int] = []
     for index in indexes:
         try:
-            cat_ids.append(cat_ids[index])
+            selected_ids.append(cat_ids[index])
         except IndexError:
             helper.colored_text(
                 f"Option is too high: {index} - Make sure to select the index on the left rather than the cat id",
                 helper.RED,
             )
-    return cat_ids
+    return selected_ids
 
 
 def get_cat_by_form_and_id(

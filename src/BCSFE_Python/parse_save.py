@@ -229,7 +229,7 @@ def read_variable_length_int() -> int:
     return i
 
 
-def get_variable_data() -> tuple[dict[int, int], dict[int, int]]:
+def load_bonus_hash() -> tuple[dict[int, int], dict[int, int]]:
     """
     Get the variable data from the save file
 
@@ -1434,7 +1434,6 @@ def get_data_after_orbs() -> list[dict[str, int]]:
     data.append(next_int_len(4))  # 90800
 
     data.append(next_int_len(1))
-    data.append(next_int_len(8 * 2))
     return data
 
 
@@ -1445,10 +1444,12 @@ def get_cat_shrine_data() -> dict[str, Any]:
     Returns:
         dict[str, Any]: The cat shrine data
     """
+    stamp_1 = get_double()
+    stamp_2 = get_double()
     shrine_gone = next_int(1)
     flags: list[int] = get_length_data(1, 1)
     xp_offering = next_int(4)
-    return {"flags": flags, "xp_offering": xp_offering, "shrine_gone": shrine_gone}
+    return {"flags": flags, "xp_offering": xp_offering, "shrine_gone": shrine_gone, "stamp_1": stamp_1, "stamp_2": stamp_2}
 
 
 def get_slot_names(save_stats: dict[str, Any]) -> list[str]:
@@ -1843,7 +1844,7 @@ def parse_save(save_data: bytes, country_code: Union[str, None]) -> dict[str, An
     save_stats["unknown_9"] = next_int_len(6 * 4)
 
     save_stats["thirty2_code"] = get_utf8_string()
-    save_stats["unknown_10"] = get_variable_data()
+    save_stats["unknown_10"] = load_bonus_hash()
     save_stats["unknown_11"] = get_length_data(length=4)
     save_stats["normal_tickets"] = next_int_len(4)
     save_stats["rare_tickets"] = next_int_len(4)

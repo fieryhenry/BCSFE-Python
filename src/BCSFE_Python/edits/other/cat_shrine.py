@@ -116,7 +116,9 @@ def edit_shrine_xp(save_stats: dict[str, Any]) -> dict[str, Any]:
     if shrine_level > data["max_level"]:
         shrine_level = data["max_level"]
     save_stats["shrine_dialogs"]["Value"] = shrine_level - 1 # Level up dialog
-    save_stats["shrine_gone"] = 0 # Make the shrine appear
+    save_stats["shrine_gone"] = 0
+    save_stats["cat_shrine"]["stamp_1"] = 0
+    save_stats["cat_shrine"]["stamp_2"] = 0
 
     save_stats["cat_shrine"]["xp_offering"] = shrine_xp
     return save_stats

@@ -82,8 +82,7 @@ def check_update() -> None:
             end="",
         )
         if input().lower() == "y":
-            updater.update(update_data[1])
-            helper.colored_text("Update successful", base=helper.GREEN)
+            updater.try_update(update_data[1])
             helper.exit_editor()
 
 

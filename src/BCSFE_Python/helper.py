@@ -135,10 +135,23 @@ def chunks(lst: list[Any], chunk_len: int) -> Generator[Any, Any, Any]:
 def frames_to_time(frames: int) -> dict[str, Any]:
     """Turn frames into hours, minutes, seconds, frames"""
 
+    frames = clamp_int(frames)
     seconds, frames = divmod(frames, 30)
     minutes, seconds = divmod(seconds, 60)
     hours, minutes = divmod(minutes, 60)
     return {"hh": hours, "mm": minutes, "ss": seconds, "frames": frames}
+
+def clamp_int(value: int) -> int:
+    """
+    Clamp an integer to the range of a signed 32 bit integer
+
+    Args:
+        value (int): The value to clamp
+
+    Returns:
+        int: The clamped value
+    """
+    return clamp(value, 0, 2147483647)
 
 
 def num_to_bytes(num: int, length: int) -> bytes:
@@ -170,6 +183,7 @@ def time_to_frames(time: dict[str, Any]) -> int:
     total_frames += time["ss"] * 30
     total_frames += time["mm"] * 60 * 30
     total_frames += time["hh"] * 60 * 60 * 30
+    total_frames = clamp_int(total_frames)
     return total_frames
 
 

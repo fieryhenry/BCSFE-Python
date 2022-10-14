@@ -1,5 +1,27 @@
 # Changelog
 
+## [2.5.0] - 2022-10-14
+
+#### Added
+
+- A feature to fix time related issues (HGT, no energy recovery, etc)
+
+#### Changed
+
+- Features that fix things (fix time related issues, fix gamatoto crashing the game, fix equip menu not unlocked, etc) have been moved / copied to their own category called `Fixes`
+
+#### Fixed
+
+- Having a very high playtime not allowing you to transfer
+
+- Having corrupted cat unlock flags messing up user rank calculation and not letting you transfer
+
+- Cat shrine not appearing when editing it
+
+- Selecting cats from name not letting you select cats
+
+- Transfer error messages not appearing in some cases
+
 ## [2.4.0] - 2022-10-05
 
 #### Added

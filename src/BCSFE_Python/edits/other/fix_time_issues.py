@@ -18,5 +18,9 @@ def fix_time_issues(save_stats: dict[str, Any]) -> dict[str, Any]:
     save_stats["time_stamp"] = helper.get_time()
     save_stats["time_stamp_4"] = helper.get_time()
 
-    helper.colored_text("Successfully fixed time issues &(Your device time on both devices must be correct for this to work!)&", helper.GREEN, helper.RED)
+    helper.colored_text(
+        "Successfully fixed time issues &(Your device time on both devices must be correct for this to work!)&",
+        helper.GREEN,
+        helper.RED,
+    )
     return save_stats

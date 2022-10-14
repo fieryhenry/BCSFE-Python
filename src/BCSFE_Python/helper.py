@@ -657,7 +657,7 @@ def select_file(
         path = user_input_handler.colored_input(f"Enter the path to the file ({title}): ")
         if not os.path.isfile(path):
             colored_text("Invalid path", new=RED)
-            return initial_file
+            return ""
         return path
     setup_tk()
     from tkinter import filedialog

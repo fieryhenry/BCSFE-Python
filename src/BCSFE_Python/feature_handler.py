@@ -139,10 +139,17 @@ FEATURES: dict[str, Any] = {
         "Unlock / Remove Enemy Guide Entries": other.unlock_enemy_guide.enemy_guide,
         "Catnip Challenges / Missions": other.missions.edit_missions,
         "Normal Ticket Max Trade Progress (allows for unbannable rare tickets)": other.trade_progress.set_trade_progress,
-        "Unlock the Equip Menu": other.unlock_equip_menu.unlock_equip,
         "Get / Remove Gold Pass": other.get_gold_pass.get_gold_pass,
         "Claim / Remove all user rank rewards (does not give any items)": other.claim_user_rank_rewards.edit_rewards,
         "Cat Shrine Level / XP": other.cat_shrine.edit_shrine_xp,
+    },
+    "Fixes": {
+        "Fix time errors" : other.fix_time_issues.fix_time_issues,
+        "Unlock the Equip Menu": other.unlock_equip_menu.unlock_equip,
+        "Clear Tutorial": levels.clear_tutorial.clear_tutorial,
+        "Fix elsewhere error / Unban account": other.fix_elsewhere.fix_elsewhere,
+        "Old Fix elsewhere error / Unban account (needs 2 save files)": fix_elsewhere_old,
+        "Fix gamatoto from crashing the game": gamototo.fix_gamatoto.fix_gamatoto,
     },
     "Edit Config": {
         "Edit DEFAULT_COUNTRY_CODE": config_manager.edit_default_gv,

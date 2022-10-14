@@ -25,13 +25,14 @@ def update(latest_version: str, command: str = "py") -> bool:
     except subprocess.CalledProcessError:
         return False
 
+
 def try_update(latest_version: str):
     """
     Try to update the editor
 
     Args:
         latest_version (str): The latest version of the editor
-    """ 
+    """
     success = update(latest_version, "py")
     if success:
         return
@@ -41,8 +42,10 @@ def try_update(latest_version: str):
     success = update(latest_version, "python")
     if success:
         return
-    helper.colored_text("Update failed\nYou may need to manually update with py -m pip install -U battle-cats-save-editor", base=helper.RED)
-
+    helper.colored_text(
+        "Update failed\nYou may need to manually update with py -m pip install -U battle-cats-save-editor",
+        base=helper.RED,
+    )
 
 
 def get_local_version() -> str:

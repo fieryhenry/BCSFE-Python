@@ -1762,8 +1762,8 @@ def get_login_bonuses() -> dict[int, int]:
     length = next_int(4)
     data: dict[int, int] = {}
     for _ in range(length):
-        id = next_int(4)
-        data[id] = next_int(4)
+        login_id = next_int(4)
+        data[login_id] = next_int(4)
     return data
 
 

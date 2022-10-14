@@ -10,4 +10,5 @@ from . import (
     get_gold_pass,
     claim_user_rank_rewards,
     cat_shrine,
+    fix_time_issues,
 )

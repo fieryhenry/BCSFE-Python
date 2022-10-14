@@ -5,6 +5,7 @@ from multiprocessing import Process
 import os
 import shutil
 import sys
+import time
 from tkinter import Tk, filedialog
 from typing import Any, Callable, Generator, Optional, Union
 import colored  # type: ignore
@@ -26,6 +27,15 @@ BLACK = "#000000"
 WHITE = "#FFFFFF"
 CYAN = "#00FFFF"
 
+def get_time() -> int:
+    """Get current time in seconds"""
+
+    return int(time.time())
+
+def get_iso_time() -> str:
+    """Get the current time in iso format"""
+
+    return time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime())
 
 def print_line_seperator(base: str, char: str = "-", length: int = 80):
     """Print a line of a char"""

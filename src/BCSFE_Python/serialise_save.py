@@ -694,7 +694,7 @@ def serialise_cat_shrine(
         list[int]: The save data
     """
     save_data = write_double(save_data, shrine_data["stamp_1"])
-    save_data = write_double(save_data, shrine_data["stamp_1"])
+    save_data = write_double(save_data, shrine_data["stamp_2"])
     save_data = write(save_data, shrine_data["shrine_gone"], 1)
     save_data = write_length_data(save_data, shrine_data["flags"], 1, 1)
     save_data = write(save_data, shrine_data["xp_offering"], 4)

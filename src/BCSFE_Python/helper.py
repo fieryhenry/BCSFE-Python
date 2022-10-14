@@ -622,7 +622,7 @@ def save_file(
 ) -> Optional[str]:
     """Save a file with tkinter"""
     if not has_tkinter():
-        return os.path.join(get_home_path(), os.path.basename(path))
+        return os.path.basename(path)
     setup_tk()
     from tkinter import filedialog
 

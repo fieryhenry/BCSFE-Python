@@ -150,7 +150,7 @@ def normal_start_up(default_op: bool = True) -> None:
         path = helper.select_file(
             "Select a save file:",
             helper.get_save_file_filetype(),
-            initial_file=helper.get_default_save_name(),
+            initial_file=helper.get_save_path_home(),
         )
     elif index == 2:
         print("Enter details for save pulling:")
@@ -171,7 +171,7 @@ def normal_start_up(default_op: bool = True) -> None:
         js_path = helper.select_file(
             "Select save data json file",
             [("Json", "*.json")],
-            initial_file=helper.get_default_save_name() + ".json",
+            initial_file=helper.get_save_path_home() + ".json",
         )
         if js_path:
             path = helper.load_json_handler(js_path)

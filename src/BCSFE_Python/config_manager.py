@@ -131,7 +131,7 @@ def create_config_file(config_path: Optional[str] = None) -> None:
     file_data += "# The following settings are available:\n#\n"
     file_data += """DEFAULT_COUNTRY_CODE: "" # The default game version when downloading / pulling / loading save data. E.g en, jp, kr, tw. Empty means the game version is not specified and will be asked for when needed.
 DEFAULT_SAVE_FILE_PATH: "SAVE_DATA" # The default file path for your save data when saving changes / downloading save data / pulling etc
-
+FIXED_SAVE_PATH: False # If True, the save path will be from your user's folder / home folder. If False, the save path will be where the program is run from
 EDITOR:
   DISABLE_MAXES: False # Allows you to edit the level / amount of items past the max amount.
   SHOW_BAN_WARNING: True # Show a warning when editing bannable items.
@@ -204,6 +204,20 @@ def edit_default_save_file_path(_: Any) -> None:
     set_config_setting(
         "DEFAULT_SAVE_FILE_PATH", os.path.join(default_save_file_path, "SAVE_DATA")
     )
+
+def edit_fixed_save_path(_: Any) -> None:
+    """
+    Edit the fixed save path
+    """
+    fixed_save_path = get_config_value("FIXED_SAVE_PATH")
+    fixed_save_path = user_input_handler.colored_input(
+        f"Enter if the save path should be fixed. Current value: {fixed_save_path} (True/False):",
+    )
+    if fixed_save_path.lower() == "true":
+        fixed_save_path = True
+    else:
+        fixed_save_path = False
+    set_config_setting("FIXED_SAVE_PATH", fixed_save_path)
 
 
 def edit_editor_settings(_: Any) -> None:

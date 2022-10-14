@@ -580,7 +580,7 @@ def download_handler() -> Optional[str]:
     path = helper.save_file(
         "Save save data",
         helper.get_save_file_filetype(),
-        helper.get_default_save_name(),
+        helper.get_save_path_home(),
     )
     if path is None:
         return None

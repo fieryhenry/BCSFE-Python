@@ -271,11 +271,11 @@ def adb_pull_save_data(game_version: str) -> str:
         adb_pull(
             get_package_name(game_version),
             "files/SAVE_DATA",
-            helper.get_default_save_name(),
+            helper.get_save_path_home(),
         )
     except ADBException as err:
         adb_err_handler(err)
-    return helper.get_default_save_name()
+    return helper.get_save_path_home()
 
 
 def adb_push_save_data(game_version: str, path: str) -> None:

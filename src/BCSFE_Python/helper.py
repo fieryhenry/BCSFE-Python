@@ -26,15 +26,18 @@ BLACK = "#000000"
 WHITE = "#FFFFFF"
 CYAN = "#00FFFF"
 
+
 def get_time() -> int:
     """Get current time in seconds"""
 
     return int(time.time())
 
+
 def get_iso_time() -> str:
     """Get the current time in iso format"""
 
     return time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime())
+
 
 def print_line_seperator(base: str, char: str = "-", length: int = 80):
     """Print a line of a char"""
@@ -95,6 +98,7 @@ def get_file(file_name: str) -> str:
     file_path = os.path.join(get_local_files_path(), file_name)
     return file_path
 
+
 def get_files_in_dir(dir_path: str) -> list[str]:
     """Get all files in a directory"""
 
@@ -104,6 +108,7 @@ def get_files_in_dir(dir_path: str) -> list[str]:
             file_path = os.path.join(dir_path, file)
             files.append(file_path)
     return files
+
 
 def find_files_in_dir(dir_path: str, file_name: str) -> list[str]:
     """Find all files in a directory with a certain name"""
@@ -149,6 +154,7 @@ def frames_to_time(frames: int) -> dict[str, Any]:
     minutes, seconds = divmod(seconds, 60)
     hours, minutes = divmod(minutes, 60)
     return {"hh": hours, "mm": minutes, "ss": seconds, "frames": frames}
+
 
 def clamp_int(value: int) -> int:
     """
@@ -544,15 +550,17 @@ def select_dir(title: str, default_dir: str) -> str:
     """
     if not has_tkinter():
         return default_dir
-    from tkinter import filedialog # type: ignore
+    from tkinter import filedialog  # type: ignore
+
     root = setup_tk()
     dir_path = filedialog.askdirectory(title=title, initialdir=default_dir, parent=root)
     return dir_path
 
+
 def has_tkinter() -> bool:
     """Check if tkinter is installed"""
     try:
-        import tkinter # type: ignore
+        import tkinter  # type: ignore
     except ImportError:
         return False
     return True
@@ -566,6 +574,7 @@ def setup_tk() -> Any:
         Tk: Tkinter window
     """
     from tkinter import Tk
+
     root = Tk()
     root.withdraw()
     root.wm_attributes("-topmost", 1)  # type: ignore
@@ -586,6 +595,7 @@ def run_in_parallel(fns: list[Process]) -> None:
     for p in proc:
         p.join()
 
+
 def run_in_background(func: Callable[..., Any]) -> None:
     """
     Run a function in the background
@@ -603,6 +613,7 @@ def get_cc(save_stats: dict[str, Any]) -> str:
         return "jp"
     return "en"
 
+
 def get_save_path_home() -> str:
     """
     Get the save path
@@ -616,6 +627,7 @@ def get_save_path_home() -> str:
         create_dirs(os.path.dirname(path))
         return path
     return save_name
+
 
 def save_file(
     title: str, file_types: list[tuple[str, str]], path: str
@@ -654,13 +666,16 @@ def select_file(
 ) -> str:
     """Select a file with tkinter"""
     if not has_tkinter():
-        path = user_input_handler.colored_input(f"Enter the path to the file ({title}): ")
+        path = user_input_handler.colored_input(
+            f"Enter the path to the file ({title}): "
+        )
         if not os.path.isfile(path):
             colored_text("Invalid path", new=RED)
             return ""
         return path
     setup_tk()
     from tkinter import filedialog
+
     file_path = filedialog.askopenfilename(
         initialdir=default_dir,
         title=title,
@@ -668,6 +683,7 @@ def select_file(
         initialfile=initial_file,
     )
     return file_path
+
 
 def get_home_path() -> str:
     """
@@ -677,7 +693,6 @@ def get_home_path() -> str:
         str: Home path
     """
     return os.path.expanduser("~")
-
 
 
 def get_default_save_name() -> str:

@@ -6,7 +6,6 @@ import os
 import shutil
 import sys
 import time
-from tkinter import Tk, filedialog
 from typing import Any, Callable, Generator, Optional, Union
 import colored  # type: ignore
 
@@ -543,18 +542,30 @@ def select_dir(title: str, default_dir: str) -> str:
     Returns:
         str: Selected directory
     """
+    if not has_tkinter():
+        return default_dir
+    from tkinter import filedialog # type: ignore
     root = setup_tk()
     dir_path = filedialog.askdirectory(title=title, initialdir=default_dir, parent=root)
     return dir_path
 
+def has_tkinter() -> bool:
+    """Check if tkinter is installed"""
+    try:
+        import tkinter # type: ignore
+    except ImportError:
+        return False
+    return True
 
-def setup_tk() -> Tk:
+
+def setup_tk() -> Any:
     """
     Setup the tkinter window
 
     Returns:
         Tk: Tkinter window
     """
+    from tkinter import Tk
     root = Tk()
     root.withdraw()
     root.wm_attributes("-topmost", 1)  # type: ignore
@@ -592,12 +603,28 @@ def get_cc(save_stats: dict[str, Any]) -> str:
         return "jp"
     return "en"
 
+def get_save_path_home() -> str:
+    """
+    Get the save path
+
+    Returns:
+        str: Save path
+    """
+    save_name = get_default_save_name()
+    if config_manager.get_config_value("FIXED_SAVE_PATH"):
+        path = os.path.join(get_home_path(), "bc_saves", os.path.basename(save_name))
+        create_dirs(os.path.dirname(path))
+        return path
+    return save_name
 
 def save_file(
     title: str, file_types: list[tuple[str, str]], path: str
 ) -> Optional[str]:
     """Save a file with tkinter"""
+    if not has_tkinter():
+        return os.path.join(get_home_path(), os.path.basename(path))
     setup_tk()
+    from tkinter import filedialog
 
     try:
         path_d = filedialog.asksaveasfile(
@@ -626,7 +653,10 @@ def select_file(
     initial_file: str = "",
 ) -> str:
     """Select a file with tkinter"""
+    if not has_tkinter():
+        return user_input_handler.colored_input(f"Enter the path to the file ({title}): ")
     setup_tk()
+    from tkinter import filedialog
     file_path = filedialog.askopenfilename(
         initialdir=default_dir,
         title=title,
@@ -634,6 +664,16 @@ def select_file(
         initialfile=initial_file,
     )
     return file_path
+
+def get_home_path() -> str:
+    """
+    Get the home path
+
+    Returns:
+        str: Home path
+    """
+    return os.path.expanduser("~")
+
 
 
 def get_default_save_name() -> str:
@@ -697,7 +737,7 @@ def export_json(save_stats: dict[str, Any], path: str) -> None:
 
     ordered_data = parse_save.re_order(save_stats)
     if os.path.isdir(path):
-        path = os.path.join(path, f"{get_default_save_name()}.json")
+        path = os.path.join(path, f"{get_save_path_home()}.json")
     write_file_string(path, json.dumps(ordered_data, indent=4))
     colored_text(f"Successfully wrote json to &{os.path.abspath(path)}&")
 
@@ -711,7 +751,7 @@ def load_json_handler(json_path: str) -> Union[None, str]:
     path = save_file(
         "Save file",
         get_save_file_filetype(),
-        os.path.join(os.path.dirname(json_path), get_default_save_name()),
+        os.path.join(os.path.dirname(json_path), get_save_path_home()),
     )
     if path is None:
         return None

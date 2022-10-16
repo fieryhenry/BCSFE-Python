@@ -1,5 +1,7 @@
 """Module that runs when the module is run directly"""
+import os
 import sys
+import traceback
 
 from . import (
     adb_handler,
@@ -211,6 +213,8 @@ def start(path: str) -> None:
             helper.colored_text(
                 f"Save data saved to &{path}&", base=helper.GREEN, new=helper.WHITE
             )
+        temp_path = os.path.join(config_manager.get_app_data_folder(), "SAVE_DATA_temp")
+        helper.write_file_bytes(temp_path, save_data)
         if config_manager.get_config_value_category(
             "SAVE_CHANGES", "ALWAYS_EXPORT_JSON"
         ):
@@ -222,3 +226,28 @@ if __name__ == "__main__":
         main()
     except KeyboardInterrupt:
         sys.exit()
+    except Exception as e:  # pylint: disable=broad-except
+        helper.colored_text(
+            f"An error occured: &{e}&", base=helper.RED, new=helper.WHITE
+        )
+        traceback.print_exc()
+        save = (
+            user_input_handler.colored_input(
+                "Do you want to save your changes? (&y&/&n&):"
+            )
+            == "y"
+        )
+        if save:
+            current_path = helper.get_save_path()
+            temp_file_path = os.path.join(
+                config_manager.get_app_data_folder(), "SAVE_DATA_temp"
+            )
+            if os.path.exists(temp_file_path):
+                helper.write_file_bytes(
+                    current_path, helper.read_file_bytes(temp_file_path)
+                )
+                helper.colored_text(
+                    f"Save data saved to &{current_path}&",
+                    base=helper.GREEN,
+                    new=helper.WHITE,
+                )

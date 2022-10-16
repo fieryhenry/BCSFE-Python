@@ -165,6 +165,13 @@ def select_options(
         ids_s = helper.int_to_str_ls(ids)
 
     ids = helper.parse_int_list(ids_s, -1)
+    for item_id in ids:
+        if item_id < 0 or item_id > total - 1:
+            helper.colored_text(
+                f"Invalid input. Please enter a valid integer between 1 and {total+1}.",
+                helper.RED,
+            )
+            return select_options(options, mode, extra_data, offset)
     return ids, individual
 
 

@@ -262,7 +262,7 @@ def get_save_path() -> str:
 def set_save_path(path: str) -> None:
     """Set the save path in the env variable"""
 
-    os.environ["BC_SAVE_PATH"] = path
+    os.environ["BC_SAVE_PATH"] = os.path.abspath(path)
 
 
 def get_text_splitter(isjp: bool):

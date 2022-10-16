@@ -6,7 +6,7 @@ import re
 import subprocess
 from typing import Union
 
-from . import helper, user_input_handler
+from . import helper, user_input_handler, config_manager
 
 
 class ADBExceptionTypes(enum.Enum):
@@ -181,11 +181,17 @@ def find_adb_path() -> Union[str, None]:
         "Program Files (x86)\\Nox\\bin",
         "adb",
     ]
+    found_paths: list[str] = []
     for drive_letter in drive_letters:
         for path in paths:
             path = f"{drive_letter}:\\{path}"
             if os.path.exists(path):
+                found_paths.append(path)
+    if found_paths:
+        for path in found_paths:
+            if "adb" not in path:
                 return path
+        return found_paths[0]
 
     return None
 
@@ -216,8 +222,15 @@ def add_to_path() -> None:
             adb_path = os.path.dirname(adb_path)
 
     print(f"Adding {adb_path} to your path environment variable")
-    subprocess.run(f"set PATH={adb_path};%PATH%", shell=True, check=True)
-    subprocess.run(f"setx PATH {adb_path};%PATH%", shell=True, check=True)
+    backup = os.environ["PATH"]
+    backup_path = os.path.join(config_manager.get_app_data_folder(), "path_backup.txt")
+    helper.write_file_string(backup_path, backup)
+    helper.colored_text(
+        f"Your old PATH environment variable has been backed up to &{backup_path}&"
+    )
+    subprocess.run(
+        f'setx PATH "{adb_path};%PATH%"', shell=True, check=True, text=True
+    )
     print("Successfully added adb to path")
 
 

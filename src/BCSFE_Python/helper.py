@@ -563,6 +563,10 @@ def has_tkinter() -> bool:
         import tkinter  # type: ignore
     except ImportError:
         return False
+    try:
+        setup_tk()
+    except tkinter.TclError:
+        return False
     return True
 
 

@@ -41,7 +41,7 @@ class Tracker:
     def read_tracker(self) -> dict[str, int]:
         """Read the item tracker"""
 
-        if not os.path.exists(helper.get_file("tracker.json")):
+        if not os.path.exists(helper.get_file("item_tracker.json")):
             self.reset_tracker()
         data = helper.read_file_string(helper.get_file("item_tracker.json"))
         return json.loads(data)
@@ -89,7 +89,7 @@ class Tracker:
         if not config_manager.get_config_value_category("SERVER", "UPLOAD_METADATA"):
             return False
 
-        for item in self.items.__dict__.values():
+        for item in self.items.to_dict().values():
             if item != 0:
                 return True
         return False

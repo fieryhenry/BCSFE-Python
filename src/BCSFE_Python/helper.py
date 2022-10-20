@@ -431,12 +431,13 @@ def exit_editor():
 
 def check_cat_ids(cat_ids: list[int], save_stats: dict[str, Any]) -> list[int]:
     """Check if a list of cat ids is valid"""
-
+    new_cat_ids: list[int] = []
     for cat_id in cat_ids:
-        if cat_id > len(save_stats["cats"]):
+        if cat_id > len(save_stats["cats"]) - 1:
             colored_text(f"Invalid cat id {cat_id}", base=RED)
-            cat_ids.remove(cat_id)
-    return cat_ids
+            continue
+        new_cat_ids.append(cat_id)
+    return new_cat_ids
 
 
 def colored_text(

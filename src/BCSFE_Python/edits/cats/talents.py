@@ -93,14 +93,14 @@ def get_cat_talents(
 
     data: dict[Any, Any] = {}
     letter_order = find_order(cat_talents, cat_talent_data)
-    for i in range(len(cat_talents) - 1):
+    for i, letter in enumerate(letter_order):
         cat_data = {}
-        if letter_order[i] == "F":
+        if letter == "F":
             text_id_str = "tFxtID_F"  # ponos made a typo, should be textID_F
         else:
-            text_id_str = f"textID_{letter_order[i]}"
+            text_id_str = f"textID_{letter}"
         cat_data["name"] = cat_talent_data[text_id_str].strip("\n")
-        cat_data["max"] = int(cat_talent_data[f"MAXLv_{letter_order[i]}"])
+        cat_data["max"] = int(cat_talent_data[f"MAXLv_{letter}"])
         if cat_data["max"] == 0:
             cat_data["max"] = 1
         data[i] = cat_data

@@ -30,7 +30,7 @@ def edit_cache(password: str, token: str, save_stats: dict[str, Any]) -> bool:
     return success
 
 
-def fix_elsewhere(save_stats: dict[str, Any], force_mi: bool = False) -> dict[str, Any]:
+def fix_elsewhere(save_stats: dict[str, Any], force_mi: bool = False, text: bool = True) -> dict[str, Any]:
     """Handler for fixing the elsewhere issue and unban an account"""
 
     helper.colored_text("Getting account password...", helper.GREEN)
@@ -49,9 +49,10 @@ def fix_elsewhere(save_stats: dict[str, Any], force_mi: bool = False) -> dict[st
         server_handler.update_managed_items(
             save_stats["inquiry_code"], token, save_stats
         )
-    helper.colored_text(
-        "Done!\nYou may get a ban message when pressing play. If you do, just press play again and it should go away\nPress enter to continue...(You still need to save your changes)",
-        helper.DARK_YELLOW,
-    )
-    input()
+    if text:
+        helper.colored_text(
+            "Done!\nYou may get a ban message when pressing play. If you do, just press play again and it should go away\nPress enter to continue...(You still need to save your changes)",
+            helper.DARK_YELLOW,
+        )
+        input()
     return save_stats

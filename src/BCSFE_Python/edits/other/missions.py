@@ -38,7 +38,9 @@ def get_mission_names(is_jp: bool) -> dict[int, Any]:
         if not helper.check_int(line_data[0]):
             continue
         mission_id = int(line_data[0])
-        mission_names[mission_id] = line_data[1]
+        name = line_data[1]
+        name = name.replace("&", "\\&")
+        mission_names[mission_id] = name
     return mission_names
 
 

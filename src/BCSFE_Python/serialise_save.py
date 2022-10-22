@@ -937,7 +937,7 @@ def serialize_save(save_stats: dict[str, Any]) -> bytes:
     else:
         save_data = write(save_data, save_stats["unknown_24"])
 
-    save_data = write_length_data(save_data, save_stats["catseye_related_data"])
+    save_data = serialise_cat_upgrades(save_data, save_stats["catseye_related_data"])
 
     save_data = write_length_data(
         save_data, save_stats["unknown_22"], write_length=False

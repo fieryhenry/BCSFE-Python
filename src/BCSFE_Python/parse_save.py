@@ -1449,7 +1449,13 @@ def get_cat_shrine_data() -> dict[str, Any]:
     shrine_gone = next_int(1)
     flags: list[int] = get_length_data(1, 1)
     xp_offering = next_int(4)
-    return {"flags": flags, "xp_offering": xp_offering, "shrine_gone": shrine_gone, "stamp_1": stamp_1, "stamp_2": stamp_2}
+    return {
+        "flags": flags,
+        "xp_offering": xp_offering,
+        "shrine_gone": shrine_gone,
+        "stamp_1": stamp_1,
+        "stamp_2": stamp_2,
+    }
 
 
 def get_slot_names(save_stats: dict[str, Any]) -> list[str]:
@@ -1920,7 +1926,7 @@ def parse_save(save_data: bytes, country_code: Union[str, None]) -> dict[str, An
     else:
         save_stats["unknown_24"] = next_int_len(4)
 
-    save_stats["catseye_related_data"] = get_length_data()
+    save_stats["catseye_related_data"] = get_cat_upgrades()
     save_stats["unknown_22"] = get_length_data(length=11)
     save_stats["user_rank_rewards"] = get_length_data(4, 1)
 

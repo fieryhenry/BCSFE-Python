@@ -19,3 +19,15 @@ def edit_uncanny(save_stats: dict[str, Any]) -> dict[str, Any]:
     save_stats["uncanny"] = event_stages.stage_handler(stage_data, ids, -1)
 
     return save_stats
+
+def is_ancient_curse_clear(save_stats: dict[str, Any]) -> bool:
+    """
+    Check if the ancient curse is cleared
+
+    Args:
+        save_stats (dict[str, Any]): The save stats
+
+    Returns:
+        bool: If the ancient curse is cleared
+    """
+    return save_stats["uncanny"]["Value"]["clear_progress"][0][0] >= 1

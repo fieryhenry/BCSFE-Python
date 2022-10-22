@@ -2150,8 +2150,8 @@ def parse_save(save_data: bytes, country_code: Union[str, None]) -> dict[str, An
     save_stats["officer_pass_cat_form"] = next_int_len(2)
 
     save_stats["gv_80200"] = next_int_len(4)  # 80200
-
-    save_stats["unknown_73"] = next_int_len(2)
+    save_stats["filibuster_stage_id"] = next_int_len(1)
+    save_stats["filibuster_stage_enabled"] = next_int_len(1)
 
     save_stats["gv_80300"] = next_int_len(4)  # 80300
 

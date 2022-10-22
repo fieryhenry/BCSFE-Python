@@ -1171,7 +1171,8 @@ def serialize_save(save_stats: dict[str, Any]) -> bytes:
 
     save_data = write(save_data, save_stats["gv_80200"])
 
-    save_data = write(save_data, save_stats["unknown_73"])
+    save_data = write(save_data, save_stats["filibuster_stage_id"])
+    save_data = write(save_data, save_stats["filibuster_stage_enabled"])
 
     save_data = write(save_data, save_stats["gv_80300"])
 

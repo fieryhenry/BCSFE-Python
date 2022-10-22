@@ -122,6 +122,7 @@ FEATURES: dict[str, Any] = {
         "Clear Tutorial": levels.clear_tutorial.clear_tutorial,
         "Catclaw Dojo Score (Hall of Initiates)": basic.basic_items.edit_dojo_score,
         "Add Enigma Stages": levels.enigma_stages.edit_enigma_stages,
+        "Allow the filibuster stage to be recleared" : levels.allow_filibuster_clearing.allow_filibuster_clearing,
     },
     "Inquiry Code / Token / Account": {
         "Inquiry Code": basic.basic_items.edit_inquiry_code,

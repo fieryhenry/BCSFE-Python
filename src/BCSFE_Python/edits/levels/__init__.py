@@ -11,4 +11,5 @@ from . import (
     towers,
     treasures,
     uncanny,
+    allow_filibuster_clearing
 )

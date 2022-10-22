@@ -1,41 +1,34 @@
 """Handler for cat upgrades"""
 from typing import Any, Union
 
-from ... import helper, user_input_handler, game_data_getter, csv_handler
-from . import cat_id_selector
+from ... import helper, user_input_handler
+from . import cat_id_selector, cat_helper
 
 
-def get_rarities(is_jp: bool) -> list[int]:
-    """Get all cat ids of each rarity"""
+def set_level_caps(save_stats: dict[str, Any]) -> dict[str, Any]:
+    """
+    Set the level caps for the cats
 
-    file_data = game_data_getter.get_file_latest(
-        "DataLocal", "unitbuy.csv", is_jp
-    ).decode("utf-8")
-    data = helper.parse_int_list_list(csv_handler.parse_csv(file_data))
-    rarity_ids = helper.copy_first_n(data, 13)
-    return rarity_ids
+    Args:
+        save_stats (dict[str, Any]): The save stats
 
+    Returns:
+        dict[str, Any]: The save stats
+    """    
 
-def get_rarity(rarity_ids: list[int], is_jp: bool) -> list[int]:
-    """Get all cat ids of a certain rarity"""
-
-    rarities = get_rarities(is_jp)
-    cat_ids: list[int] = []
-    for rarity_id in rarity_ids:
-        for i, rarity_val in enumerate(rarities):
-            if int(rarity_val) == rarity_id:
-                cat_ids.append(i)
-    return cat_ids
-
-
-TYPES = [
-    "Normal",
-    "Special",
-    "Rare",
-    "Super Rare",
-    "Uber Super Rare",
-    "Legend Rare",
-]
+    unit_max_data = cat_helper.get_unit_max_levels(helper.is_jp(save_stats))
+    rarities = cat_helper.get_rarities(helper.is_jp(save_stats))
+    for cat_id in range(len(save_stats["cats"])):
+        base_level = save_stats["cat_upgrades"]["Base"][cat_id]
+        max_base_level = cat_helper.get_unit_max_level(unit_max_data, cat_id)[0]
+        rarity = rarities[cat_id]
+        max_base_level_ur = cat_helper.get_max_level(save_stats, rarity, cat_id)
+        level_cap = cat_helper.get_level_cap_increase_amount(
+            min(base_level, max_base_level, max_base_level_ur)
+        )
+        save_stats["catseye_cat_data"][cat_id] = level_cap
+        save_stats["catseye_related_data"]["Base"][cat_id] = level_cap + 10
+    return save_stats
 
 
 def set_user_popups(save_stats: dict[str, Any]) -> dict[str, Any]:
@@ -129,5 +122,6 @@ def upgrade_cats_ids(save_stats: dict[str, Any], ids: list[int]) -> dict[str, An
         save_stats=save_stats,
     )
     save_stats = set_user_popups(save_stats)
+    save_stats = set_level_caps(save_stats)
     print("Successfully set cat levels")
     return save_stats

@@ -247,7 +247,7 @@ class ItemGroup:
                 display_val = item.value
 
         helper.colored_text(
-            f"Successfully set the {self.selected_items[0].success_message} of {self.name} to &{display_val + self.selected_items[0].offset}&"
+            f"Successfully {self.selected_items[0].success_message} of {self.name} to &{display_val + self.selected_items[0].offset}&"
         )
 
 

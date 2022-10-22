@@ -32,6 +32,21 @@ def clear_specific_levels(
     )
     return story_chapters
 
+def has_cleared_chapter(save_stats: dict[str, Any], chapter_id: int) -> bool:
+    """
+    Check if a chapter has been cleared
+
+    Args:
+        save_stats (dict[str, Any]): Save stats
+        chapter_id (int): Chapter ID
+
+    Returns:
+        bool: True if cleared, False if not
+    """
+    chapter_id = format_story_id(chapter_id)
+
+    return save_stats["story_chapters"]["Chapter Progress"][chapter_id] >= 48
+
 
 def clear_specific_level_ids(
     story_chapters: dict[str, Any], chapter_id: int, ids: list[int], val: int

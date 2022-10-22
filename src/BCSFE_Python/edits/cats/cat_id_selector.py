@@ -12,7 +12,7 @@ from ... import (
     user_input_handler,
 )
 from ..levels import treasures
-from . import upgrade_cats
+from . import cat_helper
 
 
 def select_cats(save_stats: dict[str, Any], current: bool = True) -> list[int]:
@@ -65,12 +65,12 @@ def select_cats_rarity(save_stats: dict[str, Any]) -> list[int]:
     """Select cats of a certain rarity"""
 
     ids = user_input_handler.select_not_inc(
-        options=upgrade_cats.TYPES,
+        options=cat_helper.TYPES,
         mode="select",
     )
     is_jp = helper.is_jp(save_stats)
 
-    cat_ids = upgrade_cats.get_rarity(ids, is_jp)
+    cat_ids = cat_helper.get_rarity(ids, is_jp)
     return cat_ids
 
 

@@ -5,12 +5,15 @@ from typing import Any, Optional
 
 from ... import helper, user_input_handler, game_data_getter
 
+
 def get_medal_names(is_jp: bool) -> list[str]:
     """Get all medal names"""
 
-    medal_names = game_data_getter.get_file_latest(
-        "resLocal", "medalname.tsv", is_jp
-    ).decode("utf-8").splitlines()
+    medal_names = (
+        game_data_getter.get_file_latest("resLocal", "medalname.tsv", is_jp)
+        .decode("utf-8")
+        .splitlines()
+    )
     names: list[str] = []
     for line in medal_names:
         line_split = line.split("\t")
@@ -36,6 +39,20 @@ def set_medals(medal_stats: dict[str, Any], ids: list[int]) -> dict[str, Any]:
             if medal_id not in medal_stats["medal_data_2"]:
                 medal_stats["medal_data_1"].append(medal_id)
             medal_stats["medal_data_2"][medal_id] = 0
+    return medal_stats
+
+
+def remove_medals(medal_stats: dict[str, Any], ids: list[int]) -> dict[str, Any]:
+    """Remove the medal stats of a set of medals"""
+
+    for medal_id in ids:
+        if medal_id == 0:
+            continue
+        medal_id -= 1
+        if medal_id in medal_stats["medal_data_1"]:
+            medal_stats["medal_data_1"].remove(medal_id)
+        if medal_id in medal_stats["medal_data_2"]:
+            medal_stats["medal_data_2"].pop(medal_id)
     return medal_stats
 
 
@@ -152,9 +169,11 @@ class Medals:
 def get_medal_data(is_jp: bool) -> Medals:
     """Get the medal data"""
 
-    medal_data = json.loads(game_data_getter.get_file_latest("DataLocal", "medallist.json", is_jp).decode("utf-8"))[
-        "iconID"
-    ]
+    medal_data = json.loads(
+        game_data_getter.get_file_latest("DataLocal", "medallist.json", is_jp).decode(
+            "utf-8"
+        )
+    )["iconID"]
 
     treasures: list[TreasureMedal] = []
     characters: list[CharacterMedal] = []
@@ -216,6 +235,12 @@ def medals(save_stats: dict[str, Any]) -> dict[str, Any]:
     """Handler for editting meow medals"""
 
     medal_stats = save_stats["medals"]
+    remove = (
+        user_input_handler.colored_input(
+            "Do you want to add or remove medals? (&a&/&r&):"
+        )
+        == "r"
+    )
 
     names = get_medal_names(helper.check_data_is_jp(save_stats))
     helper.colored_list(names)
@@ -226,7 +251,10 @@ def medals(save_stats: dict[str, Any]) -> dict[str, Any]:
         ),
         len(names) + 1,
     )
-    medal_stats = set_medals(medal_stats, ids)
+    if remove:
+        medal_stats = remove_medals(medal_stats, ids)
+    else:
+        medal_stats = set_medals(medal_stats, ids)
     save_stats["medals"] = medal_stats
-    print("Successfully gave medals")
+    print(f"Successfully {'gave' if not remove else 'removed'} medals")
     return save_stats

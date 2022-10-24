@@ -4,6 +4,7 @@ from typing import Any
 from ... import user_input_handler, helper
 from ...edits.other import meow_medals
 
+
 def set_stage_data(
     stage_data_edit: dict[str, Any],
     stage_id: int,
@@ -102,7 +103,9 @@ def stage_handler(
 
     individual = True
     if len(ids) > 1:
-        individual = user_input_handler.ask_if_individual("stars / crowns for each stage")
+        individual = user_input_handler.ask_if_individual(
+            "stars / crowns for each stage"
+        )
     first = True
     stars = 0
     stage_data_edit = stage_data
@@ -152,7 +155,13 @@ def stories_of_legend(save_stats: dict[str, Any]) -> dict[str, Any]:
     )
     offset = -1
     save_stats["event_stages"] = stage_handler(stage_data, ids, offset)
-    save_stats["event_stages"], save_stats["medals"] = set_medals(save_stats["event_stages"], save_stats["medals"], (0, 50), 0, helper.check_data_is_jp(save_stats))
+    save_stats["event_stages"], save_stats["medals"] = set_medals(
+        save_stats["event_stages"],
+        save_stats["medals"],
+        (0, 50),
+        0,
+        helper.check_data_is_jp(save_stats),
+    )
     return save_stats
 
 
@@ -170,5 +179,11 @@ def event_stages(save_stats: dict[str, Any]) -> dict[str, Any]:
     )
     offset = 400
     save_stats["event_stages"] = stage_handler(stage_data, ids, offset)
-    save_stats["event_stages"], save_stats["medals"] = set_medals(save_stats["event_stages"], save_stats["medals"], (0, len(save_stats["event_stages"]["Value"]["unlock_next"])), -600, helper.check_data_is_jp(save_stats))
+    save_stats["event_stages"], save_stats["medals"] = set_medals(
+        save_stats["event_stages"],
+        save_stats["medals"],
+        (0, len(save_stats["event_stages"]["Value"]["unlock_next"])),
+        -600,
+        helper.check_data_is_jp(save_stats),
+    )
     return save_stats

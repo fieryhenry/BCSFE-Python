@@ -11,5 +11,6 @@ from . import (
     towers,
     treasures,
     uncanny,
-    allow_filibuster_clearing
+    allow_filibuster_clearing,
+    unlock_aku_realm,
 )

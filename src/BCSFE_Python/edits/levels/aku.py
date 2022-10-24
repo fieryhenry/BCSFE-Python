@@ -1,12 +1,13 @@
 """Handler for editing the aku realm"""
 from typing import Any
-from . import story_level_id_selector
+from . import story_level_id_selector, unlock_aku_realm
 from ... import helper, user_input_handler
 
 
 def edit_aku(save_stats: dict[str, Any]) -> dict[str, Any]:
     """Clear whole chapters"""
 
+    save_stats = unlock_aku_realm.unlock_aku_realm(save_stats)
     options = ["Clear aku stages", "Wipe aku data"]
     option = user_input_handler.select_single(options, "select")
     if option == 2:

@@ -16,9 +16,11 @@ Everyone who's given me saves, which helped to test save parsing/serialising and
 
 ## How to use:
 
-[Tutorial video](https://www.youtube.com/watch?v=Kr6VaLTXOSY) here, or scroll down for a text tutorial
+If you have a pc: watch a [Tutorial video](https://www.youtube.com/watch?v=Kr6VaLTXOSY), or scroll down for a text tutorial
 
-### Main tutorial
+If you only have an android device: read the [Android text tutorial](https://github.com/fieryhenry/BCSFE-Python#android-tutorial)
+
+## Main tutorial
 
 You no longer need a rooted device nor a rooted android emulator.
 
@@ -148,3 +150,47 @@ The way you fix it is the same method as the elsewhere fix, so just follow that.
 - Instead of hacking in cat food, just edit everything in that you can buy with cat food, e.g battle items, catamins, xp, energy refills (leaderships), etc. If you really want catfood then you can clear and unclear catnip missions with the feature `Catnip Challenges / Missions` then entering 1 when asked. You'll need to collect the catfood in-game after each clear though
 
 - Instead of hacking in tickets, just hack in the cats/upgrades you want directly
+
+## Android Tutorial
+
+If you don't have a pc to install and run the editor you can use Termux.
+
+1. Download [F-Droid](https://f-droid.org/F-Droid.apk) - You can download the Termux apk directly but then it won't automatically update
+
+2. Install F-Droid
+
+3. Open it and wait for it to finish `Updating repositories`
+
+4. Tap the green search button in the bottom right and search for `Termux`
+
+5. Tap `Termux Terminal emulator with packages`
+
+6. Tap `INSTALL` and then `OPEN` once installed
+
+7. Once opened enter the command `pkg install python`
+
+8. If that doesn't work then read this: https://stackoverflow.com/a/71097459
+
+9. Then run `python -m pip install -U battle-cats-save-editor`
+
+10. Then run `python -m BCSFE_Python`
+
+11. You can then use the editor like normal (If asked to enter the path to a save file, then just enter `SAVE_DATA`)
+
+### Install from source
+
+If you want the latest features and don't mind bugs then you can install the editor from the github.
+
+1. Download [Git](https://git-scm.com/downloads)
+
+2. Run the following commands: (You may have to replace `py` with `python` or `python3`)
+
+```batch
+git clone https://github.com/fieryhenry/BCSFE-Python.git
+py -m pip install -e BCSFE-Python/
+py -m BCSFE_Python
+```
+
+If you want to use the editor again all you need to do is run the `py -m BCSFE_Python` command
+
+Then if you want the latest changes you only need to run `git pull` in the downloaded `BCSFE-Python` folder. (use `cd` to change the folder)

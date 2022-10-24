@@ -439,6 +439,10 @@ def check_cat_ids(cat_ids: list[int], save_stats: dict[str, Any]) -> list[int]:
         new_cat_ids.append(cat_id)
     return new_cat_ids
 
+def error_text(text: str):
+    """Print error text"""
+
+    colored_text(text, base=RED)
 
 def colored_text(
     text: str,

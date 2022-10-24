@@ -1,7 +1,7 @@
 """Update the editor"""
 
 import subprocess
-from typing import Any
+from typing import Any, Optional
 
 import requests
 
@@ -54,7 +54,7 @@ def get_local_version() -> str:
     return helper.read_file_string(helper.get_file("version.txt"))
 
 
-def get_version_info() -> tuple[str, str]:
+def get_version_info() -> Optional[tuple[str, str]]:
     """Gets the latest version of the program"""
 
     package_name = "battle-cats-save-editor"
@@ -62,8 +62,8 @@ def get_version_info() -> tuple[str, str]:
         response = requests.get(f"https://pypi.org/pypi/{package_name}/json")
         response.raise_for_status()
         data = response.json()
-    except requests.exceptions.RequestException as err:
-        raise Exception("Error getting pypi version") from err
+    except requests.exceptions.RequestException:
+        return None
 
     info = (
         get_pypi_version(data),

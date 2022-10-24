@@ -1,10 +1,10 @@
 """Handler for editing gamatoto helpers"""
-from typing import Any
+from typing import Any, Optional
 
 from ... import item, game_data_getter, helper
 
 
-def get_gamatoto_helpers(is_jp: bool) -> dict[str, Any]:
+def get_gamatoto_helpers(is_jp: bool) -> Optional[dict[str, Any]]:
     """Get the rarities of all gamatoto helpers"""
 
     if is_jp:
@@ -12,13 +12,13 @@ def get_gamatoto_helpers(is_jp: bool) -> dict[str, Any]:
     else:
         country_code = "en"
 
-    data = (
-        game_data_getter.get_file_latest(
-            "resLocal", f"GamatotoExpedition_Members_name_{country_code}.csv", is_jp
-        )
-        .decode("utf-8")
-        .splitlines()
-    )[1:]
+    file_data = game_data_getter.get_file_latest(
+        "resLocal", f"GamatotoExpedition_Members_name_{country_code}.csv", is_jp
+    )
+    if file_data is None:
+        helper.error_text("Failed to get gamatoto helper data")
+        return None
+    data = file_data.decode("utf-8").splitlines()[1:]
     helpers: dict[str, Any] = {}
     for line in data:
         line_data = line.split(helper.get_text_splitter(is_jp))
@@ -87,6 +87,8 @@ def edit_helpers(save_stats: dict[str, Any]) -> dict[str, Any]:
 
     helpers = save_stats["helpers"]
     helper_data = get_gamatoto_helpers(helper.check_data_is_jp(save_stats))
+    if helper_data is None:
+        return save_stats
 
     helper_count = get_helpers(helpers, helper_data)
 

@@ -1,5 +1,5 @@
 """Helper for cats"""
-from typing import Any
+from typing import Any, Optional
 
 from ... import csv_handler, game_data_getter, helper
 from ..levels import main_story, uncanny
@@ -27,7 +27,7 @@ def get_level_cap_increase_amount(cat_base_level: int) -> int:
     return max(0, cat_base_level - 29)
 
 
-def get_unit_max_levels(is_jp: bool):
+def get_unit_max_levels(is_jp: bool) -> Optional[tuple[list[int], list[int]]]:
     """
     Get the max base and plus levels for all cats
 
@@ -37,10 +37,11 @@ def get_unit_max_levels(is_jp: bool):
     Returns:
         tuple[list[int], list[int]]: The max base and plus levels for all cats
     """
-    file_data = game_data_getter.get_file_latest(
-        "DataLocal", "unitbuy.csv", is_jp
-    ).decode("utf-8")
-    data = helper.parse_int_list_list(csv_handler.parse_csv(file_data))
+    file_data = game_data_getter.get_file_latest("DataLocal", "unitbuy.csv", is_jp)
+    if file_data is None:
+        helper.error_text("Could not get unitbuy.csv")
+        return None
+    data = helper.parse_int_list_list(csv_handler.parse_csv(file_data.decode("utf-8")))
     max_base_level = helper.copy_first_n(data, 50)
     max_plus_level = helper.copy_first_n(data, 51)
     return max_base_level, max_plus_level
@@ -67,8 +68,11 @@ def get_rarities(is_jp: bool) -> list[int]:
 
     file_data = game_data_getter.get_file_latest(
         "DataLocal", "unitbuy.csv", is_jp
-    ).decode("utf-8")
-    data = helper.parse_int_list_list(csv_handler.parse_csv(file_data))
+    )
+    if file_data is None:
+        helper.error_text("Could not get unitbuy.csv")
+        return []
+    data = helper.parse_int_list_list(csv_handler.parse_csv(file_data.decode("utf-8")))
     rarity_ids = helper.copy_first_n(data, 13)
     return rarity_ids
 
@@ -204,7 +208,6 @@ def get_max_cat_level_special(save_stats: dict[str, Any], cat_id: int) -> int:
     if acient_curse_clear and legend:
         return 40
     return 50
-
 
 
 def get_max_cat_level_rare(save_stats: dict[str, Any]) -> int:

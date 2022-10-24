@@ -6,17 +6,21 @@ from ... import item, csv_handler, game_data_getter, helper
 def get_fruit_names(is_jp: bool) -> list[str]:
     """Get the catfruit fruit names"""
 
+    file_data = game_data_getter.get_file_latest("resLocal", "GatyaitemName.csv", is_jp)
+    if file_data is None:
+        helper.error_text("Failed to get catfruit names")
+        return []
     item_names = csv_handler.parse_csv(
-        game_data_getter.get_file_latest("resLocal", "GatyaitemName.csv", is_jp).decode(
-            "utf-8"
-        ),
+        file_data.decode("utf-8"),
         delimeter=helper.get_text_splitter(is_jp),
     )
+    file_data = game_data_getter.get_file_latest("DataLocal", "Matatabi.tsv", is_jp)
+    if file_data is None:
+        helper.error_text("Failed to get catfruit names")
+        return []
     fruit_ids = helper.parse_int_list_list(
         csv_handler.parse_csv(
-            game_data_getter.get_file_latest("DataLocal", "Matatabi.tsv", is_jp).decode(
-                "utf-8"
-            ),
+            file_data.decode("utf-8"),
             delimeter="\t",
         )
     )[1:]

@@ -5,6 +5,7 @@ from typing import Any
 from ... import helper, user_input_handler, csv_handler, game_data_getter
 from . import cat_id_selector
 
+
 def set_t_ids(save_stats: dict[str, Any]) -> dict[str, Any]:
     """handler for editing treasure ids"""
 
@@ -61,12 +62,12 @@ def get_character_drops(save_stats: dict[str, Any]) -> dict[str, Any]:
 def get_data(is_jp: bool) -> dict[str, Any]:
     """gets all of the cat ids and treasure ids that can be dropped"""
 
+    file_data = game_data_getter.get_file_latest("DataLocal", "drop_chara.csv", is_jp)
+    if file_data is None:
+        helper.error_text("Failed to get drop_chara.csv")
+        return {"t_ids": [], "c_ids": [], "indexes": []}
     character_data = helper.parse_int_list_list(
-        csv_handler.parse_csv(
-            game_data_getter.get_file_latest(
-                "DataLocal", "drop_chara.csv", is_jp
-            ).decode("utf-8")
-        )[1:]
+        csv_handler.parse_csv(file_data.decode("utf-8"))[1:]
     )
 
     treasure_ids = helper.copy_first_n(character_data, 0)

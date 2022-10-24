@@ -2,7 +2,7 @@
 from typing import Any
 
 
-from ... import helper
+from ... import helper, user_input_handler
 from . import story_level_id_selector
 
 CHAPTERS = [
@@ -17,19 +17,18 @@ CHAPTERS = [
     "Cats of the Cosmos 3",
 ]
 
-
-def clear_specific_levels(
-    story_chapters: dict[str, Any],
-    chapter_id: int,
-    max_level: int,
-    val: int,
+def clear_specific_level_ids(
+    story_chapters: dict[str, Any], chapter_id: int, ids: list[int], val: int
 ) -> dict[str, Any]:
-    """Clear specific stages in a chapter"""
+    """Clear specific levels in a chapter"""
 
-    story_chapters["Chapter Progress"][chapter_id] = max_level
-    story_chapters["Times Cleared"][chapter_id] = (
-        ([val] * max_level) + ([0] * (48 - max_level)) + ([0] * 3)
-    )
+    if val >= 1:
+        story_chapters["Chapter Progress"][chapter_id] = max(ids)
+    else:
+        story_chapters["Chapter Progress"][chapter_id] = min(ids) - 1
+
+    for level_id in ids:
+        story_chapters["Times Cleared"][chapter_id][level_id] = val
     return story_chapters
 
 def has_cleared_chapter(save_stats: dict[str, Any], chapter_id: int) -> bool:
@@ -46,18 +45,6 @@ def has_cleared_chapter(save_stats: dict[str, Any], chapter_id: int) -> bool:
     chapter_id = format_story_id(chapter_id)
 
     return save_stats["story_chapters"]["Chapter Progress"][chapter_id] >= 48
-
-
-def clear_specific_level_ids(
-    story_chapters: dict[str, Any], chapter_id: int, ids: list[int], val: int
-) -> dict[str, Any]:
-    """Clear specific levels in a chapter"""
-
-    story_chapters["Chapter Progress"][chapter_id] = max(ids)
-
-    for level_id in ids:
-        story_chapters["Times Cleared"][chapter_id][level_id] = val
-    return story_chapters
 
 
 def format_story_ids(ids: list[int]) -> list[int]:
@@ -100,6 +87,8 @@ def clear_levels(
 def clear_each(save_stats: dict[str, Any]):
     """Clear stages for each chapter"""
 
+    clear = user_input_handler.colored_input("Do you want to clear or unclear (c/u)?:") == "c"
+
     chapter_ids = story_level_id_selector.select_specific_chapters()
 
     for chapter_id in chapter_ids:
@@ -107,7 +96,7 @@ def clear_each(save_stats: dict[str, Any]):
         ids = story_level_id_selector.select_levels(chapter_id)
         chapter_id = format_story_id(chapter_id)
         save_stats["story_chapters"] = clear_specific_level_ids(
-            save_stats["story_chapters"], chapter_id, ids, 1
+            save_stats["story_chapters"], chapter_id, ids, 1 if clear else 0
         )
     helper.colored_text("Successfully cleared main story chapters")
     return save_stats
@@ -116,6 +105,7 @@ def clear_each(save_stats: dict[str, Any]):
 def clear_all(save_stats: dict[str, Any]) -> dict[str, Any]:
     """Clear whole chapters"""
 
+    clear = user_input_handler.colored_input("Do you want to clear or unclear (c/u)?:") == "c"
     chapter_ids = story_level_id_selector.select_specific_chapters()
     text = ""
     for chapter_id in chapter_ids:
@@ -124,8 +114,8 @@ def clear_all(save_stats: dict[str, Any]) -> dict[str, Any]:
     ids = story_level_id_selector.select_levels(None)
     for chapter_id in chapter_ids:
         chapter_id = format_story_id(chapter_id)
-        save_stats["story_chapters"] = clear_specific_levels(
-            save_stats["story_chapters"], chapter_id, len(ids), 1
+        save_stats["story_chapters"] = clear_specific_level_ids(
+            save_stats["story_chapters"], chapter_id, ids, 1 if clear else 0
         )
     helper.colored_text("Successfully cleared main story chapters")
     return save_stats

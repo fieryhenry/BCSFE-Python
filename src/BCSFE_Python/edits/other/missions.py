@@ -1,15 +1,19 @@
 """Handler for editing catnip missions"""
-from typing import Any
+from typing import Any, Optional
 
 from ... import user_input_handler, game_data_getter, csv_handler, helper
 
 
-def get_mission_conditions(is_jp: bool) -> dict[Any, Any]:
+def get_mission_conditions(is_jp: bool) -> Optional[dict[Any, Any]]:
     """Get the mission data and what you need to do to complete it"""
 
-    mission_condition_data = game_data_getter.get_file_latest(
+    file_data = game_data_getter.get_file_latest(
         "DataLocal", "Mission_Condition.csv", is_jp
-    ).decode("utf-8")
+    )
+    if file_data is None:
+        helper.error_text("Failed to get mission conditions")
+        return None
+    mission_condition_data = file_data.decode("utf-8")
     mission_conditions_list = helper.parse_int_list_list(
         csv_handler.parse_csv(mission_condition_data)
     )
@@ -25,12 +29,14 @@ def get_mission_conditions(is_jp: bool) -> dict[Any, Any]:
     return mission_conditions
 
 
-def get_mission_names(is_jp: bool) -> dict[int, Any]:
+def get_mission_names(is_jp: bool) -> Optional[dict[int, Any]]:
     """Get all mission names"""
 
-    mission_name = game_data_getter.get_file_latest(
-        "resLocal", "Mission_Name.csv", is_jp
-    ).decode("utf-8")
+    file_data = game_data_getter.get_file_latest("resLocal", "Mission_Name.csv", is_jp)
+    if file_data is None:
+        helper.error_text("Failed to get mission names")
+        return None
+    mission_name = file_data.decode("utf-8")
     mission_name_list = mission_name.split("\n")
     mission_names: dict[Any, Any] = {}
     for mission_name in mission_name_list:
@@ -102,9 +108,10 @@ def edit_missions(save_stats: dict[str, Any]) -> dict[str, Any]:
     names = get_mission_names(helper.check_data_is_jp(save_stats))
     conditions = get_mission_conditions(helper.check_data_is_jp(save_stats))
 
-    mission_ids_to_use, names_to_use = get_mission_ids(
-        missions, conditions, names
-    )
+    if names is None or conditions is None:
+        return save_stats
+
+    mission_ids_to_use, names_to_use = get_mission_ids(missions, conditions, names)
 
     ids = user_input_handler.select_not_inc(
         options=names_to_use,
@@ -116,9 +123,7 @@ def edit_missions(save_stats: dict[str, Any]) -> dict[str, Any]:
         )
         == "1"
     )
-    missions = set_missions(
-        missions, ids, conditions, mission_ids_to_use, re_claim
-    )
+    missions = set_missions(missions, ids, conditions, mission_ids_to_use, re_claim)
     save_stats["missions"] = missions
     print("Successfully completed missions")
     return save_stats

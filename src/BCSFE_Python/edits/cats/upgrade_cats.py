@@ -14,13 +14,16 @@ def set_level_caps(save_stats: dict[str, Any]) -> dict[str, Any]:
 
     Returns:
         dict[str, Any]: The save stats
-    """    
+    """
 
     unit_max_data = cat_helper.get_unit_max_levels(helper.is_jp(save_stats))
     rarities = cat_helper.get_rarities(helper.is_jp(save_stats))
     for cat_id in range(len(save_stats["cats"])):
         base_level = save_stats["cat_upgrades"]["Base"][cat_id]
-        max_base_level = cat_helper.get_unit_max_level(unit_max_data, cat_id)[0]
+        if unit_max_data is not None:
+            max_base_level = cat_helper.get_unit_max_level(unit_max_data, cat_id)[0]
+        else:
+            max_base_level = 50000
         rarity = rarities[cat_id]
         max_base_level_ur = cat_helper.get_max_level(save_stats, rarity, cat_id)
         level_cap = cat_helper.get_level_cap_increase_amount(

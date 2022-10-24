@@ -56,31 +56,16 @@ def evolve_handler(
 def get_evolve_data(is_jp: bool) -> list[int]:
     """Get max form of cats"""
 
-    data = helper.parse_int_list_list(
-        csv_handler.parse_csv(
-            game_data_getter.get_file_latest(
-                "DataLocal", "nyankoPictureBookData.csv", is_jp
-            ).decode("utf-8")
-        )
+    file_data = game_data_getter.get_file_latest(
+        "DataLocal", "nyankoPictureBookData.csv", is_jp
     )
+    if file_data is None:
+        helper.error_text("Failed to get evolve data")
+        return []
+    data = helper.parse_int_list_list(csv_handler.parse_csv(file_data.decode("utf-8")))
     forms = helper.copy_first_n(data, 2)
     forms = helper.offset_list(forms, -1)
     return forms
-
-
-def get_total_forms(is_jp: bool, cat_id: int) -> int:
-    """
-    Get total forms of cat
-
-    Args:
-        is_jp (bool): Whether the game is JP or not
-        cat_id (int): The cat id
-
-    Returns:
-        int: The total forms of the cat
-    """
-    data = get_evolve_data(is_jp)
-    return data[cat_id]
 
 
 def evolve_handler_ids(

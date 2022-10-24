@@ -89,13 +89,13 @@ def select_cats_range(save_stats: dict[str, Any]) -> list[int]:
 def select_cats_gatya_banner(save_stats: dict[str, Any]) -> list[int]:
     """Select cats for a specific gacha banner"""
     is_jp = helper.is_jp(save_stats)
-    data = helper.parse_int_list_list(
-        csv_handler.parse_csv(
-            game_data_getter.get_file_latest(
-                "DataLocal", "GatyaDataSetR1.csv", is_jp
-            ).decode("utf-8")
-        )
+    file_data = game_data_getter.get_file_latest(
+        "DataLocal", "GatyaDataSetR1.csv", is_jp
     )
+    if file_data is None:
+        helper.colored_text("Failed to get gatya banners")
+        return []
+    data = helper.parse_int_list_list(csv_handler.parse_csv(file_data.decode("utf-8")))
     ids = user_input_handler.get_range(
         user_input_handler.colored_input(
             "Enter gacha banner id (Look up the gacha banners you want, then click on the image at the top, and look for the last digits of the file name (e.g royal fest = 602))(You can enter &all& to get all, a range e.g &1&-&50&, or ids separate by spaces e.g &5 4 7&):"
@@ -126,6 +126,8 @@ def select_cat_names(save_stats: dict[str, Any]) -> list[int]:
         list[int]: cat ids
     """
     all_names = get_cat_names(save_stats)
+    if all_names is None:
+        return []
     name = user_input_handler.colored_input("Enter cat name:")
     found_names = search_cat_names(name, all_names)
     found_names = filter_cat_names(found_names)
@@ -254,7 +256,7 @@ def download_10_files(game_version: str, file_names: list[str]) -> None:
         game_data_getter.download_file(game_version, "resLocal", file_name, False)
 
 
-def get_cat_names(save_stats: dict[str, Any]) -> list[tuple[str, int, int]]:
+def get_cat_names(save_stats: dict[str, Any]) -> Optional[list[tuple[str, int, int]]]:
     """
     Get cat names and ids
 
@@ -262,14 +264,16 @@ def get_cat_names(save_stats: dict[str, Any]) -> list[tuple[str, int, int]]:
         save_stats (dict[str, Any]): save stats
 
     Returns:
-        list[tuple[str, int, int]]: cat names and ids
+        Optional[list[tuple[str, int, int]]]: cat names and ids
     """
 
     is_jp = helper.is_jp(save_stats)
 
-    file_path_dir = os.path.dirname(
-        helper.get_file(game_data_getter.get_path("resLocal", "", is_jp))
-    )
+    path = game_data_getter.get_path("resLocal", "", is_jp)
+    if path is None:
+        helper.colored_text("Failed to get cat names", helper.RED)
+        return None
+    file_path_dir = os.path.dirname(helper.get_file(path))
     helper.create_dirs(file_path_dir)
     if len(helper.find_files_in_dir(file_path_dir, "Unit_Explanation")) < len(
         save_stats["cats"]
@@ -280,6 +284,9 @@ def get_cat_names(save_stats: dict[str, Any]) -> list[tuple[str, int, int]]:
         )
         funcs: list[Process] = []
         version = game_data_getter.get_latest_version(is_jp)
+        if version is None:
+            helper.colored_text("Failed to get cat names", helper.RED)
+            return None
         all_file_names: list[str] = []
         for cat_id, _ in enumerate(save_stats["cats"]):
             file_name = f"Unit_Explanation{cat_id+1}_{helper.get_cc(save_stats)}.csv"
@@ -319,13 +326,13 @@ def get_obtainability(save_stats: dict[str, Any]) -> list[int]:
     Returns:
         list[int]: obtainability of cats (0 = not obtainable, 1 = obtainable)
     """
-    data = helper.parse_int_list_list(
-        csv_handler.parse_csv(
-            game_data_getter.get_file_latest(
-                "DataLocal", "nyankoPictureBookData.csv", helper.is_jp(save_stats)
-            ).decode("utf-8")
-        )
+    file_data = game_data_getter.get_file_latest(
+        "DataLocal", "nyankoPictureBookData.csv", helper.is_jp(save_stats)
     )
+    if file_data is None:
+        helper.colored_text("Failed to get obtainability", helper.RED)
+        return []
+    data = helper.parse_int_list_list(csv_handler.parse_csv(file_data.decode("utf-8")))
     is_obtainable = helper.copy_first_n(data, 0)
     return is_obtainable
 

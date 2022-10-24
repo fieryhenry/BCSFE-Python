@@ -1,10 +1,10 @@
 """Handler for editing cata shrine xp and level"""
-from typing import Any
+from typing import Any, Optional
 
 from ... import game_data_getter, helper, item, user_input_handler
 
 
-def get_boundaries(is_jp: bool) -> list[int]:
+def get_boundaries(is_jp: bool) -> Optional[list[int]]:
     """
     Returns the xp requirements for each level
 
@@ -14,11 +14,11 @@ def get_boundaries(is_jp: bool) -> list[int]:
     Returns:
         list[int]: The xp requirements for each level
     """
-    boundaries = (
-        game_data_getter.get_file_latest("resLocal", "jinja_level.csv", is_jp)
-        .decode("utf-8")
-        .splitlines()
-    )
+    file_data = game_data_getter.get_file_latest("resLocal", "jinja_level.csv", is_jp)
+    if file_data is None:
+        helper.error_text("Failed to get jinja level data")
+        return None
+    boundaries = file_data.decode("utf-8").splitlines()
     xp_requirements: list[int] = []
     counter = 0
     for line in boundaries:
@@ -28,7 +28,7 @@ def get_boundaries(is_jp: bool) -> list[int]:
     return xp_requirements
 
 
-def get_level_from_xp(shrine_xp: int, is_jp: bool) -> dict[str, Any]:
+def get_level_from_xp(shrine_xp: int, is_jp: bool) -> Optional[dict[str, Any]]:
     """
     Returns the level, max level and max xp from the given xp
 
@@ -40,6 +40,8 @@ def get_level_from_xp(shrine_xp: int, is_jp: bool) -> dict[str, Any]:
         dict[str, Any]: The level, max level, and max xp
     """
     xp_requirements = get_boundaries(is_jp)
+    if xp_requirements is None:
+        return None
     level = 1
     for requirement in xp_requirements:
         if shrine_xp >= requirement:
@@ -53,7 +55,7 @@ def get_level_from_xp(shrine_xp: int, is_jp: bool) -> dict[str, Any]:
     }
 
 
-def get_xp_from_level(level: int, is_jp: bool) -> int:
+def get_xp_from_level(level: int, is_jp: bool) -> Optional[int]:
     """
     Returns the xp required to reach the given level
 
@@ -61,6 +63,8 @@ def get_xp_from_level(level: int, is_jp: bool) -> int:
         _type_: int
     """
     xp_requirements = get_boundaries(is_jp)
+    if xp_requirements is None:
+        return None
     if level <= 1:
         shrine_xp = 0
     else:
@@ -82,6 +86,8 @@ def edit_shrine_xp(save_stats: dict[str, Any]) -> dict[str, Any]:
     shrine_xp = save_stats["cat_shrine"]["xp_offering"]
 
     data = get_level_from_xp(shrine_xp, helper.check_data_is_jp(save_stats))
+    if data is None:
+        return save_stats
     level = data["level"]
 
     helper.colored_text(f"Shrine XP: &{shrine_xp}&\nLevel: &{level}&")
@@ -112,10 +118,15 @@ def edit_shrine_xp(save_stats: dict[str, Any]) -> dict[str, Any]:
         shrine_xp = get_xp_from_level(
             int(shrine_level.value), helper.check_data_is_jp(save_stats)
         )
-    shrine_level = get_level_from_xp(shrine_xp, helper.check_data_is_jp(save_stats))["level"]
+    if shrine_xp is None:
+        return save_stats
+    shrine_data = get_level_from_xp(shrine_xp, helper.check_data_is_jp(save_stats))
+    if shrine_data is None:
+        return save_stats
+    shrine_level = shrine_data["level"]
     if shrine_level > data["max_level"]:
         shrine_level = data["max_level"]
-    save_stats["shrine_dialogs"]["Value"] = shrine_level - 1 # Level up dialog
+    save_stats["shrine_dialogs"]["Value"] = shrine_level - 1  # Level up dialog
     save_stats["shrine_gone"] = 0
     save_stats["cat_shrine"]["stamp_1"] = 0
     save_stats["cat_shrine"]["stamp_2"] = 0

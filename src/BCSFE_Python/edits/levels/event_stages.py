@@ -66,6 +66,8 @@ def set_medals(
     """Set the medals for completed stages"""
 
     medal_data = meow_medals.get_medal_data(is_jp)
+    if medal_data is None:
+        return stage_stats, medal_stats
 
     unlock_next = stage_stats["Value"]["unlock_next"]
 

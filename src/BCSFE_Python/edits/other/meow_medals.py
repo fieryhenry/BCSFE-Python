@@ -6,14 +6,14 @@ from typing import Any, Optional
 from ... import helper, user_input_handler, game_data_getter
 
 
-def get_medal_names(is_jp: bool) -> list[str]:
+def get_medal_names(is_jp: bool) -> Optional[list[str]]:
     """Get all medal names"""
 
-    medal_names = (
-        game_data_getter.get_file_latest("resLocal", "medalname.tsv", is_jp)
-        .decode("utf-8")
-        .splitlines()
-    )
+    file_data = game_data_getter.get_file_latest("resLocal", "medalname.tsv", is_jp)
+    if file_data is None:
+        helper.error_text("Failed to get medal names")
+        return None
+    medal_names = file_data.decode("utf-8").splitlines()
     names: list[str] = []
     for line in medal_names:
         line_split = line.split("\t")
@@ -166,14 +166,14 @@ class Medals:
         self.stages = stages
 
 
-def get_medal_data(is_jp: bool) -> Medals:
+def get_medal_data(is_jp: bool) -> Optional[Medals]:
     """Get the medal data"""
 
-    medal_data = json.loads(
-        game_data_getter.get_file_latest("DataLocal", "medallist.json", is_jp).decode(
-            "utf-8"
-        )
-    )["iconID"]
+    file_data = game_data_getter.get_file_latest("DataLocal", "medallist.json", is_jp)
+    if file_data is None:
+        helper.error_text("Failed to get medal data")
+        return None
+    medal_data = json.loads(file_data.decode("utf-8"))["iconID"]
 
     treasures: list[TreasureMedal] = []
     characters: list[CharacterMedal] = []
@@ -243,6 +243,8 @@ def medals(save_stats: dict[str, Any]) -> dict[str, Any]:
     )
 
     names = get_medal_names(helper.check_data_is_jp(save_stats))
+    if names is None:
+        return save_stats
     helper.colored_list(names)
 
     ids = user_input_handler.get_range(

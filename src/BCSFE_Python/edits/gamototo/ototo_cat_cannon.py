@@ -1,16 +1,20 @@
 """Handler for editing the ototo cat cannon"""
-from typing import Any
+from typing import Any, Optional
 
 from ... import user_input_handler, item, game_data_getter, csv_handler, helper
 
 
-def get_canon_types(is_jp: bool):
+def get_canon_types(is_jp: bool) -> Optional[list[str]]:
     """Get the cannon types"""
 
+    file_data = game_data_getter.get_file_latest(
+        "resLocal", "CastleRecipeDescriptions.csv", is_jp
+    )
+    if file_data is None:
+        helper.error_text("Could not find CastleRecipeDescriptions.csv")
+        return None
     data = csv_handler.parse_csv(
-        game_data_getter.get_file_latest(
-            "resLocal", "CastleRecipeDescriptions.csv", is_jp
-        ).decode("utf-8"),
+        file_data.decode("utf-8"),
         delimeter=helper.get_text_splitter(is_jp),
     )
     types: list[str] = []
@@ -19,16 +23,15 @@ def get_canon_types(is_jp: bool):
     return types
 
 
-def get_cannon_maxes(is_jp: bool) -> list[int]:
+def get_cannon_maxes(is_jp: bool) -> Optional[list[int]]:
     """Get the cannon maxes"""
-
-    data = helper.parse_int_list_list(
-        csv_handler.parse_csv(
-            game_data_getter.get_file_latest(
-                "DataLocal", "CastleRecipeUnlock.csv", is_jp
-            ).decode("utf-8")
-        )
+    file_data = game_data_getter.get_file_latest(
+        "DataLocal", "CastleRecipeUnlock.csv", is_jp
     )
+    if file_data is None:
+        helper.error_text("Could not find CastleRecipeUnlock.csv")
+        return None
+    data = helper.parse_int_list_list(csv_handler.parse_csv(file_data.decode("utf-8")))
     maxes: list[int] = []
     for cannon in data:
         cannon_id = cannon[0]
@@ -80,11 +83,14 @@ def set_level(save_stats: dict[str, Any], levels: list[int]) -> dict[str, Any]:
     """Set the upgrade level of the cannon"""
 
     cannons = save_stats["ototo_cannon"]
-
+    names = get_canon_types(helper.check_data_is_jp(save_stats))
+    maxes = get_cannon_maxes(helper.check_data_is_jp(save_stats))
+    if names is None or maxes is None:
+        return save_stats
     ot_levels = item.create_item_group(
-        names=get_canon_types(helper.check_data_is_jp(save_stats)),
+        names=names,
         values=levels,
-        maxes=get_cannon_maxes(helper.check_data_is_jp(save_stats)),
+        maxes=maxes,
         edit_name="level",
         group_name="Cannon Level",
         offset=1,
@@ -99,9 +105,11 @@ def set_stage(save_stats: dict[str, Any], stages: list[int]) -> dict[str, Any]:
     """Set the stage of the cannon development"""
 
     cannons = save_stats["ototo_cannon"]
-
+    names = get_canon_types(helper.check_data_is_jp(save_stats))
+    if names is None:
+        return save_stats
     ot_stages = item.create_item_group(
-        names=get_canon_types(helper.check_data_is_jp(save_stats))[1:],
+        names=names[1:],
         values=stages[1:],
         maxes=3,
         edit_name="stage",

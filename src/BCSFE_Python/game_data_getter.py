@@ -1,5 +1,6 @@
 """Get game data from the BCData GitHub repository."""
 import os
+from typing import Optional
 import requests
 
 from . import helper
@@ -49,19 +50,22 @@ def download_file(
     return response.content
 
 
-def get_latest_versions() -> list[str]:
+def get_latest_versions() -> Optional[list[str]]:
     """
     Gets the latest versions of the game data.
 
     Returns:
-        list[str]: The latest versions of the game data.
+        Optional[list[str]]: The latest versions of the game data.
     """
-    response = requests.get(URL + "latest.txt")
+    try:
+        response = requests.get(URL + "latest.txt")
+    except requests.exceptions.ConnectionError:
+        return None
     versions = response.text.splitlines()
     return versions
 
 
-def get_latest_version(is_jp: bool) -> str:
+def get_latest_version(is_jp: bool) -> Optional[str]:
     """
     Gets the latest version of the game data.
 
@@ -71,13 +75,16 @@ def get_latest_version(is_jp: bool) -> str:
     Returns:
         str: The latest version of the game data.
     """
+    versions = get_latest_versions()
+    if versions is None:
+        return None
     if is_jp:
-        return get_latest_versions()[1]
+        return versions[1]
     else:
-        return get_latest_versions()[0]
+        return versions[0]
 
 
-def get_file_latest(pack_name: str, file_name: str, is_jp: bool) -> bytes:
+def get_file_latest(pack_name: str, file_name: str, is_jp: bool) -> Optional[bytes]:
     """
     Gets the latest version of the file.
 
@@ -87,13 +94,15 @@ def get_file_latest(pack_name: str, file_name: str, is_jp: bool) -> bytes:
         is_jp (bool): Whether to get the japanese version.
 
     Returns:
-        bytes: The data of the file.
+        Optional[bytes]: The data of the file.
     """
     version = get_latest_version(is_jp)
+    if version is None:
+        return None
     return download_file(version, pack_name, file_name)
 
 
-def get_path(pack_name: str, file_name: str, is_jp: bool):
+def get_path(pack_name: str, file_name: str, is_jp: bool) -> Optional[str]:
     """
     Gets the path of the file.
 
@@ -103,9 +112,11 @@ def get_path(pack_name: str, file_name: str, is_jp: bool):
         is_jp (bool): Whether to get the japanese version.
 
     Returns:
-        _type_: The path of the file.
+        Optional[str]: The path of the file.
     """
     version = get_latest_version(is_jp)
+    if version is None:
+        return None
     return os.path.join("game_data", version, pack_name, file_name)
 
 
@@ -137,5 +148,7 @@ def check_remove_handler():
     """
 
     versions = get_latest_versions()
+    if versions is None:
+        return None
     check_remove(versions[0], is_jp=False)
     check_remove(versions[1], is_jp=True)

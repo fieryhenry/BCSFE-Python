@@ -1,33 +1,45 @@
 """Handler for editing main story treasures"""
-from typing import Any
+from typing import Any, Optional
 
 from ... import helper, user_input_handler, item, csv_handler, game_data_getter
 from . import story_level_id_selector, main_story
 
 
-def get_stages(is_jp: bool) -> list[list[list[int]]]:
+def get_stages(is_jp: bool) -> Optional[list[list[list[int]]]]:
     """Get what stages belong to which treasure group"""
 
     treasures_values: list[list[list[int]]] = []
+    file_data = game_data_getter.get_file_latest(
+        "DataLocal", "treasureData0.csv", is_jp
+    )
+    if file_data is None:
+        helper.error_text("Failed to get treasureData0.csv")
+        return None
     eoc_treasures = helper.parse_int_list_list(
         csv_handler.parse_csv(
-            game_data_getter.get_file_latest(
-                "DataLocal", "treasureData0.csv", is_jp
-            ).decode("utf-8"),
+            file_data.decode("utf-8"),
         )
     )[11:22]
+    file_data = game_data_getter.get_file_latest(
+        "DataLocal", "treasureData1.csv", is_jp
+    )
+    if file_data is None:
+        helper.error_text("Failed to get treasureData1.csv")
+        return None
     itf_treasures = helper.parse_int_list_list(
         csv_handler.parse_csv(
-            game_data_getter.get_file_latest(
-                "DataLocal", "treasureData1.csv", is_jp
-            ).decode("utf-8"),
+            file_data.decode("utf-8"),
         )
     )[11:22]
+    file_data = game_data_getter.get_file_latest(
+        "DataLocal", "treasureData2_0.csv", is_jp
+    )
+    if file_data is None:
+        helper.error_text("Failed to get treasureData2_0.csv")
+        return None
     cotc_treasures = helper.parse_int_list_list(
         csv_handler.parse_csv(
-            game_data_getter.get_file_latest(
-                "DataLocal", "treasureData2_0.csv", is_jp
-            ).decode("utf-8"),
+            file_data.decode("utf-8"),
         )
     )[11:22]
 
@@ -47,7 +59,7 @@ def remove_negative_1(data: list[list[int]]) -> list[list[int]]:
     return new_data
 
 
-def get_names(is_jp: bool) -> list[list[list[str]]]:
+def get_names(is_jp: bool) -> Optional[list[list[list[str]]]]:
     """Get the names of all of the treasure groups"""
 
     names: list[list[list[str]]] = []
@@ -55,22 +67,39 @@ def get_names(is_jp: bool) -> list[list[list[str]]]:
         country_code = "ja"
     else:
         country_code = "en"
+
+    file_data = game_data_getter.get_file_latest(
+        "resLocal", f"Treasure3_0_{country_code}.csv", is_jp
+    )
+    if file_data is None:
+        helper.error_text(f"Failed to get Treasure3_0_{country_code}.csv")
+        return None
     eoc_names = csv_handler.parse_csv(
-        game_data_getter.get_file_latest(
-            "resLocal", f"Treasure3_0_{country_code}.csv", is_jp
-        ).decode("utf-8"),
+        file_data.decode("utf-8"),
         delimeter=helper.get_text_splitter(is_jp),
     )[:11]
+
+    file_data = game_data_getter.get_file_latest(
+        "resLocal", f"Treasure3_1_AfterFirstEncounter_{country_code}.csv", is_jp
+    )
+    if file_data is None:
+        helper.error_text(
+            f"Failed to get Treasure3_1_AfterFirstEncounter_{country_code}.csv"
+        )
+        return None
     itf_names = csv_handler.parse_csv(
-        game_data_getter.get_file_latest(
-            "resLocal", f"Treasure3_1_AfterFirstEncounter_{country_code}.csv", is_jp
-        ).decode("utf-8"),
+        file_data.decode("utf-8"),
         delimeter=helper.get_text_splitter(is_jp),
     )[:11]
+
+    file_data = game_data_getter.get_file_latest(
+        "resLocal", f"Treasure3_2_0_{country_code}.csv", is_jp
+    )
+    if file_data is None:
+        helper.error_text(f"Failed to get Treasure3_2_0_{country_code}.csv")
+        return None
     cotc_names = csv_handler.parse_csv(
-        game_data_getter.get_file_latest(
-            "resLocal", f"Treasure3_2_0_{country_code}.csv", is_jp
-        ).decode("utf-8"),
+        file_data.decode("utf-8"),
         delimeter=helper.get_text_splitter(is_jp),
     )[:11]
 
@@ -81,11 +110,13 @@ def get_names(is_jp: bool) -> list[list[list[str]]]:
     return names
 
 
-def get_treasure_groups(is_jp: bool) -> dict[str, Any]:
+def get_treasure_groups(is_jp: bool) -> Optional[dict[str, Any]]:
     """Get the names and stages of all of the treasure groups"""
 
     treasure_stages = get_stages(is_jp)
     treasure_names = get_names(is_jp)
+    if treasure_stages is None or treasure_names is None:
+        return None
     return {"names": treasure_names, "stages": treasure_stages}
 
 
@@ -141,6 +172,8 @@ def treasure_groups(save_stats: dict[str, Any]) -> dict[str, Any]:
     """Handler for editing treasure groups"""
 
     treasure_grps = get_treasure_groups(helper.check_data_is_jp(save_stats))
+    if treasure_grps is None:
+        return save_stats
     treasures_stats = save_stats["treasures"]
 
     ids = user_input_handler.select_not_inc(main_story.CHAPTERS, "select")
@@ -196,6 +229,7 @@ def specific_stages(save_stats: dict[str, Any]):
     save_stats["treasures"] = treasure_stats
     print("Successfully set treasures")
     return save_stats
+
 
 def specific_stages_all_chapters(save_stats: dict[str, Any]) -> dict[str, Any]:
     """Handler for editing treasure levels"""

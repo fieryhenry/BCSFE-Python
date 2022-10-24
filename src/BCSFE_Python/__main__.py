@@ -57,6 +57,9 @@ def print_start_up():
 def check_update() -> None:
     """Check if there is an update available and if so, ask the user if they want to update"""
     version_info = updater.get_version_info()
+    if version_info is None:
+        helper.colored_text("Failed to check for updates", base=helper.RED)
+        return
     stable_ver, pre_release_ver = version_info
 
     local_version = updater.get_local_version()

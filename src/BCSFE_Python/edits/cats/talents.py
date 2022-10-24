@@ -1,24 +1,32 @@
 """Handler to edit cat talents"""
-from typing import Any
+from typing import Any, Optional
 
 from ... import helper, item, csv_handler, game_data_getter
 from . import cat_id_selector
 
 
-def get_talent_data(save_stats: dict[str, Any]) -> dict[Any, Any]:
+def get_talent_data(save_stats: dict[str, Any]) -> Optional[dict[Any, Any]]:
     """Get talent data for all cats"""
 
+    file_data = game_data_getter.get_file_latest(
+        "DataLocal", "SkillAcquisition.csv", helper.check_data_is_jp(save_stats)
+    )
+    if file_data is None:
+        helper.error_text("Failed to get talent data")
+        return None
     talent_data_raw = helper.parse_int_list_list(
         csv_handler.parse_csv(
-            game_data_getter.get_file_latest(
-                "DataLocal", "SkillAcquisition.csv", helper.check_data_is_jp(save_stats)
-            ).decode("utf-8"),
+            file_data.decode("utf-8"),
         )
     )
+    file_data = game_data_getter.get_file_latest(
+        "resLocal", "SkillDescriptions.csv", helper.check_data_is_jp(save_stats)
+    )
+    if file_data is None:
+        helper.error_text("Failed to get talent names")
+        return None
     talent_names = csv_handler.parse_csv(
-        game_data_getter.get_file_latest(
-            "resLocal", "SkillDescriptions.csv", helper.check_data_is_jp(save_stats)
-        ).decode("utf-8"),
+        file_data.decode("utf-8"),
         helper.get_text_splitter(helper.check_data_is_jp(save_stats)),
     )
     columns = helper.int_to_str_ls(talent_data_raw[0])
@@ -129,6 +137,8 @@ def max_all_talents(save_stats: dict[str, Any]):
     ids = cat_id_selector.select_cats(save_stats)
 
     talent_data = get_talent_data(save_stats)
+    if talent_data is None:
+        return save_stats
     cat_talents_levels: list[int] = []
     for cat_id in ids:
         if cat_id not in talents or cat_id not in talent_data:
@@ -150,12 +160,18 @@ def edit_talents_individual(save_stats: dict[str, Any]) -> dict[str, Any]:
     ids = cat_id_selector.select_cats(save_stats)
 
     talent_data = get_talent_data(save_stats)
+    if talent_data is None:
+        return save_stats
     cat_talents_levels: list[int] = []
     for cat_id in ids:
         if cat_id not in talents or cat_id not in talent_data:
             # don't spam the user with messages if they selected alot of ids at once
             if len(ids) < 20:
-                helper.colored_text(f"Error cat &{cat_id}& does not have any talents", helper.RED, helper.WHITE)
+                helper.colored_text(
+                    f"Error cat &{cat_id}& does not have any talents",
+                    helper.RED,
+                    helper.WHITE,
+                )
             continue
         cat_talent_data = talent_data[cat_id]
         cat_talents = talents[cat_id]

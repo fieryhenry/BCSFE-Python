@@ -246,6 +246,9 @@ if __name__ == "__main__":
                 config_manager.get_app_data_folder(), "SAVE_DATA_temp"
             )
             if os.path.exists(temp_file_path):
+                data = helper.read_file_bytes(temp_file_path)
+                save_stats = parse_save.start_parse(data, helper.get_country_code(data))
+                helper.check_tracker(save_stats, temp_file_path)
                 helper.write_file_bytes(
                     current_path, helper.read_file_bytes(temp_file_path)
                 )

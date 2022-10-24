@@ -1,5 +1,37 @@
 # Changelog
 
+## [2.6.0] - 2022-10-24
+
+#### Added
+
+- Editor support for android. Using termux you can now run and install the editor
+
+- On crash, the editor will ask if you want to save your changes and upload managed item changes to the servers
+
+- A way to remove meow medals
+
+- A feature to play the CotC 3 filibuster stage again
+
+- A way to remove outbreaks
+
+- A feature to unlock the aku realm
+
+#### Changed
+
+- When upgrading cats, if you upgrade past the normal max for that cat then the level cap of the cat will also increase / decrease to match. (E.g if you upgrade a cat to level 35 using the editor, then use a catseye in game then it will unlock level 36 instead of level 31)
+
+- How selecting stages to clear works. Instead of selecting stage ids you enter a stage to complete the progress to (e.g entering 5 clears the first 5 stages, and entering 48 clears them all and then if you then enter 5 again it will clear the level progress for the levels 6-48)
+
+#### Fixed
+
+- Crash if using an older game version and getting cats by rarity / gatya id
+
+- Talents crashing
+
+- CotC 2 and 3 appearing in the outbreaks feature when they don't have outbreaks
+
+- The editor crashing if you don't have an internet connection
+
 ## [2.5.0] - 2022-10-14
 
 #### Added

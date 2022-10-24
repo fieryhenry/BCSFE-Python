@@ -2,7 +2,7 @@
 from typing import Any
 
 
-from ... import helper, user_input_handler
+from ... import helper
 from . import story_level_id_selector
 
 CHAPTERS = [
@@ -18,18 +18,27 @@ CHAPTERS = [
 ]
 
 def clear_specific_level_ids(
-    story_chapters: dict[str, Any], chapter_id: int, ids: list[int], val: int
+    save_stats: dict[str, Any], chapter_id: int, progress: int
 ) -> dict[str, Any]:
     """Clear specific levels in a chapter"""
-
-    if val >= 1:
-        story_chapters["Chapter Progress"][chapter_id] = max(ids)
+    story_chapters = save_stats["story_chapters"]
+    progress = helper.clamp(progress, 0, 48)
+    if progress == 0:
+        story_chapters["Chapter Progress"][chapter_id] = 0
+        story_chapters["Times Cleared"][chapter_id] = ([0] * 51)
     else:
-        story_chapters["Chapter Progress"][chapter_id] = min(ids) - 1
-
-    for level_id in ids:
-        story_chapters["Times Cleared"][chapter_id][level_id] = val
-    return story_chapters
+        stage_index = progress - 1
+        story_chapters["Chapter Progress"][chapter_id] = progress
+        # set all levels before the one being cleared to 1
+        story_chapters["Times Cleared"][chapter_id][stage_index] = 1
+        for i in range(stage_index):
+            story_chapters["Times Cleared"][chapter_id][i] = 1
+        # set all levels after the one being cleared to 0
+        for i in range(stage_index + 1, get_total_stages(save_stats, chapter_id) + 3):
+            story_chapters["Times Cleared"][chapter_id][i] = 0
+    
+    save_stats["story_chapters"] = story_chapters
+    return save_stats
 
 def has_cleared_chapter(save_stats: dict[str, Any], chapter_id: int) -> bool:
     """
@@ -83,39 +92,41 @@ def clear_levels(
             treasures[chapter_id] = [0] * 49
     return story_chapters, treasures
 
+def get_total_stages(save_stats: dict[str, Any], chapter_id: int) -> int:
+    """Get the total number of stages in a chapter"""
+
+    return len(save_stats["story_chapters"]["Times Cleared"][chapter_id]) - 3
+
 
 def clear_each(save_stats: dict[str, Any]):
     """Clear stages for each chapter"""
-
-    clear = user_input_handler.colored_input("Do you want to clear or unclear (c/u)?:") == "c"
 
     chapter_ids = story_level_id_selector.select_specific_chapters()
 
     for chapter_id in chapter_ids:
         helper.colored_text(f"Chapter: &{chapter_id+1}& : &{CHAPTERS[chapter_id]}&")
-        ids = story_level_id_selector.select_levels(chapter_id)
         chapter_id = format_story_id(chapter_id)
-        save_stats["story_chapters"] = clear_specific_level_ids(
-            save_stats["story_chapters"], chapter_id, ids, 1 if clear else 0
+        progress = story_level_id_selector.select_level_progress(chapter_id, get_total_stages(save_stats, chapter_id))
+        save_stats = clear_specific_level_ids(
+            save_stats, chapter_id, progress
         )
-    helper.colored_text("Successfully cleared main story chapters")
+    helper.colored_text("Successfully set main story chapters")
     return save_stats
 
 
 def clear_all(save_stats: dict[str, Any]) -> dict[str, Any]:
     """Clear whole chapters"""
 
-    clear = user_input_handler.colored_input("Do you want to clear or unclear (c/u)?:") == "c"
     chapter_ids = story_level_id_selector.select_specific_chapters()
     text = ""
     for chapter_id in chapter_ids:
         text += f"Chapter: &{chapter_id+1}& : &{CHAPTERS[chapter_id]}&\n"
     helper.colored_text(text.strip("\n"))
-    ids = story_level_id_selector.select_levels(None)
+    progress = story_level_id_selector.select_level_progress(None, get_total_stages(save_stats, 0))
     for chapter_id in chapter_ids:
         chapter_id = format_story_id(chapter_id)
-        save_stats["story_chapters"] = clear_specific_level_ids(
-            save_stats["story_chapters"], chapter_id, ids, 1 if clear else 0
+        save_stats = clear_specific_level_ids(
+            save_stats, chapter_id, progress
         )
-    helper.colored_text("Successfully cleared main story chapters")
+    helper.colored_text("Successfully set main story chapters")
     return save_stats

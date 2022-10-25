@@ -173,9 +173,11 @@ If you don't have a pc to install and run the editor you can use Termux.
 
 9. Then run `python -m pip install -U battle-cats-save-editor`
 
-10. Then run `python -m BCSFE_Python`
+10. If that doesn't work then run `pkg upgrade` and try again
 
-11. You can then use the editor like normal (If asked to enter the path to a save file, then just enter `SAVE_DATA`)
+11. Then run `python -m BCSFE_Python`
+
+12. You can then use the editor like normal (If asked to enter the path to a save file, then just enter `SAVE_DATA`)
 
 ### Install from source
 

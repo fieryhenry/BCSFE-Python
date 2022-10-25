@@ -1095,43 +1095,43 @@ def get_data_after_after_leadership(dst: bool) -> list[dict[str, int]]:
 
 def get_data_after_leadership() -> list[dict[str, int]]:
     data: list[dict[str, int]] = []
-    val_16 = next_int_len(1)
-    data.append(val_16)
+    total_subchapters = next_int_len(1)
+    data.append(total_subchapters)
 
-    val_45 = next_int_len(1)
-    data.append(val_45)
+    stages_per_subchapter = next_int_len(1)
+    data.append(stages_per_subchapter)
 
-    val_18 = next_int_len(1)
-    data.append(val_18)
+    stars = next_int_len(1)
+    data.append(stars)
 
-    for _ in range(val_16["Value"]):
-        for _ in range(val_18["Value"]):
+    for _ in range(total_subchapters["Value"]):
+        for _ in range(stars["Value"]):
             val_15 = next_int_len(1)
             data.append(val_15)
 
-    for _ in range(val_16["Value"]):
-        for _ in range(val_18["Value"]):
+    for _ in range(total_subchapters["Value"]):
+        for _ in range(stars["Value"]):
             val_15 = next_int_len(1)
             data.append(val_15)
 
-    for _ in range(val_16["Value"]):
-        for _ in range(val_45["Value"]):
-            for _ in range(val_18["Value"]):
+    for _ in range(total_subchapters["Value"]):
+        for _ in range(stages_per_subchapter["Value"]):
+            for _ in range(stars["Value"]):
                 val_20 = next_int_len(2)
                 data.append(val_20)
 
-    for _ in range(val_16["Value"]):
-        for _ in range(val_45["Value"]):
-            for _ in range(val_18["Value"]):
+    for _ in range(total_subchapters["Value"]):
+        for _ in range(stages_per_subchapter["Value"]):
+            for _ in range(stars["Value"]):
                 val_20 = next_int_len(2)
                 data.append(val_20)
 
-    for _ in range(val_16["Value"]):
-        for _ in range(val_18["Value"]):
+    for _ in range(total_subchapters["Value"]):
+        for _ in range(stars["Value"]):
             val_15 = next_int_len(1)
             data.append(val_15)
 
-    for _ in range(val_16["Value"]):
+    for _ in range(total_subchapters["Value"]):
         data.append(next_int_len(1))
     for _ in range(48):
         data.append(next_int_len(4))
@@ -2196,8 +2196,8 @@ def parse_save(save_data: bytes, country_code: Union[str, None]) -> dict[str, An
     save_stats["unknown_121"] = data[1]
 
     lengths = get_gauntlet_current()
-    save_stats["unknown_82"] = lengths
-    save_stats["unknown_83"] = get_gauntlet_progress(lengths)
+    save_stats["collab_gauntlets_current"] = lengths
+    save_stats["collab_gauntlets"] = get_gauntlet_progress(lengths)
     save_stats["unknown_84"] = get_length_data(4, 1, lengths["total"])
 
     save_stats["unknown_85"] = data_after_after_gauntlets()
@@ -2280,8 +2280,8 @@ def parse_save(save_data: bytes, country_code: Union[str, None]) -> dict[str, An
         return save_stats
 
     data = get_gauntlet_current()
-    save_stats["unknown_122"] = data
-    save_stats["unknown_123"] = get_gauntlet_progress(data)
+    save_stats["behemoth_culling_current"] = data
+    save_stats["behemoth_culling"] = get_gauntlet_progress(data)
     save_stats["unknown_124"] = get_length_data(4, 1, data["total"])
 
     save_stats["unknown_125"] = next_int_len(1)

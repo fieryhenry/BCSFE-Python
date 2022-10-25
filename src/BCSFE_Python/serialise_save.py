@@ -1212,8 +1212,8 @@ def serialize_save(save_stats: dict[str, Any]) -> bytes:
     save_data = serialise_cleared_slots(save_data, save_stats["cleared_slot_data"])
 
     save_data = serialise_dumped_data(save_data, save_stats["unknown_121"])
-    save_data = serialise_gauntlet_current(save_data, save_stats["unknown_82"])
-    save_data = serialise_gauntlet_progress(save_data, save_stats["unknown_83"])
+    save_data = serialise_gauntlet_current(save_data, save_stats["collab_gauntlets_current"])
+    save_data = serialise_gauntlet_progress(save_data, save_stats["collab_gauntlets"])
     save_data = write_length_data(
         save_data, save_stats["unknown_84"], bytes_per_val=1, write_length=False
     )
@@ -1312,8 +1312,8 @@ def serialize_save(save_stats: dict[str, Any]) -> bytes:
     if data["exit"]:
         return bytes(save_data)
 
-    save_data = serialise_gauntlet_current(save_data, save_stats["unknown_122"])
-    save_data = serialise_gauntlet_progress(save_data, save_stats["unknown_123"])
+    save_data = serialise_gauntlet_current(save_data, save_stats["behemoth_culling_current"])
+    save_data = serialise_gauntlet_progress(save_data, save_stats["behemoth_culling"])
     save_data = write_length_data(
         save_data, save_stats["unknown_124"], bytes_per_val=1, write_length=False
     )

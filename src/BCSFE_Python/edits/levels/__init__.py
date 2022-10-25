@@ -13,4 +13,5 @@ from . import (
     uncanny,
     allow_filibuster_clearing,
     unlock_aku_realm,
+    behemoth_culling,
 )

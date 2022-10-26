@@ -138,7 +138,6 @@ EDITOR:
   SHOW_CATEGORIES: True # Show the categories in the feature list, instead of a long list.
   SHOW_FEATURE_SELECT_EXPLANATION: True # Show an explanation of how to select a feature.
   ONLY_GET_EN_DATA: False # Only get the en version of the game data even if the save is jp, use if you can't read japanese
-  USE_ARROW_KEYS_FOR_FEATURE_SELECT: False # Use the arrow keys to select a feature instead of typing the number
 
 START_UP:
   CHECK_FOR_UPDATES: True # Check for updates on startup
@@ -230,7 +229,6 @@ def edit_editor_settings(_: Any) -> None:
         "SHOW_CATEGORIES",
         "SHOW_FEATURE_SELECT_EXPLANATION",
         "ONLY_GET_EN_DATA",
-        "USE_ARROW_KEYS_FOR_FEATURE_SELECT",
     ]
     option_values = [get_config_value_category("EDITOR", option) for option in options]
     ids = user_input_handler.select_not_inc(options, "select", option_values)

@@ -1960,7 +1960,8 @@ def parse_save(save_data: bytes, country_code: Union[str, None]) -> dict[str, An
 
     save_stats["backup_state"] = next_int_len(4)
 
-    save_stats["unknown_119"] = next_int_len(1)
+    if save_stats["dst"]:
+        save_stats["unknown_119"] = next_int_len(1)
 
     save_stats["gv_44"] = next_int_len(4)
 
@@ -1970,10 +1971,7 @@ def parse_save(save_data: bytes, country_code: Union[str, None]) -> dict[str, An
         helper.chunks(get_length_data(4, 4, 51 * 3), 51)
     )
 
-    if save_stats["dst"]:
-        save_stats["unknown_27"] = next_int_len(4)
-    else:
-        save_stats["unknown_27"] = next_int_len(3)
+    save_stats["unknown_27"] = next_int_len(4)
     save_stats["cat_related_data_1"] = get_length_data()
     save_stats["unknown_28"] = next_int_len(1)
 

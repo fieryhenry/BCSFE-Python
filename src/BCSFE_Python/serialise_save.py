@@ -973,7 +973,8 @@ def serialize_save(save_stats: dict[str, Any]) -> bytes:
 
     save_data = write(save_data, save_stats["unknown_25"])
     save_data = write(save_data, save_stats["backup_state"])
-    save_data = write(save_data, save_stats["unknown_119"])
+    if save_stats["dst"]:
+        save_data = write(save_data, save_stats["unknown_119"])
     save_data = write(save_data, save_stats["gv_44"])
     save_data = write(save_data, save_stats["unknown_120"])
 

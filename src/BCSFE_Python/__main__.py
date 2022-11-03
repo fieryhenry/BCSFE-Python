@@ -234,26 +234,4 @@ if __name__ == "__main__":
             f"An error occured: &{e}&", base=helper.RED, new=helper.WHITE
         )
         traceback.print_exc()
-        save = (
-            user_input_handler.colored_input(
-                "Do you want to save your changes? (&y&/&n&):"
-            )
-            == "y"
-        )
-        if save:
-            current_path = helper.get_save_path()
-            temp_file_path = os.path.join(
-                config_manager.get_app_data_folder(), "SAVE_DATA_temp"
-            )
-            if os.path.exists(temp_file_path):
-                data = helper.read_file_bytes(temp_file_path)
-                save_stats = parse_save.start_parse(data, helper.get_country_code(data))
-                helper.check_tracker(save_stats, temp_file_path)
-                helper.write_file_bytes(
-                    current_path, helper.read_file_bytes(temp_file_path)
-                )
-                helper.colored_text(
-                    f"Save data saved to &{current_path}&",
-                    base=helper.GREEN,
-                    new=helper.WHITE,
-                )
+        helper.exit_check_changes()

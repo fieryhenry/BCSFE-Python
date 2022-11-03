@@ -1,5 +1,6 @@
 """Helper script for usefull functions"""
 
+import filecmp
 import json
 from multiprocessing import Process
 import os
@@ -412,21 +413,66 @@ def check_tracker(save_stats: dict[str, Any], path: str) -> None:
             colored_text("Uploaded meta data", new=GREEN)
 
 
-def ask_exit_editor():
-    """Exit the editor"""
-
-    is_exit = (
-        user_input_handler.colored_input("Do you want to exit the editor? (&y&/&n&):")
-        == "y"
-    )
-    if is_exit:
-        exit_editor()
-
-
 def exit_editor():
     """Exit the editor"""
 
     sys.exit(0)
+
+
+def check_changes(_: Any):
+    """
+    Check if the user wants to exit the editor
+
+    Args:
+        _ (Any): Unused
+    """
+    save_path = get_save_path()
+    temp_file_path = os.path.join(
+        config_manager.get_app_data_folder(), "SAVE_DATA_temp"
+    )
+    if not os.path.exists(temp_file_path):
+        return
+    is_identical = are_identical_files(save_path, temp_file_path)
+    if is_identical:
+        return
+
+    ask_save_changes()
+def exit_check_changes(_: Any = None):
+    check_changes(None)
+    exit_editor()
+
+
+def ask_save_changes():
+    """
+    Ask if the user wants to save the changes
+    """
+    save = (
+        user_input_handler.colored_input(
+            "You have unsaved changes. Would you like to save them? (&y&/&n&):"
+        )
+        == "y"
+    )
+    if save:
+        current_path = get_save_path()
+        temp_file_path = os.path.join(
+            config_manager.get_app_data_folder(), "SAVE_DATA_temp"
+        )
+        if os.path.exists(temp_file_path):
+            data = read_file_bytes(temp_file_path)
+            save_stats = parse_save.start_parse(data, get_country_code(data))
+            check_tracker(save_stats, temp_file_path)
+            write_file_bytes(current_path, read_file_bytes(temp_file_path))
+            colored_text(
+                f"Save data saved to &{current_path}&",
+                base=GREEN,
+                new=WHITE,
+            )
+
+
+def are_identical_files(file1: str, file2: str) -> bool:
+    """Check if two files are identical"""
+
+    return filecmp.cmp(file1, file2)
 
 
 def check_cat_ids(cat_ids: list[int], save_stats: dict[str, Any]) -> list[int]:
@@ -439,10 +485,12 @@ def check_cat_ids(cat_ids: list[int], save_stats: dict[str, Any]) -> list[int]:
         new_cat_ids.append(cat_id)
     return new_cat_ids
 
+
 def error_text(text: str):
     """Print error text"""
 
     colored_text(text, base=RED)
+
 
 def colored_text(
     text: str,

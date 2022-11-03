@@ -50,6 +50,5 @@ def save_and_upload(save_stats: dict[str, Any]) -> dict[str, Any]:
     else:
         helper.colored_text(f"Transfer code : &{upload_data['transferCode']}&")
         helper.colored_text(f"Confirmation Code : &{upload_data['pin']}&")
-    helper.ask_exit_editor()
 
     return save_stats

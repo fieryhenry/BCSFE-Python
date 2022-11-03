@@ -41,14 +41,15 @@ def fix_elsewhere_old(save_stats: dict[str, Any]) -> dict[str, Any]:
 
 FEATURES: dict[str, Any] = {
     "Save Management": {
-        "Save Save" : save_management.save_and_exit.save_save,
+        "Save Save" : save_management.save.save_save,
         "Save changes and upload to game servers (get transfer and confirmation codes)": save_management.server_upload.save_and_upload,
-        "Save changes and exit": save_management.save_and_exit.save_and_exit,
-        "Save changes and push save data to the game (don't re-open game)": save_management.save_and_exit.save_and_push,
-        "Save changes and push save data to the game (re-open game)": save_management.save_and_exit.save_and_push_rerun,
+        "Save changes to file": save_management.save.save,
+        "Save changes and push save data to the game (don't re-open game)": save_management.save.save_and_push,
+        "Save changes and push save data to the game (re-open game)": save_management.save.save_and_push_rerun,
         "Export save data as json": save_management.other.export,
         "Clear save data (used to generate a new account without re-installing the game)": save_management.other.clear_data,
-        "Upload tracked bannable items (This is done automatically when saving and exiting)": save_management.server_upload.upload_metadata,
+        "Upload tracked bannable items (This is done automatically when saving or exiting)": save_management.server_upload.upload_metadata,
+        "Load save data" : save_management.load.select,
         #"Manage Presets": preset_handler.preset_manager,
     },
     "Items": {
@@ -132,7 +133,7 @@ FEATURES: dict[str, Any] = {
         "Token": basic.basic_items.edit_token,
         "Fix elsewhere error / Unban account": other.fix_elsewhere.fix_elsewhere,
         "Old Fix elsewhere error / Unban account (needs 2 save files)": fix_elsewhere_old,
-        "Create a new account / Duplicate account": other.create_new_account.create_new_account,
+        "Generate a new inquiry code and token": other.create_new_account.create_new_account,
     },
     "Other": {
         "Rare Gacha Seed": basic.basic_items.edit_rare_gacha_seed,
@@ -165,6 +166,7 @@ FEATURES: dict[str, Any] = {
         "Edit SERVER settings": config_manager.edit_server_settings,
         "Edit config path": config_manager.edit_config_path,
     },
+    "Exit": helper.exit_check_changes,
 }
 
 

@@ -9,7 +9,6 @@ def export(save_stats: dict[str, Any]) -> dict[str, Any]:
     """Export the save stats to a json file"""
 
     helper.export_json(save_stats, helper.get_save_path() + ".json")
-    helper.ask_exit_editor()
 
     return save_stats
 
@@ -21,6 +20,5 @@ def clear_data(save_stats: dict[str, Any]) -> dict[str, Any]:
     if confirm == "y":
         adb_handler.adb_clear_save_data(save_stats["version"])
         print("Data cleared")
-    helper.ask_exit_editor()
 
     return save_stats

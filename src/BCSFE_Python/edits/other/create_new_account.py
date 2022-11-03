@@ -9,7 +9,7 @@ from ... import helper, server_handler
 def create_new_account(save_stats: dict[str, Any]):
     """Create a new account"""
 
-    helper.colored_text("Creating a new account...", helper.GREEN)
+    helper.colored_text("Creating a new inquiry code and token...", helper.GREEN)
 
     save_stats["inquiry_code"] = server_handler.get_inquiry_code()
     save_stats["token"] = "0" * 40
@@ -28,7 +28,7 @@ def create_new_account_no_input(save_stats: dict[str, Any]) -> dict[str, Any]:
     Returns:
         dict[str, Any]: The save stats
     """
-    helper.colored_text("Creating a new account...", helper.GREEN)
+    helper.colored_text("Creating a new inquiry code and token...", helper.GREEN)
 
     save_stats["inquiry_code"] = server_handler.get_inquiry_code()
     save_stats["token"] = "0" * 40

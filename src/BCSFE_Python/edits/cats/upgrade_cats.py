@@ -24,7 +24,10 @@ def set_level_caps(save_stats: dict[str, Any]) -> dict[str, Any]:
             max_base_level = cat_helper.get_unit_max_level(unit_max_data, cat_id)[0]
         else:
             max_base_level = 50000
-        rarity = rarities[cat_id]
+        try:
+            rarity = rarities[cat_id]
+        except IndexError:
+            rarity = 0
         max_base_level_ur = cat_helper.get_max_level(save_stats, rarity, cat_id)
         level_cap = cat_helper.get_level_cap_increase_amount(
             min(base_level, max_base_level, max_base_level_ur)

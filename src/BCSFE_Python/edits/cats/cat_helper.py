@@ -60,7 +60,10 @@ def get_unit_max_level(
     Returns:
         tuple[int, int]: The max base and plus levels for a cat
     """
-    return data[0][cat_id], data[1][cat_id]
+    try:
+        return data[0][cat_id], data[1][cat_id]
+    except IndexError:
+        return 0, 0
 
 
 def get_rarities(is_jp: bool) -> list[int]:

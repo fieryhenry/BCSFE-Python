@@ -167,7 +167,7 @@ def clamp_int(value: int) -> int:
     Returns:
         int: The clamped value
     """
-    return clamp(value, 0, 2147483647)
+    return clamp(value, 0, (2**31) - 1)
 
 
 def num_to_bytes(num: int, length: int) -> bytes:
@@ -437,6 +437,8 @@ def check_changes(_: Any):
         return
 
     ask_save_changes()
+
+
 def exit_check_changes(_: Any = None):
     check_changes(None)
     exit_editor()

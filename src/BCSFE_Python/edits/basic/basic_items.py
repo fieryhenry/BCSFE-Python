@@ -1,6 +1,6 @@
 """Handler for basic, items that work in a common way"""
 from typing import Any
-from ... import helper, item, managed_item
+from ... import item, managed_item
 
 
 def edit_cat_food(save_stats: dict[str, Any]) -> dict[str, Any]:
@@ -343,11 +343,7 @@ def edit_dojo_score(save_stats: dict[str, Any]) -> dict[str, Any]:
     """Handler for editing the dojo score"""
 
     if not save_stats["dojo_data"]:
-        helper.colored_text(
-            "No catclaw dojo data found\nPlease enter the catclaw dojo menu and try again",
-            base=helper.RED,
-        )
-        return save_stats
+        save_stats["dojo_data"] = {0: {0: 0}}
 
     dojo_score = item.Item(
         name="Dojo Score",
@@ -356,5 +352,5 @@ def edit_dojo_score(save_stats: dict[str, Any]) -> dict[str, Any]:
         edit_name="value",
     )
     dojo_score.edit()
-    save_stats["dojo_data"][0][0] = dojo_score.value
+    save_stats["dojo_data"][0][0] = int(dojo_score.value)
     return save_stats

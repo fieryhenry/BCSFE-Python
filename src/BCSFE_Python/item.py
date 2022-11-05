@@ -56,20 +56,20 @@ class Item:
 
     def clamp(self) -> None:
         """Clamp the value to the max value"""
+        max_val = self.get_max_int_val()
 
-        if self.max_value is not None:
-            self.value = helper.clamp(
-                value=int(self.value),
-                min_value=0,
-                max_value=self.max_value,
-            )
-        else:
-            # Make sure the value is not negative and fits in the byte length
-            self.value = helper.clamp(
-                value=int(self.value),
-                min_value=0,
-                max_value=256**self.length - 1,
-            )
+        self.value = helper.clamp(
+            value=int(self.value),
+            min_value=0,
+            max_value=max_val,
+        )
+
+    def get_max_int_val(self) -> int:
+        """Get the max integer value"""
+
+        if self.max_value is None:
+            return 2 ** ((self.length * 8) - 1) - 1
+        return self.max_value
 
     def ban_warning(self) -> bool:
         """Warning for editing a bannable item"""
@@ -104,7 +104,7 @@ class Item:
                 f"The current {self.edit_name} of {self.name} is : &{int(self.value)+self.offset}&"
             )
         if self.max_value is None:
-            max_str = "(max &None&)"
+            max_str = f"(max &{self.get_max_int_val()}&)"
         else:
             max_str = f"(max &{self.max_value+self.offset}&)"
 

@@ -1,7 +1,7 @@
 """Handler to edit cat talents"""
 from typing import Any, Optional
 
-from ... import helper, item, csv_handler, game_data_getter
+from ... import helper, item, csv_handler, game_data_getter, user_input_handler
 from . import cat_id_selector
 
 
@@ -132,6 +132,14 @@ def get_talent_levels(
 
 def max_all_talents(save_stats: dict[str, Any]):
     """Max all talents for all cats"""
+    max_all = (
+        user_input_handler.colored_input(
+            "Do you want to max talents or reset talents? (&m&/&r&):"
+        )
+        == "m"
+    )
+    if not max_all:
+        return remove_all_talents(save_stats)
     talents = save_stats["talents"]
 
     ids = cat_id_selector.select_cats(save_stats)
@@ -150,6 +158,37 @@ def max_all_talents(save_stats: dict[str, Any]):
         save_stats["talents"] = talents
 
     print("Successfully set talents")
+    return save_stats
+
+
+def remove_all_talents(save_stats: dict[str, Any]) -> dict[str, Any]:
+    """
+    Remove all talents for all cats
+
+    Args:
+        save_stats (dict[str, Any]): The save stats
+
+    Returns:
+        dict[str, Any]: The save stats
+    """
+    talents = save_stats["talents"]
+
+    ids = cat_id_selector.select_cats(save_stats)
+
+    talent_data = get_talent_data(save_stats)
+    if talent_data is None:
+        return save_stats
+    cat_talents_levels: list[int] = []
+    for cat_id in ids:
+        if cat_id not in talents or cat_id not in talent_data:
+            continue
+        cat_talents = talents[cat_id]
+        cat_talents_levels = get_talent_levels(talent_data, talents, cat_id)
+        for i in range(len(cat_talents_levels)):
+            cat_talents[i + 1]["level"] = 0
+        save_stats["talents"] = talents
+
+    print("Successfully removed talents")
     return save_stats
 
 

@@ -17,6 +17,7 @@ CHAPTERS = [
     "Cats of the Cosmos 3",
 ]
 
+
 def clear_specific_level_ids(
     save_stats: dict[str, Any], chapter_id: int, progress: int
 ) -> dict[str, Any]:
@@ -25,7 +26,7 @@ def clear_specific_level_ids(
     progress = helper.clamp(progress, 0, 48)
     if progress == 0:
         story_chapters["Chapter Progress"][chapter_id] = 0
-        story_chapters["Times Cleared"][chapter_id] = ([0] * 51)
+        story_chapters["Times Cleared"][chapter_id] = [0] * 51
     else:
         stage_index = progress - 1
         story_chapters["Chapter Progress"][chapter_id] = progress
@@ -36,9 +37,10 @@ def clear_specific_level_ids(
         # set all levels after the one being cleared to 0
         for i in range(stage_index + 1, get_total_stages(save_stats, chapter_id) + 3):
             story_chapters["Times Cleared"][chapter_id][i] = 0
-    
+
     save_stats["story_chapters"] = story_chapters
     return save_stats
+
 
 def has_cleared_chapter(save_stats: dict[str, Any], chapter_id: int) -> bool:
     """
@@ -92,6 +94,7 @@ def clear_levels(
             treasures[chapter_id] = [0] * 49
     return story_chapters, treasures
 
+
 def get_total_stages(save_stats: dict[str, Any], chapter_id: int) -> int:
     """Get the total number of stages in a chapter"""
 
@@ -105,11 +108,11 @@ def clear_each(save_stats: dict[str, Any]):
 
     for chapter_id in chapter_ids:
         helper.colored_text(f"Chapter: &{chapter_id+1}& : &{CHAPTERS[chapter_id]}&")
-        chapter_id = format_story_id(chapter_id)
-        progress = story_level_id_selector.select_level_progress(chapter_id, get_total_stages(save_stats, chapter_id))
-        save_stats = clear_specific_level_ids(
-            save_stats, chapter_id, progress
+        formatted_id = format_story_id(chapter_id)
+        progress = story_level_id_selector.select_level_progress(
+            chapter_id, get_total_stages(save_stats, formatted_id)
         )
+        save_stats = clear_specific_level_ids(save_stats, formatted_id, progress)
     helper.colored_text("Successfully set main story chapters")
     return save_stats
 
@@ -122,11 +125,11 @@ def clear_all(save_stats: dict[str, Any]) -> dict[str, Any]:
     for chapter_id in chapter_ids:
         text += f"Chapter: &{chapter_id+1}& : &{CHAPTERS[chapter_id]}&\n"
     helper.colored_text(text.strip("\n"))
-    progress = story_level_id_selector.select_level_progress(None, get_total_stages(save_stats, 0))
+    progress = story_level_id_selector.select_level_progress(
+        None, get_total_stages(save_stats, 0)
+    )
     for chapter_id in chapter_ids:
         chapter_id = format_story_id(chapter_id)
-        save_stats = clear_specific_level_ids(
-            save_stats, chapter_id, progress
-        )
+        save_stats = clear_specific_level_ids(save_stats, chapter_id, progress)
     helper.colored_text("Successfully set main story chapters")
     return save_stats

@@ -2066,7 +2066,7 @@ def parse_save(save_data: bytes, country_code: Union[str, None]) -> dict[str, An
     save_stats["current_outbreaks"] = get_outbreaks()
     save_stats["unknown_55"] = get_mission_data_maybe()
 
-    save_stats["time_stamp_4"] = get_double()  # timestamp
+    save_stats["time_stamp_4"] = get_double()
     save_stats["gv_60"] = next_int_len(4)
 
     save_stats["unknown_117"] = get_unknown_data()

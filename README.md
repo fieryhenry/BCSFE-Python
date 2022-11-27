@@ -20,6 +20,8 @@ If you have a pc: watch a [Tutorial video](https://www.youtube.com/watch?v=Kr6Va
 
 If you only have an android device: read the [Android text tutorial](https://github.com/fieryhenry/BCSFE-Python#android-tutorial)
 
+If you only have an ios device: watch the [IOS tutorial video](https://www.youtube.com/watch?v=xw-uOqQRYJ8) (Made by Viarules)
+
 ## Main tutorial
 
 You no longer need a rooted device nor a rooted android emulator.

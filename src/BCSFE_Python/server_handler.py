@@ -85,6 +85,7 @@ def create_backup_metadata(
     play_time: int,
     inquiry_code: str,
     user_rank: int,
+    save_key: Optional[str],
 ) -> dict[str, Any]:
     """Create backup metadata."""
     managed_items: list[dict[str, Any]] = []
@@ -93,7 +94,6 @@ def create_backup_metadata(
 
     managed_items_s = json.dumps(managed_items)
     managed_items_s = managed_items_s.replace(" ", "")
-
     backup_metadata: dict[str, Any] = {
         "managedItemDetails": managed_items,
         "nonce": random_hex_string(32),
@@ -102,6 +102,8 @@ def create_backup_metadata(
         "receiptLogIds": [],
         "signature_v1": generate_nyanko_signature_v1(inquiry_code, managed_items_s),
     }
+    if save_key is not None:
+        backup_metadata["saveKey"] = save_key
     return backup_metadata
 
 
@@ -136,12 +138,15 @@ def get_headers(inquiry_code: str, data: str) -> dict[str, Any]:
 
 
 def handle_request(
-    url: str, data: Union[str, bytes], headers: dict[str, Any]
+    url: str, data: Union[str, bytes, None], headers: dict[str, Any], is_get: bool = False
 ) -> Union[dict[str, Any], None]:
     """Handle a request."""
 
     try:
-        response = requests.post(url, data=data, headers=headers)
+        if is_get:
+            response = requests.get(url, data=data, headers=headers)
+        else:
+            response = requests.post(url, data=data, headers=headers)
     except requests.exceptions.RequestException as err:
         raise Exception("Error getting password: " + str(err)) from err
 
@@ -319,13 +324,30 @@ def upload_save_data(
 
     if not config_manager.get_config_value_category("SERVER", "UPLOAD_METADATA"):
         items = []
-
-    metadata = create_backup_metadata(items, play_time, inquiry_code, user_rank)
+    save_key = get_save_key(token)
+    metadata = create_backup_metadata(items, play_time, inquiry_code, user_rank, save_key)
     body, headers = upload_save_data_body(metadata, inquiry_code, token, save_data)
 
     url = get_nyanko_save_url() + "/v1/transfers"
     return handle_request(url, body, headers)
 
+def get_save_key(token: str):
+    """Gets the save key for the given token"""
+
+    url = get_nyanko_save_url() + "/v2/save/key?nonce=" + random_hex_string(32)
+    headers = {
+        "accept-encoding": "gzip",
+        "connection": "keep-alive",
+        "authorization": "Bearer " + token,
+        "nyanko-timestamp" : str(get_current_time()),
+        "user-agent": "Dalvik/2.1.0 (Linux; U; Android 9; SM-G955F Build/N2G48B)",
+    }
+    payload = handle_request(url, None, headers, True)
+    if payload is not None:
+        if "key" in payload:
+            return payload["key"]
+    helper.colored_text("Error getting save key", helper.RED)
+    return None
 
 def upload_metadata(
     token: str,
@@ -336,8 +358,8 @@ def upload_metadata(
     user_rank: int,
 ):
     """Uploads the metadata for the given token, inquiry_code and save_data"""
-
-    metadata = create_backup_metadata(items, play_time, inquiry_code, user_rank)
+    save_key = get_save_key(token)
+    metadata = create_backup_metadata(items, play_time, inquiry_code, user_rank, save_key)
     body, headers = upload_save_data_body(metadata, inquiry_code, token, save_data)
 
     url = get_nyanko_save_url() + "/v1/backups"

@@ -78,7 +78,10 @@ def evolve_handler_ids(
         form_data = get_evolve_data(helper.check_data_is_jp(save_stats))
         length = min([len(ids), len(form_data)])
         for i in range(length):
-            evolves[ids[i]] = form_data[ids[i]]
+            try:
+                evolves[ids[i]] = form_data[ids[i]]
+            except IndexError:
+                pass
     else:
         for cat_id in ids:
             evolves[cat_id] = val

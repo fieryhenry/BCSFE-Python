@@ -2,7 +2,7 @@
 
 from typing import Any
 
-from ... import helper, serialise_save, patcher, adb_handler
+from ... import helper, serialise_save, patcher, adb_handler, root_handler
 
 
 def save(save_stats: dict[str, Any]) -> dict[str, Any]:
@@ -39,7 +39,8 @@ def save_and_push(save_stats: dict[str, Any]) -> dict[str, Any]:
 
     helper.check_tracker(save_stats, helper.get_save_path())
 
-    adb_handler.adb_push_save_data(save_stats["version"], helper.get_save_path())
+    if not helper.is_android():
+        adb_handler.adb_push_save_data(save_stats["version"], helper.get_save_path())
 
     return save_stats
 
@@ -53,8 +54,10 @@ def save_and_push_rerun(save_stats: dict[str, Any]) -> dict[str, Any]:
 
     helper.check_tracker(save_stats, helper.get_save_path())
 
-    adb_handler.adb_push_save_data(save_stats["version"], helper.get_save_path())
-
-    adb_handler.rerun_game(save_stats["version"])
+    if not helper.is_android():
+        adb_handler.adb_push_save_data(save_stats["version"], helper.get_save_path())
+        adb_handler.rerun_game(save_stats["version"])
+    else:
+        root_handler.rerun_game(save_stats["version"])
 
     return save_stats

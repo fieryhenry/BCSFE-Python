@@ -1,4 +1,5 @@
 import os
+import subprocess
 from typing import Optional
 from . import helper
 
@@ -84,6 +85,6 @@ def rerun_game(version: str) -> None:
         return
     package_name = "jp.co.ponos.battlecats" + version.replace("jp", "")
     # close game locally, NOT using adb
-    os.system(f"sudo pkill -f {package_name}")
+    subprocess.run(f"sudo pkill -f {package_name}", capture_output=True, check=False)
     # open game locally, NOT using adb
-    os.system(f"sudo monkey -p {package_name} -c android.intent.category.LAUNCHER 1")
+    subprocess.run(f"sudo monkey -p {package_name} -c android.intent.category.LAUNCHER 1", capture_output=True, check=False)

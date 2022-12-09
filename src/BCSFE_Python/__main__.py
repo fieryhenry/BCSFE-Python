@@ -180,9 +180,7 @@ def normal_start_up(default_op: bool = True) -> None:
             path = adb_handler.adb_pull_save_data(game_version)
         else:
             game_versions = root_handler.get_installed_battlecats_versions()
-            if not game_versions:
-                game_version = helper.ask_cc()
-            else:
+            if game_versions is not None:
                 index = (
                     user_input_handler.select_single(
                         game_versions,
@@ -193,7 +191,7 @@ def normal_start_up(default_op: bool = True) -> None:
                     - 1
                 )
                 game_version = game_versions[index]
-            path = root_handler.pull_save_data(game_version)
+                path = root_handler.pull_save_data(game_version)
     elif index == 3:
         print("Select save data json file")
         js_path = helper.select_file(

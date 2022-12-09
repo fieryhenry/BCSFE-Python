@@ -14,4 +14,5 @@ from . import (
     parse_save,
     config_manager,
     tracker,
+    root_handler,
 )

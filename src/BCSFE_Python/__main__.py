@@ -16,6 +16,7 @@ from . import (
     tracker,
     updater,
     user_input_handler,
+    root_handler,
 )
 from .edits.levels import clear_tutorial
 
@@ -140,6 +141,8 @@ def normal_start_up(default_op: bool = True) -> None:
             "Use adb to pull the save from a rooted device",
             "Load save data from json",
         ]
+        if helper.is_android():
+            options[2] = "Use root access to access the save from local storage"
         index = (
             user_input_handler.select_single(
                 options, title="Select an option to get save data:"
@@ -158,19 +161,39 @@ def normal_start_up(default_op: bool = True) -> None:
             initial_file=helper.get_save_path_home(),
         )
     elif index == 2:
-        print("Enter details for save pulling:")
-        game_versions = adb_handler.find_game_versions()
-        if not game_versions:
-            game_version = helper.ask_cc()
-        else:
-            index = (
-                user_input_handler.select_single(
-                    game_versions, "Select", "Select a game version to pull from:", True
+        if not helper.is_android():
+            print("Enter details for save pulling:")
+            game_versions = adb_handler.find_game_versions()
+            if not game_versions:
+                game_version = helper.ask_cc()
+            else:
+                index = (
+                    user_input_handler.select_single(
+                        game_versions,
+                        "Select",
+                        "Select a game version to pull from:",
+                        True,
+                    )
+                    - 1
                 )
-                - 1
-            )
-            game_version = game_versions[index]
-        path = adb_handler.adb_pull_save_data(game_version)
+                game_version = game_versions[index]
+            path = adb_handler.adb_pull_save_data(game_version)
+        else:
+            game_versions = root_handler.get_installed_battlecats_versions()
+            if not game_versions:
+                game_version = helper.ask_cc()
+            else:
+                index = (
+                    user_input_handler.select_single(
+                        game_versions,
+                        "Select",
+                        "Select a game version:",
+                        True,
+                    )
+                    - 1
+                )
+                game_version = game_versions[index]
+            path = root_handler.pull_save_data(game_version)
     elif index == 3:
         print("Select save data json file")
         js_path = helper.select_file(

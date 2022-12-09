@@ -493,6 +493,9 @@ def error_text(text: str):
 
     colored_text(text, base=RED)
 
+def is_android() -> bool:
+    """Check if the user is on android"""
+    return "ANDROID_ROOT" in os.environ
 
 def colored_text(
     text: str,

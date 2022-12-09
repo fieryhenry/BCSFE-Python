@@ -26,6 +26,14 @@ def get_installed_battlecats_versions() -> Optional[list[str]]:
     if not os.path.exists(path):
         return None
     versions: list[str] = []
+    try:
+        os.listdir(path)
+    except PermissionError:
+        helper.colored_text(
+            "Root access is required to get installed game versions. Try adding sudo before the run command",
+            base=helper.RED,
+        )
+        return None
     for folder in os.listdir(path):
         if folder == "jp.co.ponos.battlecats":
             versions.append("jp")
@@ -50,6 +58,7 @@ def pull_save_data(game_version: str) -> Optional[str]:
         return None
     return path
 
+
 def is_ran_as_root() -> bool:
     """
     Check if the program is ran as root
@@ -58,6 +67,6 @@ def is_ran_as_root() -> bool:
         bool: If the program is ran as root
     """
     try:
-        return os.geteuid() == 0 # type: ignore
+        return os.geteuid() == 0  # type: ignore
     except AttributeError:
         return False

@@ -84,7 +84,12 @@ def rerun_game(version: str) -> None:
     if not is_ran_as_root():
         return
     package_name = "jp.co.ponos.battlecats" + version.replace("jp", "")
-    # close game locally, NOT using adb
-    subprocess.run(f"sudo pkill -f {package_name}", capture_output=True, check=False, shell=True)
-    # open game locally, NOT using adb
-    subprocess.run(f"sudo monkey -p {package_name} -c android.intent.category.LAUNCHER 1", capture_output=True, check=False, shell=True)
+    subprocess.run(
+        f"sudo pkill -f {package_name}", capture_output=True, check=False, shell=True
+    )
+    subprocess.run(
+        f"sudo monkey -p {package_name} -c android.intent.category.LAUNCHER 1",
+        capture_output=True,
+        check=False,
+        shell=True,
+    )

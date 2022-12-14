@@ -101,14 +101,14 @@ class Item:
                 return
         if self.value is not None:
             helper.colored_text(
-                f"The current {self.edit_name} of {self.name} is : &{int(self.value)+self.offset}&"
+                f"The current {self.edit_name} of {self.name} is: &{int(self.value)+self.offset}&"
             )
         if self.max_value is None:
-            max_str = f"(max &{self.get_max_int_val()}&)"
+            max_str = ""
         else:
-            max_str = f"(max &{self.max_value+self.offset}&)"
+            max_str = f" (max &{self.max_value+self.offset}&)"
 
-        text = f"Enter the {self.edit_name} of {self.name} you want to {self.set_name} {max_str}:"
+        text = f"Enter the {self.edit_name} of {self.name} you want to {self.set_name}{max_str}:"
         self.value = user_input_handler.get_int(text) - self.offset
         self.clamp()
         helper.colored_text(

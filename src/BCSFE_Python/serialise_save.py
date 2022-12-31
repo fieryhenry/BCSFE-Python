@@ -523,11 +523,17 @@ def serialise_mission_segment(save_data: list[int], data: dict[int, Any]) -> lis
     return save_data
 
 
-def serialise_missions(save_data: list[int], missions: dict[str, Any]) -> list[int]:
-    save_data = serialise_mission_segment(save_data, missions["flags"])
-    save_data = serialise_mission_segment(save_data, missions["values"])
-    return save_data
+def serialise_missions(save_data: list[int], missions_data: dict[str, Any]) -> list[int]:
+    save_data = serialise_mission_segment(save_data, missions_data["states"])
+    save_data = serialise_mission_segment(save_data, missions_data["requirements"])
+    save_data = serialise_mission_segment(save_data, missions_data["clear_types"])
+    save_data = serialise_mission_segment(save_data, missions_data["gamatoto"])
+    save_data = serialise_mission_segment(save_data, missions_data["nyancombo"])
+    save_data = serialise_mission_segment(save_data, missions_data["user_rank"])
+    save_data = serialise_mission_segment(save_data, missions_data["expiry"])
+    save_data = serialise_mission_segment(save_data, missions_data["preparing"])
 
+    return save_data
 
 def serialise_dojo(save_data: list[int], dojo_data: dict[int, Any]) -> list[int]:
     save_data = write(save_data, len(dojo_data), 4)
@@ -764,6 +770,21 @@ def serialise_login_bonuses(save_data: list[int], login_bonuses: dict[int, int])
         save_data = write(save_data, value, 4)
     return save_data
 
+def serialise_tower_item_obtained(save_data: list[int], data: list[list[bool]]):
+    """
+    Serialises the tower item obtained data
+
+    Args:
+        save_data (list[int]): The save data
+        data (list[list[bool]]): The tower item obtained data
+    """
+    save_data = write(save_data, len(data), 4)
+    save_data = write(save_data, len(data[0]), 4)
+    for row in data:
+        for item in row:
+            save_data = write(save_data, item, 1)
+    return save_data
+
 def serialize_save(save_stats: dict[str, Any]) -> bytes:
     """Serialises the save stats"""
 
@@ -899,7 +920,7 @@ def serialize_save(save_stats: dict[str, Any]) -> bytes:
 
     save_data = write_length_data(save_data, save_stats["unknown_105"], 4, 4, False)
 
-    save_data = write(save_data, save_stats["unknown_107"])
+    save_data = write_length_data(save_data, save_stats["unknown_107"], write_length=False, bytes_per_val=1)
     if save_stats["dst"]:
         save_data = serialise_utf8_string(save_data, save_stats["unknown_110"])
     save_data = write(save_data, len(save_stats["unknown_108"]), 4)
@@ -1088,8 +1109,8 @@ def serialize_save(save_stats: dict[str, Any]) -> bytes:
     save_data = serialise_outbreaks(save_data, save_stats["outbreaks"])
 
     save_data = write_double(save_data, save_stats["unknown_52"])
-    save_data = write_length_data(save_data, save_stats["unknown_53"])
-    save_data = write_length_data(save_data, save_stats["unknown_54"])
+    save_data = write_length_data(save_data, save_stats["item_schemes"]["to_obtain_ids"])
+    save_data = write_length_data(save_data, save_stats["item_schemes"]["received_ids"])
 
     save_data = serialise_outbreaks(save_data, save_stats["current_outbreaks"])
 
@@ -1118,7 +1139,7 @@ def serialize_save(save_stats: dict[str, Any]) -> bytes:
     save_data = serialise_dumped_data(save_data, save_stats["unknown_59"])
     save_data = serialise_tower(save_data, save_stats["tower"])
     save_data = serialise_missions(save_data, save_stats["missions"])
-    save_data = serialise_dumped_data(save_data, save_stats["unknown_60"])
+    save_data = serialise_tower_item_obtained(save_data, save_stats["tower_item_obtained"])
     save_data = serialise_dumped_data(save_data, save_stats["unknown_61"])
     save_data = write(save_data, save_stats["challenge"]["Score"])
     save_data = write(save_data, save_stats["challenge"]["Cleared"])

@@ -643,93 +643,17 @@ def get_mission_segment() -> dict[int, int]:
         missions[mission_id] = mission_value
     return missions
 
-
 def get_mission_data() -> dict[str, Any]:
     missions: dict[str, dict[int, int]] = {}
-    missions[
-        "flags"
-    ] = (
-        get_mission_segment()
-    )  # 0 = prepare, 1 = locked, 2 = achieved, 3 = progress, 4 = received, 5 = invalid
-    missions[
-        "values"
-    ] = get_mission_segment()  # e.g number of gamatoto expeditions, stages cleared etc
+    missions["states"] = get_mission_segment()
+    missions["requirements"] = get_mission_segment()
+    missions["clear_types"] = get_mission_segment()
+    missions["gamatoto"] = get_mission_segment()
+    missions["nyancombo"] = get_mission_segment()
+    missions["user_rank"] = get_mission_segment()
+    missions["expiry"] = get_mission_segment()
+    missions["preparing"] = get_mission_segment()
     return missions
-
-
-def get_looped_data() -> list[dict[str, int]]:
-    data: list[dict[str, int]] = []
-    val_114 = next_int_len(4)
-    data.append(val_114)
-
-    val_118 = next_int_len(4)
-    data.append(val_118)
-
-    for _ in range(val_114["Value"]):
-        val_22 = next_int_len(4)
-        data.append(val_22)
-
-        val_118 = next_int_len(4)
-        data.append(val_118)
-
-    val_114 = next_int_len(4)
-    data.append(val_114)
-    for _ in range(val_118["Value"]):
-        val_22 = next_int_len(4)
-        data.append(val_22)
-
-        val_114 = next_int_len(4)
-        data.append(val_114)
-
-    val_118 = next_int_len(4)
-    data.append(val_118)
-
-    for _ in range(val_114["Value"]):
-        val_22 = next_int_len(4)
-        data.append(val_22)
-
-        val_118 = next_int_len(4)
-        data.append(val_118)
-
-    val_114 = next_int_len(4)
-    data.append(val_114)
-    for _ in range(val_118["Value"]):
-        val_22 = next_int_len(4)
-        data.append(val_22)
-
-        val_114 = next_int_len(4)
-        data.append(val_114)
-
-    val_118 = next_int_len(4)
-    data.append(val_118)
-
-    for _ in range(val_114["Value"]):
-        val_22 = next_int_len(4)
-        data.append(val_22)
-
-        val_118 = next_int_len(4)
-        data.append(val_118)
-
-    val_54 = next_int_len(4)
-    data.append(val_54)
-
-    for _ in range(val_118["Value"]):
-        val_24 = next_int_len(4)
-        data.append(val_24)
-
-        val_54 = next_int_len(4)
-        data.append(val_54)
-
-    val_61 = next_int_len(4)
-    data.append(val_61)
-
-    for _ in range(val_54["Value"]):
-        for _ in range(val_61["Value"]):
-            val_15 = next_int_len(1)
-            data.append(val_15)
-
-    return data
-
 
 def get_data_after_challenge() -> list[dict[str, int]]:
     data: list[dict[str, int]] = []
@@ -1772,6 +1696,16 @@ def get_login_bonuses() -> dict[int, int]:
         data[login_id] = next_int(4)
     return data
 
+def get_tower_item_obtained() -> list[list[int]]:
+    total_stars = next_int(4)
+    total_stages = next_int(4)
+    data: list[list[int]] = []
+    for _ in range(total_stars):
+        star_data: list[int] = []
+        for _ in range(total_stages):
+            star_data.append(next_int(1))
+        data.append(star_data)
+    return data
 
 def parse_save(save_data: bytes, country_code: Union[str, None]) -> dict[str, Any]:
     """Parse the save data."""
@@ -1883,8 +1817,7 @@ def parse_save(save_data: bytes, country_code: Union[str, None]) -> dict[str, An
 
     save_stats["fourth_time"] = get_time_data(save_stats["dst"])
     save_stats["unknown_105"] = get_length_data(length=5)
-    save_stats["unknown_108"] = {}
-    save_stats["unknown_107"] = next_int_len(3)
+    save_stats["unknown_107"] = get_length_data(separator=1, length=3)
 
     if save_stats["dst"]:
         save_stats["unknown_110"] = get_utf8_string()
@@ -2060,8 +1993,9 @@ def parse_save(save_data: bytes, country_code: Union[str, None]) -> dict[str, An
     save_stats["outbreaks"] = get_outbreaks()
 
     save_stats["unknown_52"] = get_double()
-    save_stats["unknown_53"] = get_length_data()
-    save_stats["unknown_54"] = get_length_data()
+    save_stats["item_schemes"] = {}
+    save_stats["item_schemes"]["to_obtain_ids"] = get_length_data()
+    save_stats["item_schemes"]["received_ids"] = get_length_data()
 
     save_stats["current_outbreaks"] = get_outbreaks()
     save_stats["unknown_55"] = get_mission_data_maybe()
@@ -2090,7 +2024,7 @@ def parse_save(save_data: bytes, country_code: Union[str, None]) -> dict[str, An
 
     save_stats["tower"] = get_ht_it_data()
     save_stats["missions"] = get_mission_data()
-    save_stats["unknown_60"] = get_looped_data()
+    save_stats["tower_item_obtained"] = get_tower_item_obtained()
     save_stats["unknown_61"] = get_data_after_tower()
 
     save_stats["challenge"] = {"Score": next_int_len(4), "Cleared": next_int_len(1)}

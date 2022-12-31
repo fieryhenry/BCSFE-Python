@@ -421,6 +421,47 @@ def serialise_gauntlet_progress(
         save_data = write_length_data(save_data, chapter, 1, 1, False)
     return save_data
 
+def serialise_legend_quest_current(save_data: list[int], legend_quest_current: dict[str, Any]) -> list[int]:
+    save_data = write(save_data, legend_quest_current["total"], 1)
+    save_data = write(save_data, legend_quest_current["stages"], 1)
+    save_data = write(save_data, legend_quest_current["stars"], 1)
+
+    for i in range(len(legend_quest_current["Clear"])):
+        save_data = write_length_data(save_data, legend_quest_current["Clear"][i], 1, 1, False)
+
+    return save_data
+
+def serialise_legend_quest_progress(save_data: list[int], legend_quests: dict[str, Any]) -> list[int]:
+    lengths = legend_quests["Lengths"]
+    total = lengths["total"]
+    stars = lengths["stars"]
+    stages = lengths["stages"]
+
+    for chapter in legend_quests["Value"]["clear_progress"]:
+        save_data = write_length_data(save_data, chapter, 1, 1, False)
+
+    clear_amount = [0] * total * stars * stages
+    clear_amount_data = legend_quests["Value"]["clear_amount"]
+    for i in range(total):
+        for j in range(stages):
+            for k in range(stars):
+                clear_amount[i * stages * stars + j * stars + k] = clear_amount_data[i][k][j]
+    
+    tries = [0] * total * stars * stages
+    tries_data = legend_quests["Value"]["tries"]
+    for i in range(total):
+        for j in range(stages):
+            for k in range(stars):
+                tries[i * stages * stars + j * stars + k] = tries_data[i][k][j]
+    
+
+    save_data = write_length_data(save_data, clear_amount, 4, 2, False)
+    save_data = write_length_data(save_data, tries, 4, 2, False)
+
+    for chapter in legend_quests["Value"]["unlock_next"]:
+        save_data = write_length_data(save_data, chapter, 1, 1, False)
+    return save_data
+
 
 def serialise_talent_orbs(
     save_data: list[int], talent_orbs: dict[str, int], game_verison: dict[str, int]
@@ -1203,6 +1244,12 @@ def serialize_save(save_stats: dict[str, Any]) -> bytes:
     save_data = write(save_data, save_stats["gv_80500"])
 
     save_data = write_length_data(save_data, save_stats["unknown_75"], 2)
+
+    save_data = serialise_legend_quest_current(save_data, save_stats["legend_quest_current"])
+    save_data = serialise_legend_quest_progress(save_data, save_stats["legend_quest"])
+    save_data = write_length_data(save_data, save_stats["unknown_133"], bytes_per_val = 1, write_length=False)
+    save_data = write_length_data(save_data, save_stats["legend_quest_ids"], write_length=False)
+
     save_data = serialise_dumped_data(save_data, save_stats["unknown_76"])
 
     save_data = write(save_data, save_stats["gv_80700"])

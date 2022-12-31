@@ -1016,49 +1016,67 @@ def get_data_after_after_leadership(dst: bool) -> list[dict[str, int]]:
         data.append(next_int_len(7))
     return data
 
+def get_legend_quest_current() -> dict[str, Any]:
+    total_subchapters = next_int(1)
+    stages_per_subchapter = next_int(1)
+    stars = next_int(1)
+
+    clear_progress = get_length_data(4, 1, total_subchapters * stars)
+    clear_progress = list(helper.chunks(clear_progress, stars))
+
+    return {
+        "Clear": clear_progress,
+        "total": total_subchapters,
+        "stages": stages_per_subchapter,
+        "stars": stars,
+    }
+
+def get_legend_quest_progress(lengths: dict[str, Any]):
+    total = lengths["total"]
+    stars = lengths["stars"]
+    stages = lengths["stages"]
+
+    clear_progress = get_length_data(4, 1, total * stars)
+    clear_progress = list(helper.chunks(clear_progress, stars))
+    clear_amount = get_length_data(4, 2, total * stars * stages)
+    tries = get_length_data(4, 2, total * stars * stages)
+
+    unlock_next = get_length_data(4, 1, total * stars)
+    unlock_next = list(helper.chunks(unlock_next, stars))
+
+    clear_amount = list(helper.chunks(clear_amount, stages * stars))
+    tries = list(helper.chunks(tries, stages * stars))
+
+    clear_amount_sep: list[list[list[int]]] = []
+    stage_ids_sep: list[list[list[int]]] = []
+
+    for clear_amount_val in clear_amount:
+        sub_chapter_clears: list[list[int]] = []
+        for j in range(stars):
+            sub_chapter_clears.append(clear_amount_val[j::stars])
+        clear_amount_sep.append(sub_chapter_clears)
+    clear_amount = clear_amount_sep
+
+    for stage_id_val in tries:
+        sub_chapter_ids: list[list[int]] = []
+        for j in range(stars):
+            sub_chapter_ids.append(stage_id_val[j::stars])
+        stage_ids_sep.append(sub_chapter_ids)
+    tries = stage_ids_sep
+
+    return {
+        "Value": {
+            "clear_progress": clear_progress,
+            "clear_amount": clear_amount,
+            "tries": tries,
+            "unlock_next": unlock_next,
+        },
+        "Lengths": lengths,
+    }
+
 
 def get_data_after_leadership() -> list[dict[str, int]]:
     data: list[dict[str, int]] = []
-    total_subchapters = next_int_len(1)
-    data.append(total_subchapters)
-
-    stages_per_subchapter = next_int_len(1)
-    data.append(stages_per_subchapter)
-
-    stars = next_int_len(1)
-    data.append(stars)
-
-    for _ in range(total_subchapters["Value"]):
-        for _ in range(stars["Value"]):
-            val_15 = next_int_len(1)
-            data.append(val_15)
-
-    for _ in range(total_subchapters["Value"]):
-        for _ in range(stars["Value"]):
-            val_15 = next_int_len(1)
-            data.append(val_15)
-
-    for _ in range(total_subchapters["Value"]):
-        for _ in range(stages_per_subchapter["Value"]):
-            for _ in range(stars["Value"]):
-                val_20 = next_int_len(2)
-                data.append(val_20)
-
-    for _ in range(total_subchapters["Value"]):
-        for _ in range(stages_per_subchapter["Value"]):
-            for _ in range(stars["Value"]):
-                val_20 = next_int_len(2)
-                data.append(val_20)
-
-    for _ in range(total_subchapters["Value"]):
-        for _ in range(stars["Value"]):
-            val_15 = next_int_len(1)
-            data.append(val_15)
-
-    for _ in range(total_subchapters["Value"]):
-        data.append(next_int_len(1))
-    for _ in range(48):
-        data.append(next_int_len(4))
 
     data.append(next_int_len(2))
     data.append(next_int_len(1))
@@ -2092,6 +2110,14 @@ def parse_save(save_data: bytes, country_code: Union[str, None]) -> dict[str, An
     save_stats["gv_80500"] = next_int_len(4)  # 80500
 
     save_stats["unknown_75"] = get_length_data(2, 4)
+
+    lengths = get_legend_quest_current()
+    save_stats["legend_quest_current"] = lengths
+    save_stats["legend_quest"] = get_legend_quest_progress(lengths)
+
+    save_stats["unknown_133"] = get_length_data(4, 1, lengths["total"])
+    save_stats["legend_quest_ids"] = get_length_data(4, 4, lengths["stages"])
+
     save_stats["unknown_76"] = get_data_after_leadership()
     save_stats["gv_80700"] = next_int_len(4)  # 80700
     if save_stats["dst"]:

@@ -68,7 +68,7 @@ def get_mission_ids(
     """Get the mission ids and names from the conditions"""
 
     mission_ids_to_use: list[int] = []
-    for mission_id in missions["flags"]:
+    for mission_id in missions["states"]:
         if mission_id in conditions:
             mission_ids_to_use.append(mission_id)
 
@@ -90,13 +90,13 @@ def set_missions(
         mission_id = mission_ids_to_use[mission_id]
         if re_claim:
             claim = True
-        elif not re_claim and missions["flags"][mission_id] != 4:
+        elif not re_claim and missions["states"][mission_id] != 4:
             claim = True
         else:
             claim = False
         if claim:
-            missions["flags"][mission_id] = 2
-            missions["values"][mission_id] = conditions[mission_id]["progress_count"]
+            missions["states"][mission_id] = 2
+            missions["requirements"][mission_id] = conditions[mission_id]["progress_count"]
     return missions
 
 

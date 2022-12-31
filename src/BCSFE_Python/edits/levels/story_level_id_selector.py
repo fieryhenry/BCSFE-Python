@@ -78,8 +78,14 @@ def select_all(total: int) -> list[int]:
     return list(range(0, total))
 
 
-def select_level_progress(chapter_id: Optional[int], total: int) -> int:
+def select_level_progress(chapter_id: Optional[int], total: int, examples: Optional[list[str]] = None) -> int:
     """Select level progress"""
+
+    if examples is None:
+        examples = [
+            "korea",
+            "mongolia",
+        ]
 
     print("What level do you want to clear up to and including?")
     if chapter_id is not None:
@@ -87,7 +93,7 @@ def select_level_progress(chapter_id: Optional[int], total: int) -> int:
             f"Chapter: &{chapter_id+1}& : &{main_story.CHAPTERS[chapter_id]}&"
         )
     progress = user_input_handler.get_int(
-        f"Enter the stage id that you want to clear/unclear (e.g &1&=korea cleared, &2&=korea &and& mongolia cleared, &{total}&=all, &0&=unclear all)?:"
+        f"Enter the stage id that you want to clear/unclear (e.g &1&={examples[0]} cleared, &2&={examples[0]} &and& {examples[1]} cleared, &{total}&=all, &0&=unclear all)?:"
     )
     progress = helper.clamp(progress, 0, total)
     return progress

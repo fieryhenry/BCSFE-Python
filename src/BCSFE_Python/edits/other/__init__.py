@@ -11,4 +11,5 @@ from . import (
     claim_user_rank_rewards,
     cat_shrine,
     fix_time_issues,
+    scheme_item,
 )

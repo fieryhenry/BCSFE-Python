@@ -69,6 +69,7 @@ FEATURES: dict[str, Any] = {
         "Cat Fruit / Behemoth Stones": basic.catfruit.edit_catfruit,
         "Talent Orbs": basic.talent_orbs.edit_talent_orbs,
         "Catamins": basic.basic_items.edit_catamins,
+        "Item Schemes (Allows you to get unbannable items)": other.scheme_item.edit_scheme_data,
     },
     "Gamatoto / Ototo": {
         "Ototo Engineers": basic.basic_items.edit_engineers,

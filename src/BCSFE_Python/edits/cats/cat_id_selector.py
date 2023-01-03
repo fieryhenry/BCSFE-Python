@@ -289,7 +289,7 @@ def get_cat_names(save_stats: dict[str, Any]) -> Optional[list[tuple[str, int, i
             return None
         all_file_names: list[str] = []
         for cat_id, _ in enumerate(save_stats["cats"]):
-            file_name = f"Unit_Explanation{cat_id+1}_{helper.get_cc(save_stats)}.csv"
+            file_name = f"Unit_Explanation{cat_id+1}_{helper.get_lang(is_jp)}.csv"
             all_file_names.append(file_name)
         file_names_split = helper.chunks(all_file_names, 10)
         for file_names in file_names_split:
@@ -304,7 +304,7 @@ def get_cat_names(save_stats: dict[str, Any]) -> Optional[list[tuple[str, int, i
     names: list[tuple[str, int, int]] = []
     for cat_id, _ in enumerate(save_stats["cats"]):
         file_path = os.path.join(
-            file_path_dir, f"Unit_Explanation{cat_id+1}_{helper.get_cc(save_stats)}.csv"
+            file_path_dir, f"Unit_Explanation{cat_id+1}_{helper.get_lang(is_jp)}.csv"
         )
         data = csv_handler.parse_csv(
             helper.read_file_string(file_path),

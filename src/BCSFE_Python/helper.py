@@ -675,6 +675,13 @@ def get_cc(save_stats: dict[str, Any]) -> str:
         return "jp"
     return "en"
 
+def get_lang(jp: bool) -> str:
+    """Get the language code"""
+
+    if jp:
+        return "ja"
+    return "en"
+
 
 def get_save_path_home() -> str:
     """

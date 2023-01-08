@@ -1,5 +1,49 @@
 # Changelog
 
+## [2.7.0] - 2023-01-08
+
+#### Added
+
+- Features to clear legend quest, behemoth culling stages, and collab gauntlets
+
+- Feature to get scheme item rewards (e.g go go pogo cat mission rewards)
+
+- More support for rooted android devices (pull and push directly to root folder + re-run game)
+
+- The ability to remove talents
+
+- The ability to select / download a new save without having to restart the editor
+
+#### Changed
+
+- Catseye editing will now use the game data for names - means i don't need to update the whole editor to put another catseye type in
+
+- When uploading the managed items, a save key is added (idk if this changes anything / reduces bans but newer game versions do this)
+
+- The editor will never ask if you want to exit, to exit enter the option to exit or do `ctrl+c`
+
+- Renamed feature `Create a new account` to `Generate a new inquiry code and token` to better reflect what it does
+
+#### Fixed
+
+- Cat name selection for jp
+
+- Evolve cats and upgrade cats crashing if game data is outdated
+
+- Main story crashing and chapter names being offset sometimes
+
+- Dojo score not being able to be edited if you haven't been to the dojo yet
+
+- Max value for some items being an unsigned int even though the game reads signed ints
+
+- Outbreak clearing not setting all stages
+
+- Jp timed score rewards being parsed and serialized incorrectly leading to incorrect timed scores being edited in
+
+#### Removed
+
+- The `pick` module due to issues with python 3.11
+
 ## [2.6.0] - 2022-10-24
 
 #### Added

@@ -9,3 +9,4 @@ __pychache__
 tests.txt
 src/BCSFE_Python/files/item_tracker.json
 src/BCSFE_Python/files/game_data
+pyrightconfig.json

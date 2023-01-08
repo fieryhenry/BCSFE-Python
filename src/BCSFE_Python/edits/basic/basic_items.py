@@ -157,27 +157,6 @@ def edit_battle_items(save_stats: dict[str, Any]) -> dict[str, Any]:
     return save_stats
 
 
-def edit_catseyes(save_stats: dict[str, Any]) -> dict[str, Any]:
-    """Handler for editing catseyes"""
-
-    catseyes = item.create_item_group(
-        names=[
-            "Special",
-            "Rare",
-            "Super Rare",
-            "Uber Super Rare",
-            "Legend Rare",
-        ],
-        values=save_stats["catseyes"],
-        maxes=9999,
-        edit_name="value",
-        group_name="Catseyes",
-    )
-    catseyes.edit()
-    save_stats["catseyes"] = catseyes.values
-    return save_stats
-
-
 def edit_engineers(save_stats: dict[str, Any]) -> dict[str, Any]:
     """Handler for editing ototo engineers"""
 

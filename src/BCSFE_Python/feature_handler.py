@@ -65,7 +65,7 @@ FEATURES: dict[str, Any] = {
         "NP": basic.basic_items.edit_np,
         "Leadership": basic.basic_items.edit_leadership,
         "Battle Items": basic.basic_items.edit_battle_items,
-        "Catseyes": basic.basic_items.edit_catseyes,
+        "Catseyes": basic.catseyes.edit_catseyes,
         "Cat Fruit / Behemoth Stones": basic.catfruit.edit_catfruit,
         "Talent Orbs": basic.talent_orbs.edit_talent_orbs,
         "Catamins": basic.basic_items.edit_catamins,

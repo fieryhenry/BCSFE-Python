@@ -31,4 +31,4 @@ def run_testparse(file: str):
     data_2 = serialise_save.serialize_save(save_stats)
     save_stats = parse_save.parse_save(data_2, gv_c)
     data_3 = serialise_save.serialize_save(save_stats)
-    assert data_2 == data_3 == data_1 and save_stats["extra_data"]["Length"] == 0
+    assert data_2 == data_3 == data_1

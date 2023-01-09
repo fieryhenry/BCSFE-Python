@@ -239,6 +239,7 @@ def edit_rare_gacha_seed(save_stats: dict[str, Any]) -> dict[str, Any]:
         value=save_stats["rare_gacha_seed"]["Value"],
         max_value=None,
         edit_name="value",
+        unsigned=True,
     )
     rare_gacha_seed.edit()
     save_stats["rare_gacha_seed"]["Value"] = rare_gacha_seed.value

@@ -36,6 +36,7 @@ class Item:
         set_name: str = "set",
         success_message: str = "",
         to: str = "to",
+        unsigned: bool = False,
     ) -> None:
         self.name = name
         self.value = value
@@ -50,6 +51,7 @@ class Item:
         else:
             self.success_message = set_name
         self.to = to
+        self.unsigned = unsigned
 
         if config_manager.get_config_value_category("EDITOR", "DISABLE_MAXES"):
             self.max_value = None
@@ -66,9 +68,10 @@ class Item:
 
     def get_max_int_val(self) -> int:
         """Get the max integer value"""
+        max_offset = 0 if self.unsigned else 1
 
         if self.max_value is None:
-            return 2 ** ((self.length * 8) - 1) - 1
+            return 2 ** ((self.length * 8) - max_offset) - 1
         return self.max_value
 
     def ban_warning(self) -> bool:

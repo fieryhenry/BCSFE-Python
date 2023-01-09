@@ -31,31 +31,27 @@ def set_outbreak(
 
 
 def set_outbreaks(
-    outbreaks: dict[str, Any],
+    outbreaks: dict[int, Any],
     current_outbreaks: dict[int, Any],
     ids: list[int],
     clear: bool = True,
-) -> tuple[dict[str, Any], dict[int, Any]]:
+) -> tuple[dict[int, Any], dict[int, Any]]:
     """Set outbreaks"""
-    chapter_data = outbreaks["outbreaks"]
     for chapter_id in ids:
-        outbreaks["stages_counts"][chapter_id] = 48
-        chapter_data[chapter_id] = set_outbreak(
-            chapter_data[chapter_id], 1 if clear else 0, 48
+        outbreaks[chapter_id] = set_outbreak(
+            outbreaks[chapter_id], 1 if clear else 0, 48
         )
         if chapter_id in current_outbreaks:
-            current_outbreaks[chapter_id] = set_outbreak(
-                current_outbreaks[chapter_id], 0
-            )
-    outbreaks["outbreaks"] = chapter_data
+            if clear:
+                current_outbreaks[chapter_id] = {}
     return outbreaks, current_outbreaks
 
 
 def edit_outbreaks(save_stats: dict[str, Any]) -> dict[str, Any]:
     """Handler for editting outbreaks"""
 
-    outbreaks = save_stats["outbreaks"]["outbreaks"]
-    current_outbreaks = save_stats["current_outbreaks"]["outbreaks"]
+    outbreaks = save_stats["outbreaks"]
+    current_outbreaks = save_stats["current_outbreaks"]
 
     clear = (
         user_input_handler.colored_input(
@@ -74,9 +70,9 @@ def edit_outbreaks(save_stats: dict[str, Any]) -> dict[str, Any]:
     ids = helper.check_clamp(ids, len(available_chapters) + 1, 0, 0)
     ids = main_story.format_story_ids(ids)
     outbreaks, current_outbreaks = set_outbreaks(
-        save_stats["outbreaks"], current_outbreaks, ids, clear
+        outbreaks, current_outbreaks, ids, clear
     )
     save_stats["outbreaks"] = outbreaks
-    save_stats["current_outbreaks"]["outbreaks"] = current_outbreaks
+    save_stats["current_outbreaks"] = current_outbreaks
     print("Successfully set outbreaks")
     return save_stats

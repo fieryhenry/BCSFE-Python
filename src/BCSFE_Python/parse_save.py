@@ -420,21 +420,19 @@ def get_data_before_outbreaks() -> list[dict[str, Any]]:
     return data
 
 
-def get_outbreaks() -> dict[str, Any]:
+def get_outbreaks() -> dict[int, Any]:
     chapters_count = next_int(4)
-    outbreaks = {}
-    stages_counts = {}
+    outbreaks: dict[int, Any] = {}
     for _ in range(chapters_count):
         chapter_id = next_int(4)
         stages_count = next_int(4)
-        stages_counts[chapter_id] = stages_count
         chapter = {}
         for _ in range(stages_count):
             stage_id = next_int(4)
             outbreak_cleared_flag = next_int(1)
             chapter[stage_id] = outbreak_cleared_flag
         outbreaks[chapter_id] = chapter
-    return {"outbreaks": outbreaks, "stages_counts": stages_counts}
+    return outbreaks
 
 
 def get_mission_data_maybe() -> list[dict[str, int]]:
@@ -2016,6 +2014,7 @@ def parse_save(save_data: bytes, country_code: Union[str, None]) -> dict[str, An
     save_stats["item_schemes"]["received_ids"] = get_length_data()
 
     save_stats["current_outbreaks"] = get_outbreaks()
+
     save_stats["unknown_55"] = get_mission_data_maybe()
 
     save_stats["time_stamp_4"] = get_double()

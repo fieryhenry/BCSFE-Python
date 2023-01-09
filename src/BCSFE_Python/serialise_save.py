@@ -295,15 +295,13 @@ def serialise_dumped_data(
 
 
 def serialise_outbreaks(save_data: list[int], outbreaks: dict[Any, Any]) -> list[int]:
-    outbreak_data = outbreaks["outbreaks"]
-
-    save_data = write(save_data, len(outbreak_data), 4)
-    for chapter_id in outbreak_data:
+    save_data = write(save_data, len(outbreaks), 4)
+    for chapter_id in outbreaks:
         save_data = write(save_data, int(chapter_id), 4)
-        save_data = write(save_data, outbreaks["stages_counts"][chapter_id], 4)
-        for level_id in outbreak_data[chapter_id]:
+        save_data = write(save_data, len(outbreaks[chapter_id]), 4)
+        for level_id in outbreaks[chapter_id]:
             save_data = write(save_data, level_id, 4)
-            save_data = write(save_data, outbreak_data[chapter_id][level_id], 1)
+            save_data = write(save_data, outbreaks[chapter_id][level_id], 1)
 
     return save_data
 

@@ -115,7 +115,7 @@ def stage_handler(
         if not individual and first:
             stars = helper.check_int(
                 user_input_handler.colored_input(
-                    f"Enter the number of stars/cowns (max &{lengths['stars']}&):"
+                    f"Enter the number of stars/crowns (max &{lengths['stars']}&):"
                 )
             )
             if stars is None:
@@ -126,7 +126,7 @@ def stage_handler(
         elif individual:
             stars = helper.check_int(
                 user_input_handler.colored_input(
-                    f"Enter the number of stars/cowns for subchapter &{stage_id}& (max &{lengths['stars']}&):"
+                    f"Enter the number of stars/crowns for subchapter &{stage_id}& (max &{lengths['stars']}&):"
                 )
             )
             if stars is None:

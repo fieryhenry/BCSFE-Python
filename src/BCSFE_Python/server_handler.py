@@ -352,7 +352,6 @@ def get_save_key(token: str):
 def upload_metadata(
     token: str,
     inquiry_code: str,
-    save_data: bytes,
     play_time: int,
     items: list[managed_item.ManagedItem],
     user_rank: int,
@@ -360,10 +359,14 @@ def upload_metadata(
     """Uploads the metadata for the given token, inquiry_code and save_data"""
     save_key = get_save_key(token)
     metadata = create_backup_metadata(items, play_time, inquiry_code, user_rank, save_key)
-    body, headers = upload_save_data_body(metadata, inquiry_code, token, save_data)
 
-    url = get_nyanko_save_url() + "/v1/backups"
-    return handle_request(url, body, headers)
+    managed_item_details_str = json.dumps(metadata)
+    managed_item_details_str = managed_item_details_str.replace(" ", "")
+    headers = get_headers(inquiry_code, managed_item_details_str)
+    headers["authorization"] = "Bearer " + token
+
+    url = get_nyanko_save_url() + "/v2/backups"
+    return handle_request(url, managed_item_details_str, headers)
 
 
 def get_nyanko_backups_url() -> str:
@@ -538,13 +541,12 @@ def meta_data_upload_handler(
     data = prepare_upload(save_stats, path)
     if data is None:
         return None, save_stats
-    token, inquiry_code, save_data, playtime, managed_items = data
+    token, inquiry_code, _, playtime, managed_items = data
 
     helper.colored_text("Uploading meta data...", helper.GREEN)
     upload_data = upload_metadata(
         token,
         inquiry_code,
-        save_data,
         playtime,
         managed_items,
         helper.calculate_user_rank(save_stats),

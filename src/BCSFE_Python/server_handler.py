@@ -429,6 +429,43 @@ def upload_save_data_v2(
 
     return handle_request(url_2, meta_data, headers_2)
 
+def upload_metadata_v2(
+    token: str,
+    inquiry_code: str,
+    save_data: bytes,
+    play_time: int,
+    items: list[managed_item.ManagedItem],
+    user_rank: int,
+):
+    """Uploads the save data for the given token, inquiry_code and save_data"""
+
+    if not config_manager.get_config_value_category("SERVER", "UPLOAD_METADATA"):
+        items = []
+    save_key_data = get_save_key_data(token)
+    if save_key_data is None:
+        return None
+    metadata = create_backup_metadata(items, play_time, inquiry_code, user_rank, save_key_data["key"])
+    body, boundary = upload_save_data_body_v2(save_data, save_key_data)
+
+    url = "https://nyanko-service-data-prd.s3.amazonaws.com/"
+    headers = {
+        "accept-encoding": "gzip",
+        "connection": "keep-alive",
+        "content-type": "multipart/form-data; boundary=" + boundary.decode("utf-8"),
+        "user-agent": "Dalvik/2.1.0 (Linux; U; Android 9; SM-G955F Build/N2G48B)",
+    }
+
+    response = requests.post(url, data=body, headers=headers)
+    if response.status_code != 204:
+        return None
+
+    url_2 = get_nyanko_save_url() + "/v2/backups"
+    meta_data = json.dumps(metadata).replace(" ", "")
+    headers_2 = get_headers(inquiry_code, meta_data)
+    headers_2["authorization"] = "Bearer " + token
+
+    return handle_request(url_2, meta_data, headers_2)
+
 def get_save_key_data(token: str) -> Optional[dict[str, Any]]:
     """Gets the save key for the given token"""
 
@@ -660,12 +697,13 @@ def meta_data_upload_handler(
     data = prepare_upload(save_stats, path)
     if data is None:
         return None, save_stats
-    token, inquiry_code, _, playtime, managed_items = data
+    token, inquiry_code, save_data, playtime, managed_items = data
 
     helper.colored_text("Uploading meta data...", helper.GREEN)
-    upload_data = upload_metadata(
+    upload_data = upload_metadata_v2(
         token,
         inquiry_code,
+        save_data,
         playtime,
         managed_items,
         helper.calculate_user_rank(save_stats),

@@ -569,14 +569,20 @@ def colored_list(
 def calculate_user_rank(save_stats: dict[str, Any]):
     """Calculate the user rank"""
 
-    user_rank = 10  # blue upgrade base level (1 each)
-    for cat_flag in save_stats["cats"]:
-        if cat_flag == 1:
-            user_rank += 1
-    user_rank += sum(save_stats["cat_upgrades"]["Base"])
-    user_rank += sum(save_stats["cat_upgrades"]["Plus"])
-    user_rank += sum(save_stats["blue_upgrades"]["Base"])
-    user_rank += sum(save_stats["blue_upgrades"]["Plus"])
+    user_rank = 0
+    for cat_id, cat_flag in enumerate(save_stats["cats"]):
+        if cat_flag == 0:
+            continue
+
+        user_rank += save_stats["cat_upgrades"]["Base"][cat_id] + 1
+        user_rank += save_stats["cat_upgrades"]["Plus"][cat_id]
+
+    for skill_id in range(len(save_stats["blue_upgrades"]["Base"])):
+        if skill_id == 1:
+            continue
+        user_rank += save_stats["blue_upgrades"]["Base"][skill_id] + 1
+        user_rank += save_stats["blue_upgrades"]["Plus"][skill_id]
+
     return user_rank
 
 

@@ -5,7 +5,7 @@ import datetime
 import json
 import struct
 import traceback
-from typing import Any, Union
+from typing import Any, Optional, Union
 
 
 from . import helper
@@ -641,6 +641,7 @@ def get_mission_segment() -> dict[int, int]:
         missions[mission_id] = mission_value
     return missions
 
+
 def get_mission_data() -> dict[str, Any]:
     missions: dict[str, dict[int, int]] = {}
     missions["states"] = get_mission_segment()
@@ -652,6 +653,7 @@ def get_mission_data() -> dict[str, Any]:
     missions["expiry"] = get_mission_segment()
     missions["preparing"] = get_mission_segment()
     return missions
+
 
 def get_data_after_challenge() -> list[dict[str, int]]:
     data: list[dict[str, int]] = []
@@ -1014,6 +1016,7 @@ def get_data_after_after_leadership(dst: bool) -> list[dict[str, int]]:
         data.append(next_int_len(7))
     return data
 
+
 def get_legend_quest_current() -> dict[str, Any]:
     total_subchapters = next_int(1)
     stages_per_subchapter = next_int(1)
@@ -1028,6 +1031,7 @@ def get_legend_quest_current() -> dict[str, Any]:
         "stages": stages_per_subchapter,
         "stars": stars,
     }
+
 
 def get_legend_quest_progress(lengths: dict[str, Any]):
     total = lengths["total"]
@@ -1712,6 +1716,7 @@ def get_login_bonuses() -> dict[int, int]:
         data[login_id] = next_int(4)
     return data
 
+
 def get_tower_item_obtained() -> list[list[int]]:
     total_stars = next_int(4)
     total_stages = next_int(4)
@@ -1723,7 +1728,12 @@ def get_tower_item_obtained() -> list[list[int]]:
         data.append(star_data)
     return data
 
-def parse_save(save_data: bytes, country_code: Union[str, None]) -> dict[str, Any]:
+
+def parse_save(
+    save_data: bytes,
+    country_code: Union[str, None],
+    dst: Optional[bool] = None,
+) -> dict[str, Any]:
     """Parse the save data."""
 
     set_address(0)
@@ -1749,8 +1759,20 @@ def parse_save(save_data: bytes, country_code: Union[str, None]) -> dict[str, An
     extra = new_address - old_address
     save_stats["extra_time_data"] = next_int_len(extra)
 
-    dst = get_dst(save_data, address + 118)
+    if dst is None:
+        dst = get_dst(save_data, address + 118)
     save_stats["dst"] = dst
+    if (
+        save_stats["version"] == "jp"
+        and dst
+        or save_stats["version"] != "jp"
+        and not dst
+    ):
+        helper.colored_text(
+            "Warning: DST detected is not correct for this save version, this may cause issues with save parsing.",
+            helper.RED,
+        )
+
     data = get_time_data_skip(save_stats["dst"])
 
     save_stats["time"] = data["time"]
@@ -1776,6 +1798,8 @@ def parse_save(save_data: bytes, country_code: Union[str, None]) -> dict[str, An
     save_stats["story_chapters"] = get_main_story_levels()
     save_stats["treasures"] = get_treasures()
     save_stats["enemy_guide"] = get_length_data()
+    if len(save_stats["enemy_guide"]) == 0:
+        return parse_save(save_data, country_code, not dst)
     save_stats["cats"] = get_length_data()
     save_stats["cat_upgrades"] = get_cat_upgrades()
     save_stats["current_forms"] = get_length_data()

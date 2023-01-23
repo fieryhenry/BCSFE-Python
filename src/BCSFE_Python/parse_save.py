@@ -1797,7 +1797,10 @@ def parse_save(
 
     save_stats["story_chapters"] = get_main_story_levels()
     save_stats["treasures"] = get_treasures()
-    save_stats["enemy_guide"] = get_length_data()
+    try:
+        save_stats["enemy_guide"] = get_length_data()
+    except Exception:
+        return parse_save(save_data, country_code, not dst)
     if len(save_stats["enemy_guide"]) == 0:
         return parse_save(save_data, country_code, not dst)
     save_stats["cats"] = get_length_data()

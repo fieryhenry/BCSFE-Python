@@ -625,11 +625,13 @@ def has_tkinter() -> bool:
     """Check if tkinter is installed"""
     try:
         import tkinter  # type: ignore
-    except ImportError:
+    except ImportError as e:
+        colored_text("tkinter is not installed", new=RED)
         return False
     try:
         setup_tk()
-    except tkinter.TclError:
+    except tkinter.TclError as e:
+        colored_text("error setting up tkinter", new=RED)
         return False
     return True
 

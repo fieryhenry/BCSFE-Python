@@ -54,7 +54,7 @@ def find_game_versions() -> list[str]:
     try:
         output = str(
             subprocess.run(
-                "adb shell ls /data/data/", capture_output=True, check=True
+                "adb shell ls /data/data/", capture_output=True, check=True, shell=True
             ).stdout
         )
     except subprocess.CalledProcessError:
@@ -228,9 +228,7 @@ def add_to_path() -> None:
     helper.colored_text(
         f"Your old PATH environment variable has been backed up to &{backup_path}&"
     )
-    subprocess.run(
-        f'setx PATH "{adb_path};%PATH%"', shell=True, check=True, text=True
-    )
+    subprocess.run(f'setx PATH "{adb_path};%PATH%"', shell=True, check=True, text=True)
     print("Successfully added adb to path")
 
 

@@ -41,7 +41,7 @@ def fix_elsewhere_old(save_stats: dict[str, Any]) -> dict[str, Any]:
 
 FEATURES: dict[str, Any] = {
     "Save Management": {
-        "Save Save" : save_management.save.save_save,
+        "Save Save": save_management.save.save_save,
         "Save changes and upload to game servers (get transfer and confirmation codes)": save_management.server_upload.save_and_upload,
         "Save changes to file": save_management.save.save,
         "Save changes and push save data to the game with adb (don't re-open game)": save_management.save.save_and_push,
@@ -49,8 +49,8 @@ FEATURES: dict[str, Any] = {
         "Export save data as json": save_management.other.export,
         "Clear save data with adb (used to generate a new account without re-installing the game)": save_management.other.clear_data,
         "Upload tracked bannable items (This is done automatically when saving or exiting)": save_management.server_upload.upload_metadata,
-        "Load save data" : save_management.load.select,
-        #"Manage Presets": preset_handler.preset_manager,
+        "Load save data": save_management.load.select,
+        # "Manage Presets": preset_handler.preset_manager,
     },
     "Items": {
         "Cat Food": basic.basic_items.edit_cat_food,
@@ -67,7 +67,7 @@ FEATURES: dict[str, Any] = {
         "Battle Items": basic.basic_items.edit_battle_items,
         "Catseyes": basic.catseyes.edit_catseyes,
         "Cat Fruit / Behemoth Stones": basic.catfruit.edit_catfruit,
-        "Talent Orbs": basic.talent_orbs.edit_talent_orbs,
+        "Talent Orbs": basic.talent_orbs_new.edit_talent_orbs,
         "Catamins": basic.basic_items.edit_catamins,
         "Item Schemes (Allows you to get unbannable items)": other.scheme_item.edit_scheme_data,
     },
@@ -127,7 +127,7 @@ FEATURES: dict[str, Any] = {
         "Clear Tutorial": levels.clear_tutorial.clear_tutorial,
         "Catclaw Dojo Score (Hall of Initiates)": basic.basic_items.edit_dojo_score,
         "Add Enigma Stages": levels.enigma_stages.edit_enigma_stages,
-        "Allow the filibuster stage to be recleared" : levels.allow_filibuster_clearing.allow_filibuster_clearing,
+        "Allow the filibuster stage to be recleared": levels.allow_filibuster_clearing.allow_filibuster_clearing,
         "Legend Quest": levels.legend_quest.edit_legend_quest,
     },
     "Inquiry Code / Token / Account": {
@@ -151,7 +151,7 @@ FEATURES: dict[str, Any] = {
         "Cat Shrine Level / XP": other.cat_shrine.edit_shrine_xp,
     },
     "Fixes": {
-        "Fix time errors" : other.fix_time_issues.fix_time_issues,
+        "Fix time errors": other.fix_time_issues.fix_time_issues,
         "Unlock the Equip Menu": other.unlock_equip_menu.unlock_equip,
         "Clear Tutorial": levels.clear_tutorial.clear_tutorial,
         "Fix elsewhere error / Unban account": other.fix_elsewhere.fix_elsewhere,

@@ -122,9 +122,22 @@ def create_orb_list(
     return orb_list
 
 
+def create_aku_orbs(effects: list[str], grades: list[str]) -> list[str]:
+    """Create a list of all possible aku orbs"""
+
+    orb_list: list[str] = []
+    for effect in effects:
+        for grade in grades:
+            orb_list.append(f"Aku {grade} {effect}")
+
+    return orb_list
+
+
 def get_talent_orbs_types() -> list[str]:
     """Get a list of all possible talent orbs"""
 
     orb_list = create_orb_list(ATTRIBUTES, EFFECTS[0:2], GRADES, True)
     orb_list += create_orb_list(ATTRIBUTES, EFFECTS[2:], GRADES, False)
+    orb_list += create_aku_orbs(EFFECTS, GRADES)
+    print(orb_list)
     return orb_list

@@ -102,6 +102,24 @@ def get_file_latest(pack_name: str, file_name: str, is_jp: bool) -> Optional[byt
     return download_file(version, pack_name, file_name)
 
 
+def get_file_latest_path(path: str, is_jp: bool) -> Optional[bytes]:
+    """
+    Gets the latest version of the file.
+
+    Args:
+        path (str): The path to find.
+        is_jp (bool): Whether to get the japanese version.
+
+    Returns:
+        Optional[bytes]: The data of the file.
+    """
+    version = get_latest_version(is_jp)
+    if version is None:
+        return None
+    packname, filename = path.split("/")
+    return download_file(version, packname, filename)
+
+
 def get_path(pack_name: str, file_name: str, is_jp: bool) -> Optional[str]:
     """
     Gets the path of the file.

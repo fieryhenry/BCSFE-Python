@@ -1,8 +1,8 @@
 """Handler for user input"""
 
-from typing import Any, Tuple, Union
+from typing import Any, Optional, Tuple, Union
 
-from . import helper, config_manager
+from . import helper
 
 
 def handle_all_at_once(
@@ -106,7 +106,6 @@ def get_range(
 
 def colored_input(dialog: str) -> str:
     """Format dialog as a colored string"""
-
     helper.colored_text(dialog, end="")
     return input()
 
@@ -209,7 +208,7 @@ def select_single(
     return val
 
 
-def get_int(dialog: str) -> int:
+def get_int(dialog: str, default: Optional[int] = None) -> int:
     """Get user input as an integer and keep asking until a valid integer is entered"""
 
     helper.colored_text(dialog, end="")
@@ -219,6 +218,8 @@ def get_int(dialog: str) -> int:
             val = val.strip(" ")
             return int(val)
         except ValueError:
+            if default is not None:
+                return default
             helper.colored_text(
                 "Invalid input. Please enter a valid integer.", helper.RED
             )

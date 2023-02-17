@@ -38,10 +38,10 @@ def get_mission_names(is_jp: bool) -> Optional[dict[int, Any]]:
         return None
     mission_name = file_data.decode("utf-8")
     mission_name_list = mission_name.split("\n")
-    mission_names: dict[Any, Any] = {}
+    mission_names: dict[int, Any] = {}
     for mission_name in mission_name_list:
         line_data = mission_name.split(helper.get_text_splitter(is_jp))
-        if not helper.check_int(line_data[0]):
+        if helper.check_int(line_data[0]) is None:
             continue
         mission_id = int(line_data[0])
         name = line_data[1]
@@ -96,7 +96,9 @@ def set_missions(
             claim = False
         if claim:
             missions["states"][mission_id] = 2
-            missions["requirements"][mission_id] = conditions[mission_id]["progress_count"]
+            missions["requirements"][mission_id] = conditions[mission_id][
+                "progress_count"
+            ]
     return missions
 
 

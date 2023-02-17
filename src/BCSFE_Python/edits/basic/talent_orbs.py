@@ -4,6 +4,7 @@ from typing import Any
 
 from ... import helper, user_input_handler
 
+
 def edit_all_orbs(save_stats: dict[str, Any], orb_list: list[str]) -> dict[str, Any]:
     """Handler for editing all talent orbs"""
 
@@ -16,7 +17,11 @@ def edit_all_orbs(save_stats: dict[str, Any], orb_list: list[str]) -> dict[str, 
         return save_stats
 
     for orb in orb_list:
-        save_stats["talent_orbs"][orb_list.index(orb)] = val
+        try:
+            orb_id = orb_list.index(orb)
+        except ValueError:
+            continue
+        save_stats["talent_orbs"][orb_id] = val
 
     helper.colored_text(f"Set all talent orbs to &{val}&")
     return save_stats
@@ -30,8 +35,12 @@ def edit_talent_orbs(save_stats: dict[str, Any]) -> dict[str, Any]:
     talent_orbs = save_stats["talent_orbs"]
     print("You have:")
     for orb in talent_orbs:
-        if talent_orbs[orb] > 0:
-            helper.colored_text(f"&{talent_orbs[orb]}& {orb_list[orb]} orbs")
+        amount = talent_orbs[orb]
+        text = "orbs" if amount != 1 else "orb"
+        try:
+            helper.colored_text(f"&{amount}& {orb_list[orb]} {text}")
+        except IndexError:
+            helper.colored_text(f"&{amount}& Unknown {orb} {text}")
 
     orbs_str = user_input_handler.colored_input(
         "Enter the name of the orb that you want. You can enter multiple orb names separated by &spaces& to edit multiple at once or you can enter &all& to select all talent orbs to edit (e.g &angel a massive red d strong black b resistant&):"
@@ -47,7 +56,9 @@ def edit_talent_orbs(save_stats: dict[str, Any]) -> dict[str, Any]:
         try:
             orbs_to_set.append(orb_list.index(orb_name))
         except ValueError:
-            helper.colored_text(f"Error orb &{orb_name}& does not exist")
+            helper.colored_text(
+                f"Error orb &{orb_name}& does not exist or is not recognized"
+            )
 
     for orb_id in orbs_to_set:
         name = orb_list[orb_id]

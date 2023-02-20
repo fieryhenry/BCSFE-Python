@@ -61,8 +61,10 @@ def find_game_versions() -> list[str]:
         return []
     package_names: list[str] = re.findall(f"{package_name}..", output)
     for i, package_name in enumerate(package_names):
-        package_names[i] = package_name.replace("  ", "jp").replace(
-            "jp.co.ponos.battlecats", ""
+        package_names[i] = (
+            package_name.replace("\\n", "jp")
+            .replace("  ", "jp")
+            .replace("jp.co.ponos.battlecats", "")
         )
     return package_names
 
@@ -156,19 +158,21 @@ def adb_kill_server():
 
 def adb_error_handler(err: subprocess.CalledProcessError):
     """Handle ADB errors"""
+    error_text = str(err.stderr).lower()
 
-    if "not found" in err.stderr:
+    if "not found" in error_text:
         raise ADBException(ADBExceptionTypes.NO_DEVICE)
-    if "offline" in err.stderr:
-        print(err.stderr)
+    if "offline" in error_text:
         raise ADBException(ADBExceptionTypes.DEVICE_OFFLINE)
-    if "does not exist" in err.stderr:
+    if "does not exist" in error_text:
         raise ADBException(ADBExceptionTypes.PATH_NOT_FOUND)
-    if "'adb' is not recognized" in err.stderr:
+    if "'adb' is not recognized" in error_text:
         raise ADBException(ADBExceptionTypes.ADB_NOT_INSTALLED)
-    if "more than one device" in err.stderr:
+    if "more than one device" in error_text:
         raise ADBException(ADBExceptionTypes.MORE_THAN_ONE_DEVICE)
-    raise ADBException(ADBExceptionTypes.UNKNOWN, err.stderr)
+    if "no such file or directory" in error_text:
+        raise ADBException(ADBExceptionTypes.PATH_NOT_FOUND)
+    raise ADBException(ADBExceptionTypes.UNKNOWN, error_text)
 
 
 def find_adb_path() -> Union[str, None]:

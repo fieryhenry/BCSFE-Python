@@ -128,6 +128,6 @@ def upgrade_cats_ids(save_stats: dict[str, Any], ids: list[int]) -> dict[str, An
         save_stats=save_stats,
     )
     save_stats = set_user_popups(save_stats)
-    save_stats = set_level_caps(save_stats)
+    # save_stats = set_level_caps(save_stats)
     print("Successfully set cat levels")
     return save_stats

@@ -104,9 +104,15 @@ def get_range(
     return ids
 
 
-def colored_input(dialog: str) -> str:
+def colored_input(
+    dialog: str, base: Optional[str] = None, new: Optional[str] = None
+) -> str:
     """Format dialog as a colored string"""
-    helper.colored_text(dialog, end="")
+    if base is None:
+        base = helper.WHITE
+    if new is None:
+        new = helper.DARK_YELLOW
+    helper.colored_text(dialog, end="", base=base, new=new)
     return input()
 
 

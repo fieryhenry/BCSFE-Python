@@ -426,7 +426,10 @@ def check_changes(_: Any):
     Args:
         _ (Any): Unused
     """
-    save_path = get_save_path()
+    try:
+        save_path = get_save_path()
+    except Exception:
+        return
     temp_file_path = os.path.join(
         config_manager.get_app_data_folder(), "SAVE_DATA_temp"
     )
@@ -493,9 +496,11 @@ def error_text(text: str):
 
     colored_text(text, base=RED)
 
+
 def is_android() -> bool:
     """Check if the user is on android"""
     return "ANDROID_ROOT" in os.environ
+
 
 def colored_text(
     text: str,
@@ -682,6 +687,7 @@ def get_cc(save_stats: dict[str, Any]) -> str:
     if is_jp(save_stats):
         return "jp"
     return "en"
+
 
 def get_lang(jp: bool) -> str:
     """Get the language code"""

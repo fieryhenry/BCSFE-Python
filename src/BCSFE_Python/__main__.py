@@ -34,7 +34,9 @@ def print_start_up():
         + f"{locale_manager.search_key('discord_message')}\n"
         + f"{locale_manager.search_key('donate_message')}\n"
         + locale_manager.search_key("config_file_message")
-        % config_manager.get_config_path(),
+        % config_manager.get_config_path()
+        + "\n"
+        + locale_manager.search_key("scam_warning_message"),
         base=helper.CYAN,
         new=helper.WHITE,
     )

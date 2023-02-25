@@ -132,6 +132,7 @@ def create_config_file(config_path: Optional[str] = None) -> None:
     file_data += """DEFAULT_COUNTRY_CODE: "" # The default game version when downloading / pulling / loading save data. E.g en, jp, kr, tw. Empty means the game version is not specified and will be asked for when needed.
 DEFAULT_SAVE_FILE_PATH: "SAVE_DATA" # The default file path for your save data when saving changes / downloading save data / pulling etc
 FIXED_SAVE_PATH: False # If True, the save path will be from your user's folder / home folder. If False, the save path will be where the program is run from
+LOCALE: "en" # The locale to use for the program.
 EDITOR:
   DISABLE_MAXES: False # Allows you to edit the level / amount of items past the max amount.
   SHOW_BAN_WARNING: True # Show a warning when editing bannable items.
@@ -174,7 +175,7 @@ def get_app_data_folder() -> str:
             os.environ["HOME"], "Library", "Application Support", app_name
         )
     elif os_name == "posix":
-        path = os.path.join(os.environ["HOME"], app_name)
+        path = os.path.join(os.environ["HOME"], "Documents", app_name)
     else:
         raise Exception(f"Unsupported platform {os_name}")
     helper.create_dirs(path)
@@ -204,6 +205,7 @@ def edit_default_save_file_path(_: Any) -> None:
         "DEFAULT_SAVE_FILE_PATH", os.path.join(default_save_file_path, "SAVE_DATA")
     )
 
+
 def edit_fixed_save_path(_: Any) -> None:
     """
     Edit the fixed save path
@@ -217,6 +219,17 @@ def edit_fixed_save_path(_: Any) -> None:
     else:
         fixed_save_path = False
     set_config_setting("FIXED_SAVE_PATH", fixed_save_path)
+
+
+def edit_locale(_: Any) -> None:
+    """
+    Edit the locale
+    """
+    locale = get_config_value("LOCALE")
+    locale = user_input_handler.colored_input(
+        f"Enter the locale to use for the program. Current value: &{locale}&:",
+    )
+    set_config_setting("LOCALE", locale)
 
 
 def edit_editor_settings(_: Any) -> None:

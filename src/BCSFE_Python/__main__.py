@@ -17,6 +17,7 @@ from . import (
     updater,
     user_input_handler,
     root_handler,
+    locale_handler,
 )
 from .edits.levels import clear_tutorial
 
@@ -24,13 +25,16 @@ from .edits.levels import clear_tutorial
 def print_start_up():
     """Print start up message"""
 
+    locale_manager = locale_handler.LocalManager.from_config()
+
     helper.colored_text(
-        "Welcome to the &Battle Cats Save File Editor&\n"
-        + "Made by &fieryhenry&\n\n"
-        + "GitHub: &https://github.com/fieryhenry/BCSFE-Python&\n"
-        + "Discord: &https://discord.gg/DvmMgvn5ZB& - Please report any bugs to &#bug-reports&, or any suggestions to &#suggestions&\n"
-        + "Donate: &https://ko-fi.com/fieryhenry&\n"
-        + f"Config file path: &{config_manager.get_config_path()}&",
+        f"{locale_manager.search_key('welcome_message')}\n"
+        + f"{locale_manager.search_key('author_message')}\n\n"
+        + f"{locale_manager.search_key('github_message')}\n"
+        + f"{locale_manager.search_key('discord_message')}\n"
+        + f"{locale_manager.search_key('donate_message')}\n"
+        + locale_manager.search_key("config_file_message")
+        % config_manager.get_config_path(),
         base=helper.CYAN,
         new=helper.WHITE,
     )
@@ -138,7 +142,7 @@ def normal_start_up(default_op: bool = True) -> None:
         options = [
             "Download save data from the game using transfer and confirmation codes",
             "Select a save file from file",
-            "Use adb to pull the save from a rooted device",
+            "Use adb to pull the save from a rooted android device",
             "Load save data from json",
         ]
         if helper.is_android():

@@ -159,6 +159,7 @@ FEATURES: dict[str, Any] = {
         "Fix gamatoto from crashing the game": gamototo.fix_gamatoto.fix_gamatoto,
     },
     "Edit Config": {
+        "Edit LOCALIZATION": config_manager.edit_locale,
         "Edit DEFAULT_COUNTRY_CODE": config_manager.edit_default_gv,
         "Edit DEFAULT_SAVE_PATH": config_manager.edit_default_save_file_path,
         "Edit FIXED_SAVE_PATH": config_manager.edit_fixed_save_path,

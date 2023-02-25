@@ -43,17 +43,17 @@ def print_start_up():
     print()
     if "b" in local_version:
         helper.colored_text(
-            "You are using a &beta& release, some things may be broken. Please report any bugs you find to &#bug-reports& on Discord and specify that you are using a beta version",
+            locale_manager.search_key("beta_message"),
             base=helper.RED,
             new=helper.WHITE,
         )
     print()
     helper.colored_text(
-        "Thanks To:\n"
-        + "&Lethal's editor& for giving me inspiration to start the project and it helped me work out how to patch the save data and edit cf/xp: &https://www.reddit.com/r/BattleCatsCheats/comments/djehhn/editoren&\n"
-        + "&Beeven& and &csehydrogen's& code, which helped me figure out how to patch save data: &https://github.com/beeven/battlecats& and &https://github.com/csehydrogen/BattleCatsHacker&\n"
-        + "Anyone who has supported my work for giving me motivation to keep working on this project: &https://ko-fi.com/fieryhenry&\n"
-        + "Everyone in the discord for giving me saves, reporting bugs, suggesting new features, and for being an amazing community: &https://discord.gg/DvmMgvn5ZB&",
+        f"{locale_manager.search_key('thanks_title')}\n"
+        + f"{locale_manager.search_key('lethal_thanks')}\n"
+        + f"{locale_manager.search_key('beeven_cse_thanks')}\n"
+        + f"{locale_manager.search_key('support_thanks')}\n"
+        + locale_manager.search_key("discord_thanks"),
         base=helper.GREEN,
         new=helper.WHITE,
     )
@@ -62,22 +62,25 @@ def print_start_up():
 def check_update() -> None:
     """Check if there is an update available and if so, ask the user if they want to update"""
     version_info = updater.get_version_info()
+    locale_manager = locale_handler.LocalManager.from_config()
     if version_info is None:
-        helper.colored_text("Failed to check for updates", base=helper.RED)
+        helper.colored_text(
+            locale_manager.search_key("update_check_failed"), base=helper.RED
+        )
         return
     stable_ver, pre_release_ver = version_info
 
     local_version = updater.get_local_version()
 
     helper.colored_text(
-        f"Local version: &{local_version} | &Latest stable version: &{stable_ver}",
+        f"{locale_manager.search_key('local_version') % local_version} &|& {locale_manager.search_key('latest_stable_version') % stable_ver}",
         base=helper.CYAN,
         new=helper.WHITE,
         end="",
     )
     if pre_release_ver > stable_ver:
         helper.colored_text(
-            f"& | &Latest pre-release version: &{pre_release_ver}&",
+            f" &|& {locale_manager.search_key('latest_pre_release_version') % pre_release_ver}",
             base=helper.CYAN,
             new=helper.WHITE,
             end="",
@@ -86,7 +89,7 @@ def check_update() -> None:
     update_data = updater.check_update(version_info)
     if update_data[0]:
         helper.colored_text(
-            "\nAn update is available, would you like to update? (&y&/&n&):",
+            f"\n{locale_manager.search_key('update_available')} (&y&/&n&):",
             base=helper.GREEN,
             new=helper.WHITE,
             end="",
@@ -132,7 +135,7 @@ def normal_start_up(default_op: bool = True) -> None:
     default_start_option = config_manager.get_config_value_category(
         "START_UP", "DEFAULT_START_OPTION"
     )
-
+    locale_manager = locale_handler.LocalManager.from_config()
     if default_start_option != -1 and default_op:
         index = default_start_option - 1
     else:
@@ -140,33 +143,33 @@ def normal_start_up(default_op: bool = True) -> None:
         if not default_op:
             helper.print_line_seperator(helper.WHITE)
         options = [
-            "Download save data from the game using transfer and confirmation codes",
-            "Select a save file from file",
-            "Use adb to pull the save from a rooted android device",
-            "Load save data from json",
+            locale_manager.search_key("download_save"),
+            locale_manager.search_key("select_save_file"),
+            locale_manager.search_key("adb_pull_save"),
+            locale_manager.search_key("load_save_data_json"),
         ]
         if helper.is_android():
-            options[2] = "Use root access to access the save from local storage"
+            options[2] = locale_manager.search_key("android_direct_pull")
         index = (
             user_input_handler.select_single(
-                options, title="Select an option to get save data:"
+                options, title=locale_manager.search_key("select_save_option_title")
             )
             - 1
         )
     path = None
     if index == 0:
-        print("Enter details for data transfer:")
+        helper.colored_text(locale_manager.search_key("data_transfer_message_enter"))
         path = server_handler.download_handler()
     elif index == 1:
-        print("Select save file:")
+        helper.colored_text(locale_manager.search_key("select_save_file_message"))
         path = helper.select_file(
-            "Select a save file:",
+            locale_manager.search_key("select_save_file_message"),
             helper.get_save_file_filetype(),
             initial_file=helper.get_save_path_home(),
         )
     elif index == 2:
         if not helper.is_android():
-            print("Enter details for save pulling:")
+            helper.colored_text(locale_manager.search_key("adb_pull_message_enter"))
             game_versions = adb_handler.find_game_versions()
             if not game_versions:
                 game_version = helper.ask_cc()
@@ -174,8 +177,8 @@ def normal_start_up(default_op: bool = True) -> None:
                 index = (
                     user_input_handler.select_single(
                         game_versions,
-                        "Select",
-                        "Select a game version to pull from:",
+                        locale_manager.search_key("select"),
+                        locale_manager.search_key("pull_game_version_select"),
                         True,
                     )
                     - 1
@@ -188,8 +191,8 @@ def normal_start_up(default_op: bool = True) -> None:
                 index = (
                     user_input_handler.select_single(
                         game_versions,
-                        "Select",
-                        "Select a game version:",
+                        locale_manager.search_key("select"),
+                        locale_manager.search_key("pull_game_version_select"),
                         True,
                     )
                     - 1
@@ -197,16 +200,16 @@ def normal_start_up(default_op: bool = True) -> None:
                 game_version = game_versions[index]
                 path = root_handler.pull_save_data(game_version)
     elif index == 3:
-        print("Select save data json file")
+        helper.colored_text(locale_manager.search_key("json_save_data_json_message"))
         js_path = helper.select_file(
-            "Select save data json file",
+            locale_manager.search_key("json_save_data_json_message"),
             [("Json", "*.json")],
             initial_file=helper.get_save_path_home() + ".json",
         )
         if js_path:
             path = helper.load_json_handler(js_path)
     else:
-        helper.colored_text("Please enter a recognised option", base=helper.RED)
+        helper.colored_text(locale_manager.search_key("error_option"), base=helper.RED)
         return normal_start_up(False)
     if not path:
         return normal_start_up(False)
@@ -216,15 +219,19 @@ def normal_start_up(default_op: bool = True) -> None:
 
 def start(path: str) -> None:
     """Parse, patch, start the editor and serialise the save data"""
+
+    locale_manager = locale_handler.LocalManager.from_config()
+
+    if path.endswith(".json"):
+        user_input_handler.colored_input(
+            f"{locale_manager.search_key('error_save_json')}\n&{locale_manager.search_key('press_enter')}",
+            base=helper.RED,
+            new=helper.WHITE,
+        )
     data = helper.load_save_file(path)
     save_stats = data["save_stats"]
     save_data: bytes = data["save_data"]
     country_code = data["country_code"]
-
-    if path.endswith(".json"):
-        input(
-            "Your save data seems to be in json format. Please use to import json option if you want to load json data.\nPress enter to continue...:"
-        )
     if not clear_tutorial.is_tutorial_cleared(save_stats):
         save_stats = clear_tutorial.clear_tutorial(save_stats)
         save_data = serialise_save.start_serialize(save_stats)
@@ -239,7 +246,9 @@ def start(path: str) -> None:
         ):
             helper.write_file_bytes(path, save_data)
             helper.colored_text(
-                f"Save data saved to &{path}&", base=helper.GREEN, new=helper.WHITE
+                locale_manager.search_key("save_data_saved") % path,
+                base=helper.GREEN,
+                new=helper.WHITE,
             )
         temp_path = os.path.join(config_manager.get_app_data_folder(), "SAVE_DATA_temp")
         helper.write_file_bytes(temp_path, save_data)
@@ -255,8 +264,15 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         sys.exit()
     except Exception as e:  # pylint: disable=broad-except
+        try:
+            locale_manager = locale_handler.LocalManager.from_config()
+            error_txt = locale_manager.search_key("generic_error") % e
+        except Exception:  # pylint: disable=broad-except
+            error_txt = "An error has occurred: %s" % e
         helper.colored_text(
-            f"An error occured: &{e}&", base=helper.RED, new=helper.WHITE
+            error_txt,
+            base=helper.RED,
+            new=helper.WHITE,
         )
         traceback.print_exc()
         helper.exit_check_changes()

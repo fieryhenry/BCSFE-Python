@@ -1831,7 +1831,7 @@ def parse_save(
     save_stats["unknown_11"] = get_length_data(length=4)
     save_stats["normal_tickets"] = next_int_len(4)
     save_stats["rare_tickets"] = next_int_len(4)
-    save_stats["other_cat_data"] = get_length_data()
+    save_stats["gatya_seen_cats"] = get_length_data()
     save_stats["unknown_12"] = get_length_data(length=10)
     length = next_int(2)
     cat_storage_len = True

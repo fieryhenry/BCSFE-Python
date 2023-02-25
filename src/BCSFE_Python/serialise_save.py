@@ -925,7 +925,7 @@ def serialize_save(save_stats: dict[str, Any]) -> bytes:
     save_data = write(save_data, save_stats["normal_tickets"])
     save_data = write(save_data, save_stats["rare_tickets"])
 
-    save_data = write_length_data(save_data, save_stats["other_cat_data"])
+    save_data = write_length_data(save_data, save_stats["gatya_seen_cats"])
 
     save_data = write_length_data(
         save_data, save_stats["unknown_12"], write_length=False

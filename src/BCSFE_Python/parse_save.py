@@ -1780,7 +1780,8 @@ def parse_save(
     save_stats["time_stamp"] = data["time_stamp"]
     save_stats["duplicate_time"] = data["duplicate"]
 
-    save_stats["unknown_flags_1"] = get_length_data(length=4)
+    save_stats["unknown_flags_1"] = get_length_data(length=3)
+    save_stats["upgrade_state"] = next_int_len(4)
     save_stats["xp"] = next_int_len(4)
 
     save_stats["tutorial_cleared"] = next_int_len(4)

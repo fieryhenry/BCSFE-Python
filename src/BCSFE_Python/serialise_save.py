@@ -853,6 +853,7 @@ def serialize_save(save_stats: dict[str, Any]) -> bytes:
     save_data = write_length_data(
         save_data, save_stats["unknown_flags_1"], write_length=False
     )
+    save_data = write(save_data, save_stats["upgrade_state"])
 
     save_data = write(save_data, save_stats["xp"])
 

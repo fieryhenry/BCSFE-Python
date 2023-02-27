@@ -29,7 +29,10 @@ class TrackerItems:
     def to_dict(self):
         """Convert to dict"""
 
-        return {item.value: self.__dict__[item.value] for item in managed_item.ManagedItemType}
+        return {
+            item.value: self.__dict__[item.value]
+            for item in managed_item.ManagedItemType
+        }
 
 
 class Tracker:
@@ -38,19 +41,32 @@ class Tracker:
     def __init__(self):
         self.items = TrackerItems(self.read_tracker())
 
+    def get_path(self) -> str:
+        """Get the path to the item tracker"""
+
+        return helper.get_file("item_tracker.json")
+
     def read_tracker(self) -> dict[str, int]:
         """Read the item tracker"""
 
-        if not os.path.exists(helper.get_file("item_tracker.json")):
+        if not os.path.exists(self.get_path()):
             self.reset_tracker()
-        data = helper.read_file_string(helper.get_file("item_tracker.json"))
-        return json.loads(data)
+        data = helper.read_file_string(self.get_path())
+        try:
+            return json.loads(data)
+        except json.JSONDecodeError:
+            return {
+                "catfood": 0,
+                "rareTicket": 0,
+                "platinumTicket": 0,
+                "legendTicket": 0,
+            }
 
     def write_tracker(self):
         """Write the item tracker"""
 
         data = json.dumps(self.items.to_dict(), indent=4)
-        helper.write_file_string(helper.get_file("item_tracker.json"), data)
+        helper.write_file_string(self.get_path(), data)
 
     def update_tracker(self, amount: int, item_type: managed_item.ManagedItemType):
         """Update the item tracker"""
@@ -106,5 +122,9 @@ class Tracker:
                 value = abs(value)
             else:
                 continue
-            items.append(managed_item.ManagedItem(value, detail_type, managed_item.ManagedItemType(key)))
+            items.append(
+                managed_item.ManagedItem(
+                    value, detail_type, managed_item.ManagedItemType(key)
+                )
+            )
         return items

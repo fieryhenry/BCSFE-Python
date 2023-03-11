@@ -2,7 +2,7 @@
 
 from typing import Any, Optional, Tuple, Union
 
-from . import helper
+from . import helper, locale_handler
 
 
 def handle_all_at_once(
@@ -15,19 +15,23 @@ def handle_all_at_once(
     explain_text: str = "",
 ) -> list[int]:
     """Handle all at once option"""
-
+    locale_manager = locale_handler.LocalManager.from_config()
     first = True
     value = None
     for item_id in ids:
         if all_at_once and first:
             value = helper.check_int(
-                colored_input(f"Enter {item_name} {explain_text}:")
+                colored_input(
+                    locale_manager.search_key("enter_item_name_explain")
+                    % (item_name, explain_text)
+                )
             )
             first = False
         elif not all_at_once:
             value = helper.check_int(
                 colored_input(
-                    f"Enter {item_name} for {group_name} &{names[item_id]}& {explain_text}:"
+                    locale_manager.search_key("enter_item_name_group_explain")
+                    % (item_name, group_name, names[item_id], explain_text)
                 )
             )
         if value is None:
@@ -69,12 +73,14 @@ def get_range(
     all_ids: Union[list[int], None] = None,
 ) -> list[int]:
     """Get a range of numbers from user input"""
-
+    locale_manager = locale_handler.LocalManager.from_config()
     ids: list[int] = []
     for item in usr_input.split(" "):
-        if item.lower() == "all":
+        if item.lower() == locale_manager.search_key("all_text").lower():
             if length is None and all_ids is None:
-                helper.colored_text("You can't use &all& here", helper.RED)
+                helper.colored_text(
+                    locale_manager.search_key("invalid_all"), helper.RED
+                )
                 return []
             if all_ids:
                 return all_ids
@@ -86,7 +92,7 @@ def get_range(
             end = helper.check_int(end_s)
             if start is None or end is None:
                 helper.colored_text(
-                    "Invalid input. Please enter a valid range of numbers separated by a dash.",
+                    locale_manager.search_key("invalid_range_format"),
                     helper.RED,
                 )
                 return ids
@@ -97,7 +103,7 @@ def get_range(
             item_id = helper.check_int(item)
             if item_id is None:
                 helper.colored_text(
-                    "Invalid input. Please enter a valid integer.", helper.RED
+                    locale_manager.search_key("invalid_int"), helper.RED
                 )
                 return ids
             ids.append(item_id)
@@ -119,10 +125,9 @@ def colored_input(
 def get_range_ids(group_name: str, length: int) -> list[int]:
     """Get a range of ids from user input"""
 
+    locale_manager = locale_handler.LocalManager.from_config()
     ids = get_range(
-        colored_input(
-            f"Enter {group_name} ids(You can enter &all& to get all, a range e.g &1&-&50&, or ids separate by spaces e.g &5 4 7&):"
-        ),
+        colored_input(locale_manager.search_key("group") % (group_name)),
         length,
     )
     return ids
@@ -130,7 +135,7 @@ def get_range_ids(group_name: str, length: int) -> list[int]:
 
 def select_options(
     options: list[str],
-    mode: str = "edit",
+    mode: Optional[str] = None,
     extra_data: Union[list[Any], None] = None,
     offset: int = 0,
 ) -> Tuple[list[int], bool]:
@@ -139,11 +144,15 @@ def select_options(
     if len(options) == 1:
         return [0], True
 
+    locale_manager = locale_handler.LocalManager.from_config()
+    if mode is None:
+        mode = locale_manager.search_key("edit_text")
+
     helper.colored_list(options, extra_data=extra_data, offset=offset)
     total = len(options)
-    helper.colored_text(f"{total+1}. &Select all&")
+    helper.colored_text(f"{total+1}. {locale_manager.search_key('select_all')}")
     ids_s = colored_input(
-        f"What do you want to {mode} (You can enter multiple values separated by spaces to {mode} multiple at once):"
+        locale_manager.search_key("select_list") % (mode, mode)
     ).split(" ")
     individual = True
     if str(total + 1) in ids_s:
@@ -155,7 +164,7 @@ def select_options(
     for item_id in ids:
         if item_id < 0 or item_id > total - 1:
             helper.colored_text(
-                f"Invalid input. Please enter a valid integer between 1 and {total+1}.",
+                locale_manager.search_key("invalid_range") % (total + 1),
                 helper.RED,
             )
             return select_options(options, mode, extra_data, offset)
@@ -164,7 +173,7 @@ def select_options(
 
 def select_inc(
     options: list[str],
-    mode: str = "edit",
+    mode: Optional[str] = None,
     extra_data: Union[list[Any], None] = None,
     offset: int = 0,
 ) -> Tuple[list[int], bool]:
@@ -175,7 +184,7 @@ def select_inc(
 
 def select_not_inc(
     options: list[str],
-    mode: str = "edit",
+    mode: Optional[str] = None,
     extra_data: Union[list[Any], None] = None,
     offset: int = 0,
 ) -> list[int]:
@@ -185,29 +194,30 @@ def select_not_inc(
 
 def select_single(
     options: list[str],
-    mode: str = "edit",
+    mode: Optional[str] = None,
     title: str = "",
     allow_text: bool = False,
 ) -> int:
     "Select a single option from a list"
+    locale_manager = locale_handler.LocalManager.from_config()
     if not options:
-        raise ValueError("No options to select from")
+        raise ValueError(locale_manager.search_key("error_no_options"))
     if len(options) == 1:
         return 1
     helper.colored_list(options)
     if not title:
-        title = f"Select an option to {mode}:"
+        title = locale_manager.search_key("select_option_to") % (mode)
     val = colored_input(title)
     if allow_text:
         if val in options:
             return options.index(val) + 1
     val = helper.check_int(val)
     if val is None:
-        helper.colored_text("Invalid input. Please enter a valid integer.", helper.RED)
+        helper.colored_text(locale_manager.search_key("invalid_int"), helper.RED)
         return select_single(options, mode, title, allow_text)
     if val < 1 or val > len(options):
         helper.colored_text(
-            f"Invalid input. Please enter an integer between 1 and {len(options)}.",
+            locale_manager.search_key("invalid_range") % (len(options)),
             helper.RED,
         )
         return select_single(options, mode, title, allow_text)
@@ -218,6 +228,7 @@ def get_int(dialog: str, default: Optional[int] = None) -> int:
     """Get user input as an integer and keep asking until a valid integer is entered"""
 
     helper.colored_text(dialog, end="")
+    locale_manager = locale_handler.LocalManager.from_config()
     while True:
         try:
             val = input()
@@ -226,17 +237,15 @@ def get_int(dialog: str, default: Optional[int] = None) -> int:
         except ValueError:
             if default is not None:
                 return default
-            helper.colored_text(
-                "Invalid input. Please enter a valid integer.", helper.RED
-            )
+            helper.colored_text(locale_manager.search_key("invalid_int"), helper.RED)
 
 
 def ask_if_individual(item_name: str) -> bool:
     """Ask if the user wants to edit an individual item"""
-
+    locale_manager = locale_handler.LocalManager.from_config()
     is_individual = (
         colored_input(
-            f"Do you want to edit {item_name} individually (&1&), or all at once (&2&):"
+            locale_manager.search_key("ask_individual") % (item_name),
         )
         == "1"
     )

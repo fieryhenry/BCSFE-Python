@@ -179,7 +179,7 @@ def normal_start_up(default_op: bool = True) -> None:
                 index = (
                     user_input_handler.select_single(
                         game_versions,
-                        locale_manager.search_key("select"),
+                        locale_manager.search_key("select_l"),
                         locale_manager.search_key("pull_game_version_select"),
                         True,
                     )
@@ -193,7 +193,7 @@ def normal_start_up(default_op: bool = True) -> None:
                 index = (
                     user_input_handler.select_single(
                         game_versions,
-                        locale_manager.search_key("select"),
+                        locale_manager.search_key("select_l"),
                         locale_manager.search_key("pull_game_version_select"),
                         True,
                     )

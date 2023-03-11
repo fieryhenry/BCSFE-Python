@@ -87,17 +87,16 @@ def set_level(save_stats: dict[str, Any], levels: list[int]) -> dict[str, Any]:
     maxes = get_cannon_maxes(helper.check_data_is_jp(save_stats))
     if names is None or maxes is None:
         return save_stats
-    ot_levels = item.create_item_group(
+    ot_levels = item.IntItemGroup.from_lists(
         names=names,
         values=levels,
         maxes=maxes,
-        edit_name="level",
         group_name="Cannon Level",
         offset=1,
     )
     ot_levels.edit()
 
-    save_stats["ototo_cannon"] = set_level_val(cannons, ot_levels.values)
+    save_stats["ototo_cannon"] = set_level_val(cannons, ot_levels.get_values())
     return save_stats
 
 
@@ -108,15 +107,14 @@ def set_stage(save_stats: dict[str, Any], stages: list[int]) -> dict[str, Any]:
     names = get_canon_types(helper.check_data_is_jp(save_stats))
     if names is None:
         return save_stats
-    ot_stages = item.create_item_group(
+    ot_stages = item.IntItemGroup.from_lists(
         names=names[1:],
         values=stages[1:],
         maxes=3,
-        edit_name="stage",
         group_name="Ototo Cat Cannon Stage",
     )
     ot_stages.edit()
-    save_stats["ototo_cannon"] = set_stage_val(cannons, ot_stages.values)
+    save_stats["ototo_cannon"] = set_stage_val(cannons, ot_stages.get_values())
     return save_stats
 
 

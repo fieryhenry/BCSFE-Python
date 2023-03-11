@@ -75,24 +75,22 @@ def edit_gamatoto_xp(save_stats: dict[str, Any]) -> dict[str, Any]:
     )
 
     if raw:
-        gam_xp = item.Item(
+        gam_xp = item.IntItem(
             name="Gamatoto XP",
-            value=gamatoto_xp["Value"],
+            value=item.Int(gamatoto_xp["Value"]),
             max_value=None,
-            edit_name="value",
         )
         gam_xp.edit()
-        gamatoto_xp["Value"] = gam_xp.value
+        gamatoto_xp["Value"] = gam_xp.get_value()
     else:
-        gam_level = item.Item(
+        gam_level = item.IntItem(
             name="Gamatoto Level",
-            value=level,
+            value=item.Int(level),
             max_value=data["max_level"],
-            edit_name="level",
         )
         gam_level.edit()
         gamatoto_xp["Value"] = get_xp_from_level(
-            int(gam_level.value), helper.check_data_is_jp(save_stats)
+            gam_level.get_value(), helper.check_data_is_jp(save_stats)
         )
 
     save_stats["gamatoto_xp"] = gamatoto_xp

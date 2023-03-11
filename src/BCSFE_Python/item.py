@@ -1,285 +1,213 @@
-"""Item object"""
-
-from typing import Any, Union
-
-from . import helper, user_input_handler, managed_item, config_manager, tracker
+from typing import Optional, Union
+from . import managed_item, user_input_handler, helper, locale_handler, tracker
 
 
-class BannableItem:
-    """BannableItem object"""
-
-    def __init__(
-        self,
-        is_bannable: bool = False,
-        has_workaround: bool = False,
-        work_around_text: str = "",
-        managed_item_type: Union[None, managed_item.ManagedItemType] = None,
-    ) -> None:
-        self.is_bannable = is_bannable
-        self.has_workaround = has_workaround
-        self.work_around_text = work_around_text
-        self.managed_item_type = managed_item_type
+class Bannable:
+    def __init__(self, type: "managed_item.ManagedItemType", work_around: str = ""):
+        self.type = type
+        self.work_around = work_around
 
 
-class Item:
-    """An item"""
+class Int:
+    def __init__(self, value: Optional[int], byte_size: int = 4, signed: bool = True):
+        self.value = value
+        self.byte_size = byte_size
+        self.signed = signed
 
+    def get_max_value(self) -> int:
+        if self.signed:
+            return (2 ** (self.byte_size * 8 - 1)) - 1
+        return (2 ** (self.byte_size * 8)) - 1
+
+
+class IntItem:
     def __init__(
         self,
         name: str,
-        value: Union[int, str],
-        max_value: Union[int, None],
-        edit_name: str,
-        bannable: BannableItem = BannableItem(False, False, ""),
+        value: Int,
+        max_value: Optional[int],
+        bannable: Optional[Bannable] = None,
         offset: int = 0,
-        length: int = 4,
-        set_name: str = "set",
-        success_message: str = "",
-        to: str = "to",
-        unsigned: bool = False,
-    ) -> None:
+    ):
         self.name = name
-        self.value = value
+        self.__value = value
         self.max_value = max_value
-        self.offset = offset
-        self.edit_name = edit_name
         self.bannable = bannable
-        self.length = length
-        self.set_name = set_name
-        if success_message:
-            self.success_message = success_message
-        else:
-            self.success_message = set_name
-        self.to = to
-        self.unsigned = unsigned
+        self.offset = offset
+        self.locale_manager = locale_handler.LocalManager.from_config()
 
-        if config_manager.get_config_value_category("EDITOR", "DISABLE_MAXES"):
-            self.max_value = None
+    def get_max_value(self) -> int:
+        if self.max_value is not None:
+            return self.max_value
+        return self.__value.get_max_value()
 
-    def clamp(self) -> None:
-        """Clamp the value to the max value"""
-        max_val = self.get_max_int_val()
-
-        self.value = helper.clamp(
-            value=int(self.value),
-            min_value=0,
-            max_value=max_val,
-        )
-
-    def get_max_int_val(self) -> int:
-        """Get the max integer value"""
-        max_offset = 0 if self.unsigned else 1
-
-        if self.max_value is None:
-            return 2 ** ((self.length * 8) - max_offset) - 1
-        return self.max_value
-
-    def ban_warning(self) -> bool:
-        """Warning for editing a bannable item"""
-
-        if not config_manager.get_config_value_category("EDITOR", "SHOW_BAN_WARNING"):
+    def show_ban_warning(self) -> bool:
+        if self.bannable is None:
             return False
-
-        helper.colored_text(
-            text=f"WARNING: Editing in {self.name} will most likely lead to a ban!",
-            base=helper.RED,
-        )
-        if self.bannable.has_workaround:
+        helper.colored_text(self.locale_manager.search_key("ban_warning") % self.name)
+        if self.bannable.work_around:
             helper.colored_text(
-                text=self.bannable.work_around_text,
-                new=helper.RED,
+                self.locale_manager.search_key("work_around")
+                % self.bannable.work_around
             )
-        leave = (
-            user_input_handler.colored_input("Do you want to continue? (&y&/&n&):")
-            == "n"
-        )
-        return leave
-
-    def edit_int(self) -> None:
-        """Handler for editing an integer value"""
-
-        if self.bannable.is_bannable:
-            leave = self.ban_warning()
-            if leave:
-                return
-        if self.value is not None:
-            helper.colored_text(
-                f"The current {self.edit_name} of {self.name} is: &{int(self.value)+self.offset}&"
-            )
-        if self.max_value is None:
-            max_str = ""
-        else:
-            max_str = f" (max &{self.max_value+self.offset}&)"
-
-        text = f"Enter the {self.edit_name} of {self.name} you want to {self.set_name}{max_str}:"
-        self.value = user_input_handler.get_int(text) - self.offset
-        self.clamp()
-        helper.colored_text(
-            f"Successfully {self.success_message} the {self.edit_name} of {self.name} {self.to} &{self.value+self.offset}&"
-        )
-
-    def edit_str(self) -> None:
-        """Handler for editing a string value"""
-
-        helper.colored_text(
-            f"The current {self.edit_name} of {self.name} is : &{self.value}&"
-        )
-        text = f"Enter the {self.edit_name} of {self.name} you want to {self.set_name}:"
-        self.value = user_input_handler.colored_input(text)
-        helper.colored_text(
-            f"Successfully {self.success_message} the {self.edit_name} of {self.name} {self.to} &{self.value}&"
+        return user_input_handler.get_yes_no(
+            self.locale_manager.search_key("ban_warning_leave")
         )
 
     def edit(self) -> None:
-        """Handler for editing an item"""
-
-        original_val = self.value
-
-        if isinstance(self.value, int):
-            self.edit_int()
-        elif self.value is None:
-            self.edit_int()
-        else:
-            self.edit_str()
+        end = self.show_ban_warning()
+        if end:
             return
-
-        if self.bannable.is_bannable and original_val != self.value:
-            new_val = self.value
-            if not self.bannable.managed_item_type or isinstance(original_val, str):
-                return
+        original_value = self.__value.value
+        helper.colored_text(
+            self.locale_manager.search_key("current_item_value")
+            % (self.name, self.get_value_off())
+        )
+        max_str = ""
+        if self.max_value is not None:
+            max_str = " " + self.locale_manager.search_key("max_str") % self.max_value
+        new_value = user_input_handler.get_int(
+            self.locale_manager.search_key("enter_value_text") % (self.name, max_str),
+        )
+        new_value -= self.offset
+        new_value = helper.clamp(new_value, 0, self.get_max_value())
+        self.__value.value = new_value
+        helper.colored_text(
+            self.locale_manager.search_key("item_value_changed")
+            % (
+                self.name,
+                0 if original_value is None else original_value,
+                self.get_value_off(),
+            )
+        )
+        if self.bannable is not None and self.__value.value != original_value:
+            new_value = self.__value.value
+            if original_value is None:
+                original_value = 0
             item_tracker = tracker.Tracker()
             item_tracker.update_tracker(
-                new_val - original_val, self.bannable.managed_item_type
+                self.__value.value - original_value, self.bannable.type
             )
 
+    def get_value_off(self) -> int:
+        if self.__value.value is None:
+            return 0
+        return self.__value.value + self.offset
 
-class ItemGroup:
-    """A group of items"""
+    def get_value(self) -> int:
+        if self.__value.value is None:
+            return 0
+        return self.__value.value
 
-    def __init__(self, name: str, items: list[Item]):
-        self.name = name
+    def get_value_none(self) -> Optional[int]:
+        return self.__value.value
+
+    def set_value(self, value: int) -> None:
+        self.__value.value = value
+
+
+class IntItemGroup:
+    def __init__(self, group_name: str, items: list[IntItem]):
         self.items = items
-        self.selected_items: list[Item] = []
+        self.locale_manager = locale_handler.LocalManager.from_config()
+        self.group_name = group_name
 
-    @property
-    def max_value(self) -> Union[int, None]:
-        """Get the maximum value of the selected items"""
-        if config_manager.get_config_value_category("EDITOR", "DISABLE_MAXES"):
-            return None
-        try:
-            return max(
-                [
-                    item.max_value
-                    for item in self.selected_items
-                    if item.max_value is not None
-                ]
-            )
-        except (ValueError, TypeError):
-            return None
+    def get_values(self) -> list[int]:
+        return [item.get_value() for item in self.items]
 
-    @property
-    def selected_names(self) -> list[str]:
-        """Get the names of the selected items"""
-        return [item.name for item in self.selected_items]
+    def get_values_none(self) -> list[Optional[int]]:
+        return [item.get_value_none() for item in self.items]
 
-    @property
-    def names(self) -> list[str]:
-        """Get the names of the items"""
+    def get_values_off(self) -> list[int]:
+        return [item.get_value_off() for item in self.items]
+
+    def all_none(self) -> bool:
+        return all([item.get_value_none() is None for item in self.items])
+
+    def get_names(self) -> list[str]:
         return [item.name for item in self.items]
 
-    @property
-    def selected_values(self) -> list[Union[int, str]]:
-        """Get the values of the selected items"""
-        return [item.value for item in self.selected_items]
-
-    @property
-    def values(self) -> list[Any]:
-        """Get the values of the items"""
-        return [item.value for item in self.items]
-
-    def select(self) -> bool:
-        """Select items from the group"""
-
-        helper.colored_text(f"What &{self.name}& do you want to set?")
-        ids = user_input_handler.select_inc(
-            self.names,
-            offset=self.items[0].offset,
-            extra_data=self.values,
+    def edit(self) -> None:
+        if not self.items:
+            return
+        ids, individual = user_input_handler.select_options(
+            self.get_names(),
+            self.locale_manager.search_key("select_l"),
+            self.get_values_off() if not self.all_none() else None,
         )
-        for option_id in ids[0]:
-            if option_id < 0:
-                helper.colored_text(
-                    "You can't select options less than 1!",
-                    base=helper.RED,
+        if individual:
+            for id in ids:
+                self.items[id].edit()
+        else:
+            max_value = self.get_max_max_value()
+            offset = self.items[ids[0]].offset
+            max_str = ""
+            if self.items[ids[0]].max_value is not None:
+                max_str = " " + self.locale_manager.search_key("max_str") % (
+                    max_value + offset
                 )
-                continue
-            if option_id >= len(self.items):
-                helper.colored_text(
-                    "You can't select options greater than the last option!",
-                    base=helper.RED,
+            new_value = user_input_handler.get_int(
+                self.locale_manager.search_key("enter_value_text")
+                % (self.group_name, max_str)
+            )
+            new_value -= offset
+            entered_value = helper.clamp(new_value, 0, max_value)
+            for id in ids:
+                max_value = self.items[id].get_max_value()
+                new_value = helper.clamp(new_value, 0, max_value)
+                self.items[id].set_value(new_value)
+
+            helper.colored_text(
+                self.locale_manager.search_key("success_set")
+                % (self.group_name, entered_value + offset)
+            )
+
+    def get_max_max_value(self) -> int:
+        return max([item.get_max_value() for item in self.items])
+
+    @staticmethod
+    def from_lists(
+        names: list[str],
+        values: Optional[list[int]],
+        maxes: Union[list[int], int, None],
+        group_name: str,
+        offset: int = 0,
+    ) -> "IntItemGroup":
+        items: list[IntItem] = []
+        for i in range(len(names)):
+            max_value = maxes[i] if isinstance(maxes, list) else maxes
+            items.append(
+                IntItem(
+                    names[i],
+                    Int(values[i]) if values is not None else Int(None),
+                    max_value,
+                    offset=offset,
                 )
-                continue
-            self.selected_items.append(self.items[option_id])
-        return ids[1]
+            )
+
+        return IntItemGroup(group_name, items)
+
+
+class StrItem:
+    def __init__(self, name: str, value: str):
+        self.name = name
+        self.value = value
+        self.locale_manager = locale_handler.LocalManager.from_config()
 
     def edit(self) -> None:
-        """Edit items from the group"""
-
-        individual = self.select()
-        if not individual:
-            self.edit_all()
-        else:
-            for item in self.selected_items:
-                print()
-                item.edit()
-
-    def edit_all(self) -> None:
-        """Handler for editing all selected items at once"""
-
-        if self.max_value is None:
-            max_str = ""
-        else:
-            max_str = f" (max &{self.max_value+self.selected_items[0].offset}&)"
-        text = f"Enter the {self.selected_items[0].edit_name} of {self.name} you want to set{max_str}:"
-        value = user_input_handler.get_int(text) - self.selected_items[0].offset
-        display_val = value
-        for item in self.selected_items:
-            item.value = value
-            if self.max_value is not None:
-                item.clamp()
-                display_val = item.value
-
+        original_value = self.value
         helper.colored_text(
-            f"Successfully {self.selected_items[0].success_message} of {self.name} to &{display_val + self.selected_items[0].offset}&"
+            self.locale_manager.search_key("current_item_value")
+            % (self.name, self.value)
+        )
+        new_value = user_input_handler.colored_input(
+            self.locale_manager.search_key("enter_value_text") % (self.name, "")
+        )
+        self.value = new_value
+        helper.colored_text(
+            self.locale_manager.search_key("item_value_changed")
+            % (self.name, original_value, self.value)
         )
 
-
-def create_item_group(
-    names: list[str],
-    values: Any,
-    maxes: Any,
-    edit_name: str,
-    group_name: str,
-    offset: int = 0,
-) -> ItemGroup:
-    """Create a list of items"""
-
-    if isinstance(maxes, int) or maxes is None:
-        maxes = [maxes] * len(names)
-    if values is None:
-        values = [None] * len(names)
-
-    items = [
-        Item(
-            name=name,
-            value=value,
-            max_value=max_value,
-            edit_name=edit_name,
-            offset=offset,
-        )
-        for name, value, max_value in zip(names, values, maxes)
-    ]
-
-    item_group = ItemGroup(name=group_name, items=items)
-
-    return item_group
+    def get_value(self) -> str:
+        return self.value

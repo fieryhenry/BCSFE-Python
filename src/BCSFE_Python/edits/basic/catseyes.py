@@ -50,13 +50,12 @@ def get_catseye_names(is_jp: bool) -> list[str]:
 def edit_catseyes(save_stats: dict[str, Any]) -> dict[str, Any]:
     """Handler for editing catseyes"""
 
-    catseyes = item.create_item_group(
+    catseyes = item.IntItemGroup.from_lists(
         names=get_catseye_names(helper.check_data_is_jp(save_stats)),
         values=save_stats["catseyes"],
         maxes=9999,
-        edit_name="value",
         group_name="Catseyes",
     )
     catseyes.edit()
-    save_stats["catseyes"] = catseyes.values
+    save_stats["catseyes"] = catseyes.get_values()
     return save_stats

@@ -201,8 +201,8 @@ def edit_talents_individual(save_stats: dict[str, Any]) -> dict[str, Any]:
     talent_data = get_talent_data(save_stats)
     if talent_data is None:
         return save_stats
-    cat_talents_levels: list[int] = []
     for cat_id in ids:
+        cat_talents_levels: list[int] = []
         if cat_id not in talents or cat_id not in talent_data:
             # don't spam the user with messages if they selected alot of ids at once
             if len(ids) < 20:
@@ -221,18 +221,20 @@ def edit_talents_individual(save_stats: dict[str, Any]) -> dict[str, Any]:
             names.append(cat_talent_formatted["name"])
             cat_talents_levels.append(cat_talents[talent_index + 1]["level"])
             maxes.append(cat_talent_formatted["max"])
-        helper.colored_text(f"Cat &{cat_id}& is slected:")
-        cat_talents_levels_g = item.create_item_group(
+        helper.colored_text(f"Cat &{cat_id}& is selected:")
+        cat_talents_levels_g = item.IntItemGroup.from_lists(
             names=names,
             values=cat_talents_levels,
             maxes=maxes,
-            edit_name="talents",
             group_name="Talents",
         )
         cat_talents_levels_g.edit()
-        cat_talents_levels = helper.parse_int_list(cat_talents_levels_g.values, 0)
+        cat_talents_levels = cat_talents_levels_g.get_values()
         for i, cat_talent_level in enumerate(cat_talents_levels):
             cat_talents[i + 1]["level"] = cat_talent_level
+
+        talents[cat_id] = cat_talents
+
         save_stats["talents"] = talents
 
     print("Successfully set talents")

@@ -153,18 +153,17 @@ def set_specific_treasures(
 def set_treasure_groups(
     treasures_stats: list[list[int]],
     treasure_grps: dict[str, Any],
-    treasure_levels: list[int],
+    treasure_levels: list[Optional[int]],
     type_id: int,
     chapter_id: int,
 ) -> list[list[int]]:
     """Set the treasure stats of a group of treasures"""
 
     for i, treasure_level in enumerate(treasure_levels):
-        if treasure_level is None:
-            continue
         stages = treasure_grps["stages"][type_id][i]
         for stage in stages:
-            treasures_stats[chapter_id][stage] = treasure_level
+            if treasure_level is not None:
+                treasures_stats[chapter_id][stage] = treasure_level
     return treasures_stats
 
 
@@ -186,17 +185,20 @@ def treasure_groups(save_stats: dict[str, Any]) -> dict[str, Any]:
         names = treasure_grps["names"][type_id]
         treasure_levels = [-1] * len(names)
         helper.colored_text("&0& = None, &1& = Inferior, &2& = Normal, &3& = Superior")
-        treasure_levels = item.create_item_group(
+        treasure_levels = item.IntItemGroup.from_lists(
             names=names,
             values=None,
             maxes=None,
-            edit_name="treasure level",
             group_name="Treasures",
         )
         treasure_levels.edit()
 
         treasures_stats = set_treasure_groups(
-            treasures_stats, treasure_grps, treasure_levels.values, type_id, chapter_id
+            treasures_stats,
+            treasure_grps,
+            treasure_levels.get_values_none(),
+            type_id,
+            chapter_id,
         )
     save_stats["treasures"] = treasures_stats
 

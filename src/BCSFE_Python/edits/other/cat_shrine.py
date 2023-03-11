@@ -99,24 +99,22 @@ def edit_shrine_xp(save_stats: dict[str, Any]) -> dict[str, Any]:
     )
 
     if raw:
-        cat_shrine_xp = item.Item(
+        cat_shrine_xp = item.IntItem(
             name="Shrine XP",
-            value=shrine_xp,
+            value=item.Int(shrine_xp),
             max_value=None,
-            edit_name="value",
         )
         cat_shrine_xp.edit()
-        shrine_xp = int(cat_shrine_xp.value)
+        shrine_xp = int(cat_shrine_xp.get_value())
     else:
-        shrine_level = item.Item(
+        shrine_level = item.IntItem(
             name="Shrine Level",
-            value=level,
+            value=item.Int(level),
             max_value=data["max_level"],
-            edit_name="level",
         )
         shrine_level.edit()
         shrine_xp = get_xp_from_level(
-            int(shrine_level.value), helper.check_data_is_jp(save_stats)
+            int(shrine_level.get_value()), helper.check_data_is_jp(save_stats)
         )
     if shrine_xp is None:
         return save_stats

@@ -92,15 +92,14 @@ def edit_helpers(save_stats: dict[str, Any]) -> dict[str, Any]:
 
     helper_count = get_helpers(helpers, helper_data)
 
-    helpers_counts_input = item.create_item_group(
+    helpers_counts_input = item.IntItemGroup.from_lists(
         names=list(helper_count.keys()),
         values=list(helper_count.values()),
-        edit_name="amount",
         group_name="Gamatoto Helpers",
         maxes=10,
     )
     helpers_counts_input.edit()
-    final_helpers = generate_helpers(helpers_counts_input.values, helper_data)
+    final_helpers = generate_helpers(helpers_counts_input.get_values(), helper_data)
     helpers = add_empty_helper_slots(helpers, final_helpers)
     save_stats["helpers"] = helpers
     return save_stats

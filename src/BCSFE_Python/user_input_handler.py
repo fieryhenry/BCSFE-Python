@@ -250,3 +250,16 @@ def ask_if_individual(item_name: str) -> bool:
         == "1"
     )
     return is_individual
+
+
+def get_yes_no(dialog: str) -> bool:
+    """Get user input as a yes or no"""
+    locale_manager = locale_handler.LocalManager.from_config()
+    while True:
+        val = colored_input(dialog)
+        if val:
+            if val.lower()[0] == "y":
+                return True
+            if val.lower()[0] == "n":
+                return False
+        helper.colored_text(locale_manager.search_key("invalid_yes_no"), helper.RED)

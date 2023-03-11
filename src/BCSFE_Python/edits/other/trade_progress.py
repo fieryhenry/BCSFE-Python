@@ -24,17 +24,13 @@ def set_trade_progress(save_stats: dict[str, Any]) -> dict[str, Any]:
     trade_progress = save_stats["trade_progress"]
     max_value = helper.clamp(299 - save_stats["rare_tickets"]["Value"], 0, 299)
     storage = save_stats["cat_storage"]
-    tickets = item.Item(
+    tickets = item.IntItem(
         name="Rare Tickets",
         max_value=max_value,
-        value=save_stats["rare_tickets"]["Value"],
-        edit_name="amount",
-        set_name="gain",
-        success_message="increased",
-        to="by",
+        value=item.Int(save_stats["rare_tickets"]["Value"]),
     )
     tickets.edit()
-    trade_progress["Value"] = tickets.value * 5
+    trade_progress["Value"] = tickets.get_value() * 5
 
     storage, has_space = set_trade_progress_val(storage)
 

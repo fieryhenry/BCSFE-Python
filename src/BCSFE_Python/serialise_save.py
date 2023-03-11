@@ -339,6 +339,23 @@ def serialise_uncanny_current(
     return save_data
 
 
+def serialise_event_timed_scores(
+    save_data: list[int], timed_scores: dict[str, Any]
+) -> list[int]:
+    total_sub_chapters = timed_scores["total"]
+    stars_per_sub_chapter = timed_scores["stars"]
+    stages_per_sub_chapter = timed_scores["stages"]
+
+    save_data = write(save_data, total_sub_chapters, 4)
+    save_data = write(save_data, stages_per_sub_chapter, 4)
+    save_data = write(save_data, stars_per_sub_chapter, 4)
+
+    for i in range(len(timed_scores["Score"])):
+        save_data = write_length_data(save_data, timed_scores["Score"][i], 4, 4, False)
+
+    return save_data
+
+
 def serialise_uncanny_progress(
     save_data: list[int], uncanny: dict[str, Any]
 ) -> list[int]:
@@ -419,17 +436,25 @@ def serialise_gauntlet_progress(
         save_data = write_length_data(save_data, chapter, 1, 1, False)
     return save_data
 
-def serialise_legend_quest_current(save_data: list[int], legend_quest_current: dict[str, Any]) -> list[int]:
+
+def serialise_legend_quest_current(
+    save_data: list[int], legend_quest_current: dict[str, Any]
+) -> list[int]:
     save_data = write(save_data, legend_quest_current["total"], 1)
     save_data = write(save_data, legend_quest_current["stages"], 1)
     save_data = write(save_data, legend_quest_current["stars"], 1)
 
     for i in range(len(legend_quest_current["Clear"])):
-        save_data = write_length_data(save_data, legend_quest_current["Clear"][i], 1, 1, False)
+        save_data = write_length_data(
+            save_data, legend_quest_current["Clear"][i], 1, 1, False
+        )
 
     return save_data
 
-def serialise_legend_quest_progress(save_data: list[int], legend_quests: dict[str, Any]) -> list[int]:
+
+def serialise_legend_quest_progress(
+    save_data: list[int], legend_quests: dict[str, Any]
+) -> list[int]:
     lengths = legend_quests["Lengths"]
     total = lengths["total"]
     stars = lengths["stars"]
@@ -443,15 +468,16 @@ def serialise_legend_quest_progress(save_data: list[int], legend_quests: dict[st
     for i in range(total):
         for j in range(stages):
             for k in range(stars):
-                clear_amount[i * stages * stars + j * stars + k] = clear_amount_data[i][k][j]
-    
+                clear_amount[i * stages * stars + j * stars + k] = clear_amount_data[i][
+                    k
+                ][j]
+
     tries = [0] * total * stars * stages
     tries_data = legend_quests["Value"]["tries"]
     for i in range(total):
         for j in range(stages):
             for k in range(stars):
                 tries[i * stages * stars + j * stars + k] = tries_data[i][k][j]
-    
 
     save_data = write_length_data(save_data, clear_amount, 4, 2, False)
     save_data = write_length_data(save_data, tries, 4, 2, False)
@@ -562,7 +588,9 @@ def serialise_mission_segment(save_data: list[int], data: dict[int, Any]) -> lis
     return save_data
 
 
-def serialise_missions(save_data: list[int], missions_data: dict[str, Any]) -> list[int]:
+def serialise_missions(
+    save_data: list[int], missions_data: dict[str, Any]
+) -> list[int]:
     save_data = serialise_mission_segment(save_data, missions_data["states"])
     save_data = serialise_mission_segment(save_data, missions_data["requirements"])
     save_data = serialise_mission_segment(save_data, missions_data["clear_types"])
@@ -573,6 +601,7 @@ def serialise_missions(save_data: list[int], missions_data: dict[str, Any]) -> l
     save_data = serialise_mission_segment(save_data, missions_data["preparing"])
 
     return save_data
+
 
 def serialise_dojo(save_data: list[int], dojo_data: dict[int, Any]) -> list[int]:
     save_data = write(save_data, len(dojo_data), 4)
@@ -647,7 +676,7 @@ def serialise_gold_pass(save_data: list[int], gold_pass: dict[str, Any]) -> list
     for item_id, amount in gold_pass["claimed_rewards"].items():
         save_data = write(save_data, item_id, 4)
         save_data = write(save_data, amount, 4)
-    
+
     save_data = write(save_data, gold_pass["unknown_4"])
     save_data = write(save_data, gold_pass["unknown_5"])
     save_data = write(save_data, gold_pass["unknown_6"])
@@ -795,6 +824,7 @@ def set_variable_data(
         save_data = write(save_data, value, 1)
     return save_data
 
+
 def serialise_login_bonuses(save_data: list[int], login_bonuses: dict[int, int]):
     """
     Serialises the login bonuses
@@ -808,6 +838,7 @@ def serialise_login_bonuses(save_data: list[int], login_bonuses: dict[int, int])
         save_data = write(save_data, key, 4)
         save_data = write(save_data, value, 4)
     return save_data
+
 
 def serialise_tower_item_obtained(save_data: list[int], data: list[list[bool]]):
     """
@@ -823,6 +854,31 @@ def serialise_tower_item_obtained(save_data: list[int], data: list[list[bool]]):
         for item in row:
             save_data = write(save_data, item, 1)
     return save_data
+
+
+def write_dict(save_data: list[int], data: dict[Any, Any]) -> list[int]:
+    """
+    Writes a dictionary to the save data
+
+    Args:
+        save_data (list[int]): The save data
+        data (dict[Any, Any]): The dictionary
+
+    Returns:
+        list[int]: The save data
+    """
+    save_data = write(save_data, len(data), 4)
+    for key, value in data.items():
+        save_data = write(save_data, key, 4)
+        if isinstance(value, str):
+            save_data = serialise_utf8_string(save_data, value)
+        elif isinstance(value, bool):
+            save_data = write(save_data, value, 1)
+        else:
+            save_data = write(save_data, value, 4)
+
+    return save_data
+
 
 def serialize_save(save_stats: dict[str, Any]) -> bytes:
     """Serialises the save stats"""
@@ -960,7 +1016,9 @@ def serialize_save(save_stats: dict[str, Any]) -> bytes:
 
     save_data = write_length_data(save_data, save_stats["unknown_105"], 4, 4, False)
 
-    save_data = write_length_data(save_data, save_stats["unknown_107"], write_length=False, bytes_per_val=1)
+    save_data = write_length_data(
+        save_data, save_stats["unknown_107"], write_length=False, bytes_per_val=1
+    )
     if save_stats["dst"]:
         save_data = serialise_utf8_string(save_data, save_stats["unknown_110"])
     save_data = write(save_data, len(save_stats["unknown_108"]), 4)
@@ -1022,11 +1080,8 @@ def serialize_save(save_stats: dict[str, Any]) -> bytes:
         save_data, save_stats["stage_data_related_1"], 4, 1, False, length
     )
 
-    lengths = save_stats["event_timed_scores"]["Lengths"]
-    length = lengths[0] * lengths[1] * lengths[2]
-    save_data = write_length_data(save_data, lengths, write_length=False)
-    save_data = write_length_data(
-        save_data, save_stats["event_timed_scores"], 4, 4, False, length
+    save_data = serialise_event_timed_scores(
+        save_data, save_stats["event_timed_scores"]
     )
 
     save_data = serialise_utf8_string(save_data, save_stats["inquiry_code"])
@@ -1149,7 +1204,9 @@ def serialize_save(save_stats: dict[str, Any]) -> bytes:
     save_data = serialise_outbreaks(save_data, save_stats["outbreaks"])
 
     save_data = write_double(save_data, save_stats["unknown_52"])
-    save_data = write_length_data(save_data, save_stats["item_schemes"]["to_obtain_ids"])
+    save_data = write_length_data(
+        save_data, save_stats["item_schemes"]["to_obtain_ids"]
+    )
     save_data = write_length_data(save_data, save_stats["item_schemes"]["received_ids"])
 
     save_data = serialise_outbreaks(save_data, save_stats["current_outbreaks"])
@@ -1179,10 +1236,26 @@ def serialize_save(save_stats: dict[str, Any]) -> bytes:
     save_data = serialise_dumped_data(save_data, save_stats["unknown_59"])
     save_data = serialise_tower(save_data, save_stats["tower"])
     save_data = serialise_missions(save_data, save_stats["missions"])
-    save_data = serialise_tower_item_obtained(save_data, save_stats["tower_item_obtained"])
+    save_data = serialise_tower_item_obtained(
+        save_data, save_stats["tower_item_obtained"]
+    )
     save_data = serialise_dumped_data(save_data, save_stats["unknown_61"])
     save_data = write(save_data, save_stats["challenge"]["Score"])
     save_data = write(save_data, save_stats["challenge"]["Cleared"])
+
+    save_data = write(save_data, save_stats["gv_67"])
+
+    save_data = write_dict(save_data, save_stats["weekly_event_missions"])
+    save_data = write(save_data, save_stats["won_dojo_reward"])
+    save_data = write(save_data, save_stats["event_flag_update_flag"])
+
+    save_data = write(save_data, save_stats["gv_68"])
+
+    save_data = write_dict(save_data, save_stats["completed_one_level_in_chapter"])
+    save_data = write_dict(save_data, save_stats["displayed_cleared_limit_text"])
+    save_data = write_dict(save_data, save_stats["event_start_dates"])
+    save_data = write_length_data(save_data, save_stats["stages_beaten_twice"])
+
     save_data = serialise_dumped_data(save_data, save_stats["unknown_102"])
 
     save_data = serialise_uncanny_current(save_data, save_stats["uncanny_current"])
@@ -1244,10 +1317,16 @@ def serialize_save(save_stats: dict[str, Any]) -> bytes:
 
     save_data = write_length_data(save_data, save_stats["unknown_75"], 2)
 
-    save_data = serialise_legend_quest_current(save_data, save_stats["legend_quest_current"])
+    save_data = serialise_legend_quest_current(
+        save_data, save_stats["legend_quest_current"]
+    )
     save_data = serialise_legend_quest_progress(save_data, save_stats["legend_quest"])
-    save_data = write_length_data(save_data, save_stats["unknown_133"], bytes_per_val = 1, write_length=False)
-    save_data = write_length_data(save_data, save_stats["legend_quest_ids"], write_length=False)
+    save_data = write_length_data(
+        save_data, save_stats["unknown_133"], bytes_per_val=1, write_length=False
+    )
+    save_data = write_length_data(
+        save_data, save_stats["legend_quest_ids"], write_length=False
+    )
 
     save_data = serialise_dumped_data(save_data, save_stats["unknown_76"])
 
@@ -1280,7 +1359,9 @@ def serialize_save(save_stats: dict[str, Any]) -> bytes:
     save_data = serialise_cleared_slots(save_data, save_stats["cleared_slot_data"])
 
     save_data = serialise_dumped_data(save_data, save_stats["unknown_121"])
-    save_data = serialise_gauntlet_current(save_data, save_stats["collab_gauntlets_current"])
+    save_data = serialise_gauntlet_current(
+        save_data, save_stats["collab_gauntlets_current"]
+    )
     save_data = serialise_gauntlet_progress(save_data, save_stats["collab_gauntlets"])
     save_data = write_length_data(
         save_data, save_stats["unknown_84"], bytes_per_val=1, write_length=False
@@ -1380,7 +1461,9 @@ def serialize_save(save_stats: dict[str, Any]) -> bytes:
     if data["exit"]:
         return bytes(save_data)
 
-    save_data = serialise_gauntlet_current(save_data, save_stats["behemoth_culling_current"])
+    save_data = serialise_gauntlet_current(
+        save_data, save_stats["behemoth_culling_current"]
+    )
     save_data = serialise_gauntlet_progress(save_data, save_stats["behemoth_culling"])
     save_data = write_length_data(
         save_data, save_stats["unknown_124"], bytes_per_val=1, write_length=False

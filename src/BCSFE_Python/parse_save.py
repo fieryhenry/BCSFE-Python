@@ -657,59 +657,6 @@ def get_mission_data() -> dict[str, Any]:
 
 def get_data_after_challenge() -> list[dict[str, int]]:
     data: list[dict[str, int]] = []
-    gv_67 = next_int_len(4)  # 0x43
-    data.append(gv_67)
-
-    val_54 = next_int_len(4)
-    data.append(val_54)
-
-    for _ in range(val_54["Value"]):
-        val_57 = next_int_len(4)
-        data.append(val_57)
-
-        val_15 = next_int_len(1)
-        data.append(val_15)
-
-    data.append(next_int_len(1))
-    data.append(next_int_len(1))
-    gv_68 = next_int_len(4)  # 0x44
-    data.append(gv_68)
-
-    val_54 = next_int_len(4)
-    data.append(val_54)
-
-    for _ in range(val_54["Value"]):
-        val_57 = next_int_len(4)
-        data.append(val_57)
-
-        val_22 = next_int_len(4)
-        data.append(val_22)
-
-    val_54 = next_int_len(4)
-    data.append(val_54)
-
-    val_118 = next_int_len(4)
-    data.append(val_118)
-    for _ in range(val_54["Value"]):
-        val_15 = next_int_len(1)
-        data.append(val_15)
-
-        val_118 = next_int_len(4)
-        data.append(val_118)
-
-    val_54 = next_int_len(4)
-    data.append(val_54)
-
-    for _ in range(val_118["Value"]):
-        val_22 = next_int_len(4)
-        data.append(val_22)
-
-        val_54 = next_int_len(4)
-        data.append(val_54)
-
-    for _ in range(val_54["Value"]):
-        val_24 = next_int_len(4)
-        data.append(val_24)
 
     val_22 = next_int_len(4)
     data.append(val_22)
@@ -826,6 +773,22 @@ def get_uncanny_current() -> dict[str, Any]:
 
     return {
         "Clear": clear_progress,
+        "total": total_subchapters,
+        "stages": stages_per_subchapter,
+        "stars": stars,
+    }
+
+
+def get_event_timed_scores() -> dict[str, Any]:
+    total_subchapters = next_int(4)
+    stages_per_subchapter = next_int(4)
+    stars = next_int(4)
+
+    score = get_length_data(4, 4, total_subchapters * stars * stages_per_subchapter)
+    score = list(helper.chunks(score, stars * stages_per_subchapter))
+
+    return {
+        "Score": score,
         "total": total_subchapters,
         "stages": stages_per_subchapter,
         "stars": stars,
@@ -1729,6 +1692,28 @@ def get_tower_item_obtained() -> list[list[int]]:
     return data
 
 
+def get_dict(
+    key_type: type, value_type: type, length: Optional[int] = None
+) -> dict[Any, Any]:
+    if length is None:
+        length = next_int(4)
+    data: dict[Any, Any] = {}
+    for _ in range(length):
+        if key_type == int:
+            key = next_int(4)
+        else:
+            raise Exception("Invalid key type")
+        if value_type == int:
+            data[key] = next_int(4)
+        elif value_type == str:
+            data[key] = get_utf8_string()
+        elif value_type == bool:
+            data[key] = next_int(1) == 1
+        else:
+            raise Exception("Invalid value type")
+    return data
+
+
 def parse_save(
     save_data: bytes,
     country_code: Union[str, None],
@@ -1923,13 +1908,7 @@ def parse_save(
         "Lengths": lengths,
     }
 
-    lengths = [next_int(4), next_int(4), next_int(4)]
-    length = lengths[0] * lengths[1] * lengths[2]
-
-    save_stats["event_timed_scores"] = {
-        "Value": get_length_data(4, 4, length),
-        "Lengths": lengths,
-    }
+    save_stats["event_timed_scores"] = get_event_timed_scores()
     save_stats["inquiry_code"] = get_utf8_string()
     save_stats["play_time"] = get_play_time()
 
@@ -2073,6 +2052,19 @@ def parse_save(
     save_stats["unknown_61"] = get_data_after_tower()
 
     save_stats["challenge"] = {"Score": next_int_len(4), "Cleared": next_int_len(1)}
+
+    save_stats["gv_67"] = next_int_len(4)  # 0x43
+
+    save_stats["weekly_event_missions"] = get_dict(int, bool)
+    save_stats["won_dojo_reward"] = next_int_len(1)
+    save_stats["event_flag_update_flag"] = next_int_len(1)
+
+    save_stats["gv_68"] = next_int_len(4)  # 0x44
+
+    save_stats["completed_one_level_in_chapter"] = get_dict(int, int)
+    save_stats["displayed_cleared_limit_text"] = get_dict(int, bool)
+    save_stats["event_start_dates"] = get_dict(int, int)
+    save_stats["stages_beaten_twice"] = get_length_data()
 
     save_stats["unknown_102"] = get_data_after_challenge()
 

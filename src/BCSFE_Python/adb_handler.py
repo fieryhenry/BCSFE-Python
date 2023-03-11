@@ -159,6 +159,10 @@ def adb_kill_server():
 def adb_error_handler(err: subprocess.CalledProcessError):
     """Handle ADB errors"""
     error_text = str(err.stderr).lower()
+    if not error_text:
+        error_text = str(err.stdout).lower()
+    if not error_text:
+        error_text = str(err.output).lower()
 
     if "not found" in error_text:
         raise ADBException(ADBExceptionTypes.NO_DEVICE)
@@ -249,7 +253,7 @@ def adb_err_handler(err: ADBException):
         adb_reboot()
     elif err.exception_type == ADBExceptionTypes.PATH_NOT_FOUND:
         helper.colored_text(
-            "Error: You don't seem to have this game version installed on this device / no root access / SAVE_DATA couldn't be located, please make sure you have loaded into the game and clicked \"START\" and try again.",
+            'Error: SAVE_DATA couldn\'t be located, please make sure you have loaded into the game and clicked "START" and try again.',
             base=helper.RED,
         )
     elif err.exception_type == ADBExceptionTypes.ADB_NOT_INSTALLED:

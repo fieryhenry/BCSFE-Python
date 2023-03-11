@@ -166,7 +166,6 @@ def get_app_data_folder() -> str:
     Returns:
         str: Path to app data folder
     """
-    locale_manager = locale_handler.LocalManager.from_config()
     app_name = "BCSFE_Python"
     os_name = os.name
     if os_name == "nt":
@@ -178,7 +177,7 @@ def get_app_data_folder() -> str:
     elif os_name == "posix":
         path = os.path.join(os.environ["HOME"], "Documents", app_name)
     else:
-        raise Exception(locale_manager.search_key("unknown_os") % os_name)
+        raise Exception("Unknown OS: %s" % os_name)
     helper.create_dirs(path)
     return path
 

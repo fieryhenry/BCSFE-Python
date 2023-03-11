@@ -6,7 +6,7 @@ from typing import Any, Optional
 
 import yaml
 
-from . import helper, user_input_handler
+from . import helper, user_input_handler, locale_handler
 
 
 def get_config_value_category(category: str, key: str) -> Any:
@@ -166,6 +166,7 @@ def get_app_data_folder() -> str:
     Returns:
         str: Path to app data folder
     """
+    locale_manager = locale_handler.LocalManager.from_config()
     app_name = "BCSFE_Python"
     os_name = os.name
     if os_name == "nt":
@@ -177,7 +178,7 @@ def get_app_data_folder() -> str:
     elif os_name == "posix":
         path = os.path.join(os.environ["HOME"], "Documents", app_name)
     else:
-        raise Exception(f"Unsupported platform {os_name}")
+        raise Exception(locale_manager.search_key("unknown_os") % os_name)
     helper.create_dirs(path)
     return path
 
@@ -186,9 +187,10 @@ def edit_default_gv(_: Any) -> None:
     """
     Edit the default game version
     """
+    locale_manager = locale_handler.LocalManager.from_config()
     default_gv = get_config_value("DEFAULT_COUNTRY_CODE")
     default_gv = user_input_handler.colored_input(
-        f"Enter the default game version. Current value: {default_gv} Leave blank to not specify a default game version:",
+        locale_manager.search_key("enter_default_gv") % default_gv
     )
     set_config_setting("DEFAULT_COUNTRY_CODE", default_gv)
 
@@ -197,9 +199,11 @@ def edit_default_save_file_path(_: Any) -> None:
     """
     Edit the default save file path
     """
+    locale_manager = locale_handler.LocalManager.from_config()
     default_save_file_path = get_config_value("DEFAULT_SAVE_FILE_PATH")
     default_save_file_path = helper.select_dir(
-        "Select the default save file path", default_save_file_path
+        locale_manager.search_key("select_default_save_path"),
+        default_save_file_path,
     )
     set_config_setting(
         "DEFAULT_SAVE_FILE_PATH", os.path.join(default_save_file_path, "SAVE_DATA")
@@ -210,11 +214,18 @@ def edit_fixed_save_path(_: Any) -> None:
     """
     Edit the fixed save path
     """
+    locale_manager = locale_handler.LocalManager.from_config()
+
     fixed_save_path = get_config_value("FIXED_SAVE_PATH")
+    if fixed_save_path:
+        fixed_save_path = locale_manager.search_key("enabled")
+    else:
+        fixed_save_path = locale_manager.search_key("disabled")
     fixed_save_path = user_input_handler.colored_input(
-        f"Enter if the save path should be fixed. Current value: {fixed_save_path} (True/False):",
+        locale_manager.search_key("flag_set_config")
+        % (locale_manager.search_key("fixed_save_path"), fixed_save_path)
     )
-    if fixed_save_path.lower() == "true":
+    if fixed_save_path == "1":
         fixed_save_path = True
     else:
         fixed_save_path = False
@@ -225,10 +236,17 @@ def edit_locale(_: Any) -> None:
     """
     Edit the locale
     """
+    all_locales = locale_handler.LocalManager.get_locales()
+    locale_manager = locale_handler.LocalManager.from_config()
     locale = get_config_value("LOCALE")
-    locale = user_input_handler.colored_input(
-        f"Enter the locale to use for the program. Current value: &{locale}&:",
-    )
+    locale = all_locales[
+        user_input_handler.select_single(
+            all_locales,
+            locale_manager.search_key("select_l"),
+            locale_manager.search_key("select_locale") % locale,
+        )
+        - 1
+    ]
     set_config_setting("LOCALE", locale)
 
 
@@ -236,6 +254,7 @@ def edit_editor_settings(_: Any) -> None:
     """
     Edit the editor settings
     """
+    locale_manager = locale_handler.LocalManager.from_config()
     options = [
         "DISABLE_MAXES",
         "SHOW_BAN_WARNING",
@@ -247,9 +266,15 @@ def edit_editor_settings(_: Any) -> None:
     ids = user_input_handler.select_not_inc(options, "select", option_values)
     for option_id in ids:
         option_name = options[option_id]
+        current_value = option_values[option_id]
+        if current_value:
+            current_value = locale_manager.search_key("enabled")
+        else:
+            current_value = locale_manager.search_key("disabled")
         enable = (
             user_input_handler.colored_input(
-                f"Do you want to enable (&1&) or disable (&0&) {option_name}?:"
+                locale_manager.search_key("flag_set_config")
+                % (option_name, current_value)
             )
             == "1"
         )
@@ -263,6 +288,7 @@ def edit_start_up_settings(_: Any) -> None:
     Raises:
         Exception: If the option type is not int or bool
     """
+    locale_manager = locale_handler.LocalManager.from_config()
     options = {
         "CHECK_FOR_UPDATES": bool,
         "UPDATE_TO_BETAS": bool,
@@ -274,22 +300,29 @@ def edit_start_up_settings(_: Any) -> None:
         get_config_value_category("START_UP", option) for option in options
     ]
     ids = user_input_handler.select_not_inc(
-        list(options.keys()), "select", option_values
+        list(options.keys()), locale_manager.search_key("select_l"), option_values
     )
     for option_id in ids:
         option_name = list(options.keys())[option_id]
         option_type = options[option_name]
+        current_value = option_values[option_id]
         if option_type == bool:
+            if current_value:
+                current_value = locale_manager.search_key("enabled")
+            else:
+                current_value = locale_manager.search_key("disabled")
             enable = (
                 user_input_handler.colored_input(
-                    f"Do you want to enable (&1&) or disable (&0&) {option_name}?:"
+                    locale_manager.search_key("flag_set_config")
+                    % (option_name, current_value)
                 )
                 == "1"
             )
             set_config_setting_category("START_UP", option_name, enable)
         elif option_type == int:
             option_value = user_input_handler.get_int(
-                f"Enter the new value for {option_name}:"
+                locale_manager.search_key("enter_new_val_config")
+                % (option_name, current_value)
             )
             set_config_setting_category("START_UP", option_name, option_value)
         else:
@@ -300,6 +333,7 @@ def edit_save_changes_settings(_: Any) -> None:
     """
     Edit the save changes settings
     """
+    locale_manager = locale_handler.LocalManager.from_config()
     options = [
         "SAVE_CHANGES_ON_EDIT",
         "ALWAYS_EXPORT_JSON",
@@ -307,12 +341,20 @@ def edit_save_changes_settings(_: Any) -> None:
     option_values = [
         get_config_value_category("SAVE_CHANGES", option) for option in options
     ]
-    ids = user_input_handler.select_not_inc(options, "select", option_values)
+    ids = user_input_handler.select_not_inc(
+        options, locale_manager.search_key("select_l"), option_values
+    )
     for option_id in ids:
         option_name = options[option_id]
+        current_value = option_values[option_id]
+        if current_value:
+            current_value = locale_manager.search_key("enabled")
+        else:
+            current_value = locale_manager.search_key("disabled")
         enable = (
             user_input_handler.colored_input(
-                f"Do you want to enable (&1&) or disable (&0&) {option_name}?:"
+                locale_manager.search_key("flag_set_config")
+                % (option_name, current_value)
             )
             == "1"
         )
@@ -323,17 +365,26 @@ def edit_server_settings(_: Any) -> None:
     """
     Edit the server settings
     """
+    locale_manager = locale_handler.LocalManager.from_config()
     options = [
         "UPLOAD_METADATA",
         "WIPE_TRACKED_ITEMS_ON_START",
     ]
     option_values = [get_config_value_category("SERVER", option) for option in options]
-    ids = user_input_handler.select_not_inc(options, "select", option_values)
+    ids = user_input_handler.select_not_inc(
+        options, locale_manager.search_key("select_l"), option_values
+    )
     for option_id in ids:
         option_name = options[option_id]
+        current_value = option_values[option_id]
+        if current_value:
+            current_value = locale_manager.search_key("enabled")
+        else:
+            current_value = locale_manager.search_key("disabled")
         enable = (
             user_input_handler.colored_input(
-                f"Do you want to enable (&1&) or disable (&0&) {option_name}?:"
+                locale_manager.search_key("flag_set_config")
+                % (option_name, current_value)
             )
             == "1"
         )
@@ -344,7 +395,10 @@ def edit_config_path(_: Any) -> None:
     """
     Edit the config path
     """
+    locale_manager = locale_handler.LocalManager.from_config()
     config_path = os.path.dirname(get_config_path())
-    config_path = helper.select_dir("Select the config path", config_path)
+    config_path = helper.select_dir(
+        locale_manager.search_key("select_config_path"), config_path
+    )
     config_path = os.path.join(config_path, "config.yaml")
     set_config_path(config_path)

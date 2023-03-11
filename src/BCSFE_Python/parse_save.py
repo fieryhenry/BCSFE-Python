@@ -36,8 +36,6 @@ def set_address(val: int):
     """Set the address to a specific value"""
 
     global address
-    if address is None:
-        raise Exception("Invalid address")
     address = val
 
 

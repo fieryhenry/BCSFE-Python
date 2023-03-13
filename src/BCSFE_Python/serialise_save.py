@@ -1,7 +1,6 @@
 """Handler for serialising save data from dict"""
 
 import struct
-import traceback
 from typing import Any, Union
 
 import dateutil.parser
@@ -640,22 +639,17 @@ def start_serialize(save_stats: dict[str, Any]) -> bytes:
 
     try:
         save_data = serialize_save(save_stats)
-    except Exception:  # pylint: disable=broad-except
+    except Exception as e:  # pylint: disable=broad-except
         helper.colored_text(
             "\nError: An error has occurred while serializing your save data:",
             base=helper.RED,
         )
-        traceback.print_exc()
         game_version = save_stats["game_version"]["Value"]
         if game_version < 110000:
             helper.colored_text(
                 f"\nThis save is from before &11.0.0& (current save version is &{helper.gv_to_str(game_version)}&), so this is likely the cause for the issue. &The save editor is not designed to work with saves from before 11.0.0&"
             )
-        else:
-            helper.colored_text(
-                "\nPlease report this to &#bug-reports&, and/or &dm me your save& on discord"
-            )
-        helper.exit_editor()
+        raise e
     return save_data
 
 

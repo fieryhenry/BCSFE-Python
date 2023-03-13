@@ -501,9 +501,16 @@ def get_cat_cannon_data() -> dict[int, dict[str, int]]:
         len_val = next_int(4)
         unlock_flag = next_int(4)
         level = next_int(4)
+        extra_1 = 0
+        extra_2 = 0
+        if len_val == 4:
+            extra_1 = next_int(4)
+            extra_2 = next_int(4)
         cannon["level"] = level
         cannon["unlock_flag"] = unlock_flag
         cannon["len_val"] = len_val
+        cannon["extra_1"] = extra_1
+        cannon["extra_2"] = extra_2
         cannon_data[cannon_id] = cannon
     return cannon_data
 

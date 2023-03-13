@@ -317,6 +317,9 @@ def serialise_ototo_cat_cannon(
         save_data = write(save_data, cannon["len_val"], 4)
         save_data = write(save_data, cannon["unlock_flag"], 4)
         save_data = write(save_data, cannon["level"], 4)
+        if cannon["len_val"] == 4:
+            save_data = write(save_data, cannon["extra_1"], 4)
+            save_data = write(save_data, cannon["extra_2"], 4)
     return save_data
 
 

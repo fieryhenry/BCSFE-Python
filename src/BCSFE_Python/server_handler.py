@@ -138,7 +138,10 @@ def get_headers(inquiry_code: str, data: str) -> dict[str, Any]:
 
 
 def handle_request(
-    url: str, data: Union[str, bytes, None], headers: dict[str, Any], is_get: bool = False
+    url: str,
+    data: Union[str, bytes, None],
+    headers: dict[str, Any],
+    is_get: bool = False,
 ) -> Union[dict[str, Any], None]:
     """Handle a request."""
 
@@ -278,6 +281,7 @@ def download_save(
         raise Exception("Error getting save: " + str(err)) from err
     return response.content
 
+
 def upload_save_data_body_v2(
     save_data: bytes,
     save_key_data: dict[str, Any],
@@ -386,11 +390,14 @@ def upload_save_data(
     if not config_manager.get_config_value_category("SERVER", "UPLOAD_METADATA"):
         items = []
     save_key = get_save_key(token)
-    metadata = create_backup_metadata(items, play_time, inquiry_code, user_rank, save_key)
+    metadata = create_backup_metadata(
+        items, play_time, inquiry_code, user_rank, save_key
+    )
     body, headers = upload_save_data_body(metadata, inquiry_code, token, save_data)
 
     url = get_nyanko_save_url() + "/v1/transfers"
     return handle_request(url, body, headers)
+
 
 def upload_save_data_v2(
     token: str,
@@ -407,7 +414,9 @@ def upload_save_data_v2(
     save_key_data = get_save_key_data(token)
     if save_key_data is None:
         return None
-    metadata = create_backup_metadata(items, play_time, inquiry_code, user_rank, save_key_data["key"])
+    metadata = create_backup_metadata(
+        items, play_time, inquiry_code, user_rank, save_key_data["key"]
+    )
     body, boundary = upload_save_data_body_v2(save_data, save_key_data)
 
     url = "https://nyanko-service-data-prd.s3.amazonaws.com/"
@@ -429,6 +438,7 @@ def upload_save_data_v2(
 
     return handle_request(url_2, meta_data, headers_2)
 
+
 def upload_metadata_v2(
     token: str,
     inquiry_code: str,
@@ -444,7 +454,9 @@ def upload_metadata_v2(
     save_key_data = get_save_key_data(token)
     if save_key_data is None:
         return None
-    metadata = create_backup_metadata(items, play_time, inquiry_code, user_rank, save_key_data["key"])
+    metadata = create_backup_metadata(
+        items, play_time, inquiry_code, user_rank, save_key_data["key"]
+    )
     body, boundary = upload_save_data_body_v2(save_data, save_key_data)
 
     url = "https://nyanko-service-data-prd.s3.amazonaws.com/"
@@ -466,6 +478,7 @@ def upload_metadata_v2(
 
     return handle_request(url_2, meta_data, headers_2)
 
+
 def get_save_key_data(token: str) -> Optional[dict[str, Any]]:
     """Gets the save key for the given token"""
 
@@ -474,7 +487,7 @@ def get_save_key_data(token: str) -> Optional[dict[str, Any]]:
         "accept-encoding": "gzip",
         "connection": "keep-alive",
         "authorization": "Bearer " + token,
-        "nyanko-timestamp" : str(get_current_time()),
+        "nyanko-timestamp": str(get_current_time()),
         "user-agent": "Dalvik/2.1.0 (Linux; U; Android 9; SM-G955F Build/N2G48B)",
     }
     payload = handle_request(url, None, headers, True)
@@ -482,6 +495,7 @@ def get_save_key_data(token: str) -> Optional[dict[str, Any]]:
         return payload
     helper.colored_text("Error getting save key", helper.RED)
     return None
+
 
 def get_save_key(token: str) -> Optional[str]:
     """Gets the save key for the given token
@@ -491,11 +505,12 @@ def get_save_key(token: str) -> Optional[str]:
 
     Returns:
         Optional[str]: The save key or None if it could not be retrieved
-    """    
+    """
     data = get_save_key_data(token)
     if data is not None:
         return data["key"]
     return None
+
 
 def upload_metadata(
     token: str,
@@ -506,7 +521,9 @@ def upload_metadata(
 ):
     """Uploads the metadata for the given token, inquiry_code and save_data"""
     save_key = get_save_key(token)
-    metadata = create_backup_metadata(items, play_time, inquiry_code, user_rank, save_key)
+    metadata = create_backup_metadata(
+        items, play_time, inquiry_code, user_rank, save_key
+    )
 
     managed_item_details_str = json.dumps(metadata)
     managed_item_details_str = managed_item_details_str.replace(" ", "")
@@ -620,7 +637,10 @@ def check_gen_password(
 
 
 def prepare_upload(
-    save_stats: dict[str, Any], path: str, print_text: bool = True, managed_items: Optional[list[managed_item.ManagedItem]] = None
+    save_stats: dict[str, Any],
+    path: str,
+    print_text: bool = True,
+    managed_items: Optional[list[managed_item.ManagedItem]] = None,
 ) -> Optional[tuple[str, Any, bytes, int, list[managed_item.ManagedItem]]]:
     """Handles the pre-upload of the save data"""
 
@@ -672,14 +692,14 @@ def upload_handler(
         managed_items,
         helper.calculate_user_rank(save_stats),
     )
-    #upload_data = upload_save_data(
+    # upload_data = upload_save_data(
     #    token,
     #    inquiry_code,
     #    save_data,
     #    playtime,
     #    managed_items,
     #    helper.calculate_user_rank(save_stats),
-    #)
+    # )
 
     helper.colored_text(
         "After entering these codes in game, you may get a ban message when pressing play. If you do, just press play again and it should go away.\nPress enter to get your codes...",
@@ -711,6 +731,7 @@ def meta_data_upload_handler(
 
     return upload_data, save_stats
 
+
 def test_is_save_data(save_data: bytes) -> bool:
     """Test if the save data is a valid save data"""
 
@@ -720,6 +741,7 @@ def test_is_save_data(save_data: bytes) -> bool:
         return True
     else:
         return False
+
 
 def download_handler() -> Optional[str]:
     """Handles the download of the save data"""

@@ -73,7 +73,7 @@ FEATURES: dict[str, Any] = {
     },
     "Gamatoto / Ototo": {
         "Ototo Engineers": basic.basic_items.edit_engineers,
-        "Base materials": basic.basic_items.edit_base_materials,
+        "Base materials": basic.ototo_base_mats.edit_base_mats,
         "Catamins": basic.basic_items.edit_catamins,
         "Gamatoto XP / Level": gamototo.gamatoto_xp.edit_gamatoto_xp,
         "Ototo Cat Cannon": gamototo.ototo_cat_cannon.edit_cat_cannon,

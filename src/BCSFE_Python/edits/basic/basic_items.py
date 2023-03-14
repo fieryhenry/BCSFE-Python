@@ -155,29 +155,6 @@ def edit_engineers(save_stats: dict[str, Any]) -> dict[str, Any]:
     return save_stats
 
 
-def edit_base_materials(save_stats: dict[str, Any]) -> dict[str, Any]:
-    """Handler for editing ototo base materials"""
-
-    base_materials = item.IntItemGroup.from_lists(
-        names=[
-            "Bricks",
-            "Feathers",
-            "Coal",
-            "Sprockets",
-            "Gold",
-            "Meteorite",
-            "Beast Bones",
-            "Ammonite",
-        ],
-        values=save_stats["base_materials"],
-        maxes=9999,
-        group_name="Base Materials",
-    )
-    base_materials.edit()
-    save_stats["base_materials"] = base_materials.get_values()
-    return save_stats
-
-
 def edit_catamins(save_stats: dict[str, Any]) -> dict[str, Any]:
     """Handler for editing catamins"""
 

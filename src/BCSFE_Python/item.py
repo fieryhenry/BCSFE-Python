@@ -43,7 +43,7 @@ class IntItem:
 
     def show_ban_warning(self) -> bool:
         if self.bannable is None:
-            return False
+            return True
         helper.colored_text(self.locale_manager.search_key("ban_warning") % self.name)
         if self.bannable.work_around:
             helper.colored_text(self.bannable.work_around)
@@ -181,7 +181,6 @@ class IntItemGroup:
                     offset=offset,
                 )
             )
-
         return IntItemGroup(group_name, items)
 
 

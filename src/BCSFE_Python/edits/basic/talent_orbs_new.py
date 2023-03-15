@@ -455,7 +455,7 @@ If you want to do &multiple selections& then separate them with a &comma& like t
                 )
                 if orb_count == "q":
                     break
-                orb_count = helper.check_int(orb_count)
+                orb_count = helper.check_int_max(orb_count)
                 if orb_count is None:
                     continue
 
@@ -465,6 +465,7 @@ If you want to do &multiple selections& then separate them with a &comma& like t
             orb_count = user_input_handler.get_int(
                 "What do you want to set the amount of the selected orbs to?:"
             )
+            orb_count = helper.clamp_int(orb_count)
             for orb in orb_selection:
                 orb_id = orb.raw_orb_info.orb_id
                 self.orbs[orb_id] = SaveOrb(orb, orb_count)

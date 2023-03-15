@@ -51,9 +51,9 @@ def get_plus_base(usr_input: str) -> tuple[Union[int, None], Union[int, None]]:
     base = None
     plus = None
     if split[0]:
-        base = helper.check_int(split[0])
+        base = helper.check_int_max(split[0])
     if len(split) == 2 and split[1]:
-        plus = helper.check_int(split[1])
+        plus = helper.check_int_max(split[1])
     if len(split) == 1:
         plus = 0
     return base, plus

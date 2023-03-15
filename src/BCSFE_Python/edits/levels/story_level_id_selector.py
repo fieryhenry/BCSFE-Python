@@ -78,7 +78,9 @@ def select_all(total: int) -> list[int]:
     return list(range(0, total))
 
 
-def select_level_progress(chapter_id: Optional[int], total: int, examples: Optional[list[str]] = None) -> int:
+def select_level_progress(
+    chapter_id: Optional[int], total: int, examples: Optional[list[str]] = None
+) -> int:
     """Select level progress"""
 
     if examples is None:

@@ -11,7 +11,7 @@ def edit_all_orbs(save_stats: dict[str, Any], orb_list: list[str]) -> dict[str, 
     val = user_input_handler.colored_input(
         "What do you want to set the value of all talent orbs to?:"
     )
-    val = helper.check_int(val)
+    val = helper.check_int_max(val)
     if val is None:
         print("Error please enter a number")
         return save_stats
@@ -62,7 +62,7 @@ def edit_talent_orbs(save_stats: dict[str, Any]) -> dict[str, Any]:
 
     for orb_id in orbs_to_set:
         name = orb_list[orb_id]
-        val = helper.check_int(
+        val = helper.check_int_max(
             user_input_handler.colored_input(
                 f"What do you want to set the value of &{name}& to?:"
             )

@@ -213,6 +213,15 @@ def check_int(value: str) -> Union[int, None]:
         return None
 
 
+def check_int_max(value: str, max_value: Optional[int] = None) -> Optional[int]:
+    val = check_int(value)
+    if val is None:
+        return None
+    if max_value is not None:
+        return clamp(val, 0, max_value)
+    return clamp_int(val)
+
+
 def int_to_str_ls(int_list: list[int]) -> list[str]:
     """Turn list of ints to list of strings"""
 

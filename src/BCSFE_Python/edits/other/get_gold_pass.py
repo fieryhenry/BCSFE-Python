@@ -102,7 +102,7 @@ def get_gold_pass(save_stats: dict[str, Any]) -> dict[str, Any]:
     if officer_id == "":
         officer_id = get_random_officer_id()
     else:
-        officer_id = helper.check_int(officer_id)
+        officer_id = helper.check_int_max(officer_id)
 
     if officer_id is None:
         officer_id = 0

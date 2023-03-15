@@ -46,16 +46,13 @@ class IntItem:
             return False
         helper.colored_text(self.locale_manager.search_key("ban_warning") % self.name)
         if self.bannable.work_around:
-            helper.colored_text(
-                self.locale_manager.search_key("work_around")
-                % self.bannable.work_around
-            )
+            helper.colored_text(self.bannable.work_around)
         return user_input_handler.get_yes_no(
             self.locale_manager.search_key("ban_warning_leave")
         )
 
     def edit(self) -> None:
-        end = self.show_ban_warning()
+        end = not self.show_ban_warning()
         if end:
             return
         original_value = self.__value.value

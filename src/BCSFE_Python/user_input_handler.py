@@ -127,7 +127,7 @@ def get_range_ids(group_name: str, length: int) -> list[int]:
 
     locale_manager = locale_handler.LocalManager.from_config()
     ids = get_range(
-        colored_input(locale_manager.search_key("group") % (group_name)),
+        colored_input(locale_manager.search_key("enter_range_text") % (group_name)),
         length,
     )
     return ids

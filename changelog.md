@@ -1,5 +1,31 @@
 # Changelog
 
+## [2.7.1] - 2023-03-22
+
+#### Added
+
+- A feature to convert save versions e.g en to jp - might give issues and only works if both apps are the same version
+
+#### Changed
+
+- Base material names are no longer hardcoded and so jp base material names exist now
+
+- New cats no longer cause the cat capsule machine still thinking the cat is new
+
+- Talent orbs editing works better now + aku orbs
+
+#### Fixed
+
+- Things like treasures and gold pass id crashing the editor when entering too large of a number
+
+- Jp 12.2.0 save parsing
+
+- The first mission not showing up in mission clearing
+
+- Gatya seed not being able to set above the 32 signed int limit
+
+- Outbreaks crashing
+
 ## [2.7.0] - 2023-01-08
 
 #### Added

@@ -50,6 +50,7 @@ FEATURES: dict[str, Any] = {
         "Clear save data with adb (used to generate a new account without re-installing the game)": save_management.other.clear_data,
         "Upload tracked bannable items (This is done automatically when saving or exiting)": save_management.server_upload.upload_metadata,
         "Load save data": save_management.load.select,
+        "Convert save data to to a different version": save_management.convert.convert_save,
         # "Manage Presets": preset_handler.preset_manager,
     },
     "Items": {

@@ -233,16 +233,15 @@ def start(path: str) -> None:
     data = helper.load_save_file(path)
     save_stats = data["save_stats"]
     save_data: bytes = data["save_data"]
-    country_code = data["country_code"]
     if not clear_tutorial.is_tutorial_cleared(save_stats):
         save_stats = clear_tutorial.clear_tutorial(save_stats)
         save_data = serialise_save.start_serialize(save_stats)
     while True:
-        save_stats = parse_save.start_parse(save_data, country_code)
-        save_data = patcher.patch_save_data(save_data, country_code)
+        save_stats = parse_save.start_parse(save_data, save_stats["version"])
+        save_data = patcher.patch_save_data(save_data, save_stats["version"])
         save_stats = feature_handler.menu(save_stats, path)
         save_data = serialise_save.start_serialize(save_stats)
-        save_data = patcher.patch_save_data(save_data, country_code)
+        save_data = patcher.patch_save_data(save_data, save_stats["version"])
         if config_manager.get_config_value_category(
             "SAVE_CHANGES", "SAVE_CHANGES_ON_EDIT"
         ):

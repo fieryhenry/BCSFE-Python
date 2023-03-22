@@ -56,6 +56,15 @@ def next_int_len(number: int) -> dict[str, int]:
     return data
 
 
+def generate_empty_len(length: int) -> dict[str, int]:
+    """Generate an empty dict with a length and value of 0"""
+
+    data: dict[str, int] = {}
+    data["Length"] = length
+    data["Value"] = 0
+    return data
+
+
 def next_int(number: int) -> int:
     return next_int_len(number)["Value"]
 
@@ -1855,6 +1864,8 @@ def parse_save(
 
     if save_stats["dst"]:
         save_stats["unknown_110"] = get_utf8_string()
+    else:
+        save_stats["unknown_110"] = ""
 
     total_strs = next_int(4)
     unknown_108: list[str] = []
@@ -1872,6 +1883,11 @@ def parse_save(
         save_stats["unknown_112"] = strs
         save_stats["energy_notice"] = next_int_len(1)
         save_stats["game_version_2"] = next_int_len(4)
+    else:
+        save_stats["time_stamps"] = [0, 0, 0]
+        save_stats["unknown_112"] = []
+        save_stats["energy_notice"] = generate_empty_len(1)
+        save_stats["game_version_2"] = generate_empty_len(4)
 
     save_stats["unknown_111"] = next_int_len(4)
     save_stats["unlocked_slots"] = next_int_len(1)
@@ -1890,6 +1906,7 @@ def parse_save(
 
     if save_stats["dst"]:
         save_stats["time_stamps_2"].append(get_double())
+        save_stats["unknown_24"] = generate_empty_len(4)
     else:
         save_stats["unknown_24"] = next_int_len(4)
 
@@ -1923,6 +1940,8 @@ def parse_save(
 
     if save_stats["dst"]:
         save_stats["unknown_119"] = next_int_len(1)
+    else:
+        save_stats["unknown_119"] = generate_empty_len(1)
 
     save_stats["gv_44"] = next_int_len(4)
 
@@ -2149,6 +2168,9 @@ def parse_save(
         save_stats["gv_100600"] = next_int_len(4)
         if save_stats["gv_100600"]["Value"] != 100600:
             skip(-5)
+    else:
+        save_stats["unknown_104"] = generate_empty_len(1)
+        save_stats["gv_100600"] = generate_empty_len(4)
     save_stats["restart_pack"] = next_int_len(1)
 
     save_stats["unknown_101"] = get_data_after_after_leadership(save_stats["dst"])
@@ -2284,6 +2306,8 @@ def parse_save(
 
     if save_stats["dst"]:
         save_stats["unknown_128"] = next_int_len(1)
+    else:
+        save_stats["unknown_128"] = generate_empty_len(1)
 
     save_stats["gv_110700"] = next_int_len(4)  # 110700
     save_stats = check_gv(save_stats, 110800)

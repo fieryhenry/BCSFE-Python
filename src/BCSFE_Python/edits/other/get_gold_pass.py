@@ -101,6 +101,8 @@ def get_gold_pass(save_stats: dict[str, Any]) -> dict[str, Any]:
     )
     if officer_id == "":
         officer_id = get_random_officer_id()
+    elif officer_id == "-1":
+        officer_id = -1
     else:
         officer_id = helper.check_int_max(officer_id)
 

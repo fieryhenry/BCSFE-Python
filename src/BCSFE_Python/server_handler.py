@@ -654,7 +654,7 @@ def prepare_upload(
     if token is None:
         if print_text:
             helper.colored_text(
-                "Error getting account auth token",
+                "Error getting account auth token. Please try again. If this error persists, please report it on the discord server.",
                 helper.RED,
             )
         return None

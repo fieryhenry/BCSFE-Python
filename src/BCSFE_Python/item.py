@@ -1,5 +1,12 @@
 from typing import Optional, Union
-from . import managed_item, user_input_handler, helper, locale_handler, tracker
+from . import (
+    managed_item,
+    user_input_handler,
+    helper,
+    locale_handler,
+    tracker,
+    config_manager,
+)
 
 
 class Bannable:
@@ -31,7 +38,12 @@ class IntItem:
     ):
         self.name = name
         self.__value = value
+        disable_maxes = config_manager.get_config_value_category(
+            "EDITOR", "DISABLE_MAXES"
+        )
         self.max_value = max_value
+        if disable_maxes:
+            self.max_value = None
         self.bannable = bannable
         self.offset = offset
         self.locale_manager = locale_handler.LocalManager.from_config()

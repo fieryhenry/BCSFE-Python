@@ -303,6 +303,17 @@ def write_file_string(file_path: str, data: str):
         file.write(data)
 
 
+def config_clamp(value: int, min: int, max: int, clamp_max_int: bool = True):
+    """Clamp a value between 0 and a max value"""
+
+    disable = config_manager.get_config_value_category("EDITOR", "DISABLE_MAXES")
+    if disable:
+        if clamp_max_int:
+            return clamp_int(value)
+        return value
+    return clamp(value, min, max)
+
+
 def check_clamp(
     values: Any, max_value: int, min_value: int = 0, offset: int = -1
 ) -> list[int]:

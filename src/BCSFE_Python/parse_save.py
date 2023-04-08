@@ -2,6 +2,7 @@
 
 import collections
 import datetime
+import enum
 import json
 import struct
 import traceback
@@ -126,7 +127,6 @@ def get_time_data(dst_flag: bool) -> str:
 def get_length_data(
     length_bytes: int = 4, separator: int = 4, length: Union[int, None] = None
 ) -> list[int]:
-
     data: list[int] = []
     if length is None:
         length = next_int(length_bytes)
@@ -501,25 +501,27 @@ def get_unknown_data():
     return data
 
 
-def get_cat_cannon_data() -> dict[int, dict[str, int]]:
+def get_cat_cannon_data() -> dict[int, dict[str, Any]]:
     length = next_int(4)
-    cannon_data: dict[int, dict[str, int]] = {}
+    cannon_data: dict[int, dict[str, Any]] = {}
     for _ in range(length):
-        cannon = {"level": 0, "unlock_flag": 0}
+        cannon: dict[str, Any] = {}
         cannon_id = next_int(4)
         len_val = next_int(4)
         unlock_flag = next_int(4)
-        level = next_int(4)
-        extra_1 = 0
-        extra_2 = 0
+        effect_level = next_int(4)
+        foundation_level = 0
+        style_level = 0
         if len_val == 4:
-            extra_1 = next_int(4)
-            extra_2 = next_int(4)
-        cannon["level"] = level
+            foundation_level = next_int(4)
+            style_level = next_int(4)
+        cannon["levels"] = {
+            "effect": effect_level,
+            "foundation": foundation_level,
+            "style": style_level,
+        }
         cannon["unlock_flag"] = unlock_flag
         cannon["len_val"] = len_val
-        cannon["extra_1"] = extra_1
-        cannon["extra_2"] = extra_2
         cannon_data[cannon_id] = cannon
     return cannon_data
 
@@ -1726,6 +1728,17 @@ def get_dict(
         else:
             raise Exception("Invalid value type")
     return data
+
+
+class BackupState(enum.Enum):
+    IDLE = 0
+    GO_TO_CAN_BACKUP = 1
+    IN_CAN_BACKUP = 2
+    GO_TO_CHECK_BAN = 3
+    IN_CHECK_BAN = 4
+    GO_TO_BACKUP = 5
+    IN_BACKUP = 6
+    FINISHED = 7
 
 
 def parse_save(

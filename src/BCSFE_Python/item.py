@@ -173,10 +173,14 @@ class IntItemGroup:
         items: list[IntItem] = []
         for i in range(len(names)):
             max_value = maxes[i] if isinstance(maxes, list) else maxes
+            try:
+                value = values[i] if values is not None else None
+            except IndexError:
+                value = None
             items.append(
                 IntItem(
                     names[i],
-                    Int(values[i]) if values is not None else Int(None),
+                    Int(value),
                     max_value,
                     offset=offset,
                 )

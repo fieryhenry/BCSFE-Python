@@ -4,6 +4,7 @@ import datetime
 import hashlib
 import hmac
 import json
+import os
 from random import randint
 import time
 from typing import Any, Optional, Union
@@ -583,7 +584,7 @@ def check_gen_token(
 ) -> dict[str, Any]:
     """Gets the account auth token"""
 
-    save_stats, password_refresh_data = check_gen_password(save_stats)
+    save_stats, password = check_gen_password(save_stats)
     inquiry_code = save_stats["inquiry_code"]
 
     save_data = None
@@ -593,33 +594,101 @@ def check_gen_token(
         save_data = patcher.patch_save_data(save_data, save_stats["version"])
         save_data = helper.write_file_bytes(path, save_data)
 
+    # token = get_auth_token_from_file(inquiry_code)
+    # if token is None:
     token = get_token(
         inquiry_code,
-        password_refresh_data["password"],
+        password,
         save_stats["version"],
         save_stats["game_version"]["Value"],
     )
+
+    save_auth_token(token, inquiry_code)
 
     return {
         "token": token,
         "save_data": save_data,
         "inquiry_code": inquiry_code,
-        "password_refresh_data": password_refresh_data,
         "save_stats": save_stats,
     }
 
 
-def check_gen_password(
-    save_stats: dict[str, Any]
-) -> tuple[dict[str, Any], dict[str, str]]:
+def save_password(password: Optional[str], inquiry_code: str):
+    """Saves the password to the password file"""
+
+    app_data_folder = config_manager.get_app_data_folder()
+    path = os.path.join(app_data_folder, inquiry_code, "save_info.json")
+    try:
+        data = json.loads(helper.read_file_string(path, create=True))
+    except json.decoder.JSONDecodeError:
+        data: dict[str, Any] = {}
+    data["password"] = password
+    helper.write_file_string(path, json.dumps(data))
+
+
+def save_auth_token(token: Optional[str], inquiry_code: str):
+    """Saves the auth token to the password file"""
+
+    app_data_folder = config_manager.get_app_data_folder()
+    path = os.path.join(app_data_folder, inquiry_code, "save_info.json")
+    try:
+        data = json.loads(helper.read_file_string(path, create=True))
+    except json.decoder.JSONDecodeError:
+        data: dict[str, Any] = {}
+    data["token"] = token
+    helper.write_file_string(path, json.dumps(data))
+
+
+def get_password_from_file(inquiry_code: str) -> Optional[str]:
+    """Gets the password for the given inquiry code"""
+
+    app_data_folder = config_manager.get_app_data_folder()
+    path = os.path.join(app_data_folder, inquiry_code, "save_info.json")
+    if not os.path.exists(path):
+        return None
+
+    try:
+        data = json.loads(helper.read_file_string(path, create=True))
+    except json.decoder.JSONDecodeError:
+        return None
+    if "password" in data:
+        return data["password"]
+
+    return None
+
+
+def get_auth_token_from_file(inquiry_code: str) -> Optional[str]:
+    """Gets the auth token for the given inquiry code"""
+
+    app_data_folder = config_manager.get_app_data_folder()
+    path = os.path.join(app_data_folder, inquiry_code, "save_info.json")
+    if not os.path.exists(path):
+        return None
+
+    try:
+        data = json.loads(helper.read_file_string(path, create=True))
+    except json.decoder.JSONDecodeError:
+        return None
+    if "token" in data:
+        return data["token"]
+
+    return None
+
+
+def check_gen_password(save_stats: dict[str, Any]) -> tuple[dict[str, Any], str]:
     """Checks the password for the given save_stats and generates new if stuff is invalid"""
 
     inquiry_code = save_stats["inquiry_code"]
     password_refresh_token = save_stats["token"]
 
+    password = get_password_from_file(inquiry_code)
+    if password is not None:
+        return save_stats, password
+
     password_refresh_data = get_password_refresh(inquiry_code, password_refresh_token)
     if password_refresh_data is not None:
-        return save_stats, password_refresh_data
+        save_password(password_refresh_data["password"], inquiry_code)
+        return save_stats, password_refresh_data["password"]
 
     password_refresh_data = get_password(inquiry_code)
     if password_refresh_data is None:
@@ -633,7 +702,8 @@ def check_gen_password(
 
     password_refresh_token = password_refresh_data["passwordRefreshToken"]
     save_stats["token"] = password_refresh_token
-    return save_stats, password_refresh_data
+    save_password(password_refresh_data["password"], inquiry_code)
+    return save_stats, password_refresh_data["password"]
 
 
 def prepare_upload(
@@ -652,6 +722,8 @@ def prepare_upload(
     inquiry_code = data["inquiry_code"]
     save_data = data["save_data"]
     if token is None:
+        save_auth_token(None, inquiry_code)
+        save_password(None, inquiry_code)
         if print_text:
             helper.colored_text(
                 "Error getting account auth token. Please try again. If this error persists, please report it on the discord server.",
@@ -776,7 +848,7 @@ def download_handler() -> Optional[str]:
         helper.colored_text("Successfully downloaded save data\n", base=helper.GREEN)
     else:
         helper.colored_text(
-            "Incorrect transfer code / confirmation code",
+            "Incorrect transfer code / confirmation code / country code",
             base=helper.RED,
         )
         return None

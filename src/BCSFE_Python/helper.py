@@ -128,13 +128,17 @@ def get_local_files_path() -> str:
     return dir_path
 
 
-def read_file_string(file_path: str) -> str:
+def read_file_string(file_path: str, create: bool = False) -> str:
     """Reads a file and returns its contents as a string"""
 
     try:
         with open(file_path, "r", encoding="utf-8") as file:
             return file.read()
     except FileNotFoundError as err:
+        if create:
+            os.makedirs(os.path.dirname(file_path), exist_ok=True)
+            write_file_string(file_path, "")
+            return ""
         raise Exception("File not found: " + file_path) from err
     except UnicodeDecodeError as err:
         raise Exception("Error reading file: " + file_path + ": " + str(err)) from err

@@ -1,7 +1,7 @@
 """Handler for editing the ototo cat cannon"""
 from typing import Any, Optional
 
-from ... import user_input_handler, item, game_data_getter, csv_handler, helper
+from ... import user_input_handler, game_data_getter, csv_handler, helper
 
 
 def get_canon_types(is_jp: bool) -> Optional[list[str]]:

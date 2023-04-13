@@ -30,6 +30,8 @@ def select(save_stats: dict[str, Any]) -> dict[str, Any]:
     if not clear_tutorial.is_tutorial_cleared(save_stats):
         save_stats = clear_tutorial.clear_tutorial(save_stats)
     return save_stats
+
+
 def handle_index(index: int) -> Optional[str]:
     path = None
     if index == 0:

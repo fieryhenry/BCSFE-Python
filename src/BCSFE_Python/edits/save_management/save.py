@@ -17,6 +17,7 @@ def save(save_stats: dict[str, Any]) -> dict[str, Any]:
 
     return save_stats
 
+
 def save_save(save_stats: dict[str, Any]) -> dict[str, Any]:
     """Serialise the save data"""
 

@@ -30,7 +30,9 @@ def edit_cache(password: str, token: str, save_stats: dict[str, Any]) -> bool:
     return success
 
 
-def fix_elsewhere(save_stats: dict[str, Any], force_mi: bool = False, text: bool = True) -> dict[str, Any]:
+def fix_elsewhere(
+    save_stats: dict[str, Any], force_mi: bool = False, text: bool = True
+) -> dict[str, Any]:
     """Handler for fixing the elsewhere issue and unban an account"""
 
     helper.colored_text("Getting account password...", helper.GREEN)
@@ -38,11 +40,9 @@ def fix_elsewhere(save_stats: dict[str, Any], force_mi: bool = False, text: bool
     data = server_handler.check_gen_token(save_stats)
     token = data["token"]
     inquiry_code = data["inquiry_code"]
-    password_refresh_data = data["password_refresh_data"]
     if token is None:
         helper.colored_text("Failed to get auth token", helper.RED)
         return save_stats
-    edit_cache(password_refresh_data["password"], token, save_stats)
     if original_iq != inquiry_code or force_mi:
         item_tracker = tracker.Tracker()
         item_tracker.reset_tracker()

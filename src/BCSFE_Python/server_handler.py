@@ -637,6 +637,7 @@ def check_gen_password(save_stats: dict[str, Any]) -> tuple[dict[str, Any], str]
     password_refresh_data = get_password_refresh(inquiry_code, password_refresh_token)
     if password_refresh_data is not None:
         info.set_password(password_refresh_data["password"])
+        save_stats["token"] = password_refresh_data["passwordRefreshToken"]
         return save_stats, password_refresh_data["password"]
 
     password_refresh_data = get_password(inquiry_code)
@@ -648,6 +649,7 @@ def check_gen_password(save_stats: dict[str, Any]) -> tuple[dict[str, Any], str]
 
     if "accountCode" in password_refresh_data:
         save_stats["inquiry_code"] = password_refresh_data["accountCode"]
+        info = user_info.UserInfo(password_refresh_data["accountCode"])
 
     password_refresh_token = password_refresh_data["passwordRefreshToken"]
     save_stats["token"] = password_refresh_token
@@ -660,7 +662,9 @@ def prepare_upload(
     path: str,
     print_text: bool = True,
     managed_items: Optional[list[managed_item.ManagedItem]] = None,
-) -> Optional[tuple[str, Any, bytes, int, list[managed_item.ManagedItem]]]:
+) -> Optional[
+    tuple[str, Any, bytes, int, list[managed_item.ManagedItem], dict[str, Any]]
+]:
     """Handles the pre-upload of the save data"""
 
     original_iq = save_stats["inquiry_code"]
@@ -670,6 +674,7 @@ def prepare_upload(
     token = data["token"]
     inquiry_code = data["inquiry_code"]
     save_data = data["save_data"]
+    save_stats = data["save_stats"]
     info = user_info.UserInfo(inquiry_code)
     if token is None:
         token = info.get_auth_token()
@@ -692,18 +697,18 @@ def prepare_upload(
     playtime = helper.time_to_frames(save_stats["play_time"])
     info.clear_managed_items()
 
-    return token, inquiry_code, save_data, playtime, managed_items
+    return token, inquiry_code, save_data, playtime, managed_items, save_stats
 
 
 def upload_handler(
     save_stats: dict[str, Any], path: str
-) -> Union[None, dict[str, Any]]:
+) -> Optional[tuple[Union[None, dict[str, Any]], dict[str, Any]]]:
     """Handles the upload of the save data"""
 
     data = prepare_upload(save_stats, path)
     if data is None:
         return None
-    token, inquiry_code, save_data, playtime, managed_items = data
+    token, inquiry_code, save_data, playtime, managed_items, save_stats = data
 
     helper.colored_text("Uploading save data...", helper.GREEN)
     upload_data = upload_save_data_v2(
@@ -728,7 +733,7 @@ def upload_handler(
         helper.DARK_YELLOW,
     )
     input()
-    return upload_data
+    return upload_data, save_stats
 
 
 def meta_data_upload_handler(
@@ -739,7 +744,7 @@ def meta_data_upload_handler(
     data = prepare_upload(save_stats, path)
     if data is None:
         return None, save_stats
-    token, inquiry_code, save_data, playtime, managed_items = data
+    token, inquiry_code, save_data, playtime, managed_items, save_stats = data
 
     helper.colored_text("Uploading meta data...", helper.GREEN)
     upload_data = upload_metadata_v2(

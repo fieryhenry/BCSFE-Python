@@ -60,6 +60,9 @@ def get_dirs(path: str) -> list[str]:
 def delete_dir(path: str) -> None:
     """Delete a directory and all of its contents"""
 
+    if not os.path.exists(path):
+        return
+
     for root, dirs, files in os.walk(path, topdown=False):
         for name in files:
             os.remove(os.path.join(root, name))

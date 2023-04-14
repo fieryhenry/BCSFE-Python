@@ -107,7 +107,7 @@ def main():
     if config_manager.get_config_value_category(
         "SERVER", "WIPE_TRACKED_ITEMS_ON_START"
     ):
-        user_info.UserInfo.clear_all()
+        user_info.UserInfo.clear_all_items()
     game_data_getter.check_remove_handler()
 
     check_updates = config_manager.get_config_value_category(

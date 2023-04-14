@@ -1583,6 +1583,7 @@ def start_parse(save_data: bytes, country_code: str) -> dict[str, Any]:
                 "\nPlease report this to &#bug-reports&, and/or &dm me your save& on discord"
             )
         helper.exit_editor()
+        return {}
     return save_stats
 
 
@@ -1747,7 +1748,8 @@ def parse_save(
     dst: Optional[bool] = None,
 ) -> dict[str, Any]:
     """Parse the save data."""
-
+    if country_code == "ja" or country_code == "":
+        country_code = "jp"
     set_address(0)
     global save_data_g
     save_data_g = save_data

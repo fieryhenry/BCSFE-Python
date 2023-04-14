@@ -4,7 +4,7 @@ import os
 from typing import Any
 
 
-from ... import helper, adb_handler, server_handler, tracker
+from ... import helper, adb_handler, server_handler, user_info
 
 
 def edit_cache(password: str, token: str, save_stats: dict[str, Any]) -> bool:
@@ -44,8 +44,8 @@ def fix_elsewhere(
         helper.colored_text("Failed to get auth token", helper.RED)
         return save_stats
     if original_iq != inquiry_code or force_mi:
-        item_tracker = tracker.Tracker()
-        item_tracker.reset_tracker()
+        info = user_info.UserInfo(inquiry_code)
+        info.clear_managed_items()
         server_handler.update_managed_items(
             save_stats["inquiry_code"], token, save_stats
         )

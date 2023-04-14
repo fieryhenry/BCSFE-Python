@@ -4,14 +4,20 @@ from . import (
     user_input_handler,
     helper,
     locale_handler,
-    tracker,
     config_manager,
+    user_info,
 )
 
 
 class Bannable:
-    def __init__(self, type: "managed_item.ManagedItemType", work_around: str = ""):
+    def __init__(
+        self,
+        type: "managed_item.ManagedItemType",
+        inquiry_code: str,
+        work_around: str = "",
+    ):
         self.type = type
+        self.inquiry_code = inquiry_code
         self.work_around = work_around
 
 
@@ -93,10 +99,9 @@ class IntItem:
             new_value = self.__value.value
             if original_value is None:
                 original_value = 0
-            item_tracker = tracker.Tracker()
-            item_tracker.update_tracker(
-                self.__value.value - original_value, self.bannable.type
-            )
+
+            info = user_info.UserInfo(self.bannable.inquiry_code)
+            info.update_item(self.bannable.type, self.__value.value - original_value)
 
     def get_value_off(self) -> int:
         if self.__value.value is None:

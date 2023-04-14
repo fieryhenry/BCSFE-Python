@@ -16,8 +16,8 @@ from . import (
     patcher,
     serialise_save,
     parse_save,
-    tracker,
     config_manager,
+    user_info,
 )
 
 GREEN = "#008000"
@@ -421,20 +421,30 @@ def check_data_is_jp(save_stats: dict[str, Any]) -> bool:
     return is_jp(save_stats)
 
 
-def check_tracker(save_stats: dict[str, Any], path: str) -> None:
-    """Check if the tracker is enabled"""
-    item_tracker = tracker.Tracker()
+def check_managed_items(save_stats: dict[str, Any], path: str) -> None:
+    """Check if the user has untracked bannable items"""
+    info = user_info.UserInfo(save_stats["inquiry_code"])
 
-    if item_tracker.has_data():
+    if info.has_managed_items():
         upload = (
             user_input_handler.colored_input(
-                "You have untracked bannable items that need to be uploaded. Do you want to upload them now? (&y&/&n&) (You will be unable to do so after exiting unless you have WIPE_TRACKED_ITEMS_ON_START set to False):"
+                "You have untracked bannable items that need to be uploaded. Do you want to upload them now? (&y&/&n&) (I recommend saying &y& to avoid bans):"
             )
             == "y"
         )
         if upload:
             server_handler.meta_data_upload_handler(save_stats, path)
-            colored_text("Uploaded meta data", new=GREEN)
+            colored_text("&Uploaded meta data", new=GREEN)
+        else:
+            delete = (
+                user_input_handler.colored_input(
+                    "Do you want to remove your item logs? (&y&/&n&):"
+                )
+                == "y"
+            )
+            if delete:
+                info.clear_managed_items()
+                colored_text("&Removed item logs", new=GREEN)
 
 
 def exit_editor():
@@ -489,7 +499,7 @@ def ask_save_changes():
         if os.path.exists(temp_file_path):
             data = read_file_bytes(temp_file_path)
             save_stats = parse_save.start_parse(data, get_country_code(data))
-            check_tracker(save_stats, temp_file_path)
+            check_managed_items(save_stats, temp_file_path)
             write_file_bytes(current_path, read_file_bytes(temp_file_path))
             colored_text(
                 f"Save data saved to &{current_path}&",
@@ -762,6 +772,7 @@ def save_file(
             )
         )
         exit_editor()
+        return
     return path_d.name
 
 

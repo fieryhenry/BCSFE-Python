@@ -11,7 +11,7 @@ def edit_cat_food(save_stats: dict[str, Any]) -> dict[str, Any]:
         value=item.Int(save_stats["cat_food"]["Value"]),
         max_value=45000,
         bannable=item.Bannable(
-            managed_item.ManagedItemType.CATFOOD,
+            managed_item.ManagedItemType.CATFOOD, save_stats["inquiry_code"]
         ),
     )
     cat_food.edit()
@@ -53,6 +53,7 @@ def edit_rare_tickets(save_stats: dict[str, Any]) -> dict[str, Any]:
         value=item.Int(save_stats["rare_tickets"]["Value"]),
         max_value=299,
         bannable=item.Bannable(
+            inquiry_code=save_stats["inquiry_code"],
             work_around='&Instead of editing rare tickets directly, use the "Normal Ticket Max Trade Progress" conversion feature instead! It is much more safe.',
             type=managed_item.ManagedItemType.RARE_TICKET,
         ),
@@ -70,6 +71,7 @@ def edit_platinum_tickets(save_stats: dict[str, Any]) -> dict[str, Any]:
         value=item.Int(save_stats["platinum_tickets"]["Value"]),
         max_value=9,
         bannable=item.Bannable(
+            inquiry_code=save_stats["inquiry_code"],
             work_around="&Instead of editing platinum tickets, edit platinum shards instead! They are much more safe. 10 platinum shards = 1 platinum ticket",
             type=managed_item.ManagedItemType.PLATINUM_TICKET,
         ),
@@ -259,6 +261,7 @@ def edit_legend_tickets(save_stats: dict[str, Any]) -> dict[str, Any]:
         value=item.Int(save_stats["legend_tickets"]["Value"]),
         max_value=4,
         bannable=item.Bannable(
+            inquiry_code=save_stats["inquiry_code"],
             type=managed_item.ManagedItemType.LEGEND_TICKET,
         ),
     )

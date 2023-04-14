@@ -4,14 +4,21 @@ import datetime
 import hashlib
 import hmac
 import json
-import os
 from random import randint
 import time
 from typing import Any, Optional, Union
 
 import requests
 
-from . import helper, managed_item, serialise_save, patcher, config_manager, tracker
+from . import (
+    helper,
+    managed_item,
+    serialise_save,
+    patcher,
+    config_manager,
+    user_info,
+    parse_save,
+)
 
 
 def get_current_time() -> int:
@@ -259,7 +266,7 @@ def download_save(
     transfer_code: str,
     confirmation_code: str,
     game_version: str,
-) -> bytes:
+) -> requests.Response:
     """Downloads the save for the given country_code, transfer_code, confirmation_code
     and game_version"""
 
@@ -280,7 +287,7 @@ def download_save(
         response = requests.post(url, data=data_s, headers=headers)
     except requests.exceptions.RequestException as err:
         raise Exception("Error getting save: " + str(err)) from err
-    return response.content
+    return response
 
 
 def upload_save_data_body_v2(
@@ -603,7 +610,9 @@ def check_gen_token(
         save_stats["game_version"]["Value"],
     )
 
-    save_auth_token(token, inquiry_code)
+    info = user_info.UserInfo(inquiry_code)
+
+    info.set_auth_token("" if token is None else token)
 
     return {
         "token": token,
@@ -613,81 +622,21 @@ def check_gen_token(
     }
 
 
-def save_password(password: Optional[str], inquiry_code: str):
-    """Saves the password to the password file"""
-
-    app_data_folder = config_manager.get_app_data_folder()
-    path = os.path.join(app_data_folder, inquiry_code, "save_info.json")
-    try:
-        data = json.loads(helper.read_file_string(path, create=True))
-    except json.decoder.JSONDecodeError:
-        data: dict[str, Any] = {}
-    data["password"] = password
-    helper.write_file_string(path, json.dumps(data))
-
-
-def save_auth_token(token: Optional[str], inquiry_code: str):
-    """Saves the auth token to the password file"""
-
-    app_data_folder = config_manager.get_app_data_folder()
-    path = os.path.join(app_data_folder, inquiry_code, "save_info.json")
-    try:
-        data = json.loads(helper.read_file_string(path, create=True))
-    except json.decoder.JSONDecodeError:
-        data: dict[str, Any] = {}
-    data["token"] = token
-    helper.write_file_string(path, json.dumps(data))
-
-
-def get_password_from_file(inquiry_code: str) -> Optional[str]:
-    """Gets the password for the given inquiry code"""
-
-    app_data_folder = config_manager.get_app_data_folder()
-    path = os.path.join(app_data_folder, inquiry_code, "save_info.json")
-    if not os.path.exists(path):
-        return None
-
-    try:
-        data = json.loads(helper.read_file_string(path, create=True))
-    except json.decoder.JSONDecodeError:
-        return None
-    if "password" in data:
-        return data["password"]
-
-    return None
-
-
-def get_auth_token_from_file(inquiry_code: str) -> Optional[str]:
-    """Gets the auth token for the given inquiry code"""
-
-    app_data_folder = config_manager.get_app_data_folder()
-    path = os.path.join(app_data_folder, inquiry_code, "save_info.json")
-    if not os.path.exists(path):
-        return None
-
-    try:
-        data = json.loads(helper.read_file_string(path, create=True))
-    except json.decoder.JSONDecodeError:
-        return None
-    if "token" in data:
-        return data["token"]
-
-    return None
-
-
 def check_gen_password(save_stats: dict[str, Any]) -> tuple[dict[str, Any], str]:
     """Checks the password for the given save_stats and generates new if stuff is invalid"""
 
     inquiry_code = save_stats["inquiry_code"]
     password_refresh_token = save_stats["token"]
 
-    password = get_password_from_file(inquiry_code)
-    if password is not None:
+    info = user_info.UserInfo(inquiry_code)
+
+    password = info.get_password()
+    if password:
         return save_stats, password
 
     password_refresh_data = get_password_refresh(inquiry_code, password_refresh_token)
     if password_refresh_data is not None:
-        save_password(password_refresh_data["password"], inquiry_code)
+        info.set_password(password_refresh_data["password"])
         return save_stats, password_refresh_data["password"]
 
     password_refresh_data = get_password(inquiry_code)
@@ -702,7 +651,7 @@ def check_gen_password(save_stats: dict[str, Any]) -> tuple[dict[str, Any], str]
 
     password_refresh_token = password_refresh_data["passwordRefreshToken"]
     save_stats["token"] = password_refresh_token
-    save_password(password_refresh_data["password"], inquiry_code)
+    info.set_password(password_refresh_data["password"])
     return save_stats, password_refresh_data["password"]
 
 
@@ -721,26 +670,27 @@ def prepare_upload(
     token = data["token"]
     inquiry_code = data["inquiry_code"]
     save_data = data["save_data"]
+    info = user_info.UserInfo(inquiry_code)
     if token is None:
-        save_auth_token(None, inquiry_code)
-        save_password(None, inquiry_code)
-        if print_text:
-            helper.colored_text(
-                "Error getting account auth token. Please try again. If this error persists, please report it on the discord server.",
-                helper.RED,
-            )
-        return None
-    item_tracker = tracker.Tracker()
+        token = info.get_auth_token()
+        if not token:
+            info.set_password("")
+            if print_text:
+                helper.colored_text(
+                    "Error getting account auth token. Please try again. If this error persists, please report it on the discord server.",
+                    helper.RED,
+                )
+            return None
     if original_iq != inquiry_code:
-        item_tracker.reset_tracker()
+        info.clear_managed_items()
         update_managed_items(save_stats["inquiry_code"], token, save_stats)
 
     if print_text:
         helper.colored_text("Adding meta data...", helper.GREEN)
     if managed_items is None:
-        managed_items = item_tracker.parse_tracker_managed()
+        managed_items = info.get_managed_items_lst()
     playtime = helper.time_to_frames(save_stats["play_time"])
-    tracker.Tracker().reset_tracker()
+    info.clear_managed_items()
 
     return token, inquiry_code, save_data, playtime, managed_items
 
@@ -841,9 +791,10 @@ def download_handler() -> Optional[str]:
         return None
     game_version = input("Enter current game version (e.g 11.3, 9.6, 10.4.0):")
     game_version = helper.str_to_gv(game_version)
-    save_data = download_save(
+    response = download_save(
         country_code, transfer_code, confirmation_code, game_version
     )
+    save_data = response.content
     if test_is_save_data(save_data):
         helper.colored_text("Successfully downloaded save data\n", base=helper.GREEN)
     else:
@@ -852,6 +803,13 @@ def download_handler() -> Optional[str]:
             base=helper.RED,
         )
         return None
+    headers = response.headers
+    save_stats = parse_save.start_parse(save_data, country_code)
+    save_stats["token"] = headers["nyanko-password-refresh-token"]
+    info = user_info.UserInfo(save_stats["inquiry_code"])
+    info.set_password(headers["nyanko-password"])
+    save_data = serialise_save.start_serialize(save_stats)
+    save_data = patcher.patch_save_data(save_data, country_code)
     path = helper.save_file(
         "Save save data",
         helper.get_save_file_filetype(),

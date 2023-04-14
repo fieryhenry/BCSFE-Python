@@ -13,7 +13,7 @@ from . import (
     patcher,
     serialise_save,
     server_handler,
-    tracker,
+    user_info,
     updater,
     user_input_handler,
     root_handler,
@@ -104,12 +104,10 @@ def check_update() -> None:
 def main():
     """Main function"""
 
-    item_tracker = tracker.Tracker()
-
     if config_manager.get_config_value_category(
         "SERVER", "WIPE_TRACKED_ITEMS_ON_START"
     ):
-        item_tracker.reset_tracker()
+        user_info.UserInfo.clear_all()
     game_data_getter.check_remove_handler()
 
     check_updates = config_manager.get_config_value_category(

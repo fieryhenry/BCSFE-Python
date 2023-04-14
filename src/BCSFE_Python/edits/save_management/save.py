@@ -13,7 +13,7 @@ def save(save_stats: dict[str, Any]) -> dict[str, Any]:
         save_data, save_stats["version"], helper.get_save_path(), True
     )
 
-    helper.check_tracker(save_stats, helper.get_save_path())
+    helper.check_managed_items(save_stats, helper.get_save_path())
 
     return save_stats
 
@@ -26,7 +26,7 @@ def save_save(save_stats: dict[str, Any]) -> dict[str, Any]:
         save_data, save_stats["version"], helper.get_save_path(), False
     )
 
-    helper.check_tracker(save_stats, helper.get_save_path())
+    helper.check_managed_items(save_stats, helper.get_save_path())
 
     return save_stats
 
@@ -38,7 +38,7 @@ def save_and_push(save_stats: dict[str, Any]) -> dict[str, Any]:
     save_data = patcher.patch_save_data(save_data, save_stats["version"])
     helper.write_file_bytes(helper.get_save_path(), save_data)
 
-    helper.check_tracker(save_stats, helper.get_save_path())
+    helper.check_managed_items(save_stats, helper.get_save_path())
 
     if not helper.is_android():
         adb_handler.adb_push_save_data(save_stats["version"], helper.get_save_path())
@@ -53,7 +53,7 @@ def save_and_push_rerun(save_stats: dict[str, Any]) -> dict[str, Any]:
     save_data = patcher.patch_save_data(save_data, save_stats["version"])
     helper.write_file_bytes(helper.get_save_path(), save_data)
 
-    helper.check_tracker(save_stats, helper.get_save_path())
+    helper.check_managed_items(save_stats, helper.get_save_path())
 
     if not helper.is_android():
         adb_handler.adb_push_save_data(save_stats["version"], helper.get_save_path())

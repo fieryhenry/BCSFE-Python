@@ -89,7 +89,6 @@ class UserInfo:
 
     def set_password(self, password: str):
         self.password = password
-        print(self.password)
         self.save()
 
     def set_auth_token(self, auth_token: str):

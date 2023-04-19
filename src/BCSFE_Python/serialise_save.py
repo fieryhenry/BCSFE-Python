@@ -878,6 +878,32 @@ def write_dict(save_data: list[int], data: dict[Any, Any]) -> list[int]:
     return save_data
 
 
+def serialise_zero_legends(save_data: list[int], data: list[Any]):
+    """
+    Serialises the zero legends data
+
+    Args:
+        save_data (list[int]): The save data
+        data (list[Any]): The zero legends data
+    """
+    save_data = write(save_data, len(data), 2)
+    for chapter in data:
+        unknown_1 = chapter["unknown_1"]
+        save_data = write(save_data, unknown_1, 1)
+        save_data = write(save_data, len(chapter["stars"]), 1)
+        for star in chapter["stars"]:
+            selected_stage = star["selected_stage"]
+            stages_cleared = star["stages_cleared"]
+            unlock_next = star["unlock_next"]
+            save_data = write(save_data, selected_stage, 1)
+            save_data = write(save_data, stages_cleared, 1)
+            save_data = write(save_data, unlock_next, 1)
+            save_data = write(save_data, len(star["stages"]), 2)
+            for clear_amount in star["stages"]:
+                save_data = write(save_data, clear_amount, 2)
+    return save_data
+
+
 def serialize_save(save_stats: dict[str, Any]) -> bytes:
     """Serialises the save stats"""
 
@@ -1507,6 +1533,36 @@ def serialize_save(save_stats: dict[str, Any]) -> bytes:
     save_data = data["save_data"]
     if data["exit"]:
         return bytes(save_data)
+
+    save_data = serialise_dumped_data(save_data, save_stats["unknown_135"])
+
+    save_data = write(save_data, save_stats["gv_110900"])
+    data = check_gv(save_data, save_stats, 120000)
+    save_data = data["save_data"]
+    if data["exit"]:
+        return bytes(save_data)
+
+    save_data = serialise_zero_legends(save_data, save_stats["zero_legends"])
+
+    save_data = write(save_data, save_stats["unknown_136"])
+
+    save_data = write(save_data, save_stats["gv_120000"])
+    data = check_gv(save_data, save_stats, 120100)
+    save_data = data["save_data"]
+    if data["exit"]:
+        return bytes(save_data)
+
+    save_data = serialise_dumped_data(save_data, save_stats["unknown_137"])
+
+    save_data = write(save_data, save_stats["gv_120100"])
+    data = check_gv(save_data, save_stats, 120200)
+    save_data = data["save_data"]
+    if data["exit"]:
+        return bytes(save_data)
+
+    save_data = serialise_dumped_data(save_data, save_stats["unknown_138"])
+
+    save_data = write(save_data, save_stats["gv_120200"])
 
     save_data = write(save_data, save_stats["extra_data"])
 

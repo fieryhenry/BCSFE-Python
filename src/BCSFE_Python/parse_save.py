@@ -1742,6 +1742,143 @@ class BackupState(enum.Enum):
     FINISHED = 7
 
 
+def get_110900_data() -> list[dict[str, int]]:
+    data: list[dict[str, int]] = []
+
+    data.append(next_int_len(4))
+    data.append(next_int_len(2))
+    data.append(next_int_len(1))
+    data.append(next_int_len(1))
+    data.append(next_int_len(1))
+    data.append(next_int_len(1))
+
+    ivar_14 = next_int_len(1)
+    data.append(ivar_14)
+
+    for _ in range(ivar_14["Value"]):
+        data.append(next_int_len(2))
+
+    svar6 = next_int_len(2)
+    data.append(svar6)
+
+    for _ in range(svar6["Value"]):
+        data.append(next_int_len(2))
+
+    svar6 = next_int_len(2)
+    data.append(svar6)
+
+    for _ in range(svar6["Value"]):
+        data.append(next_int_len(2))
+
+    data.append(next_int_len(4))
+    data.append(next_int_len(4))
+    data.append(next_int_len(4))
+    data.append(next_int_len(2))
+    data.append(next_int_len(2))
+    data.append(next_int_len(2))
+    data.append(next_int_len(2))
+    data.append(next_int_len(1))
+    data.append(next_int_len(1))
+    data.append(next_int_len(1))
+    data.append(next_int_len(1))
+    data.append(next_int_len(1))
+    data.append(next_int_len(1))
+    data.append(next_int_len(1))
+    data.append(next_int_len(1))
+    svar6 = next_int_len(2)
+    data.append(svar6)
+
+    for _ in range(svar6["Value"]):
+        data.append(next_int_len(2))
+
+    data.append(next_int_len(1))
+    data.append(next_int_len(1))
+    data.append(next_int_len(1))
+    data.append(next_int_len(1))
+    data.append(next_int_len(1))
+    data.append(next_int_len(1))
+    data.append(next_int_len(1))
+    data.append(next_int_len(1))
+    data.append(next_int_len(1))
+    data.append(next_int_len(1))
+    data.append(next_int_len(1))
+    data.append(next_int_len(1))
+    data.append(next_int_len(1))
+    data.append(next_int_len(1))
+
+    cvar4 = next_int_len(1)
+    data.append(cvar4)
+    if 0 < cvar4["Value"]:
+        data.append(next_int_len(2))
+        if cvar4["Value"] != 1:
+            data.append(next_int_len(2))
+            if cvar4["Value"] != 2:
+                data.append(next_int_len(2))
+                if cvar4["Value"] != 3:
+                    data.append(next_int_len(2))
+                    if cvar4["Value"] != 4:
+                        ivar32 = cvar4["Value"] + 4
+                        for _ in range(ivar32):
+                            data.append(next_int_len(2))
+    return data
+
+
+def get_zero_legends() -> list[Any]:
+    total_chapters = next_int(2)
+    chapters: list[dict[str, Any]] = []
+    for _ in range(total_chapters):
+        unknown_1 = next_int(1)
+        total_stars = next_int(1)
+        stars: list[dict[str, Any]] = []
+        for _ in range(total_stars):
+            selected_stage = next_int(1)
+            stages_cleared = next_int(1)
+            unlock_next = next_int(1)
+            total_stages = next_int(2)
+            stages: list[Any] = []
+            for _ in range(total_stages):
+                clear_amount = next_int(2)
+                stages.append(clear_amount)
+            stars.append(
+                {
+                    "selected_stage": selected_stage,
+                    "stages_cleared": stages_cleared,
+                    "unlock_next": unlock_next,
+                    "stages": stages,
+                }
+            )
+        chapters.append(
+            {
+                "unknown_1": unknown_1,
+                "stars": stars,
+            }
+        )
+    return chapters
+
+
+def get_120100_data() -> list[dict[str, int]]:
+    data: list[dict[str, int]] = []
+    svar19 = next_int_len(2)
+    data.append(svar19)
+    for _ in range(svar19["Value"]):
+        data.append(next_int_len(2))
+
+    return data
+
+
+def get_120200_data() -> list[dict[str, int]]:
+    data: list[dict[str, int]] = []
+    data.append(next_int_len(1))
+    data.append(next_int_len(2))
+    cvar4 = next_int_len(1)
+    data.append(cvar4)
+    for _ in range(cvar4["Value"]):
+        data.append(next_int_len(2))
+        data.append(next_int_len(2))
+
+    return data
+
+
 def parse_save(
     save_data: bytes,
     country_code: Union[str, None],
@@ -2338,7 +2475,32 @@ def parse_save(
     save_stats["unknown_132"] = get_110800_data_2()
 
     save_stats["gv_110800"] = next_int_len(4)  # 110800
-    save_stats = check_gv(save_stats, 110800)
+    save_stats = check_gv(save_stats, 110900)
+    if save_stats["exit"]:
+        return save_stats
+
+    save_stats["unknown_135"] = get_110900_data()
+    save_stats["gv_110900"] = next_int_len(4)  # 110900
+    save_stats = check_gv(save_stats, 120000)
+    if save_stats["exit"]:
+        return save_stats
+
+    save_stats["zero_legends"] = get_zero_legends()
+    save_stats["unknown_136"] = next_int_len(1)
+    save_stats["gv_120000"] = next_int_len(4)  # 120000
+    save_stats = check_gv(save_stats, 120100)
+    if save_stats["exit"]:
+        return save_stats
+
+    save_stats["unknown_137"] = get_120100_data()
+    save_stats["gv_120100"] = next_int_len(4)  # 120100
+    save_stats = check_gv(save_stats, 120200)
+    if save_stats["exit"]:
+        return save_stats
+
+    save_stats["unknown_138"] = get_120200_data()
+    save_stats["gv_120200"] = next_int_len(4)  # 120200
+    save_stats = check_gv(save_stats, 120200)
     if save_stats["exit"]:
         return save_stats
 

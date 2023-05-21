@@ -1,18 +1,20 @@
 # Battle Cats Save File Editor
 
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/M4M53M4MN)
+
 A python save editor for the mobile game The Battle Cats
 
 Join the [discord server](https://discord.gg/DvmMgvn5ZB) if you want to suggest new features, report bugs or get help on how to use the editor (please read the below tutorials / watch the latest [tutorial video](https://www.youtube.com/watch?v=Kr6VaLTXOSY) first before asking for help).
 
-## Thanks to:
+## Thanks to
 
-Lethal's editor for giving me inspiration to start the project and it helped me work out how to patch the save data and edit cf/xp: https://www.reddit.com/r/BattleCatsCheats/comments/djehhn/editoren/
+Lethal's editor for giving me inspiration to start the project and it helped me work out how to patch the save data and edit cf/xp: <https://www.reddit.com/r/BattleCatsCheats/comments/djehhn/editoren/>
 
 Beeven and csehydrogen's open source code, which helped me figure out how to patch save data: [beeven/battlecats](https://github.com/beeven/battlecats), [csehydrogen/BattleCatsHacker](https://github.com/csehydrogen/BattleCatsHacker)
 
 Everyone who's given me saves, which helped to test save parsing/serialising and to test/develop new features
 
-## How to use:
+## How to use
 
 If you have a pc: watch a [Tutorial video](https://www.youtube.com/watch?v=Kr6VaLTXOSY), or scroll down for a text tutorial
 
@@ -28,7 +30,7 @@ Although if you want to get unbanned / fix the elsewhere error you will still ne
 
 ---
 
-1. Install python (You'll need version 3.9 and up) https://www.python.org/downloads/
+1. Install python (You'll need version 3.9 and up) <https://www.python.org/downloads/>
 
 2. Enter the command: `py -m pip install -U battle-cats-save-editor` into command prompt or another terminal to install the editor (**NOT the Windows Python app**). If that doesn't work then use `python3` or `python` instead of `py` in the command
 
@@ -71,9 +73,9 @@ If you can't upload your save data using the in-game system because your are ban
 If you don't have a rooted device:
 
 5. You will need to get one of the emulators listed earlier, I recommend LD Player because I know that it works with this method. If you change the default install location, make sure to keep a note of it for it later
-   
+
    1. Enable `root permission` in the settings and under `ADB Debugging` select `Open local connection`. You will need to restart LD Player for the changes to work
-   
+
    2. Open the editor and select the option named `Use adb to pull the save from a rooted device` and enter your game version
 
 6. If you get the option to add adb to your path, select enter `y`.
@@ -81,9 +83,9 @@ If you don't have a rooted device:
 7. The editor will look for adb in default install directories of common emulators and add it automatically
 
 8. If it fails, then you will need to either
-   
+
    1. Enter the path to your emulator's install directory, it might look like `C:\LDPlayer\LDPlayer4.0`
-   
+
    2. Download adb with from [here](https://dl.google.com/android/repository/platform-tools-latest-windows.zip). Extract the zip and copy the folder path (not adb.exe itself) into the editor
 
 9. Now rerun the editor and try the option again. If it still doesn't work you'll need to manually do it, using the tutorial below.
@@ -112,7 +114,7 @@ To use the options in the editor to get and push your save data to the game, you
 
 5. Then click on the `Environment Variables` button.
 
-6. Then in the `System variables` box find the variable named `Path`, then 
+6. Then in the `System variables` box find the variable named `Path`, then
    click on the `edit` button.
 
 7. Then click `New` and paste the path into it.
@@ -122,7 +124,7 @@ To use the options in the editor to get and push your save data to the game, you
 9. Relaunch powershell and maybe restart your whole pc, and try the command
    again.
 
-If this method is too difficult, just use a root file explorer instead 
+If this method is too difficult, just use a root file explorer instead
     and manually get the files that you want. The path that you will need is: `/data/data/jp.co.ponos.battlecatsen/files/SAVE_DATA`
 
 ### How to fix "This save data is currently active elsewhere" or "The current Save Data is in violation"
@@ -169,7 +171,7 @@ If you don't have a pc to install and run the editor you can use Termux.
 
 7. Once opened enter the command `pkg install python`
 
-8. If that doesn't work then read this: https://stackoverflow.com/a/71097459
+8. If that doesn't work then read this: <https://stackoverflow.com/a/71097459>
 
 9. Then run `python -m pip install -U battle-cats-save-editor`
 

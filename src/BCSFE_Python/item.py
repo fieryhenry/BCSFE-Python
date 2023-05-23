@@ -168,8 +168,8 @@ class IntItemGroup:
             entered_value = helper.clamp(new_value, 0, max_value)
             for id in ids:
                 max_value = self.items[id].get_max_value()
-                new_value = helper.clamp(new_value, 0, max_value)
-                self.items[id].set_value(new_value)
+                value = helper.clamp(new_value, 0, max_value)
+                self.items[id].set_value(value)
 
             helper.colored_text(
                 self.locale_manager.search_key("success_set")

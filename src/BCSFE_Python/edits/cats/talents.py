@@ -73,24 +73,19 @@ def find_order(
 ) -> list[str]:
     """Find what talent slot each letter corresponds to"""
 
-    letters = [
-        "A",
-        "B",
-        "C",
-        "D",
-        "E",
-        "F",
-    ]
+    letters = ["A", "B", "C", "D", "E", "F", "G", "H"]
     letter_order: list[str] = []
 
-    for i, talent in enumerate(cat_talents):
-        if i == 0:
-            continue
+    for talent in cat_talents:
         talent_id = talent["id"]
         for letter in letters:
-            ability_id = int(cat_talent_data[f"abilityID_{letter}"])
+            key = f"abilityID_{letter}"
+            if key not in cat_talent_data:
+                continue
+            ability_id = int(cat_talent_data[key])
             if ability_id == talent_id:
                 letter_order.append(letter)
+                break
     return letter_order
 
 
@@ -154,7 +149,7 @@ def max_all_talents(save_stats: dict[str, Any]):
         cat_talents = talents[cat_id]
         cat_talents_levels = get_talent_levels(talent_data, talents, cat_id)
         for i, cat_talent_level in enumerate(cat_talents_levels):
-            cat_talents[i + 1]["level"] = cat_talent_level
+            cat_talents[i]["level"] = cat_talent_level
         save_stats["talents"] = talents
 
     print("Successfully set talents")
@@ -185,7 +180,7 @@ def remove_all_talents(save_stats: dict[str, Any]) -> dict[str, Any]:
         cat_talents = talents[cat_id]
         cat_talents_levels = get_talent_levels(talent_data, talents, cat_id)
         for i in range(len(cat_talents_levels)):
-            cat_talents[i + 1]["level"] = 0
+            cat_talents[i]["level"] = 0
         save_stats["talents"] = talents
 
     print("Successfully removed talents")
@@ -219,7 +214,7 @@ def edit_talents_individual(save_stats: dict[str, Any]) -> dict[str, Any]:
         maxes: list[int] = []
         for talent_index, cat_talent_formatted in cat_talent_data_formatted.items():
             names.append(cat_talent_formatted["name"])
-            cat_talents_levels.append(cat_talents[talent_index + 1]["level"])
+            cat_talents_levels.append(cat_talents[talent_index]["level"])
             maxes.append(cat_talent_formatted["max"])
         helper.colored_text(f"Cat &{cat_id}& is selected:")
         cat_talents_levels_g = item.IntItemGroup.from_lists(
@@ -231,7 +226,7 @@ def edit_talents_individual(save_stats: dict[str, Any]) -> dict[str, Any]:
         cat_talents_levels_g.edit()
         cat_talents_levels = cat_talents_levels_g.get_values()
         for i, cat_talent_level in enumerate(cat_talents_levels):
-            cat_talents[i + 1]["level"] = cat_talent_level
+            cat_talents[i]["level"] = cat_talent_level
 
         talents[cat_id] = cat_talents
 

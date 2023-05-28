@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.7.2.1] - 2023-05-28
+
+#### Fixed
+
+- The editor crashing if user info not found
+
 ## [2.7.2] - 2023-05-28
 
 #### Added

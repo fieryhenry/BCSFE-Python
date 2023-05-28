@@ -1529,7 +1529,7 @@ def serialize_save(save_stats: dict[str, Any]) -> bytes:
     save_data = serialise_dumped_data(save_data, save_stats["unknown_132"])
 
     save_data = write(save_data, save_stats["gv_110800"])
-    data = check_gv(save_data, save_stats, 110800)
+    data = check_gv(save_data, save_stats, 110900)
     save_data = data["save_data"]
     if data["exit"]:
         return bytes(save_data)

@@ -130,6 +130,7 @@ class UserInfo:
     def clear_all_items():
         app_data_folder = config_manager.get_app_data_folder()
         path = os.path.join(app_data_folder, "user_info")
+        os.makedirs(path, exist_ok=True)
         files = helper.get_files_in_dir(path)
         for file in files:
             if file.endswith(".json"):

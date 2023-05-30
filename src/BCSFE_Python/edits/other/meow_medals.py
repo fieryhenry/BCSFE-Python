@@ -217,6 +217,8 @@ def get_medal_data(is_jp: bool) -> Optional[Medals]:
         else:
             if "star" not in medal:
                 medal["star"] = None
+            if "map" not in medal:
+                medal["map"] = None
             stages.append(
                 StageMedal(
                     i,

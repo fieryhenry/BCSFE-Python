@@ -1045,9 +1045,10 @@ def serialize_save(save_stats: dict[str, Any]) -> bytes:
     )
     if save_stats["dst"]:
         save_data = serialise_utf8_string(save_data, save_stats["unknown_110"])
-    save_data = write(save_data, len(save_stats["unknown_108"]), 4)
-    for i in range(len(save_stats["unknown_108"])):
-        save_data = serialise_utf8_string(save_data, save_stats["unknown_108"][i])
+    unknown_108 = helper.format_text(save_stats["unknown_108"])
+    save_data = write(save_data, len(unknown_108), 4)
+    for i in range(len(unknown_108)):
+        save_data = serialise_utf8_string(save_data, unknown_108[i])
 
     if save_stats["dst"]:
         save_data = write_length_doubles(

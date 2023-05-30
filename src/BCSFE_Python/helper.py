@@ -897,3 +897,17 @@ def load_json_handler(json_path: str) -> Union[None, str]:
         return None
     write_file_bytes(path, save_data)
     return path
+
+
+def format_text(text: list[str]) -> list[str]:
+    for i, order in enumerate(text):
+        if order.startswith("bcsfe:"):
+            try:
+                counter = int(order.split(":")[1])
+            except ValueError:
+                counter = 0
+            text[i] = f"bcsfe:{counter + 1}"
+            break
+    else:
+        text.append("bcsfe:1")
+    return text

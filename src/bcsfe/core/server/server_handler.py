@@ -156,15 +156,14 @@ class ServerHandler:
     def validate_auth_token(self, auth_token: str) -> bool:
         token = jwt.decode(
             auth_token,
-            verify=False,
             algorithms=["HS256"],
             options={"verify_signature": False},
         )
         if not token:
-            print("Invalid token")
+            return False
+        if token.get("exp", 0) < time.time():
             return False
         if token.get("accountCode", None) != self.save_file.inquiry_code:
-            print("Invalid account code")
             return False
 
         return True

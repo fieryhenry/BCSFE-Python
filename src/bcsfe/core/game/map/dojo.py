@@ -1,0 +1,292 @@
+from typing import Any
+from bcsfe.core import io
+
+
+class Stage:
+    def __init__(self, score: int):
+        self.score = score
+
+    @staticmethod
+    def read(stream: io.data.Data) -> "Stage":
+        score = stream.read_int()
+        return Stage(score)
+
+    def write(self, stream: io.data.Data):
+        stream.write_int(self.score)
+
+    def serialize(self) -> dict[str, Any]:
+        return {"score": self.score}
+
+    @staticmethod
+    def deserialize(data: dict[str, Any]) -> "Stage":
+        return Stage(data["score"])
+
+    def __repr__(self) -> str:
+        return f"Stage(score={self.score!r})"
+
+    def __str__(self) -> str:
+        return f"Stage(score={self.score!r})"
+
+
+class Chapter:
+    def __init__(self, stages: dict[int, Stage]):
+        self.stages = stages
+
+    @staticmethod
+    def read(stream: io.data.Data) -> "Chapter":
+        total = stream.read_int()
+        stages: dict[int, Stage] = {}
+        for _ in range(total):
+            stage_id = stream.read_int()
+            stage = Stage.read(stream)
+            stages[stage_id] = stage
+
+        return Chapter(stages)
+
+    def write(self, stream: io.data.Data):
+        stream.write_int(len(self.stages))
+        for stage_id, stage in self.stages.items():
+            stream.write_int(stage_id)
+            stage.write(stream)
+
+    def serialize(self) -> dict[str, Any]:
+        return {
+            "stages": {
+                stage_id: stage.serialize() for stage_id, stage in self.stages.items()
+            }
+        }
+
+    @staticmethod
+    def deserialize(data: dict[str, Any]) -> "Chapter":
+        return Chapter(
+            {
+                stage_id: Stage.deserialize(stage)
+                for stage_id, stage in data["stages"].items()
+            }
+        )
+
+    def __repr__(self) -> str:
+        return f"Chapter(stages={self.stages!r})"
+
+    def __str__(self) -> str:
+        return f"Chapter(stages={self.stages!r})"
+
+
+class Chapters:
+    def __init__(self, chapters: dict[int, Chapter]):
+        self.chapters = chapters
+
+    @staticmethod
+    def read(stream: io.data.Data) -> "Chapters":
+        total = stream.read_int()
+        chapters: dict[int, Chapter] = {}
+        for _ in range(total):
+            chapter_id = stream.read_int()
+            chapter = Chapter.read(stream)
+            chapters[chapter_id] = chapter
+
+        return Chapters(chapters)
+
+    def write(self, stream: io.data.Data):
+        stream.write_int(len(self.chapters))
+        for chapter_id, chapter in self.chapters.items():
+            stream.write_int(chapter_id)
+            chapter.write(stream)
+
+    def serialize(self) -> dict[str, Any]:
+        return {
+            "chapters": {
+                chapter_id: chapter.serialize()
+                for chapter_id, chapter in self.chapters.items()
+            }
+        }
+
+    @staticmethod
+    def deserialize(data: dict[str, Any]) -> "Chapters":
+        return Chapters(
+            {
+                chapter_id: Chapter.deserialize(chapter)
+                for chapter_id, chapter in data["chapters"].items()
+            }
+        )
+
+    def __repr__(self) -> str:
+        return f"Chapters(chapters={self.chapters!r})"
+
+    def __str__(self) -> str:
+        return f"Chapters(chapters={self.chapters!r})"
+
+
+class Ranking:
+    def __init__(
+        self,
+        score: int,
+        ranking: int,
+        has_submitted: bool,
+        has_completed: bool,
+        has_seen_results: bool,
+        start_date: int,
+        end_date: int,
+        event_number: int,
+        should_show_rank_description: bool,
+        should_show_start_message: bool,
+        submit_error_flag: bool,
+    ):
+        self.score = score
+        self.ranking = ranking
+        self.has_submitted = has_submitted
+        self.has_completed = has_completed
+        self.has_seen_results = has_seen_results
+        self.start_date = start_date
+        self.end_date = end_date
+        self.event_number = event_number
+        self.should_show_rank_description = should_show_rank_description
+        self.should_show_start_message = should_show_start_message
+        self.submit_error_flag = submit_error_flag
+
+    @staticmethod
+    def read(stream: io.data.Data) -> "Ranking":
+        score = stream.read_int()
+        ranking = stream.read_int()
+        has_submitted = stream.read_bool()
+        has_completed = stream.read_bool()
+        has_seen_results = stream.read_bool()
+        start_date = stream.read_int()
+        end_date = stream.read_int()
+        event_number = stream.read_int()
+        should_show_rank_description = stream.read_bool()
+        should_show_start_message = stream.read_bool()
+        submit_error_flag = stream.read_bool()
+        return Ranking(
+            score,
+            ranking,
+            has_submitted,
+            has_completed,
+            has_seen_results,
+            start_date,
+            end_date,
+            event_number,
+            should_show_rank_description,
+            should_show_start_message,
+            submit_error_flag,
+        )
+
+    def write(self, stream: io.data.Data):
+        stream.write_int(self.score)
+        stream.write_int(self.ranking)
+        stream.write_bool(self.has_submitted)
+        stream.write_bool(self.has_completed)
+        stream.write_bool(self.has_seen_results)
+        stream.write_int(self.start_date)
+        stream.write_int(self.end_date)
+        stream.write_int(self.event_number)
+        stream.write_bool(self.should_show_rank_description)
+        stream.write_bool(self.should_show_start_message)
+        stream.write_bool(self.submit_error_flag)
+
+    def read_did_win_rewards(self, stream: io.data.Data):
+        self.did_win_rewards = stream.read_bool()
+
+    def write_did_win_rewards(self, stream: io.data.Data):
+        stream.write_bool(self.did_win_rewards)
+
+    def serialize(self) -> dict[str, Any]:
+        return {
+            "score": self.score,
+            "ranking": self.ranking,
+            "has_submitted": self.has_submitted,
+            "has_completed": self.has_completed,
+            "has_seen_results": self.has_seen_results,
+            "start_date": self.start_date,
+            "end_date": self.end_date,
+            "event_number": self.event_number,
+            "should_show_rank_description": self.should_show_rank_description,
+            "should_show_start_message": self.should_show_start_message,
+            "submit_error_flag": self.submit_error_flag,
+            "did_win_rewards": self.did_win_rewards,
+        }
+
+    @staticmethod
+    def deserialize(data: dict[str, Any]) -> "Ranking":
+        ranking = Ranking(
+            data["score"],
+            data["ranking"],
+            data["has_submitted"],
+            data["has_completed"],
+            data["has_seen_results"],
+            data["start_date"],
+            data["end_date"],
+            data["event_number"],
+            data["should_show_rank_description"],
+            data["should_show_start_message"],
+            data["submit_error_flag"],
+        )
+        ranking.did_win_rewards = data["did_win_rewards"]
+        return ranking
+
+    def __repr__(self) -> str:
+        return (
+            f"Ranking(score={self.score!r}, ranking={self.ranking!r}, "
+            f"has_submitted={self.has_submitted!r}, has_completed={self.has_completed!r}, "
+            f"has_seen_results={self.has_seen_results!r}, start_date={self.start_date!r}, "
+            f"end_date={self.end_date!r}, event_number={self.event_number!r}, "
+            f"should_show_rank_description={self.should_show_rank_description!r}, "
+            f"should_show_start_message={self.should_show_start_message!r}, "
+            f"submit_error_flag={self.submit_error_flag!r},"
+            f"did_win_rewards={self.did_win_rewards!r})"
+        )
+
+    def __str__(self) -> str:
+        return self.__repr__()
+
+
+class Dojo:
+    def __init__(self, chapters: Chapters):
+        self.chapters = chapters
+
+    @staticmethod
+    def read_chapters(stream: io.data.Data) -> "Dojo":
+        chapters = Chapters.read(stream)
+        return Dojo(chapters)
+
+    def write_chapters(self, stream: io.data.Data):
+        self.chapters.write(stream)
+
+    def read_item_locks(self, stream: io.data.Data):
+        self.item_lock_flags = stream.read_bool()
+        self.item_locks = stream.read_bool_list(6)
+
+    def write_item_locks(self, stream: io.data.Data):
+        stream.write_bool(self.item_lock_flags)
+        stream.write_bool_list(self.item_locks, write_length=False)
+
+    def read_ranking(self, stream: io.data.Data):
+        self.ranking = Ranking.read(stream)
+
+    def write_ranking(self, stream: io.data.Data):
+        self.ranking.write(stream)
+
+    def serialize(self) -> dict[str, Any]:
+        return {
+            "chapters": self.chapters.serialize(),
+            "item_locks": self.item_locks,
+            "item_lock_flags": self.item_lock_flags,
+            "ranking": self.ranking.serialize(),
+        }
+
+    @staticmethod
+    def deserialize(data: dict[str, Any]) -> "Dojo":
+        chapters = Chapters.deserialize(data["chapters"])
+        item_locks = data["item_locks"]
+        item_lock_flags = data["item_lock_flags"]
+        dojo = Dojo(chapters)
+        dojo.item_locks = item_locks
+        dojo.item_lock_flags = item_lock_flags
+        dojo.ranking = Ranking.deserialize(data["ranking"])
+        return dojo
+
+    def __repr__(self) -> str:
+        return f"Dojo(chapters={self.chapters!r}, item_locks={self.item_locks!r}, item_lock_flags={self.item_lock_flags!r}, ranking={self.ranking!r})"
+
+    def __str__(self) -> str:
+        return self.__repr__()

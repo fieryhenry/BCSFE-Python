@@ -1,0 +1,170 @@
+from typing import Any
+from bcsfe.core import io
+
+
+class PurchasedPack:
+    def __init__(self, purchased: bool):
+        self.purchased = purchased
+
+    @staticmethod
+    def read(stream: io.data.Data) -> "PurchasedPack":
+        purchased = stream.read_bool()
+        return PurchasedPack(purchased)
+
+    def write(self, stream: io.data.Data):
+        stream.write_bool(self.purchased)
+
+    def serialize(self) -> dict[str, Any]:
+        return {"purchased": self.purchased}
+
+    @staticmethod
+    def deserialize(data: dict[str, Any]) -> "PurchasedPack":
+        return PurchasedPack(data["purchased"])
+
+    def __repr__(self) -> str:
+        return f"PurchasedPack(purchased={self.purchased!r})"
+
+    def __str__(self) -> str:
+        return self.__repr__()
+
+
+class PurchaseSet:
+    def __init__(self, purchases: dict[str, PurchasedPack]):
+        self.purchases = purchases
+
+    @staticmethod
+    def read(stream: io.data.Data) -> "PurchaseSet":
+        total = stream.read_int()
+        purchases: dict[str, PurchasedPack] = {}
+        for _ in range(total):
+            key = stream.read_string()
+            purchases[key] = PurchasedPack.read(stream)
+        return PurchaseSet(purchases)
+
+    def write(self, stream: io.data.Data):
+        stream.write_int(len(self.purchases))
+        for key, purchase in self.purchases.items():
+            stream.write_string(key)
+            purchase.write(stream)
+
+    def serialize(self) -> dict[str, Any]:
+        return {
+            "purchases": {
+                key: purchase.serialize() for key, purchase in self.purchases.items()
+            },
+        }
+
+    @staticmethod
+    def deserialize(data: dict[str, Any]) -> "PurchaseSet":
+        return PurchaseSet(
+            {
+                key: PurchasedPack.deserialize(purchase)
+                for key, purchase in data["purchases"].items()
+            },
+        )
+
+    def __repr__(self) -> str:
+        return f"PurchaseSet(purchases={self.purchases!r})"
+
+    def __str__(self) -> str:
+        return self.__repr__()
+
+
+class Purchases:
+    def __init__(self, purchases: dict[int, PurchaseSet]):
+        self.purchases = purchases
+
+    @staticmethod
+    def read(stream: io.data.Data) -> "Purchases":
+        total = stream.read_int()
+        purchases: dict[int, PurchaseSet] = {}
+        for _ in range(total):
+            key = stream.read_int()
+            purchases[key] = PurchaseSet.read(stream)
+
+        return Purchases(purchases)
+
+    def write(self, stream: io.data.Data):
+        stream.write_int(len(self.purchases))
+        for key, purchase in self.purchases.items():
+            stream.write_int(key)
+            purchase.write(stream)
+
+    def serialize(self) -> dict[str, Any]:
+        return {
+            "purchases": {
+                key: purchase.serialize() for key, purchase in self.purchases.items()
+            },
+        }
+
+    @staticmethod
+    def deserialize(data: dict[str, Any]) -> "Purchases":
+        return Purchases(
+            {
+                key: PurchaseSet.deserialize(purchase)
+                for key, purchase in data["purchases"].items()
+            },
+        )
+
+    def __repr__(self) -> str:
+        return f"Purchases(purchases={self.purchases!r})"
+
+    def __str__(self) -> str:
+        return self.__repr__()
+
+
+class ItemPack:
+    def __init__(self, purchases: Purchases):
+        self.purchases = purchases
+
+    @staticmethod
+    def read(stream: io.data.Data) -> "ItemPack":
+        return ItemPack(Purchases.read(stream))
+
+    def write(self, stream: io.data.Data):
+        self.purchases.write(stream)
+
+    def read_displayed_packs(self, stream: io.data.Data) -> None:
+        total = stream.read_int()
+        displayed_packs: dict[int, bool] = {}
+        for _ in range(total):
+            key = stream.read_int()
+            displayed_packs[key] = stream.read_bool()
+
+        self.displayed_packs = displayed_packs
+
+    def write_displayed_packs(self, stream: io.data.Data) -> None:
+        stream.write_int(len(self.displayed_packs))
+        for key, displayed in self.displayed_packs.items():
+            stream.write_int(key)
+            stream.write_bool(displayed)
+
+    def read_three_days(self, stream: io.data.Data) -> None:
+        self.three_days_started = stream.read_bool()
+        self.three_days_end_timestamp = stream.read_double()
+
+    def write_three_days(self, stream: io.data.Data) -> None:
+        stream.write_bool(self.three_days_started)
+        stream.write_double(self.three_days_end_timestamp)
+
+    def serialize(self) -> dict[str, Any]:
+        return {
+            "purchases": self.purchases.serialize(),
+            "displayed_packs": self.displayed_packs,
+            "three_days_started": self.three_days_started,
+            "three_days_end_timestamp": self.three_days_end_timestamp,
+        }
+
+    @staticmethod
+    def deserialize(data: dict[str, Any]) -> "ItemPack":
+        item_pack = ItemPack(Purchases.deserialize(data["purchases"]))
+        item_pack.displayed_packs = data["displayed_packs"]
+        item_pack.three_days_started = data["three_days_started"]
+        item_pack.three_days_end_timestamp = data["three_days_end_timestamp"]
+        return item_pack
+
+    def __repr__(self) -> str:
+        return f"ItemPack(purchases={self.purchases!r}, displayed_packs={self.displayed_packs!r}, three_days_started={self.three_days_started!r}, three_days_end_timestamp={self.three_days_end_timestamp!r})"
+
+    def __str__(self) -> str:
+        return self.__repr__()

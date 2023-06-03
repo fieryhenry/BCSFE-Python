@@ -1,2 +1,2 @@
-recursive-include src/BCSFE_Python/files *
-recursive-exclude src/BCSFE_Python/files/game_data *
+recursive-include src/bcsfe/files *
+recursive-exclude src/bcsfe/files/game_data *

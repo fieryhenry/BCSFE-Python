@@ -222,7 +222,7 @@
 
 #### Added
 
-- The ability to unlock the equip menu 
+- The ability to unlock the equip menu
 
 - The ability to upload catfood and other bannable item changes to the ponos servers - this is done automatically whenever your save data is saved / uploaded. This should in theory prevent bans from catfood and other items, but it seems a bit unreliable so I've kept the warning in the editor
 
@@ -335,7 +335,7 @@
 - The ability to complete cat cannons to certain stages (e.g foundation, style, cannon)
 - The ability to set the Catclaw dojo score (only `Hall of Initiates` atm - don't know if ranked stuff can be save edited)
 - The ability to remove the `Clear "{stage_name}" for a chance to get the Special unit {cat_name}` stage clear rewards when entering Legend Stages
-- The ability to set the `maxed upgrades --> rare tickets` conversion thing to allow for unbannable rare tickets to be generated. Run the `trade progress` feature, enter the number of rare tickets you want, go into game and press the `Use All` button in cat storage and then press `Trade for Ticket` . There appears to be nothing in your storage because there is an unobtainable blue upgrade / special skill between `power` and `range` and the editor adds that to your storage to allow you to use the `trade` thing, although any other blue upgrade also works, as long as it is max level.               
+- The ability to set the `maxed upgrades --> rare tickets` conversion thing to allow for unbannable rare tickets to be generated. Run the `trade progress` feature, enter the number of rare tickets you want, go into game and press the `Use All` button in cat storage and then press `Trade for Ticket` . There appears to be nothing in your storage because there is an unobtainable blue upgrade / special skill between `power` and `range` and the editor adds that to your storage to allow you to use the `trade` thing, although any other blue upgrade also works, as long as it is max level.
 
 #### Fixed
 

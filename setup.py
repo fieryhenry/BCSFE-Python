@@ -5,11 +5,11 @@ import setuptools
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
-with open("src/BCSFE_Python/files/version.txt", "r", encoding="utf-8") as fh:
+with open("src/bcsfe/files/version.txt", "r", encoding="utf-8") as fh:
     version = fh.read()
 
 setuptools.setup(
-    name="battle-cats-save-editor",
+    name="bcsfe",
     version=version,
     author="fieryhenry",
     description="A battle cats save file editor",
@@ -38,6 +38,6 @@ setuptools.setup(
             "pytest-cov",
         ],
     },
-    package_data={"BCSFE_Python": ["py.typed"]},
+    package_data={"bcsfe": ["py.typed"]},
     flake8={"max-line-length": 160},
 )

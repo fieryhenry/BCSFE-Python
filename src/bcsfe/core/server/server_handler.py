@@ -213,6 +213,9 @@ class ServerHandler:
         auth_token = self.get_auth_token()
         if auth_token is None:
             return None
+        save_key = self.get_stored_save_key_data()
+        if save_key:
+            return save_key
         save_key = self.get_save_key_new(auth_token)
         if save_key is not None:
             return save_key
@@ -239,6 +242,7 @@ class ServerHandler:
             body.add_line("Content-Type: text/plain")
             body.add_line()
             body.add_line(save_key[key])
+
         body.add_line(f"--{boundary}")
         body.add_line(
             'Content-Disposition: form-data; name="file"; filename="file.sav"'

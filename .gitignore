@@ -8,4 +8,4 @@ __pychache__
 tests.txt
 src/bcsfe/files/game_data
 pyrightconfig.json
-/test.py
+/test*.py

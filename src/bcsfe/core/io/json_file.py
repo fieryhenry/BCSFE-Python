@@ -1,5 +1,5 @@
 import json
-from typing import Any
+from typing import Any, Optional
 from bcsfe.core.io import data, path
 
 
@@ -19,8 +19,8 @@ class JsonFile:
     def from_data(data: "data.Data") -> "JsonFile":
         return JsonFile(data)
 
-    def to_data(self) -> "data.Data":
-        return data.Data(json.dumps(self.json, indent=4))
+    def to_data(self, indent: Optional[int] = 4) -> "data.Data":
+        return data.Data(json.dumps(self.json, indent=indent))
 
     def save(self, path: "path.Path") -> None:
         path.write(self.to_data())

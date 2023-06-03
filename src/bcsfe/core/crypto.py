@@ -1,5 +1,6 @@
 import enum
 import hashlib
+import hmac
 import random
 from typing import Optional
 from bcsfe.core import io
@@ -82,3 +83,80 @@ class Random:
         """
         characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
         return "".join(random.choice(characters) for _ in range(length))
+
+    @staticmethod
+    def get_hex_string(length: int) -> str:
+        """Gets a random hex string of the given length.
+
+        Args:
+            length (int): The length of the string.
+
+        Returns:
+            str: The random string.
+        """
+        characters = "0123456789abcdef"
+        return "".join(random.choice(characters) for _ in range(length))
+
+    @staticmethod
+    def get_digits_string(length: int) -> str:
+        """Gets a random digits string of the given length.
+
+        Args:
+            length (int): The length of the string.
+
+        Returns:
+            str: The random string.
+        """
+        characters = "0123456789"
+        return "".join(random.choice(characters) for _ in range(length))
+
+
+class Hmac:
+    def __init__(self, algorithm: HashAlgorithm):
+        self.algorithm = algorithm
+
+    def get_hmac(self, key: "io.data.Data", data: "io.data.Data") -> "io.data.Data":
+        if self.algorithm == HashAlgorithm.MD5:
+            alg = hashlib.md5
+        elif self.algorithm == HashAlgorithm.SHA1:
+            alg = hashlib.sha1
+        elif self.algorithm == HashAlgorithm.SHA256:
+            alg = hashlib.sha256
+        else:
+            raise ValueError("Invalid hash algorithm")
+        hmac_data = hmac.new(key.get_bytes(), data.get_bytes(), digestmod=alg).digest()
+        return io.data.Data(hmac_data)
+
+
+class NyankoSignature:
+    def __init__(self, inquiry_code: str, data: str):
+        self.inquiry_code = inquiry_code
+        self.data = data
+
+    def generate_signature(self) -> str:
+        """Generates a signature from the inquiry code and data.
+
+        Returns:
+            str: The signature.
+        """
+        random_data = Random.get_hex_string(64)
+        key = self.inquiry_code + random_data
+        hmac = Hmac(HashAlgorithm.SHA256)
+        signature = hmac.get_hmac(io.data.Data(key), io.data.Data(self.data))
+
+        return random_data + signature.to_hex()
+
+    def generate_signature_v1(self) -> str:
+        """Generates a signature from the inquiry code and data.
+
+        Returns:
+            str: The signature.
+        """
+
+        data = self.data + self.data  # repeat data for some reason
+        random_data = Random.get_hex_string(40)
+        key = self.inquiry_code + random_data
+        hmac = Hmac(HashAlgorithm.SHA1)
+        signature = hmac.get_hmac(io.data.Data(key), io.data.Data(data))
+
+        return random_data + signature.to_hex()

@@ -10,6 +10,9 @@ class CountryCode(enum.Enum):
     def get_code(self) -> str:
         return self.value
 
+    def get_client_info_code(self) -> str:
+        return self.get_code().replace("jp", "ja")
+
     def get_patching_code(self) -> str:
         return self.get_code().replace("jp", "")
 

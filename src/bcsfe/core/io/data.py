@@ -36,6 +36,10 @@ class Data:
         self.pos = 0
         self.set_little_endiness()
 
+    @staticmethod
+    def from_hex(hex: str) -> "Data":
+        return Data(bytes.fromhex(hex))
+
     def set_endiness(self, endiness: Literal["<", ">"]):
         self.endiness = endiness
 
@@ -543,6 +547,13 @@ class Data:
 
     def search(self, search_data: "Data", start: int = 0) -> int:
         return self.data.find(search_data.data, start)
+
+    def add_line(
+        self, line: Union["Data", str, None, bytes, int, bool] = None
+    ) -> "Data":
+        line = Data(line)
+        self.data += line.data + b"\r\n"
+        return self
 
 
 class PaddedInt:

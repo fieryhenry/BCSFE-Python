@@ -86,6 +86,7 @@ class SaveFile:
         """Load the save file. For most of this stuff I have no idea what it is used for"""
 
         self.data.reset_pos()
+        self.dst_index = 0
 
         self.dsts: list[bool] = []
 
@@ -298,7 +299,6 @@ class SaveFile:
             self.m_dGetTimeSave2 = self.data.read_double()
             self.ui11 = 0
         else:
-            self.m_dGetTimeSave2 = 0.0
             self.ui11 = self.data.read_int()
 
         if 20 <= self.game_version and self.game_version <= 25:
@@ -316,9 +316,7 @@ class SaveFile:
         )
 
         if not self.not_jp():
-            self.m_dGetTimeSave4 = self.data.read_double()
-        else:
-            self.m_dGetTimeSave4 = 0.0
+            self.m_dGetTimeSave2 = self.data.read_double()
 
         self.cats.read_unlocked_forms(self.data, self.game_version)
 
@@ -468,7 +466,7 @@ class SaveFile:
         if self.game_version >= 35:
             self.outbreaks.read_current_outbreaks(self.data, self.game_version)
             self.first_locks = self.data.read_int_bool_dict()
-            self.three_days_timestamp = self.data.read_double()
+            self.account_created_timestamp = self.data.read_double()
             self.gv_60 = self.data.read_int()
 
         if self.game_version >= 36:
@@ -965,6 +963,7 @@ class SaveFile:
 
     def save(self, data: data.Data):
         self.data = data
+        self.dst_index = 0
         self.data.clear()
 
         self.data.write_int(self.game_version.game_version)
@@ -1160,7 +1159,7 @@ class SaveFile:
         self.user_rank_rewards.write(self.data, self.game_version)
 
         if not self.not_jp():
-            self.data.write_double(self.m_dGetTimeSave4)
+            self.data.write_double(self.m_dGetTimeSave2)
 
         self.cats.write_unlocked_forms(self.data, self.game_version)
 
@@ -1307,7 +1306,7 @@ class SaveFile:
         if self.game_version >= 35:
             self.outbreaks.write_current_outbreaks(self.data, self.game_version)
             self.data.write_int_bool_dict(self.first_locks)
-            self.data.write_double(self.three_days_timestamp)
+            self.data.write_double(self.account_created_timestamp)
             self.data.write_int(self.gv_60)
 
         if self.game_version >= 36:
@@ -1713,6 +1712,12 @@ class SaveFile:
 
             self.data.write_int(self.gv_120200)
 
+    def to_data(self) -> "data.Data":
+        dt = data.Data()
+        self.save(dt)
+        self.set_hash(add=True)
+        return dt
+
     def not_jp(self) -> bool:
         return self.cc != country_code.CountryCode.JP
 
@@ -1728,7 +1733,8 @@ class SaveFile:
 
     def write_dst(self):
         if self.should_read_dst():
-            self.data.write_bool(self.dsts.pop(0))
+            self.data.write_bool(self.dsts[self.dst_index])
+            self.dst_index += 1
 
     def test_save(self):
         try:
@@ -1798,3 +1804,85 @@ class SaveFile:
             raise
         except Exception:
             pass
+
+    def calculate_user_rank(self):
+        user_rank = 0
+        for cat in self.cats.cats:
+            if not cat.unlocked:
+                continue
+            user_rank += cat.upgrade.base + 1
+            user_rank += cat.upgrade.plus
+
+        for i, skill in enumerate(self.special_skills.skills):
+            if i == 1:
+                continue
+            user_rank += skill.upgrade.base + 1
+            user_rank += skill.upgrade.plus
+
+        return user_rank
+
+    @staticmethod
+    def get_string_identifier(identifier: str) -> str:
+        return f"_bcsfe:{identifier}"
+
+    def store_string(self, identifier: str, string: str, overwrite: bool = True):
+        if overwrite:
+            for i, order in enumerate(self.order_ids):
+                if order.startswith(SaveFile.get_string_identifier(identifier)):
+                    self.order_ids[
+                        i
+                    ] = f"{SaveFile.get_string_identifier(identifier)}:{string}"
+                    return
+        self.order_ids.append(f"{SaveFile.get_string_identifier(identifier)}:{string}")
+
+    def get_string(self, identifier: str) -> Optional[str]:
+        for order in self.order_ids:
+            if order.startswith(SaveFile.get_string_identifier(identifier)):
+                return order.split(":")[2]
+        return None
+
+    def get_strings(self, identifier: str) -> list[str]:
+        strings: list[str] = []
+        for order in self.order_ids:
+            if order.startswith(SaveFile.get_string_identifier(identifier)):
+                strings.append(order.split(":")[2])
+
+        return strings
+
+    def remove_string(self, identifier: str):
+        for i, order in enumerate(self.order_ids):
+            if order.startswith(SaveFile.get_string_identifier(identifier)):
+                self.order_ids.pop(i)
+                return
+
+    def remove_strings(self, identifier: str):
+        for i, order in enumerate(self.order_ids):
+            if order.startswith(SaveFile.get_string_identifier(identifier)):
+                self.order_ids.pop(i)
+
+    def store_dict(
+        self, identifier: str, dictionary: dict[str, str], overwrite: bool = True
+    ):
+        if overwrite:
+            for i, order in enumerate(self.order_ids):
+                if order.startswith(SaveFile.get_string_identifier(identifier)):
+                    self.order_ids.pop(i)
+
+        for key, value in dictionary.items():
+            self.order_ids.append(
+                f"{SaveFile.get_string_identifier(identifier)}:{key}:{value}"
+            )
+
+    def get_dict(self, identifier: str) -> Optional[dict[str, str]]:
+        dictionary: dict[str, str] = {}
+        for order in self.order_ids:
+            if order.startswith(SaveFile.get_string_identifier(identifier)):
+                dictionary[order.split(":")[2]] = order.split(":")[3]
+
+        return dictionary
+
+    def remove_dict(self, identifier: str):
+        for i, order in enumerate(self.order_ids):
+            if order.startswith(SaveFile.get_string_identifier(identifier)):
+                self.order_ids.pop(i)
+                return

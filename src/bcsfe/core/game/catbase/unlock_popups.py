@@ -1,4 +1,3 @@
-from typing import Any
 from bcsfe.core import io
 
 
@@ -14,12 +13,12 @@ class Popup:
     def write(self, stream: io.data.Data):
         stream.write_bool(self.seen)
 
-    def serialize(self) -> dict[str, Any]:
-        return {"seen": self.seen}
+    def serialize(self) -> bool:
+        return self.seen
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "Popup":
-        return Popup(data["seen"])
+    def deserialize(data: bool) -> "Popup":
+        return Popup(data)
 
     def __repr__(self) -> str:
         return f"Popup(seen={self.seen!r})"
@@ -47,18 +46,13 @@ class Popups:
             stream.write_int(key)
             popup.write(stream)
 
-    def serialize(self) -> dict[str, Any]:
-        return {
-            "popups": {key: popup.serialize() for key, popup in self.popups.items()},
-        }
+    def serialize(self) -> dict[int, bool]:
+        return {key: popup.serialize() for key, popup in self.popups.items()}
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "Popups":
+    def deserialize(data: dict[int, bool]) -> "Popups":
         return Popups(
-            {
-                int(key): Popup.deserialize(popup)
-                for key, popup in data["popups"].items()
-            }
+            {int(key): Popup.deserialize(popup) for key, popup in data.items()}
         )
 
     def __repr__(self) -> str:

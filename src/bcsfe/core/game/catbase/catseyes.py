@@ -13,12 +13,12 @@ class Catsye:
     def write(self, stream: io.data.Data):
         stream.write_int(self.amount)
 
-    def serialize(self) -> dict[str, int]:
-        return {"amount": self.amount}
+    def serialize(self) -> int:
+        return self.amount
 
     @staticmethod
-    def deserialize(data: dict[str, int]) -> "Catsye":
-        return Catsye(data["amount"])
+    def deserialize(data: int) -> "Catsye":
+        return Catsye(data)
 
     def __repr__(self):
         return f"Catsye({self.amount})"
@@ -44,12 +44,12 @@ class Catseyes:
         for catseye in self.catseyes:
             catseye.write(stream)
 
-    def serialize(self) -> dict[str, list[dict[str, int]]]:
-        return {"catseyes": [catseye.serialize() for catseye in self.catseyes]}
+    def serialize(self) -> list[int]:
+        return [catseye.serialize() for catseye in self.catseyes]
 
     @staticmethod
-    def deserialize(data: dict[str, list[dict[str, int]]]) -> "Catseyes":
-        return Catseyes([Catsye.deserialize(catseye) for catseye in data["catseyes"]])
+    def deserialize(data: list[int]) -> "Catseyes":
+        return Catseyes([Catsye.deserialize(catseye) for catseye in data])
 
     def __repr__(self):
         return f"Catsyes({self.catseyes})"

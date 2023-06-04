@@ -214,16 +214,12 @@ class Chapters:
             if i > 4 and i < 8:
                 chapter.write_itf_timed_scores(stream)
 
-    def serialize(self) -> dict[str, Any]:
-        return {
-            "chapters": [chapter.serialize() for chapter in self.chapters],
-        }
+    def serialize(self) -> list[dict[str, Any]]:
+        return [chapter.serialize() for chapter in self.chapters]
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "Chapters":
-        chapters = Chapters(
-            [Chapter.deserialize(chapter) for chapter in data["chapters"]]
-        )
+    def deserialize(data: list[dict[str, Any]]) -> "Chapters":
+        chapters = Chapters([Chapter.deserialize(chapter) for chapter in data])
         return chapters
 
     def __repr__(self):

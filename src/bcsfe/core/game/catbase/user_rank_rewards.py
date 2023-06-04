@@ -1,4 +1,3 @@
-from typing import Any
 from bcsfe.core import game_version, io
 
 
@@ -13,12 +12,12 @@ class Reward:
     def write(self, stream: io.data.Data):
         stream.write_bool(self.claimed)
 
-    def serialize(self) -> dict[str, Any]:
-        return {"claimed": self.claimed}
+    def serialize(self) -> bool:
+        return self.claimed
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "Reward":
-        return Reward(data["claimed"])
+    def deserialize(data: bool) -> "Reward":
+        return Reward(data)
 
     def __repr__(self) -> str:
         return f"Reward(claimed={self.claimed})"
@@ -48,12 +47,12 @@ class Rewards:
         for reward in self.rewards:
             reward.write(stream)
 
-    def serialize(self) -> dict[str, Any]:
-        return {"rewards": [reward.serialize() for reward in self.rewards]}
+    def serialize(self) -> list[bool]:
+        return [reward.serialize() for reward in self.rewards]
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "Rewards":
-        return Rewards([Reward.deserialize(reward) for reward in data["rewards"]])
+    def deserialize(data: list[bool]) -> "Rewards":
+        return Rewards([Reward.deserialize(reward) for reward in data])
 
     def __repr__(self) -> str:
         return f"Rewards(rewards={self.rewards})"

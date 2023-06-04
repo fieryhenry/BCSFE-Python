@@ -20,12 +20,12 @@ class Cannon:
         for level in self.levels:
             stream.write_int(level)
 
-    def serialize(self) -> dict[str, Any]:
-        return {"levels": self.levels}
+    def serialize(self) -> list[int]:
+        return self.levels
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "Cannon":
-        return Cannon(data["levels"])
+    def deserialize(data: list[int]) -> "Cannon":
+        return Cannon(data)
 
     def __repr__(self):
         return f"Cannon({self.levels})"

@@ -14,12 +14,12 @@ class Helper:
     def write(self, stream: io.data.Data):
         stream.write_int(self.id)
 
-    def serialize(self) -> dict[str, Any]:
-        return {"id": self.id}
+    def serialize(self) -> int:
+        return self.id
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "Helper":
-        return Helper(data["id"])
+    def deserialize(data: int) -> "Helper":
+        return Helper(data)
 
     def __repr__(self) -> str:
         return f"Helper(id={self.id!r})"
@@ -48,12 +48,12 @@ class Helpers:
         for helper in self.helpers:
             helper.write(stream)
 
-    def serialize(self) -> dict[str, list[dict[str, Any]]]:
-        return {"helpers": [helper.serialize() for helper in self.helpers]}
+    def serialize(self) -> list[int]:
+        return [helper.serialize() for helper in self.helpers]
 
     @staticmethod
-    def deserialize(data: dict[str, list[dict[str, Any]]]) -> "Helpers":
-        return Helpers([Helper.deserialize(helper) for helper in data["helpers"]])
+    def deserialize(data: list[int]) -> "Helpers":
+        return Helpers([Helper.deserialize(helper) for helper in data])
 
     def __repr__(self) -> str:
         return f"Helpers(helpers={self.helpers!r})"

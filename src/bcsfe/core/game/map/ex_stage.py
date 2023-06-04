@@ -14,12 +14,12 @@ class Stage:
     def write(self, stream: io.data.Data):
         stream.write_int(self.clear_amount)
 
-    def serialize(self) -> dict[str, Any]:
-        return {"clear_amount": self.clear_amount}
+    def serialize(self) -> int:
+        return self.clear_amount
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "Stage":
-        return Stage(data["clear_amount"])
+    def deserialize(data: int) -> "Stage":
+        return Stage(data)
 
     def __repr__(self) -> str:
         return f"Stage(clear_amount={self.clear_amount!r})"
@@ -44,12 +44,12 @@ class Chapter:
         for stage in self.stages:
             stage.write(stream)
 
-    def serialize(self) -> dict[str, list[dict[str, Any]]]:
-        return {"stages": [stage.serialize() for stage in self.stages]}
+    def serialize(self) -> list[int]:
+        return [stage.serialize() for stage in self.stages]
 
     @staticmethod
-    def deserialize(data: dict[str, list[dict[str, Any]]]) -> "Chapter":
-        return Chapter([Stage.deserialize(stage) for stage in data["stages"]])
+    def deserialize(data: list[int]) -> "Chapter":
+        return Chapter([Stage.deserialize(stage) for stage in data])
 
     def __repr__(self) -> str:
         return f"Chapter(stages={self.stages!r})"
@@ -76,12 +76,12 @@ class Chapters:
         for chapter in self.chapters:
             chapter.write(stream)
 
-    def serialize(self) -> dict[str, list[dict[str, Any]]]:
-        return {"chapters": [chapter.serialize() for chapter in self.chapters]}
+    def serialize(self) -> list[list[int]]:
+        return [chapter.serialize() for chapter in self.chapters]
 
     @staticmethod
-    def deserialize(data: dict[str, list[dict[str, Any]]]) -> "Chapters":
-        return Chapters([Chapter.deserialize(chapter) for chapter in data["chapters"]])
+    def deserialize(data: list[list[int]]) -> "Chapters":
+        return Chapters([Chapter.deserialize(chapter) for chapter in data])
 
     def __repr__(self) -> str:
         return f"Chapters(chapters={self.chapters!r})"

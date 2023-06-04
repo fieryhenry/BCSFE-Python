@@ -14,15 +14,13 @@ class Stage:
     def write(self, data: io.data.Data):
         data.write_int(self.clear_times)
 
-    def serialize(self) -> dict[str, Any]:
-        return {
-            "clear_times": self.clear_times,
-        }
+    def serialize(self) -> int:
+        return self.clear_times
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "Stage":
+    def deserialize(data: int) -> "Stage":
         return Stage(
-            data["clear_times"],
+            data,
         )
 
     def __repr__(self):
@@ -123,14 +121,12 @@ class ChaptersStars:
         for chapter in self.chapters:
             chapter.write_chapter_unlock_state(data)
 
-    def serialize(self) -> dict[str, Any]:
-        return {
-            "chapters": [chapter.serialize() for chapter in self.chapters],
-        }
+    def serialize(self) -> list[dict[str, Any]]:
+        return [chapter.serialize() for chapter in self.chapters]
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "ChaptersStars":
-        chapters = [Chapter.deserialize(chapter) for chapter in data["chapters"]]
+    def deserialize(data: list[dict[str, Any]]) -> "ChaptersStars":
+        chapters = [Chapter.deserialize(chapter) for chapter in data]
         return ChaptersStars(chapters)
 
     def __repr__(self):
@@ -216,14 +212,12 @@ class Chapters:
         for chapter in self.chapters:
             chapter.write_chapter_unlock_state(data)
 
-    def serialize(self) -> dict[str, Any]:
-        return {
-            "chapters": [chapter.serialize() for chapter in self.chapters],
-        }
+    def serialize(self) -> list[list[dict[str, Any]]]:
+        return [chapter.serialize() for chapter in self.chapters]
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "Chapters":
-        chapters = [ChaptersStars.deserialize(chapter) for chapter in data["chapters"]]
+    def deserialize(data: list[list[dict[str, Any]]]) -> "Chapters":
+        chapters = [ChaptersStars.deserialize(chapter) for chapter in data]
         tower_chapters = Chapters(chapters)
         return tower_chapters
 

@@ -14,12 +14,12 @@ class Stage:
     def write(self, stream: io.data.Data):
         stream.write_int(self.score)
 
-    def serialize(self) -> dict[str, Any]:
-        return {"score": self.score}
+    def serialize(self) -> int:
+        return self.score
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "Stage":
-        return Stage(data["score"])
+    def deserialize(data: int) -> "Stage":
+        return Stage(data)
 
     def __repr__(self) -> str:
         return f"Stage(score={self.score!r})"
@@ -49,20 +49,13 @@ class Chapter:
             stream.write_int(stage_id)
             stage.write(stream)
 
-    def serialize(self) -> dict[str, Any]:
-        return {
-            "stages": {
-                stage_id: stage.serialize() for stage_id, stage in self.stages.items()
-            }
-        }
+    def serialize(self) -> dict[int, Any]:
+        return {stage_id: stage.serialize() for stage_id, stage in self.stages.items()}
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "Chapter":
+    def deserialize(data: dict[int, Any]) -> "Chapter":
         return Chapter(
-            {
-                stage_id: Stage.deserialize(stage)
-                for stage_id, stage in data["stages"].items()
-            }
+            {stage_id: Stage.deserialize(stage) for stage_id, stage in data.items()}
         )
 
     def __repr__(self) -> str:
@@ -93,20 +86,18 @@ class Chapters:
             stream.write_int(chapter_id)
             chapter.write(stream)
 
-    def serialize(self) -> dict[str, Any]:
+    def serialize(self) -> dict[int, Any]:
         return {
-            "chapters": {
-                chapter_id: chapter.serialize()
-                for chapter_id, chapter in self.chapters.items()
-            }
+            chapter_id: chapter.serialize()
+            for chapter_id, chapter in self.chapters.items()
         }
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "Chapters":
+    def deserialize(data: dict[int, Any]) -> "Chapters":
         return Chapters(
             {
                 chapter_id: Chapter.deserialize(chapter)
-                for chapter_id, chapter in data["chapters"].items()
+                for chapter_id, chapter in data.items()
             }
         )
 

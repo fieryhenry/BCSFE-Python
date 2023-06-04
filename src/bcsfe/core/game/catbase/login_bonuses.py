@@ -14,12 +14,12 @@ class Login:
     def write(self, stream: io.data.Data):
         stream.write_int(self.count)
 
-    def serialize(self) -> dict[str, int]:
-        return {"count": self.count}
+    def serialize(self) -> int:
+        return self.count
 
     @staticmethod
-    def deserialize(data: dict[str, int]) -> "Login":
-        return Login(data["count"])
+    def deserialize(data: int) -> "Login":
+        return Login(data)
 
     def __repr__(self):
         return f"Login({self.count})"
@@ -45,12 +45,12 @@ class Logins:
         for login in self.logins:
             login.write(stream)
 
-    def serialize(self) -> dict[str, list[dict[str, int]]]:
-        return {"logins": [login.serialize() for login in self.logins]}
+    def serialize(self) -> list[int]:
+        return [login.serialize() for login in self.logins]
 
     @staticmethod
-    def deserialize(data: dict[str, list[dict[str, int]]]) -> "Logins":
-        return Logins([Login.deserialize(login) for login in data["logins"]])
+    def deserialize(data: list[int]) -> "Logins":
+        return Logins([Login.deserialize(login) for login in data])
 
     def __repr__(self):
         return f"Logins({self.logins})"
@@ -76,14 +76,12 @@ class LoginSets:
         for login in self.logins:
             login.write(stream)
 
-    def serialize(self) -> dict[str, list[dict[str, list[dict[str, int]]]]]:
-        return {"logins": [login.serialize() for login in self.logins]}
+    def serialize(self) -> list[list[int]]:
+        return [login.serialize() for login in self.logins]
 
     @staticmethod
-    def deserialize(
-        data: dict[str, list[dict[str, list[dict[str, int]]]]]
-    ) -> "LoginSets":
-        return LoginSets([Logins.deserialize(login) for login in data["logins"]])
+    def deserialize(data: list[list[int]]) -> "LoginSets":
+        return LoginSets([Logins.deserialize(login) for login in data])
 
     def __repr__(self):
         return f"LoginSets({self.logins})"

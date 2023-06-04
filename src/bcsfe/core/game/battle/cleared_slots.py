@@ -109,15 +109,13 @@ class ClearedSlotsCat:
         for lineup in self.lineups:
             lineup.write(stream)
 
-    def serialize(self) -> dict[str, Any]:
-        return {
-            "lineups": [lineup.serialize() for lineup in self.lineups],
-        }
+    def serialize(self) -> list[dict[str, Any]]:
+        return [lineup.serialize() for lineup in self.lineups]
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "ClearedSlotsCat":
+    def deserialize(data: list[dict[str, Any]]) -> "ClearedSlotsCat":
         return ClearedSlotsCat(
-            [LineupCat.deserialize(lineup) for lineup in data["lineups"]],
+            [LineupCat.deserialize(lineup) for lineup in data],
         )
 
     def __repr__(self):

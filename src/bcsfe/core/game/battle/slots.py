@@ -13,14 +13,12 @@ class EquipSlot:
     def write(self, stream: io.data.Data):
         stream.write_int(self.cat_id)
 
-    def serialize(self) -> dict[str, Any]:
-        return {
-            "cat_id": self.cat_id,
-        }
+    def serialize(self) -> int:
+        return self.cat_id
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "EquipSlot":
-        return EquipSlot(data["cat_id"])
+    def deserialize(data: int) -> "EquipSlot":
+        return EquipSlot(data)
 
     def __repr__(self):
         return f"EquipSlot({self.cat_id})"

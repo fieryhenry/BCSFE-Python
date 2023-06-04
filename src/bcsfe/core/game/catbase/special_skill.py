@@ -5,8 +5,10 @@ from typing import Any
 
 
 class Skill:
-    def __init__(self, upgrade: upgrade.Upgrade):
-        self.upgrade = upgrade
+    def __init__(self, upg: upgrade.Upgrade):
+        self.upgrade = upg
+        self.seen = 0
+        self.max_upgrade_level = upgrade.Upgrade(0, 0)
 
     @staticmethod
     def read_upgrade(stream: io.data.Data) -> "Skill":
@@ -93,15 +95,13 @@ class Skills:
         for skill in self.skills:
             skill.write_max_upgrade_level(stream)
 
-    def serialize(self) -> dict[str, Any]:
-        return {
-            "skills": [skill.serialize() for skill in self.skills],
-        }
+    def serialize(self) -> list[dict[str, Any]]:
+        return [skill.serialize() for skill in self.skills]
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "Skills":
+    def deserialize(data: list[dict[str, Any]]) -> "Skills":
         skills = Skills([])
-        for skill in data["skills"]:
+        for skill in data:
             skills.skills.append(Skill.deserialize(skill))
 
         return skills

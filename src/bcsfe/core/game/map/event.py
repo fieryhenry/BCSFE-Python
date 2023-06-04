@@ -20,15 +20,13 @@ class EventStage:
         else:
             data.write_short(self.clear_amount)
 
-    def serialize(self) -> dict[str, Any]:
-        return {
-            "clear_amount": self.clear_amount,
-        }
+    def serialize(self) -> int:
+        return self.clear_amount
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "EventStage":
+    def deserialize(data: int) -> "EventStage":
         return EventStage(
-            clear_amount=data["clear_amount"],
+            clear_amount=data,
         )
 
     def __repr__(self) -> str:
@@ -233,16 +231,12 @@ class EventChapterGroup:
         for chapter in self.chapters:
             chapter.write_legend_restrictions(data)
 
-    def serialize(self) -> dict[str, Any]:
-        return {
-            "chapters": [chapter.serialize() for chapter in self.chapters],
-        }
+    def serialize(self) -> list[dict[str, Any]]:
+        return [chapter.serialize() for chapter in self.chapters]
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "EventChapterGroup":
-        chapters = [
-            EventSubChapterStars.deserialize(chapter) for chapter in data["chapters"]
-        ]
+    def deserialize(data: list[dict[str, Any]]) -> "EventChapterGroup":
+        chapters = [EventSubChapterStars.deserialize(chapter) for chapter in data]
         return EventChapterGroup(chapters)
 
     def __repr__(self) -> str:

@@ -65,14 +65,12 @@ class BattleItems:
         for item in self.items:
             item.write_locked(stream)
 
-    def serialize(self) -> dict[str, Any]:
-        return {
-            "items": [item.serialize() for item in self.items],
-        }
+    def serialize(self) -> list[dict[str, Any]]:
+        return [item.serialize() for item in self.items]
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "BattleItems":
-        return BattleItems([BattleItem.deserialize(item) for item in data["items"]])
+    def deserialize(data: list[dict[str, Any]]) -> "BattleItems":
+        return BattleItems([BattleItem.deserialize(item) for item in data])
 
     def __repr__(self):
         return f"BattleItems({self.items})"

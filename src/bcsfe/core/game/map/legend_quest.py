@@ -139,14 +139,12 @@ class ChaptersStars:
         for chapter in self.chapters:
             chapter.write_chapter_unlock_state(data)
 
-    def serialize(self) -> dict[str, Any]:
-        return {
-            "chapters": [chapter.serialize() for chapter in self.chapters],
-        }
+    def serialize(self) -> list[dict[str, Any]]:
+        return [chapter.serialize() for chapter in self.chapters]
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "ChaptersStars":
-        chapters = [Chapter.deserialize(chapter) for chapter in data["chapters"]]
+    def deserialize(data: list[dict[str, Any]]) -> "ChaptersStars":
+        chapters = [Chapter.deserialize(chapter) for chapter in data]
         return ChaptersStars(chapters)
 
     def __repr__(self):

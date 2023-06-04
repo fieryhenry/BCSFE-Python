@@ -13,12 +13,12 @@ class Stage:
     def write(self, stream: io.data.Data):
         stream.write_bool(self.claimed)
 
-    def serialize(self) -> dict[str, Any]:
-        return {"claimed": self.claimed}
+    def serialize(self) -> bool:
+        return self.claimed
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "Stage":
-        return Stage(data["claimed"])
+    def deserialize(data: bool) -> "Stage":
+        return Stage(data)
 
     def __repr__(self) -> str:
         return f"Stage(claimed={self.claimed})"
@@ -42,12 +42,12 @@ class SubChapter:
         for stage in self.stages:
             stage.write(stream)
 
-    def serialize(self) -> dict[str, Any]:
-        return {"stages": [stage.serialize() for stage in self.stages]}
+    def serialize(self) -> list[bool]:
+        return [stage.serialize() for stage in self.stages]
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "SubChapter":
-        return SubChapter([Stage.deserialize(stage) for stage in data["stages"]])
+    def deserialize(data: list[bool]) -> "SubChapter":
+        return SubChapter([Stage.deserialize(stage) for stage in data])
 
     def __repr__(self) -> str:
         return f"SubChapter(stages={self.stages})"
@@ -73,20 +73,13 @@ class SubChapterStars:
         for sub_chapter in self.sub_chapters:
             sub_chapter.write(stream)
 
-    def serialize(self) -> dict[str, Any]:
-        return {
-            "sub_chapters": [
-                sub_chapter.serialize() for sub_chapter in self.sub_chapters
-            ]
-        }
+    def serialize(self) -> list[list[bool]]:
+        return [sub_chapter.serialize() for sub_chapter in self.sub_chapters]
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "SubChapterStars":
+    def deserialize(data: list[list[bool]]) -> "SubChapterStars":
         return SubChapterStars(
-            [
-                SubChapter.deserialize(sub_chapter)
-                for sub_chapter in data["sub_chapters"]
-            ]
+            [SubChapter.deserialize(sub_chapter) for sub_chapter in data]
         )
 
     def __repr__(self) -> str:
@@ -181,20 +174,18 @@ class ItemObtainSets:
             stream.write_int(item_id)
             item_obtain_set.write(stream)
 
-    def serialize(self) -> dict[str, Any]:
+    def serialize(self) -> dict[int, Any]:
         return {
-            "item_obtain_sets": {
-                item_id: item_obtain_set.serialize()
-                for item_id, item_obtain_set in self.item_obtain_sets.items()
-            }
+            item_id: item_obtain_set.serialize()
+            for item_id, item_obtain_set in self.item_obtain_sets.items()
         }
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "ItemObtainSets":
+    def deserialize(data: dict[int, Any]) -> "ItemObtainSets":
         return ItemObtainSets(
             {
                 int(item_id): ItemObtainSet.deserialize(item_obtain_set)
-                for item_id, item_obtain_set in data["item_obtain_sets"].items()
+                for item_id, item_obtain_set in data.items()
             }
         )
 

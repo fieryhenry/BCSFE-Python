@@ -58,14 +58,12 @@ class TalentOrbs:
         for orb in self.orbs.values():
             orb.write(stream, gv)
 
-    def serialize(self) -> dict[str, Any]:
-        return {
-            "orbs": [orb.serialize() for orb in self.orbs.values()],
-        }
+    def serialize(self) -> list[dict[str, Any]]:
+        return [orb.serialize() for orb in self.orbs.values()]
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "TalentOrbs":
-        return TalentOrbs({orb["id"]: Orb.deserialize(orb) for orb in data["orbs"]})
+    def deserialize(data: list[dict[str, Any]]) -> "TalentOrbs":
+        return TalentOrbs({orb["id"]: Orb.deserialize(orb) for orb in data})
 
     def __repr__(self):
         return f"TalentOrbs({self.orbs})"

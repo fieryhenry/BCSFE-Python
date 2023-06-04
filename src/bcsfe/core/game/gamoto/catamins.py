@@ -13,12 +13,12 @@ class Catamin:
     def write(self, stream: io.data.Data):
         stream.write_int(self.amount)
 
-    def serialize(self) -> dict[str, int]:
-        return {"amount": self.amount}
+    def serialize(self) -> int:
+        return self.amount
 
     @staticmethod
-    def deserialize(data: dict[str, int]) -> "Catamin":
-        return Catamin(data["amount"])
+    def deserialize(data: int) -> "Catamin":
+        return Catamin(data)
 
     def __repr__(self):
         return f"Catamin({self.amount})"
@@ -44,12 +44,12 @@ class Catamins:
         for catamin in self.catamins:
             catamin.write(stream)
 
-    def serialize(self) -> dict[str, list[dict[str, int]]]:
-        return {"catamins": [catamin.serialize() for catamin in self.catamins]}
+    def serialize(self) -> list[int]:
+        return [catamin.serialize() for catamin in self.catamins]
 
     @staticmethod
-    def deserialize(data: dict[str, list[dict[str, int]]]) -> "Catamins":
-        return Catamins([Catamin.deserialize(catamin) for catamin in data["catamins"]])
+    def deserialize(data: list[int]) -> "Catamins":
+        return Catamins([Catamin.deserialize(catamin) for catamin in data])
 
     def __repr__(self):
         return f"Catamins({self.catamins})"

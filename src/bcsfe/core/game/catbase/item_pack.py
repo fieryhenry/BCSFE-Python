@@ -14,12 +14,12 @@ class PurchasedPack:
     def write(self, stream: io.data.Data):
         stream.write_bool(self.purchased)
 
-    def serialize(self) -> dict[str, Any]:
-        return {"purchased": self.purchased}
+    def serialize(self) -> bool:
+        return self.purchased
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "PurchasedPack":
-        return PurchasedPack(data["purchased"])
+    def deserialize(data: bool) -> "PurchasedPack":
+        return PurchasedPack(data)
 
     def __repr__(self) -> str:
         return f"PurchasedPack(purchased={self.purchased!r})"
@@ -48,18 +48,14 @@ class PurchaseSet:
             purchase.write(stream)
 
     def serialize(self) -> dict[str, Any]:
-        return {
-            "purchases": {
-                key: purchase.serialize() for key, purchase in self.purchases.items()
-            },
-        }
+        return {key: purchase.serialize() for key, purchase in self.purchases.items()}
 
     @staticmethod
     def deserialize(data: dict[str, Any]) -> "PurchaseSet":
         return PurchaseSet(
             {
                 key: PurchasedPack.deserialize(purchase)
-                for key, purchase in data["purchases"].items()
+                for key, purchase in data.items()
             },
         )
 
@@ -90,20 +86,13 @@ class Purchases:
             stream.write_int(key)
             purchase.write(stream)
 
-    def serialize(self) -> dict[str, Any]:
-        return {
-            "purchases": {
-                key: purchase.serialize() for key, purchase in self.purchases.items()
-            },
-        }
+    def serialize(self) -> dict[int, Any]:
+        return {key: purchase.serialize() for key, purchase in self.purchases.items()}
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "Purchases":
+    def deserialize(data: dict[int, Any]) -> "Purchases":
         return Purchases(
-            {
-                key: PurchaseSet.deserialize(purchase)
-                for key, purchase in data["purchases"].items()
-            },
+            {key: PurchaseSet.deserialize(purchase) for key, purchase in data.items()},
         )
 
     def __repr__(self) -> str:

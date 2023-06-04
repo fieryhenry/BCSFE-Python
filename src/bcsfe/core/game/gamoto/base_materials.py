@@ -14,12 +14,12 @@ class Material:
     def write(self, stream: io.data.Data):
         stream.write_int(self.amount)
 
-    def serialize(self) -> dict[str, Any]:
-        return {"amount": self.amount}
+    def serialize(self) -> int:
+        return self.amount
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "Material":
-        return Material(data["amount"])
+    def deserialize(data: int) -> "Material":
+        return Material(data)
 
     def __repr__(self) -> str:
         return f"Material(amount={self.amount!r})"
@@ -45,14 +45,12 @@ class Materials:
         for material in self.materials:
             material.write(stream)
 
-    def serialize(self) -> dict[str, Any]:
-        return {"materials": [material.serialize() for material in self.materials]}
+    def serialize(self) -> list[int]:
+        return [material.serialize() for material in self.materials]
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "Materials":
-        return Materials(
-            [Material.deserialize(material) for material in data["materials"]]
-        )
+    def deserialize(data: list[int]) -> "Materials":
+        return Materials([Material.deserialize(material) for material in data])
 
     def __repr__(self) -> str:
         return f"Materials(materials={self.materials!r})"

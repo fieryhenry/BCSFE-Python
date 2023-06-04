@@ -14,12 +14,12 @@ class Outbreak:
     def write(self, stream: io.data.Data):
         stream.write_bool(self.cleared)
 
-    def serialize(self) -> dict[str, Any]:
-        return {"cleared": self.cleared}
+    def serialize(self) -> bool:
+        return self.cleared
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "Outbreak":
-        return Outbreak(data["cleared"])
+    def deserialize(data: bool) -> "Outbreak":
+        return Outbreak(data)
 
     def __repr__(self) -> str:
         return f"Outbreak(cleared={self.cleared!r})"
@@ -49,20 +49,18 @@ class Chapter:
             stream.write_int(outbreak_id)
             outbreak.write(stream)
 
-    def serialize(self) -> dict[str, Any]:
+    def serialize(self) -> dict[int, Any]:
         return {
-            "outbreaks": {
-                outbreak_id: outbreak.serialize()
-                for outbreak_id, outbreak in self.outbreaks.items()
-            }
+            outbreak_id: outbreak.serialize()
+            for outbreak_id, outbreak in self.outbreaks.items()
         }
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "Chapter":
+    def deserialize(data: dict[int, Any]) -> "Chapter":
         return Chapter(
             {
                 outbreak_id: Outbreak.deserialize(outbreak_data)
-                for outbreak_id, outbreak_data in data["outbreaks"].items()
+                for outbreak_id, outbreak_data in data.items()
             }
         )
 

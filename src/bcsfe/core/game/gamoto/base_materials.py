@@ -1,4 +1,3 @@
-from typing import Any
 from bcsfe.core import io
 
 

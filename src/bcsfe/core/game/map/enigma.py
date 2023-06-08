@@ -36,10 +36,10 @@ class Stage:
     @staticmethod
     def deserialize(data: dict[str, Any]) -> "Stage":
         return Stage(
-            data["level"],
-            data["stage_id"],
-            data["decoding_satus"],
-            data["start_time"],
+            data.get("level", 0),
+            data.get("stage_id", 0),
+            data.get("decoding_satus", 0),
+            data.get("start_time", 0.0),
         )
 
     def __repr__(self):
@@ -106,12 +106,12 @@ class Enigma:
     @staticmethod
     def deserialize(data: dict[str, Any]) -> "Enigma":
         return Enigma(
-            data["energy_since_1"],
-            data["energy_since_2"],
-            data["enigma_level"],
-            data["unknown_1"],
-            data["unknown_2"],
-            [Stage.deserialize(stage) for stage in data["stages"]],
+            data.get("energy_since_1", 0),
+            data.get("energy_since_2", 0),
+            data.get("enigma_level", 0),
+            data.get("unknown_1", 0),
+            data.get("unknown_2", False),
+            [Stage.deserialize(stage) for stage in data.get("stages", [])],
         )
 
     def __repr__(self):

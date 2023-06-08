@@ -56,8 +56,10 @@ class EquipSlots:
 
     @staticmethod
     def deserialize(data: dict[str, Any]) -> "EquipSlots":
-        slots = EquipSlots([EquipSlot.deserialize(slot) for slot in data["slots"]])
-        slots.name = data["name"]
+        slots = EquipSlots(
+            [EquipSlot.deserialize(slot) for slot in data.get("slots", [])]
+        )
+        slots.name = data.get("name")
         return slots
 
     def __repr__(self):
@@ -72,6 +74,7 @@ class LineUps:
         self.slots = slots
         self.selected_slot = 0
         self.unlocked_slots = 0
+        self.slot_names_length = 0
 
     @staticmethod
     def read(stream: io.data.Data, gv: game_version.GameVersion) -> "LineUps":
@@ -132,13 +135,17 @@ class LineUps:
             "slots": [slot.serialize() for slot in self.slots],
             "selected_slot": self.selected_slot,
             "unlocked_slots": self.unlocked_slots,
+            "slot_names_length": self.slot_names_length,
         }
 
     @staticmethod
     def deserialize(data: dict[str, Any]) -> "LineUps":
-        line_ups = LineUps([EquipSlots.deserialize(slot) for slot in data["slots"]])
-        line_ups.selected_slot = data["selected_slot"]
-        line_ups.unlocked_slots = data["unlocked_slots"]
+        line_ups = LineUps(
+            [EquipSlots.deserialize(slot) for slot in data.get("slots", [])]
+        )
+        line_ups.selected_slot = data.get("selected_slot", 0)
+        line_ups.unlocked_slots = data.get("unlocked_slots", 0)
+        line_ups.slot_names_length = data.get("slot_names_length", 0)
         return line_ups
 
     def __repr__(self):

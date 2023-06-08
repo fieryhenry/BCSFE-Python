@@ -44,10 +44,10 @@ class MapResetData:
     @staticmethod
     def deserialize(data: dict[str, float]) -> "MapResetData":
         return MapResetData(
-            data["yearly_end_timestamp"],
-            data["monthly_end_timestamp"],
-            data["weekly_end_timestamp"],
-            data["daily_end_timestamp"],
+            data.get("yearly_end_timestamp", 0.0),
+            data.get("monthly_end_timestamp", 0.0),
+            data.get("weekly_end_timestamp", 0.0),
+            data.get("daily_end_timestamp", 0.0),
         )
 
     def __str__(self) -> str:

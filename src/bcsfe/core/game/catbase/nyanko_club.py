@@ -116,21 +116,21 @@ class NyankoClub:
     @staticmethod
     def deserialize(data: dict[str, Any]) -> "NyankoClub":
         return NyankoClub(
-            data["officer_id"],
-            data["total_renewal_times"],
-            data["start_date"],
-            data["end_date"],
-            data["unknown_ts_1"],
-            data["unknown_ts_2"],
-            data["start_date_2"],
-            data["end_date_2"],
-            data["unknown_ts_3"],
-            data["flag"],
-            data["end_date_3"],
-            data["claimed_rewards"],
-            data["unknown_ts_4"],
-            data["unknown_bool_1"],
-            data["unknown_bool_2"],
+            data.get("officer_id", 0),
+            data.get("total_renewal_times", 0),
+            data.get("start_date", 0.0),
+            data.get("end_date", 0.0),
+            data.get("unknown_ts_1", 0.0),
+            data.get("unknown_ts_2", 0.0),
+            data.get("start_date_2", 0.0),
+            data.get("end_date_2", 0.0),
+            data.get("unknown_ts_3", 0.0),
+            data.get("flag", 0),
+            data.get("end_date_3", 0.0),
+            data.get("claimed_rewards", {}),
+            data.get("unknown_ts_4", 0.0),
+            data.get("unknown_bool_1", False),
+            data.get("unknown_bool_2", False),
         )
 
     def __repr__(self):

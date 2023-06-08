@@ -177,8 +177,8 @@ class StorageItem:
 
     @staticmethod
     def deserialize(data: dict[str, Any]) -> "StorageItem":
-        item = StorageItem(data["item_id"])
-        item.item_type = data["item_type"]
+        item = StorageItem(data.get("item_id", 0))
+        item.item_type = data.get("item_type", 0)
         return item
 
     def __repr__(self) -> str:
@@ -406,13 +406,13 @@ class Cats:
 
     @staticmethod
     def deserialize(data: dict[str, Any]) -> "Cats":
-        cats_l = [Cat.deserialize(cat) for cat in data["cats"]]
+        cats_l = [Cat.deserialize(cat) for cat in data.get("cats", [])]
         cats = Cats(cats_l)
         cats.storage_items = [
-            StorageItem.deserialize(item) for item in data["storage_items"]
+            StorageItem.deserialize(item) for item in data.get("storage_items", [])
         ]
-        cats.favourites = data["favorites"]
-        cats.chara_new_flags = data["chara_new_flags"]
+        cats.favourites = data.get("favorites", {})
+        cats.chara_new_flags = data.get("chara_new_flags", {})
         return cats
 
     def __repr__(self) -> str:

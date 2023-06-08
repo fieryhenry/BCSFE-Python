@@ -60,12 +60,12 @@ class Medals:
     @staticmethod
     def deserialize(data: dict[str, Any]) -> "Medals":
         return Medals(
-            data["u1"],
-            data["u2"],
-            data["u3"],
-            data["medal_data_1"],
-            data["medal_data_2"],
-            data["ub"],
+            data.get("u1", 0),
+            data.get("u2", 0),
+            data.get("u3", 0),
+            data.get("medal_data_1", []),
+            data.get("medal_data_2", {}),
+            data.get("ub", False),
         )
 
     def __repr__(self) -> str:

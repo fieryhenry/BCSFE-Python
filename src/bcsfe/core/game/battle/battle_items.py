@@ -27,8 +27,8 @@ class BattleItem:
 
     @staticmethod
     def deserialize(data: dict[str, Any]) -> "BattleItem":
-        battle_item = BattleItem(data["amount"])
-        battle_item.locked = data["locked"]
+        battle_item = BattleItem(data.get("amount", 0))
+        battle_item.locked = data.get("locked", False)
         return battle_item
 
     def __repr__(self):
@@ -44,6 +44,7 @@ class BattleItem:
 class BattleItems:
     def __init__(self, items: list[BattleItem]):
         self.items = items
+        self.lock_item = False
 
     @staticmethod
     def read_items(stream: io.data.Data) -> "BattleItems":
@@ -65,12 +66,19 @@ class BattleItems:
         for item in self.items:
             item.write_locked(stream)
 
-    def serialize(self) -> list[dict[str, Any]]:
-        return [item.serialize() for item in self.items]
+    def serialize(self) -> dict[str, Any]:
+        return {
+            "items": [item.serialize() for item in self.items],
+            "lock_item": self.lock_item,
+        }
 
     @staticmethod
-    def deserialize(data: list[dict[str, Any]]) -> "BattleItems":
-        return BattleItems([BattleItem.deserialize(item) for item in data])
+    def deserialize(data: dict[str, Any]) -> "BattleItems":
+        battle_items = BattleItems(
+            [BattleItem.deserialize(item) for item in data.get("items", [])]
+        )
+        battle_items.lock_item = data.get("lock_item", False)
+        return battle_items
 
     def __repr__(self):
         return f"BattleItems({self.items})"

@@ -39,13 +39,13 @@ class OfficerPass:
     @staticmethod
     def deserialize(data: dict[str, Any]) -> "OfficerPass":
         officer_pass = OfficerPass(
-            data["play_time"],
+            data.get("play_time", 0),
         )
         officer_pass.gold_pass = game.catbase.nyanko_club.NyankoClub.deserialize(
-            data["gold_pass"],
+            data.get("gold_pass", {})
         )
-        officer_pass.cat_id = data["cat_id"]
-        officer_pass.cat_form = data["cat_form"]
+        officer_pass.cat_id = data.get("cat_id", 0)
+        officer_pass.cat_form = data.get("cat_form", 0)
         return officer_pass
 
     def __repr__(self):

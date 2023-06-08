@@ -36,9 +36,9 @@ class Stage:
 
     @staticmethod
     def deserialize(data: dict[str, Any]) -> "Stage":
-        stage = Stage(data["clear_times"])
-        stage.treasure = data["treasure"]
-        stage.itf_timed_score = data["itf_timed_score"]
+        stage = Stage(data.get("clear_times", 0))
+        stage.treasure = data.get("treasure", 0)
+        stage.itf_timed_score = data.get("itf_timed_score", 0)
         return stage
 
     def __repr__(self):
@@ -51,6 +51,13 @@ class Stage:
 class Chapter:
     def __init__(self, selected_stage: int):
         self.selected_stage = selected_stage
+        self.progress = 0
+        self.stages = []
+        self.time_until_treasure_chance = 0
+        self.treasure_chance_duration = 0
+        self.treasure_chance_value = 0
+        self.treasure_chance_stage_id = 0
+        self.treasure_festival_type = 0
 
     def get_valid_treasure_stages(self) -> list[Stage]:
         return self.stages[:49]
@@ -124,6 +131,7 @@ class Chapter:
 
     def serialize(self) -> dict[str, Any]:
         return {
+            "selected_stage": self.selected_stage,
             "progress": self.progress,
             "stages": [stage.serialize() for stage in self.stages],
             "time_until_treasure_chance": self.time_until_treasure_chance,
@@ -135,13 +143,14 @@ class Chapter:
 
     @staticmethod
     def deserialize(data: dict[str, Any]) -> "Chapter":
-        chapter = Chapter(data["progress"])
-        chapter.stages = [Stage.deserialize(stage) for stage in data["stages"]]
-        chapter.time_until_treasure_chance = data["time_until_treasure_chance"]
-        chapter.treasure_chance_duration = data["treasure_chance_duration"]
-        chapter.treasure_chance_value = data["treasure_chance_value"]
-        chapter.treasure_chance_stage_id = data["treasure_chance_stage_id"]
-        chapter.treasure_festival_type = data["treasure_festival_type"]
+        chapter = Chapter(data.get("selected_stage", 0))
+        chapter.progress = data.get("progress", 0)
+        chapter.stages = [Stage.deserialize(stage) for stage in data.get("stages", [])]
+        chapter.time_until_treasure_chance = data.get("time_until_treasure_chance", 0)
+        chapter.treasure_chance_duration = data.get("treasure_chance_duration", 0)
+        chapter.treasure_chance_value = data.get("treasure_chance_value", 0)
+        chapter.treasure_chance_stage_id = data.get("treasure_chance_stage_id", 0)
+        chapter.treasure_festival_type = data.get("treasure_festival_type", 0)
         return chapter
 
     def __repr__(self):
@@ -215,7 +224,8 @@ class Chapters:
                 chapter.write_itf_timed_scores(stream)
 
     def serialize(self) -> list[dict[str, Any]]:
-        return [chapter.serialize() for chapter in self.chapters]
+        chapters = [chapter.serialize() for chapter in self.chapters]
+        return chapters
 
     @staticmethod
     def deserialize(data: list[dict[str, Any]]) -> "Chapters":

@@ -147,13 +147,15 @@ class Outbreaks:
         outbreaks = Outbreaks(
             {
                 chapter_id: Chapter.deserialize(chapter_data)
-                for chapter_id, chapter_data in data["chapters"].items()
+                for chapter_id, chapter_data in data.get("chapters", {}).items()
             }
         )
-        outbreaks.zombie_event_remaining_time = data["zombie_event_remaining_time"]
+        outbreaks.zombie_event_remaining_time = data.get(
+            "zombie_event_remaining_time", 0.0
+        )
         outbreaks.current_outbreaks = {
             chapter_id: Chapter.deserialize(chapter_data)
-            for chapter_id, chapter_data in data["current_outbreaks"].items()
+            for chapter_id, chapter_data in data.get("current_outbreaks", {}).items()
         }
 
         return outbreaks

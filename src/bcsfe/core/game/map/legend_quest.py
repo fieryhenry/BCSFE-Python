@@ -29,9 +29,9 @@ class Stage:
     @staticmethod
     def deserialize(data: dict[str, Any]) -> "Stage":
         stage = Stage(
-            data["clear_times"],
+            data.get("clear_times", 0),
         )
-        stage.tries = data["tries"]
+        stage.tries = data.get("tries", 0)
         return stage
 
     def __repr__(self):
@@ -88,11 +88,11 @@ class Chapter:
     @staticmethod
     def deserialize(data: dict[str, Any]) -> "Chapter":
         chapter = Chapter(
-            data["selected_stage"],
+            data.get("selected_stage", 0),
         )
-        chapter.clear_progress = data["clear_progress"]
-        chapter.stages = [Stage.deserialize(stage) for stage in data["stages"]]
-        chapter.chapter_unlock_state = data["chapter_unlock_state"]
+        chapter.clear_progress = data.get("clear_progress", 0)
+        chapter.stages = [Stage.deserialize(stage) for stage in data.get("stages", [])]
+        chapter.chapter_unlock_state = data.get("chapter_unlock_state", 0)
         return chapter
 
     def __repr__(self):
@@ -219,9 +219,11 @@ class Chapters:
 
     @staticmethod
     def deserialize(data: dict[str, Any]) -> "Chapters":
-        chapters = [ChaptersStars.deserialize(chapter) for chapter in data["chapters"]]
-        unknown = data["unknown"]
-        ids = data["ids"]
+        chapters = [
+            ChaptersStars.deserialize(chapter) for chapter in data.get("chapters", [])
+        ]
+        unknown = data.get("unknown", [])
+        ids = data.get("ids", [])
         return Chapters(chapters, unknown, ids)
 
     def __repr__(self):

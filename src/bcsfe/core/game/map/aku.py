@@ -57,8 +57,8 @@ class Chapter:
 
     @staticmethod
     def deserialize(data: dict[str, Any]) -> "Chapter":
-        chapter = Chapter(data["clear_progress"])
-        chapter.stages = [Stage.deserialize(stage) for stage in data["stages"]]
+        chapter = Chapter(data.get("clear_progress", 0))
+        chapter.stages = [Stage.deserialize(stage) for stage in data.get("stages", [])]
         return chapter
 
     def __repr__(self):

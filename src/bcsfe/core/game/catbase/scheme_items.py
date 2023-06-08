@@ -34,7 +34,7 @@ class SchemeItems:
 
     @staticmethod
     def deserialize(data: dict[str, list[int]]) -> "SchemeItems":
-        return SchemeItems(data["to_obtain"], data["received"])
+        return SchemeItems(data.get("to_obtain", []), data.get("received", []))
 
     def __repr__(self) -> str:
         return f"SchemeItems(to_obtain={self.to_obtain!r}, received={self.received!r})"

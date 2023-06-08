@@ -50,7 +50,9 @@ class BeaconEventListScene:
     @staticmethod
     def deserialize(data: dict[str, Any]) -> "BeaconEventListScene":
         return BeaconEventListScene(
-            data["int_array"], data["str_array"], data["bool_array"]
+            data.get("int_array", []),
+            data.get("str_array", []),
+            data.get("bool_array", []),
         )
 
     def __repr__(self):

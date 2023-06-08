@@ -18,6 +18,7 @@ class CatShrine:
         self.shrine_gone = shrine_gone
         self.flags = flags
         self.xp_offering = xp_offering
+        self.dialogs = 0
 
     @staticmethod
     def read(stream: io.data.Data) -> "CatShrine":
@@ -58,14 +59,14 @@ class CatShrine:
     @staticmethod
     def deserialize(data: dict[str, Any]) -> "CatShrine":
         shrine = CatShrine(
-            data["unknown"],
-            data["stamp_1"],
-            data["stamp_2"],
-            data["shrine_gone"],
-            data["flags"],
-            data["xp_offering"],
+            data.get("unknown", False),
+            data.get("stamp_1", 0.0),
+            data.get("stamp_2", 0.0),
+            data.get("shrine_gone", False),
+            data.get("flags", []),
+            data.get("xp_offering", 0),
         )
-        shrine.dialogs = data["dialogs"]
+        shrine.dialogs = data.get("dialogs", 0)
         return shrine
 
     def __repr__(self):

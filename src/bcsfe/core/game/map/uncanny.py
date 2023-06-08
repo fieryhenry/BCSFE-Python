@@ -27,8 +27,8 @@ class Uncanny:
     @staticmethod
     def deserialize(data: dict[str, Any]) -> "Uncanny":
         return Uncanny(
-            chapters.Chapters.deserialize(data["chapters"]),
-            data["unknown"],
+            chapters.Chapters.deserialize(data.get("chapters", {})),
+            data.get("unknown", []),
         )
 
     def __repr__(self):

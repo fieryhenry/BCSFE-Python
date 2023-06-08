@@ -31,7 +31,7 @@ class Orb:
 
     @staticmethod
     def deserialize(data: dict[str, Any]) -> "Orb":
-        return Orb(data["id"], data["value"])
+        return Orb(data.get("id", 0), data.get("value", 0))
 
     def __repr__(self):
         return f"Orb({self.id}, {self.value})"
@@ -63,7 +63,7 @@ class TalentOrbs:
 
     @staticmethod
     def deserialize(data: list[dict[str, Any]]) -> "TalentOrbs":
-        return TalentOrbs({orb["id"]: Orb.deserialize(orb) for orb in data})
+        return TalentOrbs({orb.get("id", 0): Orb.deserialize(orb) for orb in data})
 
     def __repr__(self):
         return f"TalentOrbs({self.orbs})"

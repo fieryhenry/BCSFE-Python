@@ -1,3 +1,4 @@
+import base64
 from typing import Any, Optional, Union
 from bcsfe.core.io import data
 from bcsfe.core import country_code, game_version, game, crypto
@@ -11,16 +12,21 @@ class CantDetectCCError(Exception):
 class SaveFile:
     def __init__(
         self,
-        data: data.Data,
+        dt: Optional[data.Data] = None,
         cc: Optional[country_code.CountryCode] = None,
+        load: bool = True,
     ):
-        self.data = data
+        if dt is None:
+            self.data = data.Data()
+        else:
+            self.data = dt
         if cc is None:
             self.cc = self.detect_cc()
         else:
             self.cc = cc
 
-        self.load()
+        if dt is not None and load:
+            self.load()
 
     def detect_cc(self) -> country_code.CountryCode:
         for cc in country_code.CountryCode.get_all():
@@ -144,7 +150,6 @@ class SaveFile:
         self.lineups = game.battle.slots.LineUps.read(self.data, self.game_version)
 
         self.stamp_data = game.catbase.stamp.StampData.read(self.data)
-
         self.story = game.map.story.Chapters.read(self.data)
 
         if 20 <= self.game_version and self.game_version <= 25:
@@ -332,7 +337,6 @@ class SaveFile:
             self.timed_score_stages = game.map.timed_score.Chapters.read(
                 self.data, self.game_version
             )
-
             self.inquiry_code = self.data.read_string()
             self.officer_pass = game.catbase.officer_pass.OfficerPass.read(self.data)
             self.has_account = self.data.read_byte()
@@ -403,11 +407,11 @@ class SaveFile:
             self.time_since_check = self.data.read_double()
             self.last_checked_expedition_time = self.data.read_double()
 
-            self.catfruit = game.catbase.catfruit.Matatabi.read(self.data)
+            self.catfruit = self.data.read_int_list()
             self.cats.read_forth_forms(self.data)
             self.cats.read_catseyes_used(self.data)
-            self.catseyes = game.catbase.catseyes.Catseyes.read(self.data)
-            self.catamins = game.gamoto.catamins.Catamins.read(self.data)
+            self.catseyes = self.data.read_int_list()
+            self.catamins = self.data.read_int_list()
             self.gamatoto = game.gamoto.gamatoto.Gamatoto.read(self.data)
 
             self.unlock_popups_6 = self.data.read_bool_list()
@@ -961,6 +965,8 @@ class SaveFile:
 
             self.gv_120200 = self.data.read_int()
 
+        self.remaining_data = self.data.read_to_end(32)
+
     def save(self, data: data.Data):
         self.data = data
         self.dst_index = 0
@@ -1005,7 +1011,7 @@ class SaveFile:
         self.data.write_int(self.ui3)
         self.data.write_int(self.tutorial_state_2)
 
-        self.data.write_int_list(self.unlock_popups_11, write_length=False)
+        self.data.write_int_list(self.unlock_popups_11, write_length=False, length=3)
         self.data.write_int(self.ui5)
         self.data.write_int(self.unlock_enemy_guide)
         self.data.write_int(self.ui6)
@@ -1022,7 +1028,7 @@ class SaveFile:
         self.story.write(self.data)
 
         if 20 <= self.game_version and self.game_version <= 25:
-            self.data.write_int_list(self.enemy_guide, write_length=False)
+            self.data.write_int_list(self.enemy_guide, write_length=False, length=231)
         else:
             self.data.write_int_list(self.enemy_guide)
 
@@ -1032,9 +1038,12 @@ class SaveFile:
 
         self.special_skills.write_upgrades(self.data)
 
-        if self.game_version <= 26:
-            self.data.write_int_list(self.menu_unlocks, write_length=False)
-            self.data.write_int_list(self.unlock_popups_0, write_length=False)
+        if self.game_version <= 25:
+            self.data.write_int_list(self.menu_unlocks, write_length=False, length=5)
+            self.data.write_int_list(self.unlock_popups_0, write_length=False, length=5)
+        elif self.game_version <= 26:
+            self.data.write_int_list(self.menu_unlocks, write_length=False, length=6)
+            self.data.write_int_list(self.unlock_popups_0, write_length=False, length=6)
         else:
             self.data.write_int_list(self.menu_unlocks)
             self.data.write_int_list(self.unlock_popups_0)
@@ -1042,13 +1051,15 @@ class SaveFile:
         self.battle_items.write_items(self.data)
 
         if self.game_version <= 26:
-            self.data.write_int_list(self.new_dialogs_2, write_length=False)
+            self.data.write_int_list(self.new_dialogs_2, write_length=False, length=17)
         else:
             self.data.write_int_list(self.new_dialogs_2)
 
-        self.data.write_int_list(self.uil1, write_length=False)
-        self.data.write_int_list(self.moneko_bonus, write_length=False)
-        self.data.write_int_list(self.daily_reward_initialized, write_length=False)
+        self.data.write_int_list(self.uil1, write_length=False, length=20)
+        self.data.write_int_list(self.moneko_bonus, write_length=False, length=1)
+        self.data.write_int_list(
+            self.daily_reward_initialized, write_length=False, length=1
+        )
 
         self.battle_items.write_locked_items(self.data)
 
@@ -1072,13 +1083,13 @@ class SaveFile:
         self.data.write_string(self.save_data_4_hash)
 
         self.mysale.write_bonus_hash(self.data)
-        self.data.write_int_list(self.chara_flags, write_length=False)
+        self.data.write_int_list(self.chara_flags, write_length=False, length=2)
 
         if self.game_version <= 37:
             self.data.write_int(self.uim1)
             self.data.write_bool(self.ubm1)
 
-        self.data.write_int_list(self.chara_flags_2, write_length=False)
+        self.data.write_int_list(self.chara_flags_2, write_length=False, length=2)
 
         self.data.write_int(self.normal_tickets)
         self.data.write_int(self.rare_tickets)
@@ -1093,17 +1104,19 @@ class SaveFile:
         self.data.write_int(self.continue_flag)
 
         if 20 <= self.game_version:
-            self.data.write_int_list(self.unlock_popups_8, write_length=False)
+            self.data.write_int_list(
+                self.unlock_popups_8, write_length=False, length=36
+            )
 
         if 20 <= self.game_version and self.game_version <= 25:
-            self.data.write_int_list(self.unit_drops, write_length=False)
+            self.data.write_int_list(self.unit_drops, write_length=False, length=110)
         elif 26 <= self.game_version:
             self.data.write_int_list(self.unit_drops)
 
         self.gatya.write_rare_normal_seed(self.data)
 
         self.data.write_bool(self.get_event_data)
-        self.data.write_bool_list(self.achievements, write_length=False)
+        self.data.write_bool_list(self.achievements, write_length=False, length=7)
 
         self.data.write_int(self.os_value)
 
@@ -1129,9 +1142,9 @@ class SaveFile:
         self.event_stages.write_legend_restrictions(self.data, self.game_version)
 
         if self.game_version <= 37:
-            self.data.write_int_list(self.uil2, write_length=False)
-            self.data.write_int_list(self.uil3, write_length=False)
-            self.data.write_int_list(self.uil4, write_length=False)
+            self.data.write_int_list(self.uil2, write_length=False, length=7)
+            self.data.write_int_list(self.uil3, write_length=False, length=7)
+            self.data.write_int_list(self.uil4, write_length=False, length=7)
 
         self.data.write_double(self.g_timestamp_2)
         self.data.write_double(self.g_servertimestamp_2)
@@ -1149,7 +1162,7 @@ class SaveFile:
             self.data.write_int(self.ui11)
 
         if 20 <= self.game_version and self.game_version <= 25:
-            self.data.write_bool_list(self.ubl1, write_length=False)
+            self.data.write_bool_list(self.ubl1, write_length=False, length=12)
         elif 26 <= self.game_version and self.game_version < 39:
             self.data.write_bool_list(self.ubl1)
 
@@ -1195,8 +1208,12 @@ class SaveFile:
             self.data.write_int(self.gv_46)
             self.gatya.write_event_seed(self.data)
             if self.game_version < 34:
-                self.data.write_int_list(self.event_capsules_1, write_length=False)
-                self.data.write_int_list(self.event_capsules_2, write_length=False)
+                self.data.write_int_list(
+                    self.event_capsules_1, write_length=False, length=100
+                )
+                self.data.write_int_list(
+                    self.event_capsules_2, write_length=False, length=100
+                )
             else:
                 self.data.write_int_list(self.event_capsules_1)
                 self.data.write_int_list(self.event_capsules_2)
@@ -1213,16 +1230,22 @@ class SaveFile:
             self.data.write_double(self.m_dGetTimeSave3)
             if self.game_version < 26:
                 self.data.write_int_list(
-                    self.gatya_seen_lucky_drops, write_length=False
+                    self.gatya_seen_lucky_drops,
+                    write_length=False,
+                    length=44,
                 )
             else:
                 self.data.write_int_list(self.gatya_seen_lucky_drops)
             self.data.write_bool(self.banned)
             self.data.write_bool_list(
-                self.catfood_beginner_purchased, write_length=False
+                self.catfood_beginner_purchased,
+                write_length=False,
+                length=3,
             )
             self.data.write_double(self.next_week_timestamp)
-            self.data.write_bool_list(self.catfood_beginner_expired, write_length=False)
+            self.data.write_bool_list(
+                self.catfood_beginner_expired, write_length=False, length=3
+            )
             self.data.write_int(self.rank_up_sale_value)
             self.data.write_int(self.gv_49)
 
@@ -1243,11 +1266,11 @@ class SaveFile:
             self.data.write_double(self.time_since_check)
             self.data.write_double(self.last_checked_expedition_time)
 
-            self.catfruit.write(self.data)
+            self.data.write_int_list(self.catfruit)
             self.cats.write_forth_forms(self.data)
             self.cats.write_catseyes_used(self.data)
-            self.catseyes.write(self.data)
-            self.catamins.write(self.data)
+            self.data.write_int_list(self.catseyes)
+            self.data.write_int_list(self.catamins)
             self.gamatoto.write(self.data)
 
             self.data.write_bool_list(self.unlock_popups_6)
@@ -1272,7 +1295,9 @@ class SaveFile:
             self.data.write_double(self.reward_remaining_time)
             self.data.write_double(self.last_checked_reward_time)
 
-            self.data.write_int_tuple_list(self.announcements, write_length=False)
+            self.data.write_int_tuple_list(
+                self.announcements, write_length=False, length=16
+            )
             self.data.write_int(self.backup_counter)
             self.data.write_int(self.ui12)
             self.data.write_int(self.ui13)
@@ -1499,7 +1524,7 @@ class SaveFile:
         if self.game_version >= 90800:
             self.data.write_short(len(self.uil7))
             self.data.write_int_list(self.uil7, write_length=False)
-            self.data.write_bool_list(self.ubl2, write_length=False)
+            self.data.write_bool_list(self.ubl2, write_length=False, length=10)
             self.data.write_int(self.gv_90800)
 
         if self.game_version >= 90900:
@@ -1683,7 +1708,7 @@ class SaveFile:
             self.data.write_short(len(self.ushl4))
             self.data.write_short_list(self.ushl4, write_length=False)
 
-            self.data.write_bool_list(self.ubl3, write_length=False)
+            self.data.write_bool_list(self.ubl3, write_length=False, length=14)
 
             self.data.write_byte(len(self.ushl5))
             self.data.write_short_list(self.ushl5, write_length=False)
@@ -1712,6 +1737,8 @@ class SaveFile:
 
             self.data.write_int(self.gv_120200)
 
+        self.data.write_bytes(self.remaining_data)
+
     def to_data(self) -> "data.Data":
         dt = data.Data()
         self.save(dt)
@@ -1720,6 +1747,7 @@ class SaveFile:
 
     def to_dict(self) -> dict[str, Any]:
         data: dict[str, Any] = {
+            "cc": self.cc.get_code(),
             "dsts": self.dsts,
             "game_version": self.game_version.game_version,
             "ub1": self.ub1,
@@ -1731,7 +1759,7 @@ class SaveFile:
             "month": self.month,
             "day": self.day,
             "timestamp": self.timestamp,
-            "date": self.date.strftime("%Y-%m-%d %H:%M:%S"),
+            "date": self.date.timestamp(),
             "ui1": self.ui1,
             "stamp_value_save": self.stamp_value_save,
             "ui2": self.ui2,
@@ -1762,8 +1790,8 @@ class SaveFile:
             "uil1": self.uil1,
             "moneko_bonus": self.moneko_bonus,
             "daily_reward_initialized": self.daily_reward_initialized,
-            "date_2": self.date_2.strftime("%Y-%m-%d %H:%M:%S"),
-            "date_3": self.date_3.strftime("%Y-%m-%d %H:%M:%S"),
+            "date_2": self.date_2.timestamp(),
+            "date_3": self.date_3.timestamp(),
             "ui0": self.ui0,
             "stage_unlock_cat_value": self.stage_unlock_cat_value,
             "show_ending_value": self.show_ending_value,
@@ -1788,7 +1816,7 @@ class SaveFile:
             "get_event_data": self.get_event_data,
             "achievements": self.achievements,
             "os_value": self.os_value,
-            "date_4": self.date_4.strftime("%Y-%m-%d %H:%M:%S"),
+            "date_4": self.date_4.timestamp(),
             "player_id": self.player_id,
             "order_ids": self.order_ids,
             "g_timestamp": self.g_timestamp,
@@ -1834,6 +1862,7 @@ class SaveFile:
             "gatya_seen_lucky_drops": self.gatya_seen_lucky_drops,
             "banned": self.banned,
             "catfood_beginner_purchased": self.catfood_beginner_purchased,
+            "next_week_timestamp": self.next_week_timestamp,
             "catfood_beginner_expired": self.catfood_beginner_expired,
             "rank_up_sale_value": self.rank_up_sale_value,
             "gv_49": self.gv_49,
@@ -1845,9 +1874,9 @@ class SaveFile:
             "last_checked_energy_recovery_time": self.last_checked_energy_recovery_time,
             "time_since_check": self.time_since_check,
             "last_checked_expedition_time": self.last_checked_expedition_time,
-            "catfruit": self.catfruit.serialize(),
-            "catseyes": self.catseyes.serialize(),
-            "catamins": self.catamins.serialize(),
+            "catfruit": self.catfruit,
+            "catseyes": self.catseyes,
+            "catamins": self.catamins,
             "gamatoto": self.gamatoto.serialize(),
             "unlock_popups_6": self.unlock_popups_6,
             "ex_stages": self.ex_stages.serialize(),
@@ -1874,6 +1903,7 @@ class SaveFile:
             "gv_58": self.gv_58,
             "last_checked_zombie_time": self.last_checked_zombie_time,
             "outbreaks": self.outbreaks.serialize(),
+            "scheme_items": self.scheme_items.serialize(),
             "first_locks": self.first_locks,
             "account_created_timestamp": self.account_created_timestamp,
             "gv_60": self.gv_60,
@@ -2054,8 +2084,431 @@ class SaveFile:
             "ush9": self.ush9,
             "ushshd": self.ushshd,
             "gv_120200": self.gv_120200,
+            "remaining_data": base64.b64encode(self.remaining_data).decode("utf-8"),
         }
         return data
+
+    @staticmethod
+    def from_dict(data: dict[str, Any]):
+        cc = country_code.CountryCode.from_code(data.get("cc", None))
+        save_file = SaveFile(cc=cc)
+        save_file.dsts = data.get("dsts", [])
+        save_file.game_version = game_version.GameVersion(data.get("game_version", 0))
+        save_file.ub1 = data.get("ub1", False)
+        save_file.mute_bgm = data.get("mute_bgm", False)
+        save_file.mute_se = data.get("mute_se", False)
+        save_file.catfood = data.get("catfood", 0)
+        save_file.current_energy = data.get("current_energy", 0)
+        save_file.year = data.get("year", 0)
+        save_file.month = data.get("month", 0)
+        save_file.day = data.get("day", 0)
+        save_file.timestamp = data.get("timestamp", 0.0)
+        save_file.date = datetime.datetime.fromtimestamp(data.get("date", 0))
+        save_file.ui1 = data.get("ui1", 0)
+        save_file.stamp_value_save = data.get("stamp_value_save", 0)
+        save_file.ui2 = data.get("ui2", 0)
+        save_file.eoc_chapter_clear_state = data.get("eoc_chapter_clear_state", 0)
+        save_file.xp = data.get("xp", 0)
+        save_file.tutorial_state = data.get("tutorial_state", 0)
+        save_file.ui3 = data.get("ui3", 0)
+        save_file.tutorial_state_2 = data.get("tutorial_state_2", 0)
+        save_file.unlock_popups_11 = data.get("unlock_popups_11", [])
+        save_file.ui5 = data.get("ui5", 0)
+        save_file.unlock_enemy_guide = data.get("unlock_enemy_guide", 0)
+        save_file.ui6 = data.get("ui6", 0)
+        save_file.ub0 = data.get("ub0", False)
+        save_file.ui7 = data.get("ui7", 0)
+        save_file.cleared_eoc_1 = data.get("cleared_eoc_1", 0)
+        save_file.ui8 = data.get("ui8", 0)
+        save_file.unlocked_ending = data.get("unlocked_ending", 0)
+        save_file.lineups = game.battle.slots.LineUps.deserialize(
+            data.get("lineups", {})
+        )
+        save_file.stamp_data = game.catbase.stamp.StampData.deserialize(
+            data.get("stamp_data", {})
+        )
+        save_file.story = game.map.story.Chapters.deserialize(data.get("story", []))
+        save_file.enemy_guide = data.get("enemy_guide", [])
+        save_file.cats = game.catbase.cat.Cats.deserialize(data.get("cats", {}))
+        save_file.special_skills = game.catbase.special_skill.Skills.deserialize(
+            data.get("special_skills", [])
+        )
+        save_file.menu_unlocks = data.get("menu_unlocks", [])
+        save_file.unlock_popups_0 = data.get("unlock_popups_0", [])
+        save_file.battle_items = game.battle.battle_items.BattleItems.deserialize(
+            data.get("battle_items", {})
+        )
+        save_file.new_dialogs_2 = data.get("new_dialogs_2", [])
+        save_file.uil1 = data.get("uil1", [])
+        save_file.moneko_bonus = data.get("moneko_bonus", [])
+        save_file.daily_reward_initialized = data.get("daily_reward_initialized", [])
+        save_file.date_2 = datetime.datetime.fromtimestamp(data.get("date_2", 0))
+        save_file.date_3 = datetime.datetime.fromtimestamp(data.get("date_3", 0))
+        save_file.ui0 = data.get("ui0", 0)
+        save_file.stage_unlock_cat_value = data.get("stage_unlock_cat_value", 0)
+        save_file.show_ending_value = data.get("show_ending_value", 0)
+        save_file.chapter_clear_cat_unlock = data.get("chapter_clear_cat_unlock", 0)
+        save_file.ui9 = data.get("ui9", 0)
+        save_file.ios_android_month = data.get("ios_android_month", 0)
+        save_file.ui10 = data.get("ui10", 0)
+        save_file.save_data_4_hash = data.get("save_data_4_hash", "")
+        save_file.mysale = game.catbase.my_sale.MySale.deserialize(
+            data.get("mysale", {})
+        )
+        save_file.chara_flags = data.get("chara_flags", [])
+        save_file.uim1 = data.get("uim1", 0)
+        save_file.ubm1 = data.get("ubm1", False)
+        save_file.chara_flags_2 = data.get("chara_flags_2", [])
+        save_file.normal_tickets = data.get("normal_tickets", 0)
+        save_file.rare_tickets = data.get("rare_tickets", 0)
+        save_file.event_stages = game.map.event.EventChapters.deserialize(
+            data.get("event_stages", {})
+        )
+        save_file.itf1_ending = data.get("itf1_ending", 0)
+        save_file.continue_flag = data.get("continue_flag", 0)
+        save_file.unlock_popups_8 = data.get("unlock_popups_8", [])
+        save_file.unit_drops = data.get("unit_drops", [])
+        save_file.gatya = game.catbase.gatya.Gatya.deserialize(data.get("gatya", {}))
+        save_file.get_event_data = data.get("get_event_data", False)
+        save_file.achievements = data.get("achievements", [])
+        save_file.os_value = data.get("os_value", 0)
+        save_file.date_4 = datetime.datetime.fromtimestamp(data.get("date_4", 0))
+        save_file.player_id = data.get("player_id", "")
+        save_file.order_ids = data.get("order_ids", [])
+        save_file.g_timestamp = data.get("g_timestamp", 0.0)
+        save_file.g_servertimestamp = data.get("g_servertimestamp", 0.0)
+        save_file.m_gettimesave = data.get("m_gettimesave", 0.0)
+        save_file.usl1 = data.get("usl1", [])
+        save_file.energy_notification = data.get("energy_notification", False)
+        save_file.full_gameversion = data.get("full_gameversion", 0)
+        save_file.uil2 = data.get("uil2", [])
+        save_file.uil3 = data.get("uil3", [])
+        save_file.uil4 = data.get("uil4", [])
+        save_file.g_timestamp_2 = data.get("g_timestamp_2", 0.0)
+        save_file.g_servertimestamp_2 = data.get("g_servertimestamp_2", 0.0)
+        save_file.m_gettimesave_2 = data.get("m_gettimesave_2", 0.0)
+        save_file.unknown_timestamp = data.get("unknown_timestamp", 0.0)
+        save_file.usl2 = data.get("usl2", [])
+        save_file.m_dGetTimeSave2 = data.get("m_dGetTimeSave2", 0.0)
+        save_file.ui11 = data.get("ui11", 0)
+        save_file.ubl1 = data.get("ubl1", [])
+        save_file.user_rank_rewards = (
+            game.catbase.user_rank_rewards.Rewards.deserialize(
+                data.get("user_rank_rewards", [])
+            )
+        )
+        save_file.transfer_code = data.get("transfer_code", "")
+        save_file.confirmation_code = data.get("confirmation_code", "")
+        save_file.transfer_flag = data.get("transfer_flag", False)
+        save_file.item_reward_stages = game.map.item_reward_stage.Chapters.deserialize(
+            data.get("item_reward_stages", {})
+        )
+        save_file.timed_score_stages = game.map.timed_score.Chapters.deserialize(
+            data.get("timed_score_stages", [])
+        )
+        save_file.inquiry_code = data.get("inquiry_code", "")
+        save_file.officer_pass = game.catbase.officer_pass.OfficerPass.deserialize(
+            data.get("officer_pass", {})
+        )
+        save_file.has_account = data.get("has_account", False)
+        save_file.backup_state = data.get("backup_state", 0)
+        save_file.ub2 = data.get("ub2", False)
+        save_file.gv_44 = data.get("gv_44", 44)
+        save_file.itf1_complete = data.get("itf1_complete", 0)
+        save_file.title_chapter_bg = data.get("title_chapter_bg", 0)
+        save_file.combo_unlocks = data.get("combo_unlocks", [])
+        save_file.combo_unlocked_10k_ur = data.get("combo_unlocked_10k_ur", False)
+        save_file.gv_45 = data.get("gv_45", 45)
+        save_file.gv_46 = data.get("gv_46", 46)
+        save_file.event_capsules_1 = data.get("event_capsules_1", [])
+        save_file.event_capsules_2 = data.get("event_capsules_2", [])
+        save_file.gv_47 = data.get("gv_47", 47)
+        save_file.gv_48 = data.get("gv_48", 48)
+        save_file.m_dGetTimeSave3 = data.get("m_dGetTimeSave3", 0.0)
+        save_file.gatya_seen_lucky_drops = data.get("gatya_seen_lucky_drops", [])
+        save_file.banned = data.get("banned", False)
+        save_file.catfood_beginner_purchased = data.get(
+            "catfood_beginner_purchased", []
+        )
+        save_file.next_week_timestamp = data.get("next_week_timestamp", 0.0)
+        save_file.catfood_beginner_expired = data.get("catfood_beginner_expired", [])
+        save_file.rank_up_sale_value = data.get("rank_up_sale_value", 0)
+        save_file.gv_49 = data.get("gv_49", 49)
+        save_file.gv_50 = data.get("gv_50", 50)
+        save_file.gv_51 = data.get("gv_51", 51)
+        save_file.gv_52 = data.get("gv_52", 52)
+        save_file.time_since_time_check_cumulative = data.get(
+            "time_since_time_check_cumulative", 0.0
+        )
+        save_file.server_timestamp = data.get("server_timestamp", 0.0)
+        save_file.last_checked_energy_recovery_time = data.get(
+            "last_checked_energy_recovery_time", 0.0
+        )
+        save_file.time_since_check = data.get("time_since_check", 0.0)
+        save_file.last_checked_expedition_time = data.get(
+            "last_checked_expedition_time", 0.0
+        )
+        save_file.catfruit = data.get("catfruit", [])
+        save_file.catseyes = data.get("catseyes", [])
+        save_file.catamins = data.get("catamins", [])
+        save_file.gamatoto = game.gamoto.gamatoto.Gamatoto.deserialize(
+            data.get("gamatoto", {})
+        )
+        save_file.unlock_popups_6 = data.get("unlock_popups_6", [])
+        save_file.ex_stages = game.map.ex_stage.Chapters.deserialize(
+            data.get("ex_stages", [])
+        )
+        save_file.gv_53 = data.get("gv_53", 53)
+        save_file.gv_54 = data.get("gv_54", 54)
+        save_file.item_pack = game.catbase.item_pack.ItemPack.deserialize(
+            data.get("item_pack", {})
+        )
+        save_file.platinum_tickets = data.get("platinum_tickets", 0)
+        save_file.logins = game.catbase.login_bonuses.LoginBonus.deserialize(
+            data.get("logins", {})
+        )
+        save_file.reset_item_reward_flags = data.get("reset_item_reward_flags", [])
+        save_file.reward_remaining_time = data.get("reward_remaining_time", 0.0)
+        save_file.last_checked_reward_time = data.get("last_checked_reward_time", 0.0)
+        save_file.announcements = data.get("announcements", [])
+        save_file.backup_counter = data.get("backup_counter", 0)
+        save_file.ui12 = data.get("ui12", 0)
+        save_file.ui13 = data.get("ui13", 0)
+        save_file.ui14 = data.get("ui14", 0)
+        save_file.gv_55 = data.get("gv_55", 55)
+        save_file.ub3 = data.get("ub3", False)
+        save_file.backup_frame = data.get("backup_frame", 0)
+        save_file.gv_56 = data.get("gv_56", 56)
+        save_file.ub4 = data.get("ub4", False)
+        save_file.gv_57 = data.get("gv_57", 57)
+        save_file.dojo = game.map.dojo.Dojo.deserialize(data.get("dojo", {}))
+        save_file.gv_58 = data.get("gv_58", 58)
+        save_file.last_checked_zombie_time = data.get("last_checked_zombie_time", 0.0)
+        save_file.outbreaks = game.map.outbreaks.Outbreaks.deserialize(
+            data.get("outbreaks", {})
+        )
+        save_file.scheme_items = game.catbase.scheme_items.SchemeItems.deserialize(
+            data.get("scheme_items", {})
+        )
+        save_file.first_locks = data.get("first_locks", {})
+        save_file.account_created_timestamp = data.get("account_created_timestamp", 0.0)
+        save_file.gv_60 = data.get("gv_60", 60)
+        save_file.shown_maxcollab_mg = data.get("shown_maxcollab_mg", False)
+        save_file.gv_61 = data.get("gv_61", 61)
+        save_file.unlock_popups = game.catbase.unlock_popups.Popups.deserialize(
+            data.get("unlock_popups", {})
+        )
+        save_file.gv_63 = data.get("gv_63", 63)
+        save_file.ototo = game.gamoto.ototo.Ototo.deserialize(data.get("ototo", {}))
+        save_file.last_checked_castle_time = data.get("last_checked_castle_time", 0.0)
+        save_file.gv_64 = data.get("gv_64", 64)
+        save_file.beacon_base = (
+            game.catbase.beacon_base.BeaconEventListScene.deserialize(
+                data.get("beacon_base", {})
+            )
+        )
+        save_file.gv_65 = data.get("gv_65", 65)
+        save_file.tower = game.map.tower.Tower.deserialize(data.get("tower", {}))
+        save_file.missions = game.catbase.mission.Missions.deserialize(
+            data.get("missions", {})
+        )
+        save_file.gv_66 = data.get("gv_66", 66)
+        save_file.challenge = game.map.challenge.Challenge.deserialize(
+            data.get("challenge", {})
+        )
+        save_file.gv_67 = data.get("gv_67", 67)
+        save_file.event_update_flags = data.get("event_update_flags", [])
+        save_file.gv_68 = data.get("gv_68", 68)
+        save_file.cotc_1_complete = data.get("cotc_1_complete", False)
+        save_file.gv_69 = data.get("gv_69", 69)
+        save_file.gv_71 = data.get("gv_71", 71)
+        save_file.map_resets = game.map.map_reset.MapResets.deserialize(
+            data.get("map_resets", {})
+        )
+        save_file.gv_72 = data.get("gv_72", 72)
+        save_file.uncanny = game.map.uncanny.Uncanny.deserialize(
+            data.get("uncanny", {})
+        )
+        save_file.gv_76 = data.get("gv_76", 76)
+        save_file.uncanny_2 = game.map.uncanny.Uncanny.deserialize(
+            data.get("uncanny_2", {})
+        )
+        save_file.event_capsules_3 = data.get("event_capsules_3", [])
+        save_file.ub5 = data.get("ub5", False)
+        save_file.gv_77 = data.get("gv_77", 77)
+        save_file.np = data.get("np", 0)
+        save_file.ub6 = data.get("ub6", False)
+        save_file.gv_80000 = data.get("gv_80000", 80000)
+        save_file.ub7 = data.get("ub7", False)
+        save_file.leadership = data.get("leadership", 0)
+        save_file.gv_80200 = data.get("gv_80200", 80200)
+        save_file.filibuster_stage_id = data.get("filibuster_stage_id", 0)
+        save_file.filibuster_stage_enabled = data.get("filibuster_stage_enabled", False)
+        save_file.gv_80300 = data.get("gv_80300", 80300)
+        save_file.uil5 = data.get("uil5", [])
+        save_file.gv_80500 = data.get("gv_80500", 80500)
+        save_file.uil6 = data.get("uil6", [])
+        save_file.legend_quest = game.map.legend_quest.Chapters.deserialize(
+            data.get("legend_quest", {})
+        )
+        save_file.ush1 = data.get("ush1", 0)
+        save_file.uby1 = data.get("uby1", 0)
+        save_file.gv_80600 = data.get("gv_80600", 80600)
+        save_file.uiid1 = data.get("uiid1", {})
+        save_file.gv_80700 = data.get("gv_80700", 80700)
+        save_file.uby2 = data.get("uby2", 0)
+        save_file.gv_100600 = data.get("gv_100600", 10600)
+        save_file.restart_pack = data.get("restart_pack", 0)
+        save_file.gv_81000 = data.get("gv_81000", 81000)
+        save_file.medals = game.catbase.medals.Medals.deserialize(
+            data.get("medals", {})
+        )
+        save_file.ushbd1 = data.get("ushbd1", {})
+        save_file.uidiid1 = data.get("uidiid1", {})
+        save_file.uiid2 = data.get("uiid2", {})
+        save_file.gv_90000 = data.get("gv_90000", 90000)
+        save_file.ush2 = data.get("ush2", 0)
+        save_file.ush3 = data.get("ush3", 0)
+        save_file.ui15 = data.get("ui15", 0)
+        save_file.ud1 = data.get("ud1", 0.0)
+        save_file.gv_90100 = data.get("gv_90100", 90100)
+        save_file.utl1 = data.get("utl1", [])
+        save_file.uidd1 = data.get("uidd1", {})
+        save_file.gauntlets = game.map.gauntlets.Chapters.deserialize(
+            data.get("gauntlets", {})
+        )
+        save_file.gv_90300 = data.get("gv_90300", 90300)
+        save_file.gauntlets_2 = game.map.gauntlets.Chapters.deserialize(
+            data.get("gauntlets_2", {})
+        )
+        save_file.enigma = game.map.enigma.Enigma.deserialize(data.get("enigma", {}))
+        save_file.cleared_slots = game.battle.cleared_slots.ClearedSlots.deserialize(
+            data.get("cleared_slots", {})
+        )
+        save_file.gv_90400 = data.get("gv_90400", 90400)
+        save_file.collab_gauntlets = game.map.gauntlets.Chapters.deserialize(
+            data.get("collab_gauntlets", {})
+        )
+        save_file.ub8 = data.get("ub8", False)
+        save_file.ud2 = data.get("ud2", 0.0)
+        save_file.ud3 = data.get("ud3", 0.0)
+        save_file.ui16 = data.get("ui16", 0)
+        save_file.uby3 = data.get("uby3", 0)
+        save_file.ub9 = data.get("ub9", False)
+        save_file.ud4 = data.get("ud4", 0.0)
+        save_file.ud5 = data.get("ud5", 0.0)
+        save_file.gv_90500 = data.get("gv_90500", 90500)
+        save_file.talent_orbs = game.catbase.talent_orbs.TalentOrbs.deserialize(
+            data.get("talent_orbs", {})
+        )
+        save_file.uidiid2 = data.get("uidiid2", {})
+        save_file.ub10 = data.get("ub10", False)
+        save_file.gv_90700 = data.get("gv_90700", 90700)
+        save_file.uil7 = data.get("uil7", [])
+        save_file.ubl2 = data.get("ubl2", [])
+        save_file.gv_90800 = data.get("gv_90800", 90800)
+        save_file.cat_shrine = game.gamoto.cat_shrine.CatShrine.deserialize(
+            data.get("cat_shrine", {})
+        )
+        save_file.ud6 = data.get("ud6", 0.0)
+        save_file.ud7 = data.get("ud7", 0)
+        save_file.gv_90900 = data.get("gv_90900", 90900)
+        save_file.gv_91000 = data.get("gv_91000", 91000)
+        save_file.legend_tickets = data.get("legend_tickets", 0)
+        save_file.uiil1 = data.get("uiil1", [])
+        save_file.ub11 = data.get("ub11", False)
+        save_file.ub12 = data.get("ub12", False)
+        save_file.password_refresh_token = data.get("password_refresh_token", "")
+        save_file.ub13 = data.get("ub13", False)
+        save_file.uby4 = data.get("uby4", 0)
+        save_file.uby5 = data.get("uby5", 0)
+        save_file.ud8 = data.get("ud8", 0.0)
+        save_file.ud9 = data.get("ud9", 0.0)
+        save_file.gv_100000 = data.get("gv_100000", 100000)
+        save_file.date_int = data.get("date_int", 0)
+        save_file.gv_100100 = data.get("gv_100100", 100100)
+        save_file.utl2 = data.get("utl2", [])
+        save_file.gv_100300 = data.get("gv_100300", 100300)
+        save_file.uil8 = data.get("uil8", [])
+        save_file.ub14 = data.get("ub14", False)
+        save_file.gv_100400 = data.get("gv_100400", 100400)
+        save_file.ud10 = data.get("ud10", 0.0)
+        save_file.platinum_shards = data.get("platinum_shards", 0)
+        save_file.ub15 = data.get("ub15", False)
+        save_file.gv_100600 = data.get("gv_100600", 100600)
+        save_file.ushbd2 = data.get("ushbd2", {})
+        save_file.ushdshd = data.get("ushdshd", {})
+        save_file.ushid = data.get("ushid", {})
+        save_file.gv_100700 = data.get("gv_100700", 100700)
+        save_file.aku = game.map.aku.Chapters.deserialize(data.get("aku", {}))
+        save_file.ub16 = data.get("ub16", False)
+        save_file.ub17 = data.get("ub17", False)
+        save_file.ushdshd2 = data.get("ushdshd2", {})
+        save_file.ushdd = data.get("ushdd", {})
+        save_file.ushdd2 = data.get("ushdd2", {})
+        save_file.ub18 = data.get("ub18", False)
+        save_file.gv_100900 = data.get("gv_100900", 100900)
+        save_file.uby6 = data.get("uby6", 0)
+        save_file.gv_101000 = data.get("gv_101000", 101000)
+        save_file.uidtii = data.get("uidtii", {})
+        save_file.gv_110000 = data.get("gv_110000", 110000)
+        save_file.behemoth_culling = game.map.gauntlets.Chapters.deserialize(
+            data.get("behemoth_culling", {})
+        )
+        save_file.ub19 = data.get("ub19", False)
+        save_file.gv_110500 = data.get("gv_110500", 110500)
+        save_file.ub20 = data.get("ub20", False)
+        save_file.gv_110600 = data.get("gv_110600", 110600)
+        save_file.uidtff = data.get("uidtff", {})
+        save_file.ub20 = data.get("ub20", False)
+        save_file.gv_110700 = data.get("gv_110700", 110700)
+        save_file.ub21 = data.get("ub21", False)
+        save_file.dojo_3x_speed = data.get("dojo_3x_speed", False)
+        save_file.ub22 = data.get("ub22", False)
+        save_file.ub23 = data.get("ub23", False)
+        save_file.gv_110800 = data.get("gv_110800", 110800)
+        save_file.ui17 = data.get("ui17", 0)
+        save_file.ush4 = data.get("ush4", 0)
+        save_file.uby7 = data.get("uby7", 0)
+        save_file.uby8 = data.get("uby8", 0)
+        save_file.ub24 = data.get("ub24", False)
+        save_file.uby9 = data.get("uby9", 0)
+        save_file.ushl1 = data.get("ushl1", [])
+        save_file.ushl2 = data.get("ushl2", [])
+        save_file.ushl3 = data.get("ushl3", [])
+        save_file.ui18 = data.get("ui18", 0)
+        save_file.ui19 = data.get("ui19", 0)
+        save_file.ui20 = data.get("ui20", 0)
+        save_file.ush5 = data.get("ush5", 0)
+        save_file.ush6 = data.get("ush6", 0)
+        save_file.ush7 = data.get("ush7", 0)
+        save_file.ush8 = data.get("ush8", 0)
+        save_file.uby10 = data.get("uby10", 0)
+        save_file.ub25 = data.get("ub25", False)
+        save_file.ub26 = data.get("ub26", False)
+        save_file.ub27 = data.get("ub27", False)
+        save_file.ub28 = data.get("ub28", False)
+        save_file.ub29 = data.get("ub29", False)
+        save_file.ub30 = data.get("ub30", False)
+        save_file.uby11 = data.get("uby11", 0)
+        save_file.ushl4 = data.get("ushl4", [])
+        save_file.ubl3 = data.get("ubl3", [])
+        save_file.ushl5 = data.get("ushl5", [])
+        save_file.gv_111000 = data.get("gv_111000", 111000)
+        save_file.zero_legends = game.map.zero_legends.Chapters.deserialize(
+            data.get("zero_legends", [])
+        )
+        save_file.uby12 = data.get("uby12", 0)
+        save_file.gv_120000 = data.get("gv_120000", 120000)
+        save_file.ushl6 = data.get("ushl6", [])
+        save_file.gv_120100 = data.get("gv_120100", 120100)
+        save_file.ub31 = data.get("ub31", False)
+        save_file.ush9 = data.get("ush9", 0)
+        save_file.ushshd = data.get("ushshd", {})
+        save_file.gv_120200 = data.get("gv_120200", 120200)
+        save_file.remaining_data = base64.b64decode(data.get("remaining_data", ""))
+
+        return save_file
 
     def not_jp(self) -> bool:
         return self.cc != country_code.CountryCode.JP

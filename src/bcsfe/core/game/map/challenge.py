@@ -39,9 +39,12 @@ class Challenge:
 
     @staticmethod
     def deserialize(data: dict[str, Any]) -> "Challenge":
-        return Challenge(
-            chapters.Chapters.deserialize(data["chapters"]),
+        challenge = Challenge(
+            chapters.Chapters.deserialize(data.get("chapters", {})),
         )
+        challenge.scores = data.get("scores", [])
+        challenge.shown_popup = data.get("shown_popup", False)
+        return challenge
 
     def __repr__(self):
         return f"Challenge({self.chapters})"

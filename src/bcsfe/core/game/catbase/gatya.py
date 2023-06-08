@@ -110,19 +110,19 @@ class Gatya:
 
     @staticmethod
     def deserialize(data: dict[str, Any]) -> "Gatya":
-        gatya = Gatya(data["rare_seed"], data["normal_seed"])
-        gatya.stepup_stage_3_cooldown = data["stepup_stage_3_cooldown"]
-        gatya.previous_normal_roll = data["previous_normal_roll"]
-        gatya.previous_normal_roll_type = data["previous_normal_roll_type"]
-        gatya.previous_rare_roll = data["previous_rare_roll"]
-        gatya.previous_rare_roll_type = data["previous_rare_roll_type"]
-        gatya.unknown1 = data["unknown1"]
-        gatya.roll_single = data["roll_single"]
-        gatya.roll_multi = data["roll_multi"]
-        gatya.trade_progress = data["trade_progress"]
-        gatya.event_seed = data["event_seed"]
-        gatya.step_up_stages = data["step_up_stages"]
-        gatya.stepup_durations = data["stepup_durations"]
+        gatya = Gatya(data.get("rare_seed", 0), data.get("normal_seed", 0))
+        gatya.stepup_stage_3_cooldown = data.get("stepup_stage_3_cooldown", 0)
+        gatya.previous_normal_roll = data.get("previous_normal_roll", 0)
+        gatya.previous_normal_roll_type = data.get("previous_normal_roll_type", 0)
+        gatya.previous_rare_roll = data.get("previous_rare_roll", 0)
+        gatya.previous_rare_roll_type = data.get("previous_rare_roll_type", 0)
+        gatya.unknown1 = data.get("unknown1", False)
+        gatya.roll_single = data.get("roll_single", False)
+        gatya.roll_multi = data.get("roll_multi", False)
+        gatya.trade_progress = data.get("trade_progress", 0)
+        gatya.event_seed = data.get("event_seed", 0)
+        gatya.step_up_stages = data.get("step_up_stages", {})
+        gatya.stepup_durations = data.get("stepup_durations", {})
         return gatya
 
     def __repr__(self) -> str:

@@ -25,7 +25,7 @@ class CatSlot:
 
     @staticmethod
     def deserialize(data: dict[str, Any]) -> "CatSlot":
-        return CatSlot(data["cat_id"], data["form"])
+        return CatSlot(data.get("cat_id", 0), data.get("form", 0))
 
     def __repr__(self):
         return f"CatSlot({self.cat_id}, {self.form})"
@@ -80,11 +80,11 @@ class LineupCat:
     @staticmethod
     def deserialize(data: dict[str, Any]) -> "LineupCat":
         return LineupCat(
-            data["index"],
-            [CatSlot.deserialize(cat) for cat in data["cats"]],
-            data["u1"],
-            data["u2"],
-            data["u3"],
+            data.get("index", 0),
+            [CatSlot.deserialize(cat) for cat in data.get("cats", [])],
+            data.get("u1", 0),
+            data.get("u2", 0),
+            data.get("u3", 0),
         )
 
     def __repr__(self):
@@ -137,14 +137,12 @@ class StageSlot:
     def write(self, stream: io.data.Data):
         stream.write_int(self.stage_id)
 
-    def serialize(self) -> dict[str, Any]:
-        return {
-            "stage_id": self.stage_id,
-        }
+    def serialize(self) -> int:
+        return self.stage_id
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "StageSlot":
-        return StageSlot(data["stage_id"])
+    def deserialize(data: int) -> "StageSlot":
+        return StageSlot(data)
 
     def __repr__(self):
         return f"StageSlot({self.stage_id})"
@@ -180,8 +178,8 @@ class StageLineups:
     @staticmethod
     def deserialize(data: dict[str, Any]) -> "StageLineups":
         return StageLineups(
-            data["index"],
-            [StageSlot.deserialize(slot) for slot in data["slots"]],
+            data.get("index", 0),
+            [StageSlot.deserialize(slot) for slot in data.get("slots", [])],
         )
 
     def __repr__(self):
@@ -214,7 +212,7 @@ class ClearedStageSlots:
     @staticmethod
     def deserialize(data: dict[str, Any]) -> "ClearedStageSlots":
         return ClearedStageSlots(
-            [StageLineups.deserialize(lineup) for lineup in data["lineups"]],
+            [StageLineups.deserialize(lineup) for lineup in data.get("lineups", [])],
         )
 
     def __repr__(self):
@@ -259,9 +257,9 @@ class ClearedSlots:
     @staticmethod
     def deserialize(data: dict[str, Any]) -> "ClearedSlots":
         return ClearedSlots(
-            ClearedSlotsCat.deserialize(data["cleared_slots"]),
-            ClearedStageSlots.deserialize(data["cleared_stage_slots"]),
-            data["unknown"],
+            ClearedSlotsCat.deserialize(data.get("cleared_slots", [])),
+            ClearedStageSlots.deserialize(data.get("cleared_stage_slots", {})),
+            data.get("unknown", {}),
         )
 
     def __repr__(self):

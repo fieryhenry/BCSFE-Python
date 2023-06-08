@@ -146,10 +146,10 @@ class ItemPack:
 
     @staticmethod
     def deserialize(data: dict[str, Any]) -> "ItemPack":
-        item_pack = ItemPack(Purchases.deserialize(data["purchases"]))
-        item_pack.displayed_packs = data["displayed_packs"]
-        item_pack.three_days_started = data["three_days_started"]
-        item_pack.three_days_end_timestamp = data["three_days_end_timestamp"]
+        item_pack = ItemPack(Purchases.deserialize(data.get("purchases", {})))
+        item_pack.displayed_packs = data.get("displayed_packs", {})
+        item_pack.three_days_started = data.get("three_days_started", False)
+        item_pack.three_days_end_timestamp = data.get("three_days_end_timestamp", 0.0)
         return item_pack
 
     def __repr__(self) -> str:

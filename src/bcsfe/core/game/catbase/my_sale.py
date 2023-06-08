@@ -34,7 +34,6 @@ class MySale:
         stream.write_variable_length_int(len(self.dict_2))
         for key, value in self.dict_2.items():
             stream.write_variable_length_int(key)
-            # print(f"Byte", stream.pos)
             stream.write_byte(value)
 
     def serialize(self) -> dict[str, Any]:
@@ -45,7 +44,7 @@ class MySale:
 
     @staticmethod
     def deserialize(data: dict[str, Any]) -> "MySale":
-        return MySale(data["dict_1"], data["dict_2"])
+        return MySale(data.get("dict_1", {}), data.get("dict_2", {}))
 
     def __repr__(self) -> str:
         return f"MySale(dict_1={self.dict_1}, dict_2={self.dict_2})"

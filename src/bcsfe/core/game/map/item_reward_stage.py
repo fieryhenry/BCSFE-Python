@@ -100,12 +100,12 @@ class ItemObtain:
     def write(self, stream: io.data.Data):
         stream.write_bool(self.flag)
 
-    def serialize(self) -> dict[str, Any]:
-        return {"flag": self.flag}
+    def serialize(self) -> bool:
+        return self.flag
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "ItemObtain":
-        return ItemObtain(data["flag"])
+    def deserialize(data: bool) -> "ItemObtain":
+        return ItemObtain(data)
 
     def __repr__(self) -> str:
         return f"ItemObtain(flag={self.flag})"
@@ -145,7 +145,7 @@ class ItemObtainSet:
         return ItemObtainSet(
             {
                 int(item_id): ItemObtain.deserialize(item_obtain)
-                for item_id, item_obtain in data["item_obtains"].items()
+                for item_id, item_obtain in data.get("item_obtains", {}).items()
             }
         )
 
@@ -207,12 +207,12 @@ class UnobtainedItem:
     def write(self, stream: io.data.Data):
         stream.write_bool(self.unobtained)
 
-    def serialize(self) -> dict[str, Any]:
-        return {"unobtained": self.unobtained}
+    def serialize(self) -> bool:
+        return self.unobtained
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "UnobtainedItem":
-        return UnobtainedItem(data["unobtained"])
+    def deserialize(data: bool) -> "UnobtainedItem":
+        return UnobtainedItem(data)
 
     def __repr__(self) -> str:
         return f"UnobtainedItem(unobtained={self.unobtained})"
@@ -252,7 +252,7 @@ class UnobtainedItems:
         return UnobtainedItems(
             {
                 int(item_id): UnobtainedItem.deserialize(unobtained_item)
-                for item_id, unobtained_item in data["unobtained_items"].items()
+                for item_id, unobtained_item in data.get("unobtained_items", {}).items()
             }
         )
 
@@ -324,12 +324,12 @@ class Chapters:
         chapters = Chapters(
             [
                 SubChapterStars.deserialize(sub_chapter)
-                for sub_chapter in data["sub_chapters"]
+                for sub_chapter in data.get("sub_chapters", [])
             ]
         )
-        chapters.item_obtains = ItemObtainSets.deserialize(data["item_obtains"])
+        chapters.item_obtains = ItemObtainSets.deserialize(data.get("item_obtains", {}))
         chapters.unobtained_items = UnobtainedItems.deserialize(
-            data["unobtained_items"]
+            data.get("unobtained_items", {})
         )
         return chapters
 

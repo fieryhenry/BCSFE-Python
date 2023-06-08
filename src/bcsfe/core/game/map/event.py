@@ -96,11 +96,13 @@ class EventSubChapter:
     @staticmethod
     def deserialize(data: dict[str, Any]) -> "EventSubChapter":
         sub_chapter = EventSubChapter(
-            selected_stage=data["selected_stage"],
+            selected_stage=data.get("selected_stage", 0),
         )
-        sub_chapter.clear_progress = data["clear_progress"]
-        sub_chapter.stages = [EventStage.deserialize(stage) for stage in data["stages"]]
-        sub_chapter.chapter_unlock_state = data["chapter_unlock_state"]
+        sub_chapter.clear_progress = data.get("clear_progress", 0)
+        sub_chapter.stages = [
+            EventStage.deserialize(stage) for stage in data.get("stages", [])
+        ]
+        sub_chapter.chapter_unlock_state = data.get("chapter_unlock_state", 0)
         return sub_chapter
 
     def __repr__(self) -> str:
@@ -168,10 +170,10 @@ class EventSubChapterStars:
     @staticmethod
     def deserialize(data: dict[str, Any]) -> "EventSubChapterStars":
         chapters = [
-            EventSubChapter.deserialize(chapter) for chapter in data["chapters"]
+            EventSubChapter.deserialize(chapter) for chapter in data.get("chapters", [])
         ]
         chapter = EventSubChapterStars(chapters)
-        chapter.legend_restriction = data["legend_restriction"]
+        chapter.legend_restriction = data.get("legend_restriction", 0)
         return chapter
 
     def __repr__(self) -> str:
@@ -470,13 +472,16 @@ class EventChapters:
     @staticmethod
     def deserialize(data: dict[str, Any]) -> "EventChapters":
         chapters = [
-            EventChapterGroup.deserialize(chapter) for chapter in data["chapters"]
+            EventChapterGroup.deserialize(chapter)
+            for chapter in data.get("chapters", [])
         ]
         ch = EventChapters(chapters)
-        ch.completed_one_level_in_chapter = data["completed_one_level_in_chapter"]
-        ch.displayed_cleared_limit_text = data["displayed_cleared_limit_text"]
-        ch.event_start_dates = data["event_start_dates"]
-        ch.stages_reward_claimed = data["stages_reward_claimed"]
+        ch.completed_one_level_in_chapter = data.get(
+            "completed_one_level_in_chapter", {}
+        )
+        ch.displayed_cleared_limit_text = data.get("displayed_cleared_limit_text", {})
+        ch.event_start_dates = data.get("event_start_dates", {})
+        ch.stages_reward_claimed = data.get("stages_reward_claimed", [])
         return ch
 
     def __repr__(self) -> str:

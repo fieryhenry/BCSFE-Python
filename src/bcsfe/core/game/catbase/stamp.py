@@ -40,10 +40,10 @@ class StampData:
     @staticmethod
     def deserialize(data: dict[str, Any]) -> "StampData":
         return StampData(
-            data["current_stamp"],
-            data["collected_stamp"],
-            data["unknown"],
-            data["daily_reward"],
+            data.get("current_stamp", 0),
+            data.get("collected_stamp", []),
+            data.get("unknown", 0),
+            data.get("daily_reward", 0),
         )
 
     def __repr__(self):

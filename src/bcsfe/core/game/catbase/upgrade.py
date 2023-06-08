@@ -32,7 +32,7 @@ class Upgrade:
 
     @staticmethod
     def deserialize(data: dict[str, Any]) -> "Upgrade":
-        return Upgrade(data["plus"], data["base"])
+        return Upgrade(data.get("plus", 0), data.get("base", 0))
 
     def __repr__(self) -> str:
         return f"Upgrade(plus={self.plus}, base={self.base})"

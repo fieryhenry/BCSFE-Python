@@ -40,9 +40,11 @@ class Skill:
 
     @staticmethod
     def deserialize(data: dict[str, Any]) -> "Skill":
-        skill = Skill(upgrade.Upgrade.deserialize(data["upgrade"]))
-        skill.seen = data["seen"]
-        skill.max_upgrade_level = upgrade.Upgrade.deserialize(data["max_upgrade_level"])
+        skill = Skill(upgrade.Upgrade.deserialize(data.get("upgrade", {})))
+        skill.seen = data.get("seen", 0)
+        skill.max_upgrade_level = upgrade.Upgrade.deserialize(
+            data.get("max_upgrade_level", {})
+        )
         return skill
 
     def __repr__(self) -> str:

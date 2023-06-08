@@ -150,19 +150,19 @@ class Gamatoto:
     @staticmethod
     def deserialize(data: dict[str, Any]) -> "Gamatoto":
         gamatoto = Gamatoto(
-            data["remaining_seconds"],
-            data["return_flag"],
-            data["xp"],
-            data["dest_id"],
-            data["recon_length"],
-            data["unknown"],
-            data["notif_value"],
+            data.get("remaining_seconds", 0.0),
+            data.get("return_flag", False),
+            data.get("xp", 0),
+            data.get("dest_id", 0),
+            data.get("recon_length", 0),
+            data.get("unknown", 0),
+            data.get("notif_value", 0),
         )
-        gamatoto.helpers = Helpers.deserialize(data["helpers"])
-        gamatoto.is_ad_present = data["is_ad_present"]
-        gamatoto.skin = data["skin"]
-        gamatoto.collab_flags = data["collab_flags"]
-        gamatoto.collab_durations = data["collab_durations"]
+        gamatoto.helpers = Helpers.deserialize(data.get("helpers", []))
+        gamatoto.is_ad_present = data.get("is_ad_present", False)
+        gamatoto.skin = data.get("skin", 0)
+        gamatoto.collab_flags = data.get("collab_flags", {})
+        gamatoto.collab_durations = data.get("collab_durations", {})
         return gamatoto
 
     def __repr__(self):

@@ -6,6 +6,7 @@ from bcsfe.core.game.map import chapters
 class Tower:
     def __init__(self, chapters: chapters.Chapters):
         self.chapters = chapters
+        self.item_obtain_states: list[list[bool]] = []
 
     @staticmethod
     def read(data: io.data.Data) -> "Tower":
@@ -36,9 +37,11 @@ class Tower:
 
     @staticmethod
     def deserialize(data: dict[str, Any]) -> "Tower":
-        return Tower(
-            chapters.Chapters.deserialize(data["chapters"]),
+        tower = Tower(
+            chapters.Chapters.deserialize(data.get("chapters", {})),
         )
+        tower.item_obtain_states = data.get("item_obtain_states", [])
+        return tower
 
     def __repr__(self):
         return f"Tower({self.chapters}, {self.item_obtain_states})"

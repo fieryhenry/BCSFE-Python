@@ -91,9 +91,9 @@ class Cannons:
         return Cannons(
             {
                 cannon_id: Cannon.deserialize(cannon)
-                for cannon_id, cannon in data["cannons"].items()
+                for cannon_id, cannon in data.get("cannons", {}).items()
             },
-            data["selected_parts"],
+            data.get("selected_parts", []),
         )
 
     def __repr__(self):
@@ -141,12 +141,14 @@ class Ototo:
 
     @staticmethod
     def deserialize(data: dict[str, Any]) -> "Ototo":
-        ototo = Ototo(base_materials.Materials.deserialize(data["base_materials"]))
-        ototo.remaining_seconds = data["remaining_seconds"]
-        ototo.return_flag = data["return_flag"]
-        ototo.improve_id = data["improve_id"]
-        ototo.engineers = data["engineers"]
-        ototo.cannons = Cannons.deserialize(data["cannons"])
+        ototo = Ototo(
+            base_materials.Materials.deserialize(data.get("base_materials", []))
+        )
+        ototo.remaining_seconds = data.get("remaining_seconds", 0.0)
+        ototo.return_flag = data.get("return_flag", False)
+        ototo.improve_id = data.get("improve_id", 0)
+        ototo.engineers = data.get("engineers", 0)
+        ototo.cannons = Cannons.deserialize(data.get("cannons", {}))
         return ototo
 
     def __repr__(self):

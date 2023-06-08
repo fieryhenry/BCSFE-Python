@@ -200,19 +200,19 @@ class Ranking:
     @staticmethod
     def deserialize(data: dict[str, Any]) -> "Ranking":
         ranking = Ranking(
-            data["score"],
-            data["ranking"],
-            data["has_submitted"],
-            data["has_completed"],
-            data["has_seen_results"],
-            data["start_date"],
-            data["end_date"],
-            data["event_number"],
-            data["should_show_rank_description"],
-            data["should_show_start_message"],
-            data["submit_error_flag"],
+            data.get("score", 0),
+            data.get("ranking", 0),
+            data.get("has_submitted", False),
+            data.get("has_completed", False),
+            data.get("has_seen_results", False),
+            data.get("start_date", 0),
+            data.get("end_date", 0),
+            data.get("event_number", 0),
+            data.get("should_show_rank_description", False),
+            data.get("should_show_start_message", False),
+            data.get("submit_error_flag", False),
         )
-        ranking.did_win_rewards = data["did_win_rewards"]
+        ranking.did_win_rewards = data.get("did_win_rewards", False)
         return ranking
 
     def __repr__(self) -> str:
@@ -267,13 +267,13 @@ class Dojo:
 
     @staticmethod
     def deserialize(data: dict[str, Any]) -> "Dojo":
-        chapters = Chapters.deserialize(data["chapters"])
-        item_locks = data["item_locks"]
-        item_lock_flags = data["item_lock_flags"]
+        chapters = Chapters.deserialize(data.get("chapters", {}))
+        item_locks = data.get("item_locks", [])
+        item_lock_flags = data.get("item_lock_flags", False)
         dojo = Dojo(chapters)
         dojo.item_locks = item_locks
         dojo.item_lock_flags = item_lock_flags
-        dojo.ranking = Ranking.deserialize(data["ranking"])
+        dojo.ranking = Ranking.deserialize(data.get("ranking", {}))
         return dojo
 
     def __repr__(self) -> str:

@@ -118,6 +118,10 @@ class Data:
         self.pos += length
         return result
 
+    def read_to_end(self, remaining_data: int = 0) -> bytes:
+        length = len(self.data) - self.pos - remaining_data
+        return self.read_bytes(length)
+
     def read_int(self) -> int:
         result = struct.unpack(f"{self.endiness}i", self.read_bytes(4))[0]
         return result
@@ -282,35 +286,64 @@ class Data:
     def write_ulong(self, value: int):
         self.write_bytes(struct.pack(f"{self.endiness}Q", value))
 
-    def write_int_list(self, value: list[int], write_length: bool = True):
+    def write_list(
+        self,
+        value: list[Any],
+        data_type: str,
+        empty_value: Any = None,
+        write_length: bool = True,
+        length: Optional[int] = None,
+    ):
+        if length is None:
+            length = len(value)
         if write_length:
-            self.write_int(len(value))
+            self.write_int(length)
+        if length > len(value):
+            value += [empty_value] * (length - len(value))
+        elif length < len(value):
+            value = value[:length]
         for item in value:
-            self.write_int(item)
+            getattr(self, f"write_{data_type}")(item)
 
-    def write_bool_list(self, value: list[bool], write_length: bool = True):
-        if write_length:
-            self.write_int(len(value))
-        for item in value:
-            self.write_bool(item)
+    def write_int_list(
+        self,
+        value: list[int],
+        write_length: bool = True,
+        length: Optional[int] = None,
+    ):
+        self.write_list(value, "int", 0, write_length, length)
 
-    def write_string_list(self, value: list[str], write_length: bool = True):
-        if write_length:
-            self.write_int(len(value))
-        for item in value:
-            self.write_string(item)
+    def write_bool_list(
+        self,
+        value: list[bool],
+        write_length: bool = True,
+        length: Optional[int] = None,
+    ):
+        self.write_list(value, "bool", False, write_length, length)
 
-    def write_byte_list(self, value: list[int], write_length: bool = True):
-        if write_length:
-            self.write_int(len(value))
-        for item in value:
-            self.write_byte(item)
+    def write_string_list(
+        self,
+        value: list[str],
+        write_length: bool = True,
+        length: Optional[int] = None,
+    ):
+        self.write_list(value, "string", "", write_length, length)
 
-    def write_short_list(self, value: list[int], write_length: bool = True):
-        if write_length:
-            self.write_int(len(value))
-        for item in value:
-            self.write_short(item)
+    def write_byte_list(
+        self,
+        value: list[int],
+        write_length: bool = True,
+        length: Optional[int] = None,
+    ):
+        self.write_list(value, "byte", 0, write_length, length)
+
+    def write_short_list(
+        self,
+        value: list[int],
+        write_length: bool = True,
+        length: Optional[int] = None,
+    ):
+        self.write_list(value, "short", 0, write_length, length)
 
     def read_bool(self) -> bool:
         return self.read_byte() != 0
@@ -320,10 +353,6 @@ class Data:
 
     def read_int_tuple(self) -> tuple[int, int]:
         return self.read_int(), self.read_int()
-
-    def write_int_tuple(self, value: tuple[int, int]):
-        self.write_int(value[0])
-        self.write_int(value[1])
 
     def read_int_tuple_list(
         self, length: Optional[int] = None
@@ -335,13 +364,17 @@ class Data:
             result.append(self.read_int_tuple())
         return result
 
+    def write_int_tuple(self, value: tuple[int, int]):
+        self.write_int(value[0])
+        self.write_int(value[1])
+
     def write_int_tuple_list(
-        self, value: list[tuple[int, int]], write_length: bool = True
+        self,
+        value: list[tuple[int, int]],
+        write_length: bool = True,
+        length: Optional[int] = None,
     ):
-        if write_length:
-            self.write_int(len(value))
-        for item in value:
-            self.write_int_tuple(item)
+        self.write_list(value, "int_tuple", (0, 0), write_length, length)
 
     def read_int_bool_dict(self, length: Optional[int] = None) -> dict[int, bool]:
         if length is None:

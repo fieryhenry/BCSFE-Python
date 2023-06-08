@@ -151,16 +151,16 @@ class Missions:
     @staticmethod
     def deserialize(data: dict[str, Any]):
         missions = Missions(
-            data["clear_states"],
-            data["requirements"],
-            data["progress_types"],
-            data["gamatoto_values"],
-            data["nyancombo_values"],
-            data["user_rank_values"],
-            data["expiry_values"],
-            data["preparing_values"],
+            data.get("clear_states", {}),
+            data.get("requirements", {}),
+            data.get("progress_types", {}),
+            data.get("gamatoto_values", {}),
+            data.get("nyancombo_values", {}),
+            data.get("user_rank_values", {}),
+            data.get("expiry_values", {}),
+            data.get("preparing_values", {}),
         )
-        missions.weekly_missions = data["weekly_missions"]
+        missions.weekly_missions = data.get("weekly_missions", {})
         return missions
 
     def __repr__(self):

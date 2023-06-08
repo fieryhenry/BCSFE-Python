@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.7.2.2] - 2023-06-08
+
+#### Fixed
+
+- The editor crashing when editing meow medals or event stages
+
 ## [2.7.2.1] - 2023-05-28
 
 #### Fixed

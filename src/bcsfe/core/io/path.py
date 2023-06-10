@@ -52,6 +52,11 @@ class Path:
         else:
             raise OSError("Unknown OS")
 
+    def run(self, arg: str = ""):
+        cmd_text = self.path + " " + arg
+        cmd = command.Command(cmd_text, display_output=False)
+        return cmd.run()
+
     def to_str(self) -> str:
         return self.path
 
@@ -212,6 +217,7 @@ class Path:
             else:
                 raise FileExistsError(f"File already exists: {new_path}")
         os.rename(self.path, new_path.path)
+        self.path = new_path.path
 
     def parent(self) -> "Path":
         return Path(os.path.dirname(self.path))

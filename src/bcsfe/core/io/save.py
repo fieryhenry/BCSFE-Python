@@ -5,7 +5,19 @@ from bcsfe.core import country_code, game_version, game, crypto
 import datetime
 
 
-class CantDetectCCError(Exception):
+class CantDetectSaveCCError(Exception):
+    pass
+
+
+class InitSaveError(Exception):
+    pass
+
+
+class SaveSaveError(Exception):
+    pass
+
+
+class LoadSaveError(Exception):
     pass
 
 
@@ -29,14 +41,14 @@ class SaveFile:
         self.init_save(gv)
 
         if dt is not None and load:
-            self.load()
+            self.load_wrapper()
 
     def detect_cc(self) -> country_code.CountryCode:
         for cc in country_code.CountryCode.get_all():
             self.cc = cc
             if self.verify_hash():
                 return cc
-        raise CantDetectCCError("Please specify a country code")
+        raise CantDetectSaveCCError("Please specify a country code")
 
     def get_salt(self) -> str:
         """Get the salt for the save file. This is used for hashing the save file.
@@ -90,6 +102,16 @@ class SaveFile:
             bool: Whether the hash is valid
         """
         return self.get_current_hash() == self.get_new_hash()
+
+    def load_wrapper(self):
+        try:
+            self.load()
+        except Exception as e:
+            raise LoadSaveError("Failed to load save file") from e
+        if not self.verify_load():
+            raise LoadSaveError(
+                "Save file loaded incorrectly. GV values were not as expected"
+            )
 
     def load(self):
         """Load the save file. For most of this stuff I have no idea what it is used for"""
@@ -360,7 +382,7 @@ class SaveFile:
                 self.gatya_seen_lucky_drops = self.data.read_int_list(length=44)
             else:
                 self.gatya_seen_lucky_drops = self.data.read_int_list()
-            self.banned = self.data.read_bool()
+            self.show_ban_message = self.data.read_bool()
             self.catfood_beginner_purchased = self.data.read_bool_list(length=3)
             self.next_week_timestamp = self.data.read_double()
             self.catfood_beginner_expired = self.data.read_bool_list(length=3)
@@ -1195,7 +1217,7 @@ class SaveFile:
                 )
             else:
                 self.data.write_int_list(self.gatya_seen_lucky_drops)
-            self.data.write_bool(self.banned)
+            self.data.write_bool(self.show_ban_message)
             self.data.write_bool_list(
                 self.catfood_beginner_purchased,
                 write_length=False,
@@ -1819,7 +1841,7 @@ class SaveFile:
             "gv_48": self.gv_48,
             "m_dGetTimeSave3": self.m_dGetTimeSave3,
             "gatya_seen_lucky_drops": self.gatya_seen_lucky_drops,
-            "banned": self.banned,
+            "banned": self.show_ban_message,
             "catfood_beginner_purchased": self.catfood_beginner_purchased,
             "next_week_timestamp": self.next_week_timestamp,
             "catfood_beginner_expired": self.catfood_beginner_expired,
@@ -2184,7 +2206,7 @@ class SaveFile:
         save_file.gv_48 = data.get("gv_48", 48)
         save_file.m_dGetTimeSave3 = data.get("m_dGetTimeSave3", 0.0)
         save_file.gatya_seen_lucky_drops = data.get("gatya_seen_lucky_drops", [])
-        save_file.banned = data.get("banned", False)
+        save_file.show_ban_message = data.get("banned", False)
         save_file.catfood_beginner_purchased = data.get(
             "catfood_beginner_purchased", []
         )
@@ -2515,7 +2537,7 @@ class SaveFile:
         self.energy_notification = False
         self.transfer_flag = False
         self.combo_unlocked_10k_ur = False
-        self.banned = False
+        self.show_ban_message = False
         self.shown_maxcollab_mg = False
         self.event_update_flags = False
         self.filibuster_stage_enabled = False
@@ -2859,7 +2881,7 @@ class SaveFile:
                 self.data.write_bool(False)
             self.dst_index += 1
 
-    def test_save(self):
+    def verify_load(self):
         try:
             assert self.gv_44 == 44
             assert self.gv_45 == 45
@@ -2922,11 +2944,9 @@ class SaveFile:
             assert self.gv_120000 == 120000
             assert self.gv_120100 == 120100
             assert self.gv_120200 == 120200
-
         except AssertionError:
-            raise
-        except Exception:
-            pass
+            return False
+        return True
 
     def calculate_user_rank(self):
         user_rank = 0

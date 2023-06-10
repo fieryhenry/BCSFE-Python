@@ -83,7 +83,10 @@ class GameDataGetter:
 
             if display_text:
                 color.ColoredText.localize(
-                    "downloading", (file_name, pack_name, self.latest_version)
+                    "downloading",
+                    file_name=file_name,
+                    pack_name=pack_name,
+                    version=self.latest_version,
                 )
             data = self.save_file(pack_name, file_name)
             if data is None:

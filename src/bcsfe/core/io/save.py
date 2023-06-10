@@ -2999,9 +2999,11 @@ class SaveFile:
                 return
 
     def remove_strings(self, identifier: str):
-        for i, order in enumerate(self.order_ids):
-            if order.startswith(SaveFile.get_string_identifier(identifier)):
-                self.order_ids.pop(i)
+        new_order_ids: list[str] = []
+        for order in self.order_ids:
+            if not order.startswith(SaveFile.get_string_identifier(identifier)):
+                new_order_ids.append(order)
+        self.order_ids = new_order_ids
 
     def store_dict(
         self, identifier: str, dictionary: dict[str, str], overwrite: bool = True
@@ -3025,7 +3027,8 @@ class SaveFile:
         return dictionary
 
     def remove_dict(self, identifier: str):
-        for i, order in enumerate(self.order_ids):
-            if order.startswith(SaveFile.get_string_identifier(identifier)):
-                self.order_ids.pop(i)
-                return
+        new_order_ids: list[str] = []
+        for order in self.order_ids:
+            if not order.startswith(SaveFile.get_string_identifier(identifier)):
+                new_order_ids.append(order)
+        self.order_ids = new_order_ids

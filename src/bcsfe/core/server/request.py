@@ -1,7 +1,6 @@
 from typing import Any, Callable, Optional
 
 import requests
-from PyQt5 import QtCore
 
 from bcsfe.core import io
 
@@ -38,7 +37,6 @@ class RequestHandler:
 
     def get_stream(
         self,
-        progress_signal: QtCore.pyqtSignal,
     ) -> requests.Response:
         """Sends a GET request and streams the response.
 
@@ -52,12 +50,11 @@ class RequestHandler:
             self.url,
             headers=self.headers,
             stream=True,
-            hooks=dict(response=self.__progress_hook(progress_signal)),
+            hooks=dict(response=self.__progress_hook()),
         )
 
     def __progress_hook(
         self,
-        progress_signal: QtCore.pyqtSignal,
     ) -> Callable[[requests.Response], None]:
         """Creates a progress hook for a GET request.
 

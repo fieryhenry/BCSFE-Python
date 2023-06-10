@@ -1,6 +1,8 @@
 from typing import Any, Callable, Optional
-from bcsfe.core import request, io, country_code
+from bcsfe.core import io, country_code
 from bcsfe.cli import color
+
+from bcsfe.core.server import request
 
 
 class GameDataGetter:

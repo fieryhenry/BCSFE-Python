@@ -1,7 +1,9 @@
 import time
 from typing import Any, Optional
-from bcsfe.core import io, crypto, server, request, country_code, game_version
+from bcsfe.core import io, crypto, server, country_code, game_version
 import jwt
+
+from bcsfe.core.server import request
 
 
 class ServerHandler:

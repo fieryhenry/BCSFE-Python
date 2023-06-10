@@ -35,6 +35,16 @@ class ManagedItem:
         self.detail_code = str(uuid.uuid4())
         self.detail_created_at = int(time.time())
 
+    @staticmethod
+    def from_change(change: int, managed_item_type: ManagedItemType) -> "ManagedItem":
+        """Create a managed item from a change."""
+        if change > 0:
+            detail_type = DetailType.GET
+        else:
+            detail_type = DetailType.USE
+        managed_item = ManagedItem(abs(change), detail_type, managed_item_type)
+        return managed_item
+
     def to_dict(self) -> dict[str, Any]:
         """Convert the managed item to a dictionary."""
 
@@ -83,6 +93,14 @@ class BackupMetaData:
             managed_item = ManagedItem.from_short_form(managed_item_str)
             managed_items.append(managed_item)
         return managed_items
+
+    def add_managed_item(self, managed_item: ManagedItem):
+        managed_items = self.get_managed_items()
+        managed_items.append(managed_item)
+        self.set_managed_items(managed_items)
+
+    def remove_managed_items(self) -> None:
+        self.save_file.remove_strings(self.identifier)
 
     def create(self) -> str:
         """Create the backup metadata."""

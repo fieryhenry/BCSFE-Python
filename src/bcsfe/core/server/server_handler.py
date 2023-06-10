@@ -1,3 +1,4 @@
+import base64
 import time
 from typing import Any, Optional
 from bcsfe.core import io, crypto, server, country_code, game_version
@@ -42,7 +43,30 @@ class ServerHandler:
         self.save_file.store_dict(ServerHandler.get_save_key_key(), save_key)
 
     def get_stored_save_key_data(self) -> Optional[dict[str, Any]]:
-        return self.save_file.get_dict(ServerHandler.get_save_key_key())
+        save_key_data = self.save_file.get_dict(ServerHandler.get_save_key_key())
+        if save_key_data is None:
+            return None
+        if not self.validate_save_key_data(save_key_data):
+            self.remove_stored_save_key_data()
+            return None
+        return save_key_data
+
+    def validate_save_key_data(self, save_key_data: dict[str, Any]) -> bool:
+        policy = save_key_data.get("policy")
+        if policy is None:
+            return False
+        policy = base64.b64decode(policy)
+        json_policy = io.json_file.JsonFile.from_data(io.data.Data(policy)).get_json()
+        expiration = json_policy.get("expiration")
+        if expiration is None:
+            return False
+        expiration = int(
+            time.mktime(time.strptime(expiration, "%Y-%m-%dT%H:%M:%S.%fZ"))
+        )
+        expiration += 3600
+        if expiration < time.time():
+            return False
+        return True
 
     def remove_stored_save_key_data(self):
         self.save_file.remove_dict(ServerHandler.get_save_key_key())
@@ -133,11 +157,14 @@ class ServerHandler:
 
         response = self.do_request(url, data)
         if response is None:
+            self.remove_stored_auth_token()
+            self.remove_stored_password()
             return None
         payload, _ = response
         auth_token = payload.get("token", None)
         if auth_token is None:
             self.remove_stored_auth_token()
+            self.remove_stored_password()
             return None
         self.save_auth_token(auth_token)
         return auth_token
@@ -209,7 +236,7 @@ class ServerHandler:
 
     def get_save_key(self) -> Optional[dict[str, Any]]:
         save_key = self.get_stored_save_key_data()
-        if save_key:
+        if save_key and save_key.get("key", None):
             return save_key
         auth_token = self.get_auth_token()
         if auth_token is None:
@@ -225,6 +252,7 @@ class ServerHandler:
     def get_upload_request_body(self, boundary: str) -> Optional[io.data.Data]:
         save_key = self.get_save_key()
         if save_key is None:
+            self.remove_stored_save_key_data()
             return None
         save_data = self.save_file.to_data()
         body = io.data.Data()
@@ -242,7 +270,11 @@ class ServerHandler:
             body.add_line(f'Content-Disposition: form-data; name="{key}"')
             body.add_line("Content-Type: text/plain")
             body.add_line()
-            body.add_line(save_key[key])
+            try:
+                body.add_line(save_key[key])
+            except KeyError:
+                self.remove_stored_save_key_data()
+                return None
 
         body.add_line(f"--{boundary}")
         body.add_line(
@@ -261,6 +293,7 @@ class ServerHandler:
 
         body = self.get_upload_request_body(boundary)
         if body is None:
+            self.remove_stored_save_key_data()
             return False
         url = f"{self.aws_url}/"
         headers = {
@@ -281,7 +314,8 @@ class ServerHandler:
         auth_token = self.get_auth_token()
         if auth_token is None:
             return None
-        meta_data = server.managed_item.BackupMetaData(self.save_file).create()
+        bmd = server.managed_item.BackupMetaData(self.save_file)
+        meta_data = bmd.create()
 
         url = f"{self.save_url}/v2/transfers"
         headers = server.headers.AccountHeaders(self.save_file, meta_data).get_headers()
@@ -299,7 +333,7 @@ class ServerHandler:
         if transfer_code is None or confirmation_code is None:
             self.remove_stored_auth_token()
             return None
-
+        bmd.remove_managed_items()
         return (transfer_code, confirmation_code)
 
     def upload_meta_data(self) -> bool:
@@ -308,18 +342,20 @@ class ServerHandler:
         auth_token = self.get_auth_token()
         if auth_token is None:
             return False
-        meta_data = server.managed_item.BackupMetaData(self.save_file).create()
+        bmd = server.managed_item.BackupMetaData(self.save_file)
+        meta_data = bmd.create()
 
         url = f"{self.save_url}/v2/backups"
         headers = server.headers.AccountHeaders(self.save_file, meta_data).get_headers()
         headers["authorization"] = "Bearer " + auth_token
 
-        response = request.RequestHandler(url, headers).post()
+        response = request.RequestHandler(url, headers, io.data.Data(meta_data)).post()
         json: dict[str, Any] = response.json()
         status_code = json.get("statusCode", 0)
         if status_code != 1:
             self.remove_stored_auth_token()
             return False
+        bmd.remove_managed_items()
         return True
 
     def get_new_inquiry_code(self) -> str:

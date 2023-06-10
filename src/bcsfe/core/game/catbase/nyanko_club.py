@@ -39,6 +39,26 @@ class NyankoClub:
         self.unknown_bool_2 = unknown_bool_2
 
     @staticmethod
+    def init() -> "NyankoClub":
+        return NyankoClub(
+            0,
+            0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0,
+            0.0,
+            {},
+            0.0,
+            False,
+            False,
+        )
+
+    @staticmethod
     def read(data: io.data.Data, gv: game_version.GameVersion) -> "NyankoClub":
         officer_id = data.read_int()
         total_renewal_times = data.read_int()

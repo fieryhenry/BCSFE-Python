@@ -20,6 +20,10 @@ class Gatya:
         self.stepup_durations: dict[int, float] = {}
 
     @staticmethod
+    def init() -> "Gatya":
+        return Gatya(0, 0)
+
+    @staticmethod
     def read_rare_normal_seed(
         data: io.data.Data, gv: "game_version.GameVersion"
     ) -> "Gatya":

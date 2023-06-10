@@ -24,6 +24,19 @@ class Mission:
         self.expiry_value = expiry_value
         self.preparing_value = preparing_value
 
+    @staticmethod
+    def init() -> "Mission":
+        return Mission(
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        )
+
     def serialize(self) -> dict[str, Any]:
         return {
             "clear_state": self.clear_state,
@@ -76,6 +89,20 @@ class Missions:
         self.user_rank_values = user_rank_values
         self.expiry_values = expiry_values
         self.preparing_values = preparing_values
+        self.weekly_missions: dict[int, bool] = {}
+
+    @staticmethod
+    def init() -> "Missions":
+        return Missions(
+            {},
+            {},
+            {},
+            {},
+            {},
+            {},
+            {},
+            {},
+        )
 
     @staticmethod
     def read(stream: io.data.Data, gv: game_version.GameVersion) -> "Missions":

@@ -7,6 +7,10 @@ class PurchasedPack:
         self.purchased = purchased
 
     @staticmethod
+    def init() -> "PurchasedPack":
+        return PurchasedPack(False)
+
+    @staticmethod
     def read(stream: io.data.Data) -> "PurchasedPack":
         purchased = stream.read_bool()
         return PurchasedPack(purchased)
@@ -31,6 +35,10 @@ class PurchasedPack:
 class PurchaseSet:
     def __init__(self, purchases: dict[str, PurchasedPack]):
         self.purchases = purchases
+
+    @staticmethod
+    def init() -> "PurchaseSet":
+        return PurchaseSet({})
 
     @staticmethod
     def read(stream: io.data.Data) -> "PurchaseSet":
@@ -71,6 +79,10 @@ class Purchases:
         self.purchases = purchases
 
     @staticmethod
+    def init() -> "Purchases":
+        return Purchases({})
+
+    @staticmethod
     def read(stream: io.data.Data) -> "Purchases":
         total = stream.read_int()
         purchases: dict[int, PurchaseSet] = {}
@@ -105,6 +117,13 @@ class Purchases:
 class ItemPack:
     def __init__(self, purchases: Purchases):
         self.purchases = purchases
+        self.displayed_packs: dict[int, bool] = {}
+        self.three_days_started: bool = False
+        self.three_days_end_timestamp: float = 0.0
+
+    @staticmethod
+    def init() -> "ItemPack":
+        return ItemPack(Purchases.init())
 
     @staticmethod
     def read(stream: io.data.Data) -> "ItemPack":

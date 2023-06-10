@@ -9,6 +9,10 @@ class Talent:
         self.level = level
 
     @staticmethod
+    def init() -> "Talent":
+        return Talent(0, 0)
+
+    @staticmethod
     def read(stream: io.data.Data):
         return Talent(stream.read_int(), stream.read_int())
 
@@ -41,6 +45,10 @@ class Cat:
         self.id = id
         self.unlocked = unlocked
         self.talents: Optional[list[Talent]] = None
+
+    @staticmethod
+    def init(id: int) -> "Cat":
+        return Cat(id, 0)
 
     @staticmethod
     def read_unlocked(id: int, stream: io.data.Data):
@@ -155,6 +163,11 @@ class Cat:
 class StorageItem:
     def __init__(self, item_id: int):
         self.item_id = item_id
+        self.item_type = 0
+
+    @staticmethod
+    def init() -> "StorageItem":
+        return StorageItem(0)
 
     @staticmethod
     def read_item_id(stream: io.data.Data):
@@ -189,8 +202,26 @@ class StorageItem:
 
 
 class Cats:
-    def __init__(self, cats: list[Cat]):
+    def __init__(self, cats: list[Cat], total_storage_items: int = 0):
         self.cats = cats
+        self.storage_items = [StorageItem.init() for _ in range(total_storage_items)]
+        self.favourites: dict[int, bool] = {}
+        self.chara_new_flags: dict[int, int] = {}
+
+    @staticmethod
+    def init(gv: game_version.GameVersion) -> "Cats":
+        total_cats = Cats.get_gv_cats(gv)
+        if total_cats is None:
+            total_cats = 0
+        cats_l: list[Cat] = []
+        for i in range(total_cats):
+            cats_l.append(Cat.init(i))
+
+        if gv < 110100:
+            total_storage_items = 100
+        else:
+            total_storage_items = 0
+        return Cats(cats_l, total_storage_items)
 
     @staticmethod
     def get_gv_cats(gv: game_version.GameVersion) -> Optional[int]:

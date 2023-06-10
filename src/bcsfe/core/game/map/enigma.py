@@ -12,6 +12,10 @@ class Stage:
         self.start_time = start_time
 
     @staticmethod
+    def init() -> "Stage":
+        return Stage(0, 0, 0, 0.0)
+
+    @staticmethod
     def read(data: io.data.Data) -> "Stage":
         level = data.read_int()
         stage_id = data.read_int()
@@ -65,6 +69,10 @@ class Enigma:
         self.unknown_1 = unknown_1
         self.unknown_2 = unknown_2
         self.stages = stages
+
+    @staticmethod
+    def init() -> "Enigma":
+        return Enigma(0, 0, 0, 0, False, [])
 
     @staticmethod
     def read(data: io.data.Data) -> "Enigma":

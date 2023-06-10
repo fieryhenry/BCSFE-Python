@@ -6,6 +6,12 @@ from bcsfe.core.game.map import chapters
 class Challenge:
     def __init__(self, chapters: chapters.Chapters):
         self.chapters = chapters
+        self.scores: list[int] = []
+        self.shown_popup: bool = False
+
+    @staticmethod
+    def init() -> "Challenge":
+        return Challenge(chapters.Chapters.init())
 
     @staticmethod
     def read(data: io.data.Data) -> "Challenge":

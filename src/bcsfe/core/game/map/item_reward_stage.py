@@ -7,6 +7,10 @@ class Stage:
         self.claimed = claimed
 
     @staticmethod
+    def init() -> "Stage":
+        return Stage(False)
+
+    @staticmethod
     def read(stream: io.data.Data) -> "Stage":
         return Stage(stream.read_bool())
 
@@ -30,6 +34,11 @@ class Stage:
 class SubChapter:
     def __init__(self, stages: list[Stage]):
         self.stages = stages
+
+    @staticmethod
+    def init(total_stages: int) -> "SubChapter":
+        stages = [Stage.init() for _ in range(total_stages)]
+        return SubChapter(stages)
 
     @staticmethod
     def read(stream: io.data.Data, total_stages: int) -> "SubChapter":
@@ -59,6 +68,11 @@ class SubChapter:
 class SubChapterStars:
     def __init__(self, sub_chapters: list[SubChapter]):
         self.sub_chapters = sub_chapters
+
+    @staticmethod
+    def init(total_stages: int, total_stars: int) -> "SubChapterStars":
+        sub_chapters = [SubChapter.init(total_stages) for _ in range(total_stars)]
+        return SubChapterStars(sub_chapters)
 
     @staticmethod
     def read(
@@ -94,6 +108,10 @@ class ItemObtain:
         self.flag = flag
 
     @staticmethod
+    def init() -> "ItemObtain":
+        return ItemObtain(False)
+
+    @staticmethod
     def read(stream: io.data.Data) -> "ItemObtain":
         return ItemObtain(stream.read_bool())
 
@@ -117,6 +135,10 @@ class ItemObtain:
 class ItemObtainSet:
     def __init__(self, item_obtains: dict[int, ItemObtain]):
         self.item_obtains = item_obtains
+
+    @staticmethod
+    def init() -> "ItemObtainSet":
+        return ItemObtainSet({})
 
     @staticmethod
     def read(stream: io.data.Data) -> "ItemObtainSet":
@@ -161,6 +183,10 @@ class ItemObtainSets:
         self.item_obtain_sets = item_obtain_sets
 
     @staticmethod
+    def init() -> "ItemObtainSets":
+        return ItemObtainSets({})
+
+    @staticmethod
     def read(stream: io.data.Data) -> "ItemObtainSets":
         item_obtain_sets: dict[int, ItemObtainSet] = {}
         for _ in range(stream.read_int()):
@@ -201,6 +227,10 @@ class UnobtainedItem:
         self.unobtained = unobtained
 
     @staticmethod
+    def init() -> "UnobtainedItem":
+        return UnobtainedItem(False)
+
+    @staticmethod
     def read(stream: io.data.Data) -> "UnobtainedItem":
         return UnobtainedItem(stream.read_bool())
 
@@ -224,6 +254,10 @@ class UnobtainedItem:
 class UnobtainedItems:
     def __init__(self, unobtained_items: dict[int, UnobtainedItem]):
         self.unobtained_items = unobtained_items
+
+    @staticmethod
+    def init() -> "UnobtainedItems":
+        return UnobtainedItems({})
 
     @staticmethod
     def read(stream: io.data.Data) -> "UnobtainedItems":
@@ -266,6 +300,31 @@ class UnobtainedItems:
 class Chapters:
     def __init__(self, sub_chapters: list[SubChapterStars]):
         self.sub_chapters = sub_chapters
+        self.item_obtains = ItemObtainSets.init()
+        self.unobtained_items = UnobtainedItems.init()
+
+    @staticmethod
+    def init(gv: game_version.GameVersion) -> "Chapters":
+        if gv < 20:
+            return Chapters([])
+        if gv <= 33:
+            total_subchapters = 50
+            total_stages = 12
+            total_stars = 3
+        elif gv <= 34:
+            total_subchapters = 0
+            total_stages = 12
+            total_stars = 3
+        else:
+            total_subchapters = 0
+            total_stages = 0
+            total_stars = 0
+        return Chapters(
+            [
+                SubChapterStars.init(total_stages, total_stars)
+                for _ in range(total_subchapters)
+            ]
+        )
 
     @staticmethod
     def read(stream: io.data.Data, gv: game_version.GameVersion) -> "Chapters":
@@ -297,8 +356,14 @@ class Chapters:
             stream.write_int(len(self.sub_chapters))
         else:
             stream.write_int(len(self.sub_chapters))
-            stream.write_int(len(self.sub_chapters[0].sub_chapters[0].stages))
-            stream.write_int(len(self.sub_chapters[0].sub_chapters))
+            try:
+                stream.write_int(len(self.sub_chapters[0].sub_chapters[0].stages))
+            except IndexError:
+                stream.write_int(0)
+            try:
+                stream.write_int(len(self.sub_chapters[0].sub_chapters))
+            except IndexError:
+                stream.write_int(0)
         for sub_chapter in self.sub_chapters:
             sub_chapter.write(stream)
 

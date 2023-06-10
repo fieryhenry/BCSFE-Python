@@ -7,6 +7,10 @@ class Stage:
         self.clear_times = clear_times
 
     @staticmethod
+    def init() -> "Stage":
+        return Stage(0)
+
+    @staticmethod
     def read(data: io.data.Data) -> "Stage":
         clear_times = data.read_short()
         return Stage(clear_times)
@@ -31,8 +35,13 @@ class Stage:
 
 
 class Chapter:
-    def __init__(self, clear_progress: int):
+    def __init__(self, clear_progress: int, total_stages: int = 0):
         self.clear_progress = clear_progress
+        self.stages: list[Stage] = [Stage.init() for _ in range(total_stages)]
+
+    @staticmethod
+    def init(total_stages: int) -> "Chapter":
+        return Chapter(0, total_stages)
 
     @staticmethod
     def read_clear_progress(data: io.data.Data):
@@ -73,6 +82,10 @@ class ChaptersStars:
         self.chapters = chapters
 
     @staticmethod
+    def init(total_stages: int, total_stars: int) -> "ChaptersStars":
+        return ChaptersStars([Chapter.init(total_stages) for _ in range(total_stars)])
+
+    @staticmethod
     def read_clear_progress(data: io.data.Data, total_stars: int):
         chapters = [Chapter.read_clear_progress(data) for _ in range(total_stars)]
         return ChaptersStars(chapters)
@@ -109,6 +122,10 @@ class Chapters:
         self.chapters = chapters
 
     @staticmethod
+    def init() -> "Chapters":
+        return Chapters([])
+
+    @staticmethod
     def read(data: io.data.Data) -> "Chapters":
         total_chapters = data.read_short()
         total_stages = data.read_byte()
@@ -126,8 +143,14 @@ class Chapters:
 
     def write(self, data: io.data.Data):
         data.write_short(len(self.chapters))
-        data.write_byte(len(self.chapters[0].chapters[0].stages))
-        data.write_byte(len(self.chapters[0].chapters))
+        try:
+            data.write_byte(len(self.chapters[0].chapters[0].stages))
+        except IndexError:
+            data.write_byte(0)
+        try:
+            data.write_byte(len(self.chapters[0].chapters))
+        except IndexError:
+            data.write_byte(0)
 
         for chapter in self.chapters:
             chapter.write_clear_progress(data)

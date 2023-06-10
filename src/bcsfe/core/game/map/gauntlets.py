@@ -7,6 +7,10 @@ class Stage:
         self.clear_times = clear_times
 
     @staticmethod
+    def init() -> "Stage":
+        return Stage(0)
+
+    @staticmethod
     def read(data: io.data.Data) -> "Stage":
         clear_times = data.read_short()
         return Stage(clear_times)
@@ -31,8 +35,15 @@ class Stage:
 
 
 class Chapter:
-    def __init__(self, selected_stage: int):
+    def __init__(self, selected_stage: int, total_stages: int = 0):
         self.selected_stage = selected_stage
+        self.clear_progress = 0
+        self.stages: list[Stage] = [Stage.init() for _ in range(total_stages)]
+        self.chapter_unlock_state = 0
+
+    @staticmethod
+    def init(total_stages: int) -> "Chapter":
+        return Chapter(0, total_stages)
 
     @staticmethod
     def read_selected_stage(data: io.data.Data) -> "Chapter":
@@ -89,6 +100,11 @@ class ChaptersStars:
         self.chapters = chapters
 
     @staticmethod
+    def init(total_stages: int, total_stars: int) -> "ChaptersStars":
+        chapters = [Chapter.init(total_stages) for _ in range(total_stars)]
+        return ChaptersStars(chapters)
+
+    @staticmethod
     def read_selected_stage(data: io.data.Data, total_stars: int) -> "ChaptersStars":
         chapters = [Chapter.read_selected_stage(data) for _ in range(total_stars)]
         return ChaptersStars(chapters)
@@ -142,6 +158,10 @@ class Chapters:
         self.unknown = unknown
 
     @staticmethod
+    def init() -> "Chapters":
+        return Chapters([], [])
+
+    @staticmethod
     def read(data: io.data.Data) -> "Chapters":
         total_chapters = data.read_short()
         total_stages = data.read_byte()
@@ -167,8 +187,14 @@ class Chapters:
 
     def write(self, data: io.data.Data):
         data.write_short(len(self.chapters))
-        data.write_byte(len(self.chapters[0].chapters[0].stages))
-        data.write_byte(len(self.chapters[0].chapters))
+        try:
+            data.write_byte(len(self.chapters[0].chapters[0].stages))
+        except IndexError:
+            data.write_byte(0)
+        try:
+            data.write_byte(len(self.chapters[0].chapters))
+        except IndexError:
+            data.write_byte(0)
         for chapter in self.chapters:
             chapter.write_selected_stage(data)
 

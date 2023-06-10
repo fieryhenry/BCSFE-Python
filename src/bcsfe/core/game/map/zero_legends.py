@@ -7,6 +7,10 @@ class Stage:
         self.clear_times = clear_times
 
     @staticmethod
+    def init() -> "Stage":
+        return Stage(0)
+
+    @staticmethod
     def read(data: io.data.Data) -> "Stage":
         clear_times = data.read_short()
         return Stage(clear_times)
@@ -42,6 +46,10 @@ class Chapter:
         self.clear_progress = clear_progress
         self.unlock_state = unlock_state
         self.stages = stages
+
+    @staticmethod
+    def init() -> "Chapter":
+        return Chapter(0, 0, 0, [])
 
     @staticmethod
     def read(data: io.data.Data) -> "Chapter":
@@ -95,6 +103,10 @@ class ChaptersStars:
         self.chapters = chapters
 
     @staticmethod
+    def init() -> "ChaptersStars":
+        return ChaptersStars(0, [])
+
+    @staticmethod
     def read(data: io.data.Data) -> "ChaptersStars":
         unknown = data.read_byte()
         total_stars = data.read_byte()
@@ -133,6 +145,10 @@ class ChaptersStars:
 class Chapters:
     def __init__(self, chapters: list[ChaptersStars]):
         self.chapters = chapters
+
+    @staticmethod
+    def init() -> "Chapters":
+        return Chapters([])
 
     @staticmethod
     def read(data: io.data.Data) -> "Chapters":

@@ -6,6 +6,10 @@ class Material:
         self.amount = amount
 
     @staticmethod
+    def init() -> "Material":
+        return Material(0)
+
+    @staticmethod
     def read(stream: io.data.Data) -> "Material":
         amount = stream.read_int()
         return Material(amount)
@@ -30,6 +34,10 @@ class Material:
 class Materials:
     def __init__(self, materials: list[Material]):
         self.materials = materials
+
+    @staticmethod
+    def init() -> "Materials":
+        return Materials([])
 
     @staticmethod
     def read(stream: io.data.Data) -> "Materials":

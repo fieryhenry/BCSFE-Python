@@ -7,6 +7,10 @@ class Stage:
         self.clear_times = clear_times
 
     @staticmethod
+    def init() -> "Stage":
+        return Stage(0)
+
+    @staticmethod
     def read(data: io.data.Data) -> "Stage":
         clear_times = data.read_int()
         return Stage(clear_times)
@@ -31,8 +35,15 @@ class Stage:
 
 
 class Chapter:
-    def __init__(self, selected_stage: int):
+    def __init__(self, selected_stage: int, total_stages: int = 0):
         self.selected_stage = selected_stage
+        self.clear_progress = 0
+        self.stages: list[Stage] = [Stage.init() for _ in range(total_stages)]
+        self.chapter_unlock_state = 0
+
+    @staticmethod
+    def init(total_stages: int) -> "Chapter":
+        return Chapter(0, total_stages)
 
     @staticmethod
     def read_selected_stage(data: io.data.Data) -> "Chapter":
@@ -89,6 +100,11 @@ class ChaptersStars:
         self.chapters = chapters
 
     @staticmethod
+    def init(total_stages: int, total_stars: int) -> "ChaptersStars":
+        chapters = [Chapter.init(total_stages) for _ in range(total_stars)]
+        return ChaptersStars(chapters)
+
+    @staticmethod
     def read_selected_stage(data: io.data.Data, total_stars: int) -> "ChaptersStars":
         chapters = [Chapter.read_selected_stage(data) for _ in range(total_stars)]
         return ChaptersStars(chapters)
@@ -141,6 +157,10 @@ class Chapters:
         self.chapters = chapters
 
     @staticmethod
+    def init() -> "Chapters":
+        return Chapters([])
+
+    @staticmethod
     def read(data: io.data.Data, read_every_time: bool = True) -> "Chapters":
         total_stages = 0
         total_chapters = 0
@@ -182,33 +202,47 @@ class Chapters:
 
         return Chapters(chapters)
 
+    def get_lengths(self) -> tuple[int, int, int]:
+        total_chapters = len(self.chapters)
+        try:
+            total_stages = len(self.chapters[0].chapters[0].stages)
+        except IndexError:
+            total_stages = 0
+
+        try:
+            total_stars = len(self.chapters[0].chapters)
+        except IndexError:
+            total_stars = 0
+        return (total_chapters, total_stages, total_stars)
+
     def write(self, data: io.data.Data, write_every_time: bool = True):
+        total_chapters, total_stages, total_stars = self.get_lengths()
         if write_every_time:
-            data.write_int(len(self.chapters))
-            data.write_int(len(self.chapters[0].chapters))
+            data.write_int(total_chapters)
+            data.write_int(total_stars)
         else:
-            data.write_int(len(self.chapters))
-            data.write_int(len(self.chapters[0].chapters[0].stages))
-            data.write_int(len(self.chapters[0].chapters))
+            data.write_int(total_chapters)
+            data.write_int(total_stages)
+            data.write_int(total_stars)
         for chapter in self.chapters:
             chapter.write_selected_stage(data)
 
         if write_every_time:
-            data.write_int(len(self.chapters))
-            data.write_int(len(self.chapters[0].chapters))
+            data.write_int(total_chapters)
+            data.write_int(total_stars)
         for chapter in self.chapters:
             chapter.write_clear_progress(data)
 
         if write_every_time:
-            data.write_int(len(self.chapters))
-            data.write_int(len(self.chapters[0].chapters[0].stages))
-            data.write_int(len(self.chapters[0].chapters))
+            data.write_int(total_chapters)
+            data.write_int(total_stages)
+            data.write_int(total_stars)
         for chapter in self.chapters:
             chapter.write_stages(data)
 
         if write_every_time:
-            data.write_int(len(self.chapters))
-            data.write_int(len(self.chapters[0].chapters))
+            data.write_int(total_chapters)
+            data.write_int(total_stars)
         for chapter in self.chapters:
             chapter.write_chapter_unlock_state(data)
 

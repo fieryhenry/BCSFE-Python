@@ -8,6 +8,10 @@ class MySale:
         self.dict_2 = dict_2
 
     @staticmethod
+    def init() -> "MySale":
+        return MySale({}, {})
+
+    @staticmethod
     def read_bonus_hash(stream: io.data.Data):
         variable_length = stream.read_variable_length_int()
         dict_1 = {}

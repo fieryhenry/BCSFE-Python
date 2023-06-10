@@ -15,6 +15,15 @@ class MapResetData:
         self.daily_end_timestamp = daily_end_timestamp
 
     @staticmethod
+    def init() -> "MapResetData":
+        return MapResetData(
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+        )
+
+    @staticmethod
     def read(stream: io.data.Data) -> "MapResetData":
         yearly_end_timestamp = stream.read_double()
         monthly_end_timestamp = stream.read_double()
@@ -60,6 +69,10 @@ class MapResetData:
 class MapResets:
     def __init__(self, data: dict[int, list[MapResetData]]):
         self.data = data
+
+    @staticmethod
+    def init() -> "MapResets":
+        return MapResets({})
 
     @staticmethod
     def read(stream: io.data.Data) -> "MapResets":

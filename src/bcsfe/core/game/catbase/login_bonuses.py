@@ -7,6 +7,10 @@ class Login:
         self.count = count
 
     @staticmethod
+    def init() -> "Login":
+        return Login(0)
+
+    @staticmethod
     def read(stream: io.data.Data) -> "Login":
         count = stream.read_int()
         return Login(count)
@@ -31,6 +35,10 @@ class Login:
 class Logins:
     def __init__(self, logins: list[Login]):
         self.logins = logins
+
+    @staticmethod
+    def init() -> "Logins":
+        return Logins([])
 
     @staticmethod
     def read(stream: io.data.Data) -> "Logins":
@@ -62,6 +70,10 @@ class Logins:
 class LoginSets:
     def __init__(self, logins: list[Logins]):
         self.logins = logins
+
+    @staticmethod
+    def init() -> "LoginSets":
+        return LoginSets([])
 
     @staticmethod
     def read(stream: io.data.Data) -> "LoginSets":
@@ -98,6 +110,13 @@ class LoginBonus:
     ):
         self.old_logins = old_logins
         self.logins = logins
+
+    @staticmethod
+    def init(gv: game_version.GameVersion) -> "LoginBonus":
+        if gv < 80000:
+            return LoginBonus(old_logins=LoginSets.init())
+        else:
+            return LoginBonus(logins={})
 
     @staticmethod
     def read(stream: io.data.Data, gv: game_version.GameVersion) -> "LoginBonus":

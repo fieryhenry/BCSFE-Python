@@ -16,6 +16,10 @@ class StampData:
         self.daily_reward = daily_reward
 
     @staticmethod
+    def init() -> "StampData":
+        return StampData(0, [0] * 30, 0, 0)
+
+    @staticmethod
     def read(stream: io.data.Data) -> "StampData":
         current_stamp = stream.read_int()
         collected_stamp = stream.read_int_list(30)

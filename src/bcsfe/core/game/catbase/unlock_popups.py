@@ -6,6 +6,10 @@ class Popup:
         self.seen = seen
 
     @staticmethod
+    def init() -> "Popup":
+        return Popup(False)
+
+    @staticmethod
     def read(stream: io.data.Data) -> "Popup":
         seen = stream.read_bool()
         return Popup(seen)
@@ -30,6 +34,10 @@ class Popup:
 class Popups:
     def __init__(self, popups: dict[int, Popup]):
         self.popups = popups
+
+    @staticmethod
+    def init() -> "Popups":
+        return Popups({})
 
     @staticmethod
     def read(stream: io.data.Data) -> "Popups":

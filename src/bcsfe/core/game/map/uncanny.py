@@ -9,6 +9,10 @@ class Uncanny:
         self.unknown = unknown
 
     @staticmethod
+    def init() -> "Uncanny":
+        return Uncanny(chapters.Chapters.init(), [])
+
+    @staticmethod
     def read(data: io.data.Data) -> "Uncanny":
         ch = chapters.Chapters.read(data, read_every_time=False)
         unknown = data.read_int_list(length=len(ch.chapters))

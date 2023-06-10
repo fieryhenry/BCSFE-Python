@@ -7,6 +7,10 @@ class SchemeItems:
         self.received = received
 
     @staticmethod
+    def init() -> "SchemeItems":
+        return SchemeItems([], [])
+
+    @staticmethod
     def read(stream: io.data.Data) -> "SchemeItems":
         total = stream.read_int()
         to_obtain: list[int] = []

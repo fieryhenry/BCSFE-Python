@@ -15,6 +15,7 @@ class SaveFile:
         dt: Optional[data.Data] = None,
         cc: Optional[country_code.CountryCode] = None,
         load: bool = True,
+        gv: Optional[game_version.GameVersion] = None,
     ):
         if dt is None:
             self.data = data.Data()
@@ -24,6 +25,8 @@ class SaveFile:
             self.cc = self.detect_cc()
         else:
             self.cc = cc
+
+        self.init_save(gv)
 
         if dt is not None and load:
             self.load()
@@ -195,8 +198,6 @@ class SaveFile:
 
         if self.game_version <= 37:
             self.ui0 = self.data.read_int()
-        else:
-            self.ui0 = 0
 
         self.stage_unlock_cat_value = self.data.read_int()
         self.show_ending_value = self.data.read_int()
@@ -212,9 +213,6 @@ class SaveFile:
         if self.game_version <= 37:
             self.uim1 = self.data.read_int()
             self.ubm1 = self.data.read_bool()
-        else:
-            self.uim1 = 0
-            self.ubm1 = False
 
         self.chara_flags_2 = self.data.read_int_list(length=2)
 
@@ -232,15 +230,11 @@ class SaveFile:
         self.continue_flag = self.data.read_int()
         if 20 <= self.game_version:
             self.unlock_popups_8 = self.data.read_int_list(length=36)
-        else:
-            self.unlock_popups_8 = []
 
         if 20 <= self.game_version and self.game_version <= 25:
             self.unit_drops = self.data.read_int_list(length=110)
         elif 26 <= self.game_version:
             self.unit_drops = self.data.read_int_list()
-        else:
-            self.unit_drops = []
 
         self.gatya = game.catbase.gatya.Gatya.read_rare_normal_seed(
             self.data, self.game_version
@@ -258,8 +252,6 @@ class SaveFile:
 
         if self.not_jp():
             self.player_id = self.data.read_string()
-        else:
-            self.player_id = ""
 
         self.order_ids = self.data.read_string_list()
 
@@ -270,12 +262,6 @@ class SaveFile:
             self.usl1 = self.data.read_string_list()
             self.energy_notification = self.data.read_bool()
             self.full_gameversion = self.data.read_int()
-        else:
-            self.usl1 = []
-            self.g_timestamp = 0.0
-            self.g_servertimestamp = 0.0
-            self.m_gettimesave = 0.0
-            self.full_gameversion = 0
 
         self.lineups.read_2(self.data, self.game_version)
         self.event_stages.read_legend_restrictions(self.data, self.game_version)
@@ -284,10 +270,6 @@ class SaveFile:
             self.uil2 = self.data.read_int_list(length=7)
             self.uil3 = self.data.read_int_list(length=7)
             self.uil4 = self.data.read_int_list(length=7)
-        else:
-            self.uil2 = []
-            self.uil3 = []
-            self.uil4 = []
 
         self.g_timestamp_2 = self.data.read_double()
         self.g_servertimestamp_2 = self.data.read_double()
@@ -297,8 +279,6 @@ class SaveFile:
 
         if self.game_version <= 37:
             self.usl2 = self.data.read_string_list()
-        else:
-            self.usl2 = []
 
         if self.not_jp():
             self.m_dGetTimeSave2 = self.data.read_double()
@@ -310,8 +290,6 @@ class SaveFile:
             self.ubl1 = self.data.read_bool_list(length=12)
         elif 26 <= self.game_version and self.game_version < 39:
             self.ubl1 = self.data.read_bool_list()
-        else:
-            self.ubl1 = []
 
         self.cats.read_max_upgrade_levels(self.data, self.game_version)
         self.special_skills.read_max_upgrade_levels(self.data)
@@ -344,8 +322,6 @@ class SaveFile:
 
             if self.not_jp():
                 self.ub2 = self.data.read_bool()
-            else:
-                self.ub2 = False
 
             self.gv_44 = self.data.read_int()
 
@@ -355,9 +331,7 @@ class SaveFile:
 
             self.title_chapter_bg = self.data.read_int()
 
-            if self.game_version <= 26:
-                self.combo_unlocks = []
-            else:
+            if self.game_version > 26:
                 self.combo_unlocks = self.data.read_int_list()
 
             self.combo_unlocked_10k_ur = self.data.read_bool()
@@ -431,8 +405,6 @@ class SaveFile:
             )
             if self.game_version < 101000:
                 self.reset_item_reward_flags = self.data.read_bool_list()
-            else:
-                self.reset_item_reward_flags = []
 
             self.reward_remaining_time = self.data.read_double()
             self.last_checked_reward_time = self.data.read_double()
@@ -529,9 +501,6 @@ class SaveFile:
         if self.game_version < 90300:
             self.map_resets = game.map.map_reset.MapResets.read(self.data)
             self.gv_72 = self.data.read_int()
-        else:
-            self.map_resets = game.map.map_reset.MapResets({})
-            self.gv_72 = 72
 
         if self.game_version >= 51:
             self.uncanny = game.map.uncanny.Uncanny.read(self.data)
@@ -589,9 +558,6 @@ class SaveFile:
             if self.is_en():
                 self.uby2 = self.data.read_byte()
                 self.gv_100600 = self.data.read_int()
-            else:
-                self.uby2 = 0
-                self.gv_100600 = 100600
 
         if self.game_version >= 81000:
             self.restart_pack = self.data.read_byte()
@@ -673,11 +639,6 @@ class SaveFile:
                 self.ub9 = self.data.read_bool()
                 self.ud4 = self.data.read_double()
                 self.ud5 = self.data.read_double()
-            else:
-                self.uby3 = 0
-                self.ub9 = False
-                self.ud4 = 0.0
-                self.ud5 = 0.0
 
             self.gv_90500 = self.data.read_int()
 
@@ -884,8 +845,6 @@ class SaveFile:
 
             if self.not_jp():
                 self.ub20 = self.data.read_bool()
-            else:
-                self.ub20 = False
 
             self.gv_110700 = self.data.read_int()
 
@@ -2040,7 +1999,6 @@ class SaveFile:
             "ub20": self.ub20,
             "gv_110600": self.gv_110600,
             "uidtff": self.uidtff,
-            "ub20": self.ub20,
             "gv_110700": self.gv_110700,
             "ub21": self.ub21,
             "dojo_3x_speed": self.dojo_3x_speed,
@@ -2427,7 +2385,7 @@ class SaveFile:
         save_file.gv_100000 = data.get("gv_100000", 100000)
         save_file.date_int = data.get("date_int", 0)
         save_file.gv_100100 = data.get("gv_100100", 100100)
-        save_file.utl2 = data.get("utl2", [])
+        save_file.utl2 = data.get("utl2", [(False, False, 0, 0.0, 0.0)] * 6)
         save_file.gv_100300 = data.get("gv_100300", 100300)
         save_file.uil8 = data.get("uil8", [])
         save_file.ub14 = data.get("ub14", False)
@@ -2460,7 +2418,6 @@ class SaveFile:
         save_file.ub20 = data.get("ub20", False)
         save_file.gv_110600 = data.get("gv_110600", 110600)
         save_file.uidtff = data.get("uidtff", {})
-        save_file.ub20 = data.get("ub20", False)
         save_file.gv_110700 = data.get("gv_110700", 110700)
         save_file.ub21 = data.get("ub21", False)
         save_file.dojo_3x_speed = data.get("dojo_3x_speed", False)
@@ -2510,6 +2467,377 @@ class SaveFile:
 
         return save_file
 
+    def init_save(self, gv: Optional[game_version.GameVersion] = None):
+        self.dsts = []
+        self.dst_index = 0
+        if gv is None:
+            gv = game_version.GameVersion(120200)
+        self.game_version = gv
+
+        self.ubm1 = False
+        self.ubm = False
+        self.ub0 = False
+        self.ub1 = False
+        self.ub2 = False
+        self.ub3 = False
+        self.ub4 = False
+        self.ub5 = False
+        self.ub6 = False
+        self.ub7 = False
+        self.ub8 = False
+        self.ub9 = False
+        self.ub10 = False
+        self.ub11 = False
+        self.ub12 = False
+        self.ub13 = False
+        self.ub14 = False
+        self.ub15 = False
+        self.ub16 = False
+        self.ub17 = False
+        self.ub18 = False
+        self.ub19 = False
+        self.ub20 = False
+        self.ub21 = False
+        self.ub22 = False
+        self.ub23 = False
+        self.ub24 = False
+        self.ub25 = False
+        self.ub26 = False
+        self.ub27 = False
+        self.ub28 = False
+        self.ub29 = False
+        self.ub30 = False
+        self.ub31 = False
+
+        self.mute_bgm = False
+        self.mute_se = False
+        self.get_event_data = False
+        self.energy_notification = False
+        self.transfer_flag = False
+        self.combo_unlocked_10k_ur = False
+        self.banned = False
+        self.shown_maxcollab_mg = False
+        self.event_update_flags = False
+        self.filibuster_stage_enabled = False
+        self.dojo_3x_speed = False
+
+        self.uim1 = 0
+        self.ui0 = 0
+        self.ui1 = 0
+        self.ui2 = 0
+        self.ui3 = 0
+        self.ui4 = 0
+        self.ui5 = 0
+        self.ui6 = 0
+        self.ui7 = 0
+        self.ui8 = 0
+        self.ui9 = 0
+        self.ui10 = 0
+        self.ui11 = 0
+        self.ui12 = 0
+        self.ui13 = 0
+        self.ui14 = 0
+        self.ui15 = 0
+        self.ui16 = 0
+        self.ui17 = 0
+        self.ui18 = 0
+        self.ui19 = 0
+        self.ui20 = 0
+
+        self.gv_44 = 44
+        self.gv_45 = 45
+        self.gv_46 = 46
+        self.gv_47 = 47
+        self.gv_48 = 48
+        self.gv_49 = 49
+        self.gv_50 = 50
+        self.gv_51 = 51
+        self.gv_52 = 52
+        self.gv_53 = 53
+        self.gv_54 = 54
+        self.gv_55 = 55
+        self.gv_56 = 56
+        self.gv_57 = 57
+        self.gv_58 = 58
+        self.gv_60 = 60
+        self.gv_61 = 61
+        self.gv_63 = 63
+        self.gv_64 = 64
+        self.gv_65 = 65
+        self.gv_66 = 66
+        self.gv_67 = 67
+        self.gv_68 = 68
+        self.gv_69 = 69
+        self.gv_71 = 71
+        self.gv_72 = 72
+        self.gv_76 = 76
+        self.gv_77 = 77
+        self.gv_80000 = 80000
+        self.gv_80200 = 80200
+        self.gv_80300 = 80300
+        self.gv_80500 = 80500
+        self.gv_80600 = 80600
+        self.gv_80700 = 80700
+        self.gv_81000 = 81000
+        self.gv_90000 = 90000
+        self.gv_90100 = 90100
+        self.gv_90200 = 90200
+        self.gv_90300 = 90300
+        self.gv_90400 = 90400
+        self.gv_90500 = 90500
+        self.gv_90700 = 90700
+        self.gv_90800 = 90800
+        self.gv_90900 = 90900
+        self.gv_91000 = 91000
+        self.gv_100000 = 100000
+        self.gv_100100 = 100100
+        self.gv_100300 = 100300
+        self.gv_100400 = 100400
+        self.gv_100600 = 100600
+        self.gv_100700 = 100700
+        self.gv_100900 = 100900
+        self.gv_101000 = 101000
+        self.gv_110000 = 110000
+        self.gv_110500 = 110500
+        self.gv_110600 = 110600
+        self.gv_110700 = 110700
+        self.gv_110800 = 110800
+        self.gv_111000 = 111000
+        self.gv_120000 = 120000
+        self.gv_120100 = 120100
+        self.gv_120200 = 120200
+
+        self.catfood = 0
+        self.current_energy = 0
+        self.year = 0
+        self.month = 0
+        self.day = 0
+        self.stamp_value_save = 0
+        self.eoc_chapter_clear_state = 0
+        self.xp = 0
+        self.tutorial_state = 0
+        self.tutorial_state_2 = 0
+        self.unlock_enemy_guide = 0
+        self.cleared_eoc_1 = 0
+        self.unlocked_ending = 0
+        self.stage_unlock_cat_value = 0
+        self.show_ending_value = 0
+        self.chapter_clear_cat_unlock = 0
+        self.ios_android_month = 0
+        self.normal_tickets = 0
+        self.rare_tickets = 0
+        self.itf1_ending = 0
+        self.continue_flag = 0
+        self.os_value = 0
+        self.full_gameversion = 0
+        self.backup_state = 0
+        self.itf1_complete = 0
+        self.title_chapter_bg = 0
+        self.rank_up_sale_value = 0
+        self.platinum_tickets = 0
+        self.backup_counter = 0
+        self.backup_frame = 0
+        self.cotc_1_complete = 0
+        self.np = 0
+        self.legend_tickets = 0
+        self.date_int = 0
+        self.platinum_shards = 0
+
+        self.ud1 = 0.0
+        self.ud2 = 0.0
+        self.ud3 = 0.0
+        self.ud4 = 0.0
+        self.ud5 = 0.0
+        self.ud6 = 0.0
+        self.ud7 = 0.0
+        self.ud8 = 0.0
+        self.ud9 = 0.0
+        self.ud10 = 0.0
+
+        self.timestamp = 0.0
+        self.g_timestamp = 0.0
+        self.g_servertimestamp = 0.0
+        self.m_gettimesave = 0.0
+        self.g_timestamp_2 = 0.0
+        self.g_servertimestamp_2 = 0.0
+        self.m_gettimesave_2 = 0.0
+        self.unknown_timestamp = 0.0
+        self.m_dGetTimeSave2 = 0.0
+        self.m_dGetTimeSave3 = 0.0
+        self.next_week_timestamp = 0.0
+        self.time_since_time_check_cumulative = 0.0
+        self.server_timestamp = 0.0
+        self.last_checked_energy_recovery_time = 0.0
+        self.time_since_check = 0.0
+        self.last_checked_expedition_time = 0.0
+        self.reward_remaining_time = 0.0
+        self.last_checked_reward_time = 0.0
+        self.last_checked_zombie_time = 0.0
+        self.account_created_timestamp = 0.0
+        self.last_checked_castle_time = 0.0
+
+        self.date = datetime.datetime.fromtimestamp(0)
+        self.date_2 = datetime.datetime.fromtimestamp(0)
+        self.date_3 = datetime.datetime.fromtimestamp(0)
+        self.date_4 = datetime.datetime.fromtimestamp(0)
+
+        self.uil1 = []
+        self.uil2 = []
+        self.uil3 = []
+        self.uil4 = []
+        self.uil5 = []
+        self.uil6 = []
+        self.uil7 = []
+        self.uil8 = []
+
+        self.uiil1 = []
+
+        self.usl1 = []
+        self.usl2 = []
+
+        self.ubl1 = []
+        self.ubl2 = []
+        self.ubl3 = []
+
+        self.ushl1 = []
+        self.ushl2 = []
+        self.ushl3 = []
+        self.ushl4 = []
+        self.ushl5 = []
+        self.ushl6 = []
+
+        self.utl1 = []
+        self.utl2 = [(False, False, 0, 0.0, 0.0)] * 6
+
+        self.unlock_popups_11 = []
+        self.enemy_guide = []
+        self.menu_unlocks = []
+        self.unlock_popups_0 = []
+        self.new_dialogs_2 = []
+        self.moneko_bonus = []
+        self.daily_reward_initialized = []
+        self.chara_flags = []
+        self.chara_flags_2 = []
+        self.unlock_popups_8 = []
+        self.unit_drops = []
+        self.achievements = []
+        self.order_ids = []
+        self.combo_unlocks = []
+        self.event_capsules_1 = []
+        self.event_capsules_2 = []
+        self.gatya_seen_lucky_drops = []
+        self.catfood_beginner_purchased = []
+        self.catfood_beginner_expired = []
+        self.catfruit = []
+        self.catseyes = []
+        self.catamins = []
+        self.unlock_popups_6 = []
+        self.reset_item_reward_flags = []
+        self.announcements = []
+        self.event_capsules_3 = []
+
+        self.save_data_4_hash = ""
+        self.player_id = ""
+        self.transfer_code = ""
+        self.confirmation_code = ""
+        self.inquiry_code = ""
+        self.password_refresh_token = ""
+
+        self.uby1 = 0
+        self.uby2 = 0
+        self.uby3 = 0
+        self.uby4 = 0
+        self.uby5 = 0
+        self.uby6 = 0
+        self.uby7 = 0
+        self.uby8 = 0
+        self.uby9 = 0
+        self.uby10 = 0
+        self.uby11 = 0
+        self.uby12 = 0
+
+        self.has_account = 0
+        self.filibuster_stage_id = 0
+        self.restart_pack = 0
+
+        self.ush1 = 0
+        self.ush2 = 0
+        self.ush3 = 0
+        self.ush4 = 0
+        self.ush5 = 0
+        self.ush6 = 0
+        self.ush7 = 0
+        self.ush8 = 0
+        self.ush9 = 0
+
+        self.leadership = 0
+
+        self.lineups = game.battle.slots.LineUps.init(self.game_version)
+        self.stamp_data = game.catbase.stamp.StampData.init()
+        self.story = game.map.story.Chapters.init()
+        self.cats = game.catbase.cat.Cats.init(self.game_version)
+        self.special_skills = game.catbase.special_skill.Skills.init()
+        self.battle_items = game.battle.battle_items.BattleItems.init()
+        self.mysale = game.catbase.my_sale.MySale.init()
+        self.event_stages = game.map.event.EventChapters.init(self.game_version)
+        self.gatya = game.catbase.gatya.Gatya.init()
+        self.user_rank_rewards = game.catbase.user_rank_rewards.Rewards.init(
+            self.game_version
+        )
+        self.item_reward_stages = game.map.item_reward_stage.Chapters.init(
+            self.game_version
+        )
+        self.timed_score_stages = game.map.timed_score.Chapters.init(self.game_version)
+        self.officer_pass = game.catbase.officer_pass.OfficerPass.init()
+        self.gamatoto = game.gamoto.gamatoto.Gamatoto.init()
+        self.ex_stages = game.map.ex_stage.Chapters.init()
+        self.item_pack = game.catbase.item_pack.ItemPack.init()
+        self.logins = game.catbase.login_bonuses.LoginBonus.init(self.game_version)
+        self.dojo = game.map.dojo.Dojo.init()
+        self.outbreaks = game.map.outbreaks.Outbreaks.init()
+        self.scheme_items = game.catbase.scheme_items.SchemeItems.init()
+        self.unlock_popups = game.catbase.unlock_popups.Popups.init()
+        self.ototo = game.gamoto.ototo.Ototo.init(self.game_version)
+        self.beacon_base = game.catbase.beacon_base.BeaconEventListScene.init()
+        self.tower = game.map.tower.Tower.init()
+        self.missions = game.catbase.mission.Missions.init()
+        self.challenge = game.map.challenge.Challenge.init()
+        self.map_resets = game.map.map_reset.MapResets.init()
+        self.uncanny = game.map.uncanny.Uncanny.init()
+        self.uncanny_2 = game.map.uncanny.Uncanny.init()
+        self.legend_quest = game.map.legend_quest.Chapters.init()
+        self.medals = game.catbase.medals.Medals.init()
+        self.gauntlets = game.map.gauntlets.Chapters.init()
+        self.gauntlets_2 = game.map.gauntlets.Chapters.init()
+        self.enigma = game.map.enigma.Enigma.init()
+        self.cleared_slots = game.battle.cleared_slots.ClearedSlots.init()
+        self.collab_gauntlets = game.map.gauntlets.Chapters.init()
+        self.talent_orbs = game.catbase.talent_orbs.TalentOrbs.init()
+        self.cat_shrine = game.gamoto.cat_shrine.CatShrine.init()
+        self.aku = game.map.aku.Chapters.init()
+        self.behemoth_culling = game.map.gauntlets.Chapters.init()
+        self.zero_legends = game.map.zero_legends.Chapters.init()
+
+        self.uiid1 = {}
+        self.ushbd1 = {}
+        self.uidiid1 = {}
+        self.uiid2 = {}
+        self.uidd1 = {}
+        self.uidiid2 = {}
+        self.ushbd2 = {}
+        self.ushdshd = {}
+        self.ushid = {}
+        self.ushdshd2 = {}
+        self.ushdd = {}
+        self.ushdd2 = {}
+        self.uidtii = {}
+        self.uidtff = {}
+        self.ushshd = {}
+
+        self.first_locks = {}
+
+        self.remaining_data = b""
+
     def not_jp(self) -> bool:
         return self.cc != country_code.CountryCode.JP
 
@@ -2525,7 +2853,10 @@ class SaveFile:
 
     def write_dst(self):
         if self.should_read_dst():
-            self.data.write_bool(self.dsts[self.dst_index])
+            try:
+                self.data.write_bool(self.dsts[self.dst_index])
+            except IndexError:
+                self.data.write_bool(False)
             self.dst_index += 1
 
     def test_save(self):

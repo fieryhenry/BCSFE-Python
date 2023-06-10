@@ -9,6 +9,10 @@ class Tower:
         self.item_obtain_states: list[list[bool]] = []
 
     @staticmethod
+    def init() -> "Tower":
+        return Tower(chapters.Chapters.init())
+
+    @staticmethod
     def read(data: io.data.Data) -> "Tower":
         ch = chapters.Chapters.read(data)
         return Tower(ch)
@@ -25,7 +29,10 @@ class Tower:
 
     def write_item_obtain_states(self, data: io.data.Data):
         data.write_int(len(self.item_obtain_states))
-        data.write_int(len(self.item_obtain_states[0]))
+        try:
+            data.write_int(len(self.item_obtain_states[0]))
+        except IndexError:
+            data.write_int(0)
         for item_obtain_state in self.item_obtain_states:
             data.write_bool_list(item_obtain_state, write_length=False)
 

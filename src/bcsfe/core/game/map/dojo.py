@@ -7,6 +7,10 @@ class Stage:
         self.score = score
 
     @staticmethod
+    def init() -> "Stage":
+        return Stage(0)
+
+    @staticmethod
     def read(stream: io.data.Data) -> "Stage":
         score = stream.read_int()
         return Stage(score)
@@ -31,6 +35,10 @@ class Stage:
 class Chapter:
     def __init__(self, stages: dict[int, Stage]):
         self.stages = stages
+
+    @staticmethod
+    def init() -> "Chapter":
+        return Chapter({})
 
     @staticmethod
     def read(stream: io.data.Data) -> "Chapter":
@@ -68,6 +76,10 @@ class Chapter:
 class Chapters:
     def __init__(self, chapters: dict[int, Chapter]):
         self.chapters = chapters
+
+    @staticmethod
+    def init() -> "Chapters":
+        return Chapters({})
 
     @staticmethod
     def read(stream: io.data.Data) -> "Chapters":
@@ -134,6 +146,23 @@ class Ranking:
         self.should_show_rank_description = should_show_rank_description
         self.should_show_start_message = should_show_start_message
         self.submit_error_flag = submit_error_flag
+        self.did_win_rewards = False
+
+    @staticmethod
+    def init() -> "Ranking":
+        return Ranking(
+            0,
+            0,
+            False,
+            False,
+            False,
+            0,
+            0,
+            0,
+            False,
+            False,
+            False,
+        )
 
     @staticmethod
     def read(stream: io.data.Data) -> "Ranking":
@@ -234,6 +263,13 @@ class Ranking:
 class Dojo:
     def __init__(self, chapters: Chapters):
         self.chapters = chapters
+        self.item_lock_flags = False
+        self.item_locks = [False] * 6
+        self.ranking = Ranking.init()
+
+    @staticmethod
+    def init() -> "Dojo":
+        return Dojo(Chapters.init())
 
     @staticmethod
     def read_chapters(stream: io.data.Data) -> "Dojo":
@@ -249,7 +285,7 @@ class Dojo:
 
     def write_item_locks(self, stream: io.data.Data):
         stream.write_bool(self.item_lock_flags)
-        stream.write_bool_list(self.item_locks, write_length=False)
+        stream.write_bool_list(self.item_locks, write_length=False, length=6)
 
     def read_ranking(self, stream: io.data.Data):
         self.ranking = Ranking.read(stream)

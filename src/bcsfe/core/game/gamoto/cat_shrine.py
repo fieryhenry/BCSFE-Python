@@ -21,6 +21,10 @@ class CatShrine:
         self.dialogs = 0
 
     @staticmethod
+    def init() -> "CatShrine":
+        return CatShrine(False, 0.0, 0.0, False, [], 0)
+
+    @staticmethod
     def read(stream: io.data.Data) -> "CatShrine":
         unknown = stream.read_bool()
         stamp_1 = stream.read_double()

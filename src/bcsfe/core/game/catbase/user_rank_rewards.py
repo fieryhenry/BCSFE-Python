@@ -6,6 +6,10 @@ class Reward:
         self.claimed = claimed
 
     @staticmethod
+    def init() -> "Reward":
+        return Reward(False)
+
+    @staticmethod
     def read(stream: io.data.Data) -> "Reward":
         return Reward(stream.read_bool())
 
@@ -29,6 +33,15 @@ class Reward:
 class Rewards:
     def __init__(self, rewards: list[Reward]):
         self.rewards = rewards
+
+    @staticmethod
+    def init(gv: game_version.GameVersion) -> "Rewards":
+        if gv >= 30:
+            total = 0
+        else:
+            total = 50
+        rewards = [Reward.init() for _ in range(total)]
+        return Rewards(rewards)
 
     @staticmethod
     def read(stream: io.data.Data, gv: game_version.GameVersion) -> "Rewards":

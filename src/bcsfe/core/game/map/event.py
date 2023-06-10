@@ -7,6 +7,10 @@ class EventStage:
         self.clear_amount = clear_amount
 
     @staticmethod
+    def init() -> "EventStage":
+        return EventStage(0)
+
+    @staticmethod
     def read(data: io.data.Data, is_int: bool) -> "EventStage":
         if is_int:
             clear_amount = data.read_int()
@@ -37,8 +41,15 @@ class EventStage:
 
 
 class EventSubChapter:
-    def __init__(self, selected_stage: int):
+    def __init__(self, selected_stage: int, total_stages: int = 0):
         self.selected_stage = selected_stage
+        self.clear_progress = 0
+        self.stages = [EventStage.init() for _ in range(total_stages)]
+        self.chapter_unlock_state = 0
+
+    @staticmethod
+    def init(total_stages: int) -> "EventSubChapter":
+        return EventSubChapter(0, total_stages)
 
     @staticmethod
     def read_selected_stage(data: io.data.Data, is_int: bool) -> "EventSubChapter":
@@ -118,6 +129,12 @@ class EventSubChapterStars:
         self.legend_restriction = 0
 
     @staticmethod
+    def init(total_stars: int) -> "EventSubChapterStars":
+        return EventSubChapterStars(
+            [EventSubChapter.init(0) for _ in range(total_stars)]
+        )
+
+    @staticmethod
     def read_selected_stage(
         data: io.data.Data, total_stars: int, is_int: bool
     ) -> "EventSubChapterStars":
@@ -188,6 +205,12 @@ class EventChapterGroup:
         self.chapters = chapters
 
     @staticmethod
+    def init(total_subchapters: int, total_stars: int) -> "EventChapterGroup":
+        return EventChapterGroup(
+            [EventSubChapterStars.init(total_stars) for _ in range(total_subchapters)]
+        )
+
+    @staticmethod
     def read_selected_stage(
         data: io.data.Data, total_subchapters: int, total_stars: int, is_int: bool
     ) -> "EventChapterGroup":
@@ -255,6 +278,30 @@ class EventChapters:
         self.displayed_cleared_limit_text: dict[int, bool] = {}
         self.event_start_dates: dict[int, int] = {}
         self.stages_reward_claimed: list[int] = []
+
+    @staticmethod
+    def init(gv: "game_version.GameVersion") -> "EventChapters":
+        if gv < 20:
+            return EventChapters([])
+        if gv <= 32:
+            total_map_types = 3
+            total_subchapters = 150
+            stars_per_subchapter = 3
+        elif gv <= 34:
+            total_map_types = 4
+            total_subchapters = 150
+            stars_per_subchapter = 3
+        else:
+            total_map_types = 0
+            total_subchapters = 0
+            stars_per_subchapter = 0
+
+        return EventChapters(
+            [
+                EventChapterGroup.init(total_subchapters, stars_per_subchapter)
+                for _ in range(total_map_types)
+            ]
+        )
 
     @staticmethod
     def read(data: io.data.Data, gv: "game_version.GameVersion") -> "EventChapters":
@@ -356,20 +403,49 @@ class EventChapters:
 
         return EventChapters(chapters)
 
+    def get_lengths(self) -> tuple[int, int, int, int]:
+        total_map_types = len(self.chapters)
+        try:
+            total_subchapters = len(self.chapters[0].chapters)
+        except IndexError:
+            total_subchapters = 0
+
+        try:
+            stars_per_subchapter = len(self.chapters[0].chapters[0].chapters)
+        except IndexError:
+            stars_per_subchapter = 0
+
+        try:
+            stages_per_subchapter = len(self.chapters[0].chapters[0].chapters[0].stages)
+        except IndexError:
+            stages_per_subchapter = 0
+        return (
+            total_map_types,
+            total_subchapters,
+            stars_per_subchapter,
+            stages_per_subchapter,
+        )
+
     def write(self, data: io.data.Data, gv: "game_version.GameVersion"):
+        (
+            total_map_types,
+            total_subchapters,
+            stars_per_subchapter,
+            stages_per_subchapter,
+        ) = self.get_lengths()
         if gv <= 34:
             is_int = True
         else:
             if 80099 < gv:
-                data.write_byte(len(self.chapters))
-                data.write_short(len(self.chapters[0].chapters))
-                data.write_byte(len(self.chapters[0].chapters[0].chapters))
-                data.write_byte(len(self.chapters[0].chapters[0].chapters[0].stages))
+                data.write_byte(total_map_types)
+                data.write_short(total_subchapters)
+                data.write_byte(stars_per_subchapter)
+                data.write_byte(stages_per_subchapter)
                 is_int = False
             else:
-                data.write_int(len(self.chapters))
-                data.write_int(len(self.chapters[0].chapters))
-                data.write_int(len(self.chapters[0].chapters[0].chapters))
+                data.write_int(total_map_types)
+                data.write_int(total_subchapters)
+                data.write_int(stars_per_subchapter)
                 is_int = True
 
         for chapter in self.chapters:
@@ -381,9 +457,9 @@ class EventChapters:
             if 80099 < gv:
                 is_int = False
             else:
-                data.write_int(len(self.chapters))
-                data.write_int(len(self.chapters[0].chapters))
-                data.write_int(len(self.chapters[0].chapters[0].chapters))
+                data.write_int(total_map_types)
+                data.write_int(total_subchapters)
+                data.write_int(stars_per_subchapter)
                 is_int = True
 
         for chapter in self.chapters:
@@ -395,10 +471,10 @@ class EventChapters:
             if 80099 < gv:
                 is_int = False
             else:
-                data.write_int(len(self.chapters))
-                data.write_int(len(self.chapters[0].chapters))
-                data.write_int(len(self.chapters[0].chapters[0].chapters[0].stages))
-                data.write_int(len(self.chapters[0].chapters[0].chapters))
+                data.write_int(total_map_types)
+                data.write_int(total_subchapters)
+                data.write_int(stages_per_subchapter)
+                data.write_int(stars_per_subchapter)
                 is_int = True
 
         for chapter in self.chapters:
@@ -410,9 +486,9 @@ class EventChapters:
             if 80099 < gv:
                 is_int = False
             else:
-                data.write_int(len(self.chapters))
-                data.write_int(len(self.chapters[0].chapters))
-                data.write_int(len(self.chapters[0].chapters[0].chapters))
+                data.write_int(total_map_types)
+                data.write_int(total_subchapters)
+                data.write_int(stars_per_subchapter)
                 is_int = True
 
         for chapter in self.chapters:
@@ -443,7 +519,10 @@ class EventChapters:
             return
         if gv >= 41:
             data.write_int(len(self.chapters))
-            data.write_int(len(self.chapters[0].chapters))
+            try:
+                data.write_int(len(self.chapters[0].chapters))
+            except IndexError:
+                data.write_int(0)
 
         for chapter in self.chapters:
             chapter.write_legend_restrictions(data)

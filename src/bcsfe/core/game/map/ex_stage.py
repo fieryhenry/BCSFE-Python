@@ -1,10 +1,13 @@
-from typing import Any
 from bcsfe.core import io
 
 
 class Stage:
     def __init__(self, clear_amount: int):
         self.clear_amount = clear_amount
+
+    @staticmethod
+    def init() -> "Stage":
+        return Stage(0)
 
     @staticmethod
     def read(stream: io.data.Data) -> "Stage":
@@ -31,6 +34,10 @@ class Stage:
 class Chapter:
     def __init__(self, stages: list[Stage]):
         self.stages = stages
+
+    @staticmethod
+    def init() -> "Chapter":
+        return Chapter([Stage.init() for _ in range(12)])
 
     @staticmethod
     def read(stream: io.data.Data) -> "Chapter":
@@ -61,6 +68,10 @@ class Chapter:
 class Chapters:
     def __init__(self, chapters: list[Chapter]):
         self.chapters = chapters
+
+    @staticmethod
+    def init() -> "Chapters":
+        return Chapters([])
 
     @staticmethod
     def read(stream: io.data.Data) -> "Chapters":

@@ -1,10 +1,13 @@
-from typing import Any
 from bcsfe.core import game_version, io
 
 
 class Stage:
     def __init__(self, score: int):
         self.score = score
+
+    @staticmethod
+    def init() -> "Stage":
+        return Stage(0)
 
     @staticmethod
     def read(stream: io.data.Data) -> "Stage":
@@ -30,6 +33,10 @@ class Stage:
 class SubChapter:
     def __init__(self, stages: list[Stage]):
         self.stages = stages
+
+    @staticmethod
+    def init(total_stages: int) -> "SubChapter":
+        return SubChapter([Stage.init() for _ in range(total_stages)])
 
     @staticmethod
     def read(stream: io.data.Data, total_stages: int) -> "SubChapter":
@@ -59,6 +66,12 @@ class SubChapter:
 class SubChapterStars:
     def __init__(self, sub_chapters: list[SubChapter]):
         self.sub_chapters = sub_chapters
+
+    @staticmethod
+    def init(total_stages: int, total_stars: int) -> "SubChapterStars":
+        return SubChapterStars(
+            [SubChapter.init(total_stages) for _ in range(total_stars)]
+        )
 
     @staticmethod
     def read(
@@ -94,6 +107,29 @@ class Chapters:
         self.sub_chapters = sub_chapters
 
     @staticmethod
+    def init(gv: game_version.GameVersion) -> "Chapters":
+        if gv < 20:
+            return Chapters([])
+        if gv <= 33:
+            total_subchapters = 50
+            total_stages = 12
+            total_stars = 3
+        elif gv <= 34:
+            total_subchapters = 0
+            total_stages = 12
+            total_stars = 3
+        else:
+            total_subchapters = 0
+            total_stages = 0
+            total_stars = 0
+        return Chapters(
+            [
+                SubChapterStars.init(total_stages, total_stars)
+                for _ in range(total_subchapters)
+            ]
+        )
+
+    @staticmethod
     def read(stream: io.data.Data, gv: game_version.GameVersion) -> "Chapters":
         if gv < 20:
             return Chapters([])
@@ -123,8 +159,14 @@ class Chapters:
             stream.write_int(len(self.sub_chapters))
         else:
             stream.write_int(len(self.sub_chapters))
-            stream.write_int(len(self.sub_chapters[0].sub_chapters[0].stages))
-            stream.write_int(len(self.sub_chapters[0].sub_chapters))
+            try:
+                stream.write_int(len(self.sub_chapters[0].sub_chapters[0].stages))
+            except IndexError:
+                stream.write_int(0)
+            try:
+                stream.write_int(len(self.sub_chapters[0].sub_chapters))
+            except IndexError:
+                stream.write_int(0)
         for sub_chapter in self.sub_chapters:
             sub_chapter.write(stream)
 

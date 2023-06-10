@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Optional
 from bcsfe.core import game_version, io
 from bcsfe.core.game.gamoto import base_materials
 
@@ -6,6 +6,10 @@ from bcsfe.core.game.gamoto import base_materials
 class Cannon:
     def __init__(self, levels: list[int]):
         self.levels = levels
+
+    @staticmethod
+    def init() -> "Cannon":
+        return Cannon([])
 
     @staticmethod
     def read(stream: io.data.Data) -> "Cannon":
@@ -40,6 +44,20 @@ class Cannons:
         self.selected_parts = selected_parts
 
     @staticmethod
+    def init(gv: game_version.GameVersion) -> "Cannons":
+        cannnons = {}
+        if gv < 80200:
+            selected_parts = [[0, 0, 0]]
+        else:
+            if gv > 90699:
+                total_selected_parts = 0
+            else:
+                total_selected_parts = 10
+
+            selected_parts = [[0, 0, 0] for _ in range(total_selected_parts)]
+        return Cannons(cannnons, selected_parts)
+
+    @staticmethod
     def read(stream: io.data.Data, gv: game_version.GameVersion) -> "Cannons":
         total = stream.read_int()
         cannons: dict[int, Cannon] = {}
@@ -67,15 +85,13 @@ class Cannons:
             stream.write_int(cannon_id)
             cannon.write(stream)
         if gv < 80200:
-            stream.write_int_list(self.selected_parts[0], write_length=False)
+            stream.write_int_list(self.selected_parts[0], write_length=False, length=3)
         else:
             if gv > 90699:
                 stream.write_byte(len(self.selected_parts))
-            else:
-                stream.write_byte(10)
 
             for part in self.selected_parts:
-                stream.write_byte_list(part, write_length=False)
+                stream.write_byte_list(part, write_length=False, length=3)
 
     def serialize(self) -> dict[str, Any]:
         return {
@@ -104,8 +120,21 @@ class Cannons:
 
 
 class Ototo:
-    def __init__(self, base_materials: base_materials.Materials):
+    def __init__(
+        self,
+        base_materials: base_materials.Materials,
+        game_version: Optional[game_version.GameVersion] = None,
+    ):
         self.base_materials = base_materials
+        self.remaining_seconds = 0.0
+        self.return_flag = False
+        self.improve_id = 0
+        self.engineers = 0
+        self.cannons = Cannons.init(game_version) if game_version else None
+
+    @staticmethod
+    def init(game_version: game_version.GameVersion) -> "Ototo":
+        return Ototo(base_materials.Materials.init(), game_version)
 
     @staticmethod
     def read(stream: io.data.Data) -> "Ototo":
@@ -127,7 +156,10 @@ class Ototo:
         stream.write_bool(self.return_flag)
         stream.write_int(self.improve_id)
         stream.write_int(self.engineers)
-        self.cannons.write(stream, gv)
+        if self.cannons is None:
+            Cannons.init(gv).write(stream, gv)
+        else:
+            self.cannons.write(stream, gv)
 
     def serialize(self) -> dict[str, Any]:
         return {
@@ -136,7 +168,7 @@ class Ototo:
             "return_flag": self.return_flag,
             "improve_id": self.improve_id,
             "engineers": self.engineers,
-            "cannons": self.cannons.serialize(),
+            "cannons": self.cannons.serialize() if self.cannons else None,
         }
 
     @staticmethod

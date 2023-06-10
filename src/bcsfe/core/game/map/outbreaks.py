@@ -7,6 +7,10 @@ class Outbreak:
         self.cleared = cleared
 
     @staticmethod
+    def init() -> "Outbreak":
+        return Outbreak(False)
+
+    @staticmethod
     def read(stream: io.data.Data) -> "Outbreak":
         cleared = stream.read_bool()
         return Outbreak(cleared)
@@ -31,6 +35,10 @@ class Outbreak:
 class Chapter:
     def __init__(self, outbreaks: dict[int, Outbreak]):
         self.outbreaks = outbreaks
+
+    @staticmethod
+    def init() -> "Chapter":
+        return Chapter({})
 
     @staticmethod
     def read(stream: io.data.Data) -> "Chapter":
@@ -74,6 +82,12 @@ class Chapter:
 class Outbreaks:
     def __init__(self, chapters: dict[int, Chapter]):
         self.chapters = chapters
+        self.zombie_event_remaining_time = 0.0
+        self.current_outbreaks: dict[int, Chapter] = {}
+
+    @staticmethod
+    def init() -> "Outbreaks":
+        return Outbreaks({})
 
     @staticmethod
     def read_chapters(stream: io.data.Data) -> "Outbreaks":

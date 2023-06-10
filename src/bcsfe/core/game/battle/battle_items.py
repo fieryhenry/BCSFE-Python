@@ -5,6 +5,11 @@ from bcsfe.core import io
 class BattleItem:
     def __init__(self, amount: int):
         self.amount = amount
+        self.locked = False
+
+    @staticmethod
+    def init() -> "BattleItem":
+        return BattleItem(0)
 
     @staticmethod
     def read_amount(stream: io.data.Data) -> "BattleItem":
@@ -45,6 +50,10 @@ class BattleItems:
     def __init__(self, items: list[BattleItem]):
         self.items = items
         self.lock_item = False
+
+    @staticmethod
+    def init() -> "BattleItems":
+        return BattleItems([BattleItem.init() for _ in range(6)])
 
     @staticmethod
     def read_items(stream: io.data.Data) -> "BattleItems":

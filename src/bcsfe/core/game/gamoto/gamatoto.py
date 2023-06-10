@@ -7,6 +7,10 @@ class Helper:
         self.id = id
 
     @staticmethod
+    def init() -> "Helper":
+        return Helper(-1)
+
+    @staticmethod
     def read(stream: io.data.Data) -> "Helper":
         id = stream.read_int()
         return Helper(id)
@@ -34,6 +38,10 @@ class Helper:
 class Helpers:
     def __init__(self, helpers: list[Helper]):
         self.helpers = helpers
+
+    @staticmethod
+    def init() -> "Helpers":
+        return Helpers([])
 
     @staticmethod
     def read(stream: io.data.Data) -> "Helpers":
@@ -80,6 +88,23 @@ class Gamatoto:
         self.recon_length = recon_length
         self.unknown = unknown
         self.notif_value = notif_value
+        self.helpers = Helpers.init()
+        self.is_ad_present = False
+        self.skin = 0
+        self.collab_flags: dict[int, bool] = {}
+        self.collab_durations: dict[int, float] = {}
+
+    @staticmethod
+    def init() -> "Gamatoto":
+        return Gamatoto(
+            0.0,
+            False,
+            0,
+            0,
+            0,
+            0,
+            0,
+        )
 
     @staticmethod
     def read(stream: io.data.Data) -> "Gamatoto":

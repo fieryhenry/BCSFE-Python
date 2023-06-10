@@ -8,6 +8,10 @@ class CatSlot:
         self.form = form
 
     @staticmethod
+    def init() -> "CatSlot":
+        return CatSlot(0, 0)
+
+    @staticmethod
     def read(stream: io.data.Data) -> "CatSlot":
         cat_id = stream.read_short()
         form = stream.read_byte()
@@ -48,6 +52,11 @@ class LineupCat:
         self.u1 = u1
         self.u2 = u2
         self.u3 = u3
+
+    @staticmethod
+    def init() -> "LineupCat":
+        cats = [CatSlot.init() for _ in range(10)]
+        return LineupCat(0, cats, 0, 0, 0)
 
     @staticmethod
     def read(stream: io.data.Data) -> "LineupCat":
@@ -99,6 +108,10 @@ class ClearedSlotsCat:
         self.lineups = lineups
 
     @staticmethod
+    def init() -> "ClearedSlotsCat":
+        return ClearedSlotsCat([])
+
+    @staticmethod
     def read(stream: io.data.Data) -> "ClearedSlotsCat":
         total = stream.read_short()
         lineups = [LineupCat.read(stream) for _ in range(total)]
@@ -130,6 +143,10 @@ class StageSlot:
         self.stage_id = stage_id
 
     @staticmethod
+    def init() -> "StageSlot":
+        return StageSlot(0)
+
+    @staticmethod
     def read(stream: io.data.Data) -> "StageSlot":
         stage_id = stream.read_int()
         return StageSlot(stage_id)
@@ -155,6 +172,10 @@ class StageLineups:
     def __init__(self, index: int, slots: list[StageSlot]):
         self.index = index
         self.slots = slots
+
+    @staticmethod
+    def init() -> "StageLineups":
+        return StageLineups(0, [])
 
     @staticmethod
     def read(stream: io.data.Data) -> "StageLineups":
@@ -192,6 +213,10 @@ class StageLineups:
 class ClearedStageSlots:
     def __init__(self, lineups: list[StageLineups]):
         self.lineups = lineups
+
+    @staticmethod
+    def init() -> "ClearedStageSlots":
+        return ClearedStageSlots([])
 
     @staticmethod
     def read(stream: io.data.Data) -> "ClearedStageSlots":
@@ -232,6 +257,14 @@ class ClearedSlots:
         self.cleared_slots = cleared_slots
         self.cleared_stage_slots = cleared_stage_slots
         self.unknown = unknown
+
+    @staticmethod
+    def init() -> "ClearedSlots":
+        return ClearedSlots(
+            ClearedSlotsCat.init(),
+            ClearedStageSlots.init(),
+            {},
+        )
 
     @staticmethod
     def read(stream: io.data.Data) -> "ClearedSlots":

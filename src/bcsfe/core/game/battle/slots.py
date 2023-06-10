@@ -38,6 +38,12 @@ class EquipSlots:
         slots = [EquipSlot.read(stream) for _ in range(length)]
         return EquipSlots(slots)
 
+    @staticmethod
+    def init() -> "EquipSlots":
+        length = 10
+        slots = [EquipSlot(-1) for _ in range(length)]
+        return EquipSlots(slots)
+
     def write(self, stream: io.data.Data):
         for slot in self.slots:
             slot.write(stream)
@@ -70,11 +76,23 @@ class EquipSlots:
 
 
 class LineUps:
-    def __init__(self, slots: list[EquipSlots]):
+    def __init__(self, slots: list[EquipSlots], total_slots: int = 15):
         self.slots = slots
         self.selected_slot = 0
         self.unlocked_slots = 0
-        self.slot_names_length = 0
+        self.slot_names_length = total_slots
+
+    @staticmethod
+    def init(gv: game_version.GameVersion) -> "LineUps":
+        if gv < 90700:
+            length = 10
+        else:
+            length = 15
+        slots = [EquipSlots.init() for _ in range(length)]
+        total_slots = 15
+        if gv >= 110600:
+            total_slots = 0
+        return LineUps(slots, total_slots)
 
     @staticmethod
     def read(stream: io.data.Data, gv: game_version.GameVersion) -> "LineUps":
@@ -88,6 +106,13 @@ class LineUps:
     def write(self, stream: io.data.Data, gv: game_version.GameVersion):
         if gv >= 90700:
             stream.write_byte(len(self.slots))
+            length = len(self.slots)
+        else:
+            length = 10
+        if length > len(self.slots):
+            self.slots += [EquipSlots.init() for _ in range(length)]
+        else:
+            self.slots = self.slots[:length]
         for slot in self.slots:
             slot.write(stream)
 
@@ -104,7 +129,8 @@ class LineUps:
         stream.write_int(self.selected_slot)
         if gv < 90700:
             unlocked_slots_l = [False] * 10
-            for i in range(self.unlocked_slots):
+            unlocked_slots = min(self.unlocked_slots, 10)
+            for i in range(unlocked_slots):
                 unlocked_slots_l[i] = True
             stream.write_bool_list(unlocked_slots_l, write_length=False)
         else:
@@ -118,7 +144,12 @@ class LineUps:
         else:
             total_slots = 15
         for i in range(total_slots):
-            self.slots[i].read_name(stream)
+            try:
+                self.slots[i].read_name(stream)
+            except IndexError:
+                slot = EquipSlots.init()
+                slot.read_name(stream)
+                self.slots.append(slot)
 
         self.slot_names_length = total_slots
 
@@ -128,7 +159,12 @@ class LineUps:
         if game_version >= 110600:
             stream.write_byte(self.slot_names_length)
         for i in range(self.slot_names_length):
-            self.slots[i].write_name(stream)
+            try:
+                self.slots[i].write_name(stream)
+            except IndexError:
+                slot = EquipSlots.init()
+                slot.write_name(stream)
+                self.slots.append(slot)
 
     def serialize(self) -> dict[str, Any]:
         return {

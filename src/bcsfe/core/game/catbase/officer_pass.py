@@ -5,6 +5,13 @@ from bcsfe.core import game_version, io, game
 class OfficerPass:
     def __init__(self, play_time: int):
         self.play_time = play_time
+        self.gold_pass = game.catbase.nyanko_club.NyankoClub.init()
+        self.cat_id = 0
+        self.cat_form = 0
+
+    @staticmethod
+    def init() -> "OfficerPass":
+        return OfficerPass(0)
 
     @staticmethod
     def read(data: io.data.Data) -> "OfficerPass":

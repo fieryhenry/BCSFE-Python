@@ -8,6 +8,13 @@ class Orb:
         self.value = value
 
     @staticmethod
+    def init() -> "Orb":
+        return Orb(
+            0,
+            0,
+        )
+
+    @staticmethod
     def read(stream: io.data.Data, gv: game_version.GameVersion) -> "Orb":
         id = stream.read_short()
         if gv < 110400:
@@ -43,6 +50,10 @@ class Orb:
 class TalentOrbs:
     def __init__(self, orbs: dict[int, Orb]):
         self.orbs = orbs
+
+    @staticmethod
+    def init() -> "TalentOrbs":
+        return TalentOrbs({})
 
     @staticmethod
     def read(stream: io.data.Data, gv: game_version.GameVersion) -> "TalentOrbs":

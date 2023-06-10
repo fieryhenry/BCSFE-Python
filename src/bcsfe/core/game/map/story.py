@@ -9,6 +9,10 @@ class Stage:
         self.itf_timed_score = 0
 
     @staticmethod
+    def init() -> "Stage":
+        return Stage(0)
+
+    @staticmethod
     def read_clear_times(stream: io.data.Data) -> "Stage":
         return Stage(stream.read_int())
 
@@ -52,12 +56,16 @@ class Chapter:
     def __init__(self, selected_stage: int):
         self.selected_stage = selected_stage
         self.progress = 0
-        self.stages = []
+        self.stages = [Stage.init() for _ in range(51)]
         self.time_until_treasure_chance = 0
         self.treasure_chance_duration = 0
         self.treasure_chance_value = 0
         self.treasure_chance_stage_id = 0
         self.treasure_festival_type = 0
+
+    @staticmethod
+    def init() -> "Chapter":
+        return Chapter(0)
 
     def get_valid_treasure_stages(self) -> list[Stage]:
         return self.stages[:49]
@@ -163,6 +171,11 @@ class Chapter:
 class Chapters:
     def __init__(self, chapters: list[Chapter]):
         self.chapters = chapters
+
+    @staticmethod
+    def init() -> "Chapters":
+        chapters = [Chapter.init() for _ in range(10)]
+        return Chapters(chapters)
 
     @staticmethod
     def read(stream: io.data.Data) -> "Chapters":

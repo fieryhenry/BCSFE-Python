@@ -11,6 +11,10 @@ class Skill:
         self.max_upgrade_level = upgrade.Upgrade(0, 0)
 
     @staticmethod
+    def init() -> "Skill":
+        return Skill(upgrade.Upgrade(0, 0))
+
+    @staticmethod
     def read_upgrade(stream: io.data.Data) -> "Skill":
         up = upgrade.Upgrade.read(stream)
         return Skill(up)
@@ -57,6 +61,11 @@ class Skill:
 class Skills:
     def __init__(self, skills: list[Skill]):
         self.skills = skills
+
+    @staticmethod
+    def init() -> "Skills":
+        skills = [Skill.init() for _ in range(11)]
+        return Skills(skills)
 
     def get_valid_skills(self) -> list[Skill]:
         new_skills: list[Skill] = []

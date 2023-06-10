@@ -20,6 +20,10 @@ class Medals:
         self.ub = ub
 
     @staticmethod
+    def init() -> "Medals":
+        return Medals(0, 0, 0, [], {}, False)
+
+    @staticmethod
     def read(data: io.data.Data) -> "Medals":
         u1 = data.read_int()
         u2 = data.read_int()

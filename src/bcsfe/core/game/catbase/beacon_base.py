@@ -14,6 +14,10 @@ class BeaconEventListScene:
         self.bool_array = bool_dict
 
     @staticmethod
+    def init() -> "BeaconEventListScene":
+        return BeaconEventListScene({}, {}, {})
+
+    @staticmethod
     def read(stream: io.data.Data) -> "BeaconEventListScene":
         int_dict = {}
         str_dict = {}

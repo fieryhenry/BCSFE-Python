@@ -1,3 +1,3 @@
-from bcsfe import core
+from bcsfe import core, cli
 
-__all__ = ["core"]
+__all__ = ["core", "cli"]

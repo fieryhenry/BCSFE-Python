@@ -1,3 +1,4 @@
+from typing import Optional
 from bcsfe.core import io
 
 
@@ -64,14 +65,19 @@ class PropertySet:
 class LocalManager:
     """Manages properties for a locale"""
 
-    def __init__(self, locale: str):
+    def __init__(self, locale: Optional[str] = None):
         """Initializes a new instance of the LocalManager class.
 
         Args:
             locale (str): Language code of the locale.
         """
-        self.locale = locale
-        self.path = io.path.Path("locales", True).add(locale)
+        if locale is None:
+            lc = io.config.Config().get(io.config.Key.LOCALE)
+        else:
+            lc = locale
+
+        self.locale = lc
+        self.path = io.path.Path("locales", True).add(lc)
         self.properties: dict[str, PropertySet] = {}
         self.all_properties: dict[str, str] = {}
         self.parse()
@@ -94,7 +100,7 @@ class LocalManager:
         Returns:
             str: Value of the key.
         """
-        return self.all_properties[key]
+        return self.all_properties.get(key, key)
 
     @staticmethod
     def from_config() -> "LocalManager":

@@ -1,6 +1,7 @@
 from typing import Any, Optional
-from bcsfe.core import game_version, io
+from bcsfe.core import game_version, io, game, country_code, server
 from bcsfe.core.game.gamoto import base_materials
+from bcsfe.cli import dialog_creator
 
 
 class Cannon:
@@ -188,3 +189,19 @@ class Ototo:
 
     def __str__(self):
         return self.__repr__()
+
+    @staticmethod
+    def get_max_engineers(cc: country_code.CountryCode) -> int:
+        file = server.game_data_getter.GameDataGetter(cc).download(
+            "DataLocal", "CastleCustomLimit.csv"
+        )
+        if file is None:
+            return 5
+        csv = io.bc_csv.CSV(file)
+        return csv.lines[0][0].to_int()
+
+    def edit_engineers(self, cc: country_code.CountryCode):
+        name = game.catbase.gatya_item.GatyaItemNames(cc).get_name(92)
+        self.engineers = dialog_creator.SingleEditor(
+            name, self.engineers, Ototo.get_max_engineers(cc)
+        ).edit()

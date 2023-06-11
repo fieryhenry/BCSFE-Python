@@ -335,8 +335,15 @@ class MultiEditor:
 
 class SingleEditor:
     def __init__(
-        self, item: str, value: int, max_value: Optional[int], signed: bool = True
+        self,
+        item: str,
+        value: int,
+        max_value: Optional[int],
+        signed: bool = True,
+        localized_item: bool = False,
     ):
+        if localized_item:
+            item = locale_handler.LocalManager().get_key(item)
         self.item = item
         self.value = value
         self.max_value = max_value
@@ -349,6 +356,53 @@ class SingleEditor:
         usr_input = IntInput(max_value, default=self.value).get_input_locale_while(
             "input",
             {"name": self.item, "value": self.value, "max": max_value},
+        )
+        if usr_input is None:
+            return self.value
+        color.ColoredText.localize(
+            "value_changed",
+            name=self.item,
+            value=usr_input,
+        )
+        return usr_input
+
+
+class StringInput:
+    def __init__(self, default: str = ""):
+        self.default = default
+
+    def get_input_locale_while(
+        self, key: str, perameters: dict[str, Any]
+    ) -> Optional[str]:
+        while True:
+            usr_input = self.get_input_locale(key, perameters)
+            if usr_input is None:
+                return None
+            if usr_input == "":
+                return self.default
+            if usr_input == " ":
+                continue
+            return usr_input
+
+    def get_input_locale(self, key: str, perameters: dict[str, Any]) -> Optional[str]:
+        dialog_str = locale_handler.LocalManager().get_key(key).format(**perameters)
+        usr_input = color.ColoredInput().get(dialog_str)
+        if usr_input == "":
+            return None
+        return usr_input
+
+
+class StringEditor:
+    def __init__(self, item: str, value: str, item_localized: bool = False):
+        if item_localized:
+            item = locale_handler.LocalManager().get_key(item)
+        self.item = item
+        self.value = value
+
+    def edit(self) -> str:
+        usr_input = StringInput(default=self.value).get_input_locale_while(
+            "input_non_max",
+            {"name": self.item, "value": self.value},
         )
         if usr_input is None:
             return self.value

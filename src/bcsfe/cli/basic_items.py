@@ -90,12 +90,6 @@ class BasicItems:
             name, self.save_file.leadership, 9999
         ).edit()
 
-    def edit_engineers(self):
-        name = game.catbase.gatya_item.GatyaItemNames(self.save_file.cc).get_name(92)
-        self.save_file.ototo.engineers = dialog_creator.SingleEditor(
-            name, self.save_file.ototo.engineers, 5
-        ).edit()
-
     def edit_catamins(self):
         names = game.catbase.gatya_item.GatyaItemNames(self.save_file.cc).names
         items = game.catbase.gatya_item.GatyaItemBuy(self.save_file.cc).get_by_category(
@@ -126,27 +120,6 @@ class BasicItems:
         ).edit()
         self.save_file.catseyes = values
 
-    def edit_base_materials(self):
-        names = game.catbase.gatya_item.GatyaItemNames(self.save_file.cc).names
-        items = game.catbase.gatya_item.GatyaItemBuy(self.save_file.cc).get_by_category(
-            7
-        )
-        names = [names[item.id] for item in items]
-        base_materials = [
-            base_material.amount
-            for base_material in self.save_file.ototo.base_materials.materials
-        ]
-        values = dialog_creator.MultiEditor.from_reduced(
-            "base_materials",
-            names,
-            base_materials,
-            9999,
-            group_name_localized=True,
-        ).edit()
-        self.save_file.ototo.base_materials.materials = [
-            game.gamoto.ototo.base_materials.Material(value) for value in values
-        ]
-
     def edit_catfruit(self):
         names = game.catbase.matatabi.Matatabi(self.save_file.cc).get_names()
 
@@ -169,3 +142,16 @@ class BasicItems:
         names = game.catbase.gatya_item.GatyaItemNames(self.save_file.cc).names
         name = names[123]
         color.ColoredText.localize("value_gave", name=name)
+
+    def edit_inquiry_code(self):
+        item_name = (
+            game.localizable.Localizable(self.save_file.cc).get("autoSave_txt5").strip()
+        )
+        self.save_file.inquiry_code = dialog_creator.StringEditor(
+            item_name, self.save_file.inquiry_code
+        ).edit()
+
+    def edit_password_refresh_token(self):
+        self.save_file.password_refresh_token = dialog_creator.StringEditor(
+            "password_refresh_token", self.save_file.password_refresh_token
+        ).edit()

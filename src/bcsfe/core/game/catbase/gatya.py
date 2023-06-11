@@ -1,5 +1,6 @@
 from typing import Any
 from bcsfe.core import io, game_version
+from bcsfe.cli import dialog_creator
 
 
 class Gatya:
@@ -134,3 +135,27 @@ class Gatya:
 
     def __str__(self) -> str:
         return f"Gatya({self.serialize()})"
+
+    def edit_rare_gatya_seed(self):
+        self.rare_seed = dialog_creator.SingleEditor(
+            "rare_gatya_seed",
+            self.rare_seed,
+            None,
+            localized_item=True,
+        ).edit()
+
+    def edit_normal_gatya_seed(self):
+        self.normal_seed = dialog_creator.SingleEditor(
+            "normal_gatya_seed",
+            self.normal_seed,
+            None,
+            localized_item=True,
+        ).edit()
+
+    def edit_event_gatya_seed(self):
+        self.event_seed = dialog_creator.SingleEditor(
+            "event_gatya_seed",
+            self.event_seed,
+            None,
+            localized_item=True,
+        ).edit()

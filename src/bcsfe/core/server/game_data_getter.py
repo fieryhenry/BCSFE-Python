@@ -65,6 +65,12 @@ class GameDataGetter:
         path = self.get_file_path(pack_name, file_name)
         return path.exists()
 
+    def download_from_path(
+        self, path: str, retries: int = 2, display_text: bool = True
+    ) -> Optional[io.data.Data]:
+        pack_name, file_name = path.split("/")
+        return self.download(pack_name, file_name, retries, display_text)
+
     def download(
         self,
         pack_name: str,

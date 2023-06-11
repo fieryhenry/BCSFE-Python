@@ -1,5 +1,5 @@
 from bcsfe.core import io, game, server
-from bcsfe.cli import dialog_creator
+from bcsfe.cli import dialog_creator, color
 
 
 class BasicItems:
@@ -126,6 +126,27 @@ class BasicItems:
         ).edit()
         self.save_file.catseyes = values
 
+    def edit_base_materials(self):
+        names = game.catbase.gatya_item.GatyaItemNames(self.save_file.cc).names
+        items = game.catbase.gatya_item.GatyaItemBuy(self.save_file.cc).get_by_category(
+            7
+        )
+        names = [names[item.id] for item in items]
+        base_materials = [
+            base_material.amount
+            for base_material in self.save_file.ototo.base_materials.materials
+        ]
+        values = dialog_creator.MultiEditor.from_reduced(
+            "base_materials",
+            names,
+            base_materials,
+            9999,
+            group_name_localized=True,
+        ).edit()
+        self.save_file.ototo.base_materials.materials = [
+            game.gamoto.ototo.base_materials.Material(value) for value in values
+        ]
+
     def edit_catfruit(self):
         names = game.catbase.matatabi.Matatabi(self.save_file.cc).get_names()
 
@@ -142,3 +163,9 @@ class BasicItems:
             cumulative_max=True,
         ).edit()
         self.save_file.catfruit = values
+
+    def set_restart_pack(self):
+        self.save_file.restart_pack = 1
+        names = game.catbase.gatya_item.GatyaItemNames(self.save_file.cc).names
+        name = names[123]
+        color.ColoredText.localize("value_gave", name=name)

@@ -1,6 +1,7 @@
 from typing import Any
 from bcsfe.core import io
 from bcsfe.core.game.map import chapters
+from bcsfe.cli import dialog_creator
 
 
 class Challenge:
@@ -57,3 +58,10 @@ class Challenge:
 
     def __str__(self):
         return self.__repr__()
+
+    def edit_score(self):
+        if not self.scores:
+            self.scores = [0]
+        self.scores[0] = dialog_creator.SingleEditor(
+            "challenge_score", self.scores[0], None, localized_item=True
+        ).edit()

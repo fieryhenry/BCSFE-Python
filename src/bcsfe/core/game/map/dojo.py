@@ -1,5 +1,6 @@
 from typing import Any
 from bcsfe.core import io
+from bcsfe.cli import dialog_creator
 
 
 class Stage:
@@ -317,3 +318,16 @@ class Dojo:
 
     def __str__(self) -> str:
         return self.__repr__()
+
+    def edit_score(self):
+        if len(self.chapters.chapters) == 0:
+            self.chapters.chapters[0] = Chapter.init()
+        if len(self.chapters.chapters[0].stages) == 0:
+            self.chapters.chapters[0].stages[0] = Stage.init()
+
+        self.chapters.chapters[0].stages[0].score = dialog_creator.SingleEditor(
+            "dojo_score",
+            self.chapters.chapters[0].stages[0].score,
+            None,
+            localized_item=True,
+        ).edit()

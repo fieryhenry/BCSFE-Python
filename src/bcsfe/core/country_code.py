@@ -1,4 +1,5 @@
 import enum
+from bcsfe.cli import dialog_creator
 
 
 class CountryCode(enum.Enum):
@@ -46,3 +47,15 @@ class CountryCode(enum.Enum):
 
     def copy(self) -> "CountryCode":
         return self
+
+    @staticmethod
+    def select() -> "CountryCode":
+        index = dialog_creator.ChoiceInput(
+            CountryCode.get_all_str(),
+            CountryCode.get_all_str(),
+            [],
+            {},
+            "country_code_select",
+            True,
+        ).get_input_locale_while()[0]
+        return CountryCode.get_all()[index - 1]

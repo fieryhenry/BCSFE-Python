@@ -1,6 +1,6 @@
 import base64
 from typing import Any, Optional, Union
-from bcsfe.core.io import data
+from bcsfe.core.io import data, path
 from bcsfe.core import country_code, game_version, game, crypto
 import datetime
 
@@ -1726,6 +1726,10 @@ class SaveFile:
         self.set_hash(add=True)
         return dt
 
+    def to_file(self, path: path.Path) -> None:
+        dt = self.to_data()
+        dt.to_file(path)
+
     def to_dict(self) -> dict[str, Any]:
         data: dict[str, Any] = {
             "cc": self.cc.get_code(),
@@ -3032,3 +3036,15 @@ class SaveFile:
             if not order.startswith(SaveFile.get_string_identifier(identifier)):
                 new_order_ids.append(order)
         self.order_ids = new_order_ids
+
+    def get_default_path(self) -> path.Path:
+        date = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        local_path = (
+            path.Path.get_appdata_folder()
+            .add("saves")
+            .add(f"{self.cc.get_code()}")
+            .add(self.inquiry_code)
+        )
+        local_path.generate_dirs()
+        local_path = local_path.add(date)
+        return local_path

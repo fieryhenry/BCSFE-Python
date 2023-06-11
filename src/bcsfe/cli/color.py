@@ -37,6 +37,8 @@ class ColorHex(NamedConstant):
     DGN = DARK_GREEN
     LIGHT_GREY = "#D3D3D3"
     LG = LIGHT_GREY
+    ORANGE = "#FFA500"
+    O = ORANGE
 
     @staticmethod
     def from_name(name: str) -> str:
@@ -146,6 +148,14 @@ class ColoredInput:
     def get(self, display_string: str) -> str:
         ColoredText(display_string, end=self.end)
         return input()
+
+    def localize(self, string: str, **kwargs: Any) -> str:
+        text = locale_handler.LocalManager().get_key(string)
+        try:
+            text = text.format(**kwargs)
+        except TypeError:
+            pass
+        return self.get(text)
 
     def get_int(
         self,

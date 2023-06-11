@@ -8,6 +8,7 @@ from bcsfe.core.io import (
     json_file,
     save,
     thread_helper,
+    root_handler,
     adb_handler,
 )
 
@@ -21,5 +22,6 @@ __all__ = [
     "json_file",
     "save",
     "thread_helper",
+    "root_handler",
     "adb_handler",
 ]

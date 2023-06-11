@@ -26,17 +26,40 @@ class PropertySet:
             KeyError: If a key is already defined in the property file.
         """
         lines = self.path.read().to_str().splitlines()
-        for line in lines:
-            if line.startswith("#") or line == "":
+        i = 0
+        in_multi_line = False
+        multi_line_text = ""
+        multi_line_key = ""
+        while i < len(lines):
+            line = lines[i]
+            if line.startswith("#") or not line:
+                i += 1
                 continue
+            if in_multi_line and not line.startswith(">") or i == len(lines) - 1:
+                in_multi_line = False
+                if multi_line_key in self.properties:
+                    raise KeyError(
+                        f"Key {multi_line_key} already exists in property file"
+                    )
+                self.properties[multi_line_key] = multi_line_text
+                multi_line_text = ""
+                multi_line_key = ""
+            if line.startswith(">") and in_multi_line:
+                multi_line_text += line[1:] + "\n"
+
             parts = line.split("=")
-            if len(parts) < 2:
-                continue
-            key = parts[0]
-            value = "=".join(parts[1:])
-            if key in self.properties:
-                raise KeyError(f"Key {key} already exists in property file")
-            self.properties[key] = value
+            if line.strip().endswith("="):
+                in_multi_line = True
+                multi_line_key = parts[0]
+
+            if not in_multi_line:
+                key = parts[0]
+                value = "=".join(parts[1:])
+                if key in self.properties:
+                    raise KeyError(f"Key {key} already exists in property file")
+                self.properties[key] = value
+
+            i += 1
 
     def get_key(self, key: str) -> str:
         """Gets a key from the property file.

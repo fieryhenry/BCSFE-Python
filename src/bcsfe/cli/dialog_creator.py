@@ -110,7 +110,11 @@ class ListOutput:
         end_string = dialog.format(**self.perameters)
         end_string += "\n"
         for i, string in enumerate(strings):
-            string = string.format(int=self.ints[i])
+            try:
+                int_string = str(self.ints[i])
+            except IndexError:
+                int_string = ""
+            string = string.format(int=int_string)
             end_string += f" <w>{i+1}.</> <g>{string}</>\n"
         end_string = end_string.strip("\n")
         return end_string
@@ -161,7 +165,8 @@ class ChoiceInput:
             if user_input == "q":
                 return None
 
-    def get_input_locale(self) -> list[int]:
+    def get_input_locale(self) -> tuple[list[int], bool]:
+        self.strings.append("all_at_once")
         ListOutput(
             self.strings, self.ints, self.dialog, self.perameters
         ).display_locale()
@@ -177,18 +182,21 @@ class ChoiceInput:
                 int_vals.append(int(i))
             except ValueError:
                 continue
-        return int_vals
+        if len(self.strings) in int_vals:
+            return list(range(1, len(self.strings))), True
 
-    def multiple_choice(self) -> list[int]:
-        user_input = self.get_input_locale()
-        return [i - 1 for i in user_input]
+        return int_vals, False
+
+    def multiple_choice(self) -> tuple[list[int], bool]:
+        user_input, all_at_once = self.get_input_locale()
+        return [i - 1 for i in user_input], all_at_once
 
     def single_choice(self) -> Optional[int]:
         return self.get_input_while()
 
-    def get(self) -> Union[Optional[int], list[int]]:
+    def get(self) -> tuple[Union[Optional[int], list[int]], bool]:
         if self.is_single_choice:
-            return self.single_choice()
+            return self.single_choice(), False
         return self.multiple_choice()
 
 
@@ -204,6 +212,8 @@ class MultiEditor:
         dialog: str,
         single_choice: bool = False,
         signed: bool = True,
+        group_name_localized: bool = False,
+        cumulative_max: bool = False,
     ):
         self.items = items
         self.strings = strings
@@ -218,23 +228,93 @@ class MultiEditor:
         if perameters is None:
             perameters = {}
         self.perameters = perameters
-        self.perameters["group_name"] = group_name
+        if group_name_localized:
+            self.perameters["group_name"] = locale_handler.LocalManager().get_key(
+                group_name
+            )
+        else:
+            self.perameters["group_name"] = group_name
         self.dialog = dialog
         self.is_single_choice = single_choice
         self.signed = signed
+        self.cumulative_max = cumulative_max
+
+    @staticmethod
+    def from_reduced(
+        group_name: str,
+        items: list[str],
+        ints: list[int],
+        max_values: Optional[Union[list[int], int]],
+        group_name_localized: bool = False,
+        dialog: str = "input",
+        cumulative_max: bool = False,
+    ):
+        text: list[str] = []
+        for item_name in items:
+            text.append(f"{item_name} <c>: {{int}}</>")
+        return MultiEditor(
+            group_name,
+            items,
+            text,
+            ints,
+            max_values,
+            None,
+            dialog,
+            group_name_localized=group_name_localized,
+            cumulative_max=cumulative_max,
+        )
 
     def edit(self) -> list[int]:
-        choices = ChoiceInput(
+        choices, all_at_once = ChoiceInput(
             self.items, self.strings, self.ints, self.perameters, "select_edit"
         ).get()
         if choices is None:
             return self.ints
         if isinstance(choices, int):
             choices = [choices]
+        if all_at_once:
+            return self.edit_all(choices)
+        return self.edit_one(choices)
+
+    def edit_all(self, choices: list[int]) -> list[int]:
+        max_max_value = 0
         for choice in choices:
             max_value = self.max_values[choice]
             if max_value is None:
                 max_value = IntInput.get_max_value(max_value, self.signed)
+            max_max_value = max(max_max_value, max_value)
+        if self.cumulative_max:
+            max_max_value = max_max_value // len(choices)
+        usr_input = IntInput(max_max_value, default=None).get_input_locale_while(
+            self.dialog + "_all",
+            {
+                "name": self.perameters["group_name"],
+                "max": max_max_value,
+            },
+        )
+        if usr_input is None:
+            return self.ints
+        for choice in choices:
+            max_value = IntInput.get_max_value(self.max_values[choice], self.signed)
+            value = min(usr_input, max_value)
+            self.ints[choice] = value
+            color.ColoredText.localize(
+                "value_changed",
+                name=self.items[choice],
+                value=value,
+            )
+
+        return self.ints
+
+    def edit_one(self, choices: list[int]) -> list[int]:
+        for choice in choices:
+            max_value = self.max_values[choice]
+            if max_value is None:
+                max_value = IntInput.get_max_value(max_value, self.signed)
+
+            if self.cumulative_max:
+                max_value -= sum(self.ints) - self.ints[choice]
+
             item = self.items[choice]
             usr_input = IntInput(
                 max_value, default=self.ints[choice]
@@ -251,6 +331,33 @@ class MultiEditor:
                 value=self.ints[choice],
             )
         return self.ints
+
+
+class SingleEditor:
+    def __init__(
+        self, item: str, value: int, max_value: Optional[int], signed: bool = True
+    ):
+        self.item = item
+        self.value = value
+        self.max_value = max_value
+        self.signed = signed
+
+    def edit(self) -> int:
+        max_value = self.max_value
+        if max_value is None:
+            max_value = IntInput.get_max_value(max_value, self.signed)
+        usr_input = IntInput(max_value, default=self.value).get_input_locale_while(
+            "input",
+            {"name": self.item, "value": self.value, "max": max_value},
+        )
+        if usr_input is None:
+            return self.value
+        color.ColoredText.localize(
+            "value_changed",
+            name=self.item,
+            value=usr_input,
+        )
+        return usr_input
 
 
 class DialogBuilder:

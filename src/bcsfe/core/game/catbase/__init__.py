@@ -1,5 +1,5 @@
 from bcsfe.core.game.catbase import (
-    catseyes,
+    gatya_item,
     stamp,
     cat,
     upgrade,
@@ -7,7 +7,6 @@ from bcsfe.core.game.catbase import (
     my_sale,
     gatya,
     user_rank_rewards,
-    catfruit,
     item_pack,
     login_bonuses,
     scheme_items,
@@ -18,6 +17,7 @@ from bcsfe.core.game.catbase import (
     officer_pass,
     medals,
     talent_orbs,
+    matatabi,
 )
 
 __all__ = [
@@ -28,8 +28,6 @@ __all__ = [
     "my_sale",
     "gatya",
     "user_rank_rewards",
-    "catfruit",
-    "catseyes",
     "item_pack",
     "login_bonuses",
     "scheme_items",
@@ -40,4 +38,6 @@ __all__ = [
     "officer_pass",
     "medals",
     "talent_orbs",
+    "gatya_item",
+    "matatabi",
 ]

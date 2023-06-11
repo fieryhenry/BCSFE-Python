@@ -1,3 +1,3 @@
-from bcsfe.core.game import catbase, battle, map, item, gamoto
+from bcsfe.core.game import catbase, battle, map, item, gamoto, localizable
 
-__all__ = ["catbase", "battle", "map", "item", "gamoto"]
+__all__ = ["catbase", "battle", "map", "item", "gamoto", "localizable"]

@@ -141,6 +141,7 @@ class Gatya:
             "rare_gatya_seed",
             self.rare_seed,
             None,
+            min_value=self.get_min_max()[0],
             localized_item=True,
         ).edit()
 
@@ -149,13 +150,18 @@ class Gatya:
             "normal_gatya_seed",
             self.normal_seed,
             None,
+            min_value=self.get_min_max()[0],
             localized_item=True,
         ).edit()
+
+    def get_min_max(self) -> tuple[int, int]:
+        return -(2**31), 2**31 - 1
 
     def edit_event_gatya_seed(self):
         self.event_seed = dialog_creator.SingleEditor(
             "event_gatya_seed",
             self.event_seed,
             None,
+            min_value=self.get_min_max()[0],
             localized_item=True,
         ).edit()

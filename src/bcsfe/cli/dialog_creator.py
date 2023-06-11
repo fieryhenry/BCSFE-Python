@@ -339,6 +339,7 @@ class SingleEditor:
         item: str,
         value: int,
         max_value: Optional[int],
+        min_value: int = 0,
         signed: bool = True,
         localized_item: bool = False,
     ):
@@ -347,15 +348,28 @@ class SingleEditor:
         self.item = item
         self.value = value
         self.max_value = max_value
+        self.min_value = min_value
         self.signed = signed
 
     def edit(self) -> int:
         max_value = self.max_value
         if max_value is None:
             max_value = IntInput.get_max_value(max_value, self.signed)
-        usr_input = IntInput(max_value, default=self.value).get_input_locale_while(
-            "input",
-            {"name": self.item, "value": self.value, "max": max_value},
+
+        if self.min_value != 0:
+            dialog = "input_min"
+        else:
+            dialog = "input"
+        usr_input = IntInput(
+            max_value, self.min_value, default=self.value
+        ).get_input_locale_while(
+            dialog,
+            {
+                "name": self.item,
+                "value": self.value,
+                "max": max_value,
+                "min": self.min_value,
+            },
         )
         if usr_input is None:
             return self.value

@@ -2,10 +2,6 @@ from typing import Any, Optional, Union
 from bcsfe.core import io, locale_handler
 from bcsfe.cli import color
 
-"""
-ChoiceInput(battle_item_names, battle_item_values, True)
-"""
-
 
 class IntInput:
     def __init__(

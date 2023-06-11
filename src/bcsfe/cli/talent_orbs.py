@@ -170,7 +170,7 @@ class OrbInfoList:
         """Create an OrbInfoList
 
         Args:
-            is_jp (bool): Whether the game is in Japanese
+            cc (country_code.CountryCode): The country code
 
         Returns:
             Optional[OrbInfoList]: The OrbInfoList
@@ -200,7 +200,7 @@ class OrbInfoList:
         """Parse the json data of the equipment
 
         Args:
-            json_data (str): The json data
+            json_data (io.data.Data): The json data
 
         Returns:
             list[RawOrbInfo]: The list of RawOrbInfo
@@ -226,9 +226,9 @@ class OrbInfoList:
 
         Args:
             raw_orb_info (list[RawOrbInfo]): The list of RawOrbInfo
-            grade_data (str): Raw data of the grade list
-            attribute_data (str): Raw data of the attribute list
-            effect_data (str): Raw data of the effect list
+            grade_data (io.data.Data): Raw data of the grade list
+            attribute_data (io.data.Data): Raw data of the attribute list
+            effect_data (io.data.Data): Raw data of the effect list
 
         Returns:
             list[OrbInfo]: The list of OrbInfo
@@ -370,7 +370,7 @@ class SaveOrbs:
         """Create a SaveOrbs from the save stats
 
         Args:
-            save_stats (dict[str, Any]): The save stats
+            save_file (io.save.SaveFile): The save file
 
         Returns:
             Optional[SaveOrbs]: The SaveOrbs
@@ -537,7 +537,7 @@ class SaveOrbs:
         """Save the orbs to the save_stats
 
         Args:
-            save_stats (dict[str, Any]): The save_stats to save the orbs to
+            save_file (io.save.SaveFile): The save_stats to save the orbs to
         """
         for orb_id, orb in self.orbs.items():
             save_file.talent_orbs.orbs[orb_id] = game.catbase.talent_orbs.Orb(
@@ -549,7 +549,7 @@ class SaveOrbs:
         """Edit the talent orbs
 
         Args:
-            save_stats (dict[str, Any]): The save_stats to edit the orbs in
+            save_file (io.save.SaveFile): The save_stats to edit the orbs of
 
         """
         save_orbs = SaveOrbs.from_save_file(save_file)

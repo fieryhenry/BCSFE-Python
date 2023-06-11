@@ -166,13 +166,17 @@ class ChoiceInput:
                 return None
 
     def get_input_locale(self) -> tuple[list[int], bool]:
-        self.strings.append("all_at_once")
+        if not self.is_single_choice:
+            self.strings.append("all_at_once")
         ListOutput(
             self.strings, self.ints, self.dialog, self.perameters
         ).display_locale()
+        key = "input_many"
+        if self.is_single_choice:
+            key = "input_single"
         dialog = (
             locale_handler.LocalManager()
-            .get_key("input_many")
+            .get_key(key)
             .format(min=1, max=len(self.strings))
         )
         usr_input = color.ColoredInput().get(dialog).split(" ")
@@ -182,10 +186,24 @@ class ChoiceInput:
                 int_vals.append(int(i))
             except ValueError:
                 continue
-        if len(self.strings) in int_vals:
+        if len(self.strings) in int_vals and not self.is_single_choice:
             return list(range(1, len(self.strings))), True
 
+        if self.is_single_choice and len(int_vals) > 1:
+            int_vals = [int_vals[0]]
+
         return int_vals, False
+
+    def get_input_locale_while(self) -> list[int]:
+        while True:
+            int_vals, all_at_once = self.get_input_locale()
+            if all_at_once:
+                return int_vals
+            if len(int_vals) == 0:
+                continue
+            if len(int_vals) == 1 and int_vals[0] == 0:
+                return []
+            return int_vals
 
     def multiple_choice(self) -> tuple[list[int], bool]:
         user_input, all_at_once = self.get_input_locale()

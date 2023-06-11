@@ -451,4 +451,6 @@ class ServerHandler:
         if status_code != 1:
             self.remove_stored_auth_token()
             return False
+
+        server.managed_item.BackupMetaData(self.save_file).remove_managed_items()
         return True

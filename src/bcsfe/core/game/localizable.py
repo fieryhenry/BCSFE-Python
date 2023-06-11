@@ -2,7 +2,7 @@ from bcsfe.core import io, server, country_code
 
 
 class Localizable:
-    def __init__(self, cc: country_code.CountryCode):
+    def __init__(self, cc: "country_code.CountryCode"):
         self.cc = cc
         self.localizable = self.get_localizable()
 

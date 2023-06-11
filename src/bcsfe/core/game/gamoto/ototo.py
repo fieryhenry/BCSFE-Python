@@ -191,7 +191,7 @@ class Ototo:
         return self.__repr__()
 
     @staticmethod
-    def get_max_engineers(cc: country_code.CountryCode) -> int:
+    def get_max_engineers(cc: "country_code.CountryCode") -> int:
         file = server.game_data_getter.GameDataGetter(cc).download(
             "DataLocal", "CastleCustomLimit.csv"
         )
@@ -200,7 +200,7 @@ class Ototo:
         csv = io.bc_csv.CSV(file)
         return csv.lines[0][0].to_int()
 
-    def edit_engineers(self, cc: country_code.CountryCode):
+    def edit_engineers(self, cc: "country_code.CountryCode"):
         name = game.catbase.gatya_item.GatyaItemNames(cc).get_name(92)
         self.engineers = dialog_creator.SingleEditor(
             name, self.engineers, Ototo.get_max_engineers(cc)

@@ -96,13 +96,13 @@ class BattleItems:
     def __str__(self):
         return f"BattleItems({self.items})"
 
-    def get_names(self, cc: country_code.CountryCode) -> list[str]:
+    def get_names(self, cc: "country_code.CountryCode") -> list[str]:
         names = game.catbase.gatya_item.GatyaItemNames(cc).names
         items = game.catbase.gatya_item.GatyaItemBuy(cc).get_by_category(3)
         names = [names[item.id] for item in items]
         return names
 
-    def edit(self, cc: country_code.CountryCode):
+    def edit(self, cc: "country_code.CountryCode"):
         group_name = game.localizable.Localizable(cc).get("shop_category1")
         item_names = self.get_names(cc)
         current_values = [item.amount for item in self.items]

@@ -166,7 +166,7 @@ class OrbInfoList:
         self.orb_info_list = orb_info_list
 
     @staticmethod
-    def create(cc: country_code.CountryCode) -> Optional["OrbInfoList"]:
+    def create(cc: "country_code.CountryCode") -> Optional["OrbInfoList"]:
         """Create an OrbInfoList
 
         Args:

@@ -66,7 +66,7 @@ class Materials:
     def __str__(self) -> str:
         return self.__repr__()
 
-    def edit_base_materials(self, cc: country_code.CountryCode):
+    def edit_base_materials(self, cc: "country_code.CountryCode"):
         names = game.catbase.gatya_item.GatyaItemNames(cc).names
         items = game.catbase.gatya_item.GatyaItemBuy(cc).get_by_category(7)
         names = [names[item.id] for item in items]

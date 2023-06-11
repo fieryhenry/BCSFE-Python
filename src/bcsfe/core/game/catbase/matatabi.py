@@ -23,7 +23,7 @@ class Fruit:
 
 
 class Matatabi:
-    def __init__(self, cc: country_code.CountryCode):
+    def __init__(self, cc: "country_code.CountryCode"):
         self.cc = cc
         self.matatabi = self.__get_matatabi()
         self.gatya_item_names = game.catbase.gatya_item.GatyaItemNames(self.cc)

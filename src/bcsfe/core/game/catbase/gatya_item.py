@@ -2,7 +2,7 @@ from bcsfe.core import io, server, country_code
 
 
 class GatyaItemNames:
-    def __init__(self, cc: country_code.CountryCode):
+    def __init__(self, cc: "country_code.CountryCode"):
         self.cc = cc
         self.names = self.__get_names()
 
@@ -53,7 +53,7 @@ class GatyaItemBuyItem:
 
 
 class GatyaItemBuy:
-    def __init__(self, cc: country_code.CountryCode):
+    def __init__(self, cc: "country_code.CountryCode"):
         self.cc = cc
         self.buy = self.get_buy()
 

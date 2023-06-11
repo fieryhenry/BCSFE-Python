@@ -3,7 +3,7 @@ from bcsfe.cli import dialog_creator, color
 
 
 class BasicItems:
-    def __init__(self, save_file: io.save.SaveFile):
+    def __init__(self, save_file: "io.save.SaveFile"):
         self.save_file = save_file
 
     def edit_catfood(self):

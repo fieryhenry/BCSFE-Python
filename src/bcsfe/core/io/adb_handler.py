@@ -1,3 +1,4 @@
+from typing import Optional
 from bcsfe.core import io
 
 
@@ -6,7 +7,9 @@ class DeviceIDNotSet(Exception):
 
 
 class AdbHandler(io.root_handler.RootHandler):
-    def __init__(self, adb_path: io.path.Path):
+    def __init__(self, adb_path: Optional[io.path.Path] = None):
+        if adb_path is None:
+            adb_path = io.path.Path("adb")
         self.adb_path = adb_path
         self.start_server()
         self.root()

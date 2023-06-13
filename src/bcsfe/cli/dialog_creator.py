@@ -148,12 +148,18 @@ class ChoiceInput:
         self.is_single_choice = single_choice
 
     def get_input(self) -> tuple[Optional[int], str]:
+        if len(self.strings) == 0:
+            return None, ""
+        if len(self.strings) == 1:
+            return 1, ""
         ListOutput(
             self.strings, self.ints, self.dialog, self.perameters
         ).display_non_locale()
         return IntInput(len(self.strings), 1).get_input(self.dialog, self.perameters)
 
     def get_input_while(self) -> Optional[int]:
+        if len(self.strings) == 0:
+            return None
         while True:
             int_val, user_input = self.get_input()
             if int_val is not None:
@@ -162,6 +168,10 @@ class ChoiceInput:
                 return None
 
     def get_input_locale(self) -> tuple[list[int], bool]:
+        if len(self.strings) == 0:
+            return [], False
+        if len(self.strings) == 1:
+            return [1], False
         if not self.is_single_choice:
             self.strings.append("all_at_once")
         ListOutput(
@@ -191,6 +201,10 @@ class ChoiceInput:
         return int_vals, False
 
     def get_input_locale_while(self) -> list[int]:
+        if len(self.strings) == 0:
+            return []
+        if len(self.strings) == 1:
+            return [1]
         while True:
             int_vals, all_at_once = self.get_input_locale()
             if all_at_once:

@@ -9,18 +9,6 @@ class CantDetectSaveCCError(Exception):
     pass
 
 
-class InitSaveError(Exception):
-    pass
-
-
-class SaveSaveError(Exception):
-    pass
-
-
-class LoadSaveError(Exception):
-    pass
-
-
 class SaveFile:
     def __init__(
         self,
@@ -104,12 +92,9 @@ class SaveFile:
         return self.get_current_hash() == self.get_new_hash()
 
     def load_wrapper(self):
-        try:
-            self.load()
-        except Exception as e:
-            raise LoadSaveError("Failed to load save file") from e
+        self.load()
         if not self.verify_load():
-            raise LoadSaveError(
+            raise ValueError(
                 "Save file loaded incorrectly. GV values were not as expected"
             )
 
@@ -2074,7 +2059,7 @@ class SaveFile:
 
     @staticmethod
     def from_dict(data: dict[str, Any]):
-        cc = country_code.CountryCode.from_code(data.get("cc", None))
+        cc = country_code.CountryCode(data.get("cc", None))
         save_file = SaveFile(cc=cc)
         save_file.dsts = data.get("dsts", [])
         save_file.game_version = game_version.GameVersion(data.get("game_version", 0))
@@ -2865,10 +2850,10 @@ class SaveFile:
         self.remaining_data = b""
 
     def not_jp(self) -> bool:
-        return self.cc != country_code.CountryCode.JP
+        return self.cc != country_code.CountryCodeType.JP
 
     def is_en(self) -> bool:
-        return self.cc == country_code.CountryCode.EN
+        return self.cc == country_code.CountryCodeType.EN
 
     def should_read_dst(self) -> bool:
         return self.not_jp() and self.game_version >= 49

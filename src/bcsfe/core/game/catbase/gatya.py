@@ -29,21 +29,21 @@ class Gatya:
         data: io.data.Data, gv: "game_version.GameVersion"
     ) -> "Gatya":
         if gv < 33:
-            return Gatya(data.read_long(), data.read_long())
-        return Gatya(data.read_int(), data.read_int())
+            return Gatya(data.read_ulong(), data.read_ulong())
+        return Gatya(data.read_uint(), data.read_uint())
 
     def read_event_seed(self, data: io.data.Data, gv: "game_version.GameVersion"):
         if gv < 33:
-            self.event_seed = data.read_long()
+            self.event_seed = data.read_ulong()
         else:
-            self.event_seed = data.read_int()
+            self.event_seed = data.read_uint()
 
     def write_rare_normal_seed(self, data: io.data.Data):
-        data.write_int(self.rare_seed)
-        data.write_int(self.normal_seed)
+        data.write_uint(self.rare_seed)
+        data.write_uint(self.normal_seed)
 
     def write_event_seed(self, data: io.data.Data):
-        data.write_int(self.event_seed)
+        data.write_uint(self.event_seed)
 
     def read2(self, data: io.data.Data):
         self.stepup_stage_3_cooldown = data.read_int()
@@ -141,7 +141,6 @@ class Gatya:
             "rare_gatya_seed",
             self.rare_seed,
             None,
-            min_value=self.get_min_max()[0],
             localized_item=True,
         ).edit()
 
@@ -150,18 +149,13 @@ class Gatya:
             "normal_gatya_seed",
             self.normal_seed,
             None,
-            min_value=self.get_min_max()[0],
             localized_item=True,
         ).edit()
-
-    def get_min_max(self) -> tuple[int, int]:
-        return -(2**31), 2**31 - 1
 
     def edit_event_gatya_seed(self):
         self.event_seed = dialog_creator.SingleEditor(
             "event_gatya_seed",
             self.event_seed,
             None,
-            min_value=self.get_min_max()[0],
             localized_item=True,
         ).edit()

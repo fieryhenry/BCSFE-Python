@@ -35,17 +35,19 @@ class PropertySet:
             if line.startswith("#") or not line:
                 i += 1
                 continue
-            if in_multi_line and not line.startswith(">") or i == len(lines) - 1:
+            if line.startswith(">") and in_multi_line:
+                multi_line_text += line[1:] + "\n"
+            if (in_multi_line and not line.startswith(">")) or (
+                in_multi_line and i == len(lines) - 1
+            ):
                 in_multi_line = False
                 if multi_line_key in self.properties:
                     raise KeyError(
                         f"Key {multi_line_key} already exists in property file"
                     )
-                self.properties[multi_line_key] = multi_line_text
+                self.properties[multi_line_key] = multi_line_text[:-1]
                 multi_line_text = ""
                 multi_line_key = ""
-            if line.startswith(">") and in_multi_line:
-                multi_line_text += line[1:] + "\n"
 
             parts = line.split("=")
             if line.strip().endswith("="):

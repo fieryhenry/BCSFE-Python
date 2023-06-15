@@ -1,3 +1,6 @@
 from bcsfe import cli
 
-cli.main.Main().main()
+try:
+    cli.main.Main().main()
+except KeyboardInterrupt:
+    pass

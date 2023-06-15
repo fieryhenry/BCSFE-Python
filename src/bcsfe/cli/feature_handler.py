@@ -71,6 +71,7 @@ class FeatureHandler:
         feature_names: list[str] = []
         for feature_name in features:
             feature_names.append(feature_name.split(".")[-1])
+        print()
         dialog_creator.ListOutput(feature_names, [], "features", {}).display_locale()
 
     def select_features(self, features: list[str], parent_path: str = "") -> list[str]:

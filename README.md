@@ -22,126 +22,49 @@ If you only have an ios device: watch the [IOS tutorial video](https://www.youtu
 
 ## Main tutorial
 
-You no longer need a rooted device nor a rooted android emulator.
-
-Although if you want to get unbanned / fix the elsewhere error you will still need one. I recommend LDPlayer, Nox, or MEmu if needed. Bluestacks is also an option but is more difficult to root as it doesn't have a built in option.
-
----
-
 1. Install python (You'll need version 3.9 and up) <https://www.python.org/downloads/>
 
-2. Enter the command: `py -m pip install -U battle-cats-save-editor` into command prompt or another terminal to install the editor (**NOT the Windows Python app**). If that doesn't work then use `python3` or `python` instead of `py` in the command
+1. Enter the command: `pip install -U battle-cats-save-editor` into command prompt or another terminal to install the editor (**NOT the Windows Python app**).
 
-3. Enter the command: `py -m bcsfe` to run the editor. If that doesn't work then use `python3` or `python` instead of `py` in the command
+1. Enter the command: `py -m bcsfe` to run the editor. If that doesn't work then use `python3` or `python` instead of `py` in the command
 
-4. Look below for the tutorial that you need, or watch [here](https://www.youtube.com/watch?v=Kr6VaLTXOSY) for a video
+1. Look below for the tutorial or watch [here](https://www.youtube.com/watch?v=Kr6VaLTXOSY) for a video
 
-#### Using Transfer Codes
+1. Go into the in-game transfer system in `Settings-> Data Transfer` and click `Begin Data Transfer`
 
-If you don't have a rooted device or an emulator setup then do this:
+1. In the editor use the option called `Download save file using transfer and confirmation code` (enter the corresponding number, not the name itself)
 
-5. Go into the game and look in the top right of the screen and record / remember the game version
+1. Enter your transfer code
 
-6. Go into the in-game transfer system in `Settings-> Data Transfer` and click `Begin Data Transfer`
+1. Enter your confirmation code
 
-7. In the editor use the option called `Download save data from the game using transfer and confirmation codes` (enter the corresponding number, not the name itself)
+1. Select the country code that you are using, `en`=english, `kr`=korean, `jp`=japanese, `tw`=taiwan.
 
-8. Enter the game version that you are using, `en`=english, `kr`=korean, `ja`=japanese, `tw`=taiwan.
+1. Edit what you want
 
-9. Enter your transfer code
+1. Go into the `Save Management` option and select `Save changes and upload to game servers (get transfer and confirmation codes)`. It may take some time
 
-10. Enter your confirmation code
+1. Enter those codes into the game's transfer system (click on `Resume Data Transfer`) (You may need to `Cancel Data Transfer` in-game before doing so)
 
-11. Enter the game version that you recorded earlier in step 5. If you entered everything in correctly it should work and you should be able to select a place to put the save
+### Using a rooted device
 
-12. If you get a parsing error please join the [discord server](https://discord.gg/DvmMgvn5ZB) and report it in #bug-reports and / or dm me your save file (preferably <b>not</b> transfer codes)
+If you can't upload your save data using the in-game system you will need direct access to the save data or a copy of it.
 
-13. Edit what you want
+1. Open the editor and select the option named `Pull save file from device using adb` and enter your game version, or select the option named `Select save file from file` and select a copy of your save data
 
-14. Go into the `Save Management` option and select `Save changes and upload to game servers (get transfer and confirmation codes)`. It may take some time
+1. Edit what you want
 
-15. Enter those codes into the game's transfer system (click on `Resume Data Transfer`) (You may need to `Cancel Data Transfer` in-game before doing so)
+1. Go into save management and select an option to push save data to the game
 
-16. If you press play you may get a `The current Save Data is in violation` message, if so press ok and try again and it should go away, if it doesn't look at the tutorial below
-
-#### Using a rooted device
-
-If you can't upload your save data using the in-game system because your are banned or the `This save data is currently active elsewhere` message appears, you will need direct access to the save data:
-
-If you don't have a rooted device:
-
-5. You will need to get one of the emulators listed earlier, I recommend LD Player because I know that it works with this method. If you change the default install location, make sure to keep a note of it for it later
-
-   1. Enable `root permission` in the settings and under `ADB Debugging` select `Open local connection`. You will need to restart LD Player for the changes to work
-
-   2. Open the editor and select the option named `Use adb to pull the save from a rooted device` and enter your game version
-
-6. If you get the option to add adb to your path, select enter `y`.
-
-7. The editor will look for adb in default install directories of common emulators and add it automatically
-
-8. If it fails, then you will need to either
-
-   1. Enter the path to your emulator's install directory, it might look like `C:\LDPlayer\LDPlayer4.0`
-
-   2. Download adb with from [here](https://dl.google.com/android/repository/platform-tools-latest-windows.zip). Extract the zip and copy the folder path (not adb.exe itself) into the editor
-
-9. Now rerun the editor and try the option again. If it still doesn't work you'll need to manually do it, using the tutorial below.
-
-10. If you get a parsing issue please join the [discord server](https://discord.gg/DvmMgvn5ZB) and report it in #bug-reports and / or dm me your save file (preferably not transfer codes)
-
-11. Edit what you want
-
-12. Go into save management and select an option to push save data to the game
-
-13. Enter the game and you should see changes
-
-### Put adb in path
-
-To use the options in the editor to get and push your save data to the game, you will need to have adb in your path system environment variable. The editor will try to do this automatically, but it may not work. So do this if it doesn't (If you're not using windows look up how to do this):
-
-1. If you are using an emulator: Go to your emulator's install directory, if you're
-   using LDPlayer it will most likely be in `C:/LDPlayer/LDPlayer4.0`.
-   Then find `adb` in that folder (other emulators might have it in the `bin` directory)
-
-2. If you aren't using an emulator [Download the Android SDK Platform Tools ZIP file for Windows](https://dl.google.com/android/repository/platform-tools-latest-windows.zip), and unzip it.
-
-3. Copy the path to the folder that you are in (not adb.exe itself)
-
-4. Then open the windows start menu and search: `edit the system environment variables` and press enter.
-
-5. Then click on the `Environment Variables` button.
-
-6. Then in the `System variables` box find the variable named `Path`, then
-   click on the `edit` button.
-
-7. Then click `New` and paste the path into it.
-
-8. Click `Ok` then `Ok` again then `Ok` again.
-
-9. Relaunch powershell and maybe restart your whole pc, and try the command
-   again.
-
-If this method is too difficult, just use a root file explorer instead
-    and manually get the files that you want. The path that you will need is: `/data/data/jp.co.ponos.battlecatsen/files/SAVE_DATA`
+1. Enter the game and you should see changes
 
 ### How to fix "This save data is currently active elsewhere" or "The current Save Data is in violation"
 
-1. You will need to get access to save data so you will need a rooted device / emulator, so look at the first part of the `Using a rooted device` tutorial.
+1. Select the option in `Inquiry Code / Token` to `Fix elsewhere error / Unban account` or just upload the save data to the game servers again
 
-2. Select the option in `Inquiry Code / Token` to `Fix elsewhere error / Unban account`
+1. It may take some time but after, you should be able to choose one of the options in save management to push the save data to the game.
 
-3. It may take some time but after, you should be able to choose one of the options in save management to push the save data to the game.
-
-4. If you press play you may get a `The current Save Data is in violation` message, if so press ok and try again and it should go away, if it doesn't then either you've done something wrong or the process didn't work. You may need to follow the tutorial in the second part of the old help video [here](https://www.youtube.com/watch?v=xBnGR1A3A-U) (3:40) and use the `Old Fix elsewhere error / Unban account (needs 2 save files)` feature instead
-
-### How to unban an account
-
-You can get banned for editing in any amount of cat food, rare tickets, platinum tickets or legend tickets.
-
-The way you fix it is the same method as the elsewhere fix, so just follow that.
-
-##### How to prevent a ban in the future
+#### How to prevent a ban in the future
 
 - Instead of editing in platinum tickets use the `Platinum Shards` feature
 
@@ -155,7 +78,7 @@ The way you fix it is the same method as the elsewhere fix, so just follow that.
 
 If you don't have a pc to install and run the editor you can use Termux.
 
-1. Download [F-Droid](https://f-droid.org/F-Droid.apk) - You can download the Termux apk directly but then it won't automatically update
+1. Download [F-Droid](https://f-droid.org/F-Droid.apk) - You can download the Termux apk directly but then it won't automatically update. You cannot download Termux from the Play Store because it does not work
 
 2. Install F-Droid
 
@@ -181,7 +104,7 @@ If you don't have a pc to install and run the editor you can use Termux.
 
 ### Install from source
 
-If you want the latest features and don't mind bugs then you can install the editor from the github.
+If you want the latest features then you can install the editor from the github.
 
 1. Download [Git](https://git-scm.com/downloads)
 
@@ -189,7 +112,7 @@ If you want the latest features and don't mind bugs then you can install the edi
 
 ```batch
 git clone https://github.com/fieryhenry/bcsfe.git
-py -m pip install -e bcsfe/
+pip install -e bcsfe/
 py -m bcsfe
 ```
 

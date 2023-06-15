@@ -72,7 +72,7 @@ class PropertySet:
         Returns:
             str: Value of the key.
         """
-        return self.properties[key].replace("\\n", "\n")
+        return self.properties.get(key, key).replace("\\n", "\n")
 
     @staticmethod
     def from_config(property: str) -> "PropertySet":
@@ -105,7 +105,11 @@ class LocalManager:
         self.path = io.path.Path("locales", True).add(lc)
         self.properties: dict[str, PropertySet] = {}
         self.all_properties: dict[str, str] = {}
+        self.en_properties: dict[str, str] = {}
+        self.en_properties_path = io.path.Path("locales", True).add("en")
         self.parse()
+        if self.locale == "en":
+            self.en_properties = self.all_properties
 
     def parse(self):
         """Parses all property files in the locale folder."""
@@ -115,6 +119,12 @@ class LocalManager:
                 property_set = PropertySet(self.locale, file_name[:-11])
                 self.all_properties.update(property_set.properties)
                 self.properties[file_name[:-11]] = property_set
+        if self.locale != "en":
+            for file in self.en_properties_path.get_files():
+                file_name = file.basename()
+                if file_name.endswith(".properties"):
+                    property_set = PropertySet("en", file_name[:-11])
+                    self.en_properties.update(property_set.properties)
 
     def get_key(self, key: str) -> str:
         """Gets a key from the property file.
@@ -125,7 +135,10 @@ class LocalManager:
         Returns:
             str: Value of the key.
         """
-        return self.all_properties.get(key, key)
+        value = self.all_properties.get(key)
+        if value is None:
+            return self.en_properties.get(key, key).replace("\\n", "\n")
+        return value.replace("\\n", "\n")
 
     @staticmethod
     def from_config() -> "LocalManager":

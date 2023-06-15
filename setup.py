@@ -39,5 +39,4 @@ setuptools.setup(
         ],
     },
     package_data={"bcsfe": ["py.typed"]},
-    flake8={"max-line-length": 160},
 )

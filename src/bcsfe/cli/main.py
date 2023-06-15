@@ -1,3 +1,5 @@
+"""Main class for the CLI."""
+
 from bcsfe.cli import dialog_creator, file_dialog, server_cli, color, feature_handler
 from bcsfe.core import io, country_code
 
@@ -8,10 +10,11 @@ class Main:
     def __init__(self):
         self.save_file = None
         self.exit = False
+        self.save_path = None
+        self.fh = None
 
     def main(self):
         """Main function for the CLI."""
-
         while not self.exit:
             self.load_save_options()
 
@@ -82,12 +85,21 @@ class Main:
         self.feature_handler()
 
     def feature_handler(self):
+        """Run the feature handler."""
         if self.save_file is None:
             return
         self.fh = feature_handler.FeatureHandler(self.save_file)
         self.fh.select_features_run()
 
     def save_save_dialog(self, save_file: "io.save.SaveFile") -> io.path.Path:
+        """Save save file dialog.
+
+        Args:
+            save_file (io.save.SaveFile): Save file to save.
+
+        Returns:
+            io.path.Path: Path to save file.
+        """
         path = save_file.get_default_path()
         path = file_dialog.FileDialog().save_file(
             "save_save_dialog",
@@ -98,12 +110,22 @@ class Main:
         path.parent().generate_dirs()
         return path
 
-    def load_save_file(self):
+    def load_save_file(self) -> io.path.Path:
+        """Load save file from file dialog.
+
+        Returns:
+            io.path.Path: Path to save file.
+        """
         path = file_dialog.FileDialog().get_file("select_save_file")
         path = io.path.Path(path)
         return path
 
-    def load_save_data_json(self):
+    def load_save_data_json(self) -> io.path.Path:
+        """Load save data from json file.
+
+        Returns:
+            io.path.Path: Path to save file.
+        """
         path = file_dialog.FileDialog().get_file("load_save_data_json")
         path = io.path.Path(path)
         json_data = io.json_file.JsonFile.from_data(path.read()).get_json()

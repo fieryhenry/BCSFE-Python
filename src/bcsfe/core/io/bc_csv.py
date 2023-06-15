@@ -20,7 +20,7 @@ class Delimeter:
 
     @staticmethod
     def from_country_code_res(cc: "country_code.CountryCode") -> "Delimeter":
-        if cc == country_code.CountryCode.JP:
+        if cc == country_code.CountryCodeType.JP:
             return Delimeter(DelimeterType.COMMA)
         else:
             return Delimeter(DelimeterType.PIPE)

@@ -24,13 +24,13 @@ class GameDataGetter:
             request.RequestHandler(self.url + "latest.txt").get().text.split("\n")
         )
         length = len(versions)
-        if self.cc == country_code.CountryCode.EN and length >= 1:
+        if self.cc == country_code.CountryCodeType.EN and length >= 1:
             return versions[0]
-        elif self.cc == country_code.CountryCode.JP and length >= 2:
+        elif self.cc == country_code.CountryCodeType.JP and length >= 2:
             return versions[1]
-        elif self.cc == country_code.CountryCode.KR and length >= 3:
+        elif self.cc == country_code.CountryCodeType.KR and length >= 3:
             return versions[2]
-        elif self.cc == country_code.CountryCode.TW and length >= 4:
+        elif self.cc == country_code.CountryCodeType.TW and length >= 4:
             return versions[3]
         else:
             return None

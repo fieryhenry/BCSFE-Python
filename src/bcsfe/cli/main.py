@@ -15,8 +15,15 @@ class Main:
 
     def main(self):
         """Main function for the CLI."""
+        self.print_start_text()
         while not self.exit:
             self.load_save_options()
+
+    def print_start_text(self):
+        color.ColoredText.localize(
+            "welcome", config_path=io.config.Config.get_config_path()
+        )
+        print()
 
     def load_save_options(self):
         """Load save options."""

@@ -13,7 +13,7 @@ class Key(enum.Enum):
 
 class Config:
     def __init__(self):
-        config = yaml.YamlFile(path.Path.get_appdata_folder().add("config.yaml"))
+        config = yaml.YamlFile(Config.get_config_path())
         if config.yaml is None:
             config.yaml = {}
         self.config: dict[Key, Any] = {}
@@ -24,6 +24,10 @@ class Config:
                 pass
         self.config_object = config
         self.initialize_config()
+
+    @staticmethod
+    def get_config_path() -> path.Path:
+        return path.Path.get_appdata_folder().add("config.yaml")
 
     def __getitem__(self, key: Key) -> Any:
         return self.config[key]

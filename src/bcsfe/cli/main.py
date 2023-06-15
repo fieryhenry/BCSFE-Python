@@ -1,4 +1,4 @@
-from bcsfe.cli import dialog_creator, file_dialog, server_cli, color
+from bcsfe.cli import dialog_creator, file_dialog, server_cli, color, feature_handler
 from bcsfe.core import io, country_code
 
 
@@ -7,10 +7,13 @@ class Main:
 
     def __init__(self):
         self.save_file = None
+        self.exit = False
 
     def main(self):
         """Main function for the CLI."""
-        self.load_save_options()
+
+        while not self.exit:
+            self.load_save_options()
 
     def load_save_options(self):
         """Load save options."""
@@ -20,6 +23,7 @@ class Main:
             "select_save_file",
             "adb_pull_save",
             "load_save_data_json",
+            "exit",
         ]
 
         root_handler = io.root_handler.RootHandler()
@@ -62,6 +66,9 @@ class Main:
             self.save_path = handler.save_locally()
         elif choice == 3:
             self.save_path = self.load_save_data_json()
+        elif choice == 4:
+            self.exit = True
+            return
 
         if self.save_path is None:
             return
@@ -71,6 +78,14 @@ class Main:
         except Exception as e:
             color.ColoredText.localize("parse_save_error", error=e)
             return
+
+        self.feature_handler()
+
+    def feature_handler(self):
+        if self.save_file is None:
+            return
+        self.fh = feature_handler.FeatureHandler(self.save_file)
+        self.fh.select_features_run()
 
     def save_save_dialog(self, save_file: "io.save.SaveFile") -> io.path.Path:
         path = save_file.get_default_path()

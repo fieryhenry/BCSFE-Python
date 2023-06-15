@@ -1,6 +1,8 @@
 # Battle Cats Save File Editor
 
-A python save editor for the mobile game The Battle Cats
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/M4M53M4MN)
+
+BCSFE is a python command line save editor for The Battle Cats.
 
 Join the [discord server](https://discord.gg/DvmMgvn5ZB) if you want to suggest new features, report bugs or get help on how to use the editor (please read the below tutorials / watch the latest [tutorial video](https://www.youtube.com/watch?v=Kr6VaLTXOSY) first before asking for help).
 
@@ -10,7 +12,7 @@ Lethal's editor for giving me inspiration to start the project and it helped me 
 
 Beeven and csehydrogen's open source code, which helped me figure out how to patch save data: [beeven/battlecats](https://github.com/beeven/battlecats), [csehydrogen/BattleCatsHacker](https://github.com/csehydrogen/BattleCatsHacker)
 
-Everyone who's given me saves, which helped to test save parsing/serialising and to test/develop new features
+Everyone who's given me saves, which helped to test save loading/saving and to test/develop new features
 
 ## How to use
 

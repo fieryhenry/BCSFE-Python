@@ -8,6 +8,7 @@ class Key(enum.Enum):
     UPDATE_TO_BETA = "update_to_beta"
     LOCALE = "locale"
     DISABLE_MAXES = "disable_maxes"
+    MAX_SAVE_COUNT = "max_save_count"
 
 
 class Config:
@@ -39,6 +40,7 @@ class Config:
             Key.UPDATE_TO_BETA: False,
             Key.LOCALE: "en",
             Key.DISABLE_MAXES: False,
+            Key.MAX_SAVE_COUNT: 50,
         }
         for key, value in initial_values.items():
             if key not in self.config:

@@ -1,6 +1,7 @@
 """Main class for the CLI."""
 
 import sys
+from typing import Any, Optional
 from bcsfe.cli import dialog_creator, file_dialog, server_cli, color, feature_handler
 from bcsfe.core import io, country_code, server
 
@@ -85,16 +86,7 @@ class Main:
             handler = root_handler
             if not root_handler.is_android():
                 handler = io.adb_handler.AdbHandler()
-                devices = handler.get_connected_devices()
-                device = dialog_creator.ChoiceInput(
-                    devices, devices, [], {}, "select_device", True
-                ).get_input_locale_while()
-                if not device:
-                    color.ColoredText.localize("no_device_error")
-                    return
-                device = device[0]
-
-                handler.set_device(devices[device - 1])
+                handler.select_device()
 
             ccs = handler.get_battlecats_ccs()
             cc = country_code.CountryCode.select_from_ccs(ccs)
@@ -114,6 +106,7 @@ class Main:
 
         try:
             self.save_file = io.save.SaveFile(self.save_path.read())
+            self.save_file.save_path = self.save_path
         except Exception as e:
             color.ColoredText.localize("parse_save_error", error=e)
             return
@@ -127,7 +120,8 @@ class Main:
         self.fh = feature_handler.FeatureHandler(self.save_file)
         self.fh.select_features_run()
 
-    def save_save_dialog(self, save_file: "io.save.SaveFile") -> io.path.Path:
+    @staticmethod
+    def save_save_dialog(save_file: "io.save.SaveFile") -> Optional[io.path.Path]:
         """Save save file dialog.
 
         Args:
@@ -142,8 +136,29 @@ class Main:
             initialdir=path.parent().to_str(),
             initialfile=path.basename(),
         )
+        if path is None:
+            return None
         path = io.path.Path(path)
         path.parent().generate_dirs()
+        save_file.save_path = path
+        return path
+
+    @staticmethod
+    def save_json_dialog(json_data: dict[str, Any]) -> Optional[io.path.Path]:
+        """Save json file dialog.
+
+        Args:
+            json_data (dict): Json data to save.
+
+        Returns:
+            io.path.Path: Path to save file.
+        """
+        path = file_dialog.FileDialog().save_file("save_json_dialog")
+        if path is None:
+            return None
+        path = io.path.Path(path)
+        path.parent().generate_dirs()
+        io.json_file.JsonFile.from_object(json_data).to_data().to_file(path)
         return path
 
     def load_save_file(self) -> io.path.Path:
@@ -156,7 +171,7 @@ class Main:
         path = io.path.Path(path)
         return path
 
-    def load_save_data_json(self) -> io.path.Path:
+    def load_save_data_json(self) -> Optional[io.path.Path]:
         """Load save data from json file.
 
         Returns:
@@ -167,5 +182,7 @@ class Main:
         json_data = io.json_file.JsonFile.from_data(path.read()).get_json()
         save_file = io.save.SaveFile.from_dict(json_data)
         path = self.save_save_dialog(save_file)
+        if path is None:
+            return None
         save_file.to_file(path)
         return path

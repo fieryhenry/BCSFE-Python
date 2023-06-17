@@ -1,7 +1,8 @@
 """Main class for the CLI."""
 
+import sys
 from bcsfe.cli import dialog_creator, file_dialog, server_cli, color, feature_handler
-from bcsfe.core import io, country_code
+from bcsfe.core import io, country_code, server
 
 
 class Main:
@@ -15,9 +16,37 @@ class Main:
 
     def main(self):
         """Main function for the CLI."""
+        self.check_update()
+        print()
         self.print_start_text()
         while not self.exit:
             self.load_save_options()
+
+    def check_update(self):
+        updater = server.updater.Updater()
+        has_pre_release = updater.has_enabled_pre_release()
+        local_version = updater.get_local_version()
+        latest_version = updater.get_latest_version(has_pre_release)
+
+        color.ColoredText.localize(
+            "version_line",
+            local_version=local_version,
+            latest_version=latest_version,
+        )
+
+        if local_version < latest_version:
+            update = (
+                color.ColoredInput().localize(
+                    "update_available", latest_version=latest_version
+                )
+                == "y"
+            )
+            if update:
+                if updater.update(latest_version):
+                    color.ColoredText.localize("update_success")
+                else:
+                    color.ColoredText.localize("update_fail")
+                sys.exit()
 
     def print_start_text(self):
         color.ColoredText.localize(

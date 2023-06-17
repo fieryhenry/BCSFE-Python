@@ -5,6 +5,7 @@ from bcsfe.core.server import (
     server_handler,
     game_data_getter,
     request,
+    updater,
 )
 
 __all__ = [
@@ -14,4 +15,5 @@ __all__ = [
     "client_info",
     "game_data_getter",
     "request",
+    "updater",
 ]

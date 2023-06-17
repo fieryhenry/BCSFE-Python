@@ -24,6 +24,7 @@ class Updater:
 
     def get_latest_version(self, prereleases: bool = False) -> str:
         releases = self.get_releases()
+        releases.reverse()
         if prereleases:
             return releases[0]
         else:
@@ -35,30 +36,23 @@ class Updater:
     def get_latest_version_info(self, prereleases: bool = False) -> dict[str, Any]:
         return self.get_pypi_json()["releases"][self.get_latest_version(prereleases)]
 
-    def check_for_updates(self) -> bool:
-        return self.get_local_version() < self.get_latest_version()
-
-    def check_for_prereleases(self) -> bool:
-        return self.get_local_version() < self.get_latest_version(prereleases=True)
-
-    def update(self, prereleases: bool = False) -> bool:
+    def update(self, target_version: str) -> bool:
         python_aliases = ["py", "python", "python3"]
         for python_alias in python_aliases:
-            cmd = f"{python_alias} -m pip install --upgrade {self.package_name}=={self.get_latest_version(prereleases)}"
-            try:
-                io.path.Path().run(cmd)
+            cmd = f"{python_alias} -m pip install --upgrade {self.package_name}=={target_version}"
+            result = io.path.Path().run(cmd)
+            if result.exit_code == 0:
                 break
-            except FileNotFoundError:
-                continue
         else:
             pip_aliases = ["pip", "pip3"]
             for pip_alias in pip_aliases:
-                cmd = f"{pip_alias} install --upgrade {self.package_name}=={self.get_latest_version(prereleases)}"
-                try:
-                    io.path.Path().run(cmd)
+                cmd = f"{pip_alias} install --upgrade {self.package_name}=={target_version}"
+                result = io.path.Path().run(cmd)
+                if result.exit_code == 0:
                     break
-                except FileNotFoundError:
-                    continue
             else:
                 return False
         return True
+
+    def has_enabled_pre_release(self) -> bool:
+        return io.config.Config().get(io.config.Key.UPDATE_TO_BETA)

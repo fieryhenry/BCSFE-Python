@@ -2,7 +2,14 @@
 
 import sys
 from typing import Any, Optional
-from bcsfe.cli import dialog_creator, file_dialog, server_cli, color, feature_handler
+from bcsfe.cli import (
+    dialog_creator,
+    file_dialog,
+    server_cli,
+    color,
+    feature_handler,
+    theme_handler,
+)
 from bcsfe.core import io, country_code, server
 
 
@@ -50,8 +57,14 @@ class Main:
                 sys.exit()
 
     def print_start_text(self):
+        theme_manager = theme_handler.ThemeHandler()
         color.ColoredText.localize(
-            "welcome", config_path=io.config.Config.get_config_path()
+            "welcome",
+            config_path=io.config.Config.get_config_path(),
+            theme_name=theme_manager.get_theme_name(),
+            theme_version=theme_manager.get_theme_version(),
+            theme_author=theme_manager.get_theme_author(),
+            theme_path=theme_manager.get_theme_path(),
         )
         print()
 

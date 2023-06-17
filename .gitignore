@@ -9,3 +9,4 @@ tests.txt
 src/bcsfe/files/game_data
 pyrightconfig.json
 /test*.py
+/save.json

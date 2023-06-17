@@ -1,6 +1,6 @@
 from typing import Any, Callable, Optional
 from bcsfe.core import io, locale_handler
-from bcsfe.cli import dialog_creator, color, basic_items
+from bcsfe.cli import dialog_creator, color, basic_items, save_management
 
 
 class FeatureHandler:
@@ -9,6 +9,15 @@ class FeatureHandler:
 
     def get_features(self):
         features: dict[str, Any] = {
+            "save_management": {
+                "save_save": save_management.SaveManagement.save_save,
+                "save_upload": save_management.SaveManagement.save_upload,
+                "save_save_file": save_management.SaveManagement.save_save_dialog,
+                "adb_push": save_management.SaveManagement.adb_push,
+                "adb_push_rerun": save_management.SaveManagement.adb_push_rerun,
+                "export_save": save_management.SaveManagement.export_save,
+                "unban_account": save_management.SaveManagement.unban_account,
+            },
             "items": {
                 "catfood": basic_items.BasicItems.edit_catfood,
                 "xp": basic_items.BasicItems.edit_xp,

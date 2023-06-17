@@ -6,6 +6,8 @@ from bcsfe.cli import (
     main,
     file_dialog,
     feature_handler,
+    save_management,
+    server_cli,
 )
 
 __all__ = [
@@ -16,4 +18,6 @@ __all__ = [
     "main",
     "file_dialog",
     "feature_handler",
+    "save_management",
+    "server_cli",
 ]

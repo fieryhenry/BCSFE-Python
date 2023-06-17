@@ -93,7 +93,18 @@ class Main:
                 color.ColoredText.localize("no_cc_error")
                 return
             handler.set_cc(cc)
+            if root_handler.is_android():
+                key = "storage_pulling"
+            else:
+                key = "adb_pulling"
+            color.ColoredText.localize(key, cc=cc)
             self.save_path = handler.save_locally()
+            if self.save_path is None:
+                if root_handler.is_android():
+                    key = "storage_pull_fail"
+                else:
+                    key = "adb_pull_fail"
+                color.ColoredText.localize(key, cc=cc)
         elif choice == 3:
             self.save_path = self.load_save_data_json()
         elif choice == 4:

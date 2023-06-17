@@ -9,6 +9,7 @@ class Key(enum.Enum):
     LOCALE = "locale"
     DISABLE_MAXES = "disable_maxes"
     MAX_SAVE_COUNT = "max_save_count"
+    THEME = "theme"
 
 
 class Config:
@@ -45,6 +46,7 @@ class Config:
             Key.LOCALE: "en",
             Key.DISABLE_MAXES: False,
             Key.MAX_SAVE_COUNT: 50,
+            Key.THEME: "default",
         }
         for key, value in initial_values.items():
             if key not in self.config:

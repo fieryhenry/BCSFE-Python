@@ -2,6 +2,7 @@ from typing import Any
 from aenum import NamedConstant  # type: ignore
 import colored  # type: ignore
 from bcsfe.core import locale_handler
+from bcsfe.cli import theme_handler
 
 
 class ColorHex(NamedConstant):
@@ -47,11 +48,51 @@ class ColorHex(NamedConstant):
         return getattr(ColorHex, name.upper())
 
 
+class ColorHelper:
+    def __init__(self):
+        self.theme_handler = theme_handler.ThemeHandler()
+
+    def get_color(self, color_name: str) -> str:
+        try:
+            first_char = color_name[0]
+        except IndexError:
+            return ""
+        if first_char == "#":
+            return color_name
+        elif first_char == "@":
+            try:
+                second_char = color_name[1]
+            except IndexError:
+                return ""
+            if second_char == "p":
+                return self.theme_handler.get_primary_color()
+            elif second_char == "s":
+                return self.theme_handler.get_secondary_color()
+            elif second_char == "t":
+                return self.theme_handler.get_tertiary_color()
+            elif second_char == "q":
+                return self.theme_handler.get_quaternary_color()
+            elif second_char == "e":
+                return self.theme_handler.get_error_color()
+            elif second_char == "w":
+                return self.theme_handler.get_warning_color()
+            elif color_name == "su":
+                return self.theme_handler.get_success_color()
+            else:
+                return self.theme_handler.get_theme_color(color_name[1:])
+        else:
+            try:
+                return ColorHex.from_name(color_name)
+            except AttributeError:
+                return ""
+
+
 class ColoredText:
     def __init__(self, string: str, end: str = "\n") -> None:
         string = string.replace("\\n", "\n")
         self.string = string
         self.end = end
+        self.color_helper = ColorHelper()
         self.display(string)
 
     def display(self, string: str) -> None:
@@ -89,7 +130,7 @@ class ColoredText:
         # output: [("This is a ", "#FF0000"), ("white", "#FFFFFF"), (" red text", "#FF0000")]
 
         # allow escaping of < and > with \, so that \\<red\\> is not parsed as a color tag
-        txt += "</>"
+        txt = "<@p>" + txt + "</>"
         output: list[tuple[str, str]] = []
         i = 0
         tags: list[str] = []
@@ -119,14 +160,8 @@ class ColoredText:
             if char == "<" and not inside_tag:
                 inside_tag = True
                 if text:
-                    if not tag.startswith("#"):
-                        try:
-                            hex_code = ColorHex.from_name(tag)
-                        except KeyError:
-                            hex_code = tag
-                    else:
-                        hex_code = tag
-                    output.append((text, hex_code))
+                    color = self.color_helper.get_color(tag)
+                    output.append((text, color))
                     text = ""
                     tag_text = ""
             if char == "/" and inside_tag:

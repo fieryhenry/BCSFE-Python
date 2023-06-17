@@ -1,0 +1,17 @@
+{
+    "info": {
+        "name": "Default Theme",
+        "author": "fieryhenry",
+        "version": "1.0",
+        "description": "The main theme of the app"
+    },
+    "colors": {
+        "primary": "#FFFFFF",
+        "secondary": "#FFFFFF",
+        "tertiary": "#008000",
+        "quaternary": "#00FFFF",
+        "error": "#FF0000",
+        "warning": "#FF0000",
+        "success": "#008000"
+    }
+}

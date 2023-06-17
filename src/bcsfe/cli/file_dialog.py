@@ -17,6 +17,8 @@ class FileDialog:
         initialdir: str = "",
         initialfile: str = "",
     ) -> str:
+        if filetypes is None:
+            filetypes = [("All files", "*.*")]
         title = locale_handler.LocalManager().get_key(title)
         return filedialog.askopenfilename(
             title=title,
@@ -47,6 +49,8 @@ class FileDialog:
         Returns:
             Optional[str]: Path to file.
         """
+        if filetypes is None:
+            filetypes = [("All files", "*.*")]
         title = locale_handler.LocalManager().get_key(title)
         return (
             filedialog.asksaveasfilename(

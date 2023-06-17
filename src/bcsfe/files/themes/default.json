@@ -1,9 +1,8 @@
 {
     "info": {
-        "name": "Default Theme",
+        "name": "Default",
         "author": "fieryhenry",
-        "version": "1.0",
-        "description": "The main theme of the app"
+        "version": "1.0"
     },
     "colors": {
         "primary": "#FFFFFF",

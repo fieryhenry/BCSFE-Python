@@ -31,14 +31,8 @@ class ThemeHandler:
             "version", locale_handler.LocalManager().get_key("unknown_theme_version")
         )
 
-    def get_theme_description(self) -> str:
-        return self.get_theme_info().get(
-            "description",
-            locale_handler.LocalManager().get_key("unknown_theme_description"),
-        )
-
     def get_theme_path(self) -> io.path.Path:
-        return io.path.Path("themes", True).add(self.theme_code)
+        return io.path.Path("themes", True).add(self.theme_code + ".json")
 
     def get_theme_colors(self) -> dict[str, Any]:
         return self.get_theme_data().get("colors", {})

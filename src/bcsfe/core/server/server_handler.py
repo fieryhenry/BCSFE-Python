@@ -334,6 +334,7 @@ class ServerHandler:
             self.remove_stored_auth_token()
             return None
         bmd.remove_managed_items()
+        self.save_file.show_ban_message = False
         return (transfer_code, confirmation_code)
 
     def upload_meta_data(self) -> bool:
@@ -375,6 +376,8 @@ class ServerHandler:
         password = self.get_password()
         auth_token = self.get_auth_token()
         save_key_data = self.get_save_key()
+        self.update_managed_items()
+        self.save_file.show_ban_message = False
         if password is None or auth_token is None or save_key_data is None:
             return False
         return True

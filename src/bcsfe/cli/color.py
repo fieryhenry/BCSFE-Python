@@ -64,9 +64,13 @@ class ColorHelper:
                 second_char = color_name[1]
             except IndexError:
                 return ""
+            try:
+                third_char = color_name[2]
+            except IndexError:
+                third_char = ""
             if second_char == "p":
                 return self.theme_handler.get_primary_color()
-            elif second_char == "s":
+            elif second_char == "s" and third_char != "u":
                 return self.theme_handler.get_secondary_color()
             elif second_char == "t":
                 return self.theme_handler.get_tertiary_color()
@@ -76,7 +80,7 @@ class ColorHelper:
                 return self.theme_handler.get_error_color()
             elif second_char == "w":
                 return self.theme_handler.get_warning_color()
-            elif color_name == "su":
+            elif second_char == "s" and third_char == "u":
                 return self.theme_handler.get_success_color()
             else:
                 return self.theme_handler.get_theme_color(color_name[1:])

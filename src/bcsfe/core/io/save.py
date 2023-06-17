@@ -17,6 +17,7 @@ class SaveFile:
         load: bool = True,
         gv: Optional[game_version.GameVersion] = None,
     ):
+        self.save_path: Optional[path.Path] = None
         if dt is None:
             self.data = data.Data()
         else:
@@ -1923,7 +1924,6 @@ class SaveFile:
             "uiid1": self.uiid1,
             "gv_80700": self.gv_80700,
             "uby2": self.uby2,
-            "gv_100600": self.gv_100600,
             "restart_pack": self.restart_pack,
             "gv_81000": self.gv_81000,
             "medals": self.medals.serialize(),

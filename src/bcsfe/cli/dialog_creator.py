@@ -111,7 +111,7 @@ class ListOutput:
             except IndexError:
                 int_string = ""
             string = string.format(int=int_string)
-            end_string += f" <w>{i+1}.</> <g>{string}</>\n"
+            end_string += f" <@s>{i+1}.</> <@t>{string}</>\n"
         end_string = end_string.strip("\n")
         return end_string
 
@@ -279,7 +279,7 @@ class MultiEditor:
     ):
         text: list[str] = []
         for item_name in items:
-            text.append(f"{item_name} <c>: {{int}}</>")
+            text.append(f"{item_name} <@q>: {{int}}</>")
         return MultiEditor(
             group_name,
             items,

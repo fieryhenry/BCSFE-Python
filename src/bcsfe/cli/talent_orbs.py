@@ -398,7 +398,7 @@ class SaveOrbs:
         )
         color.ColoredText.localize("current_orbs")
         for orb in self.orbs.values():
-            color.ColoredText(f"<c>{orb.count}</> {orb.orb.to_colortext()}")
+            color.ColoredText(f"<@q>{orb.count}</> {orb.orb.to_colortext()}")
 
     def sort_orbs(self):
         """Sort the orbs by attribute, effect, grade and id in that order with attribute being the most important"""

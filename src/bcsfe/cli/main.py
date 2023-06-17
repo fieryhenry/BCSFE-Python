@@ -55,9 +55,7 @@ class Main:
         )
         print()
 
-    def load_save_options(self):
-        """Load save options."""
-
+    def select_save(self):
         options = [
             "download_save",
             "select_save_file",
@@ -86,7 +84,8 @@ class Main:
             handler = root_handler
             if not root_handler.is_android():
                 handler = io.adb_handler.AdbHandler()
-                handler.select_device()
+                if not handler.select_device():
+                    return
 
             ccs = handler.get_battlecats_ccs()
             cc = country_code.CountryCode.select_from_ccs(ccs)
@@ -111,6 +110,9 @@ class Main:
             color.ColoredText.localize("parse_save_error", error=e)
             return
 
+    def load_save_options(self):
+        """Load save options."""
+        self.select_save()
         self.feature_handler()
 
     def feature_handler(self):
@@ -130,17 +132,19 @@ class Main:
         Returns:
             io.path.Path: Path to save file.
         """
-        path = save_file.get_default_path()
+        main_path = save_file.get_default_path()
         path = file_dialog.FileDialog().save_file(
             "save_save_dialog",
-            initialdir=path.parent().to_str(),
-            initialfile=path.basename(),
+            initialdir=save_file.get_saves_path().to_str(),
+            initialfile="SAVE_DATA",
         )
         if path is None:
             return None
         path = io.path.Path(path)
         path.parent().generate_dirs()
         save_file.save_path = path
+        save_file.to_file(path)
+        save_file.to_file(main_path)
         return path
 
     @staticmethod
@@ -167,7 +171,9 @@ class Main:
         Returns:
             io.path.Path: Path to save file.
         """
-        path = file_dialog.FileDialog().get_file("select_save_file")
+        path = file_dialog.FileDialog().get_file(
+            "select_save_file", initialdir=io.save.SaveFile.get_saves_path().to_str()
+        )
         if path is None:
             return None
         path = io.path.Path(path)

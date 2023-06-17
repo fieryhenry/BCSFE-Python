@@ -3022,14 +3022,13 @@ class SaveFile:
                 new_order_ids.append(order)
         self.order_ids = new_order_ids
 
+    @staticmethod
+    def get_saves_path() -> path.Path:
+        return path.Path.get_appdata_folder().add("saves")
+
     def get_default_path(self) -> path.Path:
         date = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        local_path = (
-            path.Path.get_appdata_folder()
-            .add("saves")
-            .add(f"{self.cc.get_code()}")
-            .add(self.inquiry_code)
-        )
+        local_path = self.get_saves_path().add("backups").add(f"{self.cc.get_code()}").add(self.inquiry_code)
         local_path.generate_dirs()
         local_path = local_path.add(date)
         return local_path

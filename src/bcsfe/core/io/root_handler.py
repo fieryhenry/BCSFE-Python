@@ -94,10 +94,12 @@ class RootHandler:
                 inquiry_code = save_file.inquiry_code
             except Exception:
                 inquiry_code = "UNKNOWN"
+
         date = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         local_path = (
             io.path.Path.get_appdata_folder()
             .add("saves")
+            .add("backups")
             .add(f"{self.get_cc().get_code()}")
             .add(inquiry_code)
         )
@@ -105,6 +107,8 @@ class RootHandler:
         self.save_battlecats_save(local_path)
         local_path = local_path.add("SAVE_DATA")
         local_path.rename(date)
+        new_path = io.path.Path.get_appdata_folder().add("saves").add("SAVE_DATA")
+        local_path.copy(new_path)
         return local_path
 
     def get_save_file(self) -> io.save.SaveFile:

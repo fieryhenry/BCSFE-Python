@@ -1,3 +1,4 @@
+from typing import Optional
 from bcsfe.core import io, country_code
 import tempfile
 import datetime
@@ -85,10 +86,12 @@ class RootHandler:
 
         return True
 
-    def save_locally(self) -> io.path.Path:
+    def save_locally(self) -> Optional[io.path.Path]:
         with tempfile.TemporaryDirectory() as temp_dir:
             local_path = io.path.Path(temp_dir).add("SAVE_DATA")
-            self.save_battlecats_save(local_path)
+            if not self.save_battlecats_save(local_path):
+                return None
+
             try:
                 save_file = io.save.SaveFile(local_path.read())
                 inquiry_code = save_file.inquiry_code
@@ -111,8 +114,10 @@ class RootHandler:
         local_path.copy(new_path)
         return local_path
 
-    def get_save_file(self) -> io.save.SaveFile:
+    def get_save_file(self) -> Optional[io.save.SaveFile]:
         path = self.save_locally()
+        if path is None:
+            return None
         return io.save.SaveFile(path.read())
 
     def load_locally(self, local_path: io.path.Path) -> bool:

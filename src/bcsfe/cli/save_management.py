@@ -32,6 +32,7 @@ class SaveManagement:
     def save_upload(save_file: "io.save.SaveFile"):
         """Upload the save file."""
         result = server.server_handler.ServerHandler(save_file).get_codes()
+        SaveManagement.save_save(save_file)
         if result is not None:
             transfer_code, confirmation_code = result
             color.ColoredText.localize(

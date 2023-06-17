@@ -1,5 +1,6 @@
 from typing import Optional
 from bcsfe.core import io
+from bcsfe.cli import dialog_creator, color
 
 
 class DeviceIDNotSet(Exception):
@@ -16,14 +17,14 @@ class AdbHandler(io.root_handler.RootHandler):
         self.device_id = None
         self.cc = None
 
-    def start_server(self):
-        self.adb_path.run("start-server")
+    def start_server(self) -> bool:
+        return self.adb_path.run("start-server").success
 
-    def kill_server(self):
-        self.adb_path.run("kill-server")
+    def kill_server(self) -> bool:
+        return self.adb_path.run("kill-server").success
 
-    def root(self):
-        self.adb_path.run("root")
+    def root(self) -> bool:
+        return self.adb_path.run("root").success
 
     def get_connected_devices(self) -> list[str]:
         devices = self.adb_path.run("devices").result.split("\n")
@@ -43,13 +44,15 @@ class AdbHandler(io.root_handler.RootHandler):
             f"-s {self.get_device()} shell getprop ro.product.model"
         ).result.strip()
 
-    def pull_file(self, device_path: io.path.Path, local_path: io.path.Path):
-        self.adb_path.run(
+    def pull_file(self, device_path: io.path.Path, local_path: io.path.Path) -> bool:
+        return self.adb_path.run(
             f"-s {self.get_device()} pull {device_path} {local_path}"
-        ).result
+        ).success
 
-    def push_file(self, local_path: io.path.Path, device_path: io.path.Path):
-        self.adb_path.run(f"-s {self.get_device()} push {local_path} {device_path}")
+    def push_file(self, local_path: io.path.Path, device_path: io.path.Path) -> bool:
+        return self.adb_path.run(
+            f"-s {self.get_device()} push {local_path} {device_path}"
+        ).success
 
     def get_packages(self) -> list[str]:
         return self.adb_path.run(
@@ -67,18 +70,31 @@ class AdbHandler(io.root_handler.RootHandler):
             if "jp.co.ponos.battlecats" in package
         ]
 
-    def save_battlecats_save(self, local_path: io.path.Path):
-        self.pull_file(self.get_battlecats_save_path(), local_path)
+    def save_battlecats_save(self, local_path: io.path.Path) -> bool:
+        return self.pull_file(self.get_battlecats_save_path(), local_path)
 
-    def load_battlecats_save(self, local_path: io.path.Path):
-        self.push_file(local_path, self.get_battlecats_save_path())
+    def load_battlecats_save(self, local_path: io.path.Path) -> bool:
+        return self.push_file(local_path, self.get_battlecats_save_path())
 
-    def close_game(self):
-        self.adb_path.run(
+    def close_game(self) -> bool:
+        return self.adb_path.run(
             f"-s {self.get_device()} shell am force-stop {self.get_battlecats_package_name()}"
-        )
+        ).success
 
-    def run_game(self):
-        self.adb_path.run(
+    def run_game(self) -> bool:
+        return self.adb_path.run(
             f"-s {self.get_device()} shell monkey -p {self.get_battlecats_package_name()} -c android.intent.category.LAUNCHER 1"
-        )
+        ).success
+
+    def select_device(self) -> bool:
+        devices = self.get_connected_devices()
+        device = dialog_creator.ChoiceInput(
+            devices, devices, [], {}, "select_device", True
+        ).get_input_locale_while()
+        if not device:
+            color.ColoredText.localize("no_device_error")
+            return False
+        device = device[0]
+
+        self.set_device(devices[device - 1])
+        return True

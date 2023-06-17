@@ -16,20 +16,23 @@ class FileDialog:
         filetypes: Optional[list[tuple[str, str]]] = None,
         initialdir: str = "",
         initialfile: str = "",
-    ) -> str:
+    ) -> Optional[str]:
         if filetypes is None:
             filetypes = [("All files", "*.*")]
         title = locale_handler.LocalManager().get_key(title)
-        return filedialog.askopenfilename(
-            title=title,
-            filetypes=filetypes,
-            initialdir=initialdir,
-            initialfile=initialfile,
+        return (
+            filedialog.askopenfilename(
+                title=title,
+                filetypes=filetypes,
+                initialdir=initialdir,
+                initialfile=initialfile,
+            )
+            or None
         )
 
-    def get_directory(self, title: str, initialdir: str = "") -> str:
+    def get_directory(self, title: str, initialdir: str = "") -> Optional[str]:
         title = locale_handler.LocalManager().get_key(title)
-        return filedialog.askdirectory(title=title, initialdir=initialdir)
+        return filedialog.askdirectory(title=title, initialdir=initialdir) or None
 
     def save_file(
         self,

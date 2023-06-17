@@ -161,13 +161,15 @@ class Main:
         io.json_file.JsonFile.from_object(json_data).to_data().to_file(path)
         return path
 
-    def load_save_file(self) -> io.path.Path:
+    def load_save_file(self) -> Optional[io.path.Path]:
         """Load save file from file dialog.
 
         Returns:
             io.path.Path: Path to save file.
         """
         path = file_dialog.FileDialog().get_file("select_save_file")
+        if path is None:
+            return None
         path = io.path.Path(path)
         return path
 
@@ -178,6 +180,8 @@ class Main:
             io.path.Path: Path to save file.
         """
         path = file_dialog.FileDialog().get_file("load_save_data_json")
+        if path is None:
+            return None
         path = io.path.Path(path)
         json_data = io.json_file.JsonFile.from_data(path.read()).get_json()
         save_file = io.save.SaveFile.from_dict(json_data)

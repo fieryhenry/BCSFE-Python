@@ -137,8 +137,21 @@ class LocalManager:
         """
         value = self.all_properties.get(key)
         if value is None:
-            return self.en_properties.get(key, key).replace("\\n", "\n")
-        return value.replace("\\n", "\n")
+            value = self.en_properties.get(key, key)
+        value = value.replace("\\n", "\n")
+        # replace {{key}} with the value of the key
+        char_index = 0
+        while char_index < len(value):
+            if value[char_index] == "{" and value[char_index + 1] == "{":
+                key_name = ""
+                char_index += 2
+                while value[char_index] != "}":
+                    key_name += value[char_index]
+                    char_index += 1
+                value = value.replace("{{" + key_name + "}}", self.get_key(key_name))
+            char_index += 1
+
+        return value
 
     @staticmethod
     def from_config() -> "LocalManager":

@@ -27,13 +27,22 @@ class ManagedItem:
     """Managed item for backupmetadata"""
 
     def __init__(
-        self, amount: int, detail_type: DetailType, managed_item_type: ManagedItemType
+        self,
+        amount: int,
+        detail_type: DetailType,
+        managed_item_type: ManagedItemType,
+        detail_code: str = "",
+        detail_created_at: int = 0,
     ):
         self.amount = amount
         self.detail_type = detail_type
         self.managed_item_type = managed_item_type
-        self.detail_code = str(uuid.uuid4())
-        self.detail_created_at = int(time.time())
+        if not detail_code:
+            detail_code = str(uuid.uuid4())
+        self.detail_code = detail_code
+        if not detail_created_at:
+            detail_created_at = int(time.time())
+        self.detail_created_at = detail_created_at
 
     @staticmethod
     def from_change(change: int, managed_item_type: ManagedItemType) -> "ManagedItem":
@@ -60,15 +69,33 @@ class ManagedItem:
     def to_short_form(self) -> str:
         """Convert the managed item to a short form."""
 
-        return f"{self.amount}_{self.detail_type.value}_{self.managed_item_type.value}"
+        return f"{self.amount}_{self.detail_created_at}_{self.managed_item_type.value}"
 
     @staticmethod
     def from_short_form(short_form: str) -> "ManagedItem":
-        amount, detail_type, managed_item_type = short_form.split("_")
-        amount = int(amount)
-        detail_type = DetailType(detail_type)
+        values = short_form.split("_")
+        try:
+            amount = int(values[0])
+            amount = int(amount)
+        except (IndexError, ValueError):
+            amount = 0
+
+        try:
+            detail_created_at = int(values[1])
+            detail_created_at = int(detail_created_at)
+        except (IndexError, ValueError):
+            detail_created_at = 0
+
+        try:
+            managed_item_type = values[2]
+        except IndexError:
+            managed_item_type = ManagedItemType.CATFOOD.value
+
+        detail_type = DetailType.GET if amount > 0 else DetailType.USE
         managed_item_type = ManagedItemType(managed_item_type)
-        managed_item = ManagedItem(amount, detail_type, managed_item_type)
+        managed_item = ManagedItem(
+            amount, detail_type, managed_item_type, detail_created_at=detail_created_at
+        )
         return managed_item
 
 

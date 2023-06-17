@@ -8,10 +8,10 @@
     "colors": {
         "primary": "#FFFFFF",
         "secondary": "#FFFFFF",
-        "tertiary": "#008000",
-        "quaternary": "#00FFFF",
+        "quaternary": "#008000",
+        "tertiary": "#00FFFF",
         "error": "#FF0000",
         "warning": "#FF0000",
-        "success": "#008000"
+        "success": "#00FF00"
     }
 }

@@ -25,7 +25,7 @@ setuptools.setup(
     packages=setuptools.find_packages(where="src"),
     python_requires=">=3.9",
     install_requires=[
-        "colored",
+        "colored==1.4.4",
         "tk",
         "python-dateutil",
         "requests",

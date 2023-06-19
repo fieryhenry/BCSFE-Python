@@ -17,14 +17,14 @@ class AdbHandler(io.root_handler.RootHandler):
         self.device_id = None
         self.cc = None
 
-    def start_server(self) -> bool:
-        return self.adb_path.run("start-server").success
+    def start_server(self) -> "io.command.Result":
+        return self.adb_path.run("start-server")
 
-    def kill_server(self) -> bool:
-        return self.adb_path.run("kill-server").success
+    def kill_server(self) -> "io.command.Result":
+        return self.adb_path.run("kill-server")
 
-    def root(self) -> bool:
-        return self.adb_path.run("root").success
+    def root(self) -> "io.command.Result":
+        return self.adb_path.run("root")
 
     def get_connected_devices(self) -> list[str]:
         devices = self.adb_path.run("devices").result.split("\n")
@@ -44,15 +44,19 @@ class AdbHandler(io.root_handler.RootHandler):
             f"-s {self.get_device()} shell getprop ro.product.model"
         ).result.strip()
 
-    def pull_file(self, device_path: io.path.Path, local_path: io.path.Path) -> bool:
+    def pull_file(
+        self, device_path: io.path.Path, local_path: io.path.Path
+    ) -> "io.command.Result":
         return self.adb_path.run(
-            f"-s {self.get_device()} pull {device_path} {local_path}"
-        ).success
+            f"-s {self.get_device()} pull {device_path} {local_path}",
+        )
 
-    def push_file(self, local_path: io.path.Path, device_path: io.path.Path) -> bool:
+    def push_file(
+        self, local_path: io.path.Path, device_path: io.path.Path
+    ) -> "io.command.Result":
         return self.adb_path.run(
             f"-s {self.get_device()} push {local_path} {device_path}"
-        ).success
+        )
 
     def get_packages(self) -> list[str]:
         return self.adb_path.run(
@@ -70,21 +74,22 @@ class AdbHandler(io.root_handler.RootHandler):
             if "jp.co.ponos.battlecats" in package
         ]
 
-    def save_battlecats_save(self, local_path: io.path.Path) -> bool:
-        return self.pull_file(self.get_battlecats_save_path(), local_path)
+    def save_battlecats_save(self, local_path: io.path.Path) -> "io.command.Result":
+        result = self.pull_file(self.get_battlecats_save_path(), local_path)
+        return result
 
-    def load_battlecats_save(self, local_path: io.path.Path) -> bool:
+    def load_battlecats_save(self, local_path: io.path.Path) -> "io.command.Result":
         return self.push_file(local_path, self.get_battlecats_save_path())
 
-    def close_game(self) -> bool:
+    def close_game(self) -> "io.command.Result":
         return self.adb_path.run(
             f"-s {self.get_device()} shell am force-stop {self.get_battlecats_package_name()}"
-        ).success
+        )
 
-    def run_game(self) -> bool:
+    def run_game(self) -> "io.command.Result":
         return self.adb_path.run(
             f"-s {self.get_device()} shell monkey -p {self.get_battlecats_package_name()} -c android.intent.category.LAUNCHER 1"
-        ).success
+        )
 
     def select_device(self) -> bool:
         devices = self.get_connected_devices()

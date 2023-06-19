@@ -17,6 +17,14 @@ class Result:
     def success(self) -> bool:
         return self.exit_code == 0
 
+    @staticmethod
+    def create_success(result: str = "") -> "Result":
+        return Result(result, 0)
+
+    @staticmethod
+    def create_failure(result: str = "") -> "Result":
+        return Result(result, 1)
+
 
 class Command:
     def __init__(self, command: str, display_output: bool = True):

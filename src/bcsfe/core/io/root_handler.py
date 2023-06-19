@@ -56,41 +56,42 @@ class RootHandler:
     def get_battlecats_save_path(self) -> io.path.Path:
         return self.get_battlecats_path().add("files").add("SAVE_DATA")
 
-    def save_battlecats_save(self, local_path: io.path.Path) -> bool:
+    def save_battlecats_save(self, local_path: io.path.Path) -> "io.command.Result":
         self.get_battlecats_save_path().copy(local_path)
-        return True
+        return io.command.Result.create_success()
 
-    def load_battlecats_save(self, local_path: io.path.Path) -> bool:
+    def load_battlecats_save(self, local_path: io.path.Path) -> "io.command.Result":
         self.get_battlecats_save_path().copy(local_path)
-        return True
+        return io.command.Result.create_success()
 
-    def close_game(self) -> bool:
+    def close_game(self) -> "io.command.Result":
         cmd = io.command.Command(
             f"sudo pkill -f {self.get_battlecats_package_name()}",
         )
-        return cmd.run().success
+        return cmd.run()
 
-    def run_game(self) -> bool:
+    def run_game(self) -> "io.command.Result":
         cmd = io.command.Command(
             f"sudo monkey -p {self.get_battlecats_package_name()} -c android.intent.category.LAUNCHER 1",
         )
-        return cmd.run().success
+        return cmd.run()
 
-    def rerun_game(self) -> bool:
+    def rerun_game(self) -> "io.command.Result":
         success = self.close_game()
         if not success:
-            return False
+            return io.command.Result.create_failure()
         success = self.run_game()
         if not success:
-            return False
+            return io.command.Result.create_failure()
 
-        return True
+        return io.command.Result.create_success()
 
-    def save_locally(self) -> Optional[io.path.Path]:
+    def save_locally(self) -> tuple[Optional[io.path.Path], "io.command.Result"]:
         with tempfile.TemporaryDirectory() as temp_dir:
             local_path = io.path.Path(temp_dir).add("SAVE_DATA")
-            if not self.save_battlecats_save(local_path):
-                return None
+            result = self.save_battlecats_save(local_path)
+            if not result.success:
+                return None, result
 
             try:
                 save_file = io.save.SaveFile(local_path.read())
@@ -112,35 +113,35 @@ class RootHandler:
         local_path.rename(date)
         new_path = io.path.Path.get_appdata_folder().add("saves").add("SAVE_DATA")
         local_path.copy(new_path)
-        return local_path
+        return local_path, result
 
-    def get_save_file(self) -> Optional[io.save.SaveFile]:
-        path = self.save_locally()
+    def get_save_file(self) -> tuple[Optional[io.save.SaveFile], "io.command.Result"]:
+        path, result = self.save_locally()
         if path is None:
-            return None
-        return io.save.SaveFile(path.read())
+            return None, result
+        return io.save.SaveFile(path.read()), result
 
-    def load_locally(self, local_path: io.path.Path) -> bool:
+    def load_locally(self, local_path: io.path.Path) -> "io.command.Result":
         success = self.load_battlecats_save(local_path)
         if not success:
-            return False
+            return io.command.Result.create_failure()
 
         success = self.rerun_game()
         if not success:
-            return False
+            return io.command.Result.create_failure()
 
-        return True
+        return io.command.Result.create_success()
 
-    def load_save(self, save: io.save.SaveFile, rerun_game: bool = True) -> bool:
+    def load_save(
+        self, save: io.save.SaveFile, rerun_game: bool = True
+    ) -> "io.command.Result":
         with tempfile.TemporaryDirectory() as temp_dir:
             local_path = io.path.Path(temp_dir).add("SAVE_DATA")
             save.to_data().to_file(local_path)
-            success = self.load_battlecats_save(local_path)
-            if not success:
-                return False
+            result = self.load_battlecats_save(local_path)
+            if not result.success:
+                return result
         if rerun_game:
-            success = self.rerun_game()
-            if not success:
-                return False
+            result = self.rerun_game()
 
-        return True
+        return result

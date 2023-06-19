@@ -111,13 +111,14 @@ class Main:
             else:
                 key = "adb_pulling"
             color.ColoredText.localize(key, cc=cc)
-            self.save_path = handler.save_locally()
+            self.save_path, result = handler.save_locally()
             if self.save_path is None:
                 if root_handler.is_android():
-                    key = "storage_pull_fail"
+                    color.ColoredText.localize(
+                        "storage_pull_fail", cc=cc, error=result.result
+                    )
                 else:
-                    key = "adb_pull_fail"
-                color.ColoredText.localize(key, cc=cc)
+                    color.ColoredText.localize("adb_pull_fail", cc=cc)
         elif choice == 3:
             self.save_path = self.load_save_data_json()
         elif choice == 4:

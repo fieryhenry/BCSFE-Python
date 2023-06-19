@@ -68,10 +68,11 @@ class SaveManagement:
         adb_handler.set_cc(save_file.cc)
         if save_file.save_path is None:
             return adb_handler
-        if adb_handler.load_battlecats_save(save_file.save_path):
+        result = adb_handler.load_battlecats_save(save_file.save_path)
+        if result.success:
             color.ColoredText.localize("adb_push_success")
         else:
-            color.ColoredText.localize("adb_push_fail")
+            color.ColoredText.localize("adb_push_fail", error=result.result)
 
         return adb_handler
 
@@ -79,10 +80,11 @@ class SaveManagement:
     def adb_push_rerun(save_file: "io.save.SaveFile"):
         """Push the save file and rerun the game."""
         adb_handler = SaveManagement.adb_push(save_file)
-        if adb_handler.rerun_game():
+        result = adb_handler.rerun_game()
+        if result.success:
             color.ColoredText.localize("adb_rerun_success")
         else:
-            color.ColoredText.localize("adb_rerun_fail")
+            color.ColoredText.localize("adb_rerun_fail", error=result.result)
 
     @staticmethod
     def export_save(save_file: "io.save.SaveFile"):

@@ -26,7 +26,7 @@ setuptools.setup(
     python_requires=">=3.9",
     install_requires=[
         "aenum",
-        "colored",
+        "colored==1.4.4",
         "pyjwt",
         "requests",
         "pyyaml",

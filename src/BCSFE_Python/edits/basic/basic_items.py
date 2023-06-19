@@ -209,7 +209,7 @@ def edit_unlocked_slots(save_stats: dict[str, Any]) -> dict[str, Any]:
     unlocked_slots = item.IntItem(
         name="Unlocked Slots",
         value=item.Int(save_stats["unlocked_slots"]["Value"]),
-        max_value=len(save_stats["slots"]),
+        max_value=len(save_stats["slot_names"]),
     )
     unlocked_slots.edit()
     save_stats["unlocked_slots"]["Value"] = unlocked_slots.get_value()

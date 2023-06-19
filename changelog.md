@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.7.2.3] - 2023-06-19
+
+#### Fixed
+
+- New version of colored crashing the editor by forcing the editor to use the old version (new colored version renamed stuff and also raises an exception when not using a specific set of colors)
+
+- Max value for equip slots being too high, for some reason ponos has allocated space for 18 equip slots but has only allocated space for 17 slot names
+
 ## [2.7.2.2] - 2023-06-08
 
 #### Fixed

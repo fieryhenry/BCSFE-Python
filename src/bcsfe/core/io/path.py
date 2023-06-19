@@ -52,9 +52,9 @@ class Path:
         else:
             raise OSError("Unknown OS")
 
-    def run(self, arg: str = ""):
+    def run(self, arg: str = "", display_output: bool = False) -> "command.Result":
         cmd_text = self.path + " " + arg
-        cmd = command.Command(cmd_text, display_output=False)
+        cmd = command.Command(cmd_text, display_output=display_output)
         return cmd.run()
 
     def to_str(self) -> str:

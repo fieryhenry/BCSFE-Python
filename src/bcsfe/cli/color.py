@@ -142,9 +142,10 @@ class ColoredText:
         in_closing_tag = False
         tag_text = ""
         text = ""
+        special_chars: list[str] = ["<", ">", "/"]
         while i < len(txt):
             char = txt[i]
-            if char == "\\":
+            if char == "\\" and i + 1 < len(txt) and txt[i + 1] in special_chars:
                 i += 1
                 char = txt[i]
                 text += char

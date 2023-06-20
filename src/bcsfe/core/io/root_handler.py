@@ -13,7 +13,7 @@ class RootHandler:
         self.cc = None
 
     def is_android(self) -> bool:
-        return io.path.Path("/").add("system").exists()
+        return io.path.Path.get_root().add("system").exists()
 
     def get_cc(self) -> country_code.CountryCode:
         if self.cc is None:
@@ -24,7 +24,7 @@ class RootHandler:
         self.cc = cc
 
     def get_battlecats_packages(self) -> list[str]:
-        packages = io.path.Path("/").add("data").add("data").get_dirs()
+        packages = io.path.Path.get_root().add("data").add("data").get_dirs()
         packages = [
             package.basename()
             for package in packages
@@ -47,7 +47,7 @@ class RootHandler:
 
     def get_battlecats_path(self) -> io.path.Path:
         return (
-            io.path.Path("/")
+            io.path.Path.get_root()
             .add("data")
             .add("data")
             .add(self.get_battlecats_package_name())

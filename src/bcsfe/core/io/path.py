@@ -14,6 +14,10 @@ class Path:
         else:
             self.path = path
 
+    @staticmethod
+    def get_root() -> "Path":
+        return Path(os.sep)
+
     def get_relative_path(self, path: str) -> str:
         return os.path.join(self.get_files_folder().path, path)
 

@@ -118,7 +118,9 @@ class Main:
                         "storage_pull_fail", cc=cc, error=result.result
                     )
                 else:
-                    color.ColoredText.localize("adb_pull_fail", cc=cc)
+                    color.ColoredText.localize(
+                        "adb_pull_fail", cc=cc, error=result.result
+                    )
         elif choice == 3:
             self.save_path = self.load_save_data_json()
         elif choice == 4:

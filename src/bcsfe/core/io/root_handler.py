@@ -61,7 +61,7 @@ class RootHandler:
         return io.command.Result.create_success()
 
     def load_battlecats_save(self, local_path: io.path.Path) -> "io.command.Result":
-        self.get_battlecats_save_path().copy(local_path)
+        local_path.copy(self.get_battlecats_save_path())
         return io.command.Result.create_success()
 
     def close_game(self) -> "io.command.Result":
@@ -87,32 +87,29 @@ class RootHandler:
         return io.command.Result.create_success()
 
     def save_locally(self) -> tuple[Optional[io.path.Path], "io.command.Result"]:
-        with tempfile.TemporaryDirectory() as temp_dir:
-            local_path = io.path.Path(temp_dir).add("SAVE_DATA")
-            result = self.save_battlecats_save(local_path)
-            if not result.success:
-                return None, result
+        local_path = io.path.Path.get_appdata_folder().add("saves").add("SAVE_DATA")
+        local_path.parent().generate_dirs()
+        result = self.save_battlecats_save(local_path)
+        if not result.success:
+            return None, result
 
-            try:
-                save_file = io.save.SaveFile(local_path.read())
-                inquiry_code = save_file.inquiry_code
-            except Exception:
-                inquiry_code = "UNKNOWN"
+        try:
+            save_file = io.save.SaveFile(local_path.read())
+            inquiry_code = save_file.inquiry_code
+        except Exception:
+            inquiry_code = "UNKNOWN"
 
         date = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        local_path = (
+        backup_path = (
             io.path.Path.get_appdata_folder()
             .add("saves")
             .add("backups")
             .add(f"{self.get_cc().get_code()}")
             .add(inquiry_code)
         )
-        local_path.generate_dirs()
-        self.save_battlecats_save(local_path)
-        local_path = local_path.add("SAVE_DATA")
-        local_path.rename(date)
-        new_path = io.path.Path.get_appdata_folder().add("saves").add("SAVE_DATA")
-        local_path.copy(new_path)
+        backup_path.generate_dirs()
+        local_path.copy(backup_path.add(date))
+
         return local_path, result
 
     def get_save_file(self) -> tuple[Optional[io.save.SaveFile], "io.command.Result"]:

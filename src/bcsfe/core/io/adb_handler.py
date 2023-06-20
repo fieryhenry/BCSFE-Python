@@ -48,14 +48,14 @@ class AdbHandler(io.root_handler.RootHandler):
         self, device_path: io.path.Path, local_path: io.path.Path
     ) -> "io.command.Result":
         return self.adb_path.run(
-            f"-s {self.get_device()} pull {device_path} {local_path}",
+            f"-s {self.get_device()} pull {device_path.to_str_forwards()} {local_path}",
         )
 
     def push_file(
         self, local_path: io.path.Path, device_path: io.path.Path
     ) -> "io.command.Result":
         return self.adb_path.run(
-            f"-s {self.get_device()} push {local_path} {device_path}"
+            f"-s {self.get_device()} push {local_path} {device_path.to_str_forwards()}"
         )
 
     def get_packages(self) -> list[str]:

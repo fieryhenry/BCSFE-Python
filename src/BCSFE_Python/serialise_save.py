@@ -1149,7 +1149,6 @@ def serialize_save(save_stats: dict[str, Any]) -> bytes:
 
     save_data = write(save_data, save_stats["user_rank_popups"])
 
-    save_data = write(save_data, save_stats["unknown_37"])
     save_data = write(save_data, save_stats["gv_49"])
     save_data = write(save_data, save_stats["gv_50"])
     save_data = write(save_data, save_stats["gv_51"])

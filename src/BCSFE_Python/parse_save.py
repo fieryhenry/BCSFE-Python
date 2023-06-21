@@ -2124,9 +2124,7 @@ def parse_save(
     save_stats["unknown_35"] = get_length_data()
     save_stats["unknown_36"] = next_int_len(15)
 
-    save_stats["user_rank_popups"] = next_int_len(3)
-
-    save_stats["unknown_37"] = next_int_len(1)
+    save_stats["user_rank_popups"] = next_int_len(4)
 
     save_stats["gv_49"] = next_int_len(4)
     save_stats["gv_50"] = next_int_len(4)

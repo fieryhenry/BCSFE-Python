@@ -40,7 +40,7 @@ def set_level_caps(save_stats: dict[str, Any]) -> dict[str, Any]:
 def set_user_popups(save_stats: dict[str, Any]) -> dict[str, Any]:
     """Set user popups, stops the user rank popups from spamming up the screen"""
 
-    save_stats["user_rank_popups"]["Value"] = 0xFFFFFF
+    save_stats["user_rank_popups"]["Value"] = 0x7FFFFFFF
     return save_stats
 
 

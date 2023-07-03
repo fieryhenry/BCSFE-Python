@@ -93,6 +93,10 @@ class BasicItems:
         ).edit()
 
     @staticmethod
+    def edit_battle_items(save_file: "io.save.SaveFile"):
+        save_file.battle_items.edit(save_file.cc)
+
+    @staticmethod
     def edit_catamins(save_file: "io.save.SaveFile"):
         names = game.catbase.gatya_item.GatyaItemNames(save_file.cc).names
         items = game.catbase.gatya_item.GatyaItemBuy(save_file.cc).get_by_category(6)
@@ -159,3 +163,7 @@ class BasicItems:
         save_file.password_refresh_token = dialog_creator.StringEditor(
             "password_refresh_token", save_file.password_refresh_token
         ).edit()
+
+    @staticmethod
+    def edit_scheme_items(save_file: "io.save.SaveFile"):
+        save_file.scheme_items.edit(save_file.cc)

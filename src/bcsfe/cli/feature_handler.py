@@ -129,7 +129,7 @@ class FeatureHandler:
             feature = None
             if len(features) == 1:
                 feature = features[0]
-            if len(features) == 2:
+            if len(features) == 2 and features[0] == "go_back":
                 feature = features[1]
 
             if feature:

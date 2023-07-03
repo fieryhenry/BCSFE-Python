@@ -21,3 +21,6 @@ class Localizable:
 
     def get(self, key: str):
         return self.localizable.get(key, key)
+
+    def get_lang(self) -> str:
+        return self.get("lang")

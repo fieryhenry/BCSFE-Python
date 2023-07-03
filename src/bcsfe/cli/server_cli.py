@@ -43,6 +43,8 @@ class ServerCLI:
         if path is None:
             return None
 
+        save_file.to_file(path)
+
         color.ColoredText.localize("save_downloaded", path=path.to_str())
 
         return path

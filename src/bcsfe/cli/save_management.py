@@ -17,6 +17,8 @@ class SaveManagement:
         if save_file.save_path is None:
             return
 
+        save_file.to_file(save_file.save_path)
+
         color.ColoredText.localize("save_success", path=save_file.save_path)
 
     @staticmethod
@@ -25,6 +27,8 @@ class SaveManagement:
         save_file.save_path = main.Main.save_save_dialog(save_file)
         if save_file.save_path is None:
             return
+
+        save_file.to_file(save_file.save_path)
 
         color.ColoredText.localize("save_success", path=save_file.save_path)
 

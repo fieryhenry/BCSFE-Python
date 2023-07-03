@@ -4,7 +4,6 @@ from bcsfe.core.io import path, yaml
 
 
 class Key(enum.Enum):
-    UPDATE = "update"
     UPDATE_TO_BETA = "update_to_beta"
     LOCALE = "locale"
     DISABLE_MAXES = "disable_maxes"
@@ -41,7 +40,6 @@ class Config:
 
     def initialize_config(self):
         initial_values = {
-            Key.UPDATE: True,
             Key.UPDATE_TO_BETA: False,
             Key.LOCALE: "en",
             Key.DISABLE_MAXES: False,

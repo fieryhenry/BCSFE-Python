@@ -41,7 +41,16 @@ class Main:
             latest_version=latest_version,
         )
 
-        if local_version < latest_version:
+        if local_version.split("b")[0] == latest_version:
+            update_needed = True
+            if local_version == latest_version:
+                update_needed = False
+        elif local_version < latest_version:
+            update_needed = True
+        else:
+            update_needed = False
+
+        if update_needed:
             update = (
                 color.ColoredInput().localize(
                     "update_available", latest_version=latest_version

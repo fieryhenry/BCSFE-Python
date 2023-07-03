@@ -558,4 +558,3 @@ class SaveOrbs:
             return None
         save_orbs.edit()
         save_orbs.save(save_file)
-        return save_file

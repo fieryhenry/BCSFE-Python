@@ -3,14 +3,13 @@
 import sys
 from typing import Any, Optional
 from bcsfe.cli import (
-    dialog_creator,
     file_dialog,
-    server_cli,
     color,
     feature_handler,
     theme_handler,
+    save_management,
 )
-from bcsfe.core import io, country_code, server
+from bcsfe.core import io, server
 
 
 class Main:
@@ -68,78 +67,12 @@ class Main:
         )
         print()
 
-    def select_save(self):
-        options = [
-            "download_save",
-            "select_save_file",
-            "adb_pull_save",
-            "load_save_data_json",
-            "exit",
-        ]
-
-        root_handler = io.root_handler.RootHandler()
-
-        if root_handler.is_android():
-            options[2] = "root_storage_pull_save"
-
-        choice = (
-            dialog_creator.ChoiceInput(
-                options, options, [], {}, "save_load_option", True
-            ).get_input_locale_while()[0]
-            - 1
-        )
-
-        if choice == 0:
-            self.save_path = server_cli.ServerCLI().download_save()
-        elif choice == 1:
-            self.save_path = self.load_save_file()
-        elif choice == 2:
-            handler = root_handler
-            if not root_handler.is_android():
-                handler = io.adb_handler.AdbHandler()
-                if not handler.select_device():
-                    return
-
-            ccs = handler.get_battlecats_ccs()
-            cc = country_code.CountryCode.select_from_ccs(ccs)
-            if cc is None:
-                color.ColoredText.localize("no_cc_error")
-                return
-            handler.set_cc(cc)
-            if root_handler.is_android():
-                key = "storage_pulling"
-            else:
-                key = "adb_pulling"
-            color.ColoredText.localize(key, cc=cc)
-            self.save_path, result = handler.save_locally()
-            if self.save_path is None:
-                if root_handler.is_android():
-                    color.ColoredText.localize(
-                        "storage_pull_fail", cc=cc, error=result.result
-                    )
-                else:
-                    color.ColoredText.localize(
-                        "adb_pull_fail", cc=cc, error=result.result
-                    )
-        elif choice == 3:
-            self.save_path = self.load_save_data_json()
-        elif choice == 4:
-            self.exit = True
-            return
-
-        if self.save_path is None:
-            return
-
-        try:
-            self.save_file = io.save.SaveFile(self.save_path.read())
-            self.save_file.save_path = self.save_path
-        except Exception as e:
-            color.ColoredText.localize("parse_save_error", error=e)
-            return
-
     def load_save_options(self):
         """Load save options."""
-        self.select_save()
+        save_file = save_management.SaveManagement.select_save(True)
+        if save_file is None:
+            return
+        self.save_file = save_file
         self.feature_handler()
 
     def feature_handler(self):
@@ -192,7 +125,8 @@ class Main:
         io.json_file.JsonFile.from_object(json_data).to_data().to_file(path)
         return path
 
-    def load_save_file(self) -> Optional[io.path.Path]:
+    @staticmethod
+    def load_save_file() -> Optional[io.path.Path]:
         """Load save file from file dialog.
 
         Returns:
@@ -206,7 +140,8 @@ class Main:
         path = io.path.Path(path)
         return path
 
-    def load_save_data_json(self) -> Optional[io.path.Path]:
+    @staticmethod
+    def load_save_data_json() -> Optional[io.path.Path]:
         """Load save data from json file.
 
         Returns:
@@ -218,7 +153,7 @@ class Main:
         path = io.path.Path(path)
         json_data = io.json_file.JsonFile.from_data(path.read()).get_json()
         save_file = io.save.SaveFile.from_dict(json_data)
-        path = self.save_save_dialog(save_file)
+        path = Main.save_save_dialog(save_file)
         if path is None:
             return None
         save_file.to_file(path)

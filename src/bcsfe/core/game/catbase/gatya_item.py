@@ -6,9 +6,11 @@ class GatyaItemNames:
         self.cc = cc
         self.names = self.__get_names()
 
-    def __get_names(self):
+    def __get_names(self) -> list[str]:
         gdg = server.game_data_getter.GameDataGetter(self.cc)
         data = gdg.download("resLocal", "GatyaitemName.csv")
+        if data is None:
+            return []
         csv = io.bc_csv.CSV(data, io.bc_csv.Delimeter.from_country_code_res(self.cc))
         names: list[str] = []
         for line in csv:

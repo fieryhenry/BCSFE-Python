@@ -1,6 +1,6 @@
 from typing import Any, Callable, Optional
 from bcsfe.core import io, locale_handler
-from bcsfe.cli import dialog_creator, color, basic_items, save_management
+from bcsfe.cli import dialog_creator, color, basic_items, save_management, talent_orbs
 
 
 class FeatureHandler:
@@ -16,7 +16,8 @@ class FeatureHandler:
                 "adb_push": save_management.SaveManagement.adb_push,
                 "adb_push_rerun": save_management.SaveManagement.adb_push_rerun,
                 "export_save": save_management.SaveManagement.export_save,
-                "unban_account": save_management.SaveManagement.unban_account,
+                "load_save": save_management.SaveManagement.load_save,
+                "init_save": save_management.SaveManagement.init_save,
             },
             "items": {
                 "catfood": basic_items.BasicItems.edit_catfood,
@@ -28,9 +29,16 @@ class FeatureHandler:
                 "platinum_shards": basic_items.BasicItems.edit_platinum_shards,
                 "np": basic_items.BasicItems.edit_np,
                 "leadership": basic_items.BasicItems.edit_leadership,
-                "catamins": basic_items.BasicItems.edit_catamins,
+                "battle_items": basic_items.BasicItems.edit_battle_items,
                 "catseyes": basic_items.BasicItems.edit_catseyes,
                 "catfruit": basic_items.BasicItems.edit_catfruit,
+                "talent_orbs": talent_orbs.SaveOrbs.edit_talent_orbs,
+                "catamins": basic_items.BasicItems.edit_catamins,
+                "scheme_items": basic_items.BasicItems.edit_scheme_items,
+            },
+            "account": {
+                "unban_account": save_management.SaveManagement.unban_account,
+                "upload_items": save_management.SaveManagement.upload_items,
             },
         }
         return features

@@ -1,7 +1,5 @@
 from bcsfe.cli import (
     color,
-    basic_items,
-    talent_orbs,
     dialog_creator,
     main,
     file_dialog,
@@ -9,12 +7,11 @@ from bcsfe.cli import (
     save_management,
     server_cli,
     theme_handler,
+    edits,
 )
 
 __all__ = [
     "color",
-    "basic_items",
-    "talent_orbs",
     "dialog_creator",
     "main",
     "file_dialog",
@@ -22,4 +19,5 @@ __all__ = [
     "save_management",
     "server_cli",
     "theme_handler",
+    "edits",
 ]

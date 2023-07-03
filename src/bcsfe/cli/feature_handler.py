@@ -1,6 +1,6 @@
 from typing import Any, Callable, Optional
 from bcsfe.core import io, locale_handler
-from bcsfe.cli import dialog_creator, color, basic_items, save_management, talent_orbs
+from bcsfe.cli import dialog_creator, color, edits, save_management
 
 
 class FeatureHandler:
@@ -20,21 +20,21 @@ class FeatureHandler:
                 "init_save": save_management.SaveManagement.init_save,
             },
             "items": {
-                "catfood": basic_items.BasicItems.edit_catfood,
-                "xp": basic_items.BasicItems.edit_xp,
-                "normal_tickets": basic_items.BasicItems.edit_normal_tickets,
-                "rare_tickets": basic_items.BasicItems.edit_rare_tickets,
-                "platinum_tickets": basic_items.BasicItems.edit_platinum_tickets,
-                "legend_tickets": basic_items.BasicItems.edit_legend_tickets,
-                "platinum_shards": basic_items.BasicItems.edit_platinum_shards,
-                "np": basic_items.BasicItems.edit_np,
-                "leadership": basic_items.BasicItems.edit_leadership,
-                "battle_items": basic_items.BasicItems.edit_battle_items,
-                "catseyes": basic_items.BasicItems.edit_catseyes,
-                "catfruit": basic_items.BasicItems.edit_catfruit,
-                "talent_orbs": talent_orbs.SaveOrbs.edit_talent_orbs,
-                "catamins": basic_items.BasicItems.edit_catamins,
-                "scheme_items": basic_items.BasicItems.edit_scheme_items,
+                "catfood": edits.basic_items.BasicItems.edit_catfood,
+                "xp": edits.basic_items.BasicItems.edit_xp,
+                "normal_tickets": edits.basic_items.BasicItems.edit_normal_tickets,
+                "rare_tickets": edits.basic_items.BasicItems.edit_rare_tickets,
+                "platinum_tickets": edits.basic_items.BasicItems.edit_platinum_tickets,
+                "legend_tickets": edits.basic_items.BasicItems.edit_legend_tickets,
+                "platinum_shards": edits.basic_items.BasicItems.edit_platinum_shards,
+                "np": edits.basic_items.BasicItems.edit_np,
+                "leadership": edits.basic_items.BasicItems.edit_leadership,
+                "battle_items": edits.basic_items.BasicItems.edit_battle_items,
+                "catseyes": edits.basic_items.BasicItems.edit_catseyes,
+                "catfruit": edits.basic_items.BasicItems.edit_catfruit,
+                "talent_orbs": edits.talent_orbs.SaveOrbs.edit_talent_orbs,
+                "catamins": edits.basic_items.BasicItems.edit_catamins,
+                "scheme_items": edits.basic_items.BasicItems.edit_scheme_items,
             },
             "account": {
                 "unban_account": save_management.SaveManagement.unban_account,

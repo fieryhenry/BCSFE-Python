@@ -456,6 +456,40 @@ class StringEditor:
         return usr_input
 
 
+class YesNoInput:
+    def __init__(self, default: bool = False):
+        self.default = default
+
+    def get_input_locale_while(self, key: str, perameters: dict[str, Any]) -> bool:
+        while True:
+            usr_input = self.get_input_locale(key, perameters)
+            if usr_input is None:
+                return self.default
+            if usr_input == "":
+                return self.default
+            if usr_input == " ":
+                continue
+            return usr_input == locale_handler.LocalManager().get_key("yes_key")
+
+    def get_input_locale(self, key: str, perameters: dict[str, Any]) -> Optional[str]:
+        dialog_str = locale_handler.LocalManager().get_key(key).format(**perameters)
+        usr_input = color.ColoredInput().get(dialog_str)
+        if usr_input == "":
+            return None
+        return usr_input
+
+    def get_input_once(
+        self, key: str, perameters: Optional[dict[str, Any]] = None
+    ) -> bool:
+        if perameters is None:
+            perameters = {}
+        dialog_str = locale_handler.LocalManager().get_key(key).format(**perameters)
+        usr_input = color.ColoredInput().get(dialog_str)
+        if usr_input == "":
+            return self.default
+        return usr_input == locale_handler.LocalManager().get_key("yes_key")
+
+
 class DialogBuilder:
     def __init__(self, dialog_structure: dict[Any, Any]):
         self.dialog_structure = dialog_structure

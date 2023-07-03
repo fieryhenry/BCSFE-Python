@@ -90,10 +90,7 @@ class LineUps:
         else:
             length = 15
         slots = [EquipSlots.init() for _ in range(length)]
-        total_slots = 15
-        if gv >= 110600:
-            total_slots = 0
-        return LineUps(slots, total_slots)
+        return LineUps(slots, length)
 
     @staticmethod
     def read(stream: io.data.Data, gv: game_version.GameVersion) -> "LineUps":
@@ -137,10 +134,8 @@ class LineUps:
         else:
             stream.write_byte(self.unlocked_slots)
 
-    def read_slot_names(
-        self, stream: io.data.Data, game_version: game_version.GameVersion
-    ):
-        if game_version >= 110600:
+    def read_slot_names(self, stream: io.data.Data, gv: game_version.GameVersion):
+        if gv >= 110600:
             total_slots = stream.read_byte()
         else:
             total_slots = 15
@@ -154,10 +149,8 @@ class LineUps:
 
         self.slot_names_length = total_slots
 
-    def write_slot_names(
-        self, stream: io.data.Data, game_version: game_version.GameVersion
-    ):
-        if game_version >= 110600:
+    def write_slot_names(self, stream: io.data.Data, gv: game_version.GameVersion):
+        if gv >= 110600:
             stream.write_byte(self.slot_names_length)
         for i in range(self.slot_names_length):
             try:

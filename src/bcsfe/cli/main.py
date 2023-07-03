@@ -112,8 +112,9 @@ class Main:
         path = io.path.Path(path)
         path.parent().generate_dirs()
         save_file.save_path = path
-        save_file.to_file(path)
-        save_file.to_file(main_path)
+        dt = save_file.to_data()
+        dt.to_file(path)
+        dt.to_file(main_path)
         return path
 
     @staticmethod
@@ -165,5 +166,4 @@ class Main:
         path = Main.save_save_dialog(save_file)
         if path is None:
             return None
-        save_file.to_file(path)
         return path

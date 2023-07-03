@@ -40,7 +40,8 @@ class ServerCLI:
 
         save_file = server_handler.save_file
         path = main.Main().save_save_dialog(save_file)
-        save_file.to_file(path)
+        if path is None:
+            return None
 
         color.ColoredText.localize("save_downloaded", path=path.to_str())
 

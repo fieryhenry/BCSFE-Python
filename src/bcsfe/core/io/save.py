@@ -32,6 +32,13 @@ class SaveFile:
         if dt is not None and load:
             self.load_wrapper()
 
+    def load_save_file(self, other: "SaveFile"):
+        self.data = other.data
+        self.cc = other.cc
+        self.game_version = other.game_version
+        self.init_save(other.game_version)
+        self.load_wrapper()
+
     def detect_cc(self) -> country_code.CountryCode:
         for cc in country_code.CountryCode.get_all():
             self.cc = cc
@@ -98,6 +105,12 @@ class SaveFile:
             raise ValueError(
                 "Save file loaded incorrectly. GV values were not as expected"
             )
+
+    def set_gv(self, gv: game_version.GameVersion):
+        self.game_version = gv
+
+    def set_cc(self, cc: country_code.CountryCode):
+        self.cc = cc
 
     def load(self):
         """Load the save file. For most of this stuff I have no idea what it is used for"""
@@ -1441,7 +1454,24 @@ class SaveFile:
 
         if self.game_version >= 90300:
             self.data.write_short(len(self.utl1))
-            for i1, i2, i3, i4, i5, i6, i7 in self.utl1:
+            for tuple_ in self.utl1:
+                tuple_len = len(tuple_)
+                i1, i2, i3, i4, i5, i6, i7 = 0, 0, 0, 0, 0, 0, 0
+                if tuple_len >= 1:
+                    i1 = tuple_[0]
+                if tuple_len >= 2:
+                    i2 = tuple_[1]
+                if tuple_len >= 3:
+                    i3 = tuple_[2]
+                if tuple_len >= 4:
+                    i4 = tuple_[3]
+                if tuple_len >= 5:
+                    i5 = tuple_[4]
+                if tuple_len >= 6:
+                    i6 = tuple_[5]
+                if tuple_len >= 7:
+                    i7 = tuple_[6]
+
                 self.data.write_int(i1)
                 self.data.write_int(i2)
                 self.data.write_short(i3)
@@ -1529,7 +1559,25 @@ class SaveFile:
             self.data.write_int(self.gv_100100)
 
         if self.game_version >= 100300:
-            for b1, b2, i1, f1, f2 in self.utl2:
+            for i in range(6):
+                try:
+                    item = self.utl2[i]
+                except IndexError:
+                    item = (False, False, 0, 0.0, 0.0)
+
+                tuple_len = len(item)
+                b1, b2, i1, f1, f2 = False, False, 0, 0.0, 0.0
+                if tuple_len >= 1:
+                    b1 = item[0]
+                if tuple_len >= 2:
+                    b2 = item[1]
+                if tuple_len >= 3:
+                    i1 = item[2]
+                if tuple_len >= 4:
+                    f1 = item[3]
+                if tuple_len >= 5:
+                    f2 = item[4]
+
                 self.data.write_bool(b1)
                 self.data.write_bool(b2)
                 self.data.write_byte(i1)
@@ -2483,7 +2531,7 @@ class SaveFile:
         self.dst_index = 0
         if gv is None:
             gv = game_version.GameVersion(120200)
-        self.game_version = gv
+        self.set_gv(gv)
 
         self.ubm1 = False
         self.ubm = False
@@ -2692,10 +2740,10 @@ class SaveFile:
         self.date_3 = datetime.datetime.fromtimestamp(0)
         self.date_4 = datetime.datetime.fromtimestamp(0)
 
-        self.uil1 = []
-        self.uil2 = []
-        self.uil3 = []
-        self.uil4 = []
+        self.uil1 = [0] * 20
+        self.uil2 = [0] * 7
+        self.uil3 = [0] * 7
+        self.uil4 = [0] * 7
         self.uil5 = []
         self.uil6 = []
         self.uil7 = []
@@ -2706,9 +2754,13 @@ class SaveFile:
         self.usl1 = []
         self.usl2 = []
 
-        self.ubl1 = []
-        self.ubl2 = []
-        self.ubl3 = []
+        if 20 <= gv and gv <= 25:
+            self.ubl1 = [False] * 12
+        else:
+            self.ubl1 = []
+
+        self.ubl2 = [False] * 10
+        self.ubl3 = [False] * 14
 
         self.ushl1 = []
         self.ushl2 = []
@@ -2720,31 +2772,61 @@ class SaveFile:
         self.utl1 = []
         self.utl2 = [(False, False, 0, 0.0, 0.0)] * 6
 
-        self.unlock_popups_11 = []
-        self.enemy_guide = []
-        self.menu_unlocks = []
-        self.unlock_popups_0 = []
-        self.new_dialogs_2 = []
-        self.moneko_bonus = []
-        self.daily_reward_initialized = []
-        self.chara_flags = []
-        self.chara_flags_2 = []
-        self.unlock_popups_8 = []
-        self.unit_drops = []
-        self.achievements = []
+        self.unlock_popups_11 = [0] * 3
+        if 20 <= gv and gv <= 25:
+            self.enemy_guide = [0] * 231
+        else:
+            self.enemy_guide = []
+
+        if gv <= 25:
+            self.menu_unlocks = [0] * 5
+            self.unlock_popups_0 = [0] * 5
+        elif gv <= 26:
+            self.menu_unlocks = [0] * 6
+            self.unlock_popups_0 = [0] * 6
+        else:
+            self.menu_unlocks = []
+            self.unlock_popups_0 = []
+
+        if gv <= 26:
+            self.new_dialogs_2 = [0] * 17
+        else:
+            self.new_dialogs_2 = []
+
+        self.moneko_bonus = [0] * 1
+        self.daily_reward_initialized = [0] * 1
+        self.chara_flags = [0] * 2
+        self.chara_flags_2 = [0] * 2
+
+        self.unlock_popups_8 = [0] * 36
+
+        if 20 <= gv and gv <= 25:
+            self.unit_drops = [0] * 10
+        else:
+            self.unit_drops = []
+
+        self.achievements = [False] * 7
         self.order_ids = []
         self.combo_unlocks = []
-        self.event_capsules_1 = []
-        self.event_capsules_2 = []
-        self.gatya_seen_lucky_drops = []
-        self.catfood_beginner_purchased = []
-        self.catfood_beginner_expired = []
+        if gv < 34:
+            self.event_capsules_1 = [0] * 100
+            self.event_capsules_2 = [0] * 100
+        else:
+            self.event_capsules_1 = []
+            self.event_capsules_2 = []
+
+        if gv < 26:
+            self.gatya_seen_lucky_drops = [0] * 44
+        else:
+            self.gatya_seen_lucky_drops = []
+        self.catfood_beginner_purchased = [False] * 3
+        self.catfood_beginner_expired = [False] * 3
         self.catfruit = []
         self.catseyes = []
         self.catamins = []
         self.unlock_popups_6 = []
         self.reset_item_reward_flags = []
-        self.announcements = []
+        self.announcements = [tuple([0, 0])] * 16
         self.event_capsules_3 = []
 
         self.save_data_4_hash = ""
@@ -3028,7 +3110,12 @@ class SaveFile:
 
     def get_default_path(self) -> path.Path:
         date = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        local_path = self.get_saves_path().add("backups").add(f"{self.cc.get_code()}").add(self.inquiry_code)
+        local_path = (
+            self.get_saves_path()
+            .add("backups")
+            .add(f"{self.cc.get_code()}")
+            .add(self.inquiry_code)
+        )
         local_path.generate_dirs()
         local_path = local_path.add(date)
         return local_path

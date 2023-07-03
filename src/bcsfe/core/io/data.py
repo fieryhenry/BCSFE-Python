@@ -489,13 +489,19 @@ class Data:
         return data_list
 
     def to_int(self) -> int:
-        return int(self.data.decode())
+        try:
+            return int(self.data.decode())
+        except ValueError:
+            return 0
 
     def to_int_little(self) -> int:
         return int.from_bytes(self.data, "little")
 
     def to_str(self) -> str:
-        return self.data.decode()
+        try:
+            return self.data.decode()
+        except UnicodeDecodeError:
+            return ""
 
     def to_bool(self) -> bool:
         return bool(self.to_int())

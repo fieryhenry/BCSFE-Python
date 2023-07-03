@@ -1,6 +1,6 @@
 from typing import Any, Optional
 from bcsfe.core.game.catbase import upgrade
-from bcsfe.core import io, game_version
+from bcsfe.core import io, game_version, server, country_code, game
 
 
 class Talent:
@@ -158,6 +158,26 @@ class Cat:
         stream.write_int(len(self.talents))
         for talent in self.talents:
             talent.write(stream)
+
+    @staticmethod
+    def get_names(
+        id: int,
+        cc: "country_code.CountryCode",
+        localizable: "game.localizable.Localizable",
+    ) -> Optional[list[str]]:
+        file_name = f"Unit_Explanation{id+1}_{localizable.get_lang()}.csv"
+        data = server.game_data_getter.GameDataGetter(cc).download(
+            "resLocal", file_name
+        )
+        if data is None:
+            return None
+        csv = io.bc_csv.CSV(
+            data, io.bc_csv.Delimeter.from_country_code_res(cc), remove_empty=False
+        )
+        names: list[str] = []
+        for line in csv.lines:
+            names.append(line[0].to_str())
+        return names
 
 
 class StorageItem:

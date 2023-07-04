@@ -46,12 +46,13 @@ class Path:
             raise OSError("Unknown OS")
 
     def open_file(self):
-        if os.name == "nt":
-            os.startfile(self.path)
-        elif os.name == "posix":
+        os_name = os.name
+        if os_name == "nt":
+            os.startfile(self.path)  # type: ignore
+        elif os_name == "posix":
             cmd = f"xdg-open {self.path}"
             command.Command(cmd, display_output=False).run_in_thread()
-        elif os.name == "mac":
+        elif os_name == "mac":
             command.Command(f"open {self.path}", display_output=False).run()
         else:
             raise OSError("Unknown OS")
@@ -68,17 +69,15 @@ class Path:
         return self.path.replace("\\", "/")
 
     @staticmethod
-    def get_appdata_folder() -> "Path":
+    def get_documents_folder() -> "Path":
         app_name = "bcsfe"
         os_name = os.name
         if os_name == "nt":
-            path = Path.join(os.environ["APPDATA"], app_name)
+            path = Path.join(os.environ["USERPROFILE"], "Documents", app_name)
         elif os_name == "posix":
             path = Path.join(os.environ["HOME"], "Documents", app_name)
         elif os_name == "mac":
-            path = Path.join(
-                os.environ["HOME"], "Library", "Application Support", app_name
-            )
+            path = Path.join(os.environ["HOME"], "Documents", app_name)
         else:
             raise OSError("Unknown OS")
         path.generate_dirs()

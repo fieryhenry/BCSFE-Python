@@ -87,7 +87,7 @@ class RootHandler:
         return io.command.Result.create_success()
 
     def save_locally(self) -> tuple[Optional[io.path.Path], "io.command.Result"]:
-        local_path = io.path.Path.get_appdata_folder().add("saves").add("SAVE_DATA")
+        local_path = io.path.Path.get_documents_folder().add("saves").add("SAVE_DATA")
         local_path.parent().generate_dirs()
         result = self.save_battlecats_save(local_path)
         if not result.success:
@@ -101,7 +101,7 @@ class RootHandler:
 
         date = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         backup_path = (
-            io.path.Path.get_appdata_folder()
+            io.path.Path.get_documents_folder()
             .add("saves")
             .add("backups")
             .add(f"{self.get_cc().get_code()}")

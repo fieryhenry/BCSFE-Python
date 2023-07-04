@@ -27,7 +27,7 @@ class Config:
 
     @staticmethod
     def get_config_path() -> path.Path:
-        return path.Path.get_appdata_folder().add("config.yaml")
+        return path.Path.get_documents_folder().add("config.yaml")
 
     def __getitem__(self, key: Key) -> Any:
         return self.config[key]

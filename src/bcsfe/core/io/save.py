@@ -27,10 +27,18 @@ class SaveFile:
         else:
             self.cc = cc
 
+        self.latest_game_data_version: Optional[str] = None
+        self.localizable: Optional[game.localizable.Localizable] = None
+
         self.init_save(gv)
 
         if dt is not None and load:
             self.load_wrapper()
+
+    def get_localizable(self) -> game.localizable.Localizable:
+        if self.localizable is None:
+            self.localizable = game.localizable.Localizable(self)
+        return self.localizable
 
     def load_save_file(self, other: "SaveFile"):
         self.data = other.data
@@ -3106,7 +3114,7 @@ class SaveFile:
 
     @staticmethod
     def get_saves_path() -> path.Path:
-        return path.Path.get_appdata_folder().add("saves")
+        return path.Path.get_documents_folder().add("saves")
 
     def get_default_path(self) -> path.Path:
         date = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")

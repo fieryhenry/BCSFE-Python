@@ -1,6 +1,7 @@
 import csv as csv_module
 import enum
 from typing import Any, Optional, Union
+import typing
 from bcsfe.core.io import data, path
 from bcsfe.core import country_code, log
 
@@ -54,7 +55,15 @@ class Row:
         self.cells = cells
         self.index = 0
 
+    @typing.overload
     def __getitem__(self, index: int) -> Cell:
+        ...
+
+    @typing.overload
+    def __getitem__(self, index: slice) -> list[Cell]:
+        ...
+
+    def __getitem__(self, index: Union[int, slice]) -> Union[Cell, list[Cell]]:
         try:
             return self.cells[index]
         except IndexError:

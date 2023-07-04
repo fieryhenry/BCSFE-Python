@@ -1,7 +1,6 @@
 from typing import Optional
 from bcsfe.core import io, country_code
 import tempfile
-import datetime
 
 
 class CCNotSet(Exception):
@@ -92,23 +91,6 @@ class RootHandler:
         result = self.save_battlecats_save(local_path)
         if not result.success:
             return None, result
-
-        try:
-            save_file = io.save.SaveFile(local_path.read())
-            inquiry_code = save_file.inquiry_code
-        except Exception:
-            inquiry_code = "UNKNOWN"
-
-        date = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        backup_path = (
-            io.path.Path.get_documents_folder()
-            .add("saves")
-            .add("backups")
-            .add(f"{self.get_cc().get_code()}")
-            .add(inquiry_code)
-        )
-        backup_path.generate_dirs()
-        local_path.copy(backup_path.add(date))
 
         return local_path, result
 

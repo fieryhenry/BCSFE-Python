@@ -101,10 +101,9 @@ class Main:
         Returns:
             io.path.Path: Path to save file.
         """
-        main_path = save_file.get_default_path()
         path = file_dialog.FileDialog().save_file(
             "save_save_dialog",
-            initialdir=save_file.get_saves_path().to_str(),
+            initialdir=io.save.SaveFile.get_saves_path().to_str(),
             initialfile="SAVE_DATA",
         )
         if path is None:
@@ -112,8 +111,6 @@ class Main:
         path = io.path.Path(path)
         path.parent().generate_dirs()
         save_file.save_path = path
-        dt = save_file.to_data()
-        dt.to_file(main_path)
         return path
 
     @staticmethod

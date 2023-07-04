@@ -8,16 +8,13 @@ from bcsfe.core.server import request
 class GameDataGetter:
     url = "https://raw.githubusercontent.com/fieryhenry/BCData/master/"
 
-    def __init__(self, cc: country_code.CountryCode):
-        self.cc = cc
-        latest_version = self.get_latest_version()
-        if latest_version is None:
+    def __init__(self, save_file: io.save.SaveFile):
+        self.cc = save_file.cc
+        if save_file.latest_game_data_version is None:
+            save_file.latest_game_data_version = self.get_latest_version()
+        if save_file.latest_game_data_version is None:
             raise Exception("Could not find latest version")
-        self.latest_version = latest_version
-
-    @staticmethod
-    def from_save_file(save_file: io.save.SaveFile) -> "GameDataGetter":
-        return GameDataGetter(save_file.cc)
+        self.latest_version = save_file.latest_game_data_version
 
     def get_latest_version(self) -> Optional[str]:
         versions = (
@@ -102,18 +99,18 @@ class GameDataGetter:
 
     def download_all(
         self, pack_name: str, file_names: list[str], display_text: bool = True
-    ) -> list[Optional[io.data.Data]]:
+    ) -> list[Optional[tuple[str, io.data.Data]]]:
         callables: list[Callable[..., Any]] = []
         args: list[tuple[str, str, int, bool]] = []
         for file_name in file_names:
             callables.append(self.download)
             args.append((pack_name, file_name, 2, display_text))
         io.thread_helper.run_many(callables, args)
-        data_list: list[Optional[io.data.Data]] = []
+        data_list: list[Optional[tuple[str, io.data.Data]]] = []
         for file_name in file_names:
             path = self.get_file_path(pack_name, file_name)
             if not path.exists():
                 data_list.append(None)
             else:
-                data_list.append(path.read())
+                data_list.append((file_name, path.read()))
         return data_list

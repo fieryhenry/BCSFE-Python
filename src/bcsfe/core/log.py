@@ -8,7 +8,7 @@ class Logger:
         """
         Initializes a Logger object
         """
-        self.log_file = io.path.Path.get_appdata_folder().add("bcsfe.log")
+        self.log_file = io.path.Path.get_documents_folder().add("bcsfe.log")
         self.log_data = self.log_file.read(True).split(b"\n")
 
     def get_time(self) -> str:

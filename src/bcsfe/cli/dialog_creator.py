@@ -6,7 +6,7 @@ from bcsfe.cli import color
 class IntInput:
     def __init__(
         self,
-        max: Optional[int],
+        max: Optional[int] = None,
         min: int = 0,
         default: Optional[int] = None,
         signed: bool = True,
@@ -71,6 +71,16 @@ class IntInput:
     ) -> Optional[int]:
         dialog = locale_handler.LocalManager().get_key(localization_key)
         return self.get_input_while(dialog, perameters)
+
+    def get_basic_input_locale(self, localization_key: str, perameters: dict[str, Any]):
+        dialog = locale_handler.LocalManager().get_key(localization_key)
+        try:
+            user_input = int(
+                color.ColoredInput(end="").get(dialog.format(**perameters))
+            )
+        except ValueError:
+            return None
+        return user_input
 
 
 class IntOutput:
@@ -154,8 +164,10 @@ class ChoiceInput:
             return 1, ""
         ListOutput(
             self.strings, self.ints, self.dialog, self.perameters
-        ).display_non_locale()
-        return IntInput(len(self.strings), 1).get_input(self.dialog, self.perameters)
+        ).display_locale()
+        return IntInput(len(self.strings), 1).get_input_locale(
+            self.dialog, self.perameters
+        )
 
     def get_input_while(self) -> Optional[int]:
         if len(self.strings) == 0:

@@ -1,5 +1,5 @@
 from typing import Optional
-from bcsfe.core import io, server, country_code, game
+from bcsfe.core import io, server, game
 
 
 class Fruit:
@@ -23,13 +23,13 @@ class Fruit:
 
 
 class Matatabi:
-    def __init__(self, cc: "country_code.CountryCode"):
-        self.cc = cc
+    def __init__(self, save_file: "io.save.SaveFile"):
+        self.save_file = save_file
         self.matatabi = self.__get_matatabi()
-        self.gatya_item_names = game.catbase.gatya_item.GatyaItemNames(self.cc)
+        self.gatya_item_names = game.catbase.gatya_item.GatyaItemNames(self.save_file)
 
     def __get_matatabi(self):
-        gdg = server.game_data_getter.GameDataGetter(self.cc)
+        gdg = server.game_data_getter.GameDataGetter(self.save_file)
         data = gdg.download("DataLocal", "Matatabi.tsv")
         csv = io.bc_csv.CSV(data, "\t")
         matatabi: list[Fruit] = []
@@ -47,7 +47,7 @@ class Matatabi:
             else:
                 text = None
             if len(line) > 6:
-                grow_up = io.data.Data.data_list_int_list(line[6:])
+                grow_up = [item.to_int() for item in line[6:]]
             else:
                 grow_up = None
             matatabi.append(Fruit(id, seed, group, sort, require, text, grow_up))

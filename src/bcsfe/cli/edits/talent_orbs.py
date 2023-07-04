@@ -1,5 +1,5 @@
 from typing import Any, Optional
-from bcsfe.core import server, country_code, io, game
+from bcsfe.core import server, io, game
 from bcsfe.cli import color, dialog_creator
 
 
@@ -166,16 +166,16 @@ class OrbInfoList:
         self.orb_info_list = orb_info_list
 
     @staticmethod
-    def create(cc: "country_code.CountryCode") -> Optional["OrbInfoList"]:
+    def create(save_file: "io.save.SaveFile") -> Optional["OrbInfoList"]:
         """Create an OrbInfoList
 
         Args:
-            cc (country_code.CountryCode): The country code
+            save_file (io.save.SaveFile): The save file
 
         Returns:
             Optional[OrbInfoList]: The OrbInfoList
         """
-        gdg = server.game_data_getter.GameDataGetter(cc)
+        gdg = server.game_data_getter.GameDataGetter(save_file)
         json_data_file = gdg.download_from_path(OrbInfoList.equipment_data_file_name)
         grade_list_file = gdg.download_from_path(OrbInfoList.grade_list_file_name)
         attribute_list_file = gdg.download_from_path(
@@ -375,7 +375,7 @@ class SaveOrbs:
         Returns:
             Optional[SaveOrbs]: The SaveOrbs
         """
-        orb_info_list = OrbInfoList.create(save_file.cc)
+        orb_info_list = OrbInfoList.create(save_file)
         if orb_info_list is None:
             return None
         orbs: dict[int, SaveOrb] = {}

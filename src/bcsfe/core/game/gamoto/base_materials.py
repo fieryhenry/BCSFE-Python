@@ -1,4 +1,4 @@
-from bcsfe.core import io, game, country_code
+from bcsfe.core import io, game
 from bcsfe.cli import dialog_creator
 
 
@@ -66,9 +66,9 @@ class Materials:
     def __str__(self) -> str:
         return self.__repr__()
 
-    def edit_base_materials(self, cc: "country_code.CountryCode"):
-        names = game.catbase.gatya_item.GatyaItemNames(cc).names
-        items = game.catbase.gatya_item.GatyaItemBuy(cc).get_by_category(7)
+    def edit_base_materials(self, save_file: "io.save.SaveFile"):
+        names = game.catbase.gatya_item.GatyaItemNames(save_file).names
+        items = game.catbase.gatya_item.GatyaItemBuy(save_file).get_by_category(7)
         names = [names[item.id] for item in items]
         base_materials = [base_material.amount for base_material in self.materials]
         values = dialog_creator.MultiEditor.from_reduced(

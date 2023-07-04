@@ -1,13 +1,14 @@
-from bcsfe.core import io, server, country_code
+from typing import Optional
+from bcsfe.core import io, server
 
 
 class Localizable:
-    def __init__(self, cc: "country_code.CountryCode"):
-        self.cc = cc
+    def __init__(self, save_file: "io.save.SaveFile"):
+        self.save_file = save_file
         self.localizable = self.get_localizable()
 
     def get_localizable(self):
-        gdg = server.game_data_getter.GameDataGetter(self.cc)
+        gdg = server.game_data_getter.GameDataGetter(self.save_file)
         data = gdg.download("resLocal", "localizable.tsv")
         csv = io.bc_csv.CSV(data, "\t")
         keys: dict[str, str] = {}
@@ -21,6 +22,9 @@ class Localizable:
 
     def get(self, key: str):
         return self.localizable.get(key, key)
+
+    def get_optional(self, key: str) -> Optional[str]:
+        return self.localizable.get(key)
 
     def get_lang(self) -> str:
         return self.get("lang")

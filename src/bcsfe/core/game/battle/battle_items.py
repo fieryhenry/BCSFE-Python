@@ -1,5 +1,5 @@
 from typing import Any
-from bcsfe.core import io, game, country_code
+from bcsfe.core import io, game
 from bcsfe.cli import dialog_creator
 
 
@@ -96,15 +96,15 @@ class BattleItems:
     def __str__(self):
         return f"BattleItems({self.items})"
 
-    def get_names(self, cc: "country_code.CountryCode") -> list[str]:
-        names = game.catbase.gatya_item.GatyaItemNames(cc).names
-        items = game.catbase.gatya_item.GatyaItemBuy(cc).get_by_category(3)
+    def get_names(self, save_file: "io.save.SaveFile") -> list[str]:
+        names = game.catbase.gatya_item.GatyaItemNames(save_file).names
+        items = game.catbase.gatya_item.GatyaItemBuy(save_file).get_by_category(3)
         names = [names[item.id] for item in items]
         return names
 
-    def edit(self, cc: "country_code.CountryCode"):
-        group_name = game.localizable.Localizable(cc).get("shop_category1")
-        item_names = self.get_names(cc)
+    def edit(self, save_file: "io.save.SaveFile"):
+        group_name = save_file.get_localizable().get("shop_category1")
+        item_names = self.get_names(save_file)
         current_values = [item.amount for item in self.items]
         values = dialog_creator.MultiEditor.from_reduced(
             group_name, item_names, current_values, 9999

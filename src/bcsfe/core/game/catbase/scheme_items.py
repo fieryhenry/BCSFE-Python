@@ -1,4 +1,4 @@
-from bcsfe.core import io, country_code, game, server
+from bcsfe.core import io, game, server
 from bcsfe.cli import dialog_creator, color
 from typing import Optional
 
@@ -83,10 +83,10 @@ class SchemeItems:
     def __str__(self) -> str:
         return self.__repr__()
 
-    def edit(self, cc: "country_code.CountryCode"):
-        item_names = game.catbase.gatya_item.GatyaItemNames(cc)
-        localizable = game.localizable.Localizable(cc)
-        scheme_data = server.game_data_getter.GameDataGetter(cc).download(
+    def edit(self, save_file: "io.save.SaveFile"):
+        item_names = game.catbase.gatya_item.GatyaItemNames(save_file)
+        localizable = save_file.get_localizable()
+        scheme_data = server.game_data_getter.GameDataGetter(save_file).download(
             "DataLocal", "schemeItemData.tsv"
         )
         if scheme_data is None:
@@ -114,7 +114,7 @@ class SchemeItems:
             string = "\n\t"
             if item.is_cat():
                 cat_names = game.catbase.cat.Cat.get_names(
-                    item.item_id, cc, localizable
+                    item.item_id, save_file, localizable
                 )
                 if cat_names is None:
                     continue

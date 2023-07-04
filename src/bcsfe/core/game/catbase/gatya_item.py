@@ -1,25 +1,30 @@
-from bcsfe.core import io, server, country_code
+from bcsfe.core import io, server
 
 
 class GatyaItemNames:
-    def __init__(self, cc: "country_code.CountryCode"):
-        self.cc = cc
+    def __init__(self, save_file: "io.save.SaveFile"):
+        self.save_file = save_file
         self.names = self.__get_names()
 
     def __get_names(self) -> list[str]:
-        gdg = server.game_data_getter.GameDataGetter(self.cc)
+        gdg = server.game_data_getter.GameDataGetter(self.save_file)
         data = gdg.download("resLocal", "GatyaitemName.csv")
         if data is None:
             return []
-        csv = io.bc_csv.CSV(data, io.bc_csv.Delimeter.from_country_code_res(self.cc))
+        csv = io.bc_csv.CSV(
+            data, io.bc_csv.Delimeter.from_country_code_res(self.save_file.cc)
+        )
         names: list[str] = []
         for line in csv:
             names.append(line[0].to_str())
 
         return names
 
-    def get_name(self, index: int):
-        return self.names[index]
+    def get_name(self, index: int) -> str:
+        try:
+            return self.names[index]
+        except IndexError:
+            return ""
 
 
 class GatyaItemBuyItem:
@@ -55,12 +60,12 @@ class GatyaItemBuyItem:
 
 
 class GatyaItemBuy:
-    def __init__(self, cc: "country_code.CountryCode"):
-        self.cc = cc
+    def __init__(self, save_file: "io.save.SaveFile"):
+        self.save_file = save_file
         self.buy = self.get_buy()
 
     def get_buy(self):
-        gdg = server.game_data_getter.GameDataGetter(self.cc)
+        gdg = server.game_data_getter.GameDataGetter(self.save_file)
         data = gdg.download("DataLocal", "Gatyaitembuy.csv")
         csv = io.bc_csv.CSV(data)
         buy: list[GatyaItemBuyItem] = []

@@ -15,7 +15,8 @@ at the same time
 
 - Save backup system. When you load a save file, a backup of the save file is
 created in your Documents folder with the following path format
-`Documents/backups/{country_code}/{inquiry_code}/{YYYY-MM-DD_HH-MM-SS}` folder
+`Documents/bcsfe/saves/backups/{country_code}/{inquiry_code}/{YYYY-MM-DD_HH-MM-SS}`
+ folder
 
 - Custom color themes
 

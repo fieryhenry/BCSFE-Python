@@ -32,11 +32,5 @@ setuptools.setup(
         "pyyaml",
     ],
     include_package_data=True,
-    extras_require={
-        "testing": [
-            "pytest",
-            "pytest-cov",
-        ],
-    },
     package_data={"bcsfe": ["py.typed"]},
 )

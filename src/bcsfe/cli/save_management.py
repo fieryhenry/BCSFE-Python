@@ -230,6 +230,7 @@ class SaveManagement:
         try:
             save_file = io.save.SaveFile(save_path.read())
             save_file.save_path = save_path
+            save_file.save_path.copy(save_file.get_default_path())
         except Exception as e:
             color.ColoredText.localize("parse_save_error", error=e)
             return None

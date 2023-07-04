@@ -31,6 +31,10 @@ class Upgrade:
         }
 
     @staticmethod
+    def init() -> "Upgrade":
+        return Upgrade(0, 1)
+
+    @staticmethod
     def deserialize(data: dict[str, Any]) -> "Upgrade":
         return Upgrade(data.get("plus", 0), data.get("base", 0))
 

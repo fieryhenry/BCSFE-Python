@@ -39,7 +39,7 @@ def run_many_helper(funcs: list[Callable[..., Any]], *args: list[Any]):
     return
 
 
-def run_many(funcs: list[Callable[..., Any]], args: Any = None, max_threads: int = 32):
+def run_many(funcs: list[Callable[..., Any]], args: Any = None, max_threads: int = 16):
     chunk_size = len(funcs) // max_threads
     if chunk_size == 0:
         chunk_size = 1

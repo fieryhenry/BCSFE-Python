@@ -1,5 +1,5 @@
-from typing import Any
-from bcsfe.core import io, game_version
+from typing import Any, Optional
+from bcsfe.core import io, game_version, server
 from bcsfe.cli import dialog_creator
 
 
@@ -19,6 +19,8 @@ class Gatya:
         self.trade_progress = 0
         self.step_up_stages: dict[int, int] = {}
         self.stepup_durations: dict[int, float] = {}
+
+        self.gatya_data_set: Optional[GatyaDataSet] = None
 
     @staticmethod
     def init() -> "Gatya":
@@ -159,3 +161,38 @@ class Gatya:
             None,
             localized_item=True,
         ).edit()
+
+    def read_gatya_data_set(self, save_file: "io.save.SaveFile") -> "GatyaDataSet":
+        if self.gatya_data_set is not None:
+            return self.gatya_data_set
+        self.gatya_data_set = GatyaDataSet(save_file)
+        return self.gatya_data_set
+
+
+class GatyaDataSet:
+    def __init__(self, save_file: "io.save.SaveFile"):
+        self.save_file = save_file
+        self.gatya_data_set = self.load_gatya_data_set("R", 1)
+
+    def load_gatya_data_set(self, rarity: str, id: int) -> list[list[int]]:
+        file_name = f"GatyaDataSet{rarity.upper()[0]}{id}.csv"
+        gdg = server.game_data_getter.GameDataGetter(self.save_file)
+        data = gdg.download("DataLocal", file_name)
+        if data is None:
+            return []
+        csv = io.bc_csv.CSV(data)
+        dt: list[list[int]] = []
+        for line in csv:
+            cat_ids: list[int] = []
+            for cat_id in line:
+                cat_id = cat_id.to_int()
+                if cat_id != -1:
+                    cat_ids.append(cat_id)
+            dt.append(cat_ids)
+        return dt
+
+    def get_cat_ids(self, gatya_id: int) -> list[int]:
+        try:
+            return self.gatya_data_set[gatya_id]
+        except IndexError:
+            return []

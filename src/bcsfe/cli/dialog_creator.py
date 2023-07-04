@@ -3,6 +3,57 @@ from bcsfe.core import io, locale_handler
 from bcsfe.cli import color
 
 
+class RangeInput:
+    def __init__(self, max: Optional[int] = None, min: int = 0):
+        self.max = max
+        self.min = min
+
+    def clamp_value(self, value: int) -> int:
+        if self.max is None:
+            return max(value, self.min)
+        return max(min(value, self.max), self.min)
+
+    def get_input_locale(
+        self, dialog: str, perameters: dict[str, Union[int, str]]
+    ) -> list[int]:
+        user_input = color.ColoredInput(end="").localize(dialog, **perameters)
+        if user_input == "":
+            return []
+        parts = user_input.split(" ")
+        ids: list[int] = []
+        all_text = locale_handler.LocalManager().get_key("all")
+        for part in parts:
+            if "-" in part and len(part.split("-")) == 2:
+                lower, upper = part.split("-")
+                try:
+                    lower = int(lower)
+                    upper = int(upper)
+                except ValueError:
+                    continue
+                if lower > upper:
+                    lower, upper = upper, lower
+                if self.max is not None:
+                    lower = max(lower, self.min)
+                    upper = min(upper, self.max)
+                else:
+                    lower = max(lower, self.min)
+                ids.extend(range(lower, upper + 1))
+            elif part.lower() == all_text.lower() and self.max is not None:
+                ids.extend(range(self.min, self.max + 1))
+            else:
+                try:
+                    part = int(part)
+                except ValueError:
+                    continue
+                if self.max is not None:
+                    part = max(part, self.min)
+                    part = min(part, self.max)
+                else:
+                    part = max(part, self.min)
+                ids.append(part)
+        return ids
+
+
 class IntInput:
     def __init__(
         self,

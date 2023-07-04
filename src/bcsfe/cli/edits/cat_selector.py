@@ -57,11 +57,12 @@ class CatSelector:
                 color.ColoredText.localize("selected_cat", id=cat.id, name=names[0])
 
         options: list[str] = [
-            "select_cats_rarity",
-            "select_cats_name",
-            "select_cats_obtainable",
-            "select_cats_gatya_banner",
             "select_cats_all",
+            "select_cats_obtainable",
+            "select_cats_id",
+            "select_cats_name",
+            "select_cats_rarity",
+            "select_cats_gatya_banner",
         ]
         option_id = dialog_creator.ChoiceInput(
             options, options, [], {}, "select_cats", True
@@ -69,7 +70,7 @@ class CatSelector:
         if option_id is None:
             return current_cats
         option_id -= 1
-        if option_id == 4:
+        if option_id == 0:
             if filter:
                 cats = self.get_current_cats()
             else:
@@ -88,13 +89,15 @@ class CatSelector:
                 mode = SelectMode.OR
         else:
             mode = SelectMode.OR
-        if option_id == 0:
-            new_cats = self.select_rarity()
-        elif option_id == 1:
-            new_cats = self.select_name()
-        elif option_id == 2:
+        if option_id == 1:
             new_cats = self.select_obtainable()
+        elif option_id == 2:
+            new_cats = self.select_id()
         elif option_id == 3:
+            new_cats = self.select_name()
+        elif option_id == 4:
+            new_cats = self.select_rarity()
+        elif option_id == 5:
             new_cats = self.select_gatya_banner()
         else:
             new_cats = []
@@ -104,6 +107,12 @@ class CatSelector:
         if mode == SelectMode.OR:
             return list(set(current_cats + new_cats))
         return new_cats
+
+    def select_id(self) -> list[game.catbase.cat.Cat]:
+        cat_ids = dialog_creator.RangeInput(
+            len(self.save_file.cats.cats) - 1
+        ).get_input_locale("enter_cat_ids", {})
+        return self.save_file.cats.get_cats_by_ids(cat_ids)
 
     def select_rarity(self) -> list[game.catbase.cat.Cat]:
         rarity_names = self.save_file.cats.get_rarity_names(self.save_file)
@@ -146,8 +155,10 @@ class CatSelector:
         return cats
 
     def select_gatya_banner(self) -> list[game.catbase.cat.Cat]:
-        gatya_ids = color.ColoredInput().get("select_gatya_banner").split(" ")
-        gatya_ids = [int(gatya_id) for gatya_id in gatya_ids if gatya_id.isdigit()]
+        gatya_ids = dialog_creator.RangeInput(
+            len(self.save_file.gatya.read_gatya_data_set(self.save_file).gatya_data_set)
+            - 1
+        ).get_input_locale("select_gatya_banner", {})
         cats: list[game.catbase.cat.Cat] = []
         for gatya_id in gatya_ids:
             gatya_cats = self.get_cats_gatya_banner(gatya_id)
@@ -158,4 +169,5 @@ class CatSelector:
     def edit_cats(save_file: "io.save.SaveFile"):
         cat_selector = CatSelector(save_file)
         cats = cat_selector.select()
+        print([cat.id for cat in cats])
         raise NotImplementedError()

@@ -196,27 +196,3 @@ class ColoredInput:
         except TypeError:
             pass
         return self.get(text)
-
-    def get_int(
-        self,
-        display_string: str,
-        error_message: str = "<red>Please enter a valid number</>",
-    ) -> int:
-        while True:
-            try:
-                return int(self.get(display_string))
-            except ValueError:
-                ColoredText(error_message)
-
-    def get_bool(
-        self,
-        display_string: str,
-        true_string: str = "y",
-        false_string: str = "n",
-    ):
-        while True:
-            result = self.get(display_string).lower()
-            if result == true_string:
-                return True
-            if result == false_string:
-                return False

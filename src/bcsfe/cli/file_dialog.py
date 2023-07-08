@@ -1,14 +1,27 @@
-from tkinter import filedialog
-import tkinter as tk
 from bcsfe.core import locale_handler
+from bcsfe.cli import color
 from typing import Optional
 
 
 class FileDialog:
+    def load_tk(self):
+        try:
+            import tkinter as tk
+            from tkinter import filedialog
+
+            self.tk = tk
+            self.filedialog = filedialog
+        except ImportError:
+            self.tk = None
+            self.filedialog = None
+            color.ColoredText.localize("tkinter_not_found")
+
     def __init__(self):
-        self.root = tk.Tk()
-        self.root.withdraw()
-        self.root.wm_attributes("-topmost", 1)  # type: ignore
+        self.load_tk()
+        if self.tk is not None:
+            self.root = self.tk.Tk()
+            self.root.withdraw()
+            self.root.wm_attributes("-topmost", 1)  # type: ignore
 
     def get_file(
         self,
@@ -20,8 +33,11 @@ class FileDialog:
         if filetypes is None:
             filetypes = []
         title = locale_handler.LocalManager().get_key(title)
+        if self.filedialog is None:
+            path = color.ColoredInput().localize(title)
+            return path if path else None
         return (
-            filedialog.askopenfilename(
+            self.filedialog.askopenfilename(
                 title=title,
                 filetypes=filetypes,
                 initialdir=initialdir,
@@ -32,7 +48,11 @@ class FileDialog:
 
     def get_directory(self, title: str, initialdir: str = "") -> Optional[str]:
         title = locale_handler.LocalManager().get_key(title)
-        return filedialog.askdirectory(title=title, initialdir=initialdir) or None
+        if self.filedialog is None:
+            path = color.ColoredInput().localize(title)
+            return path if path else None
+
+        return self.filedialog.askdirectory(title=title, initialdir=initialdir) or None
 
     def save_file(
         self,
@@ -55,8 +75,11 @@ class FileDialog:
         if filetypes is None:
             filetypes = []
         title = locale_handler.LocalManager().get_key(title)
+        if self.filedialog is None:
+            path = color.ColoredInput().localize(title)
+            return path if path else None
         return (
-            filedialog.asksaveasfilename(
+            self.filedialog.asksaveasfilename(
                 title=title,
                 filetypes=filetypes,
                 initialdir=initialdir,

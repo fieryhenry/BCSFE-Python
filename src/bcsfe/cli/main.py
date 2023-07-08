@@ -157,6 +157,8 @@ class Main:
         if path is None:
             return None
         path = io.path.Path(path)
+        if not path.exists():
+            return None
         json_data = io.json_file.JsonFile.from_data(path.read()).get_json()
         save_file = io.save.SaveFile.from_dict(json_data)
         path = Main.save_save_dialog(save_file)

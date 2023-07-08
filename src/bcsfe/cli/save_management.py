@@ -224,7 +224,7 @@ class SaveManagement:
         elif choice == 4 and exit_option:
             sys.exit(0)
 
-        if save_path is None:
+        if save_path is None or not save_path.exists():
             return None
 
         try:

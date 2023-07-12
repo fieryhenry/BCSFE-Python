@@ -36,6 +36,7 @@ class FeatureHandler:
                 "catamins": edits.basic_items.BasicItems.edit_catamins,
                 "scheme_items": edits.basic_items.BasicItems.edit_scheme_items,
             },
+            "cats": edits.cat_selector.CatSelector.edit_cats,
             "account": {
                 "unban_account": save_management.SaveManagement.unban_account,
                 "upload_items": save_management.SaveManagement.upload_items,
@@ -133,6 +134,7 @@ class FeatureHandler:
         features = self.get_features()
         features = list(features.keys())
         while True:
+            edits.clear_tutorial.clear_tutorial(self.save_file, False)
             features = self.select_features(features)
             feature = None
             if len(features) == 1:

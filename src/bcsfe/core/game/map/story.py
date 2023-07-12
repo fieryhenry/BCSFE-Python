@@ -51,6 +51,15 @@ class Stage:
     def __str__(self):
         return self.__repr__()
 
+    def clear_stage(self, increase: bool = False):
+        if increase:
+            self.clear_times += 1
+        else:
+            self.clear_times = 1
+
+    def is_cleared(self) -> bool:
+        return self.clear_times > 0
+
 
 class Chapter:
     def __init__(self, selected_stage: int):
@@ -62,6 +71,18 @@ class Chapter:
         self.treasure_chance_value = 0
         self.treasure_chance_stage_id = 0
         self.treasure_festival_type = 0
+
+    def clear_stage(
+        self, stage_id: int, increase: bool = False, overwrite_progress: bool = False
+    ):
+        self.stages[stage_id].clear_stage(increase)
+        if overwrite_progress:
+            self.progress = stage_id
+        else:
+            self.progress = max(self.progress, stage_id + 1)
+
+    def is_stage_clear(self, stage_id: int) -> bool:
+        return self.stages[stage_id].is_cleared()
 
     @staticmethod
     def init() -> "Chapter":
@@ -172,6 +193,18 @@ class Chapters:
     def __init__(self, chapters: list[Chapter]):
         self.chapters = chapters
 
+    def clear_stage(
+        self,
+        chapter: int,
+        stage: int,
+        increase: bool = False,
+        overwrite_progress: bool = False,
+    ):
+        self.chapters[chapter].clear_stage(stage, increase, overwrite_progress)
+
+    def is_stage_clear(self, chapter: int, stage: int) -> bool:
+        return self.chapters[chapter].is_stage_clear(stage)
+
     @staticmethod
     def init() -> "Chapters":
         chapters = [Chapter.init() for _ in range(10)]
@@ -250,3 +283,12 @@ class Chapters:
 
     def __str__(self):
         return f"Chapters({self.chapters})"
+
+
+def clear_tutorial(save_file: "io.save.SaveFile"):
+    save_file.tutorial_state = 1
+    save_file.story.clear_stage(chapter=0, stage=0)
+
+
+def is_tutorial_clear(save_file: "io.save.SaveFile") -> bool:
+    return save_file.tutorial_state == 1

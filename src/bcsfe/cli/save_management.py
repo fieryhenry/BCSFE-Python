@@ -86,7 +86,7 @@ class SaveManagement:
         SaveManagement.save_save(save_file)
         adb_handler = io.adb_handler.AdbHandler()
         adb_handler.select_device()
-        adb_handler.set_cc(save_file.cc)
+        adb_handler.set_cc(save_file.real_cc)
         if save_file.save_path is None:
             return adb_handler
         result = adb_handler.load_battlecats_save(save_file.save_path)
@@ -186,9 +186,14 @@ class SaveManagement:
         )
 
         save_path = None
+        cc: Optional[country_code.CountryCode] = None
 
         if choice == 0:
-            save_path = server_cli.ServerCLI().download_save()
+            data = server_cli.ServerCLI().download_save()
+            if data is not None:
+                save_path, cc = data
+            else:
+                save_path = None
         elif choice == 1:
             save_path = main.Main.load_save_file()
         elif choice == 2:
@@ -220,7 +225,11 @@ class SaveManagement:
                         "adb_pull_fail", cc=cc, error=result.result
                     )
         elif choice == 3:
-            save_path = main.Main.load_save_data_json()
+            data = main.Main.load_save_data_json()
+            if data is not None:
+                save_path, cc = data
+            else:
+                save_path = None
         elif choice == 4 and exit_option:
             sys.exit(0)
 
@@ -228,7 +237,7 @@ class SaveManagement:
             return None
 
         try:
-            save_file = io.save.SaveFile(save_path.read())
+            save_file = io.save.SaveFile(save_path.read(), cc)
             save_file.save_path = save_path
             save_file.save_path.copy(save_file.get_default_path())
         except Exception as e:

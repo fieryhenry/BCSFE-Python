@@ -9,7 +9,7 @@ from bcsfe.cli import (
     theme_handler,
     save_management,
 )
-from bcsfe.core import io, server
+from bcsfe.core import country_code, io, server
 
 
 class Main:
@@ -82,6 +82,7 @@ class Main:
         if save_file is None:
             return
         self.save_file = save_file
+
         self.feature_handler()
 
     def feature_handler(self):
@@ -147,7 +148,9 @@ class Main:
         return path
 
     @staticmethod
-    def load_save_data_json() -> Optional[io.path.Path]:
+    def load_save_data_json() -> (
+        Optional[tuple[io.path.Path, "country_code.CountryCode"]]
+    ):
         """Load save data from json file.
 
         Returns:
@@ -165,4 +168,4 @@ class Main:
         if path is None:
             return None
         save_file.to_file(path)
-        return path
+        return path, save_file.cc

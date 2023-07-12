@@ -22,10 +22,18 @@ class SaveFile:
             self.data = data.Data()
         else:
             self.data = dt
-        if cc is None:
-            self.cc = self.detect_cc()
-        else:
+        detected_cc = self.detect_cc()
+        if detected_cc is None:
+            if cc is None:
+                raise CantDetectSaveCCError()
             self.cc = cc
+            self.real_cc = cc
+        else:
+            self.cc = detected_cc
+            if cc is not None:
+                self.real_cc = cc
+            else:
+                self.real_cc = detected_cc
 
         self.latest_game_data_version: Optional[str] = None
         self.localizable: Optional[game.localizable.Localizable] = None
@@ -47,12 +55,12 @@ class SaveFile:
         self.init_save(other.game_version)
         self.load_wrapper()
 
-    def detect_cc(self) -> country_code.CountryCode:
+    def detect_cc(self) -> Optional[country_code.CountryCode]:
         for cc in country_code.CountryCode.get_all():
             self.cc = cc
             if self.verify_hash():
                 return cc
-        raise CantDetectSaveCCError("Please specify a country code")
+        return None
 
     def get_salt(self) -> str:
         """Get the salt for the save file. This is used for hashing the save file.
@@ -3126,4 +3134,5 @@ class SaveFile:
         )
         local_path.generate_dirs()
         local_path = local_path.add(date)
+
         return local_path

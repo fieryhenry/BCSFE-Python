@@ -7,7 +7,9 @@ class ServerCLI:
     def __init__(self):
         pass
 
-    def download_save(self) -> Optional["io.path.Path"]:
+    def download_save(
+        self,
+    ) -> Optional[tuple["io.path.Path", "country_code.CountryCode"]]:
         transfer_code = dialog_creator.StringInput().get_input_locale_while(
             "enter_transfer_code", {}
         )
@@ -47,4 +49,4 @@ class ServerCLI:
 
         color.ColoredText.localize("save_downloaded", path=path.to_str())
 
-        return path
+        return path, cc

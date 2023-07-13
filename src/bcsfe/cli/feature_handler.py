@@ -80,8 +80,10 @@ class FeatureHandler:
                         found_features,
                     )
                 )
-            elif name in feature_name.lower().replace(" ", "") or name == "":
-                found_features.add(path)
+            for alias in core.LocalManager.get_all_aliases(feature_name):
+                if name in alias.lower().replace(" ", "") or name == "":
+                    found_features.add(path)
+                    break
 
         return found_features
 
@@ -90,7 +92,9 @@ class FeatureHandler:
         for feature_name in features:
             feature_names.append(feature_name.split(".")[-1])
         print()
-        dialog_creator.ListOutput(feature_names, [], "features", {}).display_locale()
+        dialog_creator.ListOutput(feature_names, [], "features", {}).display_locale(
+            remove_alias=True
+        )
 
     def select_features(self, features: list[str], parent_path: str = "") -> list[str]:
         if features != list(self.get_features().keys()):

@@ -152,6 +152,32 @@ class LocalManager:
         return value
 
     @staticmethod
+    def get_all_aliases(value: str) -> list[str]:
+        """Gets all aliases from a string. Aliases are separated by |.
+
+        Args:
+            value (str): String to get aliases from.
+
+        Returns:
+            list[str]: List of aliases.
+        """
+        if "|" not in value:
+            return [value]
+        i = 0
+        aliases: list[str] = []
+        while i < len(value):
+            char = value[i]
+            prev_char = value[i - 1] if i > 0 else ""
+            if char == "|" and prev_char != "\\":
+                aliases.append(value[:i])
+                value = value[i + 1 :]
+                i = 0
+            i += 1
+
+        aliases.append(value)
+        return aliases
+
+    @staticmethod
     def from_config() -> "LocalManager":
         """Gets a LocalManager from the language code in the config.
 

@@ -180,11 +180,14 @@ class ListOutput:
         output = self.get_output(dialog, strings)
         color.ColoredText(output)
 
-    def display_locale(self) -> None:
+    def display_locale(self, remove_alias: bool = False) -> None:
         dialog = core.LocalManager().get_key(self.dialog)
         new_strings: list[str] = []
         for string in self.strings:
-            new_strings.append(core.LocalManager().get_key(string))
+            string_ = core.LocalManager().get_key(string)
+            if remove_alias:
+                string_ = core.LocalManager.get_all_aliases(string_)[0]
+            new_strings.append(string_)
         self.display(dialog, new_strings)
 
     def display_non_locale(self) -> None:

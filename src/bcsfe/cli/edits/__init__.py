@@ -1,1 +1,1 @@
-from bcsfe.cli.edits import basic_items, talent_orbs, cat_selector, clear_tutorial
+from bcsfe.cli.edits import basic_items, cat_editor, talent_orbs, clear_tutorial

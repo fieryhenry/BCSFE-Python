@@ -115,7 +115,7 @@ class ColoredText:
                 print(colored.stylize(text, fg), end="")  # type: ignore
 
     @staticmethod
-    def localize(string: str, **kwargs: Any) -> "ColoredText":
+    def get_localized_text(string: str, **kwargs: Any) -> str:
         text = core.LocalManager().get_key(string)
         try:
             for key, value in kwargs.items():
@@ -123,7 +123,11 @@ class ColoredText:
                 text = text.replace("{" + key + "}", value)
         except TypeError:
             pass
-        return ColoredText(text)
+        return text
+
+    @staticmethod
+    def localize(string: str, **kwargs: Any) -> "ColoredText":
+        return ColoredText(ColoredText.get_localized_text(string, **kwargs))
 
     @staticmethod
     def get_special_chars() -> list[str]:
@@ -202,9 +206,5 @@ class ColoredInput:
         return input()
 
     def localize(self, string: str, **kwargs: Any) -> str:
-        text = core.LocalManager().get_key(string)
-        try:
-            text = text.format(**kwargs)
-        except TypeError:
-            pass
+        text = ColoredText.get_localized_text(string, **kwargs)
         return self.get(text)

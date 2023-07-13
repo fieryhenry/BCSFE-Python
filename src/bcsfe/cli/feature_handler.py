@@ -1,6 +1,6 @@
 from typing import Any, Callable, Optional
 from bcsfe import core
-from bcsfe.cli import dialog_creator, color, edits, save_management
+from bcsfe.cli import dialog_creator, color, edits, save_management, main
 
 
 class FeatureHandler:
@@ -41,6 +41,7 @@ class FeatureHandler:
                 "unban_account": save_management.SaveManagement.unban_account,
                 "upload_items": save_management.SaveManagement.upload_items,
             },
+            "exit": main.Main.exit_editor,
         }
         return features
 

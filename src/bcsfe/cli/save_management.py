@@ -1,4 +1,3 @@
-import sys
 from bcsfe import core
 from bcsfe.core import io
 from bcsfe.cli import main, color, dialog_creator, server_cli
@@ -232,7 +231,7 @@ class SaveManagement:
             else:
                 save_path = None
         elif choice == 4 and exit_option:
-            sys.exit(0)
+            main.Main.exit_editor()
 
         if save_path is None or not save_path.exists():
             return None

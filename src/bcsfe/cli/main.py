@@ -167,3 +167,14 @@ class Main:
             return None
         save_file.to_file(path)
         return path, save_file.cc
+
+    @staticmethod
+    def exit_editor(save_file: Optional["core.SaveFile"] = None):
+        """Exit the editor."""
+        if save_file is not None:
+            save = color.ColoredInput().localize("save_before_exit") == "y"
+
+            if save:
+                save_management.SaveManagement.save_save(save_file)
+
+        sys.exit()

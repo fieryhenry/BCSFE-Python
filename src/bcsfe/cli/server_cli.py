@@ -21,7 +21,7 @@ class ServerCLI:
         if confirmation_code is None:
             return None
         cc = core.CountryCode.select()
-        gv = core.GameVersion(120200)
+        gv = core.GameVersion(120200)  # not important
 
         color.ColoredText.localize(
             "downloading_save_file",

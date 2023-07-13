@@ -1,50 +1,56 @@
 import enum
 from typing import Any
-from bcsfe.core.io import path, yaml
+from bcsfe import core
 
 
-class Key(enum.Enum):
+class ConfigKey(enum.Enum):
     UPDATE_TO_BETA = "update_to_beta"
     LOCALE = "locale"
     DISABLE_MAXES = "disable_maxes"
     MAX_SAVE_COUNT = "max_save_count"
     THEME = "theme"
+    RESET_CAT_DATA = "reset_cat_data"
+    FILTER_CURRENT_CATS = "filter_current_cats"
+    SET_CAT_CURRENT_FORMS = "set_cat_current_forms"
 
 
 class Config:
     def __init__(self):
-        config = yaml.YamlFile(Config.get_config_path())
+        config = core.YamlFile(Config.get_config_path())
         if config.yaml is None:
             config.yaml = {}
-        self.config: dict[Key, Any] = {}
+        self.config: dict[ConfigKey, Any] = {}
         for key, value in config.yaml.items():
             try:
-                self.config[Key(key)] = value
+                self.config[ConfigKey(key)] = value
             except ValueError:
                 pass
         self.config_object = config
         self.initialize_config()
 
     @staticmethod
-    def get_config_path() -> path.Path:
-        return path.Path.get_documents_folder().add("config.yaml")
+    def get_config_path() -> "core.Path":
+        return core.Path.get_documents_folder().add("config.yaml")
 
-    def __getitem__(self, key: Key) -> Any:
+    def __getitem__(self, key: ConfigKey) -> Any:
         return self.config[key]
 
-    def __setitem__(self, key: Key, value: Any) -> None:
+    def __setitem__(self, key: ConfigKey, value: Any) -> None:
         self.config[key] = value
 
-    def __contains__(self, key: Key) -> bool:
+    def __contains__(self, key: ConfigKey) -> bool:
         return key in self.config
 
     def initialize_config(self):
         initial_values = {
-            Key.UPDATE_TO_BETA: False,
-            Key.LOCALE: "en",
-            Key.DISABLE_MAXES: False,
-            Key.MAX_SAVE_COUNT: 50,
-            Key.THEME: "default",
+            ConfigKey.UPDATE_TO_BETA: False,
+            ConfigKey.LOCALE: "en",
+            ConfigKey.DISABLE_MAXES: False,
+            ConfigKey.MAX_SAVE_COUNT: 50,
+            ConfigKey.THEME: "default",
+            ConfigKey.RESET_CAT_DATA: True,
+            ConfigKey.FILTER_CURRENT_CATS: True,
+            ConfigKey.SET_CAT_CURRENT_FORMS: True,
         }
         for key, value in initial_values.items():
             if key not in self.config:
@@ -56,7 +62,7 @@ class Config:
             self.config_object.yaml[key.value] = value
         self.config_object.save()
 
-    def get(self, key: Key) -> Any:
+    def get(self, key: ConfigKey) -> Any:
         return self.config[key]
 
     def reset(self):
@@ -64,6 +70,6 @@ class Config:
         self.config_object.remove()
         self.initialize_config()
 
-    def set(self, key: Key, value: Any):
+    def set(self, key: ConfigKey, value: Any):
         self.config[key] = value
         self.save()

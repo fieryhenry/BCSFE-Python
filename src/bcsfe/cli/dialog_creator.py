@@ -82,9 +82,9 @@ class IntInput:
         return max(min(value, self.max), self.min)
 
     def get_input(
-        self, dialog: str, perameters: dict[str, Union[int, str]]
+        self, localization_key: str, perameters: dict[str, Union[int, str]]
     ) -> tuple[Optional[int], str]:
-        user_input = color.ColoredInput(end="").get(dialog.format(**perameters))
+        user_input = color.ColoredInput(end="").localize(localization_key, **perameters)
         if user_input == "" and self.default is not None:
             return self.default, user_input
         try:
@@ -94,7 +94,7 @@ class IntInput:
 
         return self.clamp_value(user_input_i), user_input
 
-    def get_input_while(
+    def get_input_locale_while(
         self, dialog: str, perameters: dict[str, Union[int, str]]
     ) -> Optional[int]:
         while True:
@@ -114,40 +114,16 @@ class IntInput:
             else:
                 perameters = {"min": self.min, "max": self.max}
                 localization_key = "input_int"
-        dialog = core.LocalManager().get_key(localization_key)
-        return self.get_input(dialog, perameters)
-
-    def get_input_locale_while(
-        self, localization_key: str, perameters: dict[str, Union[int, str]]
-    ) -> Optional[int]:
-        dialog = core.LocalManager().get_key(localization_key)
-        return self.get_input_while(dialog, perameters)
+        return self.get_input(localization_key, perameters)
 
     def get_basic_input_locale(self, localization_key: str, perameters: dict[str, Any]):
-        dialog = core.LocalManager().get_key(localization_key)
         try:
             user_input = int(
-                color.ColoredInput(end="").get(dialog.format(**perameters))
+                color.ColoredInput(end="").localize(localization_key, **perameters)
             )
         except ValueError:
             return None
         return user_input
-
-
-class IntOutput:
-    def __init__(self, dialog: str, perameters: dict[str, Union[int, str]]):
-        self.dialog = dialog
-        self.perameters = perameters
-
-    def get_output(self, dialog: str) -> str:
-        return dialog.format(**self.perameters)
-
-    def display(self) -> None:
-        color.ColoredText(self.get_output(self.dialog))
-
-    def display_locale(self) -> None:
-        dialog = core.LocalManager().get_key(self.dialog)
-        color.ColoredText(self.get_output(dialog))
 
 
 class ListOutput:
@@ -164,7 +140,7 @@ class ListOutput:
         self.perameters = perameters
 
     def get_output(self, dialog: str, strings: list[str]) -> str:
-        end_string = dialog.format(**self.perameters)
+        end_string = color.ColoredText.get_localized_text(dialog, **self.perameters)
         end_string += "\n"
         for i, string in enumerate(strings):
             try:
@@ -487,8 +463,7 @@ class StringInput:
             return usr_input
 
     def get_input_locale(self, key: str, perameters: dict[str, Any]) -> Optional[str]:
-        dialog_str = core.LocalManager().get_key(key).format(**perameters)
-        usr_input = color.ColoredInput().get(dialog_str)
+        usr_input = color.ColoredInput().localize(key, **perameters)
         if usr_input == "":
             return None
         return usr_input
@@ -532,8 +507,7 @@ class YesNoInput:
             return usr_input == core.LocalManager().get_key("yes_key")
 
     def get_input_locale(self, key: str, perameters: dict[str, Any]) -> Optional[str]:
-        dialog_str = core.LocalManager().get_key(key).format(**perameters)
-        usr_input = color.ColoredInput().get(dialog_str)
+        usr_input = color.ColoredInput().get(key, **perameters)
         if usr_input == "":
             return None
         return usr_input
@@ -543,8 +517,7 @@ class YesNoInput:
     ) -> bool:
         if perameters is None:
             perameters = {}
-        dialog_str = core.LocalManager().get_key(key).format(**perameters)
-        usr_input = color.ColoredInput().get(dialog_str)
+        usr_input = color.ColoredInput().localize(key, **perameters)
         if usr_input == "":
             return self.default
         return usr_input == core.LocalManager().get_key("yes_key")

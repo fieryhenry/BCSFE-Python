@@ -41,12 +41,7 @@ class CatEditor:
         )
         return self.save_file.cats.get_cats_by_ids(cat_ids)
 
-    def select(
-        self,
-        current_cats: Optional[list["core.Cat"]] = None,
-    ) -> list["core.Cat"]:
-        if current_cats is None:
-            current_cats = []
+    def print_selected_cats(self, current_cats: list["core.Cat"]):
         if len(current_cats) > 50 or not current_cats:
             color.ColoredText.localize("total_selected_cats", total=len(current_cats))
         else:
@@ -57,6 +52,14 @@ class CatEditor:
                 if not names:
                     names = [str(cat.id)]
                 color.ColoredText.localize("selected_cat", id=cat.id, name=names[0])
+
+    def select(
+        self,
+        current_cats: Optional[list["core.Cat"]] = None,
+    ) -> list["core.Cat"]:
+        if current_cats is None:
+            current_cats = []
+        self.print_selected_cats(current_cats)
 
         options: list[str] = [
             "select_cats_all",
@@ -77,18 +80,6 @@ class CatEditor:
             cats = self.save_file.cats.cats
             return cats
 
-        if current_cats:
-            mode_id = dialog_creator.IntInput().get_basic_input_locale("and_mode_q", {})
-            if mode_id is None:
-                mode = SelectMode.OR
-            elif mode_id == 1:
-                mode = SelectMode.AND
-            elif mode_id == 2:
-                mode = SelectMode.OR
-            else:
-                mode = SelectMode.OR
-        else:
-            mode = SelectMode.OR
         if option_id == 1:
             new_cats = self.get_current_cats()
         if option_id == 2:
@@ -104,12 +95,29 @@ class CatEditor:
         else:
             new_cats = []
 
+        if current_cats:
+            mode_id = dialog_creator.IntInput().get_basic_input_locale("and_mode_q", {})
+            if mode_id is None:
+                mode = SelectMode.OR
+            elif mode_id == 1:
+                mode = SelectMode.AND
+            elif mode_id == 2:
+                mode = SelectMode.OR
+            elif mode_id == 3:
+                mode = SelectMode.REPLACE
+            else:
+                mode = SelectMode.OR
+        else:
+            mode = SelectMode.OR
+
         new_cats = self.check_and_filter(new_cats)
 
         if mode == SelectMode.AND:
             return [cat for cat in new_cats if cat in current_cats]
         if mode == SelectMode.OR:
             return list(set(current_cats + new_cats))
+        if mode == SelectMode.REPLACE:
+            return new_cats
         return new_cats
 
     def select_id(self) -> list["core.Cat"]:
@@ -243,11 +251,21 @@ class CatEditor:
         color.ColoredText.localize("upgrade_success")
 
     @staticmethod
-    def edit_cats(
-        save_file: "core.SaveFile", current_cats: Optional[list["core.Cat"]] = None
-    ):
+    def edit_cats(save_file: "core.SaveFile"):
         cat_editor = CatEditor(save_file)
-        cats = cat_editor.select(current_cats)
+        current_cats = cat_editor.select()
+        while True:
+            should_exit, current_cats = CatEditor.run_edit_cats(save_file, current_cats)
+            if should_exit:
+                break
+
+    @staticmethod
+    def run_edit_cats(
+        save_file: "core.SaveFile",
+        cats: list["core.Cat"],
+    ) -> tuple[bool, list["core.Cat"]]:
+        cat_editor = CatEditor(save_file)
+        cat_editor.print_selected_cats(cats)
         options: list[str] = [
             "select_cats_again",
             "unlock_cats",
@@ -263,10 +281,10 @@ class CatEditor:
             options, options, [], {}, "select_edit_cats_option", True
         ).single_choice()
         if option_id is None:
-            return
+            return False, cats
         option_id -= 1
         if option_id == 0:
-            cat_editor.edit_cats(save_file, cats)
+            cats = cat_editor.select(cats)
         elif option_id == 1:
             cat_editor.unlock_cats(cats)
         elif option_id == 2:
@@ -284,4 +302,6 @@ class CatEditor:
             raise NotImplementedError
             # cat_editor.remove_talents_cats(cats)
         save_file.rank_up_sale_value = 0x7FFFFFFF
-        return
+        if option_id == 8:
+            return True, cats
+        return False, cats

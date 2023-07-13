@@ -138,8 +138,8 @@ class FeatureHandler:
     def select_features_run(self):
         features = self.get_features()
         features = list(features.keys())
+        self.save_file.to_file(self.save_file.get_temp_path())
         while True:
-            self.save_file.to_file(self.save_file.get_temp_path())
             edits.clear_tutorial.clear_tutorial(self.save_file, False)
             features = self.select_features(features)
             feature = None
@@ -151,11 +151,13 @@ class FeatureHandler:
             if feature:
                 if isinstance(feature, Callable):
                     feature(self.save_file)
+                    self.save_file.to_file(self.save_file.get_temp_path())
                     features = self.get_features()
                     features = list(features.keys())
                 else:
                     feature = self.get_feature(feature)
                     if isinstance(feature, Callable):
                         feature(self.save_file)
+                        self.save_file.to_file(self.save_file.get_temp_path())
                         features = self.get_features()
                         features = list(features.keys())

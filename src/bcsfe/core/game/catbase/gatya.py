@@ -1,5 +1,5 @@
 from typing import Any, Optional
-from bcsfe.core import io, game_version, server
+from bcsfe import core
 from bcsfe.cli import dialog_creator
 
 
@@ -27,27 +27,25 @@ class Gatya:
         return Gatya(0, 0)
 
     @staticmethod
-    def read_rare_normal_seed(
-        data: io.data.Data, gv: "game_version.GameVersion"
-    ) -> "Gatya":
+    def read_rare_normal_seed(data: "core.Data", gv: "core.GameVersion") -> "Gatya":
         if gv < 33:
             return Gatya(data.read_ulong(), data.read_ulong())
         return Gatya(data.read_uint(), data.read_uint())
 
-    def read_event_seed(self, data: io.data.Data, gv: "game_version.GameVersion"):
+    def read_event_seed(self, data: "core.Data", gv: "core.GameVersion"):
         if gv < 33:
             self.event_seed = data.read_ulong()
         else:
             self.event_seed = data.read_uint()
 
-    def write_rare_normal_seed(self, data: io.data.Data):
+    def write_rare_normal_seed(self, data: "core.Data"):
         data.write_uint(self.rare_seed)
         data.write_uint(self.normal_seed)
 
-    def write_event_seed(self, data: io.data.Data):
+    def write_event_seed(self, data: "core.Data"):
         data.write_uint(self.event_seed)
 
-    def read2(self, data: io.data.Data):
+    def read2(self, data: "core.Data"):
         self.stepup_stage_3_cooldown = data.read_int()
         self.previous_normal_roll = data.read_int()
         self.previous_normal_roll_type = data.read_int()
@@ -57,7 +55,7 @@ class Gatya:
         self.roll_single = data.read_bool()
         self.roll_multi = data.read_bool()
 
-    def write2(self, data: io.data.Data):
+    def write2(self, data: "core.Data"):
         data.write_int(self.stepup_stage_3_cooldown)
         data.write_int(self.previous_normal_roll)
         data.write_int(self.previous_normal_roll_type)
@@ -67,13 +65,13 @@ class Gatya:
         data.write_bool(self.roll_single)
         data.write_bool(self.roll_multi)
 
-    def read_trade_progress(self, data: io.data.Data):
+    def read_trade_progress(self, data: "core.Data"):
         self.trade_progress = data.read_int()
 
-    def write_trade_progress(self, data: io.data.Data):
+    def write_trade_progress(self, data: "core.Data"):
         data.write_int(self.trade_progress)
 
-    def read_stepup(self, data: io.data.Data):
+    def read_stepup(self, data: "core.Data"):
         self.step_up_stages: dict[int, int] = {}
         total = data.read_int()
         for _ in range(total):
@@ -86,7 +84,7 @@ class Gatya:
             key = data.read_int()
             self.stepup_durations[key] = data.read_double()
 
-    def write_stepup(self, data: io.data.Data):
+    def write_stepup(self, data: "core.Data"):
         data.write_int(len(self.step_up_stages))
         for id, stage in self.step_up_stages.items():
             data.write_int(id)
@@ -162,7 +160,7 @@ class Gatya:
             localized_item=True,
         ).edit()
 
-    def read_gatya_data_set(self, save_file: "io.save.SaveFile") -> "GatyaDataSet":
+    def read_gatya_data_set(self, save_file: "core.SaveFile") -> "GatyaDataSet":
         if self.gatya_data_set is not None:
             return self.gatya_data_set
         self.gatya_data_set = GatyaDataSet(save_file)
@@ -170,17 +168,17 @@ class Gatya:
 
 
 class GatyaDataSet:
-    def __init__(self, save_file: "io.save.SaveFile"):
+    def __init__(self, save_file: "core.SaveFile"):
         self.save_file = save_file
         self.gatya_data_set = self.load_gatya_data_set("R", 1)
 
     def load_gatya_data_set(self, rarity: str, id: int) -> list[list[int]]:
         file_name = f"GatyaDataSet{rarity.upper()[0]}{id}.csv"
-        gdg = server.game_data_getter.GameDataGetter(self.save_file)
+        gdg = core.GameDataGetter(self.save_file)
         data = gdg.download("DataLocal", file_name)
         if data is None:
             return []
-        csv = io.bc_csv.CSV(data)
+        csv = core.CSV(data)
         dt: list[list[int]] = []
         for line in csv:
             cat_ids: list[int] = []

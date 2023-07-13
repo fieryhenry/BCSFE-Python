@@ -3,7 +3,7 @@ import hashlib
 import hmac
 import random
 from typing import Optional
-from bcsfe.core import io
+from bcsfe import core
 
 
 class HashAlgorithm(enum.Enum):
@@ -27,20 +27,20 @@ class Hash:
 
     def get_hash(
         self,
-        data: "io.data.Data",
+        data: "core.Data",
         length: Optional[int] = None,
-    ) -> "io.data.Data":
+    ) -> "core.Data":
         """Gets the hash of the given data.
 
         Args:
-            data (io.data.Data): The data to hash.
+            data (core.Data): The data to hash.
             length (Optional[int], optional): The length of the hash. Defaults to None.
 
         Raises:
             ValueError: Invalid hash algorithm.
 
         Returns:
-            io.data.Data: The hash of the data.
+            core.Data: The hash of the data.
         """
         if self.algorithm == HashAlgorithm.MD5:
             hash = hashlib.md5()
@@ -52,8 +52,8 @@ class Hash:
             raise ValueError("Invalid hash algorithm")
         hash.update(data.get_bytes())
         if length is None:
-            return io.data.Data(hash.digest())
-        return io.data.Data(hash.digest()[:length])
+            return core.Data(hash.digest())
+        return core.Data(hash.digest()[:length])
 
 
 class Random:
@@ -115,7 +115,7 @@ class Hmac:
     def __init__(self, algorithm: HashAlgorithm):
         self.algorithm = algorithm
 
-    def get_hmac(self, key: "io.data.Data", data: "io.data.Data") -> "io.data.Data":
+    def get_hmac(self, key: "core.Data", data: "core.Data") -> "core.Data":
         if self.algorithm == HashAlgorithm.MD5:
             alg = hashlib.md5
         elif self.algorithm == HashAlgorithm.SHA1:
@@ -125,7 +125,7 @@ class Hmac:
         else:
             raise ValueError("Invalid hash algorithm")
         hmac_data = hmac.new(key.get_bytes(), data.get_bytes(), digestmod=alg).digest()
-        return io.data.Data(hmac_data)
+        return core.Data(hmac_data)
 
 
 class NyankoSignature:
@@ -142,7 +142,7 @@ class NyankoSignature:
         random_data = Random.get_hex_string(64)
         key = self.inquiry_code + random_data
         hmac = Hmac(HashAlgorithm.SHA256)
-        signature = hmac.get_hmac(io.data.Data(key), io.data.Data(self.data))
+        signature = hmac.get_hmac(core.Data(key), core.Data(self.data))
 
         return random_data + signature.to_hex()
 
@@ -157,6 +157,6 @@ class NyankoSignature:
         random_data = Random.get_hex_string(40)
         key = self.inquiry_code + random_data
         hmac = Hmac(HashAlgorithm.SHA1)
-        signature = hmac.get_hmac(io.data.Data(key), io.data.Data(data))
+        signature = hmac.get_hmac(core.Data(key), core.Data(data))
 
         return random_data + signature.to_hex()

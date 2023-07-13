@@ -1,4 +1,4 @@
-from bcsfe.core import io
+from bcsfe import core
 
 
 class Catamin:
@@ -6,11 +6,11 @@ class Catamin:
         self.amount = amount
 
     @staticmethod
-    def read(stream: io.data.Data) -> "Catamin":
+    def read(stream: "core.Data") -> "Catamin":
         amount = stream.read_int()
         return Catamin(amount)
 
-    def write(self, stream: io.data.Data):
+    def write(self, stream: "core.Data"):
         stream.write_int(self.amount)
 
     def serialize(self) -> int:
@@ -32,14 +32,14 @@ class Catamins:
         self.catamins = catamins
 
     @staticmethod
-    def read(stream: io.data.Data) -> "Catamins":
+    def read(stream: "core.Data") -> "Catamins":
         total = stream.read_int()
         catamins: list[Catamin] = []
         for _ in range(total):
             catamins.append(Catamin.read(stream))
         return Catamins(catamins)
 
-    def write(self, stream: io.data.Data):
+    def write(self, stream: "core.Data"):
         stream.write_int(len(self.catamins))
         for catamin in self.catamins:
             catamin.write(stream)

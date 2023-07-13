@@ -1,4 +1,4 @@
-from bcsfe.core import io, game, server
+from bcsfe import core
 from bcsfe.cli import dialog_creator, color
 from typing import Optional
 
@@ -33,7 +33,7 @@ class SchemeDataItem:
     def is_cat(self) -> bool:
         return self.type_id == 1
 
-    def get_name(self, localizable: "game.localizable.Localizable"):
+    def get_name(self, localizable: "core.Localizable"):
         key = f"scheme_popup_{self.id}"
         return localizable.get(key).replace("<flash>,", "").replace("<flash>", "")
 
@@ -48,7 +48,7 @@ class SchemeItems:
         return SchemeItems([], [])
 
     @staticmethod
-    def read(stream: io.data.Data) -> "SchemeItems":
+    def read(stream: "core.Data") -> "SchemeItems":
         total = stream.read_int()
         to_obtain: list[int] = []
         for _ in range(total):
@@ -61,7 +61,7 @@ class SchemeItems:
 
         return SchemeItems(to_obtain, received)
 
-    def write(self, stream: io.data.Data):
+    def write(self, stream: "core.Data"):
         stream.write_int(len(self.to_obtain))
         for item in self.to_obtain:
             stream.write_int(item)
@@ -83,15 +83,15 @@ class SchemeItems:
     def __str__(self) -> str:
         return self.__repr__()
 
-    def edit(self, save_file: "io.save.SaveFile"):
-        item_names = game.catbase.gatya_item.GatyaItemNames(save_file)
+    def edit(self, save_file: "core.SaveFile"):
+        item_names = core.GatyaItemNames(save_file)
         localizable = save_file.get_localizable()
-        scheme_data = server.game_data_getter.GameDataGetter(save_file).download(
+        scheme_data = core.GameDataGetter(save_file).download(
             "DataLocal", "schemeItemData.tsv"
         )
         if scheme_data is None:
             return
-        csv = io.bc_csv.CSV(scheme_data, "\t")
+        csv = core.CSV(scheme_data, "\t")
         scheme_items: dict[int, SchemeDataItem] = {}
         for line in csv.lines[1:]:
             scheme_items[line[0].to_int()] = SchemeDataItem(
@@ -113,10 +113,8 @@ class SchemeItems:
             scheme_name = item.get_name(localizable)
             string = "\n\t"
             if item.is_cat():
-                cat_names = game.catbase.cat.Cat.get_names(
-                    item.item_id, save_file, localizable
-                )
-                if cat_names is None:
+                cat_names = core.Cat.get_names(item.item_id, save_file, localizable)
+                if not cat_names:
                     continue
                 cat_name = cat_names[0]
                 string += scheme_name.replace("%@", cat_name)

@@ -1,6 +1,6 @@
 from typing import Optional
 from bcsfe.cli import dialog_creator, main, color
-from bcsfe.core import server, country_code, game_version, io
+from bcsfe import core
 
 
 class ServerCLI:
@@ -9,7 +9,7 @@ class ServerCLI:
 
     def download_save(
         self,
-    ) -> Optional[tuple["io.path.Path", "country_code.CountryCode"]]:
+    ) -> Optional[tuple["core.Path", "core.CountryCode"]]:
         transfer_code = dialog_creator.StringInput().get_input_locale_while(
             "enter_transfer_code", {}
         )
@@ -20,8 +20,8 @@ class ServerCLI:
         )
         if confirmation_code is None:
             return None
-        cc = country_code.CountryCode.select()
-        gv = game_version.GameVersion(120200)
+        cc = core.CountryCode.select()
+        gv = core.GameVersion(120200)
 
         color.ColoredText.localize(
             "downloading_save_file",
@@ -30,7 +30,7 @@ class ServerCLI:
             country_code=cc,
         )
 
-        server_handler = server.server_handler.ServerHandler.from_codes(
+        server_handler = core.ServerHandler.from_codes(
             transfer_code,
             confirmation_code,
             cc,

@@ -1,5 +1,5 @@
 from typing import Optional
-from bcsfe.core import io
+from bcsfe import core
 
 
 class PropertySet:
@@ -13,9 +13,7 @@ class PropertySet:
             property (str): Name of the property file.
         """
         self.locale = locale
-        self.path = (
-            io.path.Path("locales", True).add(locale).add(property + ".properties")
-        )
+        self.path = core.Path("locales", True).add(locale).add(property + ".properties")
         self.properties: dict[str, str] = {}
         self.parse()
 
@@ -84,7 +82,7 @@ class PropertySet:
         Returns:
             PropertySet: PropertySet for the property file.
         """
-        return PropertySet(io.config.Config().get(io.config.Key.LOCALE), property)
+        return PropertySet(core.Config().get(core.ConfigKey.LOCALE), property)
 
 
 class LocalManager:
@@ -97,16 +95,16 @@ class LocalManager:
             locale (str): Language code of the locale.
         """
         if locale is None:
-            lc = io.config.Config().get(io.config.Key.LOCALE)
+            lc = core.Config().get(core.ConfigKey.LOCALE)
         else:
             lc = locale
 
         self.locale = lc
-        self.path = io.path.Path("locales", True).add(lc)
+        self.path = core.Path("locales", True).add(lc)
         self.properties: dict[str, PropertySet] = {}
         self.all_properties: dict[str, str] = {}
         self.en_properties: dict[str, str] = {}
-        self.en_properties_path = io.path.Path("locales", True).add("en")
+        self.en_properties_path = core.Path("locales", True).add("en")
         self.parse()
         if self.locale == "en":
             self.en_properties = self.all_properties
@@ -160,7 +158,7 @@ class LocalManager:
         Returns:
             LocalManager: LocalManager for the locale.
         """
-        return LocalManager(io.config.Config().get(io.config.Key.LOCALE))
+        return LocalManager(core.Config().get(core.ConfigKey.LOCALE))
 
     def check_duplicates(self):
         """Checks for duplicate keys in all property files.

@@ -32,14 +32,16 @@ class Thread:
         return thread
 
 
-def run_many_helper(funcs: list[Callable[..., Any]], *args: list[Any]):
+def thread_run_many_helper(funcs: list[Callable[..., Any]], *args: list[Any]):
     for i in range(len(funcs)):
         args_ = args[i]
         funcs[i](*args_)
     return
 
 
-def run_many(funcs: list[Callable[..., Any]], args: Any = None, max_threads: int = 16):
+def thread_run_many(
+    funcs: list[Callable[..., Any]], args: Any = None, max_threads: int = 16
+):
     chunk_size = len(funcs) // max_threads
     if chunk_size == 0:
         chunk_size = 1
@@ -56,7 +58,9 @@ def run_many(funcs: list[Callable[..., Any]], args: Any = None, max_threads: int
             args_ = []
 
         threads.append(
-            Thread.run("run_many_helper", run_many_helper, (callable_chunks[i], *args_))
+            Thread.run(
+                "run_many_helper", thread_run_many_helper, (callable_chunks[i], *args_)
+            )
         )
 
     for thread in threads:

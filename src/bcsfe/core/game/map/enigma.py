@@ -1,5 +1,5 @@
 from typing import Any
-from bcsfe.core import io
+from bcsfe import core
 
 
 class Stage:
@@ -16,14 +16,14 @@ class Stage:
         return Stage(0, 0, 0, 0.0)
 
     @staticmethod
-    def read(data: io.data.Data) -> "Stage":
+    def read(data: "core.Data") -> "Stage":
         level = data.read_int()
         stage_id = data.read_int()
         decoding_satus = data.read_byte()
         start_time = data.read_double()
         return Stage(level, stage_id, decoding_satus, start_time)
 
-    def write(self, data: io.data.Data):
+    def write(self, data: "core.Data"):
         data.write_int(self.level)
         data.write_int(self.stage_id)
         data.write_byte(self.decoding_satus)
@@ -75,7 +75,7 @@ class Enigma:
         return Enigma(0, 0, 0, 0, False, [])
 
     @staticmethod
-    def read(data: io.data.Data) -> "Enigma":
+    def read(data: "core.Data") -> "Enigma":
         energy_since_1 = data.read_int()
         energy_since_2 = data.read_int()
         enigma_level = data.read_byte()
@@ -91,7 +91,7 @@ class Enigma:
             stages,
         )
 
-    def write(self, data: io.data.Data):
+    def write(self, data: "core.Data"):
         data.write_int(self.energy_since_1)
         data.write_int(self.energy_since_2)
         data.write_byte(self.enigma_level)

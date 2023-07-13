@@ -1,6 +1,5 @@
 from typing import Any, Optional
-from bcsfe.core import game_version, io, game, server
-from bcsfe.core.game.gamoto import base_materials
+from bcsfe import core
 from bcsfe.cli import dialog_creator
 
 
@@ -13,14 +12,14 @@ class Cannon:
         return Cannon([])
 
     @staticmethod
-    def read(stream: io.data.Data) -> "Cannon":
+    def read(stream: "core.Data") -> "Cannon":
         total = stream.read_int()
         levels: list[int] = []
         for _ in range(total):
             levels.append(stream.read_int())
         return Cannon(levels)
 
-    def write(self, stream: io.data.Data):
+    def write(self, stream: "core.Data"):
         stream.write_int(len(self.levels))
         for level in self.levels:
             stream.write_int(level)
@@ -45,7 +44,7 @@ class Cannons:
         self.selected_parts = selected_parts
 
     @staticmethod
-    def init(gv: game_version.GameVersion) -> "Cannons":
+    def init(gv: "core.GameVersion") -> "Cannons":
         cannnons = {}
         if gv < 80200:
             selected_parts = [[0, 0, 0]]
@@ -59,7 +58,7 @@ class Cannons:
         return Cannons(cannnons, selected_parts)
 
     @staticmethod
-    def read(stream: io.data.Data, gv: game_version.GameVersion) -> "Cannons":
+    def read(stream: "core.Data", gv: "core.GameVersion") -> "Cannons":
         total = stream.read_int()
         cannons: dict[int, Cannon] = {}
         for _ in range(total):
@@ -80,7 +79,7 @@ class Cannons:
 
         return Cannons(cannons, selected_parts)
 
-    def write(self, stream: io.data.Data, gv: game_version.GameVersion):
+    def write(self, stream: "core.Data", gv: "core.GameVersion"):
         stream.write_int(len(self.cannons))
         for cannon_id, cannon in self.cannons.items():
             stream.write_int(cannon_id)
@@ -123,8 +122,8 @@ class Cannons:
 class Ototo:
     def __init__(
         self,
-        base_materials: base_materials.Materials,
-        game_version: Optional[game_version.GameVersion] = None,
+        base_materials: "core.BaseMaterials",
+        game_version: Optional["core.GameVersion"] = None,
     ):
         self.base_materials = base_materials
         self.remaining_seconds = 0.0
@@ -134,25 +133,25 @@ class Ototo:
         self.cannons = Cannons.init(game_version) if game_version else None
 
     @staticmethod
-    def init(game_version: game_version.GameVersion) -> "Ototo":
-        return Ototo(base_materials.Materials.init(), game_version)
+    def init(game_version: "core.GameVersion") -> "Ototo":
+        return Ototo(core.BaseMaterials.init(), game_version)
 
     @staticmethod
-    def read(stream: io.data.Data) -> "Ototo":
-        bm = base_materials.Materials.read(stream)
+    def read(stream: "core.Data") -> "Ototo":
+        bm = core.BaseMaterials.read(stream)
         return Ototo(bm)
 
-    def write(self, stream: io.data.Data):
+    def write(self, stream: "core.Data"):
         self.base_materials.write(stream)
 
-    def read_2(self, stream: io.data.Data, gv: game_version.GameVersion):
+    def read_2(self, stream: "core.Data", gv: "core.GameVersion"):
         self.remaining_seconds = stream.read_double()
         self.return_flag = stream.read_bool()
         self.improve_id = stream.read_int()
         self.engineers = stream.read_int()
         self.cannons = Cannons.read(stream, gv)
 
-    def write_2(self, stream: io.data.Data, gv: game_version.GameVersion):
+    def write_2(self, stream: "core.Data", gv: "core.GameVersion"):
         stream.write_double(self.remaining_seconds)
         stream.write_bool(self.return_flag)
         stream.write_int(self.improve_id)
@@ -174,9 +173,7 @@ class Ototo:
 
     @staticmethod
     def deserialize(data: dict[str, Any]) -> "Ototo":
-        ototo = Ototo(
-            base_materials.Materials.deserialize(data.get("base_materials", []))
-        )
+        ototo = Ototo(core.BaseMaterials.deserialize(data.get("base_materials", [])))
         ototo.remaining_seconds = data.get("remaining_seconds", 0.0)
         ototo.return_flag = data.get("return_flag", False)
         ototo.improve_id = data.get("improve_id", 0)
@@ -191,17 +188,17 @@ class Ototo:
         return self.__repr__()
 
     @staticmethod
-    def get_max_engineers(save_file: "io.save.SaveFile") -> int:
-        file = server.game_data_getter.GameDataGetter(save_file).download(
+    def get_max_engineers(save_file: "core.SaveFile") -> int:
+        file = core.GameDataGetter(save_file).download(
             "DataLocal", "CastleCustomLimit.csv"
         )
         if file is None:
             return 5
-        csv = io.bc_csv.CSV(file)
+        csv = core.CSV(file)
         return csv.lines[0][0].to_int()
 
-    def edit_engineers(self, save_file: "io.save.SaveFile"):
-        name = game.catbase.gatya_item.GatyaItemNames(save_file).get_name(92)
+    def edit_engineers(self, save_file: "core.SaveFile"):
+        name = core.GatyaItemNames(save_file).get_name(92)
         self.engineers = dialog_creator.SingleEditor(
             name, self.engineers, Ototo.get_max_engineers(save_file)
         ).edit()

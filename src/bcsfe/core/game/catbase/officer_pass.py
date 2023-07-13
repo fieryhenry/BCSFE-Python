@@ -1,11 +1,11 @@
 from typing import Any
-from bcsfe.core import game_version, io, game
+from bcsfe import core
 
 
 class OfficerPass:
     def __init__(self, play_time: int):
         self.play_time = play_time
-        self.gold_pass = game.catbase.nyanko_club.NyankoClub.init()
+        self.gold_pass = core.NyankoClub.init()
         self.cat_id = 0
         self.cat_form = 0
 
@@ -14,24 +14,24 @@ class OfficerPass:
         return OfficerPass(0)
 
     @staticmethod
-    def read(data: io.data.Data) -> "OfficerPass":
+    def read(data: "core.Data") -> "OfficerPass":
         play_time = data.read_int()
         return OfficerPass(play_time)
 
-    def write(self, data: io.data.Data):
+    def write(self, data: "core.Data"):
         data.write_int(self.play_time)
 
-    def read_gold_pass(self, data: io.data.Data, gv: game_version.GameVersion):
-        self.gold_pass = game.catbase.nyanko_club.NyankoClub.read(data, gv)
+    def read_gold_pass(self, data: "core.Data", gv: "core.GameVersion"):
+        self.gold_pass = core.NyankoClub.read(data, gv)
 
-    def write_gold_pass(self, data: io.data.Data, gv: game_version.GameVersion):
+    def write_gold_pass(self, data: "core.Data", gv: "core.GameVersion"):
         self.gold_pass.write(data, gv)
 
-    def read_cat_data(self, data: io.data.Data):
+    def read_cat_data(self, data: "core.Data"):
         self.cat_id = data.read_short()
         self.cat_form = data.read_short()
 
-    def write_cat_data(self, data: io.data.Data):
+    def write_cat_data(self, data: "core.Data"):
         data.write_short(self.cat_id)
         data.write_short(self.cat_form)
 
@@ -48,9 +48,7 @@ class OfficerPass:
         officer_pass = OfficerPass(
             data.get("play_time", 0),
         )
-        officer_pass.gold_pass = game.catbase.nyanko_club.NyankoClub.deserialize(
-            data.get("gold_pass", {})
-        )
+        officer_pass.gold_pass = core.NyankoClub.deserialize(data.get("gold_pass", {}))
         officer_pass.cat_id = data.get("cat_id", 0)
         officer_pass.cat_form = data.get("cat_form", 0)
         return officer_pass

@@ -9,7 +9,7 @@ from bcsfe.cli import (
     theme_handler,
     save_management,
 )
-from bcsfe.core import country_code, io, server
+from bcsfe import core
 
 
 class Main:
@@ -30,7 +30,7 @@ class Main:
             self.load_save_options()
 
     def check_update(self):
-        updater = server.updater.Updater()
+        updater = core.Updater()
         has_pre_release = updater.has_enabled_pre_release()
         local_version = updater.get_local_version()
         latest_version = updater.get_latest_version(has_pre_release)
@@ -68,7 +68,7 @@ class Main:
         theme_manager = theme_handler.ThemeHandler()
         color.ColoredText.localize(
             "welcome",
-            config_path=io.config.Config.get_config_path(),
+            config_path=core.Config.get_config_path(),
             theme_name=theme_manager.get_theme_name(),
             theme_version=theme_manager.get_theme_version(),
             theme_author=theme_manager.get_theme_author(),
@@ -93,77 +93,75 @@ class Main:
         self.fh.select_features_run()
 
     @staticmethod
-    def save_save_dialog(save_file: "io.save.SaveFile") -> Optional[io.path.Path]:
+    def save_save_dialog(save_file: "core.SaveFile") -> Optional["core.Path"]:
         """Save save file dialog.
 
         Args:
-            save_file (io.save.SaveFile): Save file to save.
+            save_file (core.SaveFile): Save file to save.
 
         Returns:
-            io.path.Path: Path to save file.
+            core.Path: Path to save file.
         """
         path = file_dialog.FileDialog().save_file(
             "save_save_dialog",
-            initialdir=io.save.SaveFile.get_saves_path().to_str(),
+            initialdir=core.SaveFile.get_saves_path().to_str(),
             initialfile="SAVE_DATA",
         )
         if path is None:
             return None
-        path = io.path.Path(path)
+        path = core.Path(path)
         path.parent().generate_dirs()
         save_file.save_path = path
         return path
 
     @staticmethod
-    def save_json_dialog(json_data: dict[str, Any]) -> Optional[io.path.Path]:
+    def save_json_dialog(json_data: dict[str, Any]) -> Optional["core.Path"]:
         """Save json file dialog.
 
         Args:
             json_data (dict): Json data to save.
 
         Returns:
-            io.path.Path: Path to save file.
+            core.Path: Path to save file.
         """
         path = file_dialog.FileDialog().save_file("save_json_dialog")
         if path is None:
             return None
-        path = io.path.Path(path)
+        path = core.Path(path)
         path.parent().generate_dirs()
-        io.json_file.JsonFile.from_object(json_data).to_data().to_file(path)
+        core.JsonFile.from_object(json_data).to_data().to_file(path)
         return path
 
     @staticmethod
-    def load_save_file() -> Optional[io.path.Path]:
+    def load_save_file() -> Optional["core.Path"]:
         """Load save file from file dialog.
 
         Returns:
-            io.path.Path: Path to save file.
+            core.Path: Path to save file.
         """
         path = file_dialog.FileDialog().get_file(
-            "select_save_file", initialdir=io.save.SaveFile.get_saves_path().to_str()
+            "select_save_file", initialdir=core.SaveFile.get_saves_path().to_str()
         )
         if path is None:
             return None
-        path = io.path.Path(path)
+        path = core.Path(path)
         return path
 
     @staticmethod
-    def load_save_data_json() -> (
-        Optional[tuple[io.path.Path, "country_code.CountryCode"]]
-    ):
+    def load_save_data_json() -> Optional[tuple["core.Path", "core.CountryCode"]]:
         """Load save data from json file.
 
         Returns:
-            io.path.Path: Path to save file.
+            core.Path: Path to save file.
         """
         path = file_dialog.FileDialog().get_file("load_save_data_json")
         if path is None:
             return None
-        path = io.path.Path(path)
+        path = core.Path(path)
         if not path.exists():
             return None
-        json_data = io.json_file.JsonFile.from_data(path.read()).get_json()
-        save_file = io.save.SaveFile.from_dict(json_data)
+        json_data = core.JsonFile.from_data(path.read()).get_json()
+        save_file = core.SaveFile.from_dict(json_data)
         path = Main.save_save_dialog(save_file)
         if path is None:
             return None

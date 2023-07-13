@@ -1,10 +1,8 @@
 import base64
 import time
 from typing import Any, Optional
-from bcsfe.core import io, crypto, server, country_code, game_version
+from bcsfe import core
 import jwt
-
-from bcsfe.core.server import request
 
 
 class ServerHandler:
@@ -14,7 +12,7 @@ class ServerHandler:
     aws_url = "https://nyanko-service-data-prd.s3.amazonaws.com"
     managed_item_url = "https://nyanko-managed-item.ponosgames.com"
 
-    def __init__(self, save_file: io.save.SaveFile):
+    def __init__(self, save_file: "core.SaveFile"):
         self.save_file = save_file
         self.counter = 0
 
@@ -56,7 +54,7 @@ class ServerHandler:
         if policy is None:
             return False
         policy = base64.b64decode(policy)
-        json_policy = io.json_file.JsonFile.from_data(io.data.Data(policy)).get_json()
+        json_policy = core.JsonFile.from_data(core.Data(policy)).get_json()
         expiration = json_policy.get("expiration")
         if expiration is None:
             return False
@@ -86,7 +84,7 @@ class ServerHandler:
         data = {
             "accountCode": self.save_file.inquiry_code,
             "accountCreatedAt": int(self.save_file.account_created_timestamp),
-            "nonce": crypto.Random.get_hex_string(32),
+            "nonce": "core.Random".get_hex_string(32),
         }
         password = self.do_password_request(url, data)
         return password
@@ -121,13 +119,13 @@ class ServerHandler:
         self, url: str, dict_data: dict[str, Any]
     ) -> Optional[tuple[dict[str, Any], Optional[int]]]:
         data = (
-            io.json_file.JsonFile.from_object(dict_data)
+            core.JsonFile.from_object(dict_data)
             .to_data(indent=None)
             .to_str()
             .replace(" ", "")
         )
-        headers = server.headers.AccountHeaders(self.save_file, data).get_headers()
-        response = request.RequestHandler(url, headers, io.data.Data(data)).post()
+        headers = core.AccountHeaders(self.save_file, data).get_headers()
+        response = core.RequestHandler(url, headers, core.Data(data)).post()
         json: dict[str, Any] = response.json()
         status_code = json.get("statusCode", 0)
         if status_code != 1:
@@ -143,15 +141,13 @@ class ServerHandler:
         data = {
             "accountCode": self.save_file.inquiry_code,
             "passwordRefreshToken": self.save_file.password_refresh_token,
-            "nonce": crypto.Random.get_hex_string(32),
+            "nonce": "core.Random".get_hex_string(32),
         }
         return self.do_password_request(url, data)
 
     def get_auth_token_new(self, password: str) -> Optional[str]:
         url = f"{self.auth_url}/v1/tokens"
-        data = server.client_info.ClientInfo.from_save_file(
-            self.save_file
-        ).get_client_info()
+        data = core.ClientInfo.from_save_file(self.save_file).get_client_info()
         data["password"] = password
         data["accountCode"] = self.save_file.inquiry_code
 
@@ -215,7 +211,7 @@ class ServerHandler:
         return None
 
     def get_save_key_new(self, auth_token: str) -> Optional[dict[str, Any]]:
-        nonce = crypto.Random.get_hex_string(32)
+        nonce = core.Random.get_hex_string(32)
         url = f"{self.save_url}/v2/save/key?nonce={nonce}"
         headers = {
             "accept-encoding": "gzip",
@@ -224,7 +220,7 @@ class ServerHandler:
             "nyanko-timestamp": str(int(time.time())),
             "user-agent": "Dalvik/2.1.0 (Linux; U; Android 9; SM-G955F Build/N2G48B)",
         }
-        response = request.RequestHandler(url, headers).get()
+        response = core.RequestHandler(url, headers).get()
         json: dict[str, Any] = response.json()
         status_code = json.get("statusCode", 0)
         if status_code != 1:
@@ -249,13 +245,13 @@ class ServerHandler:
             return save_key
         return None
 
-    def get_upload_request_body(self, boundary: str) -> Optional[io.data.Data]:
+    def get_upload_request_body(self, boundary: str) -> Optional["core.Data"]:
         save_key = self.get_save_key()
         if save_key is None:
             self.remove_stored_save_key_data()
             return None
         save_data = self.save_file.to_data()
-        body = io.data.Data()
+        body = core.Data()
         keys = [
             "key",
             "policy",
@@ -288,7 +284,7 @@ class ServerHandler:
 
     def upload_save_data(self) -> bool:
         boundary = (
-            f"__-----------------------{crypto.Random.get_digits_string(9)}-2147483648"
+            f"__-----------------------{core.Random.get_digits_string(9)}-2147483648"
         )
 
         body = self.get_upload_request_body(boundary)
@@ -302,7 +298,7 @@ class ServerHandler:
             "content-type": f"multipart/form-data; boundary={boundary}",
             "user-agent": "Dalvik/2.1.0 (Linux; U; Android 9; SM-G955F Build/N2G48B)",
         }
-        response = request.RequestHandler(url, headers, body).post()
+        response = core.RequestHandler(url, headers, body).post()
         if response.status_code != 204:
             self.remove_stored_save_key_data()
             return False
@@ -314,14 +310,14 @@ class ServerHandler:
         auth_token = self.get_auth_token()
         if auth_token is None:
             return None
-        bmd = server.managed_item.BackupMetaData(self.save_file)
+        bmd = core.BackupMetaData(self.save_file)
         meta_data = bmd.create()
 
         url = f"{self.save_url}/v2/transfers"
-        headers = server.headers.AccountHeaders(self.save_file, meta_data).get_headers()
+        headers = core.AccountHeaders(self.save_file, meta_data).get_headers()
         headers["authorization"] = "Bearer " + auth_token
 
-        response = request.RequestHandler(url, headers, io.data.Data(meta_data)).post()
+        response = core.RequestHandler(url, headers, core.Data(meta_data)).post()
         json: dict[str, Any] = response.json()
         status_code = json.get("statusCode", 0)
         if status_code != 1:
@@ -343,14 +339,14 @@ class ServerHandler:
         auth_token = self.get_auth_token()
         if auth_token is None:
             return False
-        bmd = server.managed_item.BackupMetaData(self.save_file)
+        bmd = core.BackupMetaData(self.save_file)
         meta_data = bmd.create()
 
         url = f"{self.save_url}/v2/backups"
-        headers = server.headers.AccountHeaders(self.save_file, meta_data).get_headers()
+        headers = core.AccountHeaders(self.save_file, meta_data).get_headers()
         headers["authorization"] = "Bearer " + auth_token
 
-        response = request.RequestHandler(url, headers, io.data.Data(meta_data)).post()
+        response = core.RequestHandler(url, headers, core.Data(meta_data)).post()
         json: dict[str, Any] = response.json()
         status_code = json.get("statusCode", 0)
         if status_code != 1:
@@ -362,7 +358,7 @@ class ServerHandler:
     def get_new_inquiry_code(self) -> str:
         url = f"{self.backups_url}/?action=createAccount&referenceId="
 
-        response = request.RequestHandler(url).get()
+        response = core.RequestHandler(url).get()
         data = response.json()
         iq = data["accountId"]
         return iq
@@ -386,14 +382,14 @@ class ServerHandler:
     def from_codes(
         transfer_code: str,
         confirmation_code: str,
-        cc: country_code.CountryCode,
-        gv: game_version.GameVersion,
+        cc: "core.CountryCode",
+        gv: "core.GameVersion",
     ) -> Optional["ServerHandler"]:
         url = f"{ServerHandler.save_url}/v2/transfers/{transfer_code}/reception"
-        data = server.client_info.ClientInfo(cc, gv).get_client_info()
+        data = core.ClientInfo(cc, gv).get_client_info()
         data["pin"] = confirmation_code
         data_str = (
-            io.json_file.JsonFile.from_object(data)
+            core.JsonFile.from_object(data)
             .to_data(indent=None)
             .to_str()
             .replace(" ", "")
@@ -405,14 +401,14 @@ class ServerHandler:
             "connection": "keep-alive",
             "user-agent": "Dalvik/2.1.0 (Linux; U; Android 9; SM-G955F Build/N2G48B)",
         }
-        response = request.RequestHandler(url, headers, io.data.Data(data_str)).post()
+        response = core.RequestHandler(url, headers, core.Data(data_str)).post()
         headers = response.headers
         content_type = headers.get("content-type", "")
         if content_type != "application/octet-stream":
             return None
 
         save_data = response.content
-        save_file = io.save.SaveFile(io.data.Data(save_data))
+        save_file = core.SaveFile(core.Data(save_data))
 
         password_refresh_token = headers.get("Nyanko-Password-Refresh-Token")
         if password_refresh_token is None:
@@ -435,25 +431,25 @@ class ServerHandler:
             "catfoodAmount": self.save_file.catfood,
             "isPaid": False,
             "legendTicketAmount": self.save_file.legend_tickets,
-            "nonce": crypto.Random.get_hex_string(32),
+            "nonce": "core.Random".get_hex_string(32),
             "platinumTicketAmount": self.save_file.platinum_tickets,
             "rareTicketAmount": self.save_file.rare_tickets,
         }
         data_str = (
-            io.json_file.JsonFile.from_object(data)
+            core.JsonFile.from_object(data)
             .to_data(indent=None)
             .to_str()
             .replace(" ", "")
         )
         url = f"{self.managed_item_url}/v1/managed-items"
-        headers = server.headers.AccountHeaders(self.save_file, data_str).get_headers()
+        headers = core.AccountHeaders(self.save_file, data_str).get_headers()
         headers["authorization"] = "Bearer " + auth_token
-        response = request.RequestHandler(url, headers, io.data.Data(data_str)).post()
+        response = core.RequestHandler(url, headers, core.Data(data_str)).post()
         json: dict[str, Any] = response.json()
         status_code = json.get("statusCode", 0)
         if status_code != 1:
             self.remove_stored_auth_token()
             return False
 
-        server.managed_item.BackupMetaData(self.save_file).remove_managed_items()
+        core.BackupMetaData(self.save_file).remove_managed_items()
         return True

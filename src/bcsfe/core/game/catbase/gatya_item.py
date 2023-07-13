@@ -1,19 +1,17 @@
-from bcsfe.core import io, server
+from bcsfe import core
 
 
 class GatyaItemNames:
-    def __init__(self, save_file: "io.save.SaveFile"):
+    def __init__(self, save_file: "core.SaveFile"):
         self.save_file = save_file
         self.names = self.__get_names()
 
     def __get_names(self) -> list[str]:
-        gdg = server.game_data_getter.GameDataGetter(self.save_file)
+        gdg = core.GameDataGetter(self.save_file)
         data = gdg.download("resLocal", "GatyaitemName.csv")
         if data is None:
             return []
-        csv = io.bc_csv.CSV(
-            data, io.bc_csv.Delimeter.from_country_code_res(self.save_file.cc)
-        )
+        csv = core.CSV(data, core.Delimeter.from_country_code_res(self.save_file.cc))
         names: list[str] = []
         for line in csv:
             names.append(line[0].to_str())
@@ -60,14 +58,14 @@ class GatyaItemBuyItem:
 
 
 class GatyaItemBuy:
-    def __init__(self, save_file: "io.save.SaveFile"):
+    def __init__(self, save_file: "core.SaveFile"):
         self.save_file = save_file
         self.buy = self.get_buy()
 
     def get_buy(self):
-        gdg = server.game_data_getter.GameDataGetter(self.save_file)
+        gdg = core.GameDataGetter(self.save_file)
         data = gdg.download("DataLocal", "Gatyaitembuy.csv")
-        csv = io.bc_csv.CSV(data)
+        csv = core.CSV(data)
         buy: list[GatyaItemBuyItem] = []
         for i, line in enumerate(csv.lines[1:]):
             try:

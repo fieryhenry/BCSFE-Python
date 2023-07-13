@@ -1,5 +1,5 @@
 from typing import Any
-from bcsfe.core import io
+from bcsfe import core
 
 
 class CatShrine:
@@ -25,7 +25,7 @@ class CatShrine:
         return CatShrine(False, 0.0, 0.0, False, [], 0)
 
     @staticmethod
-    def read(stream: io.data.Data) -> "CatShrine":
+    def read(stream: "core.Data") -> "CatShrine":
         unknown = stream.read_bool()
         stamp_1 = stream.read_double()
         stamp_2 = stream.read_double()
@@ -34,7 +34,7 @@ class CatShrine:
         xp_offering = stream.read_long()
         return CatShrine(unknown, stamp_1, stamp_2, shrine_gone, flags, xp_offering)
 
-    def write(self, stream: io.data.Data):
+    def write(self, stream: "core.Data"):
         stream.write_bool(self.unknown)
         stream.write_double(self.stamp_1)
         stream.write_double(self.stamp_2)
@@ -43,10 +43,10 @@ class CatShrine:
         stream.write_byte_list(self.flags, write_length=False)
         stream.write_long(self.xp_offering)
 
-    def read_dialogs(self, stream: io.data.Data):
+    def read_dialogs(self, stream: "core.Data"):
         self.dialogs = stream.read_int()
 
-    def write_dialogs(self, stream: io.data.Data):
+    def write_dialogs(self, stream: "core.Data"):
         stream.write_int(self.dialogs)
 
     def serialize(self) -> dict[str, Any]:

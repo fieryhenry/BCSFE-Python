@@ -1,5 +1,5 @@
 from typing import Any
-from bcsfe.core import io
+from bcsfe import core
 
 
 class Helper:
@@ -11,11 +11,11 @@ class Helper:
         return Helper(-1)
 
     @staticmethod
-    def read(stream: io.data.Data) -> "Helper":
+    def read(stream: "core.Data") -> "Helper":
         id = stream.read_int()
         return Helper(id)
 
-    def write(self, stream: io.data.Data):
+    def write(self, stream: "core.Data"):
         stream.write_int(self.id)
 
     def serialize(self) -> int:
@@ -44,14 +44,14 @@ class Helpers:
         return Helpers([])
 
     @staticmethod
-    def read(stream: io.data.Data) -> "Helpers":
+    def read(stream: "core.Data") -> "Helpers":
         total = stream.read_int()
         helpers: list[Helper] = []
         for _ in range(total):
             helpers.append(Helper.read(stream))
         return Helpers(helpers)
 
-    def write(self, stream: io.data.Data):
+    def write(self, stream: "core.Data"):
         stream.write_int(len(self.helpers))
         for helper in self.helpers:
             helper.write(stream)
@@ -107,7 +107,7 @@ class Gamatoto:
         )
 
     @staticmethod
-    def read(stream: io.data.Data) -> "Gamatoto":
+    def read(stream: "core.Data") -> "Gamatoto":
         remaining_seconds = stream.read_double()
         return_flag = stream.read_bool()
         xp = stream.read_int()
@@ -125,7 +125,7 @@ class Gamatoto:
             notif_value,
         )
 
-    def write(self, stream: io.data.Data):
+    def write(self, stream: "core.Data"):
         stream.write_double(self.remaining_seconds)
         stream.write_bool(self.return_flag)
         stream.write_int(self.xp)
@@ -134,25 +134,25 @@ class Gamatoto:
         stream.write_int(self.unknown)
         stream.write_int(self.notif_value)
 
-    def read_2(self, stream: io.data.Data):
+    def read_2(self, stream: "core.Data"):
         self.helpers = Helpers.read(stream)
         self.is_ad_present = stream.read_bool()
 
-    def write_2(self, stream: io.data.Data):
+    def write_2(self, stream: "core.Data"):
         self.helpers.write(stream)
         stream.write_bool(self.is_ad_present)
 
-    def read_skin(self, stream: io.data.Data):
+    def read_skin(self, stream: "core.Data"):
         self.skin = stream.read_int()
 
-    def write_skin(self, stream: io.data.Data):
+    def write_skin(self, stream: "core.Data"):
         stream.write_int(self.skin)
 
-    def read_collab_data(self, stream: io.data.Data):
+    def read_collab_data(self, stream: "core.Data"):
         self.collab_flags: dict[int, bool] = stream.read_int_bool_dict()
         self.collab_durations: dict[int, float] = stream.read_int_double_dict()
 
-    def write_collab_data(self, stream: io.data.Data):
+    def write_collab_data(self, stream: "core.Data"):
         stream.write_int_bool_dict(self.collab_flags)
         stream.write_int_double_dict(self.collab_durations)
 

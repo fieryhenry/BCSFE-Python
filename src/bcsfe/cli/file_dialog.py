@@ -1,4 +1,4 @@
-from bcsfe.core import locale_handler
+from bcsfe import core
 from bcsfe.cli import color
 from typing import Optional
 
@@ -32,7 +32,7 @@ class FileDialog:
     ) -> Optional[str]:
         if filetypes is None:
             filetypes = []
-        title = locale_handler.LocalManager().get_key(title)
+        title = core.LocalManager().get_key(title)
         if self.filedialog is None:
             path = color.ColoredInput().localize(title)
             return path if path else None
@@ -47,7 +47,7 @@ class FileDialog:
         )
 
     def get_directory(self, title: str, initialdir: str = "") -> Optional[str]:
-        title = locale_handler.LocalManager().get_key(title)
+        title = core.LocalManager().get_key(title)
         if self.filedialog is None:
             path = color.ColoredInput().localize(title)
             return path if path else None
@@ -74,7 +74,7 @@ class FileDialog:
         """
         if filetypes is None:
             filetypes = []
-        title = locale_handler.LocalManager().get_key(title)
+        title = core.LocalManager().get_key(title)
         if self.filedialog is None:
             path = color.ColoredInput().localize(title)
             return path if path else None

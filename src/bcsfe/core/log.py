@@ -1,5 +1,5 @@
 """Module for handling logging"""
-from bcsfe.core import io
+from bcsfe import core
 import time
 
 
@@ -8,7 +8,7 @@ class Logger:
         """
         Initializes a Logger object
         """
-        self.log_file = io.path.Path.get_documents_folder().add("bcsfe.log")
+        self.log_file = core.Path.get_documents_folder().add("bcsfe.log")
         self.log_data = self.log_file.read(True).split(b"\n")
 
     def get_time(self) -> str:
@@ -27,7 +27,7 @@ class Logger:
         Args:
             message (str): The message to log
         """
-        self.log_data.append(io.data.Data(f"[DEBUG]::{self.get_time()} - {message}"))
+        self.log_data.append(core.Data(f"[DEBUG]::{self.get_time()} - {message}"))
         self.write()
 
     def log_info(self, message: str):
@@ -37,7 +37,7 @@ class Logger:
         Args:
             message (str): The message to log
         """
-        self.log_data.append(io.data.Data(f"[INFO]::{self.get_time()} - {message}"))
+        self.log_data.append(core.Data(f"[INFO]::{self.get_time()} - {message}"))
         self.write()
 
     def log_warning(self, message: str):
@@ -47,7 +47,7 @@ class Logger:
         Args:
             message (str): The message to log
         """
-        self.log_data.append(io.data.Data(f"[WARNING]::{self.get_time()} - {message}"))
+        self.log_data.append(core.Data(f"[WARNING]::{self.get_time()} - {message}"))
         self.write()
 
     def log_error(self, message: str):
@@ -57,14 +57,14 @@ class Logger:
         Args:
             message (str): The message to log
         """
-        self.log_data.append(io.data.Data(f"[ERROR]::{self.get_time()} - {message}"))
+        self.log_data.append(core.Data(f"[ERROR]::{self.get_time()} - {message}"))
         self.write()
 
     def write(self):
         """
         Writes the log data to the log file
         """
-        self.log_file.write(io.data.Data.from_many(self.log_data, io.data.Data("\n")))
+        self.log_file.write(core.Data.from_many(self.log_data, core.Data("\n")))
 
     def log_no_file_found(self, file_name: str):
         """

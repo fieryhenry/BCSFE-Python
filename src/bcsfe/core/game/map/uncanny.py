@@ -1,24 +1,23 @@
 from typing import Any
-from bcsfe.core import io
-from bcsfe.core.game.map import chapters
+from bcsfe import core
 
 
-class Uncanny:
-    def __init__(self, chapters: chapters.Chapters, unknown: list[int]):
+class UncannyChapters:
+    def __init__(self, chapters: "core.Chapters", unknown: list[int]):
         self.chapters = chapters
         self.unknown = unknown
 
     @staticmethod
-    def init() -> "Uncanny":
-        return Uncanny(chapters.Chapters.init(), [])
+    def init() -> "UncannyChapters":
+        return UncannyChapters(core.Chapters.init(), [])
 
     @staticmethod
-    def read(data: io.data.Data) -> "Uncanny":
-        ch = chapters.Chapters.read(data, read_every_time=False)
+    def read(data: "core.Data") -> "UncannyChapters":
+        ch = core.Chapters.read(data, read_every_time=False)
         unknown = data.read_int_list(length=len(ch.chapters))
-        return Uncanny(ch, unknown)
+        return UncannyChapters(ch, unknown)
 
-    def write(self, data: io.data.Data):
+    def write(self, data: "core.Data"):
         self.chapters.write(data, write_every_time=False)
         data.write_int_list(self.unknown, write_length=False)
 
@@ -29,9 +28,9 @@ class Uncanny:
         }
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "Uncanny":
-        return Uncanny(
-            chapters.Chapters.deserialize(data.get("chapters", {})),
+    def deserialize(data: dict[str, Any]) -> "UncannyChapters":
+        return UncannyChapters(
+            core.Chapters.deserialize(data.get("chapters", {})),
             data.get("unknown", []),
         )
 

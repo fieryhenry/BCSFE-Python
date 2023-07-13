@@ -1,4 +1,4 @@
-from bcsfe.core import io
+from bcsfe import core
 from typing import Any
 
 
@@ -12,12 +12,12 @@ class CatSlot:
         return CatSlot(0, 0)
 
     @staticmethod
-    def read(stream: io.data.Data) -> "CatSlot":
+    def read(stream: "core.Data") -> "CatSlot":
         cat_id = stream.read_short()
         form = stream.read_byte()
         return CatSlot(cat_id, form)
 
-    def write(self, stream: io.data.Data):
+    def write(self, stream: "core.Data"):
         stream.write_short(self.cat_id)
         stream.write_byte(self.form)
 
@@ -59,7 +59,7 @@ class LineupCat:
         return LineupCat(0, cats, 0, 0, 0)
 
     @staticmethod
-    def read(stream: io.data.Data) -> "LineupCat":
+    def read(stream: "core.Data") -> "LineupCat":
         index = stream.read_short()
         length = 10
 
@@ -69,7 +69,7 @@ class LineupCat:
         u3 = stream.read_byte()
         return LineupCat(index, cats, u1, u2, u3)
 
-    def write(self, stream: io.data.Data):
+    def write(self, stream: "core.Data"):
         stream.write_short(self.index)
         for cat in self.cats:
             cat.write(stream)
@@ -112,12 +112,12 @@ class ClearedSlotsCat:
         return ClearedSlotsCat([])
 
     @staticmethod
-    def read(stream: io.data.Data) -> "ClearedSlotsCat":
+    def read(stream: "core.Data") -> "ClearedSlotsCat":
         total = stream.read_short()
         lineups = [LineupCat.read(stream) for _ in range(total)]
         return ClearedSlotsCat(lineups)
 
-    def write(self, stream: io.data.Data):
+    def write(self, stream: "core.Data"):
         stream.write_short(len(self.lineups))
         for lineup in self.lineups:
             lineup.write(stream)
@@ -147,11 +147,11 @@ class StageSlot:
         return StageSlot(0)
 
     @staticmethod
-    def read(stream: io.data.Data) -> "StageSlot":
+    def read(stream: "core.Data") -> "StageSlot":
         stage_id = stream.read_int()
         return StageSlot(stage_id)
 
-    def write(self, stream: io.data.Data):
+    def write(self, stream: "core.Data"):
         stream.write_int(self.stage_id)
 
     def serialize(self) -> int:
@@ -178,13 +178,13 @@ class StageLineups:
         return StageLineups(0, [])
 
     @staticmethod
-    def read(stream: io.data.Data) -> "StageLineups":
+    def read(stream: "core.Data") -> "StageLineups":
         index = stream.read_short()
         total = stream.read_short()
         slots = [StageSlot.read(stream) for _ in range(total)]
         return StageLineups(index, slots)
 
-    def write(self, stream: io.data.Data):
+    def write(self, stream: "core.Data"):
         stream.write_short(self.index)
         stream.write_short(len(self.slots))
         for slot in self.slots:
@@ -219,12 +219,12 @@ class ClearedStageSlots:
         return ClearedStageSlots([])
 
     @staticmethod
-    def read(stream: io.data.Data) -> "ClearedStageSlots":
+    def read(stream: "core.Data") -> "ClearedStageSlots":
         total = stream.read_short()
         lineups = [StageLineups.read(stream) for _ in range(total)]
         return ClearedStageSlots(lineups)
 
-    def write(self, stream: io.data.Data):
+    def write(self, stream: "core.Data"):
         stream.write_short(len(self.lineups))
         for lineup in self.lineups:
             lineup.write(stream)
@@ -267,14 +267,14 @@ class ClearedSlots:
         )
 
     @staticmethod
-    def read(stream: io.data.Data) -> "ClearedSlots":
+    def read(stream: "core.Data") -> "ClearedSlots":
         cleared_slots = ClearedSlotsCat.read(stream)
         cleared_stage_slots = ClearedStageSlots.read(stream)
         length = stream.read_short()
         unknown = stream.read_short_bool_dict(length)
         return ClearedSlots(cleared_slots, cleared_stage_slots, unknown)
 
-    def write(self, stream: io.data.Data):
+    def write(self, stream: "core.Data"):
         self.cleared_slots.write(stream)
         self.cleared_stage_slots.write(stream)
         stream.write_short(len(self.unknown))

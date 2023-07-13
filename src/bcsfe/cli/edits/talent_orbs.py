@@ -1,5 +1,5 @@
 from typing import Any, Optional
-from bcsfe.core import server, io, game
+from bcsfe import core
 from bcsfe.cli import color, dialog_creator
 
 
@@ -166,16 +166,16 @@ class OrbInfoList:
         self.orb_info_list = orb_info_list
 
     @staticmethod
-    def create(save_file: "io.save.SaveFile") -> Optional["OrbInfoList"]:
+    def create(save_file: "core.SaveFile") -> Optional["OrbInfoList"]:
         """Create an OrbInfoList
 
         Args:
-            save_file (io.save.SaveFile): The save file
+            save_file (core.SaveFile): The save file
 
         Returns:
             Optional[OrbInfoList]: The OrbInfoList
         """
-        gdg = server.game_data_getter.GameDataGetter(save_file)
+        gdg = core.GameDataGetter(save_file)
         json_data_file = gdg.download_from_path(OrbInfoList.equipment_data_file_name)
         grade_list_file = gdg.download_from_path(OrbInfoList.grade_list_file_name)
         attribute_list_file = gdg.download_from_path(
@@ -196,16 +196,16 @@ class OrbInfoList:
         return OrbInfoList(orbs)
 
     @staticmethod
-    def parse_json_data(json_data: io.data.Data) -> list[RawOrbInfo]:
+    def parse_json_data(json_data: "core.Data") -> list[RawOrbInfo]:
         """Parse the json data of the equipment
 
         Args:
-            json_data (io.data.Data): The json data
+            json_data (core.Data): The json data
 
         Returns:
             list[RawOrbInfo]: The list of RawOrbInfo
         """
-        data: dict[str, Any] = io.json_file.JsonFile.from_data(json_data).get_json()
+        data: dict[str, Any] = core.JsonFile.from_data(json_data).get_json()
         orb_info_list: list[RawOrbInfo] = []
         for id, orb in enumerate(data["ID"]):
             grade_id = orb["gradeID"]
@@ -218,24 +218,24 @@ class OrbInfoList:
     @staticmethod
     def load_names(
         raw_orb_info: list[RawOrbInfo],
-        grade_data: io.data.Data,
-        attribute_data: io.data.Data,
-        effect_data: io.data.Data,
+        grade_data: "core.Data",
+        attribute_data: "core.Data",
+        effect_data: "core.Data",
     ) -> list[OrbInfo]:
         """Load the names of the equipment
 
         Args:
             raw_orb_info (list[RawOrbInfo]): The list of RawOrbInfo
-            grade_data (io.data.Data): Raw data of the grade list
-            attribute_data (io.data.Data): Raw data of the attribute list
-            effect_data (io.data.Data): Raw data of the effect list
+            grade_data (core.Data): Raw data of the grade list
+            attribute_data (core.Data): Raw data of the attribute list
+            effect_data (core.Data): Raw data of the effect list
 
         Returns:
             list[OrbInfo]: The list of OrbInfo
         """
-        grade_csv = io.bc_csv.CSV(grade_data)
-        attribute_tsv = io.bc_csv.CSV(attribute_data, "\t")
-        effect_csv = io.bc_csv.CSV(effect_data, "\t")
+        grade_csv = core.CSV(grade_data)
+        attribute_tsv = core.CSV(attribute_data, "\t")
+        effect_csv = core.CSV(effect_data, "\t")
         orb_info_list: list[OrbInfo] = []
         for orb in raw_orb_info:
             grade = grade_csv.lines[orb.grade_id][3].to_str()
@@ -366,11 +366,11 @@ class SaveOrbs:
         self.orb_info_list = orb_info_list
 
     @staticmethod
-    def from_save_file(save_file: "io.save.SaveFile") -> Optional["SaveOrbs"]:
+    def from_save_file(save_file: "core.SaveFile") -> Optional["SaveOrbs"]:
         """Create a SaveOrbs from the save stats
 
         Args:
-            save_file (io.save.SaveFile): The save file
+            save_file (core.SaveFile): The save file
 
         Returns:
             Optional[SaveOrbs]: The SaveOrbs
@@ -533,23 +533,21 @@ class SaveOrbs:
 
         self.print()
 
-    def save(self, save_file: "io.save.SaveFile"):
+    def save(self, save_file: "core.SaveFile"):
         """Save the orbs to the save_stats
 
         Args:
-            save_file (io.save.SaveFile): The save_stats to save the orbs to
+            save_file (core.SaveFile): The save_stats to save the orbs to
         """
         for orb_id, orb in self.orbs.items():
-            save_file.talent_orbs.orbs[orb_id] = game.catbase.talent_orbs.Orb(
-                orb_id, orb.count
-            )
+            save_file.talent_orbs.orbs[orb_id] = core.TalentOrb(orb_id, orb.count)
 
     @staticmethod
-    def edit_talent_orbs(save_file: "io.save.SaveFile"):
+    def edit_talent_orbs(save_file: "core.SaveFile"):
         """Edit the talent orbs
 
         Args:
-            save_file (io.save.SaveFile): The save_stats to edit the orbs of
+            save_file (core.SaveFile): The save_stats to edit the orbs of
 
         """
         save_orbs = SaveOrbs.from_save_file(save_file)

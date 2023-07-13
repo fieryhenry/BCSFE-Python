@@ -1,5 +1,5 @@
 from typing import Any
-from bcsfe.core import io, server
+from bcsfe import core
 
 
 class Updater:
@@ -9,13 +9,13 @@ class Updater:
         pass
 
     def get_local_version(self) -> str:
-        return io.path.Path("version.txt", is_relative=True).read().to_str().strip()
+        return core.Path("version.txt", is_relative=True).read().to_str().strip()
 
     def get_pypi_json(self) -> dict[str, Any]:
         url = f"https://pypi.org/pypi/{self.package_name}/json"
         try:
-            response = server.request.RequestHandler(url).get()
-        except server.request.requests.exceptions.ConnectionError:
+            response = core.RequestHandler(url).get()
+        except core.ConnectionError:
             return {}
         return response.json()
 
@@ -40,14 +40,14 @@ class Updater:
         python_aliases = ["py", "python", "python3"]
         for python_alias in python_aliases:
             cmd = f"{python_alias} -m pip install --upgrade {self.package_name}=={target_version}"
-            result = io.path.Path().run(cmd)
+            result = core.Path().run(cmd)
             if result.exit_code == 0:
                 break
         else:
             pip_aliases = ["pip", "pip3"]
             for pip_alias in pip_aliases:
                 cmd = f"{pip_alias} install --upgrade {self.package_name}=={target_version}"
-                result = io.path.Path().run(cmd)
+                result = core.Path().run(cmd)
                 if result.exit_code == 0:
                     break
             else:
@@ -55,4 +55,4 @@ class Updater:
         return True
 
     def has_enabled_pre_release(self) -> bool:
-        return io.config.Config().get(io.config.Key.UPDATE_TO_BETA)
+        return core.Config().get(core.ConfigKey.UPDATE_TO_BETA)

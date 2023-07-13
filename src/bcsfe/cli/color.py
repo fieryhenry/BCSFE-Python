@@ -1,7 +1,7 @@
 from typing import Any
 from aenum import NamedConstant  # type: ignore
 import colored  # type: ignore
-from bcsfe.core import locale_handler
+from bcsfe import core
 from bcsfe.cli import theme_handler
 
 
@@ -116,7 +116,7 @@ class ColoredText:
 
     @staticmethod
     def localize(string: str, **kwargs: Any) -> "ColoredText":
-        text = locale_handler.LocalManager().get_key(string)
+        text = core.LocalManager().get_key(string)
         try:
             text = text.format(**kwargs)
         except TypeError:
@@ -190,7 +190,7 @@ class ColoredInput:
         return input()
 
     def localize(self, string: str, **kwargs: Any) -> str:
-        text = locale_handler.LocalManager().get_key(string)
+        text = core.LocalManager().get_key(string)
         try:
             text = text.format(**kwargs)
         except TypeError:

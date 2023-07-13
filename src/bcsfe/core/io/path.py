@@ -3,7 +3,7 @@ import os
 import shutil
 import typing
 
-from bcsfe.core.io import data, command
+from bcsfe import core
 import re
 
 
@@ -36,12 +36,12 @@ class Path:
     def open(self):
         self.generate_dirs()
         if os.name == "nt":
-            os.startfile(self.path)
+            os.startfile(self.path)  # type: ignore
         elif os.name == "posix":
             cmd = f"dbus-send --session --dest=org.freedesktop.FileManager1 --type=method_call --print-reply /org/freedesktop/FileManager1 org.freedesktop.FileManager1.ShowItems array:string:'file://{self.path}' string:''"
-            command.Command(cmd, display_output=False).run_in_thread()
+            core.Command(cmd, display_output=False).run_in_thread()
         elif os.name == "mac":
-            command.Command(f"open {self.path}", display_output=False).run()
+            core.Command(f"open {self.path}", display_output=False).run()
         else:
             raise OSError("Unknown OS")
 
@@ -51,15 +51,15 @@ class Path:
             os.startfile(self.path)  # type: ignore
         elif os_name == "posix":
             cmd = f"xdg-open {self.path}"
-            command.Command(cmd, display_output=False).run_in_thread()
+            core.Command(cmd, display_output=False).run_in_thread()
         elif os_name == "mac":
-            command.Command(f"open {self.path}", display_output=False).run()
+            core.Command(f"open {self.path}", display_output=False).run()
         else:
             raise OSError("Unknown OS")
 
-    def run(self, arg: str = "", display_output: bool = False) -> "command.Result":
+    def run(self, arg: str = "", display_output: bool = False) -> "core.CommandResult":
         cmd_text = self.path + " " + arg
-        cmd = command.Command(cmd_text, display_output=display_output)
+        cmd = core.Command(cmd_text, display_output=display_output)
         return cmd.run()
 
     def to_str(self) -> str:
@@ -93,7 +93,7 @@ class Path:
 
     def create(self) -> "Path":
         if not self.exists():
-            self.write(data.Data("test"))
+            self.write(core.Data("test"))
         return self
 
     def exists(self) -> bool:
@@ -172,16 +172,16 @@ class Path:
         if self.exists():
             shutil.copytree(self.path, target.path)
 
-    def read(self, create: bool = False) -> "data.Data":
+    def read(self, create: bool = False) -> "core.Data":
         if self.exists():
-            return data.Data.from_file(self)
+            return core.Data.from_file(self)
         elif create:
-            self.write(data.Data())
+            self.write(core.Data())
             return self.read()
         else:
             raise FileNotFoundError(f"File not found: {self.path}")
 
-    def write(self, data: "data.Data"):
+    def write(self, data: "core.Data"):
         data.to_file(self)
 
     def get_files(self, regex: typing.Optional[str] = None) -> list["Path"]:

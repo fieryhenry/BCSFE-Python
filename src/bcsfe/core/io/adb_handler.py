@@ -1,4 +1,5 @@
 from typing import Optional
+from bcsfe import core
 from bcsfe.core import io
 from bcsfe.cli import dialog_creator, color
 
@@ -8,22 +9,22 @@ class DeviceIDNotSet(Exception):
 
 
 class AdbHandler(io.root_handler.RootHandler):
-    def __init__(self, adb_path: Optional[io.path.Path] = None):
+    def __init__(self, adb_path: Optional["core.Path"] = None):
         if adb_path is None:
-            adb_path = io.path.Path("adb")
+            adb_path = core.Path("adb")
         self.adb_path = adb_path
         self.start_server()
         self.root()
         self.device_id = None
         self.cc = None
 
-    def start_server(self) -> "io.command.Result":
+    def start_server(self) -> "core.CommandResult":
         return self.adb_path.run("start-server")
 
-    def kill_server(self) -> "io.command.Result":
+    def kill_server(self) -> "core.CommandResult":
         return self.adb_path.run("kill-server")
 
-    def root(self) -> "io.command.Result":
+    def root(self) -> "core.CommandResult":
         return self.adb_path.run("root")
 
     def get_connected_devices(self) -> list[str]:
@@ -45,15 +46,15 @@ class AdbHandler(io.root_handler.RootHandler):
         ).result.strip()
 
     def pull_file(
-        self, device_path: io.path.Path, local_path: io.path.Path
-    ) -> "io.command.Result":
+        self, device_path: "core.Path", local_path: "core.Path"
+    ) -> "core.CommandResult":
         return self.adb_path.run(
             f'-s {self.get_device()} pull "{device_path.to_str_forwards()}" "{local_path}"',
         )
 
     def push_file(
-        self, local_path: io.path.Path, device_path: io.path.Path
-    ) -> "io.command.Result":
+        self, local_path: "core.Path", device_path: "core.Path"
+    ) -> "core.CommandResult":
         return self.adb_path.run(
             f'-s {self.get_device()} push "{local_path}" "{device_path.to_str_forwards()}"'
         )
@@ -74,19 +75,19 @@ class AdbHandler(io.root_handler.RootHandler):
             if "jp.co.ponos.battlecats" in package
         ]
 
-    def save_battlecats_save(self, local_path: io.path.Path) -> "io.command.Result":
+    def save_battlecats_save(self, local_path: "core.Path") -> "core.CommandResult":
         result = self.pull_file(self.get_battlecats_save_path(), local_path)
         return result
 
-    def load_battlecats_save(self, local_path: io.path.Path) -> "io.command.Result":
+    def load_battlecats_save(self, local_path: "core.Path") -> "core.CommandResult":
         return self.push_file(local_path, self.get_battlecats_save_path())
 
-    def close_game(self) -> "io.command.Result":
+    def close_game(self) -> "core.CommandResult":
         return self.adb_path.run(
             f"-s {self.get_device()} shell am force-stop {self.get_battlecats_package_name()}"
         )
 
-    def run_game(self) -> "io.command.Result":
+    def run_game(self) -> "core.CommandResult":
         return self.adb_path.run(
             f"-s {self.get_device()} shell monkey -p {self.get_battlecats_package_name()} -c android.intent.category.LAUNCHER 1"
         )

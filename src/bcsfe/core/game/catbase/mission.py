@@ -1,6 +1,6 @@
 from typing import Any, Optional, Union
 
-from bcsfe.core import game_version, io
+from bcsfe import core
 
 
 class Mission:
@@ -105,7 +105,7 @@ class Missions:
         )
 
     @staticmethod
-    def read(stream: io.data.Data, gv: game_version.GameVersion) -> "Missions":
+    def read(stream: "core.Data", gv: "core.GameVersion") -> "Missions":
         clear_states: dict[int, int] = stream.read_int_int_dict()
         requirements: dict[int, int] = stream.read_int_int_dict()
         progress_types: dict[int, int] = stream.read_int_int_dict()
@@ -133,7 +133,7 @@ class Missions:
             preparing_values,
         )
 
-    def write(self, stream: io.data.Data, gv: game_version.GameVersion):
+    def write(self, stream: "core.Data", gv: "core.GameVersion"):
         stream.write_int_int_dict(self.clear_states)
         stream.write_int_int_dict(self.requirements)
         stream.write_int_int_dict(self.progress_types)
@@ -150,13 +150,13 @@ class Missions:
             else:
                 stream.write_int(int(value))
 
-    def read_weekly_missions(self, stream: io.data.Data):
+    def read_weekly_missions(self, stream: "core.Data"):
         self.weekly_missions: dict[int, bool] = {}
         for _ in range(stream.read_int()):
             key = stream.read_int()
             self.weekly_missions[key] = stream.read_bool()
 
-    def write_weekly_missions(self, stream: io.data.Data):
+    def write_weekly_missions(self, stream: "core.Data"):
         stream.write_int(len(self.weekly_missions))
         for key, value in self.weekly_missions.items():
             stream.write_int(key)

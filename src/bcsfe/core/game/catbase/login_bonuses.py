@@ -1,5 +1,5 @@
 from typing import Any, Optional
-from bcsfe.core import game_version, io
+from bcsfe import core
 
 
 class Login:
@@ -11,11 +11,11 @@ class Login:
         return Login(0)
 
     @staticmethod
-    def read(stream: io.data.Data) -> "Login":
+    def read(stream: "core.Data") -> "Login":
         count = stream.read_int()
         return Login(count)
 
-    def write(self, stream: io.data.Data):
+    def write(self, stream: "core.Data"):
         stream.write_int(self.count)
 
     def serialize(self) -> int:
@@ -41,14 +41,14 @@ class Logins:
         return Logins([])
 
     @staticmethod
-    def read(stream: io.data.Data) -> "Logins":
+    def read(stream: "core.Data") -> "Logins":
         total = stream.read_int()
         logins: list[Login] = []
         for _ in range(total):
             logins.append(Login.read(stream))
         return Logins(logins)
 
-    def write(self, stream: io.data.Data):
+    def write(self, stream: "core.Data"):
         stream.write_int(len(self.logins))
         for login in self.logins:
             login.write(stream)
@@ -76,14 +76,14 @@ class LoginSets:
         return LoginSets([])
 
     @staticmethod
-    def read(stream: io.data.Data) -> "LoginSets":
+    def read(stream: "core.Data") -> "LoginSets":
         total = stream.read_int()
         logins: list[Logins] = []
         for _ in range(total):
             logins.append(Logins.read(stream))
         return LoginSets(logins)
 
-    def write(self, stream: io.data.Data):
+    def write(self, stream: "core.Data"):
         stream.write_int(len(self.logins))
         for login in self.logins:
             login.write(stream)
@@ -112,14 +112,14 @@ class LoginBonus:
         self.logins = logins
 
     @staticmethod
-    def init(gv: game_version.GameVersion) -> "LoginBonus":
+    def init(gv: "core.GameVersion") -> "LoginBonus":
         if gv < 80000:
             return LoginBonus(old_logins=LoginSets.init())
         else:
             return LoginBonus(logins={})
 
     @staticmethod
-    def read(stream: io.data.Data, gv: game_version.GameVersion) -> "LoginBonus":
+    def read(stream: "core.Data", gv: "core.GameVersion") -> "LoginBonus":
         if gv < 80000:
             logins_old = LoginSets.read(stream)
             return LoginBonus(logins_old)
@@ -131,7 +131,7 @@ class LoginBonus:
                 logins[id] = Login.read(stream)
             return LoginBonus(logins=logins)
 
-    def write(self, stream: io.data.Data, gv: game_version.GameVersion):
+    def write(self, stream: "core.Data", gv: "core.GameVersion"):
         if gv < 80000 and self.old_logins is not None:
             self.old_logins.write(stream)
         elif gv >= 80000 and self.logins is not None:

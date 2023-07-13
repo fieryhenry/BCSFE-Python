@@ -1,5 +1,5 @@
 from typing import Any
-from bcsfe.core import io
+from bcsfe import core
 
 
 class Stage:
@@ -11,11 +11,11 @@ class Stage:
         return Stage(0)
 
     @staticmethod
-    def read(data: io.data.Data) -> "Stage":
+    def read(data: "core.Data") -> "Stage":
         clear_times = data.read_int()
         return Stage(clear_times)
 
-    def write(self, data: io.data.Data):
+    def write(self, data: "core.Data"):
         data.write_int(self.clear_times)
 
     def serialize(self) -> int:
@@ -46,30 +46,30 @@ class Chapter:
         return Chapter(0, total_stages)
 
     @staticmethod
-    def read_selected_stage(data: io.data.Data) -> "Chapter":
+    def read_selected_stage(data: "core.Data") -> "Chapter":
         selected_stage = data.read_int()
         return Chapter(selected_stage)
 
-    def write_selected_stage(self, data: io.data.Data):
+    def write_selected_stage(self, data: "core.Data"):
         data.write_int(self.selected_stage)
 
-    def read_clear_progress(self, data: io.data.Data):
+    def read_clear_progress(self, data: "core.Data"):
         self.clear_progress = data.read_int()
 
-    def write_clear_progress(self, data: io.data.Data):
+    def write_clear_progress(self, data: "core.Data"):
         data.write_int(self.clear_progress)
 
-    def read_stages(self, data: io.data.Data, total_stages: int):
+    def read_stages(self, data: "core.Data", total_stages: int):
         self.stages = [Stage.read(data) for _ in range(total_stages)]
 
-    def write_stages(self, data: io.data.Data):
+    def write_stages(self, data: "core.Data"):
         for stage in self.stages:
             stage.write(data)
 
-    def read_chapter_unlock_state(self, data: io.data.Data):
+    def read_chapter_unlock_state(self, data: "core.Data"):
         self.chapter_unlock_state = data.read_int()
 
-    def write_chapter_unlock_state(self, data: io.data.Data):
+    def write_chapter_unlock_state(self, data: "core.Data"):
         data.write_int(self.chapter_unlock_state)
 
     def serialize(self) -> dict[str, Any]:
@@ -105,35 +105,35 @@ class ChaptersStars:
         return ChaptersStars(chapters)
 
     @staticmethod
-    def read_selected_stage(data: io.data.Data, total_stars: int) -> "ChaptersStars":
+    def read_selected_stage(data: "core.Data", total_stars: int) -> "ChaptersStars":
         chapters = [Chapter.read_selected_stage(data) for _ in range(total_stars)]
         return ChaptersStars(chapters)
 
-    def write_selected_stage(self, data: io.data.Data):
+    def write_selected_stage(self, data: "core.Data"):
         for chapter in self.chapters:
             chapter.write_selected_stage(data)
 
-    def read_clear_progress(self, data: io.data.Data):
+    def read_clear_progress(self, data: "core.Data"):
         for chapter in self.chapters:
             chapter.read_clear_progress(data)
 
-    def write_clear_progress(self, data: io.data.Data):
+    def write_clear_progress(self, data: "core.Data"):
         for chapter in self.chapters:
             chapter.write_clear_progress(data)
 
-    def read_stages(self, data: io.data.Data, total_stages: int):
+    def read_stages(self, data: "core.Data", total_stages: int):
         for chapter in self.chapters:
             chapter.read_stages(data, total_stages)
 
-    def write_stages(self, data: io.data.Data):
+    def write_stages(self, data: "core.Data"):
         for chapter in self.chapters:
             chapter.write_stages(data)
 
-    def read_chapter_unlock_state(self, data: io.data.Data):
+    def read_chapter_unlock_state(self, data: "core.Data"):
         for chapter in self.chapters:
             chapter.read_chapter_unlock_state(data)
 
-    def write_chapter_unlock_state(self, data: io.data.Data):
+    def write_chapter_unlock_state(self, data: "core.Data"):
         for chapter in self.chapters:
             chapter.write_chapter_unlock_state(data)
 
@@ -161,7 +161,7 @@ class Chapters:
         return Chapters([])
 
     @staticmethod
-    def read(data: io.data.Data, read_every_time: bool = True) -> "Chapters":
+    def read(data: "core.Data", read_every_time: bool = True) -> "Chapters":
         total_stages = 0
         total_chapters = 0
         total_stars = 0
@@ -215,7 +215,7 @@ class Chapters:
             total_stars = 0
         return (total_chapters, total_stages, total_stars)
 
-    def write(self, data: io.data.Data, write_every_time: bool = True):
+    def write(self, data: "core.Data", write_every_time: bool = True):
         total_chapters, total_stages, total_stars = self.get_lengths()
         if write_every_time:
             data.write_int(total_chapters)

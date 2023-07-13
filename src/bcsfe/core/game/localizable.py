@@ -1,16 +1,16 @@
 from typing import Optional
-from bcsfe.core import io, server
+from bcsfe import core
 
 
 class Localizable:
-    def __init__(self, save_file: "io.save.SaveFile"):
+    def __init__(self, save_file: "core.SaveFile"):
         self.save_file = save_file
         self.localizable = self.get_localizable()
 
     def get_localizable(self):
-        gdg = server.game_data_getter.GameDataGetter(self.save_file)
+        gdg = core.GameDataGetter(self.save_file)
         data = gdg.download("resLocal", "localizable.tsv")
-        csv = io.bc_csv.CSV(data, "\t")
+        csv = core.CSV(data, "\t")
         keys: dict[str, str] = {}
         for line in csv:
             try:

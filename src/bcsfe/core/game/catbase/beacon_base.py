@@ -1,5 +1,5 @@
 from typing import Any
-from bcsfe.core import io
+from bcsfe import core
 
 
 class BeaconEventListScene:
@@ -18,7 +18,7 @@ class BeaconEventListScene:
         return BeaconEventListScene({}, {}, {})
 
     @staticmethod
-    def read(stream: io.data.Data) -> "BeaconEventListScene":
+    def read(stream: "core.Data") -> "BeaconEventListScene":
         int_dict = {}
         str_dict = {}
         bool_dict = {}
@@ -30,7 +30,7 @@ class BeaconEventListScene:
             bool_dict[stream.read_int()] = stream.read_bool()
         return BeaconEventListScene(int_dict, str_dict, bool_dict)
 
-    def write(self, stream: io.data.Data):
+    def write(self, stream: "core.Data"):
         stream.write_int(len(self.int_array))
         for key, value in self.int_array.items():
             stream.write_int(key)

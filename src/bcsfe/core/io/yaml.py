@@ -1,10 +1,10 @@
 from typing import Any
-from bcsfe.core.io import path
+from bcsfe import core
 import yaml
 
 
 class YamlFile:
-    def __init__(self, path: path.Path):
+    def __init__(self, path: "core.Path"):
         self.path = path
         if self.path.exists():
             self.data = path.read()
@@ -14,7 +14,7 @@ class YamlFile:
             self.save()
 
     def save(self) -> None:
-        with open(self.path.path, "w") as f:
+        with open(self.path.path, "w", encoding="utf-8") as f:
             yaml.dump(self.yaml, f)
 
     def __getitem__(self, key: str) -> Any:

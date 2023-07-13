@@ -1,5 +1,6 @@
 import sys
-from bcsfe.core import io, server, country_code
+from bcsfe import core
+from bcsfe.core import io
 from bcsfe.cli import main, color, dialog_creator, server_cli
 from typing import Optional
 
@@ -9,11 +10,11 @@ class SaveManagement:
         pass
 
     @staticmethod
-    def save_save(save_file: "io.save.SaveFile"):
+    def save_save(save_file: "core.SaveFile"):
         """Save the save file without a dialog.
 
         Args:
-            save_file (io.save.SaveFile): The save file to save.
+            save_file (core.SaveFile): The save file to save.
         """
         if save_file.save_path is None:
             save_file.save_path = main.Main.save_save_dialog(save_file)
@@ -26,11 +27,11 @@ class SaveManagement:
         color.ColoredText.localize("save_success", path=save_file.save_path)
 
     @staticmethod
-    def save_save_dialog(save_file: "io.save.SaveFile"):
+    def save_save_dialog(save_file: "core.SaveFile"):
         """Save the save file with a dialog.
 
         Args:
-            save_file (io.save.SaveFile): The save file to save.
+            save_file (core.SaveFile): The save file to save.
         """
         save_file.save_path = main.Main.save_save_dialog(save_file)
         if save_file.save_path is None:
@@ -41,13 +42,13 @@ class SaveManagement:
         color.ColoredText.localize("save_success", path=save_file.save_path)
 
     @staticmethod
-    def save_upload(save_file: "io.save.SaveFile"):
+    def save_upload(save_file: "core.SaveFile"):
         """Save the save file and upload it to the server.
 
         Args:
-            save_file (io.save.SaveFile): The save file to save.
+            save_file (core.SaveFile): The save file to save.
         """
-        result = server.server_handler.ServerHandler(save_file).get_codes()
+        result = core.ServerHandler(save_file).get_codes()
         SaveManagement.save_save(save_file)
         if result is not None:
             transfer_code, confirmation_code = result
@@ -60,13 +61,13 @@ class SaveManagement:
             color.ColoredText.localize("upload_fail")
 
     @staticmethod
-    def unban_account(save_file: "io.save.SaveFile"):
+    def unban_account(save_file: "core.SaveFile"):
         """Unban the account.
 
         Args:
-            save_file (io.save.SaveFile): The save file to unban.
+            save_file (core.SaveFile): The save file to unban.
         """
-        server_handler = server.server_handler.ServerHandler(save_file)
+        server_handler = core.ServerHandler(save_file)
         success = server_handler.create_new_account()
         if success:
             color.ColoredText.localize("unban_success")
@@ -74,17 +75,17 @@ class SaveManagement:
             color.ColoredText.localize("unban_fail")
 
     @staticmethod
-    def adb_push(save_file: "io.save.SaveFile") -> "io.adb_handler.AdbHandler":
+    def adb_push(save_file: "core.SaveFile") -> "core.AdbHandler":
         """Push the save file to the device.
 
         Args:
-            save_file (io.save.SaveFile): The save file to push.
+            save_file (core.SaveFile): The save file to push.
 
         Returns:
-            io.adb_handler.AdbHandler: The AdbHandler instance.
+            core.AdbHandler: The AdbHandler instance.
         """
         SaveManagement.save_save(save_file)
-        adb_handler = io.adb_handler.AdbHandler()
+        adb_handler = core.AdbHandler()
         adb_handler.select_device()
         adb_handler.set_cc(save_file.real_cc)
         if save_file.save_path is None:
@@ -98,11 +99,11 @@ class SaveManagement:
         return adb_handler
 
     @staticmethod
-    def adb_push_rerun(save_file: "io.save.SaveFile"):
+    def adb_push_rerun(save_file: "core.SaveFile"):
         """Push the save file to the device and rerun the game.
 
         Args:
-            save_file (io.save.SaveFile): The save file to push.
+            save_file (core.SaveFile): The save file to push.
         """
         adb_handler = SaveManagement.adb_push(save_file)
         result = adb_handler.rerun_game()
@@ -112,26 +113,26 @@ class SaveManagement:
             color.ColoredText.localize("adb_rerun_fail", error=result.result)
 
     @staticmethod
-    def export_save(save_file: "io.save.SaveFile"):
+    def export_save(save_file: "core.SaveFile"):
         """Export the save file to a json file.
 
         Args:
-            save_file (io.save.SaveFile): The save file to export.
+            save_file (core.SaveFile): The save file to export.
         """
         data = save_file.to_dict()
         path = main.Main.save_json_dialog(data)
         if path is None:
             return
-        data = io.json_file.JsonFile.from_object(data).to_data()
+        data = core.JsonFile.from_object(data).to_data()
         data.to_file(path)
         color.ColoredText.localize("export_success", path=path)
 
     @staticmethod
-    def init_save(save_file: "io.save.SaveFile"):
+    def init_save(save_file: "core.SaveFile"):
         """Initialize the save file to a new save file.
 
         Args:
-            save_file (io.save.SaveFile): The save file to initialize.
+            save_file (core.SaveFile): The save file to initialize.
         """
         confirm = dialog_creator.YesNoInput().get_input_once("init_save_confirm")
         if not confirm:
@@ -140,13 +141,13 @@ class SaveManagement:
         color.ColoredText.localize("init_save_success")
 
     @staticmethod
-    def upload_items(save_file: "io.save.SaveFile"):
+    def upload_items(save_file: "core.SaveFile"):
         """Upload the items to the server.
 
         Args:
-            save_file (io.save.SaveFile): The save file to upload.
+            save_file (core.SaveFile): The save file to upload.
         """
-        server_handler = server.server_handler.ServerHandler(save_file)
+        server_handler = core.ServerHandler(save_file)
         success = server_handler.upload_meta_data()
         if success:
             color.ColoredText.localize("upload_items_success")
@@ -154,7 +155,7 @@ class SaveManagement:
             color.ColoredText.localize("upload_items_fail")
 
     @staticmethod
-    def select_save(exit_option: bool = False) -> Optional["io.save.SaveFile"]:
+    def select_save(exit_option: bool = False) -> Optional["core.SaveFile"]:
         """Select a new save file.
 
         Args:
@@ -162,7 +163,7 @@ class SaveManagement:
 
 
         Returns:
-            Optional[io.save.SaveFile]: The save file.
+            Optional[core.SaveFile]: The save file.
         """
         options = [
             "download_save",
@@ -186,7 +187,7 @@ class SaveManagement:
         )
 
         save_path = None
-        cc: Optional[country_code.CountryCode] = None
+        cc: Optional[core.CountryCode] = None
 
         if choice == 0:
             data = server_cli.ServerCLI().download_save()
@@ -199,12 +200,12 @@ class SaveManagement:
         elif choice == 2:
             handler = root_handler
             if not root_handler.is_android():
-                handler = io.adb_handler.AdbHandler()
+                handler = core.AdbHandler()
                 if not handler.select_device():
                     return None
 
             ccs = handler.get_battlecats_ccs()
-            cc = country_code.CountryCode.select_from_ccs(ccs)
+            cc = core.CountryCode.select_from_ccs(ccs)
             if cc is None:
                 color.ColoredText.localize("no_cc_error")
                 return None
@@ -237,7 +238,7 @@ class SaveManagement:
             return None
 
         try:
-            save_file = io.save.SaveFile(save_path.read(), cc)
+            save_file = core.SaveFile(save_path.read(), cc)
             save_file.save_path = save_path
             save_file.save_path.copy(save_file.get_default_path())
         except Exception as e:
@@ -247,11 +248,11 @@ class SaveManagement:
         return save_file
 
     @staticmethod
-    def load_save(save_file: "io.save.SaveFile"):
+    def load_save(save_file: "core.SaveFile"):
         """Load a new save file.
 
         Args:
-            save_file (io.save.SaveFile): The current save file.
+            save_file (core.SaveFile): The current save file.
         """
         new_save_file = SaveManagement.select_save()
         if new_save_file is None:

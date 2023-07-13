@@ -1,38 +1,38 @@
 from typing import Any, Optional
-from bcsfe.core import io, locale_handler
+from bcsfe import core
 
 
 class ThemeHandler:
     def __init__(self, theme_code: Optional[str] = None):
         if theme_code is None:
-            self.theme_code = io.config.Config().get(io.config.Key.THEME)
+            self.theme_code = core.Config().get(core.ConfigKey.THEME)
         else:
             self.theme_code = theme_code
 
     def get_theme_data(self) -> dict[str, Any]:
-        file_path = io.path.Path("themes", True).add(self.theme_code + ".json")
-        return io.json_file.JsonFile.from_data(file_path.read()).get_json()
+        file_path = core.Path("themes", True).add(self.theme_code + ".json")
+        return core.JsonFile.from_data(file_path.read()).get_json()
 
     def get_theme_info(self) -> dict[str, Any]:
         return self.get_theme_data().get("info", {})
 
     def get_theme_name(self) -> str:
         return self.get_theme_info().get(
-            "name", locale_handler.LocalManager().get_key("unknown_theme_name")
+            "name", core.LocalManager().get_key("unknown_theme_name")
         )
 
     def get_theme_author(self) -> str:
         return self.get_theme_info().get(
-            "author", locale_handler.LocalManager().get_key("unknown_theme_author")
+            "author", core.LocalManager().get_key("unknown_theme_author")
         )
 
     def get_theme_version(self) -> str:
         return self.get_theme_info().get(
-            "version", locale_handler.LocalManager().get_key("unknown_theme_version")
+            "version", core.LocalManager().get_key("unknown_theme_version")
         )
 
-    def get_theme_path(self) -> io.path.Path:
-        return io.path.Path("themes", True).add(self.theme_code + ".json")
+    def get_theme_path(self) -> "core.Path":
+        return core.Path("themes", True).add(self.theme_code + ".json")
 
     def get_theme_colors(self) -> dict[str, Any]:
         return self.get_theme_data().get("colors", {})

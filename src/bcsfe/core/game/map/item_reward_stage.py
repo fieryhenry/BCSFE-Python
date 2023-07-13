@@ -1,5 +1,5 @@
 from typing import Any
-from bcsfe.core import game_version, io
+from bcsfe import core
 
 
 class Stage:
@@ -11,10 +11,10 @@ class Stage:
         return Stage(False)
 
     @staticmethod
-    def read(stream: io.data.Data) -> "Stage":
+    def read(stream: "core.Data") -> "Stage":
         return Stage(stream.read_bool())
 
-    def write(self, stream: io.data.Data):
+    def write(self, stream: "core.Data"):
         stream.write_bool(self.claimed)
 
     def serialize(self) -> bool:
@@ -41,13 +41,13 @@ class SubChapter:
         return SubChapter(stages)
 
     @staticmethod
-    def read(stream: io.data.Data, total_stages: int) -> "SubChapter":
+    def read(stream: "core.Data", total_stages: int) -> "SubChapter":
         stages: list[Stage] = []
         for _ in range(total_stages):
             stages.append(Stage.read(stream))
         return SubChapter(stages)
 
-    def write(self, stream: io.data.Data):
+    def write(self, stream: "core.Data"):
         for stage in self.stages:
             stage.write(stream)
 
@@ -76,14 +76,14 @@ class SubChapterStars:
 
     @staticmethod
     def read(
-        stream: io.data.Data, total_stages: int, total_stars: int
+        stream: "core.Data", total_stages: int, total_stars: int
     ) -> "SubChapterStars":
         sub_chapters: list[SubChapter] = []
         for _ in range(total_stars):
             sub_chapters.append(SubChapter.read(stream, total_stages))
         return SubChapterStars(sub_chapters)
 
-    def write(self, stream: io.data.Data):
+    def write(self, stream: "core.Data"):
         for sub_chapter in self.sub_chapters:
             sub_chapter.write(stream)
 
@@ -112,10 +112,10 @@ class ItemObtain:
         return ItemObtain(False)
 
     @staticmethod
-    def read(stream: io.data.Data) -> "ItemObtain":
+    def read(stream: "core.Data") -> "ItemObtain":
         return ItemObtain(stream.read_bool())
 
-    def write(self, stream: io.data.Data):
+    def write(self, stream: "core.Data"):
         stream.write_bool(self.flag)
 
     def serialize(self) -> bool:
@@ -141,14 +141,14 @@ class ItemObtainSet:
         return ItemObtainSet({})
 
     @staticmethod
-    def read(stream: io.data.Data) -> "ItemObtainSet":
+    def read(stream: "core.Data") -> "ItemObtainSet":
         item_obtains: dict[int, ItemObtain] = {}
         for _ in range(stream.read_int()):
             key = stream.read_int()
             item_obtains[key] = ItemObtain.read(stream)
         return ItemObtainSet(item_obtains)
 
-    def write(self, stream: io.data.Data):
+    def write(self, stream: "core.Data"):
         stream.write_int(len(self.item_obtains))
         for item_id, item_obtain in self.item_obtains.items():
             stream.write_int(item_id)
@@ -187,14 +187,14 @@ class ItemObtainSets:
         return ItemObtainSets({})
 
     @staticmethod
-    def read(stream: io.data.Data) -> "ItemObtainSets":
+    def read(stream: "core.Data") -> "ItemObtainSets":
         item_obtain_sets: dict[int, ItemObtainSet] = {}
         for _ in range(stream.read_int()):
             key = stream.read_int()
             item_obtain_sets[key] = ItemObtainSet.read(stream)
         return ItemObtainSets(item_obtain_sets)
 
-    def write(self, stream: io.data.Data):
+    def write(self, stream: "core.Data"):
         stream.write_int(len(self.item_obtain_sets))
         for item_id, item_obtain_set in self.item_obtain_sets.items():
             stream.write_int(item_id)
@@ -231,10 +231,10 @@ class UnobtainedItem:
         return UnobtainedItem(False)
 
     @staticmethod
-    def read(stream: io.data.Data) -> "UnobtainedItem":
+    def read(stream: "core.Data") -> "UnobtainedItem":
         return UnobtainedItem(stream.read_bool())
 
-    def write(self, stream: io.data.Data):
+    def write(self, stream: "core.Data"):
         stream.write_bool(self.unobtained)
 
     def serialize(self) -> bool:
@@ -260,14 +260,14 @@ class UnobtainedItems:
         return UnobtainedItems({})
 
     @staticmethod
-    def read(stream: io.data.Data) -> "UnobtainedItems":
+    def read(stream: "core.Data") -> "UnobtainedItems":
         unobtained_items: dict[int, UnobtainedItem] = {}
         for _ in range(stream.read_int()):
             key = stream.read_int()
             unobtained_items[key] = UnobtainedItem.read(stream)
         return UnobtainedItems(unobtained_items)
 
-    def write(self, stream: io.data.Data):
+    def write(self, stream: "core.Data"):
         stream.write_int(len(self.unobtained_items))
         for item_id, unobtained_item in self.unobtained_items.items():
             stream.write_int(item_id)
@@ -297,16 +297,16 @@ class UnobtainedItems:
         return self.__repr__()
 
 
-class Chapters:
+class ItemRewardChapters:
     def __init__(self, sub_chapters: list[SubChapterStars]):
         self.sub_chapters = sub_chapters
         self.item_obtains = ItemObtainSets.init()
         self.unobtained_items = UnobtainedItems.init()
 
     @staticmethod
-    def init(gv: game_version.GameVersion) -> "Chapters":
+    def init(gv: "core.GameVersion") -> "ItemRewardChapters":
         if gv < 20:
-            return Chapters([])
+            return ItemRewardChapters([])
         if gv <= 33:
             total_subchapters = 50
             total_stages = 12
@@ -319,7 +319,7 @@ class Chapters:
             total_subchapters = 0
             total_stages = 0
             total_stars = 0
-        return Chapters(
+        return ItemRewardChapters(
             [
                 SubChapterStars.init(total_stages, total_stars)
                 for _ in range(total_subchapters)
@@ -327,9 +327,9 @@ class Chapters:
         )
 
     @staticmethod
-    def read(stream: io.data.Data, gv: game_version.GameVersion) -> "Chapters":
+    def read(stream: "core.Data", gv: "core.GameVersion") -> "ItemRewardChapters":
         if gv < 20:
-            return Chapters([])
+            return ItemRewardChapters([])
         if gv <= 33:
             total_subchapters = 50
             total_stages = 12
@@ -345,9 +345,9 @@ class Chapters:
         sub_chapters: list[SubChapterStars] = []
         for _ in range(total_subchapters):
             sub_chapters.append(SubChapterStars.read(stream, total_stages, total_stars))
-        return Chapters(sub_chapters)
+        return ItemRewardChapters(sub_chapters)
 
-    def write(self, stream: io.data.Data, gv: game_version.GameVersion):
+    def write(self, stream: "core.Data", gv: "core.GameVersion"):
         if gv < 20:
             return
         if gv <= 33:
@@ -367,11 +367,11 @@ class Chapters:
         for sub_chapter in self.sub_chapters:
             sub_chapter.write(stream)
 
-    def read_item_obtains(self, stream: io.data.Data):
+    def read_item_obtains(self, stream: "core.Data"):
         self.item_obtains = ItemObtainSets.read(stream)
         self.unobtained_items = UnobtainedItems.read(stream)
 
-    def write_item_obtains(self, stream: io.data.Data):
+    def write_item_obtains(self, stream: "core.Data"):
         self.item_obtains.write(stream)
         self.unobtained_items.write(stream)
 
@@ -385,8 +385,8 @@ class Chapters:
         }
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "Chapters":
-        chapters = Chapters(
+    def deserialize(data: dict[str, Any]) -> "ItemRewardChapters":
+        chapters = ItemRewardChapters(
             [
                 SubChapterStars.deserialize(sub_chapter)
                 for sub_chapter in data.get("sub_chapters", [])

@@ -1,38 +1,37 @@
-from bcsfe.core.game.catbase import upgrade
-from bcsfe.core import io
+from bcsfe import core
 
 from typing import Any
 
 
 class Skill:
-    def __init__(self, upg: upgrade.Upgrade):
+    def __init__(self, upg: "core.Upgrade"):
         self.upgrade = upg
         self.seen = 0
-        self.max_upgrade_level = upgrade.Upgrade(0, 0)
+        self.max_upgrade_level = core.Upgrade(0, 0)
 
     @staticmethod
     def init() -> "Skill":
-        return Skill(upgrade.Upgrade(0, 0))
+        return Skill(core.Upgrade(0, 0))
 
     @staticmethod
-    def read_upgrade(stream: io.data.Data) -> "Skill":
-        up = upgrade.Upgrade.read(stream)
+    def read_upgrade(stream: "core.Data") -> "Skill":
+        up = core.Upgrade.read(stream)
         return Skill(up)
 
-    def write_upgrade(self, stream: io.data.Data):
+    def write_upgrade(self, stream: "core.Data"):
         self.upgrade.write(stream)
 
-    def read_seen(self, stream: io.data.Data):
+    def read_seen(self, stream: "core.Data"):
         self.seen = stream.read_int()
 
-    def write_seen(self, stream: io.data.Data):
+    def write_seen(self, stream: "core.Data"):
         stream.write_int(self.seen)
 
-    def read_max_upgrade_level(self, stream: io.data.Data):
-        level = upgrade.Upgrade.read(stream)
+    def read_max_upgrade_level(self, stream: "core.Data"):
+        level = core.Upgrade.read(stream)
         self.max_upgrade_level = level
 
-    def write_max_upgrade_level(self, stream: io.data.Data):
+    def write_max_upgrade_level(self, stream: "core.Data"):
         self.max_upgrade_level.write(stream)
 
     def serialize(self) -> dict[str, Any]:
@@ -44,9 +43,9 @@ class Skill:
 
     @staticmethod
     def deserialize(data: dict[str, Any]) -> "Skill":
-        skill = Skill(upgrade.Upgrade.deserialize(data.get("upgrade", {})))
+        skill = Skill(core.Upgrade.deserialize(data.get("upgrade", {})))
         skill.seen = data.get("seen", 0)
-        skill.max_upgrade_level = upgrade.Upgrade.deserialize(
+        skill.max_upgrade_level = core.Upgrade.deserialize(
             data.get("max_upgrade_level", {})
         )
         return skill
@@ -58,14 +57,14 @@ class Skill:
         return self.__repr__()
 
 
-class Skills:
+class SpecialSkills:
     def __init__(self, skills: list[Skill]):
         self.skills = skills
 
     @staticmethod
-    def init() -> "Skills":
+    def init() -> "SpecialSkills":
         skills = [Skill.init() for _ in range(11)]
-        return Skills(skills)
+        return SpecialSkills(skills)
 
     def get_valid_skills(self) -> list[Skill]:
         new_skills: list[Skill] = []
@@ -77,32 +76,32 @@ class Skills:
         return new_skills
 
     @staticmethod
-    def read_upgrades(stream: io.data.Data) -> "Skills":
+    def read_upgrades(stream: "core.Data") -> "SpecialSkills":
         total_skills = 11
 
         skills: list[Skill] = []
         for _ in range(total_skills):
             skills.append(Skill.read_upgrade(stream))
 
-        return Skills(skills)
+        return SpecialSkills(skills)
 
-    def write_upgrades(self, stream: io.data.Data):
+    def write_upgrades(self, stream: "core.Data"):
         for skill in self.skills:
             skill.write_upgrade(stream)
 
-    def read_gatya_seen(self, stream: io.data.Data):
+    def read_gatya_seen(self, stream: "core.Data"):
         for skill in self.get_valid_skills():
             skill.read_seen(stream)
 
-    def write_gatya_seen(self, stream: io.data.Data):
+    def write_gatya_seen(self, stream: "core.Data"):
         for skill in self.get_valid_skills():
             skill.write_seen(stream)
 
-    def read_max_upgrade_levels(self, stream: io.data.Data):
+    def read_max_upgrade_levels(self, stream: "core.Data"):
         for skill in self.skills:
             skill.read_max_upgrade_level(stream)
 
-    def write_max_upgrade_levels(self, stream: io.data.Data):
+    def write_max_upgrade_levels(self, stream: "core.Data"):
         for skill in self.skills:
             skill.write_max_upgrade_level(stream)
 
@@ -110,8 +109,8 @@ class Skills:
         return [skill.serialize() for skill in self.skills]
 
     @staticmethod
-    def deserialize(data: list[dict[str, Any]]) -> "Skills":
-        skills = Skills([])
+    def deserialize(data: list[dict[str, Any]]) -> "SpecialSkills":
+        skills = SpecialSkills([])
         for skill in data:
             skills.skills.append(Skill.deserialize(skill))
 

@@ -1,5 +1,5 @@
 from typing import Any
-from bcsfe.core import io, game
+from bcsfe import core
 from bcsfe.cli import dialog_creator
 
 
@@ -13,16 +13,16 @@ class BattleItem:
         return BattleItem(0)
 
     @staticmethod
-    def read_amount(stream: io.data.Data) -> "BattleItem":
+    def read_amount(stream: "core.Data") -> "BattleItem":
         return BattleItem(stream.read_int())
 
-    def write_amount(self, stream: io.data.Data):
+    def write_amount(self, stream: "core.Data"):
         stream.write_int(self.amount)
 
-    def read_locked(self, stream: io.data.Data):
+    def read_locked(self, stream: "core.Data"):
         self.locked = stream.read_bool()
 
-    def write_locked(self, stream: io.data.Data):
+    def write_locked(self, stream: "core.Data"):
         stream.write_bool(self.locked)
 
     def serialize(self) -> dict[str, Any]:
@@ -57,21 +57,21 @@ class BattleItems:
         return BattleItems([BattleItem.init() for _ in range(6)])
 
     @staticmethod
-    def read_items(stream: io.data.Data) -> "BattleItems":
+    def read_items(stream: "core.Data") -> "BattleItems":
         total_items = 6
         items = [BattleItem.read_amount(stream) for _ in range(total_items)]
         return BattleItems(items)
 
-    def write_items(self, stream: io.data.Data):
+    def write_items(self, stream: "core.Data"):
         for item in self.items:
             item.write_amount(stream)
 
-    def read_locked_items(self, stream: io.data.Data):
+    def read_locked_items(self, stream: "core.Data"):
         self.lock_item = stream.read_bool()
         for item in self.items:
             item.read_locked(stream)
 
-    def write_locked_items(self, stream: io.data.Data):
+    def write_locked_items(self, stream: "core.Data"):
         stream.write_bool(self.lock_item)
         for item in self.items:
             item.write_locked(stream)
@@ -96,13 +96,13 @@ class BattleItems:
     def __str__(self):
         return f"BattleItems({self.items})"
 
-    def get_names(self, save_file: "io.save.SaveFile") -> list[str]:
-        names = game.catbase.gatya_item.GatyaItemNames(save_file).names
-        items = game.catbase.gatya_item.GatyaItemBuy(save_file).get_by_category(3)
+    def get_names(self, save_file: "core.SaveFile") -> list[str]:
+        names = core.GatyaItemNames(save_file).names
+        items = core.GatyaItemBuy(save_file).get_by_category(3)
         names = [names[item.id] for item in items]
         return names
 
-    def edit(self, save_file: "io.save.SaveFile"):
+    def edit(self, save_file: "core.SaveFile"):
         group_name = save_file.get_localizable().get("shop_category1")
         item_names = self.get_names(save_file)
         current_values = [item.amount for item in self.items]

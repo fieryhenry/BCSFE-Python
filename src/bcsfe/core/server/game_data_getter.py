@@ -1,14 +1,13 @@
 from typing import Any, Callable, Optional
-from bcsfe.core import io, country_code
 from bcsfe.cli import color
 
-from bcsfe.core.server import request
+from bcsfe import core
 
 
 class GameDataGetter:
     url = "https://raw.githubusercontent.com/fieryhenry/BCData/master/"
 
-    def __init__(self, save_file: io.save.SaveFile):
+    def __init__(self, save_file: "core.SaveFile"):
         self.cc = save_file.cc
         if save_file.latest_game_data_version is None:
             save_file.latest_game_data_version = self.get_latest_version()
@@ -17,31 +16,29 @@ class GameDataGetter:
         self.latest_version = save_file.latest_game_data_version
 
     def get_latest_version(self) -> Optional[str]:
-        versions = (
-            request.RequestHandler(self.url + "latest.txt").get().text.split("\n")
-        )
+        versions = core.RequestHandler(self.url + "latest.txt").get().text.split("\n")
         length = len(versions)
-        if self.cc == country_code.CountryCodeType.EN and length >= 1:
+        if self.cc == core.CountryCodeType.EN and length >= 1:
             return versions[0]
-        elif self.cc == country_code.CountryCodeType.JP and length >= 2:
+        elif self.cc == core.CountryCodeType.JP and length >= 2:
             return versions[1]
-        elif self.cc == country_code.CountryCodeType.KR and length >= 3:
+        elif self.cc == core.CountryCodeType.KR and length >= 3:
             return versions[2]
-        elif self.cc == country_code.CountryCodeType.TW and length >= 4:
+        elif self.cc == core.CountryCodeType.TW and length >= 4:
             return versions[3]
         else:
             return None
 
-    def get_file(self, pack_name: str, file_name: str) -> Optional[io.data.Data]:
+    def get_file(self, pack_name: str, file_name: str) -> Optional["core.Data"]:
         url = self.url + f"{self.latest_version}/{pack_name}/{file_name}"
-        response = request.RequestHandler(url).get()
+        response = core.RequestHandler(url).get()
         if response.status_code != 200:
             return None
-        return io.data.Data(response.content)
+        return core.Data(response.content)
 
-    def get_file_path(self, pack_name: str, file_name: str) -> io.path.Path:
+    def get_file_path(self, pack_name: str, file_name: str) -> "core.Path":
         path = (
-            io.path.Path("game_data", is_relative=True)
+            core.Path("game_data", is_relative=True)
             .add(self.latest_version)
             .add(pack_name)
         )
@@ -49,7 +46,7 @@ class GameDataGetter:
         path = path.add(file_name)
         return path
 
-    def save_file(self, pack_name: str, file_name: str) -> Optional[io.data.Data]:
+    def save_file(self, pack_name: str, file_name: str) -> Optional["core.Data"]:
         data = self.get_file(pack_name, file_name)
         if data is None:
             return None
@@ -64,7 +61,7 @@ class GameDataGetter:
 
     def download_from_path(
         self, path: str, retries: int = 2, display_text: bool = True
-    ) -> Optional[io.data.Data]:
+    ) -> Optional["core.Data"]:
         pack_name, file_name = path.split("/")
         return self.download(pack_name, file_name, retries, display_text)
 
@@ -74,7 +71,7 @@ class GameDataGetter:
         file_name: str,
         retries: int = 2,
         display_text: bool = True,
-    ) -> Optional[io.data.Data]:
+    ) -> Optional["core.Data"]:
         retries -= 1
 
         if self.is_downloaded(pack_name, file_name):
@@ -99,14 +96,14 @@ class GameDataGetter:
 
     def download_all(
         self, pack_name: str, file_names: list[str], display_text: bool = True
-    ) -> list[Optional[tuple[str, io.data.Data]]]:
+    ) -> list[Optional[tuple[str, "core.Data"]]]:
         callables: list[Callable[..., Any]] = []
         args: list[tuple[str, str, int, bool]] = []
         for file_name in file_names:
             callables.append(self.download)
             args.append((pack_name, file_name, 2, display_text))
-        io.thread_helper.run_many(callables, args)
-        data_list: list[Optional[tuple[str, io.data.Data]]] = []
+        core.thread_run_many(callables, args)
+        data_list: list[Optional[tuple[str, core.Data]]] = []
         for file_name in file_names:
             path = self.get_file_path(pack_name, file_name)
             if not path.exists():

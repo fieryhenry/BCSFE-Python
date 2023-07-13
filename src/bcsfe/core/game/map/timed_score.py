@@ -1,4 +1,4 @@
-from bcsfe.core import game_version, io
+from bcsfe import core
 
 
 class Stage:
@@ -10,10 +10,10 @@ class Stage:
         return Stage(0)
 
     @staticmethod
-    def read(stream: io.data.Data) -> "Stage":
+    def read(stream: "core.Data") -> "Stage":
         return Stage(stream.read_int())
 
-    def write(self, stream: io.data.Data):
+    def write(self, stream: "core.Data"):
         stream.write_int(self.score)
 
     def serialize(self) -> int:
@@ -39,13 +39,13 @@ class SubChapter:
         return SubChapter([Stage.init() for _ in range(total_stages)])
 
     @staticmethod
-    def read(stream: io.data.Data, total_stages: int) -> "SubChapter":
+    def read(stream: "core.Data", total_stages: int) -> "SubChapter":
         stages: list[Stage] = []
         for _ in range(total_stages):
             stages.append(Stage.read(stream))
         return SubChapter(stages)
 
-    def write(self, stream: io.data.Data):
+    def write(self, stream: "core.Data"):
         for stage in self.stages:
             stage.write(stream)
 
@@ -75,14 +75,14 @@ class SubChapterStars:
 
     @staticmethod
     def read(
-        stream: io.data.Data, total_stages: int, total_stars: int
+        stream: "core.Data", total_stages: int, total_stars: int
     ) -> "SubChapterStars":
         sub_chapters: list[SubChapter] = []
         for _ in range(total_stars):
             sub_chapters.append(SubChapter.read(stream, total_stages))
         return SubChapterStars(sub_chapters)
 
-    def write(self, stream: io.data.Data):
+    def write(self, stream: "core.Data"):
         for sub_chapter in self.sub_chapters:
             sub_chapter.write(stream)
 
@@ -102,14 +102,14 @@ class SubChapterStars:
         return self.__repr__()
 
 
-class Chapters:
+class TimedScoreChapters:
     def __init__(self, sub_chapters: list[SubChapterStars]):
         self.sub_chapters = sub_chapters
 
     @staticmethod
-    def init(gv: game_version.GameVersion) -> "Chapters":
+    def init(gv: "core.GameVersion") -> "TimedScoreChapters":
         if gv < 20:
-            return Chapters([])
+            return TimedScoreChapters([])
         if gv <= 33:
             total_subchapters = 50
             total_stages = 12
@@ -122,7 +122,7 @@ class Chapters:
             total_subchapters = 0
             total_stages = 0
             total_stars = 0
-        return Chapters(
+        return TimedScoreChapters(
             [
                 SubChapterStars.init(total_stages, total_stars)
                 for _ in range(total_subchapters)
@@ -130,9 +130,9 @@ class Chapters:
         )
 
     @staticmethod
-    def read(stream: io.data.Data, gv: game_version.GameVersion) -> "Chapters":
+    def read(stream: "core.Data", gv: "core.GameVersion") -> "TimedScoreChapters":
         if gv < 20:
-            return Chapters([])
+            return TimedScoreChapters([])
         if gv <= 33:
             total_subchapters = 50
             total_stages = 12
@@ -148,9 +148,9 @@ class Chapters:
         sub_chapters: list[SubChapterStars] = []
         for _ in range(total_subchapters):
             sub_chapters.append(SubChapterStars.read(stream, total_stages, total_stars))
-        return Chapters(sub_chapters)
+        return TimedScoreChapters(sub_chapters)
 
-    def write(self, stream: io.data.Data, gv: game_version.GameVersion):
+    def write(self, stream: "core.Data", gv: "core.GameVersion"):
         if gv < 20:
             return
         if gv <= 33:
@@ -174,8 +174,8 @@ class Chapters:
         return [sub_chapter.serialize() for sub_chapter in self.sub_chapters]
 
     @staticmethod
-    def deserialize(data: list[list[list[int]]]) -> "Chapters":
-        return Chapters(
+    def deserialize(data: list[list[list[int]]]) -> "TimedScoreChapters":
+        return TimedScoreChapters(
             [SubChapterStars.deserialize(sub_chapter) for sub_chapter in data]
         )
 

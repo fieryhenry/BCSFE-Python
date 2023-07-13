@@ -1,5 +1,5 @@
 from typing import Any
-from bcsfe.core import game_version, io
+from bcsfe import core
 
 
 class EventStage:
@@ -11,14 +11,14 @@ class EventStage:
         return EventStage(0)
 
     @staticmethod
-    def read(data: io.data.Data, is_int: bool) -> "EventStage":
+    def read(data: "core.Data", is_int: bool) -> "EventStage":
         if is_int:
             clear_amount = data.read_int()
         else:
             clear_amount = data.read_short()
         return EventStage(clear_amount)
 
-    def write(self, data: io.data.Data, is_int: bool):
+    def write(self, data: "core.Data", is_int: bool):
         if is_int:
             data.write_int(self.clear_amount)
         else:
@@ -52,45 +52,45 @@ class EventSubChapter:
         return EventSubChapter(0, total_stages)
 
     @staticmethod
-    def read_selected_stage(data: io.data.Data, is_int: bool) -> "EventSubChapter":
+    def read_selected_stage(data: "core.Data", is_int: bool) -> "EventSubChapter":
         if is_int:
             selected_stage = data.read_int()
         else:
             selected_stage = data.read_byte()
         return EventSubChapter(selected_stage)
 
-    def write_selected_stage(self, data: io.data.Data, is_int: bool):
+    def write_selected_stage(self, data: "core.Data", is_int: bool):
         if is_int:
             data.write_int(self.selected_stage)
         else:
             data.write_byte(self.selected_stage)
 
-    def read_clear_progress(self, data: io.data.Data, is_int: bool):
+    def read_clear_progress(self, data: "core.Data", is_int: bool):
         if is_int:
             self.clear_progress = data.read_int()
         else:
             self.clear_progress = data.read_byte()
 
-    def write_clear_progress(self, data: io.data.Data, is_int: bool):
+    def write_clear_progress(self, data: "core.Data", is_int: bool):
         if is_int:
             data.write_int(self.clear_progress)
         else:
             data.write_byte(self.clear_progress)
 
-    def read_stages(self, data: io.data.Data, total_stages: int, is_int: bool):
+    def read_stages(self, data: "core.Data", total_stages: int, is_int: bool):
         self.stages = [EventStage.read(data, is_int) for _ in range(total_stages)]
 
-    def write_stages(self, data: io.data.Data, is_int: bool):
+    def write_stages(self, data: "core.Data", is_int: bool):
         for stage in self.stages:
             stage.write(data, is_int)
 
-    def read_chapter_unlock_state(self, data: io.data.Data, is_int: bool):
+    def read_chapter_unlock_state(self, data: "core.Data", is_int: bool):
         if is_int:
             self.chapter_unlock_state = data.read_int()
         else:
             self.chapter_unlock_state = data.read_byte()
 
-    def write_chapter_unlock_state(self, data: io.data.Data, is_int: bool):
+    def write_chapter_unlock_state(self, data: "core.Data", is_int: bool):
         if is_int:
             data.write_int(self.chapter_unlock_state)
         else:
@@ -136,7 +136,7 @@ class EventSubChapterStars:
 
     @staticmethod
     def read_selected_stage(
-        data: io.data.Data, total_stars: int, is_int: bool
+        data: "core.Data", total_stars: int, is_int: bool
     ) -> "EventSubChapterStars":
         chapters = [
             EventSubChapter.read_selected_stage(data, is_int)
@@ -144,38 +144,38 @@ class EventSubChapterStars:
         ]
         return EventSubChapterStars(chapters)
 
-    def write_selected_stage(self, data: io.data.Data, is_int: bool):
+    def write_selected_stage(self, data: "core.Data", is_int: bool):
         for chapter in self.chapters:
             chapter.write_selected_stage(data, is_int)
 
-    def read_clear_progress(self, data: io.data.Data, is_int: bool):
+    def read_clear_progress(self, data: "core.Data", is_int: bool):
         for chapter in self.chapters:
             chapter.read_clear_progress(data, is_int)
 
-    def write_clear_progress(self, data: io.data.Data, is_int: bool):
+    def write_clear_progress(self, data: "core.Data", is_int: bool):
         for chapter in self.chapters:
             chapter.write_clear_progress(data, is_int)
 
-    def read_stages(self, data: io.data.Data, total_stages: int, is_int: bool):
+    def read_stages(self, data: "core.Data", total_stages: int, is_int: bool):
         for chapter in self.chapters:
             chapter.read_stages(data, total_stages, is_int)
 
-    def write_stages(self, data: io.data.Data, is_int: bool):
+    def write_stages(self, data: "core.Data", is_int: bool):
         for chapter in self.chapters:
             chapter.write_stages(data, is_int)
 
-    def read_chapter_unlock_state(self, data: io.data.Data, is_int: bool):
+    def read_chapter_unlock_state(self, data: "core.Data", is_int: bool):
         for chapter in self.chapters:
             chapter.read_chapter_unlock_state(data, is_int)
 
-    def write_chapter_unlock_state(self, data: io.data.Data, is_int: bool):
+    def write_chapter_unlock_state(self, data: "core.Data", is_int: bool):
         for chapter in self.chapters:
             chapter.write_chapter_unlock_state(data, is_int)
 
-    def read_legend_restrictions(self, data: io.data.Data):
+    def read_legend_restrictions(self, data: "core.Data"):
         self.legend_restriction = data.read_int()
 
-    def write_legend_restrictions(self, data: io.data.Data):
+    def write_legend_restrictions(self, data: "core.Data"):
         data.write_int(self.legend_restriction)
 
     def serialize(self) -> dict[str, Any]:
@@ -212,7 +212,7 @@ class EventChapterGroup:
 
     @staticmethod
     def read_selected_stage(
-        data: io.data.Data, total_subchapters: int, total_stars: int, is_int: bool
+        data: "core.Data", total_subchapters: int, total_stars: int, is_int: bool
     ) -> "EventChapterGroup":
         chapters = [
             EventSubChapterStars.read_selected_stage(data, total_stars, is_int)
@@ -220,39 +220,39 @@ class EventChapterGroup:
         ]
         return EventChapterGroup(chapters)
 
-    def write_selected_stage(self, data: io.data.Data, is_int: bool):
+    def write_selected_stage(self, data: "core.Data", is_int: bool):
         for chapter in self.chapters:
             chapter.write_selected_stage(data, is_int)
 
-    def read_clear_progress(self, data: io.data.Data, is_int: bool):
+    def read_clear_progress(self, data: "core.Data", is_int: bool):
         for chapter in self.chapters:
             chapter.read_clear_progress(data, is_int)
 
-    def write_clear_progress(self, data: io.data.Data, is_int: bool):
+    def write_clear_progress(self, data: "core.Data", is_int: bool):
         for chapter in self.chapters:
             chapter.write_clear_progress(data, is_int)
 
-    def read_stages(self, data: io.data.Data, total_stages: int, is_int: bool):
+    def read_stages(self, data: "core.Data", total_stages: int, is_int: bool):
         for chapter in self.chapters:
             chapter.read_stages(data, total_stages, is_int)
 
-    def write_stages(self, data: io.data.Data, is_int: bool):
+    def write_stages(self, data: "core.Data", is_int: bool):
         for chapter in self.chapters:
             chapter.write_stages(data, is_int)
 
-    def read_chapter_unlock_state(self, data: io.data.Data, is_int: bool):
+    def read_chapter_unlock_state(self, data: "core.Data", is_int: bool):
         for chapter in self.chapters:
             chapter.read_chapter_unlock_state(data, is_int)
 
-    def write_chapter_unlock_state(self, data: io.data.Data, is_int: bool):
+    def write_chapter_unlock_state(self, data: "core.Data", is_int: bool):
         for chapter in self.chapters:
             chapter.write_chapter_unlock_state(data, is_int)
 
-    def read_legend_restrictions(self, data: io.data.Data):
+    def read_legend_restrictions(self, data: "core.Data"):
         for chapter in self.chapters:
             chapter.read_legend_restrictions(data)
 
-    def write_legend_restrictions(self, data: io.data.Data):
+    def write_legend_restrictions(self, data: "core.Data"):
         for chapter in self.chapters:
             chapter.write_legend_restrictions(data)
 
@@ -280,7 +280,7 @@ class EventChapters:
         self.stages_reward_claimed: list[int] = []
 
     @staticmethod
-    def init(gv: "game_version.GameVersion") -> "EventChapters":
+    def init(gv: "core.GameVersion") -> "EventChapters":
         if gv < 20:
             return EventChapters([])
         if gv <= 32:
@@ -304,7 +304,7 @@ class EventChapters:
         )
 
     @staticmethod
-    def read(data: io.data.Data, gv: "game_version.GameVersion") -> "EventChapters":
+    def read(data: "core.Data", gv: "core.GameVersion") -> "EventChapters":
         if gv < 20:
             return EventChapters([])
         stages_per_subchapter = 0
@@ -426,7 +426,7 @@ class EventChapters:
             stages_per_subchapter,
         )
 
-    def write(self, data: io.data.Data, gv: "game_version.GameVersion"):
+    def write(self, data: "core.Data", gv: "core.GameVersion"):
         (
             total_map_types,
             total_subchapters,
@@ -494,9 +494,7 @@ class EventChapters:
         for chapter in self.chapters:
             chapter.write_chapter_unlock_state(data, is_int)
 
-    def read_legend_restrictions(
-        self, data: io.data.Data, gv: "game_version.GameVersion"
-    ):
+    def read_legend_restrictions(self, data: "core.Data", gv: "core.GameVersion"):
         if gv < 20:
             return
         if gv < 33:
@@ -512,9 +510,7 @@ class EventChapters:
         for chapter in self.chapters:
             chapter.read_legend_restrictions(data)
 
-    def write_legend_restrictions(
-        self, data: io.data.Data, gv: "game_version.GameVersion"
-    ):
+    def write_legend_restrictions(self, data: "core.Data", gv: "core.GameVersion"):
         if gv < 20:
             return
         if gv >= 41:
@@ -527,13 +523,13 @@ class EventChapters:
         for chapter in self.chapters:
             chapter.write_legend_restrictions(data)
 
-    def read_dicts(self, data: io.data.Data):
+    def read_dicts(self, data: "core.Data"):
         self.completed_one_level_in_chapter = data.read_int_int_dict()
         self.displayed_cleared_limit_text = data.read_int_bool_dict()
         self.event_start_dates = data.read_int_int_dict()
         self.stages_reward_claimed = data.read_int_list()
 
-    def write_dicts(self, data: io.data.Data):
+    def write_dicts(self, data: "core.Data"):
         data.write_int_int_dict(self.completed_one_level_in_chapter)
         data.write_int_bool_dict(self.displayed_cleared_limit_text)
         data.write_int_int_dict(self.event_start_dates)

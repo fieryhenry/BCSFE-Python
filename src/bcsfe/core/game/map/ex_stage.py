@@ -1,4 +1,4 @@
-from bcsfe.core import io
+from bcsfe import core
 
 
 class Stage:
@@ -10,11 +10,11 @@ class Stage:
         return Stage(0)
 
     @staticmethod
-    def read(stream: io.data.Data) -> "Stage":
+    def read(stream: "core.Data") -> "Stage":
         clear_amount = stream.read_int()
         return Stage(clear_amount)
 
-    def write(self, stream: io.data.Data):
+    def write(self, stream: "core.Data"):
         stream.write_int(self.clear_amount)
 
     def serialize(self) -> int:
@@ -40,14 +40,14 @@ class Chapter:
         return Chapter([Stage.init() for _ in range(12)])
 
     @staticmethod
-    def read(stream: io.data.Data) -> "Chapter":
+    def read(stream: "core.Data") -> "Chapter":
         total = 12
         stages: list[Stage] = []
         for _ in range(total):
             stages.append(Stage.read(stream))
         return Chapter(stages)
 
-    def write(self, stream: io.data.Data):
+    def write(self, stream: "core.Data"):
         for stage in self.stages:
             stage.write(stream)
 
@@ -65,24 +65,24 @@ class Chapter:
         return f"Chapter(stages={self.stages!r})"
 
 
-class Chapters:
+class ExChapters:
     def __init__(self, chapters: list[Chapter]):
         self.chapters = chapters
 
     @staticmethod
-    def init() -> "Chapters":
-        return Chapters([])
+    def init() -> "ExChapters":
+        return ExChapters([])
 
     @staticmethod
-    def read(stream: io.data.Data) -> "Chapters":
+    def read(stream: "core.Data") -> "ExChapters":
         total = stream.read_int()
         chapters: list[Chapter] = []
         for _ in range(total):
             chapters.append(Chapter.read(stream))
 
-        return Chapters(chapters)
+        return ExChapters(chapters)
 
-    def write(self, stream: io.data.Data):
+    def write(self, stream: "core.Data"):
         stream.write_int(len(self.chapters))
         for chapter in self.chapters:
             chapter.write(stream)
@@ -91,8 +91,8 @@ class Chapters:
         return [chapter.serialize() for chapter in self.chapters]
 
     @staticmethod
-    def deserialize(data: list[list[int]]) -> "Chapters":
-        return Chapters([Chapter.deserialize(chapter) for chapter in data])
+    def deserialize(data: list[list[int]]) -> "ExChapters":
+        return ExChapters([Chapter.deserialize(chapter) for chapter in data])
 
     def __repr__(self) -> str:
         return f"Chapters(chapters={self.chapters!r})"

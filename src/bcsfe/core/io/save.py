@@ -1,7 +1,6 @@
 import base64
 from typing import Any, Optional, Union
-from bcsfe.core.io import data, path
-from bcsfe.core import country_code, game_version, game, crypto
+from bcsfe import core
 import datetime
 
 
@@ -12,14 +11,14 @@ class CantDetectSaveCCError(Exception):
 class SaveFile:
     def __init__(
         self,
-        dt: Optional[data.Data] = None,
-        cc: Optional[country_code.CountryCode] = None,
+        dt: Optional["core.Data"] = None,
+        cc: Optional["core.CountryCode"] = None,
         load: bool = True,
-        gv: Optional[game_version.GameVersion] = None,
+        gv: Optional["core.GameVersion"] = None,
     ):
-        self.save_path: Optional[path.Path] = None
+        self.save_path: Optional[core.Path] = None
         if dt is None:
-            self.data = data.Data()
+            self.data = core.Data()
         else:
             self.data = dt
         detected_cc = self.detect_cc()
@@ -36,16 +35,16 @@ class SaveFile:
                 self.real_cc = detected_cc
 
         self.latest_game_data_version: Optional[str] = None
-        self.localizable: Optional[game.localizable.Localizable] = None
+        self.localizable: Optional[core.Localizable] = None
 
         self.init_save(gv)
 
         if dt is not None and load:
             self.load_wrapper()
 
-    def get_localizable(self) -> game.localizable.Localizable:
+    def get_localizable(self) -> "core.Localizable":
         if self.localizable is None:
-            self.localizable = game.localizable.Localizable(self)
+            self.localizable = core.Localizable(self)
         return self.localizable
 
     def load_save_file(self, other: "SaveFile"):
@@ -55,8 +54,8 @@ class SaveFile:
         self.init_save(other.game_version)
         self.load_wrapper()
 
-    def detect_cc(self) -> Optional[country_code.CountryCode]:
-        for cc in country_code.CountryCode.get_all():
+    def detect_cc(self) -> Optional["core.CountryCode"]:
+        for cc in core.CountryCode.get_all():
             self.cc = cc
             if self.verify_hash():
                 return cc
@@ -94,8 +93,8 @@ class SaveFile:
             data_to_hash = self.data.read_bytes(len(self.data) - 32)
         else:
             data_to_hash = self.data.read_bytes(len(self.data))
-        data_to_hash = data.Data(salt.encode("utf-8") + data_to_hash)
-        hash = crypto.Hash(crypto.HashAlgorithm.MD5).get_hash(data_to_hash)
+        data_to_hash = core.Data(salt.encode("utf-8") + data_to_hash)
+        hash = core.Hash(core.HashAlgorithm.MD5).get_hash(data_to_hash)
         return hash.to_hex()
 
     def set_hash(self, add: bool = False):
@@ -122,10 +121,10 @@ class SaveFile:
                 "Save file loaded incorrectly. GV values were not as expected"
             )
 
-    def set_gv(self, gv: game_version.GameVersion):
+    def set_gv(self, gv: "core.GameVersion"):
         self.game_version = gv
 
-    def set_cc(self, cc: country_code.CountryCode):
+    def set_cc(self, cc: "core.CountryCode"):
         self.cc = cc
 
     def load(self):
@@ -136,7 +135,7 @@ class SaveFile:
 
         self.dsts: list[bool] = []
 
-        self.game_version = game_version.GameVersion(self.data.read_int())
+        self.game_version = core.GameVersion(self.data.read_int())
 
         self.ub1 = self.data.read_bool()
 
@@ -187,21 +186,21 @@ class SaveFile:
         self.ui8 = self.data.read_int()
         self.unlocked_ending = self.data.read_int()
 
-        self.lineups = game.battle.slots.LineUps.read(self.data, self.game_version)
+        self.lineups = core.LineUps.read(self.data, self.game_version)
 
-        self.stamp_data = game.catbase.stamp.StampData.read(self.data)
-        self.story = game.map.story.Chapters.read(self.data)
+        self.stamp_data = core.StampData.read(self.data)
+        self.story = core.StoryChapters.read(self.data)
 
         if 20 <= self.game_version and self.game_version <= 25:
             self.enemy_guide = self.data.read_int_list(231)
         else:
             self.enemy_guide = self.data.read_int_list()
 
-        self.cats = game.catbase.cat.Cats.read_unlocked(self.data, self.game_version)
+        self.cats = core.Cats.read_unlocked(self.data, self.game_version)
         self.cats.read_upgrade(self.data, self.game_version)
         self.cats.read_current_form(self.data, self.game_version)
 
-        self.special_skills = game.catbase.special_skill.Skills.read_upgrades(self.data)
+        self.special_skills = core.SpecialSkills.read_upgrades(self.data)
         if self.game_version <= 25:
             self.menu_unlocks = self.data.read_int_list(5)
             self.unlock_popups_0 = self.data.read_int_list(5)
@@ -212,7 +211,7 @@ class SaveFile:
             self.menu_unlocks = self.data.read_int_list()
             self.unlock_popups_0 = self.data.read_int_list()
 
-        self.battle_items = game.battle.battle_items.BattleItems.read_items(self.data)
+        self.battle_items = core.BattleItems.read_items(self.data)
 
         if self.game_version <= 26:
             self.new_dialogs_2 = self.data.read_int_list(17)
@@ -244,7 +243,7 @@ class SaveFile:
         self.ui10 = self.data.read_int()
         self.save_data_4_hash = self.data.read_string()
 
-        self.mysale = game.catbase.my_sale.MySale.read_bonus_hash(self.data)
+        self.mysale = core.MySale.read_bonus_hash(self.data)
         self.chara_flags = self.data.read_int_list(length=2)
 
         if self.game_version <= 37:
@@ -260,9 +259,7 @@ class SaveFile:
         self.special_skills.read_gatya_seen(self.data)
         self.cats.read_storage(self.data, self.game_version)
 
-        self.event_stages = game.map.event.EventChapters.read(
-            self.data, self.game_version
-        )
+        self.event_stages = core.EventChapters.read(self.data, self.game_version)
         self.itf1_ending = self.data.read_int()
         self.continue_flag = self.data.read_int()
         if 20 <= self.game_version:
@@ -273,9 +270,7 @@ class SaveFile:
         elif 26 <= self.game_version:
             self.unit_drops = self.data.read_int_list()
 
-        self.gatya = game.catbase.gatya.Gatya.read_rare_normal_seed(
-            self.data, self.game_version
-        )
+        self.gatya = core.Gatya.read_rare_normal_seed(self.data, self.game_version)
 
         self.get_event_data = self.data.read_bool()
         self.achievements = self.data.read_bool_list(length=7)
@@ -331,9 +326,7 @@ class SaveFile:
         self.cats.read_max_upgrade_levels(self.data, self.game_version)
         self.special_skills.read_max_upgrade_levels(self.data)
 
-        self.user_rank_rewards = game.catbase.user_rank_rewards.Rewards.read(
-            self.data, self.game_version
-        )
+        self.user_rank_rewards = core.UserRankRewards.read(self.data, self.game_version)
 
         if not self.not_jp():
             self.m_dGetTimeSave2 = self.data.read_double()
@@ -345,15 +338,15 @@ class SaveFile:
         self.transfer_flag = self.data.read_bool()
 
         if 20 <= self.game_version:
-            self.item_reward_stages = game.map.item_reward_stage.Chapters.read(
+            self.item_reward_stages = core.ItemRewardChapters.read(
                 self.data, self.game_version
             )
 
-            self.timed_score_stages = game.map.timed_score.Chapters.read(
+            self.timed_score_stages = core.TimedScoreChapters.read(
                 self.data, self.game_version
             )
             self.inquiry_code = self.data.read_string()
-            self.officer_pass = game.catbase.officer_pass.OfficerPass.read(self.data)
+            self.officer_pass = core.OfficerPass.read(self.data)
             self.has_account = self.data.read_byte()
             self.backup_state = self.data.read_int()
 
@@ -423,23 +416,21 @@ class SaveFile:
             self.cats.read_catseyes_used(self.data)
             self.catseyes = self.data.read_int_list()
             self.catamins = self.data.read_int_list()
-            self.gamatoto = game.gamoto.gamatoto.Gamatoto.read(self.data)
+            self.gamatoto = core.Gamatoto.read(self.data)
 
             self.unlock_popups_6 = self.data.read_bool_list()
-            self.ex_stages = game.map.ex_stage.Chapters.read(self.data)
+            self.ex_stages = core.ExChapters.read(self.data)
 
             self.gv_53 = self.data.read_int()
         if 29 <= self.game_version:
             self.gamatoto.read_2(self.data)
             self.gv_54 = self.data.read_int()
-            self.item_pack = game.catbase.item_pack.ItemPack.read(self.data)
+            self.item_pack = core.ItemPack.read(self.data)
             self.gv_54 = self.data.read_int()
         if self.game_version >= 30:
             self.gamatoto.read_skin(self.data)
             self.platinum_tickets = self.data.read_int()
-            self.logins = game.catbase.login_bonuses.LoginBonus.read(
-                self.data, self.game_version
-            )
+            self.logins = core.LoginBonus.read(self.data, self.game_version)
             if self.game_version < 101000:
                 self.reset_item_reward_flags = self.data.read_bool_list()
 
@@ -466,15 +457,15 @@ class SaveFile:
             self.gv_57 = self.data.read_int()
 
         if self.game_version >= 33:
-            self.dojo = game.map.dojo.Dojo.read_chapters(self.data)
+            self.dojo = core.Dojo.read_chapters(self.data)
             self.dojo.read_item_locks(self.data)
             self.gv_58 = self.data.read_int()
 
         if self.game_version >= 34:
             self.last_checked_zombie_time = self.data.read_double()
-            self.outbreaks = game.map.outbreaks.Outbreaks.read_chapters(self.data)
+            self.outbreaks = core.Outbreaks.read_chapters(self.data)
             self.outbreaks.read_2(self.data)
-            self.scheme_items = game.catbase.scheme_items.SchemeItems.read(self.data)
+            self.scheme_items = core.SchemeItems.read(self.data)
 
         if self.game_version >= 35:
             self.outbreaks.read_current_outbreaks(self.data, self.game_version)
@@ -489,33 +480,29 @@ class SaveFile:
             self.gv_61 = self.data.read_int()
 
         if self.game_version >= 38:
-            self.unlock_popups = game.catbase.unlock_popups.Popups.read(self.data)
+            self.unlock_popups = core.UnlockPopups.read(self.data)
             self.gv_63 = self.data.read_int()
 
         if self.game_version >= 39:
-            self.ototo = game.gamoto.ototo.Ototo.read(self.data)
+            self.ototo = core.Ototo.read(self.data)
             self.ototo.read_2(self.data, self.game_version)
             self.last_checked_castle_time = self.data.read_double()
             self.gv_64 = self.data.read_int()
 
         if self.game_version >= 40:
-            self.beacon_base = game.catbase.beacon_base.BeaconEventListScene.read(
-                self.data
-            )
+            self.beacon_base = core.BeaconEventListScene.read(self.data)
             self.gv_65 = self.data.read_int()
 
         if self.game_version >= 41:
-            self.tower = game.map.tower.Tower.read(self.data)
-            self.missions = game.catbase.mission.Missions.read(
-                self.data, self.game_version
-            )
+            self.tower = core.TowerChapters.read(self.data)
+            self.missions = core.Missions.read(self.data, self.game_version)
             self.tower.read_item_obtain_states(self.data)
             self.gv_66 = self.data.read_int()
 
         if self.game_version >= 42:
             self.dojo.read_ranking(self.data)
             self.item_pack.read_three_days(self.data)
-            self.challenge = game.map.challenge.Challenge.read(self.data)
+            self.challenge = core.ChallengeChapters.read(self.data)
             self.challenge.read_scores(self.data)
             self.challenge.read_popup(self.data)
             self.gv_67 = self.data.read_int()
@@ -536,15 +523,15 @@ class SaveFile:
             self.gv_71 = self.data.read_int()
 
         if self.game_version < 90300:
-            self.map_resets = game.map.map_reset.MapResets.read(self.data)
+            self.map_resets = core.MapResets.read(self.data)
             self.gv_72 = self.data.read_int()
 
         if self.game_version >= 51:
-            self.uncanny = game.map.uncanny.Uncanny.read(self.data)
+            self.uncanny = core.UncannyChapters.read(self.data)
             self.gv_76 = self.data.read_int()
 
         if self.game_version >= 77:
-            self.uncanny_2 = game.map.uncanny.Uncanny.read(self.data)
+            self.uncanny_2 = core.UncannyChapters.read(self.data)
 
             self.event_capsules_3 = self.data.read_int_list()
 
@@ -576,7 +563,7 @@ class SaveFile:
         if self.game_version >= 80600:
             length = self.data.read_short()
             self.uil6 = self.data.read_int_list(length=length)
-            self.legend_quest = game.map.legend_quest.Chapters.read(self.data)
+            self.legend_quest = core.LegendQuestChapters.read(self.data)
             self.ush1 = self.data.read_short()
             self.uby1 = self.data.read_byte()
             self.gv_80600 = self.data.read_int()
@@ -601,7 +588,7 @@ class SaveFile:
             self.gv_81000 = self.data.read_int()
 
         if self.game_version >= 90000:
-            self.medals = game.catbase.medals.Medals.read(self.data)
+            self.medals = core.Medals.read(self.data)
             total = self.data.read_short()
             self.ushbd1 = self.data.read_short_bool_dict(total)
             length = self.data.read_short()
@@ -654,19 +641,19 @@ class SaveFile:
             length = self.data.read_short()
             self.uidd1 = self.data.read_int_double_dict(length)
 
-            self.gauntlets = game.map.gauntlets.Chapters.read(self.data)
+            self.gauntlets = core.GauntletChapters.read(self.data)
 
             self.gv_90300 = self.data.read_int()
 
         if self.game_version >= 90400:
-            self.gauntlets_2 = game.map.gauntlets.Chapters.read(self.data)
-            self.enigma = game.map.enigma.Enigma.read(self.data)
-            self.cleared_slots = game.battle.cleared_slots.ClearedSlots.read(self.data)
+            self.gauntlets_2 = core.GauntletChapters.read(self.data)
+            self.enigma = core.Enigma.read(self.data)
+            self.cleared_slots = core.ClearedSlots.read(self.data)
 
             self.gv_90400 = self.data.read_int()
 
         if self.game_version >= 90500:
-            self.collab_gauntlets = game.map.gauntlets.Chapters.read(self.data)
+            self.collab_gauntlets = core.GauntletChapters.read(self.data)
             self.ub8 = self.data.read_bool()
             self.ud2 = self.data.read_double()
             self.ud3 = self.data.read_double()
@@ -680,9 +667,7 @@ class SaveFile:
             self.gv_90500 = self.data.read_int()
 
         if self.game_version >= 90700:
-            self.talent_orbs = game.catbase.talent_orbs.TalentOrbs.read(
-                self.data, self.game_version
-            )
+            self.talent_orbs = core.TalentOrbs.read(self.data, self.game_version)
             length = self.data.read_short()
             self.uidiid2: dict[int, dict[int, int]] = {}
             for _ in range(length):
@@ -709,7 +694,7 @@ class SaveFile:
             self.gv_90800 = self.data.read_int()
 
         if self.game_version >= 90900:
-            self.cat_shrine = game.gamoto.cat_shrine.CatShrine.read(self.data)
+            self.cat_shrine = core.CatShrine.read(self.data)
             self.ud6 = self.data.read_double()
             self.ud7 = self.data.read_double()
 
@@ -805,7 +790,7 @@ class SaveFile:
             self.gv_100700 = self.data.read_int()
 
         if self.game_version >= 100900:
-            self.aku = game.map.aku.Chapters.read(self.data)
+            self.aku = core.AkuChapters.read(self.data)
             self.ub16 = self.data.read_bool()
             self.ub17 = self.data.read_bool()
 
@@ -859,7 +844,7 @@ class SaveFile:
             self.gv_110000 = self.data.read_int()
 
         if self.game_version >= 110500:
-            self.behemoth_culling = game.map.gauntlets.Chapters.read(self.data)
+            self.behemoth_culling = core.GauntletChapters.read(self.data)
             self.ub19 = self.data.read_bool()
 
             self.gv_110500 = self.data.read_int()
@@ -938,7 +923,7 @@ class SaveFile:
             self.gv_111000 = self.data.read_int()
 
         if self.game_version >= 120000:
-            self.zero_legends = game.map.zero_legends.Chapters.read(self.data)
+            self.zero_legends = core.ZeroLegendsChapters.read(self.data)
             self.uby12 = self.data.read_byte()
 
             self.gv_120000 = self.data.read_int()
@@ -963,7 +948,7 @@ class SaveFile:
 
         self.remaining_data = self.data.read_to_end(32)
 
-    def save(self, data: data.Data):
+    def save(self, data: "core.Data"):
         self.data = data
         self.dst_index = 0
         self.data.clear()
@@ -1770,13 +1755,13 @@ class SaveFile:
 
         self.data.write_bytes(self.remaining_data)
 
-    def to_data(self) -> "data.Data":
-        dt = data.Data()
+    def to_data(self) -> "core.Data":
+        dt = core.Data()
         self.save(dt)
         self.set_hash(add=True)
         return dt
 
-    def to_file(self, path: path.Path) -> None:
+    def to_file(self, path: "core.Path") -> None:
         dt = self.to_data()
         dt.to_file(path)
 
@@ -2123,10 +2108,10 @@ class SaveFile:
 
     @staticmethod
     def from_dict(data: dict[str, Any]):
-        cc = country_code.CountryCode(data.get("cc", None))
+        cc = core.CountryCode(data.get("cc", None))
         save_file = SaveFile(cc=cc)
         save_file.dsts = data.get("dsts", [])
-        save_file.game_version = game_version.GameVersion(data.get("game_version", 0))
+        save_file.game_version = core.GameVersion(data.get("game_version", 0))
         save_file.ub1 = data.get("ub1", False)
         save_file.mute_bgm = data.get("mute_bgm", False)
         save_file.mute_se = data.get("mute_se", False)
@@ -2154,21 +2139,17 @@ class SaveFile:
         save_file.cleared_eoc_1 = data.get("cleared_eoc_1", 0)
         save_file.ui8 = data.get("ui8", 0)
         save_file.unlocked_ending = data.get("unlocked_ending", 0)
-        save_file.lineups = game.battle.slots.LineUps.deserialize(
-            data.get("lineups", {})
-        )
-        save_file.stamp_data = game.catbase.stamp.StampData.deserialize(
-            data.get("stamp_data", {})
-        )
-        save_file.story = game.map.story.Chapters.deserialize(data.get("story", []))
+        save_file.lineups = core.LineUps.deserialize(data.get("lineups", {}))
+        save_file.stamp_data = core.StampData.deserialize(data.get("stamp_data", {}))
+        save_file.story = core.StoryChapters.deserialize(data.get("story", []))
         save_file.enemy_guide = data.get("enemy_guide", [])
-        save_file.cats = game.catbase.cat.Cats.deserialize(data.get("cats", {}))
-        save_file.special_skills = game.catbase.special_skill.Skills.deserialize(
+        save_file.cats = core.Cats.deserialize(data.get("cats", {}))
+        save_file.special_skills = core.SpecialSkills.deserialize(
             data.get("special_skills", [])
         )
         save_file.menu_unlocks = data.get("menu_unlocks", [])
         save_file.unlock_popups_0 = data.get("unlock_popups_0", [])
-        save_file.battle_items = game.battle.battle_items.BattleItems.deserialize(
+        save_file.battle_items = core.BattleItems.deserialize(
             data.get("battle_items", {})
         )
         save_file.new_dialogs_2 = data.get("new_dialogs_2", [])
@@ -2185,23 +2166,21 @@ class SaveFile:
         save_file.ios_android_month = data.get("ios_android_month", 0)
         save_file.ui10 = data.get("ui10", 0)
         save_file.save_data_4_hash = data.get("save_data_4_hash", "")
-        save_file.mysale = game.catbase.my_sale.MySale.deserialize(
-            data.get("mysale", {})
-        )
+        save_file.mysale = core.MySale.deserialize(data.get("mysale", {}))
         save_file.chara_flags = data.get("chara_flags", [])
         save_file.uim1 = data.get("uim1", 0)
         save_file.ubm1 = data.get("ubm1", False)
         save_file.chara_flags_2 = data.get("chara_flags_2", [])
         save_file.normal_tickets = data.get("normal_tickets", 0)
         save_file.rare_tickets = data.get("rare_tickets", 0)
-        save_file.event_stages = game.map.event.EventChapters.deserialize(
+        save_file.event_stages = core.EventChapters.deserialize(
             data.get("event_stages", {})
         )
         save_file.itf1_ending = data.get("itf1_ending", 0)
         save_file.continue_flag = data.get("continue_flag", 0)
         save_file.unlock_popups_8 = data.get("unlock_popups_8", [])
         save_file.unit_drops = data.get("unit_drops", [])
-        save_file.gatya = game.catbase.gatya.Gatya.deserialize(data.get("gatya", {}))
+        save_file.gatya = core.Gatya.deserialize(data.get("gatya", {}))
         save_file.get_event_data = data.get("get_event_data", False)
         save_file.achievements = data.get("achievements", [])
         save_file.os_value = data.get("os_value", 0)
@@ -2225,22 +2204,20 @@ class SaveFile:
         save_file.m_dGetTimeSave2 = data.get("m_dGetTimeSave2", 0.0)
         save_file.ui11 = data.get("ui11", 0)
         save_file.ubl1 = data.get("ubl1", [])
-        save_file.user_rank_rewards = (
-            game.catbase.user_rank_rewards.Rewards.deserialize(
-                data.get("user_rank_rewards", [])
-            )
+        save_file.user_rank_rewards = core.UserRankRewards.deserialize(
+            data.get("user_rank_rewards", [])
         )
         save_file.transfer_code = data.get("transfer_code", "")
         save_file.confirmation_code = data.get("confirmation_code", "")
         save_file.transfer_flag = data.get("transfer_flag", False)
-        save_file.item_reward_stages = game.map.item_reward_stage.Chapters.deserialize(
+        save_file.item_reward_stages = core.ItemRewardChapters.deserialize(
             data.get("item_reward_stages", {})
         )
-        save_file.timed_score_stages = game.map.timed_score.Chapters.deserialize(
+        save_file.timed_score_stages = core.TimedScoreChapters.deserialize(
             data.get("timed_score_stages", [])
         )
         save_file.inquiry_code = data.get("inquiry_code", "")
-        save_file.officer_pass = game.catbase.officer_pass.OfficerPass.deserialize(
+        save_file.officer_pass = core.OfficerPass.deserialize(
             data.get("officer_pass", {})
         )
         save_file.has_account = data.get("has_account", False)
@@ -2284,22 +2261,14 @@ class SaveFile:
         save_file.catfruit = data.get("catfruit", [])
         save_file.catseyes = data.get("catseyes", [])
         save_file.catamins = data.get("catamins", [])
-        save_file.gamatoto = game.gamoto.gamatoto.Gamatoto.deserialize(
-            data.get("gamatoto", {})
-        )
+        save_file.gamatoto = core.Gamatoto.deserialize(data.get("gamatoto", {}))
         save_file.unlock_popups_6 = data.get("unlock_popups_6", [])
-        save_file.ex_stages = game.map.ex_stage.Chapters.deserialize(
-            data.get("ex_stages", [])
-        )
+        save_file.ex_stages = core.ExChapters.deserialize(data.get("ex_stages", []))
         save_file.gv_53 = data.get("gv_53", 53)
         save_file.gv_54 = data.get("gv_54", 54)
-        save_file.item_pack = game.catbase.item_pack.ItemPack.deserialize(
-            data.get("item_pack", {})
-        )
+        save_file.item_pack = core.ItemPack.deserialize(data.get("item_pack", {}))
         save_file.platinum_tickets = data.get("platinum_tickets", 0)
-        save_file.logins = game.catbase.login_bonuses.LoginBonus.deserialize(
-            data.get("logins", {})
-        )
+        save_file.logins = core.LoginBonus.deserialize(data.get("logins", {}))
         save_file.reset_item_reward_flags = data.get("reset_item_reward_flags", [])
         save_file.reward_remaining_time = data.get("reward_remaining_time", 0.0)
         save_file.last_checked_reward_time = data.get("last_checked_reward_time", 0.0)
@@ -2314,13 +2283,11 @@ class SaveFile:
         save_file.gv_56 = data.get("gv_56", 56)
         save_file.ub4 = data.get("ub4", False)
         save_file.gv_57 = data.get("gv_57", 57)
-        save_file.dojo = game.map.dojo.Dojo.deserialize(data.get("dojo", {}))
+        save_file.dojo = core.Dojo.deserialize(data.get("dojo", {}))
         save_file.gv_58 = data.get("gv_58", 58)
         save_file.last_checked_zombie_time = data.get("last_checked_zombie_time", 0.0)
-        save_file.outbreaks = game.map.outbreaks.Outbreaks.deserialize(
-            data.get("outbreaks", {})
-        )
-        save_file.scheme_items = game.catbase.scheme_items.SchemeItems.deserialize(
+        save_file.outbreaks = core.Outbreaks.deserialize(data.get("outbreaks", {}))
+        save_file.scheme_items = core.SchemeItems.deserialize(
             data.get("scheme_items", {})
         )
         save_file.first_locks = data.get("first_locks", {})
@@ -2328,25 +2295,21 @@ class SaveFile:
         save_file.gv_60 = data.get("gv_60", 60)
         save_file.shown_maxcollab_mg = data.get("shown_maxcollab_mg", False)
         save_file.gv_61 = data.get("gv_61", 61)
-        save_file.unlock_popups = game.catbase.unlock_popups.Popups.deserialize(
+        save_file.unlock_popups = core.UnlockPopups.deserialize(
             data.get("unlock_popups", {})
         )
         save_file.gv_63 = data.get("gv_63", 63)
-        save_file.ototo = game.gamoto.ototo.Ototo.deserialize(data.get("ototo", {}))
+        save_file.ototo = core.Ototo.deserialize(data.get("ototo", {}))
         save_file.last_checked_castle_time = data.get("last_checked_castle_time", 0.0)
         save_file.gv_64 = data.get("gv_64", 64)
-        save_file.beacon_base = (
-            game.catbase.beacon_base.BeaconEventListScene.deserialize(
-                data.get("beacon_base", {})
-            )
+        save_file.beacon_base = core.BeaconEventListScene.deserialize(
+            data.get("beacon_base", {})
         )
         save_file.gv_65 = data.get("gv_65", 65)
-        save_file.tower = game.map.tower.Tower.deserialize(data.get("tower", {}))
-        save_file.missions = game.catbase.mission.Missions.deserialize(
-            data.get("missions", {})
-        )
+        save_file.tower = core.TowerChapters.deserialize(data.get("tower", {}))
+        save_file.missions = core.Missions.deserialize(data.get("missions", {}))
         save_file.gv_66 = data.get("gv_66", 66)
-        save_file.challenge = game.map.challenge.Challenge.deserialize(
+        save_file.challenge = core.ChallengeChapters.deserialize(
             data.get("challenge", {})
         )
         save_file.gv_67 = data.get("gv_67", 67)
@@ -2355,15 +2318,11 @@ class SaveFile:
         save_file.cotc_1_complete = data.get("cotc_1_complete", False)
         save_file.gv_69 = data.get("gv_69", 69)
         save_file.gv_71 = data.get("gv_71", 71)
-        save_file.map_resets = game.map.map_reset.MapResets.deserialize(
-            data.get("map_resets", {})
-        )
+        save_file.map_resets = core.MapResets.deserialize(data.get("map_resets", {}))
         save_file.gv_72 = data.get("gv_72", 72)
-        save_file.uncanny = game.map.uncanny.Uncanny.deserialize(
-            data.get("uncanny", {})
-        )
+        save_file.uncanny = core.UncannyChapters.deserialize(data.get("uncanny", {}))
         save_file.gv_76 = data.get("gv_76", 76)
-        save_file.uncanny_2 = game.map.uncanny.Uncanny.deserialize(
+        save_file.uncanny_2 = core.UncannyChapters.deserialize(
             data.get("uncanny_2", {})
         )
         save_file.event_capsules_3 = data.get("event_capsules_3", [])
@@ -2381,7 +2340,7 @@ class SaveFile:
         save_file.uil5 = data.get("uil5", [])
         save_file.gv_80500 = data.get("gv_80500", 80500)
         save_file.uil6 = data.get("uil6", [])
-        save_file.legend_quest = game.map.legend_quest.Chapters.deserialize(
+        save_file.legend_quest = core.LegendQuestChapters.deserialize(
             data.get("legend_quest", {})
         )
         save_file.ush1 = data.get("ush1", 0)
@@ -2393,9 +2352,7 @@ class SaveFile:
         save_file.gv_100600 = data.get("gv_100600", 10600)
         save_file.restart_pack = data.get("restart_pack", 0)
         save_file.gv_81000 = data.get("gv_81000", 81000)
-        save_file.medals = game.catbase.medals.Medals.deserialize(
-            data.get("medals", {})
-        )
+        save_file.medals = core.Medals.deserialize(data.get("medals", {}))
         save_file.ushbd1 = data.get("ushbd1", {})
         save_file.uidiid1 = data.get("uidiid1", {})
         save_file.uiid2 = data.get("uiid2", {})
@@ -2407,19 +2364,19 @@ class SaveFile:
         save_file.gv_90100 = data.get("gv_90100", 90100)
         save_file.utl1 = data.get("utl1", [])
         save_file.uidd1 = data.get("uidd1", {})
-        save_file.gauntlets = game.map.gauntlets.Chapters.deserialize(
+        save_file.gauntlets = core.GauntletChapters.deserialize(
             data.get("gauntlets", {})
         )
         save_file.gv_90300 = data.get("gv_90300", 90300)
-        save_file.gauntlets_2 = game.map.gauntlets.Chapters.deserialize(
+        save_file.gauntlets_2 = core.GauntletChapters.deserialize(
             data.get("gauntlets_2", {})
         )
-        save_file.enigma = game.map.enigma.Enigma.deserialize(data.get("enigma", {}))
-        save_file.cleared_slots = game.battle.cleared_slots.ClearedSlots.deserialize(
+        save_file.enigma = core.Enigma.deserialize(data.get("enigma", {}))
+        save_file.cleared_slots = core.ClearedSlots.deserialize(
             data.get("cleared_slots", {})
         )
         save_file.gv_90400 = data.get("gv_90400", 90400)
-        save_file.collab_gauntlets = game.map.gauntlets.Chapters.deserialize(
+        save_file.collab_gauntlets = core.GauntletChapters.deserialize(
             data.get("collab_gauntlets", {})
         )
         save_file.ub8 = data.get("ub8", False)
@@ -2431,18 +2388,14 @@ class SaveFile:
         save_file.ud4 = data.get("ud4", 0.0)
         save_file.ud5 = data.get("ud5", 0.0)
         save_file.gv_90500 = data.get("gv_90500", 90500)
-        save_file.talent_orbs = game.catbase.talent_orbs.TalentOrbs.deserialize(
-            data.get("talent_orbs", {})
-        )
+        save_file.talent_orbs = core.TalentOrbs.deserialize(data.get("talent_orbs", {}))
         save_file.uidiid2 = data.get("uidiid2", {})
         save_file.ub10 = data.get("ub10", False)
         save_file.gv_90700 = data.get("gv_90700", 90700)
         save_file.uil7 = data.get("uil7", [])
         save_file.ubl2 = data.get("ubl2", [])
         save_file.gv_90800 = data.get("gv_90800", 90800)
-        save_file.cat_shrine = game.gamoto.cat_shrine.CatShrine.deserialize(
-            data.get("cat_shrine", {})
-        )
+        save_file.cat_shrine = core.CatShrine.deserialize(data.get("cat_shrine", {}))
         save_file.ud6 = data.get("ud6", 0.0)
         save_file.ud7 = data.get("ud7", 0)
         save_file.gv_90900 = data.get("gv_90900", 90900)
@@ -2473,7 +2426,7 @@ class SaveFile:
         save_file.ushdshd = data.get("ushdshd", {})
         save_file.ushid = data.get("ushid", {})
         save_file.gv_100700 = data.get("gv_100700", 100700)
-        save_file.aku = game.map.aku.Chapters.deserialize(data.get("aku", {}))
+        save_file.aku = core.AkuChapters.deserialize(data.get("aku", {}))
         save_file.ub16 = data.get("ub16", False)
         save_file.ub17 = data.get("ub17", False)
         save_file.ushdshd2 = data.get("ushdshd2", {})
@@ -2485,7 +2438,7 @@ class SaveFile:
         save_file.gv_101000 = data.get("gv_101000", 101000)
         save_file.uidtii = data.get("uidtii", {})
         save_file.gv_110000 = data.get("gv_110000", 110000)
-        save_file.behemoth_culling = game.map.gauntlets.Chapters.deserialize(
+        save_file.behemoth_culling = core.GauntletChapters.deserialize(
             data.get("behemoth_culling", {})
         )
         save_file.ub19 = data.get("ub19", False)
@@ -2527,7 +2480,7 @@ class SaveFile:
         save_file.ubl3 = data.get("ubl3", [])
         save_file.ushl5 = data.get("ushl5", [])
         save_file.gv_111000 = data.get("gv_111000", 111000)
-        save_file.zero_legends = game.map.zero_legends.Chapters.deserialize(
+        save_file.zero_legends = core.ZeroLegendsChapters.deserialize(
             data.get("zero_legends", [])
         )
         save_file.uby12 = data.get("uby12", 0)
@@ -2542,11 +2495,11 @@ class SaveFile:
 
         return save_file
 
-    def init_save(self, gv: Optional[game_version.GameVersion] = None):
+    def init_save(self, gv: Optional["core.GameVersion"] = None):
         self.dsts = []
         self.dst_index = 0
         if gv is None:
-            gv = game_version.GameVersion(120200)
+            gv = core.GameVersion(120200)
         self.set_gv(gv)
 
         self.ubm1 = False
@@ -2881,51 +2834,47 @@ class SaveFile:
 
         self.leadership = 0
 
-        self.lineups = game.battle.slots.LineUps.init(self.game_version)
-        self.stamp_data = game.catbase.stamp.StampData.init()
-        self.story = game.map.story.Chapters.init()
-        self.cats = game.catbase.cat.Cats.init(self.game_version)
-        self.special_skills = game.catbase.special_skill.Skills.init()
-        self.battle_items = game.battle.battle_items.BattleItems.init()
-        self.mysale = game.catbase.my_sale.MySale.init()
-        self.event_stages = game.map.event.EventChapters.init(self.game_version)
-        self.gatya = game.catbase.gatya.Gatya.init()
-        self.user_rank_rewards = game.catbase.user_rank_rewards.Rewards.init(
-            self.game_version
-        )
-        self.item_reward_stages = game.map.item_reward_stage.Chapters.init(
-            self.game_version
-        )
-        self.timed_score_stages = game.map.timed_score.Chapters.init(self.game_version)
-        self.officer_pass = game.catbase.officer_pass.OfficerPass.init()
-        self.gamatoto = game.gamoto.gamatoto.Gamatoto.init()
-        self.ex_stages = game.map.ex_stage.Chapters.init()
-        self.item_pack = game.catbase.item_pack.ItemPack.init()
-        self.logins = game.catbase.login_bonuses.LoginBonus.init(self.game_version)
-        self.dojo = game.map.dojo.Dojo.init()
-        self.outbreaks = game.map.outbreaks.Outbreaks.init()
-        self.scheme_items = game.catbase.scheme_items.SchemeItems.init()
-        self.unlock_popups = game.catbase.unlock_popups.Popups.init()
-        self.ototo = game.gamoto.ototo.Ototo.init(self.game_version)
-        self.beacon_base = game.catbase.beacon_base.BeaconEventListScene.init()
-        self.tower = game.map.tower.Tower.init()
-        self.missions = game.catbase.mission.Missions.init()
-        self.challenge = game.map.challenge.Challenge.init()
-        self.map_resets = game.map.map_reset.MapResets.init()
-        self.uncanny = game.map.uncanny.Uncanny.init()
-        self.uncanny_2 = game.map.uncanny.Uncanny.init()
-        self.legend_quest = game.map.legend_quest.Chapters.init()
-        self.medals = game.catbase.medals.Medals.init()
-        self.gauntlets = game.map.gauntlets.Chapters.init()
-        self.gauntlets_2 = game.map.gauntlets.Chapters.init()
-        self.enigma = game.map.enigma.Enigma.init()
-        self.cleared_slots = game.battle.cleared_slots.ClearedSlots.init()
-        self.collab_gauntlets = game.map.gauntlets.Chapters.init()
-        self.talent_orbs = game.catbase.talent_orbs.TalentOrbs.init()
-        self.cat_shrine = game.gamoto.cat_shrine.CatShrine.init()
-        self.aku = game.map.aku.Chapters.init()
-        self.behemoth_culling = game.map.gauntlets.Chapters.init()
-        self.zero_legends = game.map.zero_legends.Chapters.init()
+        self.lineups = core.LineUps.init(self.game_version)
+        self.stamp_data = core.StampData.init()
+        self.story = core.StoryChapters.init()
+        self.cats = core.Cats.init(self.game_version)
+        self.special_skills = core.SpecialSkills.init()
+        self.battle_items = core.BattleItems.init()
+        self.mysale = core.MySale.init()
+        self.event_stages = core.EventChapters.init(self.game_version)
+        self.gatya = core.Gatya.init()
+        self.user_rank_rewards = core.UserRankRewards.init(self.game_version)
+        self.item_reward_stages = core.ItemRewardChapters.init(self.game_version)
+        self.timed_score_stages = core.TimedScoreChapters.init(self.game_version)
+        self.officer_pass = core.OfficerPass.init()
+        self.gamatoto = core.Gamatoto.init()
+        self.ex_stages = core.ExChapters.init()
+        self.item_pack = core.ItemPack.init()
+        self.logins = core.LoginBonus.init(self.game_version)
+        self.dojo = core.Dojo.init()
+        self.outbreaks = core.Outbreaks.init()
+        self.scheme_items = core.SchemeItems.init()
+        self.unlock_popups = core.UnlockPopups.init()
+        self.ototo = core.Ototo.init(self.game_version)
+        self.beacon_base = core.BeaconEventListScene.init()
+        self.tower = core.TowerChapters.init()
+        self.missions = core.Missions.init()
+        self.challenge = core.ChallengeChapters.init()
+        self.map_resets = core.MapResets.init()
+        self.uncanny = core.UncannyChapters.init()
+        self.uncanny_2 = core.UncannyChapters.init()
+        self.legend_quest = core.LegendQuestChapters.init()
+        self.medals = core.Medals.init()
+        self.gauntlets = core.GauntletChapters.init()
+        self.gauntlets_2 = core.GauntletChapters.init()
+        self.enigma = core.Enigma.init()
+        self.cleared_slots = core.ClearedSlots.init()
+        self.collab_gauntlets = core.GauntletChapters.init()
+        self.talent_orbs = core.TalentOrbs.init()
+        self.cat_shrine = core.CatShrine.init()
+        self.aku = core.AkuChapters.init()
+        self.behemoth_culling = core.GauntletChapters.init()
+        self.zero_legends = core.ZeroLegendsChapters.init()
 
         self.uiid1 = {}
         self.ushbd1 = {}
@@ -2948,10 +2897,10 @@ class SaveFile:
         self.remaining_data = b""
 
     def not_jp(self) -> bool:
-        return self.cc != country_code.CountryCodeType.JP
+        return self.cc != core.CountryCodeType.JP
 
     def is_en(self) -> bool:
-        return self.cc == country_code.CountryCodeType.EN
+        return self.cc == core.CountryCodeType.EN
 
     def should_read_dst(self) -> bool:
         return self.not_jp() and self.game_version >= 49
@@ -3121,10 +3070,10 @@ class SaveFile:
         self.order_ids = new_order_ids
 
     @staticmethod
-    def get_saves_path() -> path.Path:
-        return path.Path.get_documents_folder().add("saves")
+    def get_saves_path() -> "core.Path":
+        return core.Path.get_documents_folder().add("saves")
 
-    def get_default_path(self) -> path.Path:
+    def get_default_path(self) -> "core.Path":
         date = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         local_path = (
             self.get_saves_path()

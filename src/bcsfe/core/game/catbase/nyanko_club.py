@@ -1,6 +1,6 @@
 from typing import Any, Optional
 
-from bcsfe.core import game_version, io
+from bcsfe import core
 
 
 class NyankoClub:
@@ -59,7 +59,7 @@ class NyankoClub:
         )
 
     @staticmethod
-    def read(data: io.data.Data, gv: game_version.GameVersion) -> "NyankoClub":
+    def read(data: "core.Data", gv: "core.GameVersion") -> "NyankoClub":
         officer_id = data.read_int()
         total_renewal_times = data.read_int()
         start_date = data.read_double()
@@ -96,7 +96,7 @@ class NyankoClub:
             unknown_bool_2,
         )
 
-    def write(self, data: io.data.Data, gv: game_version.GameVersion):
+    def write(self, data: "core.Data", gv: "core.GameVersion"):
         data.write_int(self.officer_id)
         data.write_int(self.total_renewal_times)
         data.write_double(self.start_date)

@@ -1,5 +1,5 @@
 from typing import Any, Optional
-from bcsfe.core import io
+from bcsfe import core
 
 
 class Item:
@@ -7,10 +7,10 @@ class Item:
         self.amount = amount
 
     @staticmethod
-    def read(strream: io.data.Data) -> "Item":
+    def read(strream: "core.Data") -> "Item":
         return Item(strream.read_int())
 
-    def write(self, stream: io.data.Data):
+    def write(self, stream: "core.Data"):
         stream.write_int(self.amount)
 
     def serialize(self) -> dict[str, Any]:
@@ -32,14 +32,14 @@ class Items:
         self.items = items
 
     @staticmethod
-    def read(stream: io.data.Data, length: Optional[int] = None) -> "Items":
+    def read(stream: "core.Data", length: Optional[int] = None) -> "Items":
         if length is None:
             length = stream.read_int()
 
         items = [Item.read(stream) for _ in range(length)]
         return Items(items)
 
-    def write(self, stream: io.data.Data, write_length: bool = True):
+    def write(self, stream: "core.Data", write_length: bool = True):
         if write_length:
             stream.write_int(len(self.items))
 

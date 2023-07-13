@@ -1,5 +1,5 @@
 from typing import Any
-from bcsfe.core import io
+from bcsfe import core
 
 
 class PurchasedPack:
@@ -11,11 +11,11 @@ class PurchasedPack:
         return PurchasedPack(False)
 
     @staticmethod
-    def read(stream: io.data.Data) -> "PurchasedPack":
+    def read(stream: "core.Data") -> "PurchasedPack":
         purchased = stream.read_bool()
         return PurchasedPack(purchased)
 
-    def write(self, stream: io.data.Data):
+    def write(self, stream: "core.Data"):
         stream.write_bool(self.purchased)
 
     def serialize(self) -> bool:
@@ -41,7 +41,7 @@ class PurchaseSet:
         return PurchaseSet({})
 
     @staticmethod
-    def read(stream: io.data.Data) -> "PurchaseSet":
+    def read(stream: "core.Data") -> "PurchaseSet":
         total = stream.read_int()
         purchases: dict[str, PurchasedPack] = {}
         for _ in range(total):
@@ -49,7 +49,7 @@ class PurchaseSet:
             purchases[key] = PurchasedPack.read(stream)
         return PurchaseSet(purchases)
 
-    def write(self, stream: io.data.Data):
+    def write(self, stream: "core.Data"):
         stream.write_int(len(self.purchases))
         for key, purchase in self.purchases.items():
             stream.write_string(key)
@@ -83,7 +83,7 @@ class Purchases:
         return Purchases({})
 
     @staticmethod
-    def read(stream: io.data.Data) -> "Purchases":
+    def read(stream: "core.Data") -> "Purchases":
         total = stream.read_int()
         purchases: dict[int, PurchaseSet] = {}
         for _ in range(total):
@@ -92,7 +92,7 @@ class Purchases:
 
         return Purchases(purchases)
 
-    def write(self, stream: io.data.Data):
+    def write(self, stream: "core.Data"):
         stream.write_int(len(self.purchases))
         for key, purchase in self.purchases.items():
             stream.write_int(key)
@@ -126,13 +126,13 @@ class ItemPack:
         return ItemPack(Purchases.init())
 
     @staticmethod
-    def read(stream: io.data.Data) -> "ItemPack":
+    def read(stream: "core.Data") -> "ItemPack":
         return ItemPack(Purchases.read(stream))
 
-    def write(self, stream: io.data.Data):
+    def write(self, stream: "core.Data"):
         self.purchases.write(stream)
 
-    def read_displayed_packs(self, stream: io.data.Data) -> None:
+    def read_displayed_packs(self, stream: "core.Data") -> None:
         total = stream.read_int()
         displayed_packs: dict[int, bool] = {}
         for _ in range(total):
@@ -141,17 +141,17 @@ class ItemPack:
 
         self.displayed_packs = displayed_packs
 
-    def write_displayed_packs(self, stream: io.data.Data) -> None:
+    def write_displayed_packs(self, stream: "core.Data") -> None:
         stream.write_int(len(self.displayed_packs))
         for key, displayed in self.displayed_packs.items():
             stream.write_int(key)
             stream.write_bool(displayed)
 
-    def read_three_days(self, stream: io.data.Data) -> None:
+    def read_three_days(self, stream: "core.Data") -> None:
         self.three_days_started = stream.read_bool()
         self.three_days_end_timestamp = stream.read_double()
 
-    def write_three_days(self, stream: io.data.Data) -> None:
+    def write_three_days(self, stream: "core.Data") -> None:
         stream.write_bool(self.three_days_started)
         stream.write_double(self.three_days_end_timestamp)
 

@@ -1,5 +1,5 @@
 from typing import Any
-from bcsfe.core import io
+from bcsfe import core
 
 
 class Stage:
@@ -11,11 +11,11 @@ class Stage:
         return Stage(0)
 
     @staticmethod
-    def read(data: io.data.Data) -> "Stage":
+    def read(data: "core.Data") -> "Stage":
         clear_times = data.read_short()
         return Stage(clear_times)
 
-    def write(self, data: io.data.Data):
+    def write(self, data: "core.Data"):
         data.write_short(self.clear_times)
 
     def serialize(self) -> int:
@@ -52,7 +52,7 @@ class Chapter:
         return Chapter(0, 0, 0, [])
 
     @staticmethod
-    def read(data: io.data.Data) -> "Chapter":
+    def read(data: "core.Data") -> "Chapter":
         selected_stage = data.read_byte()
         clear_progress = data.read_byte()
         unlock_state = data.read_byte()
@@ -65,7 +65,7 @@ class Chapter:
             stages,
         )
 
-    def write(self, data: io.data.Data):
+    def write(self, data: "core.Data"):
         data.write_byte(self.selected_stage)
         data.write_byte(self.clear_progress)
         data.write_byte(self.unlock_state)
@@ -107,7 +107,7 @@ class ChaptersStars:
         return ChaptersStars(0, [])
 
     @staticmethod
-    def read(data: io.data.Data) -> "ChaptersStars":
+    def read(data: "core.Data") -> "ChaptersStars":
         unknown = data.read_byte()
         total_stars = data.read_byte()
         chapters = [Chapter.read(data) for _ in range(total_stars)]
@@ -116,7 +116,7 @@ class ChaptersStars:
             chapters,
         )
 
-    def write(self, data: io.data.Data):
+    def write(self, data: "core.Data"):
         data.write_byte(self.unknown)
         data.write_byte(len(self.chapters))
         for chapter in self.chapters:
@@ -142,23 +142,23 @@ class ChaptersStars:
         return self.__repr__()
 
 
-class Chapters:
+class ZeroLegendsChapters:
     def __init__(self, chapters: list[ChaptersStars]):
         self.chapters = chapters
 
     @staticmethod
-    def init() -> "Chapters":
-        return Chapters([])
+    def init() -> "ZeroLegendsChapters":
+        return ZeroLegendsChapters([])
 
     @staticmethod
-    def read(data: io.data.Data) -> "Chapters":
+    def read(data: "core.Data") -> "ZeroLegendsChapters":
         total_chapters = data.read_short()
         chapters = [ChaptersStars.read(data) for _ in range(total_chapters)]
-        return Chapters(
+        return ZeroLegendsChapters(
             chapters,
         )
 
-    def write(self, data: io.data.Data):
+    def write(self, data: "core.Data"):
         data.write_short(len(self.chapters))
         for chapter in self.chapters:
             chapter.write(data)
@@ -167,8 +167,8 @@ class Chapters:
         return [chapter.serialize() for chapter in self.chapters]
 
     @staticmethod
-    def deserialize(data: list[dict[str, Any]]) -> "Chapters":
-        return Chapters(
+    def deserialize(data: list[dict[str, Any]]) -> "ZeroLegendsChapters":
+        return ZeroLegendsChapters(
             [ChaptersStars.deserialize(chapter) for chapter in data],
         )
 

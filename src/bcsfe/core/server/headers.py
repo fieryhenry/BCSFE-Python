@@ -1,9 +1,9 @@
 import time
-from bcsfe.core import io, crypto
+from bcsfe import core
 
 
 class AccountHeaders:
-    def __init__(self, save_file: io.save.SaveFile, data: str):
+    def __init__(self, save_file: "core.SaveFile", data: str):
         self.save_file = save_file
         self.data = data
 
@@ -12,7 +12,7 @@ class AccountHeaders:
             "accept-enconding": "gzip",
             "connection": "keep-alive",
             "content-type": "application/json",
-            "nyanko-signature": crypto.NyankoSignature(
+            "nyanko-signature": "core.NyankoSignature"(
                 self.save_file.inquiry_code, self.data
             ).generate_signature(),
             "nyanko-timestamp": str(int(time.time())),

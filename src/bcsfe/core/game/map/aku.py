@@ -1,5 +1,5 @@
 from typing import Any
-from bcsfe.core import io
+from bcsfe import core
 
 
 class Stage:
@@ -11,11 +11,11 @@ class Stage:
         return Stage(0)
 
     @staticmethod
-    def read(data: io.data.Data) -> "Stage":
+    def read(data: "core.Data") -> "Stage":
         clear_times = data.read_short()
         return Stage(clear_times)
 
-    def write(self, data: io.data.Data):
+    def write(self, data: "core.Data"):
         data.write_short(self.clear_times)
 
     def serialize(self) -> int:
@@ -44,17 +44,17 @@ class Chapter:
         return Chapter(0, total_stages)
 
     @staticmethod
-    def read_clear_progress(data: io.data.Data):
+    def read_clear_progress(data: "core.Data"):
         clear_progress = data.read_byte()
         return Chapter(clear_progress)
 
-    def write_clear_progress(self, data: io.data.Data):
+    def write_clear_progress(self, data: "core.Data"):
         data.write_byte(self.clear_progress)
 
-    def read_stages(self, data: io.data.Data, total_stages: int):
+    def read_stages(self, data: "core.Data", total_stages: int):
         self.stages = [Stage.read(data) for _ in range(total_stages)]
 
-    def write_stages(self, data: io.data.Data):
+    def write_stages(self, data: "core.Data"):
         for stage in self.stages:
             stage.write(data)
 
@@ -86,19 +86,19 @@ class ChaptersStars:
         return ChaptersStars([Chapter.init(total_stages) for _ in range(total_stars)])
 
     @staticmethod
-    def read_clear_progress(data: io.data.Data, total_stars: int):
+    def read_clear_progress(data: "core.Data", total_stars: int):
         chapters = [Chapter.read_clear_progress(data) for _ in range(total_stars)]
         return ChaptersStars(chapters)
 
-    def write_clear_progress(self, data: io.data.Data):
+    def write_clear_progress(self, data: "core.Data"):
         for chapter in self.chapters:
             chapter.write_clear_progress(data)
 
-    def read_stages(self, data: io.data.Data, total_stages: int):
+    def read_stages(self, data: "core.Data", total_stages: int):
         for chapter in self.chapters:
             chapter.read_stages(data, total_stages)
 
-    def write_stages(self, data: io.data.Data):
+    def write_stages(self, data: "core.Data"):
         for chapter in self.chapters:
             chapter.write_stages(data)
 
@@ -117,16 +117,16 @@ class ChaptersStars:
         return self.__repr__()
 
 
-class Chapters:
+class AkuChapters:
     def __init__(self, chapters: list[ChaptersStars]):
         self.chapters = chapters
 
     @staticmethod
-    def init() -> "Chapters":
-        return Chapters([])
+    def init() -> "AkuChapters":
+        return AkuChapters([])
 
     @staticmethod
-    def read(data: io.data.Data) -> "Chapters":
+    def read(data: "core.Data") -> "AkuChapters":
         total_chapters = data.read_short()
         total_stages = data.read_byte()
         total_stars = data.read_byte()
@@ -139,9 +139,9 @@ class Chapters:
         for chapter in chapters:
             chapter.read_stages(data, total_stages)
 
-        return Chapters(chapters)
+        return AkuChapters(chapters)
 
-    def write(self, data: io.data.Data):
+    def write(self, data: "core.Data"):
         data.write_short(len(self.chapters))
         try:
             data.write_byte(len(self.chapters[0].chapters[0].stages))
@@ -162,9 +162,9 @@ class Chapters:
         return [chapter.serialize() for chapter in self.chapters]
 
     @staticmethod
-    def deserialize(data: list[list[dict[str, Any]]]) -> "Chapters":
+    def deserialize(data: list[list[dict[str, Any]]]) -> "AkuChapters":
         chapters = [ChaptersStars.deserialize(chapter) for chapter in data]
-        return Chapters(chapters)
+        return AkuChapters(chapters)
 
     def __repr__(self):
         return f"Chapters({self.chapters})"

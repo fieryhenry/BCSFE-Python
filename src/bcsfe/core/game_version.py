@@ -1,5 +1,5 @@
 from typing import Any
-from bcsfe.core import io
+from bcsfe import core
 
 
 class GameVersion:
@@ -68,22 +68,22 @@ class GameVersion:
         return f"game_version({self.game_version}) {self.to_string()}"
 
     @staticmethod
-    def read(data: "io.data.Data") -> "GameVersion":
+    def read(data: "core.Data") -> "GameVersion":
         """Reads a 4 byte int from a Data object.
 
         Args:
-            data (io.data.Data): Data object to read from.
+            data (core.Data): Data object to read from.
 
         Returns:
             GameVersion: Game version read from the Data object.
         """
         return GameVersion(data.read_int())
 
-    def write(self, data: "io.data.Data"):
+    def write(self, data: "core.Data"):
         """Writes the 4 byte game version to a Data object.
 
         Args:
-            data (io.data.Data): Data object to write to.
+            data (core.Data): Data object to write to.
         """
         data.write_int(self.game_version)
 

@@ -1,5 +1,5 @@
 from typing import Any
-from bcsfe.core import io
+from bcsfe import core
 
 
 class Medals:
@@ -24,7 +24,7 @@ class Medals:
         return Medals(0, 0, 0, [], {}, False)
 
     @staticmethod
-    def read(data: io.data.Data) -> "Medals":
+    def read(data: "core.Data") -> "Medals":
         u1 = data.read_int()
         u2 = data.read_int()
         u3 = data.read_int()
@@ -39,7 +39,7 @@ class Medals:
         ub = data.read_bool()
         return Medals(u1, u2, u3, medal_data_1, medal_data_2, ub)
 
-    def write(self, data: io.data.Data) -> None:
+    def write(self, data: "core.Data") -> None:
         data.write_int(self.u1)
         data.write_int(self.u2)
         data.write_int(self.u3)

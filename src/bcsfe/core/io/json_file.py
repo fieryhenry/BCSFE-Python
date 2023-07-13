@@ -1,28 +1,28 @@
 import json
 from typing import Any, Optional
-from bcsfe.core.io import data, path
+from bcsfe import core
 
 
 class JsonFile:
-    def __init__(self, data: "data.Data"):
+    def __init__(self, data: "core.Data"):
         self.json = json.loads(data.data)
 
     @staticmethod
-    def from_path(path: "path.Path") -> "JsonFile":
+    def from_path(path: "core.Path") -> "JsonFile":
         return JsonFile(path.read())
 
     @staticmethod
     def from_object(js: Any) -> "JsonFile":
-        return JsonFile(data.Data(json.dumps(js)))
+        return JsonFile(core.Data(json.dumps(js)))
 
     @staticmethod
-    def from_data(data: "data.Data") -> "JsonFile":
+    def from_data(data: "core.Data") -> "JsonFile":
         return JsonFile(data)
 
-    def to_data(self, indent: Optional[int] = 4) -> "data.Data":
-        return data.Data(json.dumps(self.json, indent=indent))
+    def to_data(self, indent: Optional[int] = 4) -> "core.Data":
+        return core.Data(json.dumps(self.json, indent=indent))
 
-    def save(self, path: "path.Path") -> None:
+    def save(self, path: "core.Path") -> None:
         path.write(self.to_data())
 
     def get_json(self) -> Any:

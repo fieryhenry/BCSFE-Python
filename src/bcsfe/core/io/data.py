@@ -4,7 +4,7 @@ from io import BytesIO
 import struct
 import typing
 from typing import Any, Literal, Optional, Union
-from bcsfe.core.io import bc_csv, path
+from bcsfe import core
 import datetime
 
 
@@ -52,7 +52,7 @@ class Data:
     def is_empty(self) -> bool:
         return len(self.data) == 0
 
-    def to_file(self, path: "path.Path"):
+    def to_file(self, path: "core.Path"):
         with open(path.path, "wb") as f:
             f.write(self.data)
 
@@ -60,7 +60,7 @@ class Data:
         return Data(self.data)
 
     @staticmethod
-    def from_file(path: "path.Path") -> "Data":
+    def from_file(path: "core.Path") -> "Data":
         with open(path.path, "rb") as f:
             return Data(f.read())
 
@@ -581,8 +581,8 @@ class Data:
     def from_base_64(string: str) -> "Data":
         return Data(base64.b64decode(string))
 
-    def to_csv(self, *args: Any, **kwargs: Any) -> "bc_csv.CSV":
-        return bc_csv.CSV(self, *args, **kwargs)
+    def to_csv(self, *args: Any, **kwargs: Any) -> "core.CSV":
+        return core.CSV(self, *args, **kwargs)
 
     def search(self, search_data: "Data", start: int = 0) -> int:
         return self.data.find(search_data.data, start)

@@ -1,5 +1,5 @@
 from typing import Any
-from bcsfe.core import game_version, io
+from bcsfe import core
 
 
 class Outbreak:
@@ -11,11 +11,11 @@ class Outbreak:
         return Outbreak(False)
 
     @staticmethod
-    def read(stream: io.data.Data) -> "Outbreak":
+    def read(stream: "core.Data") -> "Outbreak":
         cleared = stream.read_bool()
         return Outbreak(cleared)
 
-    def write(self, stream: io.data.Data):
+    def write(self, stream: "core.Data"):
         stream.write_bool(self.cleared)
 
     def serialize(self) -> bool:
@@ -41,7 +41,7 @@ class Chapter:
         return Chapter({})
 
     @staticmethod
-    def read(stream: io.data.Data) -> "Chapter":
+    def read(stream: "core.Data") -> "Chapter":
         total = stream.read_int()
         outbreaks: dict[int, Outbreak] = {}
         for _ in range(total):
@@ -51,7 +51,7 @@ class Chapter:
 
         return Chapter(outbreaks)
 
-    def write(self, stream: io.data.Data):
+    def write(self, stream: "core.Data"):
         stream.write_int(len(self.outbreaks))
         for outbreak_id, outbreak in self.outbreaks.items():
             stream.write_int(outbreak_id)
@@ -90,7 +90,7 @@ class Outbreaks:
         return Outbreaks({})
 
     @staticmethod
-    def read_chapters(stream: io.data.Data) -> "Outbreaks":
+    def read_chapters(stream: "core.Data") -> "Outbreaks":
         total = stream.read_int()
         chapters: dict[int, Chapter] = {}
         for _ in range(total):
@@ -100,21 +100,19 @@ class Outbreaks:
 
         return Outbreaks(chapters)
 
-    def write_chapters(self, stream: io.data.Data):
+    def write_chapters(self, stream: "core.Data"):
         stream.write_int(len(self.chapters))
         for chapter_id, chapter in self.chapters.items():
             stream.write_int(chapter_id)
             chapter.write(stream)
 
-    def read_2(self, stream: io.data.Data):
+    def read_2(self, stream: "core.Data"):
         self.zombie_event_remaining_time = stream.read_double()
 
-    def write_2(self, stream: io.data.Data):
+    def write_2(self, stream: "core.Data"):
         stream.write_double(self.zombie_event_remaining_time)
 
-    def read_current_outbreaks(
-        self, stream: io.data.Data, gv: game_version.GameVersion
-    ):
+    def read_current_outbreaks(self, stream: "core.Data", gv: "core.GameVersion"):
         if gv <= 43:
             total_chapters = stream.read_int()
             for _ in range(total_chapters):
@@ -133,9 +131,7 @@ class Outbreaks:
 
         self.current_outbreaks = current_outbreaks
 
-    def write_current_outbreaks(
-        self, stream: io.data.Data, gv: game_version.GameVersion
-    ):
+    def write_current_outbreaks(self, stream: "core.Data", gv: "core.GameVersion"):
         if gv <= 43:
             stream.write_int(0)
         stream.write_int(len(self.current_outbreaks))

@@ -2,7 +2,7 @@ from typing import Any, Callable, Optional
 
 import requests
 
-from bcsfe.core import io
+from bcsfe import core
 
 
 class RequestHandler:
@@ -12,17 +12,17 @@ class RequestHandler:
         self,
         url: str,
         headers: Optional[dict[str, str]] = None,
-        data: Optional["io.data.Data"] = None,
+        data: Optional["core.Data"] = None,
     ):
         """Initializes a new instance of the RequestHandler class.
 
         Args:
             url (str): URL to request.
             headers (Optional[dict[str, str]], optional): Headers to send with the request. Defaults to None.
-            data (Optional[io.data.Data], optional): Data to send with the request. Defaults to None.
+            data (Optional[core.Data], optional): Data to send with the request. Defaults to None.
         """
         if data is None:
-            data = io.data.Data()
+            data = core.Data()
         self.url = url
         self.headers = headers
         self.data = data
@@ -76,12 +76,11 @@ class RequestHandler:
                 return
             total_length = int(total_length)
             downloaded = 0
-            all_data: list[io.data.Data] = []
+            all_data: list[core.Data] = []
             for data in response.iter_content(chunk_size=4096):
                 downloaded += len(data)
-                progress_signal.emit(downloaded, total_length)  # type: ignore
-                all_data.append(io.data.Data(data))
-            response._content = io.data.Data.from_many(all_data).data
+                all_data.append(core.Data(data))
+            response._content = core.Data.from_many(all_data).data
 
         return hook
 
@@ -91,4 +90,4 @@ class RequestHandler:
         Returns:
             requests.Response: Response from the server.
         """
-        return requests.post(self.url, headers=self.headers, data=self.data.data)
+        return requests.post(self.url, headers=self.headers, data=self.core.Data)

@@ -1,33 +1,32 @@
 from typing import Any
-from bcsfe.core import io
-from bcsfe.core.game.map import chapters
+from bcsfe import core
 
 
-class Tower:
-    def __init__(self, chapters: chapters.Chapters):
+class TowerChapters:
+    def __init__(self, chapters: "core.Chapters"):
         self.chapters = chapters
         self.item_obtain_states: list[list[bool]] = []
 
     @staticmethod
-    def init() -> "Tower":
-        return Tower(chapters.Chapters.init())
+    def init() -> "TowerChapters":
+        return TowerChapters(core.Chapters.init())
 
     @staticmethod
-    def read(data: io.data.Data) -> "Tower":
-        ch = chapters.Chapters.read(data)
-        return Tower(ch)
+    def read(data: "core.Data") -> "TowerChapters":
+        ch = core.Chapters.read(data)
+        return TowerChapters(ch)
 
-    def write(self, data: io.data.Data):
+    def write(self, data: "core.Data"):
         self.chapters.write(data)
 
-    def read_item_obtain_states(self, data: io.data.Data):
+    def read_item_obtain_states(self, data: "core.Data"):
         total_stars = data.read_int()
         total_stages = data.read_int()
         self.item_obtain_states: list[list[bool]] = []
         for _ in range(total_stars):
             self.item_obtain_states.append(data.read_bool_list(total_stages))
 
-    def write_item_obtain_states(self, data: io.data.Data):
+    def write_item_obtain_states(self, data: "core.Data"):
         data.write_int(len(self.item_obtain_states))
         try:
             data.write_int(len(self.item_obtain_states[0]))
@@ -43,9 +42,9 @@ class Tower:
         }
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "Tower":
-        tower = Tower(
-            chapters.Chapters.deserialize(data.get("chapters", {})),
+    def deserialize(data: dict[str, Any]) -> "TowerChapters":
+        tower = TowerChapters(
+            core.Chapters.deserialize(data.get("chapters", {})),
         )
         tower.item_obtain_states = data.get("item_obtain_states", [])
         return tower

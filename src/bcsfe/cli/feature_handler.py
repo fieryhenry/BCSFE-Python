@@ -1,10 +1,10 @@
 from typing import Any, Callable, Optional
-from bcsfe.core import io, locale_handler
+from bcsfe import core
 from bcsfe.cli import dialog_creator, color, edits, save_management
 
 
 class FeatureHandler:
-    def __init__(self, save_file: "io.save.SaveFile"):
+    def __init__(self, save_file: "core.SaveFile"):
         self.save_file = save_file
 
     def get_features(self):
@@ -36,7 +36,7 @@ class FeatureHandler:
                 "catamins": edits.basic_items.BasicItems.edit_catamins,
                 "scheme_items": edits.basic_items.BasicItems.edit_scheme_items,
             },
-            "cats": edits.cat_selector.CatSelector.edit_cats,
+            "cats": edits.cat_editor.CatEditor.edit_cats,
             "account": {
                 "unban_account": save_management.SaveManagement.unban_account,
                 "upload_items": save_management.SaveManagement.upload_items,
@@ -67,7 +67,7 @@ class FeatureHandler:
             found_features = set()
 
         for feature_name_key, feature in features.items():
-            feature_name = locale_handler.LocalManager().get_key(feature_name_key)
+            feature_name = core.LocalManager().get_key(feature_name_key)
             path = (
                 f"{parent_path}.{feature_name_key}" if parent_path else feature_name_key
             )

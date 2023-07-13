@@ -1,4 +1,4 @@
-from bcsfe.core import io
+from bcsfe import core
 
 
 class MapResetData:
@@ -24,7 +24,7 @@ class MapResetData:
         )
 
     @staticmethod
-    def read(stream: io.data.Data) -> "MapResetData":
+    def read(stream: "core.Data") -> "MapResetData":
         yearly_end_timestamp = stream.read_double()
         monthly_end_timestamp = stream.read_double()
         weekly_end_timestamp = stream.read_double()
@@ -36,7 +36,7 @@ class MapResetData:
             daily_end_timestamp,
         )
 
-    def write(self, stream: io.data.Data):
+    def write(self, stream: "core.Data"):
         stream.write_double(self.yearly_end_timestamp)
         stream.write_double(self.monthly_end_timestamp)
         stream.write_double(self.weekly_end_timestamp)
@@ -75,7 +75,7 @@ class MapResets:
         return MapResets({})
 
     @staticmethod
-    def read(stream: io.data.Data) -> "MapResets":
+    def read(stream: "core.Data") -> "MapResets":
         data: dict[int, list[MapResetData]] = {}
         for _ in range(stream.read_int()):
             key = stream.read_int()
@@ -85,7 +85,7 @@ class MapResets:
             data[key] = value
         return MapResets(data)
 
-    def write(self, stream: io.data.Data):
+    def write(self, stream: "core.Data"):
         stream.write_int(len(self.data))
         for key, value in self.data.items():
             stream.write_int(key)

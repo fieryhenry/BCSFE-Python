@@ -4,7 +4,7 @@ from enum import Enum
 from typing import Any
 import uuid
 import time
-from bcsfe.core import io, crypto, server
+from bcsfe import core
 
 
 class DetailType(Enum):
@@ -102,7 +102,7 @@ class ManagedItem:
 class BackupMetaData:
     def __init__(
         self,
-        save_file: io.save.SaveFile,
+        save_file: "core.SaveFile",
     ):
         self.save_file = save_file
         self.identifier = "managed_items"
@@ -136,26 +136,26 @@ class BackupMetaData:
         for managed_item in self.get_managed_items():
             managed_items.append(managed_item.to_dict())
 
-        managed_items_str = io.json_file.JsonFile.from_object(managed_items)
+        managed_items_str = core.JsonFile.from_object(managed_items)
         managed_items_str = (
             managed_items_str.to_data(indent=None).to_str().replace(" ", "")
         )
 
         backup_metadata: dict[str, Any] = {
             "managedItemDetails": managed_items,
-            "nonce": crypto.Random.get_hex_string(32),
+            "nonce": "core.Random".get_hex_string(32),
             "playTime": self.save_file.officer_pass.play_time,
             "rank": self.save_file.calculate_user_rank(),
             "receiptLogIds": [],
-            "signature_v1": crypto.NyankoSignature(
+            "signature_v1": "core.NyankoSignature"(
                 self.save_file.inquiry_code, managed_items_str
             ).generate_signature_v1(),
         }
-        save_key = server.server_handler.ServerHandler(self.save_file).get_save_key()
+        save_key = core.ServerHandler(self.save_file).get_save_key()
         if save_key is not None:
             backup_metadata["saveKey"] = save_key["key"]
         return (
-            io.json_file.JsonFile.from_object(backup_metadata)
+            core.JsonFile.from_object(backup_metadata)
             .to_data(indent=None)
             .to_str()
             .replace(" ", "")

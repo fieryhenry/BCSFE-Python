@@ -4,7 +4,23 @@ from bcsfe import core
 import datetime
 
 
-class CantDetectSaveCCError(Exception):
+class SaveError(Exception):
+    pass
+
+
+class CantDetectSaveCCError(SaveError):
+    pass
+
+
+class SaveFileInvalid(SaveError):
+    pass
+
+
+class FailedToLoadError(SaveError):
+    pass
+
+
+class FailedToSaveError(SaveError):
     pass
 
 
@@ -24,7 +40,9 @@ class SaveFile:
         detected_cc = self.detect_cc()
         if detected_cc is None:
             if cc is None:
-                raise CantDetectSaveCCError()
+                raise CantDetectSaveCCError(
+                    core.LocalManager().get_key("cant_detect_cc")
+                )
             self.cc = cc
             self.real_cc = cc
         else:
@@ -115,11 +133,14 @@ class SaveFile:
         return self.get_current_hash() == self.get_new_hash()
 
     def load_wrapper(self):
-        self.load()
+        try:
+            self.load()
+        except Exception as e:
+            raise FailedToLoadError(
+                core.LocalManager().get_key("failed_to_load_save")
+            ) from e
         if not self.verify_load():
-            raise ValueError(
-                "Save file loaded incorrectly. GV values were not as expected"
-            )
+            raise SaveFileInvalid(core.LocalManager().get_key("failed_to_load_save_gv"))
 
     def set_gv(self, gv: "core.GameVersion"):
         self.game_version = gv
@@ -1757,13 +1778,27 @@ class SaveFile:
 
     def to_data(self) -> "core.Data":
         dt = core.Data()
-        self.save(dt)
+        self.save_wrapper(dt)
         self.set_hash(add=True)
         return dt
+
+    def save_wrapper(self, data: "core.Data") -> None:
+        try:
+            self.save(data)
+        except Exception as e:
+            raise FailedToSaveError(
+                core.LocalManager().get_key("failed_to_save_save")
+            ) from e
 
     def to_file(self, path: "core.Path") -> None:
         dt = self.to_data()
         dt.to_file(path)
+
+    @staticmethod
+    def get_temp_path() -> "core.Path":
+        save_temp_path = core.Path.get_documents_folder().add("save.temp")
+        save_temp_path.parent().generate_dirs()
+        return save_temp_path
 
     def to_dict(self) -> dict[str, Any]:
         data: dict[str, Any] = {

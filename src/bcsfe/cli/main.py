@@ -1,6 +1,7 @@
 """Main class for the CLI."""
 
 import sys
+import traceback
 from typing import Any, Optional
 from bcsfe.cli import (
     file_dialog,
@@ -21,8 +22,13 @@ class Main:
         self.save_path = None
         self.fh = None
 
+    def wipe_temp_save(self):
+        """Wipe the temp save."""
+        core.SaveFile.get_temp_path().remove()
+
     def main(self):
         """Main function for the CLI."""
+        self.wipe_temp_save()
         self.check_update()
         print()
         self.print_start_text()
@@ -171,10 +177,27 @@ class Main:
     @staticmethod
     def exit_editor(save_file: Optional["core.SaveFile"] = None):
         """Exit the editor."""
-        if save_file is not None:
-            save = color.ColoredInput().localize("save_before_exit") == "y"
+        print()
+        if save_file is None:
+            temp_path = core.SaveFile.get_temp_path()
+            if temp_path.exists():
+                try:
+                    save_file = core.SaveFile(temp_path.read())
+                except core.SaveError as e:
+                    tb = traceback.format_exc()
+                    color.ColoredText.localize(
+                        "save_temp_fail", error=str(e), traceback=tb
+                    )
+                    return
+                color.ColoredText.localize("save_temp_success")
+            else:
+                color.ColoredText.localize("save_temp_not_found")
 
-            if save:
-                save_management.SaveManagement.save_save(save_file)
+        if save_file is None:
+            return
+        save = color.ColoredInput().localize("save_before_exit") == "y"
+
+        if save:
+            save_management.SaveManagement.save_save(save_file)
 
         sys.exit()

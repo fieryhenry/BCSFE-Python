@@ -139,6 +139,7 @@ class FeatureHandler:
         features = self.get_features()
         features = list(features.keys())
         while True:
+            self.save_file.to_file(self.save_file.get_temp_path())
             edits.clear_tutorial.clear_tutorial(self.save_file, False)
             features = self.select_features(features)
             feature = None

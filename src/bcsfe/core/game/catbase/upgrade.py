@@ -91,14 +91,18 @@ class Upgrade:
                     min_base = int(range_parts[0]) - 1
                     max_base = min_base
                 except ValueError:
-                    color.ColoredText.localize("invalid_upgrade_base")
+                    color.ColoredText.localize("invalid_upgrade_base", base=base)
                     return None
             else:
                 try:
                     min_base = int(range_parts[0]) - 1
                     max_base = int(range_parts[1]) - 1
                 except ValueError:
-                    color.ColoredText.localize("invalid_upgrade_base_random")
+                    color.ColoredText.localize(
+                        "invalid_upgrade_base_random",
+                        min=range_parts[0],
+                        max=range_parts[1],
+                    )
                     return None
 
             base_int = (min_base + max_base) // 2
@@ -112,14 +116,18 @@ class Upgrade:
                     min_plus = int(range_parts[0])
                     max_plus = min_plus
                 except ValueError:
-                    color.ColoredText.localize("invalid_upgrade_plus")
+                    color.ColoredText.localize("invalid_upgrade_plus", plus=plus)
                     return None
             else:
                 try:
                     min_plus = int(range_parts[0])
                     max_plus = int(range_parts[1])
                 except ValueError:
-                    color.ColoredText.localize("invalid_upgrade_plus_random")
+                    color.ColoredText.localize(
+                        "invalid_upgrade_plus_random",
+                        min=range_parts[0],
+                        max=range_parts[1],
+                    )
                     return None
 
             plus_int = (min_plus + max_plus) // 2

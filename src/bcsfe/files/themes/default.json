@@ -1,8 +1,7 @@
 {
     "info": {
         "name": "Default",
-        "author": "fieryhenry",
-        "version": "1.0"
+        "author": "fieryhenry"
     },
     "colors": {
         "primary": "#FFFFFF",

@@ -76,7 +76,6 @@ class Main:
             "welcome",
             config_path=core.Config.get_config_path(),
             theme_name=theme_manager.get_theme_name(),
-            theme_version=theme_manager.get_theme_version(),
             theme_author=theme_manager.get_theme_author(),
             theme_path=theme_manager.get_theme_path(),
         )

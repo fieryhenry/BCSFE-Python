@@ -26,11 +26,6 @@ class ThemeHandler:
             "author", core.LocalManager().get_key("unknown_theme_author")
         )
 
-    def get_theme_version(self) -> str:
-        return self.get_theme_info().get(
-            "version", core.LocalManager().get_key("unknown_theme_version")
-        )
-
     def get_theme_path(self) -> "core.Path":
         return core.Path("themes", True).add(self.theme_code + ".json")
 

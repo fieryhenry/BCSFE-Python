@@ -84,7 +84,7 @@ class ServerHandler:
         data = {
             "accountCode": self.save_file.inquiry_code,
             "accountCreatedAt": int(self.save_file.account_created_timestamp),
-            "nonce": "core.Random".get_hex_string(32),
+            "nonce": core.Random.get_hex_string(32),
         }
         password = self.do_password_request(url, data)
         return password
@@ -141,7 +141,7 @@ class ServerHandler:
         data = {
             "accountCode": self.save_file.inquiry_code,
             "passwordRefreshToken": self.save_file.password_refresh_token,
-            "nonce": "core.Random".get_hex_string(32),
+            "nonce": core.Random.get_hex_string(32),
         }
         return self.do_password_request(url, data)
 
@@ -165,7 +165,7 @@ class ServerHandler:
         self.save_auth_token(auth_token)
         return auth_token
 
-    def get_password(self) -> Optional[str]:
+    def get_password(self, tries: int = 0) -> Optional[str]:
         password = self.get_stored_password()
         if password is not None:
             return password
@@ -176,7 +176,7 @@ class ServerHandler:
         if password is not None:
             return password
         self.create_new_account()
-        return self.get_password()
+        return self.get_password(tries + 1) if tries < 1 else None
 
     def validate_auth_token(self, auth_token: str) -> bool:
         token = jwt.decode(
@@ -431,7 +431,7 @@ class ServerHandler:
             "catfoodAmount": self.save_file.catfood,
             "isPaid": False,
             "legendTicketAmount": self.save_file.legend_tickets,
-            "nonce": "core.Random".get_hex_string(32),
+            "nonce": core.Random.get_hex_string(32),
             "platinumTicketAmount": self.save_file.platinum_tickets,
             "rareTicketAmount": self.save_file.rare_tickets,
         }

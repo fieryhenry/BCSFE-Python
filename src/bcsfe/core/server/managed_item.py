@@ -143,11 +143,11 @@ class BackupMetaData:
 
         backup_metadata: dict[str, Any] = {
             "managedItemDetails": managed_items,
-            "nonce": "core.Random".get_hex_string(32),
+            "nonce": core.Random.get_hex_string(32),
             "playTime": self.save_file.officer_pass.play_time,
             "rank": self.save_file.calculate_user_rank(),
             "receiptLogIds": [],
-            "signature_v1": "core.NyankoSignature"(
+            "signature_v1": core.NyankoSignature(
                 self.save_file.inquiry_code, managed_items_str
             ).generate_signature_v1(),
         }

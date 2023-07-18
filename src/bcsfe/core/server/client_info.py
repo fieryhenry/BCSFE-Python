@@ -28,6 +28,6 @@ class ClientInfo:
                     "version": "9",
                 },
             },
-            "nonce": "core.Random".get_hex_string(32),
+            "nonce": core.Random.get_hex_string(32),
         }
         return data

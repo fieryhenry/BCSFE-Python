@@ -12,7 +12,7 @@ class AccountHeaders:
             "accept-enconding": "gzip",
             "connection": "keep-alive",
             "content-type": "application/json",
-            "nyanko-signature": "core.NyankoSignature"(
+            "nyanko-signature": core.NyankoSignature(
                 self.save_file.inquiry_code, self.data
             ).generate_signature(),
             "nyanko-timestamp": str(int(time.time())),

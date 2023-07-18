@@ -291,6 +291,10 @@ class Cat:
         if plus != -1:
             self.upgrade.plus = upgrade.get_random_plus()
 
+    def set_plus_upgrade(self, plus: int):
+        self.unlock()
+        self.upgrade.plus = plus
+
     def reset(self):
         self.unlocked = 0
         self.current_form = 0

@@ -15,6 +15,8 @@ class SaveManagement:
         Args:
             save_file (core.SaveFile): The save file to save.
         """
+        SaveManagement.upload_items_checker(save_file, check_strict)
+
         if save_file.save_path is None:
             save_file.save_path = main.Main.save_save_dialog(save_file)
 
@@ -22,7 +24,6 @@ class SaveManagement:
             return
 
         save_file.to_file(save_file.save_path)
-        SaveManagement.upload_items_checker(save_file, check_strict)
 
         color.ColoredText.localize("save_success", path=save_file.save_path)
 
@@ -33,12 +34,12 @@ class SaveManagement:
         Args:
             save_file (core.SaveFile): The save file to save.
         """
+        SaveManagement.upload_items_checker(save_file)
         save_file.save_path = main.Main.save_save_dialog(save_file)
         if save_file.save_path is None:
             return
 
         save_file.to_file(save_file.save_path)
-        SaveManagement.upload_items_checker(save_file)
 
         color.ColoredText.localize("save_success", path=save_file.save_path)
 

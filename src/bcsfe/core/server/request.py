@@ -90,4 +90,4 @@ class RequestHandler:
         Returns:
             requests.Response: Response from the server.
         """
-        return requests.post(self.url, headers=self.headers, data=self.core.Data)
+        return requests.post(self.url, headers=self.headers, data=self.data.data)

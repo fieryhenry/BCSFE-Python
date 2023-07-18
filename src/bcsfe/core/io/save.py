@@ -189,7 +189,7 @@ class SaveFile:
         self.stamp_value_save = self.data.read_int()
         self.ui2 = self.data.read_int()
 
-        self.eoc_chapter_clear_state = self.data.read_int()
+        self.upgrade_state = self.data.read_int()
 
         self.xp = self.data.read_int()
         self.tutorial_state = self.data.read_int()
@@ -1005,7 +1005,7 @@ class SaveFile:
         self.data.write_int(self.stamp_value_save)
         self.data.write_int(self.ui2)
 
-        self.data.write_int(self.eoc_chapter_clear_state)
+        self.data.write_int(self.upgrade_state)
 
         self.data.write_int(self.xp)
         self.data.write_int(self.tutorial_state)
@@ -1818,7 +1818,7 @@ class SaveFile:
             "ui1": self.ui1,
             "stamp_value_save": self.stamp_value_save,
             "ui2": self.ui2,
-            "eoc_chapter_clear_state": self.eoc_chapter_clear_state,
+            "upgrade_state": self.upgrade_state,
             "xp": self.xp,
             "tutorial_state": self.tutorial_state,
             "ui3": self.ui3,
@@ -2160,7 +2160,7 @@ class SaveFile:
         save_file.ui1 = data.get("ui1", 0)
         save_file.stamp_value_save = data.get("stamp_value_save", 0)
         save_file.ui2 = data.get("ui2", 0)
-        save_file.eoc_chapter_clear_state = data.get("eoc_chapter_clear_state", 0)
+        save_file.upgrade_state = data.get("upgrade_state", 0)
         save_file.xp = data.get("xp", 0)
         save_file.tutorial_state = data.get("tutorial_state", 0)
         save_file.ui3 = data.get("ui3", 0)
@@ -2676,7 +2676,7 @@ class SaveFile:
         self.month = 0
         self.day = 0
         self.stamp_value_save = 0
-        self.eoc_chapter_clear_state = 0
+        self.upgrade_state = 0
         self.xp = 0
         self.tutorial_state = 0
         self.tutorial_state_2 = 0

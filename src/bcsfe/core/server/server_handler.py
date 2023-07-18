@@ -305,11 +305,14 @@ class ServerHandler:
         return True
 
     def get_codes(self) -> Optional[tuple[str, str]]:
+        self.save_file.show_ban_message = False
+
         if not self.upload_save_data():
             return None
         auth_token = self.get_auth_token()
         if auth_token is None:
             return None
+
         bmd = core.BackupMetaData(self.save_file)
         meta_data = bmd.create()
 
@@ -330,7 +333,6 @@ class ServerHandler:
             self.remove_stored_auth_token()
             return None
         bmd.remove_managed_items()
-        self.save_file.show_ban_message = False
         return (transfer_code, confirmation_code)
 
     def upload_meta_data(self) -> bool:

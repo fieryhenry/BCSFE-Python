@@ -152,6 +152,8 @@ class FeatureHandler:
         self.save_file.to_file(self.save_file.get_temp_path())
         while True:
             edits.clear_tutorial.clear_tutorial(self.save_file, False)
+            self.save_file.show_ban_message = False
+
             features = self.select_features(features)
             feature = None
             if len(features) == 1:

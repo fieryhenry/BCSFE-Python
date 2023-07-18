@@ -11,8 +11,6 @@ class GameDataGetter:
         self.cc = save_file.cc
         if save_file.latest_game_data_version is None:
             save_file.latest_game_data_version = self.get_latest_version()
-        if save_file.latest_game_data_version is None:
-            raise Exception("Could not find latest version")
         self.latest_version = save_file.latest_game_data_version
 
     def get_latest_version(self) -> Optional[str]:
@@ -30,13 +28,17 @@ class GameDataGetter:
             return None
 
     def get_file(self, pack_name: str, file_name: str) -> Optional["core.Data"]:
+        if self.latest_version is None:
+            return None
         url = self.url + f"{self.latest_version}/{pack_name}/{file_name}"
         response = core.RequestHandler(url).get()
         if response.status_code != 200:
             return None
         return core.Data(response.content)
 
-    def get_file_path(self, pack_name: str, file_name: str) -> "core.Path":
+    def get_file_path(self, pack_name: str, file_name: str) -> Optional["core.Path"]:
+        if self.latest_version is None:
+            return None
         path = (
             core.Path("game_data", is_relative=True)
             .add(self.latest_version)
@@ -52,11 +54,15 @@ class GameDataGetter:
             return None
 
         path = self.get_file_path(pack_name, file_name)
+        if path is None:
+            return None
         data.to_file(path)
         return data
 
     def is_downloaded(self, pack_name: str, file_name: str) -> bool:
         path = self.get_file_path(pack_name, file_name)
+        if path is None:
+            return False
         return path.exists()
 
     def download_from_path(
@@ -76,6 +82,8 @@ class GameDataGetter:
 
         if self.is_downloaded(pack_name, file_name):
             path = self.get_file_path(pack_name, file_name)
+            if path is None:
+                return None
             return path.read()
         else:
             if retries == 0:
@@ -106,7 +114,9 @@ class GameDataGetter:
         data_list: list[Optional[tuple[str, core.Data]]] = []
         for file_name in file_names:
             path = self.get_file_path(pack_name, file_name)
-            if not path.exists():
+            if path is None:
+                data_list.append(None)
+            elif not path.exists():
                 data_list.append(None)
             else:
                 data_list.append((file_name, path.read()))

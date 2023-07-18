@@ -15,6 +15,7 @@ class ConfigKey(enum.Enum):
     STRICT_UPGRADE = "strict_upgrade"
     SEPARATE_CAT_UPGRADE_OPTIONS = "separate_cat_upgrade_options"
     STRICT_BAN_PREVENTION = "strict_ban_prevention"
+    MAX_REQUEST_TIMEOUT = "max_request_timeout"
 
 
 class Config:
@@ -57,6 +58,7 @@ class Config:
             ConfigKey.STRICT_UPGRADE: False,
             ConfigKey.SEPARATE_CAT_UPGRADE_OPTIONS: True,
             ConfigKey.STRICT_BAN_PREVENTION: False,
+            ConfigKey.MAX_REQUEST_TIMEOUT: 20,
         }
         for key, value in initial_values.items():
             if key not in self.config:

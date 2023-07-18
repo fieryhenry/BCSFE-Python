@@ -26,6 +26,7 @@ class RequestHandler:
         self.url = url
         self.headers = headers
         self.data = data
+        self.config = core.Config()
 
     def get(self) -> requests.Response:
         """Sends a GET request.
@@ -33,56 +34,11 @@ class RequestHandler:
         Returns:
             requests.Response: Response from the server.
         """
-        return requests.get(self.url, headers=self.headers)
-
-    def get_stream(
-        self,
-    ) -> requests.Response:
-        """Sends a GET request and streams the response.
-
-        Args:
-            progress_signal (QtCore.pyqtSignal): Signal to emit progress on.
-
-        Returns:
-            requests.Response: Response from the server.
-        """
         return requests.get(
             self.url,
             headers=self.headers,
-            stream=True,
-            hooks=dict(response=self.__progress_hook()),
+            timeout=self.config.get(core.ConfigKey.MAX_REQUEST_TIMEOUT),
         )
-
-    def __progress_hook(
-        self,
-    ) -> Callable[[requests.Response], None]:
-        """Creates a progress hook for a GET request.
-
-        Args:
-            progress_signal (QtCore.pyqtSignal): Signal to emit progress on.
-
-        Returns:
-            Callable[[requests.Response], None]: Hook to pass to requests.
-        """
-
-        def hook(response: requests.Response, *args: Any, **kwargs: Any) -> None:
-            """Hook to pass to requests.
-
-            Args:
-                response (requests.Response): Response from the server.
-            """
-            total_length = response.headers.get("content-length")
-            if total_length is None:
-                return
-            total_length = int(total_length)
-            downloaded = 0
-            all_data: list[core.Data] = []
-            for data in response.iter_content(chunk_size=4096):
-                downloaded += len(data)
-                all_data.append(core.Data(data))
-            response._content = core.Data.from_many(all_data).data
-
-        return hook
 
     def post(self) -> requests.Response:
         """Sends a POST request.
@@ -90,4 +46,9 @@ class RequestHandler:
         Returns:
             requests.Response: Response from the server.
         """
-        return requests.post(self.url, headers=self.headers, data=self.data.data)
+        return requests.post(
+            self.url,
+            headers=self.headers,
+            data=self.data.data,
+            timeout=self.config.get(core.ConfigKey.MAX_REQUEST_TIMEOUT),
+        )

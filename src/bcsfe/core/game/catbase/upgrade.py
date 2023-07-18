@@ -18,6 +18,9 @@ class Upgrade:
     def get_plus(self) -> int:
         return self.plus
 
+    def upgrade(self):
+        self.base += 1
+
     def get_random_base(self) -> int:
         return random.randint(self.base_range[0], self.base_range[1])
 
@@ -43,11 +46,11 @@ class Upgrade:
 
     @staticmethod
     def init() -> "Upgrade":
-        return Upgrade(0, 1)
+        return Upgrade(0, 0)
 
     def reset(self):
         self.plus = 0
-        self.base = 1
+        self.base = 0
 
     @staticmethod
     def deserialize(data: dict[str, Any]) -> "Upgrade":

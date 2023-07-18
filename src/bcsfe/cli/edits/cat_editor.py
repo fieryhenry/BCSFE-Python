@@ -42,7 +42,9 @@ class CatEditor:
         return self.save_file.cats.get_cats_by_ids(cat_ids)
 
     def print_selected_cats(self, current_cats: list["core.Cat"]):
-        if len(current_cats) > 50 or not current_cats:
+        if not current_cats:
+            return
+        if len(current_cats) > 50:
             color.ColoredText.localize("total_selected_cats", total=len(current_cats))
         else:
             self.save_file.cats.bulk_download_names(self.save_file)
@@ -241,13 +243,19 @@ class CatEditor:
                 )
                 upgrade = core.Upgrade.get_user_upgrade()
                 if upgrade is not None:
-                    cat.set_upgrade(upgrade)
+                    power_up = core.PowerUpHelper(cat, self.save_file)
+                    power_up.reset_upgrade()
+                    power_up.upgrade_by(upgrade.base)
+                    cat.set_plus_upgrade(upgrade.plus)
         else:
             upgrade = core.Upgrade.get_user_upgrade()
             if upgrade is None:
                 return
             for cat in cats:
-                cat.set_upgrade(upgrade)
+                power_up = core.PowerUpHelper(cat, self.save_file)
+                power_up.reset_upgrade()
+                power_up.upgrade_by(upgrade.base)
+                cat.set_plus_upgrade(upgrade.plus)
         color.ColoredText.localize("upgrade_success")
 
     @staticmethod
@@ -258,6 +266,48 @@ class CatEditor:
             should_exit, current_cats = CatEditor.run_edit_cats(save_file, current_cats)
             if should_exit:
                 break
+
+    @staticmethod
+    def unlock_cats_run(save_file: "core.SaveFile"):
+        cat_editor = CatEditor(save_file)
+        current_cats = cat_editor.select()
+        cat_editor.unlock_cats(current_cats)
+
+    @staticmethod
+    def remove_cats_run(save_file: "core.SaveFile"):
+        cat_editor = CatEditor(save_file)
+        current_cats = cat_editor.select()
+        cat_editor.remove_cats(current_cats)
+
+    @staticmethod
+    def true_form_cats_run(save_file: "core.SaveFile"):
+        cat_editor = CatEditor(save_file)
+        current_cats = cat_editor.select()
+        cat_editor.true_form_cats(current_cats)
+
+    @staticmethod
+    def remove_true_form_cats_run(save_file: "core.SaveFile"):
+        cat_editor = CatEditor(save_file)
+        current_cats = cat_editor.select()
+        cat_editor.remove_true_form_cats(current_cats)
+
+    @staticmethod
+    def upgrade_cats_run(save_file: "core.SaveFile"):
+        cat_editor = CatEditor(save_file)
+        current_cats = cat_editor.select()
+        cat_editor.upgrade_cats(current_cats)
+
+    @staticmethod
+    def upgrade_talents_cats_run(save_file: "core.SaveFile"):
+        cat_editor = CatEditor(save_file)
+        current_cats = cat_editor.select()
+        cat_editor.upgrade_talents_cats(current_cats)
+
+    @staticmethod
+    def remove_talents_cats_run(save_file: "core.SaveFile"):
+        cat_editor = CatEditor(save_file)
+        current_cats = cat_editor.select()
+        cat_editor.remove_talents_cats(current_cats)
 
     @staticmethod
     def run_edit_cats(

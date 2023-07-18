@@ -6,8 +6,18 @@ from bcsfe.cli import dialog_creator, color, edits, save_management, main
 class FeatureHandler:
     def __init__(self, save_file: "core.SaveFile"):
         self.save_file = save_file
+        self.config = core.Config()
 
     def get_features(self):
+        cat_features = edits.cat_editor.CatEditor.edit_cats
+        if self.config.get(core.ConfigKey.SEPARATE_CAT_UPGRADE_OPTIONS):
+            cat_features = {
+                "unlock_cats": edits.cat_editor.CatEditor.unlock_cats_run,
+                "remove_cats": edits.cat_editor.CatEditor.remove_cats_run,
+                "upgrade_cats": edits.cat_editor.CatEditor.upgrade_cats_run,
+                "true_form_cats": edits.cat_editor.CatEditor.true_form_cats_run,
+                "remove_true_form_cats": edits.cat_editor.CatEditor.remove_true_form_cats_run,
+            }
         features: dict[str, Any] = {
             "save_management": {
                 "save_save": save_management.SaveManagement.save_save,
@@ -36,7 +46,7 @@ class FeatureHandler:
                 "catamins": edits.basic_items.BasicItems.edit_catamins,
                 "scheme_items": edits.basic_items.BasicItems.edit_scheme_items,
             },
-            "cats": edits.cat_editor.CatEditor.edit_cats,
+            "cats": cat_features,
             "account": {
                 "unban_account": save_management.SaveManagement.unban_account,
                 "upload_items": save_management.SaveManagement.upload_items,

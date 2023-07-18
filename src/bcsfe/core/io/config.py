@@ -12,6 +12,8 @@ class ConfigKey(enum.Enum):
     RESET_CAT_DATA = "reset_cat_data"
     FILTER_CURRENT_CATS = "filter_current_cats"
     SET_CAT_CURRENT_FORMS = "set_cat_current_forms"
+    STRICT_UPGRADE = "strict_upgrade"
+    SEPARATE_CAT_UPGRADE_OPTIONS = "separate_cat_upgrade_options"
 
 
 class Config:
@@ -51,6 +53,8 @@ class Config:
             ConfigKey.RESET_CAT_DATA: True,
             ConfigKey.FILTER_CURRENT_CATS: True,
             ConfigKey.SET_CAT_CURRENT_FORMS: True,
+            ConfigKey.STRICT_UPGRADE: False,
+            ConfigKey.SEPARATE_CAT_UPGRADE_OPTIONS: True,
         }
         for key, value in initial_values.items():
             if key not in self.config:

@@ -18,6 +18,7 @@ class FeatureHandler:
                 "true_form_cats": edits.cat_editor.CatEditor.true_form_cats_run,
                 "remove_true_form_cats": edits.cat_editor.CatEditor.remove_true_form_cats_run,
             }
+
         features: dict[str, Any] = {
             "save_management": {
                 "save_save": save_management.SaveManagement.save_save,

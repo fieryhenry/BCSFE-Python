@@ -9,7 +9,7 @@ class SaveManagement:
         pass
 
     @staticmethod
-    def save_save(save_file: "core.SaveFile"):
+    def save_save(save_file: "core.SaveFile", check_strict: bool = True):
         """Save the save file without a dialog.
 
         Args:
@@ -22,6 +22,7 @@ class SaveManagement:
             return
 
         save_file.to_file(save_file.save_path)
+        SaveManagement.upload_items_checker(save_file, check_strict)
 
         color.ColoredText.localize("save_success", path=save_file.save_path)
 
@@ -37,6 +38,7 @@ class SaveManagement:
             return
 
         save_file.to_file(save_file.save_path)
+        SaveManagement.upload_items_checker(save_file)
 
         color.ColoredText.localize("save_success", path=save_file.save_path)
 
@@ -47,8 +49,12 @@ class SaveManagement:
         Args:
             save_file (core.SaveFile): The save file to save.
         """
+        if core.Config().get(core.ConfigKey.STRICT_BAN_PREVENTION):
+            color.ColoredText.localize("strict_ban_prevention_enabled")
+            SaveManagement.create_new_account(save_file)
+
         result = core.ServerHandler(save_file).get_codes()
-        SaveManagement.save_save(save_file)
+        SaveManagement.save_save(save_file, check_strict=False)
         if result is not None:
             transfer_code, confirmation_code = result
             color.ColoredText.localize(
@@ -72,6 +78,20 @@ class SaveManagement:
             color.ColoredText.localize("unban_success")
         else:
             color.ColoredText.localize("unban_fail")
+
+    @staticmethod
+    def create_new_account(save_file: "core.SaveFile"):
+        """Create a new account.
+
+        Args:
+            save_file (core.SaveFile): The save file to create a new account.
+        """
+        server_handler = core.ServerHandler(save_file)
+        success = server_handler.create_new_account()
+        if success:
+            color.ColoredText.localize("create_new_account_success")
+        else:
+            color.ColoredText.localize("create_new_account_fail")
 
     @staticmethod
     def adb_push(save_file: "core.SaveFile") -> "core.AdbHandler":
@@ -140,18 +160,35 @@ class SaveManagement:
         color.ColoredText.localize("init_save_success")
 
     @staticmethod
-    def upload_items(save_file: "core.SaveFile"):
+    def upload_items(save_file: "core.SaveFile", check_strict: bool = True):
         """Upload the items to the server.
 
         Args:
             save_file (core.SaveFile): The save file to upload.
         """
+        if core.Config().get(core.ConfigKey.STRICT_BAN_PREVENTION) and check_strict:
+            color.ColoredText.localize("strict_ban_prevention_enabled")
+            SaveManagement.create_new_account(save_file)
+            return
+
         server_handler = core.ServerHandler(save_file)
         success = server_handler.upload_meta_data()
         if success:
             color.ColoredText.localize("upload_items_success")
         else:
             color.ColoredText.localize("upload_items_fail")
+
+    @staticmethod
+    def upload_items_checker(save_file: "core.SaveFile", check_strict: bool = True):
+        managed_items = core.BackupMetaData(save_file).get_managed_items()
+        if not managed_items:
+            return
+        should_upload = dialog_creator.YesNoInput().get_input_once(
+            "upload_items_checker_confirm"
+        )
+        if not should_upload:
+            return
+        SaveManagement.upload_items(save_file, check_strict)
 
     @staticmethod
     def select_save(exit_option: bool = False) -> Optional["core.SaveFile"]:
@@ -253,6 +290,7 @@ class SaveManagement:
         Args:
             save_file (core.SaveFile): The current save file.
         """
+        SaveManagement.upload_items_checker(save_file)
         new_save_file = SaveManagement.select_save()
         if new_save_file is None:
             return

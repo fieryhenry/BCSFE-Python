@@ -14,6 +14,7 @@ class ConfigKey(enum.Enum):
     SET_CAT_CURRENT_FORMS = "set_cat_current_forms"
     STRICT_UPGRADE = "strict_upgrade"
     SEPARATE_CAT_UPGRADE_OPTIONS = "separate_cat_upgrade_options"
+    STRICT_BAN_PREVENTION = "strict_ban_prevention"
 
 
 class Config:
@@ -55,6 +56,7 @@ class Config:
             ConfigKey.SET_CAT_CURRENT_FORMS: True,
             ConfigKey.STRICT_UPGRADE: False,
             ConfigKey.SEPARATE_CAT_UPGRADE_OPTIONS: True,
+            ConfigKey.STRICT_BAN_PREVENTION: False,
         }
         for key, value in initial_values.items():
             if key not in self.config:

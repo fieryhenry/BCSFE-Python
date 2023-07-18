@@ -3109,6 +3109,7 @@ class SaveFile:
         return core.Path.get_documents_folder().add("saves")
 
     def get_default_path(self) -> "core.Path":
+        SaveFile.check_backups()
         date = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         local_path = (
             self.get_saves_path()
@@ -3120,3 +3121,35 @@ class SaveFile:
         local_path = local_path.add(date)
 
         return local_path
+
+    @staticmethod
+    def check_backups():
+        max_backups = core.Config().get(core.ConfigKey.MAX_BACKUPS)
+        if max_backups == -1:
+            return
+        saves_path = SaveFile.get_saves_path().add("backups")
+        saves_path.generate_dirs()
+        all_saves: list[tuple[core.Path, datetime.datetime]] = []
+        for cc in saves_path.get_dirs():
+            for inquiry in cc.get_dirs():
+                for save in inquiry.get_files():
+                    name = save.basename()
+                    try:
+                        date = datetime.datetime.strptime(name, "%Y-%m-%d_%H-%M-%S")
+                    except ValueError:
+                        continue
+                    all_saves.append((save, date))
+
+        all_saves.sort(key=lambda x: x[1], reverse=True)
+        for i, save in enumerate(all_saves):
+            if i >= max_backups:
+                save[0].remove()
+
+        for cc in saves_path.get_dirs():
+            dirs = cc.get_dirs()
+            if len(dirs) == 0:
+                cc.remove()
+            for inquiry in dirs:
+                saves = inquiry.get_files()
+                if len(saves) == 0:
+                    inquiry.remove()

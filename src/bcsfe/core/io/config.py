@@ -7,7 +7,7 @@ class ConfigKey(enum.Enum):
     UPDATE_TO_BETA = "update_to_beta"
     LOCALE = "locale"
     DISABLE_MAXES = "disable_maxes"
-    MAX_SAVE_COUNT = "max_save_count"
+    MAX_BACKUPS = "max_backups"
     THEME = "theme"
     RESET_CAT_DATA = "reset_cat_data"
     FILTER_CURRENT_CATS = "filter_current_cats"
@@ -49,7 +49,7 @@ class Config:
             ConfigKey.UPDATE_TO_BETA: False,
             ConfigKey.LOCALE: "en",
             ConfigKey.DISABLE_MAXES: False,
-            ConfigKey.MAX_SAVE_COUNT: 50,
+            ConfigKey.MAX_BACKUPS: 50,
             ConfigKey.THEME: "default",
             ConfigKey.RESET_CAT_DATA: True,
             ConfigKey.FILTER_CURRENT_CATS: True,

@@ -118,10 +118,14 @@ class BackupMetaData:
         managed_items_str = self.save_file.get_strings(self.identifier)
         for managed_item_str in managed_items_str:
             managed_item = ManagedItem.from_short_form(managed_item_str)
+            if managed_item.amount == 0:
+                continue
             managed_items.append(managed_item)
         return managed_items
 
     def add_managed_item(self, managed_item: ManagedItem):
+        if managed_item.amount == 0:
+            return
         managed_items = self.get_managed_items()
         managed_items.append(managed_item)
         self.set_managed_items(managed_items)
@@ -134,6 +138,8 @@ class BackupMetaData:
 
         managed_items: list[dict[str, Any]] = []
         for managed_item in self.get_managed_items():
+            if managed_item.amount == 0:
+                continue
             managed_items.append(managed_item.to_dict())
 
         managed_items_str = core.JsonFile.from_object(managed_items)

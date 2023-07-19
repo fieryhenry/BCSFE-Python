@@ -1,6 +1,7 @@
 import enum
 from typing import Optional, Union
 from bcsfe.cli import dialog_creator
+from bcsfe import core
 
 
 class CountryCodeType(enum.Enum):
@@ -28,6 +29,10 @@ class CountryCode:
     def from_patching_code(code: str) -> "CountryCode":
         if code == "":
             return CountryCode(CountryCodeType.JP)
+        return CountryCode(code)
+
+    @staticmethod
+    def from_code(code: str) -> "CountryCode":
         return CountryCode(code)
 
     @staticmethod
@@ -86,3 +91,15 @@ class CountryCode:
         elif isinstance(o, CountryCodeType):
             return self.get_code() == o.value
         return False
+
+    def get_cc_lang(self) -> "core.CountryCode":
+        if core.config.get(core.ConfigKey.FORCE_LANG_GAME_DATA):
+            return core.CountryCode.from_code(core.config.get(core.ConfigKey.LOCALE))
+        return self
+
+    @staticmethod
+    def get_langs() -> list[str]:
+        return ["de", "it", "es", "fr", "th"]
+
+    def is_lang(self) -> bool:
+        return self.get_code() in CountryCode.get_langs()

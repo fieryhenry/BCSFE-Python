@@ -6,29 +6,38 @@ from bcsfe import core
 
 class GameDataGetter:
     def __init__(self, save_file: "core.SaveFile"):
-        self.cc = save_file.cc
         self.url = core.config.get(core.ConfigKey.GAME_DATA_REPO)
         self.lang = core.config.get(core.ConfigKey.LOCALE)
-        self.latest_version = self.get_latest_version()
+        self.cc = save_file.cc.get_cc_lang()
+        self.real_cc = save_file.cc
+        self.cc = self.cc if not self.cc.is_lang() else self.real_cc
+        self.all_versions = self.get_versions()
+        self.latest_version = self.get_latest_version(self.all_versions, self.cc)
 
-    def get_latest_version(self) -> Optional[str]:
-        versions = core.RequestHandler(self.url + "latest.txt").get().text.split("\n")
+    def get_latest_version(
+        self, versions: list[str], cc: "core.CountryCode"
+    ) -> Optional[str]:
         length = len(versions)
-        if self.cc == core.CountryCodeType.EN and length >= 1:
+        if cc == core.CountryCodeType.EN and length >= 1:
             return versions[0]
-        if self.cc == core.CountryCodeType.JP and length >= 2:
+        if cc == core.CountryCodeType.JP and length >= 2:
             return versions[1]
-        if self.cc == core.CountryCodeType.KR and length >= 3:
+        if cc == core.CountryCodeType.KR and length >= 3:
             return versions[2]
-        if self.cc == core.CountryCodeType.TW and length >= 4:
+        if cc == core.CountryCodeType.TW and length >= 4:
             return versions[3]
         return None
 
+    def get_versions(self) -> list[str]:
+        versions = core.RequestHandler(self.url + "latest.txt").get().text.split("\n")
+        return versions
+
     def get_file(self, pack_name: str, file_name: str) -> Optional["core.Data"]:
         pack_name = self.get_packname(pack_name)
-        if self.latest_version is None:
+        version = self.latest_version
+        if version is None:
             return None
-        url = self.url + f"{self.latest_version}/{pack_name}/{file_name}"
+        url = self.url + f"{version}/{pack_name}/{file_name}"
         response = core.RequestHandler(url).get()
         if response.status_code != 200:
             return None
@@ -39,19 +48,19 @@ class GameDataGetter:
             return packname
         if self.cc != core.CountryCodeType.EN:
             return packname
-        if self.lang == "en":
-            return packname
-        return f"{packname}_{self.lang}"
+        langs = core.CountryCode.get_langs()
+        if self.lang in langs:
+            return f"{packname}_{self.lang}"
+        return packname
 
     def get_file_path(self, pack_name: str, file_name: str) -> Optional["core.Path"]:
-        if self.latest_version is None:
+        version = self.latest_version
+
+        if version is None:
             return None
+        print(version)
         pack_name = self.get_packname(pack_name)
-        path = (
-            core.Path("game_data", is_relative=True)
-            .add(self.latest_version)
-            .add(pack_name)
-        )
+        path = core.Path("game_data", is_relative=True).add(version).add(pack_name)
         path.generate_dirs()
         path = path.add(file_name)
         return path
@@ -101,12 +110,17 @@ class GameDataGetter:
         if retries == 0:
             return None
 
+        version = self.latest_version
+
+        if version is None:
+            return None
+
         if display_text:
             color.ColoredText.localize(
                 "downloading",
                 file_name=file_name,
                 pack_name=pack_name,
-                version=self.latest_version,
+                version=version,
             )
         data = self.save_file(pack_name, file_name)
         if data is None:

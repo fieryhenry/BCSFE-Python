@@ -8,7 +8,14 @@ class YamlFile:
         self.path = path
         if self.path.exists():
             self.data = path.read()
-            self.yaml = yaml.safe_load(self.data.data)
+            try:
+                self.yaml = yaml.safe_load(self.data.data)
+                if not isinstance(self.yaml, dict):
+                    self.yaml = {}
+                    self.save()
+            except yaml.YAMLError:
+                self.yaml = {}
+                self.save()
         else:
             self.yaml: dict[str, Any] = {}
             self.save()

@@ -1,7 +1,5 @@
 # Changelog
 
-## [Unreleased]
-
 ## [3.0.0] - ???
 
 ### ADB
@@ -66,7 +64,11 @@ between 40 and 50. (it was requested, i guess to make it less obvious that you
 save edited)
 
 - Config option `separate_cat_edit_options` to control the following:
-  - When disabled, when editing cats, you first select your cats, then you edit them.
+  - When disabled (default), when editing cats, you first select what you want
+  to edit and then you select your cats
+
+  - When enabled, you first select your cats, then you edit
+  them.
 
 #### Changed
 

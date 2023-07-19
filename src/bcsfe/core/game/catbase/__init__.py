@@ -18,6 +18,7 @@ from bcsfe.core.game.catbase import (
     medals,
     talent_orbs,
     matatabi,
+    powerup,
 )
 
 __all__ = [
@@ -40,4 +41,5 @@ __all__ = [
     "talent_orbs",
     "gatya_item",
     "matatabi",
+    "powerup",
 ]

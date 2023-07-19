@@ -170,7 +170,10 @@ class FeatureHandler:
             if isinstance(feature, Callable):
                 edits.clear_tutorial.clear_tutorial(self.save_file, False)
                 self.save_file.show_ban_message = False
+
                 feature(self.save_file)
+
                 self.save_file.to_file(self.save_file.get_temp_path())
+
                 features = self.get_features()
                 features = list(features.keys())

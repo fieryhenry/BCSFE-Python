@@ -13,7 +13,7 @@ class ConfigKey(enum.Enum):
     FILTER_CURRENT_CATS = "filter_current_cats"
     SET_CAT_CURRENT_FORMS = "set_cat_current_forms"
     STRICT_UPGRADE = "strict_upgrade"
-    SEPARATE_CAT_UPGRADE_OPTIONS = "separate_cat_upgrade_options"
+    SEPARATE_CAT_EDIT_OPTIONS = "separate_cat_edit_options"
     STRICT_BAN_PREVENTION = "strict_ban_prevention"
     MAX_REQUEST_TIMEOUT = "max_request_timeout"
 
@@ -56,7 +56,7 @@ class Config:
             ConfigKey.FILTER_CURRENT_CATS: True,
             ConfigKey.SET_CAT_CURRENT_FORMS: True,
             ConfigKey.STRICT_UPGRADE: False,
-            ConfigKey.SEPARATE_CAT_UPGRADE_OPTIONS: True,
+            ConfigKey.SEPARATE_CAT_EDIT_OPTIONS: True,
             ConfigKey.STRICT_BAN_PREVENTION: False,
             ConfigKey.MAX_REQUEST_TIMEOUT: 20,
         }

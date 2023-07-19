@@ -20,10 +20,9 @@ class Delimeter:
 
     @staticmethod
     def from_country_code_res(cc: "core.CountryCode") -> "Delimeter":
-        if cc == core.CountryCodeType.JP:
+        if cc.get_cc_lang() == core.CountryCodeType.JP:
             return Delimeter(DelimeterType.COMMA)
-        else:
-            return Delimeter(DelimeterType.PIPE)
+        return Delimeter(DelimeterType.PIPE)
 
     def __str__(self) -> str:
         return self.delimeter.value

@@ -115,11 +115,13 @@ class ColoredText:
                 print(colored.stylize(text, fg), end="")  # type: ignore
 
     @staticmethod
-    def get_localized_text(string: str, **kwargs: Any) -> str:
+    def get_localized_text(string: str, escape: bool = True, **kwargs: Any) -> str:
         text = core.local_manager.get_key(string)
         try:
             for key, value in kwargs.items():
-                value = ColoredText.escape_string(str(value))
+                if escape:
+                    value = ColoredText.escape_string(str(value))
+
                 text = text.replace("{" + key + "}", value)
         except TypeError:
             pass

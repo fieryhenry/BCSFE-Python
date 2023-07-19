@@ -228,16 +228,21 @@ class CatEditor:
 
     def upgrade_cats(self, cats: list["core.Cat"]):
         cats = self.get_save_cats(cats)
-        options: list[str] = [
-            "upgrade_individual",
-            "upgrade_all",
-        ]
-        option_id = dialog_creator.ChoiceInput(
-            options, options, [], {}, "upgrade_cats_select_mod", True
-        ).single_choice()
-        if option_id is None:
+        if not cats:
             return
-        option_id -= 1
+        if len(cats) == 1:
+            option_id = 0
+        else:
+            options: list[str] = [
+                "upgrade_individual",
+                "upgrade_all",
+            ]
+            option_id = dialog_creator.ChoiceInput(
+                options, options, [], {}, "upgrade_cats_select_mod", True
+            ).single_choice()
+            if option_id is None:
+                return
+            option_id -= 1
         if option_id == 0:
             localizable = self.save_file.get_localizable()
             for cat in cats:

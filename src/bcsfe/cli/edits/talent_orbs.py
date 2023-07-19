@@ -422,16 +422,16 @@ class SaveOrbs:
         all_effects.sort()
 
         all_grades_str = "".join(
-            f"<{color_from_grade(grade)}>{grade},</>" for grade in all_grades
+            f"<{color_from_grade(grade)}>{grade}</>," for grade in all_grades
         )
 
         all_attributes_str = "".join(
-            f"<{color_from_enemy_type(attribute)}>{attribute},</>"
+            f"<{color_from_enemy_type(attribute)}>{attribute}</>,"
             for attribute in all_attributes
         )
 
         all_effects_str = "".join(
-            f"<{color_from_effect(effect)}>{effect},</>" for effect in all_effects
+            f"<{color_from_effect(effect)}>{effect}</>," for effect in all_effects
         )
 
         color.ColoredText.localize(

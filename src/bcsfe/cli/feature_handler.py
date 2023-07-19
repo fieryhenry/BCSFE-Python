@@ -136,7 +136,9 @@ class FeatureHandler:
 
                 else:
                     feature_path = (
-                        f"{parent_path}.{feature}" if parent_path else feature
+                        f"{parent_path}.{feature_name_top}"
+                        if parent_path
+                        else feature_name_top
                     )
                     selected_features.append(feature_path)
 
@@ -160,17 +162,15 @@ class FeatureHandler:
             if len(features) == 2 and features[0] == "go_back":
                 feature = features[1]
 
-            if feature:
-                if not isinstance(feature, Callable):
-                    feature = self.get_feature(feature)
+            if not feature:
+                continue
 
-                if isinstance(feature, Callable):
-                    edits.clear_tutorial.clear_tutorial(self.save_file, False)
-                    self.save_file.show_ban_message = False
+            feature = self.get_feature(feature)
 
-                    feature(self.save_file)
-
-                    self.save_file.to_file(self.save_file.get_temp_path())
-
-                    features = self.get_features()
-                    features = list(features.keys())
+            if isinstance(feature, Callable):
+                edits.clear_tutorial.clear_tutorial(self.save_file, False)
+                self.save_file.show_ban_message = False
+                feature(self.save_file)
+                self.save_file.to_file(self.save_file.get_temp_path())
+                features = self.get_features()
+                features = list(features.keys())

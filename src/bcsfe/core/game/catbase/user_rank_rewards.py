@@ -1,4 +1,52 @@
+from typing import Optional
 from bcsfe import core
+
+
+class RankGift:
+    def __init__(self, threshold: int, rewards: list[tuple[int, int]]):
+        self.threshold = threshold
+        self.rewards = rewards
+
+
+class RankGifts:
+    def __init__(self, save_file: "core.SaveFile"):
+        self.save_file = save_file
+        self.rank_gift = self.read_rank_gift()
+
+    def read_rank_gift(self) -> list[RankGift]:
+        rank_gift: list[RankGift] = []
+        gdg = core.get_game_data_getter(self.save_file)
+        data = gdg.download("DataLocal", "rankGift.csv")
+        if data is None:
+            return rank_gift
+        csv = core.CSV(data)
+        for line in csv:
+            rewards: list[tuple[int, int]] = []
+            for col in range(1, len(line), 2):
+                value = line[col].to_int()
+                if value == -1:
+                    break
+                rewards.append((value, line[col + 1].to_int()))
+            rank_gift.append(RankGift(line[0].to_int(), rewards))
+        return rank_gift
+
+    def get_rank_gift(self, user_rank: int) -> RankGift:
+        for rank_gift in self.rank_gift:
+            if rank_gift.threshold == user_rank:
+                return rank_gift
+        raise ValueError(f"RankGift not found for rank {user_rank}")
+
+    def get_all_rank_gifts(self, user_rank: int) -> list[RankGift]:
+        return [
+            rank_gift
+            for rank_gift in self.rank_gift
+            if rank_gift.threshold <= user_rank
+        ]
+
+    def get_by_id(self, id: int) -> Optional[RankGift]:
+        if id >= len(self.rank_gift) or id < 0:
+            return None
+        return self.rank_gift[id]
 
 
 class Reward:
@@ -33,6 +81,12 @@ class Reward:
 class UserRankRewards:
     def __init__(self, rewards: list[Reward]):
         self.rewards = rewards
+        self.rank_gifts: Optional[RankGifts] = None
+
+    def read_rank_gifts(self, save_file: "core.SaveFile") -> RankGifts:
+        if self.rank_gifts is None:
+            self.rank_gifts = RankGifts(save_file)
+        return self.rank_gifts
 
     @staticmethod
     def init(gv: "core.GameVersion") -> "UserRankRewards":

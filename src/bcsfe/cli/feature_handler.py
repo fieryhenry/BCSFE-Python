@@ -149,10 +149,10 @@ class FeatureHandler:
         features = self.get_features()
         features = list(features.keys())
         self.save_file.to_file(self.save_file.get_temp_path())
-        while True:
-            edits.clear_tutorial.clear_tutorial(self.save_file, False)
-            self.save_file.show_ban_message = False
+        edits.clear_tutorial.clear_tutorial(self.save_file, False)
+        self.save_file.show_ban_message = False
 
+        while True:
             features = self.select_features(features)
             feature = None
             if len(features) == 1:
@@ -161,15 +161,16 @@ class FeatureHandler:
                 feature = features[1]
 
             if feature:
+                if not isinstance(feature, Callable):
+                    feature = self.get_feature(feature)
+
                 if isinstance(feature, Callable):
+                    edits.clear_tutorial.clear_tutorial(self.save_file, False)
+                    self.save_file.show_ban_message = False
+
                     feature(self.save_file)
+
                     self.save_file.to_file(self.save_file.get_temp_path())
+
                     features = self.get_features()
                     features = list(features.keys())
-                else:
-                    feature = self.get_feature(feature)
-                    if isinstance(feature, Callable):
-                        feature(self.save_file)
-                        self.save_file.to_file(self.save_file.get_temp_path())
-                        features = self.get_features()
-                        features = list(features.keys())

@@ -71,7 +71,7 @@ class IntInput:
 
     @staticmethod
     def get_max_value(max: Optional[int], signed: bool = True) -> int:
-        disable_maxes = core.config.get(core.ConfigKey.DISABLE_MAXES)
+        disable_maxes = core.config.get_bool(core.ConfigKey.DISABLE_MAXES)
         if signed:
             max_int = 2**31 - 1
         else:

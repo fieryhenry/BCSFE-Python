@@ -93,8 +93,9 @@ class CountryCode:
         return False
 
     def get_cc_lang(self) -> "core.CountryCode":
-        if core.config.get(core.ConfigKey.FORCE_LANG_GAME_DATA):
-            return core.CountryCode.from_code(core.config.get(core.ConfigKey.LOCALE))
+        if core.config.get_bool(core.ConfigKey.FORCE_LANG_GAME_DATA):
+            locale = core.config.get_str(core.ConfigKey.LOCALE)
+            return core.CountryCode.from_code(locale)
         return self
 
     @staticmethod

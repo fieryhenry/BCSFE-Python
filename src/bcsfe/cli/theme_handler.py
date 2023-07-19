@@ -5,12 +5,14 @@ from bcsfe import core
 class ThemeHandler:
     def __init__(self, theme_code: Optional[str] = None):
         if theme_code is None:
-            self.theme_code = core.config.get(core.ConfigKey.THEME)
+            self.theme_code = core.config.get_str(core.ConfigKey.THEME)
         else:
             self.theme_code = theme_code
 
     def get_theme_data(self) -> dict[str, Any]:
         file_path = core.Path("themes", True).add(self.theme_code + ".json")
+        if not file_path.exists():
+            return {}
         return core.JsonFile.from_data(file_path.read()).get_json()
 
     def get_theme_info(self) -> dict[str, Any]:

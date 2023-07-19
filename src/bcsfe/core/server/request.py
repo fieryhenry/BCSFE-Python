@@ -36,7 +36,7 @@ class RequestHandler:
         return requests.get(
             self.url,
             headers=self.headers,
-            timeout=core.config.get(core.ConfigKey.MAX_REQUEST_TIMEOUT),
+            timeout=core.config.get_int(core.ConfigKey.MAX_REQUEST_TIMEOUT),
         )
 
     def post(self) -> requests.Response:
@@ -49,5 +49,5 @@ class RequestHandler:
             self.url,
             headers=self.headers,
             data=self.data.data,
-            timeout=core.config.get(core.ConfigKey.MAX_REQUEST_TIMEOUT),
+            timeout=core.config.get_int(core.ConfigKey.MAX_REQUEST_TIMEOUT),
         )

@@ -3123,7 +3123,7 @@ class SaveFile:
 
     @staticmethod
     def check_backups():
-        max_backups = core.config.get(core.ConfigKey.MAX_BACKUPS)
+        max_backups = core.config.get_int(core.ConfigKey.MAX_BACKUPS)
         if max_backups == -1:
             return
         saves_path = SaveFile.get_saves_path().add("backups")

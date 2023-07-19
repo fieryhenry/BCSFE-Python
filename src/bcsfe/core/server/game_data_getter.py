@@ -6,8 +6,8 @@ from bcsfe import core
 
 class GameDataGetter:
     def __init__(self, save_file: "core.SaveFile"):
-        self.url = core.config.get(core.ConfigKey.GAME_DATA_REPO)
-        self.lang = core.config.get(core.ConfigKey.LOCALE)
+        self.url = core.config.get_str(core.ConfigKey.GAME_DATA_REPO)
+        self.lang = core.config.get_str(core.ConfigKey.LOCALE)
         self.cc = save_file.cc.get_cc_lang()
         self.real_cc = save_file.cc
         self.cc = self.cc if not self.cc.is_lang() else self.real_cc

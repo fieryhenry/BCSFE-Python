@@ -9,7 +9,7 @@ class FeatureHandler:
 
     def get_features(self):
         cat_features = edits.cat_editor.CatEditor.edit_cats
-        if core.config.get(core.ConfigKey.SEPARATE_CAT_EDIT_OPTIONS):
+        if core.config.get_bool(core.ConfigKey.SEPARATE_CAT_EDIT_OPTIONS):
             cat_features = {
                 "unlock_cats": edits.cat_editor.CatEditor.unlock_cats_run,
                 "remove_cats": edits.cat_editor.CatEditor.remove_cats_run,

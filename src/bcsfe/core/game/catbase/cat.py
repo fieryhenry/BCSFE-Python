@@ -238,6 +238,35 @@ class UnitBuy:
         return unit_buy.rarity
 
 
+class UnitLimitCatData:
+    def __init__(self, cat_id: int, values: list[int]):
+        self.cat_id = cat_id
+        self.values = values
+
+
+class UnitLimit:
+    def __init__(self, save_file: "core.SaveFile"):
+        self.save_file = save_file
+        self.unit_limit = self.read_unit_limit()
+
+    def read_unit_limit(self) -> list[UnitLimitCatData]:
+        unit_limit: list[UnitLimitCatData] = []
+        gdg = core.get_game_data_getter(self.save_file)
+        data = gdg.download("DataLocal", "unitlimit.csv")
+        if data is None:
+            return unit_limit
+        csv = core.CSV(data)
+        for i, line in enumerate(csv):
+            unit_limit.append(UnitLimitCatData(i, line.to_int_list()))
+        return unit_limit
+
+    def get_unit_limit(self, id: int) -> Optional[UnitLimitCatData]:
+        try:
+            return self.unit_limit[id]
+        except IndexError:
+            return None
+
+
 class Cat:
     def __init__(self, id: int, unlocked: int):
         self.id = id
@@ -497,6 +526,7 @@ class Cats:
         self.favourites: dict[int, bool] = {}
         self.chara_new_flags: dict[int, int] = {}
         self.unit_buy: Optional[UnitBuy] = None
+        self.unit_limit: Optional[UnitLimit] = None
         self.nyanko_picture_book: Optional[NyankoPictureBook] = None
         self.bulk_downloaded = False
 
@@ -540,6 +570,11 @@ class Cats:
         if self.unit_buy is None:
             self.unit_buy = UnitBuy(save_file)
         return self.unit_buy
+
+    def read_unitlimit(self, save_file: "core.SaveFile") -> UnitLimit:
+        if self.unit_limit is None:
+            self.unit_limit = UnitLimit(save_file)
+        return self.unit_limit
 
     def read_nyanko_picture_book(self, save_file: "core.SaveFile") -> NyankoPictureBook:
         if self.nyanko_picture_book is None:

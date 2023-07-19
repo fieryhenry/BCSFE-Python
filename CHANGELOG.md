@@ -28,8 +28,9 @@ apk with a custom package name
 aren't hardcoded
 
 - Lots more item names are taken from the game data instead of being hardcoded
-which means that the editor doesn't need to be updated to add new items and
-jp item names are already translated
+which means that the editor doesn't need to be updated to add new items
+
+- Game data can now be downloaded for it, fr, es, th, de
 
 ### Save Management
 
@@ -104,6 +105,14 @@ uploading save data will fail
 - Uploading save data not always working
 
 - Uploading managed items not always working (ban risk should be reduced)
+
+### Other
+
+#### Added
+
+- Config option `game_data_repo` to specify where to download game data from.
+Useful if you have your own custom apk and want to use the editor with it, or
+if you think I take too long to update the game data
 
 ## [2.7.2.3] - 2023-06-19
 

@@ -15,10 +15,12 @@ class RangeInput:
 
     def get_input_locale(
         self, dialog: str, perameters: dict[str, Union[int, str]]
-    ) -> list[int]:
+    ) -> Optional[list[int]]:
         user_input = color.ColoredInput(end="").localize(dialog, **perameters)
         if user_input == "":
             return []
+        if user_input == core.local_manager.get_key("quit_key"):
+            return None
         parts = user_input.split(" ")
         ids: list[int] = []
         all_text = core.local_manager.get_key("all")
@@ -101,7 +103,7 @@ class IntInput:
             int_val, user_input = self.get_input(dialog, perameters)
             if int_val is not None:
                 return int_val
-            if user_input == "q":
+            if user_input == core.local_manager.get_key("quit_key"):
                 return None
 
     def get_input_locale(
@@ -206,7 +208,7 @@ class ChoiceInput:
             int_val, user_input = self.get_input()
             if int_val is not None:
                 return int_val
-            if user_input == "q":
+            if user_input == core.local_manager.get_key("quit_key"):
                 return None
 
     def get_input_locale(self) -> tuple[list[int], bool]:
@@ -500,7 +502,7 @@ class YesNoInput:
             usr_input = self.get_input_locale(key, perameters)
             if usr_input is None:
                 return self.default
-            if usr_input == "":
+            if usr_input == "" or usr_input == core.local_manager.get_key("quit_key"):
                 return self.default
             if usr_input == " ":
                 continue
@@ -508,7 +510,7 @@ class YesNoInput:
 
     def get_input_locale(self, key: str, perameters: dict[str, Any]) -> Optional[str]:
         usr_input = color.ColoredInput().get(key, **perameters)
-        if usr_input == "":
+        if usr_input == "" or usr_input == core.local_manager.get_key("quit_key"):
             return None
         return usr_input
 
@@ -518,7 +520,7 @@ class YesNoInput:
         if perameters is None:
             perameters = {}
         usr_input = color.ColoredInput().localize(key, **perameters)
-        if usr_input == "":
+        if usr_input == "" or usr_input == core.local_manager.get_key("quit_key"):
             return self.default
         return usr_input == core.local_manager.get_key("yes_key")
 

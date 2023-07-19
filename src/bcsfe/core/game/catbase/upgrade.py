@@ -63,8 +63,10 @@ class Upgrade:
         return f"Upgrade(plus={self.plus}, base={self.base})"
 
     @staticmethod
-    def get_user_upgrade() -> Optional["Upgrade"]:
+    def get_user_upgrade() -> tuple[Optional["Upgrade"], bool]:
         usr_input = color.ColoredInput().localize("upgrade_input")
+        if usr_input == core.local_manager.get_key("quit_key"):
+            return None, True
         # example:
         # 10+20 = Upgrade(base=9, plus=20)
         # 10+ = Upgrade(base=9, plus=-1) # -1 means no change
@@ -95,7 +97,7 @@ class Upgrade:
                     max_base = min_base
                 except ValueError:
                     color.ColoredText.localize("invalid_upgrade_base", base=base)
-                    return None
+                    return None, False
             else:
                 try:
                     min_base = int(range_parts[0]) - 1
@@ -106,7 +108,7 @@ class Upgrade:
                         min=range_parts[0],
                         max=range_parts[1],
                     )
-                    return None
+                    return None, False
 
             base_int = (min_base + max_base) // 2
 
@@ -120,7 +122,7 @@ class Upgrade:
                     max_plus = min_plus
                 except ValueError:
                     color.ColoredText.localize("invalid_upgrade_plus", plus=plus)
-                    return None
+                    return None, False
             else:
                 try:
                     min_plus = int(range_parts[0])
@@ -131,11 +133,11 @@ class Upgrade:
                         min=range_parts[0],
                         max=range_parts[1],
                     )
-                    return None
+                    return None, False
 
             plus_int = (min_plus + max_plus) // 2
 
         upgrade = Upgrade(plus_int, base_int)
         upgrade.base_range = (min_base or base_int, max_base or base_int)
         upgrade.plus_range = (min_plus or plus_int, max_plus or plus_int)
-        return upgrade
+        return upgrade, False

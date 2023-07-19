@@ -58,7 +58,7 @@ class CatEditor:
     def select(
         self,
         current_cats: Optional[list["core.Cat"]] = None,
-    ) -> list["core.Cat"]:
+    ) -> Optional[list["core.Cat"]]:
         if current_cats is None:
             current_cats = []
         self.print_selected_cats(current_cats)
@@ -97,6 +97,9 @@ class CatEditor:
         else:
             new_cats = []
 
+        if new_cats is None:
+            return None
+
         if current_cats:
             mode_id = dialog_creator.IntInput().get_basic_input_locale("and_mode_q", {})
             if mode_id is None:
@@ -122,10 +125,12 @@ class CatEditor:
             return new_cats
         return new_cats
 
-    def select_id(self) -> list["core.Cat"]:
+    def select_id(self) -> Optional[list["core.Cat"]]:
         cat_ids = dialog_creator.RangeInput(
             len(self.save_file.cats.cats) - 1
         ).get_input_locale("enter_cat_ids", {})
+        if cat_ids is None:
+            return None
         return self.save_file.cats.get_cats_by_ids(cat_ids)
 
     def select_rarity(self) -> list["core.Cat"]:
@@ -168,11 +173,13 @@ class CatEditor:
         cats = self.get_cats_obtainable()
         return cats
 
-    def select_gatya_banner(self) -> list["core.Cat"]:
+    def select_gatya_banner(self) -> Optional[list["core.Cat"]]:
         gatya_ids = dialog_creator.RangeInput(
             len(self.save_file.gatya.read_gatya_data_set(self.save_file).gatya_data_set)
             - 1
         ).get_input_locale("select_gatya_banner", {})
+        if gatya_ids is None:
+            return None
         cats: list["core.Cat"] = []
         for gatya_id in gatya_ids:
             gatya_cats = self.get_cats_gatya_banner(gatya_id)
@@ -241,15 +248,17 @@ class CatEditor:
                     base_level=cat.upgrade.base + 1,
                     plus_level=cat.upgrade.plus,
                 )
-                upgrade = core.Upgrade.get_user_upgrade()
+                upgrade, should_exit = core.Upgrade.get_user_upgrade()
+                if should_exit:
+                    return
                 if upgrade is not None:
                     power_up = core.PowerUpHelper(cat, self.save_file)
                     power_up.reset_upgrade()
                     power_up.upgrade_by(upgrade.base)
                     cat.set_plus_upgrade(upgrade.plus)
         else:
-            upgrade = core.Upgrade.get_user_upgrade()
-            if upgrade is None:
+            upgrade, should_exit = core.Upgrade.get_user_upgrade()
+            if upgrade is None or should_exit:
                 return
             for cat in cats:
                 power_up = core.PowerUpHelper(cat, self.save_file)
@@ -262,6 +271,8 @@ class CatEditor:
     def edit_cats(save_file: "core.SaveFile"):
         cat_editor = CatEditor(save_file)
         current_cats = cat_editor.select()
+        if current_cats is None:
+            return
         while True:
             should_exit, current_cats = CatEditor.run_edit_cats(save_file, current_cats)
             if should_exit:
@@ -271,42 +282,56 @@ class CatEditor:
     def unlock_cats_run(save_file: "core.SaveFile"):
         cat_editor = CatEditor(save_file)
         current_cats = cat_editor.select()
+        if current_cats is None:
+            return
         cat_editor.unlock_cats(current_cats)
 
     @staticmethod
     def remove_cats_run(save_file: "core.SaveFile"):
         cat_editor = CatEditor(save_file)
         current_cats = cat_editor.select()
+        if current_cats is None:
+            return
         cat_editor.remove_cats(current_cats)
 
     @staticmethod
     def true_form_cats_run(save_file: "core.SaveFile"):
         cat_editor = CatEditor(save_file)
         current_cats = cat_editor.select()
+        if current_cats is None:
+            return
         cat_editor.true_form_cats(current_cats)
 
     @staticmethod
     def remove_true_form_cats_run(save_file: "core.SaveFile"):
         cat_editor = CatEditor(save_file)
         current_cats = cat_editor.select()
+        if current_cats is None:
+            return
         cat_editor.remove_true_form_cats(current_cats)
 
     @staticmethod
     def upgrade_cats_run(save_file: "core.SaveFile"):
         cat_editor = CatEditor(save_file)
         current_cats = cat_editor.select()
+        if current_cats is None:
+            return
         cat_editor.upgrade_cats(current_cats)
 
     @staticmethod
     def upgrade_talents_cats_run(save_file: "core.SaveFile"):
         cat_editor = CatEditor(save_file)
         current_cats = cat_editor.select()
+        if current_cats is None:
+            return
         cat_editor.upgrade_talents_cats(current_cats)
 
     @staticmethod
     def remove_talents_cats_run(save_file: "core.SaveFile"):
         cat_editor = CatEditor(save_file)
         current_cats = cat_editor.select()
+        if current_cats is None:
+            return
         cat_editor.remove_talents_cats(current_cats)
 
     @staticmethod
@@ -334,7 +359,10 @@ class CatEditor:
             return False, cats
         option_id -= 1
         if option_id == 0:
-            cats = cat_editor.select(cats)
+            cats_ = cat_editor.select(cats)
+            if cats_ is None:
+                return False, cats
+            cats = cats_
         elif option_id == 1:
             cat_editor.unlock_cats(cats)
         elif option_id == 2:

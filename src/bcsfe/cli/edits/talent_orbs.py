@@ -448,6 +448,8 @@ class SaveOrbs:
             .replace("angle", "angel")
             .split(",")
         )
+        if orb_input_selection == [core.local_manager.get_key("quit_key")]:
+            return
 
         orb_selection: list[OrbInfo] = []
 
@@ -511,7 +513,7 @@ class SaveOrbs:
                 orb_count = color.ColoredInput().localize(
                     "input", name=orb.to_colortext(), value=orb_count, max=9999
                 )
-                if orb_count == "q":
+                if orb_count == core.local_manager.get_key("quit_key"):
                     break
                 try:
                     orb_count = int(orb_count)

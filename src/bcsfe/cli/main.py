@@ -174,10 +174,12 @@ class Main:
         return path, save_file.cc
 
     @staticmethod
-    def exit_editor(save_file: Optional["core.SaveFile"] = None):
+    def exit_editor(
+        save_file: Optional["core.SaveFile"] = None, check_temp: bool = True
+    ):
         """Exit the editor."""
         print()
-        if save_file is None:
+        if save_file is None and check_temp:
             temp_path = core.SaveFile.get_temp_path()
             if temp_path.exists():
                 try:
@@ -187,13 +189,13 @@ class Main:
                     color.ColoredText.localize(
                         "save_temp_fail", error=str(e), traceback=tb
                     )
-                    return
+                    sys.exit()
                 color.ColoredText.localize("save_temp_success")
             else:
                 color.ColoredText.localize("save_temp_not_found")
 
         if save_file is None:
-            return
+            sys.exit()
         save = color.ColoredInput().localize("save_before_exit") == "y"
 
         if save:

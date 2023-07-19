@@ -8,6 +8,7 @@ class GameDataGetter:
     def __init__(self, save_file: "core.SaveFile"):
         self.cc = save_file.cc
         self.url = core.config.get(core.ConfigKey.GAME_DATA_REPO)
+        self.lang = core.config.get(core.ConfigKey.LOCALE)
         self.latest_version = self.get_latest_version()
 
     def get_latest_version(self) -> Optional[str]:
@@ -24,6 +25,7 @@ class GameDataGetter:
         return None
 
     def get_file(self, pack_name: str, file_name: str) -> Optional["core.Data"]:
+        pack_name = self.get_packname(pack_name)
         if self.latest_version is None:
             return None
         url = self.url + f"{self.latest_version}/{pack_name}/{file_name}"
@@ -32,9 +34,19 @@ class GameDataGetter:
             return None
         return core.Data(response.content)
 
+    def get_packname(self, packname: str) -> str:
+        if packname != "resLocal":
+            return packname
+        if self.cc != core.CountryCodeType.EN:
+            return packname
+        if self.lang == "en":
+            return packname
+        return f"{packname}_{self.lang}"
+
     def get_file_path(self, pack_name: str, file_name: str) -> Optional["core.Path"]:
         if self.latest_version is None:
             return None
+        pack_name = self.get_packname(pack_name)
         path = (
             core.Path("game_data", is_relative=True)
             .add(self.latest_version)
@@ -45,6 +57,7 @@ class GameDataGetter:
         return path
 
     def save_file(self, pack_name: str, file_name: str) -> Optional["core.Data"]:
+        pack_name = self.get_packname(pack_name)
         data = self.get_file(pack_name, file_name)
         if data is None:
             return None
@@ -56,6 +69,7 @@ class GameDataGetter:
         return data
 
     def is_downloaded(self, pack_name: str, file_name: str) -> bool:
+        pack_name = self.get_packname(pack_name)
         path = self.get_file_path(pack_name, file_name)
         if path is None:
             return False
@@ -65,6 +79,7 @@ class GameDataGetter:
         self, path: str, retries: int = 2, display_text: bool = True
     ) -> Optional["core.Data"]:
         pack_name, file_name = path.split("/")
+        pack_name = self.get_packname(pack_name)
         return self.download(pack_name, file_name, retries, display_text)
 
     def download(
@@ -75,6 +90,7 @@ class GameDataGetter:
         display_text: bool = True,
     ) -> Optional["core.Data"]:
         retries -= 1
+        pack_name = self.get_packname(pack_name)
 
         if self.is_downloaded(pack_name, file_name):
             path = self.get_file_path(pack_name, file_name)
@@ -98,8 +114,13 @@ class GameDataGetter:
         return data
 
     def download_all(
-        self, pack_name: str, file_names: list[str], display_text: bool = True
+        self,
+        pack_name: str,
+        file_names: list[str],
+        display_text: bool = True,
     ) -> list[Optional[tuple[str, "core.Data"]]]:
+        pack_name = self.get_packname(pack_name)
+
         callables: list[Callable[..., Any]] = []
         args: list[tuple[str, str, int, bool]] = []
         for file_name in file_names:

@@ -99,14 +99,12 @@ class Row:
 class CSV:
     def __init__(
         self,
-        file_data: Optional["core.Data"] = None,
+        file_data: "core.Data",
         delimeter: Union[Delimeter, str] = Delimeter(DelimeterType.COMMA),
         remove_padding: bool = True,
         remove_comments: bool = True,
         remove_empty: bool = True,
     ):
-        if file_data is None:
-            file_data = core.Data()
         self.file_data = file_data
         if remove_padding:
             try:

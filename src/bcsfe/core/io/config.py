@@ -47,7 +47,8 @@ class Config:
     def __contains__(self, key: ConfigKey) -> bool:
         return key in self.config
 
-    def initialize_config(self):
+    @staticmethod
+    def get_defaults() -> dict[ConfigKey, Any]:
         initial_values = {
             ConfigKey.UPDATE_TO_BETA: False,
             ConfigKey.LOCALE: "en",
@@ -64,6 +65,17 @@ class Config:
             ConfigKey.GAME_DATA_REPO: "https://raw.githubusercontent.com/fieryhenry/BCData/master/",
             ConfigKey.FORCE_LANG_GAME_DATA: False,
         }
+        return initial_values
+
+    def get_default(self, key: ConfigKey) -> Any:
+        value = Config.get_defaults()[key]
+        self.config[key] = value
+        self.save()
+        return value
+
+    def initialize_config(self):
+        initial_values = Config.get_defaults()
+
         for key, value in initial_values.items():
             if key not in self.config:
                 self.config[key] = value
@@ -75,7 +87,28 @@ class Config:
         self.config_object.save()
 
     def get(self, key: ConfigKey) -> Any:
-        return self.config[key]
+        value = self.config[key]
+        if value is None:
+            return self.get_default(key)
+        return value
+
+    def get_str(self, key: ConfigKey) -> str:
+        value = self.get(key)
+        if not isinstance(value, str):
+            return self.get_default(key)
+        return value
+
+    def get_bool(self, key: ConfigKey) -> bool:
+        value = self.get(key)
+        if not isinstance(value, bool):
+            return self.get_default(key)
+        return value
+
+    def get_int(self, key: ConfigKey) -> int:
+        value = self.get(key)
+        if not isinstance(value, int):
+            return self.get_default(key)
+        return value
 
     def reset(self):
         self.config.clear()

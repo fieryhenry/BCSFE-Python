@@ -16,6 +16,7 @@ class ConfigKey(enum.Enum):
     SEPARATE_CAT_EDIT_OPTIONS = "separate_cat_edit_options"
     STRICT_BAN_PREVENTION = "strict_ban_prevention"
     MAX_REQUEST_TIMEOUT = "max_request_timeout"
+    GAME_DATA_REPO = "game_data_repo"
 
 
 class Config:
@@ -59,6 +60,7 @@ class Config:
             ConfigKey.SEPARATE_CAT_EDIT_OPTIONS: True,
             ConfigKey.STRICT_BAN_PREVENTION: False,
             ConfigKey.MAX_REQUEST_TIMEOUT: 20,
+            ConfigKey.GAME_DATA_REPO: "https://raw.githubusercontent.com/fieryhenry/BCData/master/",
         }
         for key, value in initial_values.items():
             if key not in self.config:

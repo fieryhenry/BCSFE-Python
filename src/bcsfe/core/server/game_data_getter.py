@@ -5,10 +5,9 @@ from bcsfe import core
 
 
 class GameDataGetter:
-    url = "https://raw.githubusercontent.com/fieryhenry/BCData/master/"
-
     def __init__(self, save_file: "core.SaveFile"):
         self.cc = save_file.cc
+        self.url = core.config.get(core.ConfigKey.GAME_DATA_REPO)
         self.latest_version = self.get_latest_version()
 
     def get_latest_version(self) -> Optional[str]:

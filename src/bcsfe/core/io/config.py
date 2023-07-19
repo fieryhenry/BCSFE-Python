@@ -23,8 +23,6 @@ class ConfigKey(enum.Enum):
 class Config:
     def __init__(self):
         config = core.YamlFile(Config.get_config_path())
-        if config.yaml is None:
-            config.yaml = {}
         self.config: dict[ConfigKey, Any] = {}
         for key, value in config.yaml.items():
             try:

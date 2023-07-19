@@ -216,12 +216,12 @@ class SaveManagement:
         if root_handler.is_android():
             options[2] = "root_storage_pull_save"
 
-        choice = (
-            dialog_creator.ChoiceInput(
-                options, options, [], {}, "save_load_option", True
-            ).get_input_locale_while()[0]
-            - 1
-        )
+        choice = dialog_creator.ChoiceInput(
+            options, options, [], {}, "save_load_option", True
+        ).get_input_locale_while()
+        if choice is None:
+            return None
+        choice = choice[0] - 1
 
         save_path = None
         cc: Optional[core.CountryCode] = None
@@ -269,7 +269,7 @@ class SaveManagement:
             else:
                 save_path = None
         elif choice == 4 and exit_option:
-            main.Main.exit_editor()
+            main.Main.exit_editor(check_temp=False)
 
         if save_path is None or not save_path.exists():
             return None

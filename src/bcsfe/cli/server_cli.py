@@ -21,6 +21,8 @@ class ServerCLI:
         if confirmation_code is None:
             return None
         cc = core.CountryCode.select()
+        if cc is None:
+            return None
         gv = core.GameVersion(120200)  # not important
 
         color.ColoredText.localize(

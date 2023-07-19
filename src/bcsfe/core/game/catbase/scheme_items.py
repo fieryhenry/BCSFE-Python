@@ -140,6 +140,8 @@ class SchemeItems:
             {},
             "scheme_items_select",
         ).multiple_choice()
+        if scheme_ids is None:
+            return
         for option_id in scheme_ids:
             scheme_id = list(scheme_items.keys())[option_id]
             if scheme_id not in self.to_obtain:

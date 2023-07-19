@@ -133,18 +133,20 @@ class CatEditor:
             return None
         return self.save_file.cats.get_cats_by_ids(cat_ids)
 
-    def select_rarity(self) -> list["core.Cat"]:
+    def select_rarity(self) -> Optional[list["core.Cat"]]:
         rarity_names = self.save_file.cats.get_rarity_names(self.save_file)
         rarity_ids, _ = dialog_creator.ChoiceInput(
             rarity_names, rarity_names, [], {}, "select_rarity"
         ).multiple_choice()
+        if rarity_ids is None:
+            return None
         cats: list["core.Cat"] = []
         for rarity_id in rarity_ids:
             rarity_cats = self.get_cats_rarity(rarity_id)
             cats = list(set(cats + rarity_cats))
         return cats
 
-    def select_name(self) -> list["core.Cat"]:
+    def select_name(self) -> Optional[list["core.Cat"]]:
         usr_name = dialog_creator.StringInput().get_input_locale("enter_name", {})
         if usr_name is None:
             return []
@@ -164,6 +166,8 @@ class CatEditor:
         cat_option_ids, _ = dialog_creator.ChoiceInput(
             cat_names, cat_names, [], {}, "select_name"
         ).multiple_choice()
+        if cat_option_ids is None:
+            return None
         cats_selected: list["core.Cat"] = []
         for cat_option_id in cat_option_ids:
             cats_selected.append(cat_list[cat_option_id])

@@ -5,7 +5,7 @@ from bcsfe import core
 class ThemeHandler:
     def __init__(self, theme_code: Optional[str] = None):
         if theme_code is None:
-            self.theme_code = core.Config().get(core.ConfigKey.THEME)
+            self.theme_code = core.config.get(core.ConfigKey.THEME)
         else:
             self.theme_code = theme_code
 
@@ -18,12 +18,12 @@ class ThemeHandler:
 
     def get_theme_name(self) -> str:
         return self.get_theme_info().get(
-            "name", core.LocalManager().get_key("unknown_theme_name")
+            "name", core.local_manager.get_key("unknown_theme_name")
         )
 
     def get_theme_author(self) -> str:
         return self.get_theme_info().get(
-            "author", core.LocalManager().get_key("unknown_theme_author")
+            "author", core.local_manager.get_key("unknown_theme_author")
         )
 
     def get_theme_path(self) -> "core.Path":

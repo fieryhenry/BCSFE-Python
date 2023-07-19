@@ -175,7 +175,7 @@ class OrbInfoList:
         Returns:
             Optional[OrbInfoList]: The OrbInfoList
         """
-        gdg = core.GameDataGetter(save_file)
+        gdg = core.get_game_data_getter(save_file)
         json_data_file = gdg.download_from_path(OrbInfoList.equipment_data_file_name)
         grade_list_file = gdg.download_from_path(OrbInfoList.grade_list_file_name)
         attribute_list_file = gdg.download_from_path(

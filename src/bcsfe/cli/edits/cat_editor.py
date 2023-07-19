@@ -18,7 +18,7 @@ class CatEditor:
         return self.save_file.cats.get_unlocked_cats()
 
     def check_and_filter(self, cats: list["core.Cat"]) -> list["core.Cat"]:
-        if core.Config().get(core.ConfigKey.FILTER_CURRENT_CATS):
+        if core.config.get(core.ConfigKey.FILTER_CURRENT_CATS):
             return self.filter_cats(cats)
         return cats
 
@@ -186,7 +186,7 @@ class CatEditor:
         color.ColoredText.localize("unlock_success")
 
     def remove_cats(self, cats: list["core.Cat"]):
-        reset = core.Config().get(core.ConfigKey.RESET_CAT_DATA)
+        reset = core.config.get(core.ConfigKey.RESET_CAT_DATA)
         cats = self.get_save_cats(cats)
         for cat in cats:
             cat.remove(reset=reset)

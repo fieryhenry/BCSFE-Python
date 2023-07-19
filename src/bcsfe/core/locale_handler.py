@@ -82,7 +82,7 @@ class PropertySet:
         Returns:
             PropertySet: PropertySet for the property file.
         """
-        return PropertySet(core.Config().get(core.ConfigKey.LOCALE), property)
+        return PropertySet(core.config.get(core.ConfigKey.LOCALE), property)
 
 
 class LocalManager:
@@ -95,7 +95,7 @@ class LocalManager:
             locale (str): Language code of the locale.
         """
         if locale is None:
-            lc = core.Config().get(core.ConfigKey.LOCALE)
+            lc = core.config.get(core.ConfigKey.LOCALE)
         else:
             lc = locale
 
@@ -184,7 +184,7 @@ class LocalManager:
         Returns:
             LocalManager: LocalManager for the locale.
         """
-        return LocalManager(core.Config().get(core.ConfigKey.LOCALE))
+        return LocalManager(core.config.get(core.ConfigKey.LOCALE))
 
     def check_duplicates(self):
         """Checks for duplicate keys in all property files.

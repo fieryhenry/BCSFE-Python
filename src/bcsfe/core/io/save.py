@@ -41,7 +41,7 @@ class SaveFile:
         if detected_cc is None:
             if cc is None:
                 raise CantDetectSaveCCError(
-                    core.LocalManager().get_key("cant_detect_cc")
+                    core.local_manager.get_key("cant_detect_cc")
                 )
             self.cc = cc
             self.real_cc = cc
@@ -52,7 +52,6 @@ class SaveFile:
             else:
                 self.real_cc = detected_cc
 
-        self.latest_game_data_version: Optional[str] = None
         self.localizable: Optional[core.Localizable] = None
 
         self.init_save(gv)
@@ -137,10 +136,10 @@ class SaveFile:
             self.load()
         except Exception as e:
             raise FailedToLoadError(
-                core.LocalManager().get_key("failed_to_load_save")
+                core.local_manager.get_key("failed_to_load_save")
             ) from e
         if not self.verify_load():
-            raise SaveFileInvalid(core.LocalManager().get_key("failed_to_load_save_gv"))
+            raise SaveFileInvalid(core.local_manager.get_key("failed_to_load_save_gv"))
 
     def set_gv(self, gv: "core.GameVersion"):
         self.game_version = gv
@@ -1787,7 +1786,7 @@ class SaveFile:
             self.save(data)
         except Exception as e:
             raise FailedToSaveError(
-                core.LocalManager().get_key("failed_to_save_save")
+                core.local_manager.get_key("failed_to_save_save")
             ) from e
 
     def to_file(self, path: "core.Path") -> None:
@@ -3124,7 +3123,7 @@ class SaveFile:
 
     @staticmethod
     def check_backups():
-        max_backups = core.Config().get(core.ConfigKey.MAX_BACKUPS)
+        max_backups = core.config.get(core.ConfigKey.MAX_BACKUPS)
         if max_backups == -1:
             return
         saves_path = SaveFile.get_saves_path().add("backups")

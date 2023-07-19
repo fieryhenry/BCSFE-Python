@@ -72,7 +72,7 @@ class NyankoPictureBook:
         self.cats = self.get_cats()
 
     def get_cats(self) -> list[NyankoPictureBookCatData]:
-        gdg = core.GameDataGetter(self.save_file)
+        gdg = core.get_game_data_getter(self.save_file)
         data = gdg.download("DataLocal", "nyankoPictureBookData.csv")
         if data is None:
             return []
@@ -216,7 +216,7 @@ class UnitBuy:
 
     def read_unit_buy(self) -> list[UnitBuyCatData]:
         unit_buy: list[UnitBuyCatData] = []
-        gdg = core.GameDataGetter(self.save_file)
+        gdg = core.get_game_data_getter(self.save_file)
         data = gdg.download("DataLocal", "unitbuy.csv")
         if data is None:
             return unit_buy
@@ -434,7 +434,7 @@ class Cat:
         localizable: "core.Localizable",
     ) -> list[str]:
         file_name = f"Unit_Explanation{id+1}_{localizable.get_lang()}.csv"
-        data = core.GameDataGetter(save_file).download("resLocal", file_name)
+        data = core.get_game_data_getter(save_file).download("resLocal", file_name)
         if data is None:
             return []
         csv = core.CSV(
@@ -571,7 +571,7 @@ class Cats:
             return
         localizable = save_file.get_localizable()
         file_names: list[str] = []
-        gdg = core.GameDataGetter(save_file)
+        gdg = core.get_game_data_getter(save_file)
         for cat in self.cats:
             if cat.names is None:
                 file_name = f"Unit_Explanation{cat.id+1}_{localizable.get_lang()}.csv"
@@ -580,7 +580,7 @@ class Cats:
                 file_names.append(file_name)
                 cat.names = []
 
-        core.GameDataGetter(save_file).download_all("resLocal", file_names)
+        core.get_game_data_getter(save_file).download_all("resLocal", file_names)
         self.bulk_downloaded = True
 
     def get_cats_obtainable(self, save_file: "core.SaveFile") -> list[Cat]:

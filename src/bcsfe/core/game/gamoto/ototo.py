@@ -189,7 +189,7 @@ class Ototo:
 
     @staticmethod
     def get_max_engineers(save_file: "core.SaveFile") -> int:
-        file = core.GameDataGetter(save_file).download(
+        file = core.get_game_data_getter(save_file).download(
             "DataLocal", "CastleCustomLimit.csv"
         )
         if file is None:

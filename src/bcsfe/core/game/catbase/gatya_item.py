@@ -7,7 +7,7 @@ class GatyaItemNames:
         self.names = self.__get_names()
 
     def __get_names(self) -> list[str]:
-        gdg = core.GameDataGetter(self.save_file)
+        gdg = core.get_game_data_getter(self.save_file)
         data = gdg.download("resLocal", "GatyaitemName.csv")
         if data is None:
             return []
@@ -63,7 +63,7 @@ class GatyaItemBuy:
         self.buy = self.get_buy()
 
     def get_buy(self):
-        gdg = core.GameDataGetter(self.save_file)
+        gdg = core.get_game_data_getter(self.save_file)
         data = gdg.download("DataLocal", "Gatyaitembuy.csv")
         csv = core.CSV(data)
         buy: list[GatyaItemBuyItem] = []

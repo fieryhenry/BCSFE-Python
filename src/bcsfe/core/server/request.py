@@ -1,4 +1,4 @@
-from typing import Any, Callable, Optional
+from typing import Optional
 
 import requests
 
@@ -26,7 +26,6 @@ class RequestHandler:
         self.url = url
         self.headers = headers
         self.data = data
-        self.config = core.Config()
 
     def get(self) -> requests.Response:
         """Sends a GET request.
@@ -37,7 +36,7 @@ class RequestHandler:
         return requests.get(
             self.url,
             headers=self.headers,
-            timeout=self.config.get(core.ConfigKey.MAX_REQUEST_TIMEOUT),
+            timeout=core.config.get(core.ConfigKey.MAX_REQUEST_TIMEOUT),
         )
 
     def post(self) -> requests.Response:
@@ -50,5 +49,5 @@ class RequestHandler:
             self.url,
             headers=self.headers,
             data=self.data.data,
-            timeout=self.config.get(core.ConfigKey.MAX_REQUEST_TIMEOUT),
+            timeout=core.config.get(core.ConfigKey.MAX_REQUEST_TIMEOUT),
         )

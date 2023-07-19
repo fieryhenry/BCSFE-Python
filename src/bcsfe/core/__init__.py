@@ -1,3 +1,4 @@
+from typing import Optional
 from requests.exceptions import ConnectionError
 
 from bcsfe.core import (
@@ -27,6 +28,7 @@ from bcsfe.core.game.catbase.mission import Missions
 from bcsfe.core.game.catbase.my_sale import MySale
 from bcsfe.core.game.catbase.nyanko_club import NyankoClub
 from bcsfe.core.game.catbase.officer_pass import OfficerPass
+from bcsfe.core.game.catbase.powerup import PowerUpHelper
 from bcsfe.core.game.catbase.scheme_items import SchemeItems
 from bcsfe.core.game.catbase.special_skill import SpecialSkills
 from bcsfe.core.game.catbase.stamp import StampData
@@ -64,7 +66,7 @@ from bcsfe.core.io.config import Config, ConfigKey
 from bcsfe.core.io.data import Data
 from bcsfe.core.io.json_file import JsonFile
 from bcsfe.core.io.path import Path
-from bcsfe.core.io.save import SaveFile, SaveError
+from bcsfe.core.io.save import SaveError, SaveFile
 from bcsfe.core.io.thread_helper import thread_run_many
 from bcsfe.core.io.yaml import YamlFile
 from bcsfe.core.locale_handler import LocalManager
@@ -76,6 +78,39 @@ from bcsfe.core.server.managed_item import BackupMetaData, ManagedItem, ManagedI
 from bcsfe.core.server.request import RequestHandler
 from bcsfe.core.server.server_handler import ServerHandler
 from bcsfe.core.server.updater import Updater
+
+config = Config()
+logger = Logger()
+local_manager = LocalManager()
+game_data_getter: Optional[GameDataGetter] = None
+
+
+def get_game_data_getter(save: SaveFile) -> GameDataGetter:
+    global game_data_getter
+    if game_data_getter is None:
+        game_data_getter = GameDataGetter(save)
+    return game_data_getter
+
+
+def reload_config() -> None:
+    global config
+    config = Config()
+
+
+def reload_logger() -> None:
+    global logger
+    logger = Logger()
+
+
+def reload_local_manager() -> None:
+    global local_manager
+    local_manager = LocalManager()
+
+
+def reload_game_data_getter(save: SaveFile) -> None:
+    global game_data_getter
+    game_data_getter = GameDataGetter(save)
+
 
 __all__ = [
     "server",

@@ -116,7 +116,7 @@ class ColoredText:
 
     @staticmethod
     def get_localized_text(string: str, **kwargs: Any) -> str:
-        text = core.LocalManager().get_key(string)
+        text = core.local_manager.get_key(string)
         try:
             for key, value in kwargs.items():
                 value = ColoredText.escape_string(str(value))

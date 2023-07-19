@@ -21,7 +21,7 @@ class RangeInput:
             return []
         parts = user_input.split(" ")
         ids: list[int] = []
-        all_text = core.LocalManager().get_key("all")
+        all_text = core.local_manager.get_key("all")
         for part in parts:
             if "-" in part and len(part.split("-")) == 2:
                 lower, upper = part.split("-")
@@ -69,7 +69,7 @@ class IntInput:
 
     @staticmethod
     def get_max_value(max: Optional[int], signed: bool = True) -> int:
-        disable_maxes = core.Config().get(core.ConfigKey.DISABLE_MAXES)
+        disable_maxes = core.config.get(core.ConfigKey.DISABLE_MAXES)
         if signed:
             max_int = 2**31 - 1
         else:
@@ -157,12 +157,12 @@ class ListOutput:
         color.ColoredText(output)
 
     def display_locale(self, remove_alias: bool = False) -> None:
-        dialog = core.LocalManager().get_key(self.dialog)
+        dialog = core.local_manager.get_key(self.dialog)
         new_strings: list[str] = []
         for string in self.strings:
-            string_ = core.LocalManager().get_key(string)
+            string_ = core.local_manager.get_key(string)
             if remove_alias:
-                string_ = core.LocalManager.get_all_aliases(string_)[0]
+                string_ = core.local_manager.get_all_aliases(string_)[0]
             new_strings.append(string_)
         self.display(dialog, new_strings)
 
@@ -222,7 +222,7 @@ class ChoiceInput:
         key = "input_many"
         if self.is_single_choice:
             key = "input_single"
-        dialog = core.LocalManager().get_key(key).format(min=1, max=len(self.strings))
+        dialog = core.local_manager.get_key(key).format(min=1, max=len(self.strings))
         usr_input = color.ColoredInput().get(dialog).split(" ")
         int_vals: list[int] = []
         for i in usr_input:
@@ -295,7 +295,7 @@ class MultiEditor:
             perameters = {}
         self.perameters = perameters
         if group_name_localized:
-            self.perameters["group_name"] = core.LocalManager().get_key(group_name)
+            self.perameters["group_name"] = core.local_manager.get_key(group_name)
         else:
             self.perameters["group_name"] = group_name
         self.dialog = dialog
@@ -408,7 +408,7 @@ class SingleEditor:
         localized_item: bool = False,
     ):
         if localized_item:
-            item = core.LocalManager().get_key(item)
+            item = core.local_manager.get_key(item)
         self.item = item
         self.value = value
         self.max_value = max_value
@@ -472,7 +472,7 @@ class StringInput:
 class StringEditor:
     def __init__(self, item: str, value: str, item_localized: bool = False):
         if item_localized:
-            item = core.LocalManager().get_key(item)
+            item = core.local_manager.get_key(item)
         self.item = item
         self.value = value
 
@@ -504,7 +504,7 @@ class YesNoInput:
                 return self.default
             if usr_input == " ":
                 continue
-            return usr_input == core.LocalManager().get_key("yes_key")
+            return usr_input == core.local_manager.get_key("yes_key")
 
     def get_input_locale(self, key: str, perameters: dict[str, Any]) -> Optional[str]:
         usr_input = color.ColoredInput().get(key, **perameters)
@@ -520,7 +520,7 @@ class YesNoInput:
         usr_input = color.ColoredInput().localize(key, **perameters)
         if usr_input == "":
             return self.default
-        return usr_input == core.LocalManager().get_key("yes_key")
+        return usr_input == core.local_manager.get_key("yes_key")
 
 
 class DialogBuilder:

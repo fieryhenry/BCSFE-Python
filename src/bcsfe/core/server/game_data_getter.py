@@ -9,23 +9,20 @@ class GameDataGetter:
 
     def __init__(self, save_file: "core.SaveFile"):
         self.cc = save_file.cc
-        if save_file.latest_game_data_version is None:
-            save_file.latest_game_data_version = self.get_latest_version()
-        self.latest_version = save_file.latest_game_data_version
+        self.latest_version = self.get_latest_version()
 
     def get_latest_version(self) -> Optional[str]:
         versions = core.RequestHandler(self.url + "latest.txt").get().text.split("\n")
         length = len(versions)
         if self.cc == core.CountryCodeType.EN and length >= 1:
             return versions[0]
-        elif self.cc == core.CountryCodeType.JP and length >= 2:
+        if self.cc == core.CountryCodeType.JP and length >= 2:
             return versions[1]
-        elif self.cc == core.CountryCodeType.KR and length >= 3:
+        if self.cc == core.CountryCodeType.KR and length >= 3:
             return versions[2]
-        elif self.cc == core.CountryCodeType.TW and length >= 4:
+        if self.cc == core.CountryCodeType.TW and length >= 4:
             return versions[3]
-        else:
-            return None
+        return None
 
     def get_file(self, pack_name: str, file_name: str) -> Optional["core.Data"]:
         if self.latest_version is None:
@@ -85,22 +82,21 @@ class GameDataGetter:
             if path is None:
                 return None
             return path.read()
-        else:
-            if retries == 0:
-                return None
 
-            if display_text:
-                color.ColoredText.localize(
-                    "downloading",
-                    file_name=file_name,
-                    pack_name=pack_name,
-                    version=self.latest_version,
-                )
-            data = self.save_file(pack_name, file_name)
-            if data is None:
-                return self.download(pack_name, file_name, retries, display_text)
-            else:
-                return data
+        if retries == 0:
+            return None
+
+        if display_text:
+            color.ColoredText.localize(
+                "downloading",
+                file_name=file_name,
+                pack_name=pack_name,
+                version=self.latest_version,
+            )
+        data = self.save_file(pack_name, file_name)
+        if data is None:
+            return self.download(pack_name, file_name, retries, display_text)
+        return data
 
     def download_all(
         self, pack_name: str, file_names: list[str], display_text: bool = True

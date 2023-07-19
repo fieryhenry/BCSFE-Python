@@ -50,7 +50,7 @@ class SaveManagement:
         Args:
             save_file (core.SaveFile): The save file to save.
         """
-        if core.Config().get(core.ConfigKey.STRICT_BAN_PREVENTION):
+        if core.config.get(core.ConfigKey.STRICT_BAN_PREVENTION):
             color.ColoredText.localize("strict_ban_prevention_enabled")
             SaveManagement.create_new_account(save_file)
 
@@ -167,7 +167,7 @@ class SaveManagement:
         Args:
             save_file (core.SaveFile): The save file to upload.
         """
-        if core.Config().get(core.ConfigKey.STRICT_BAN_PREVENTION) and check_strict:
+        if core.config.get(core.ConfigKey.STRICT_BAN_PREVENTION) and check_strict:
             color.ColoredText.localize("strict_ban_prevention_enabled")
             SaveManagement.create_new_account(save_file)
             return

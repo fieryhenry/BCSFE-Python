@@ -29,7 +29,7 @@ class Matatabi:
         self.gatya_item_names = core.GatyaItemNames(self.save_file)
 
     def __get_matatabi(self):
-        gdg = core.GameDataGetter(self.save_file)
+        gdg = core.get_game_data_getter(self.save_file)
         data = gdg.download("DataLocal", "Matatabi.tsv")
         csv = core.CSV(data, "\t")
         matatabi: list[Fruit] = []

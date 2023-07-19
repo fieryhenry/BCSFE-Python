@@ -174,7 +174,7 @@ class GatyaDataSet:
 
     def load_gatya_data_set(self, rarity: str, id: int) -> list[list[int]]:
         file_name = f"GatyaDataSet{rarity.upper()[0]}{id}.csv"
-        gdg = core.GameDataGetter(self.save_file)
+        gdg = core.get_game_data_getter(self.save_file)
         data = gdg.download("DataLocal", file_name)
         if data is None:
             return []

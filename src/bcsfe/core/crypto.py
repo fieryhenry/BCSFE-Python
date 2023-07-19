@@ -141,8 +141,8 @@ class NyankoSignature:
         """
         random_data = Random.get_hex_string(64)
         key = self.inquiry_code + random_data
-        hmac = Hmac(HashAlgorithm.SHA256)
-        signature = hmac.get_hmac(core.Data(key), core.Data(self.data))
+        hmac_ = Hmac(HashAlgorithm.SHA256)
+        signature = hmac_.get_hmac(core.Data(key), core.Data(self.data))
 
         return random_data + signature.to_hex()
 
@@ -156,7 +156,7 @@ class NyankoSignature:
         data = self.data + self.data  # repeat data for some reason
         random_data = Random.get_hex_string(40)
         key = self.inquiry_code + random_data
-        hmac = Hmac(HashAlgorithm.SHA1)
-        signature = hmac.get_hmac(core.Data(key), core.Data(data))
+        hmac_ = Hmac(HashAlgorithm.SHA1)
+        signature = hmac_.get_hmac(core.Data(key), core.Data(data))
 
         return random_data + signature.to_hex()

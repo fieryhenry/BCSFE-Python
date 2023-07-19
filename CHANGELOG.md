@@ -27,11 +27,6 @@ apk with a custom package name
 - Text colors are now specified within the text of the localized strings and
 aren't hardcoded
 
-- Lots more item names are taken from the game data instead of being hardcoded
-which means that the editor doesn't need to be updated to add new items
-
-- Game data can now be downloaded for it, fr, es, th, de
-
 ### Save Management
 
 #### Added
@@ -106,13 +101,19 @@ uploading save data will fail
 
 - Uploading managed items not always working (ban risk should be reduced)
 
-### Other
+### Game data
 
 #### Added
 
 - Config option `game_data_repo` to specify where to download game data from.
 Useful if you have your own custom apk and want to use the editor with it, or
 if you think I take too long to update the game data
+
+- Game data for it, fr, es, th, de, tw, kr
+
+#### Changed
+
+- Lots more item names are taken from the game data instead of being hardcoded
 
 ## [2.7.2.3] - 2023-06-19
 

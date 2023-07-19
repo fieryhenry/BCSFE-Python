@@ -4,63 +4,104 @@
 
 ## [3.0.0] - ???
 
-### Added
+### ADB
 
-- Theoretical support for all game versions (not tested on all versions yet). If
-you have any issues with a specific version please report it to the discord
-server
+#### Added
 
 - A way to select a specific device if multiple devices are connected through adb
 at the same time
 
-- Save backup system. When you load a save file, a backup of the save file is
-created in your Documents folder with the following path format
-`Documents/bcsfe/saves/backups/{country_code}/{inquiry_code}/{YYYY-MM-DD_HH-MM-SS}`
- folder
+#### Fixed
+
+- Not pushing to the correct game version if the save file is from a custom
+apk with a custom package name
+
+### Editor interface
+
+#### Added
 
 - Custom color themes
 
-### Fixed
-
-- Uploading save data not always working
-
-- Uploading managed items not always working (ban risk should be reduced)
-
-### Changed
-
-- Full rewrite of the editor (sorry for people who have made tools on top of the
-editor)
+#### Changed
 
 - All printed strings are taken from .properties files so they can be translated
 
 - Text colors are now specified within the text of the localized strings and
 aren't hardcoded
 
+- Lots more item names are taken from the game data instead of being hardcoded
+which means that the editor doesn't need to be updated to add new items and
+jp item names are already translated
+
+### Save Management
+
+#### Added
+
+- Theoretical support for all game versions (not tested on all versions yet). If
+you have any issues with a specific version please report it to the discord
+server
+
+- Save backup system. When you load a save file, a backup of the save file is
+created in your Documents folder with the following path format
+`Documents/bcsfe/saves/backups/{country_code}/{inquiry_code}/{YYYY-MM-DD_HH-MM-SS}`
+ folder
+
+- Option to create a blank save file
+
+#### Changed
+
 - The save file is now saved to your Documents folder by default instead of the
 current working directory
+
+#### Removed
+
+- Lots of unknown save values, especially before version 7.0.0
+
+### Cats
+
+#### Added
+
+- A way to randomize the upgrades of a cat e.g randomize plus level to be
+between 40 and 50. (it was requested, i guess to make it less obvious that you
+save edited)
+
+- Config option `separate_cat_edit_options` to control the following:
+  - When disabled, when editing cats, you first select your cats, then you edit them.
+
+#### Changed
+
+- When doing any cat operations (e.g upgrading or true forming), the cat will be
+unlocked if it isn't already
+
+- When you are upgrading cats and the level goes above the normal non-catseye
+max, the editor will now automatically increase the level cap of the cat to
+match, this prevents issues with having to use 10 catseyes to upgrade a cat
+from level 39 to 40
+
+- Cat selection now defaults to using your currently unlocked cats (e.g when
+selecting all rare cats to upgrade, it will only select the rare cats you have
+unlocked). This does not apply to the `all` option and when unlocking cats
+
+### Server stuff
+
+#### Added
+
+- Config option `strict_ban_prevention` which, when enabled, generates a new
+inquiry code and token whenever you upload your save data / managed items to
+the servers. This should reduce the chance of bans if you don't mind having a
+new inquiry code every time you upload your save data
+
+#### Changed
 
 - Important save information such as password and auth token is now saved within
 the save file instead of in a separate file which should make it less likely that
 uploading save data will fail
 
-- Lots more item names are taken from the game data instead of being hardcoded
-which means that the editor doesn't need to be updated to add new items and
-jp item names are already translated
+#### Fixed
 
-#### Cat Selection
+- Uploading save data not always working
 
-- When editing cats, you first select your cats, then you edit them.
-
-- Cat selection will always filter by your currently unlocked cats, except
-when you are unlocking cats obviously
-
-- You can now combine filters, e.g you can select all uber cats in The Almighties
-gatya set, or select all ubers in the game and all cats in The Almighties gatya
-set. (OR or AND filters)
-
-### Removed
-
-- Lots of unknown save values, especially before version 7.0.0
+- Uploading managed items not always working (ban risk should be reduced)
 
 ## [2.7.2.3] - 2023-06-19
 

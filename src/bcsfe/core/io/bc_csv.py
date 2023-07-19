@@ -95,6 +95,12 @@ class Row:
             self.index += 1
             return self.cells[self.index - 1]
 
+    def to_str_list(self) -> list[str]:
+        return [cell.to_str() for cell in self.cells]
+
+    def to_int_list(self) -> list[int]:
+        return [cell.to_int() for cell in self.cells]
+
 
 class CSV:
     def __init__(

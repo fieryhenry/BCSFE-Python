@@ -112,6 +112,13 @@ def reload_game_data_getter(save: SaveFile) -> None:
     game_data_getter = GameDataGetter(save)
 
 
+def reload_all_handlers(save: SaveFile) -> None:
+    reload_config()
+    reload_logger()
+    reload_local_manager()
+    reload_game_data_getter(save)
+
+
 __all__ = [
     "server",
     "io",

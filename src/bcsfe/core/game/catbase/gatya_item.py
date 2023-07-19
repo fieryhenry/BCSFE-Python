@@ -62,9 +62,11 @@ class GatyaItemBuy:
         self.save_file = save_file
         self.buy = self.get_buy()
 
-    def get_buy(self):
+    def get_buy(self) -> list[GatyaItemBuyItem]:
         gdg = core.get_game_data_getter(self.save_file)
         data = gdg.download("DataLocal", "Gatyaitembuy.csv")
+        if data is None:
+            return []
         csv = core.CSV(data)
         buy: list[GatyaItemBuyItem] = []
         for i, line in enumerate(csv.lines[1:]):

@@ -133,6 +133,12 @@ class LocalManager:
         Returns:
             str: Value of the key.
         """
+        try:
+            return self.get_key_recursive(key)
+        except RecursionError:
+            return key
+
+    def get_key_recursive(self, key: str) -> str:
         value = self.all_properties.get(key)
         if value is None:
             value = self.en_properties.get(key, key)
@@ -146,7 +152,11 @@ class LocalManager:
                 while value[char_index] != "}":
                     key_name += value[char_index]
                     char_index += 1
-                value = value.replace("{{" + key_name + "}}", self.get_key(key_name))
+
+                if key_name != key:
+                    value = value.replace(
+                        "{{" + key_name + "}}", self.get_key(key_name)
+                    )
             char_index += 1
 
         return value

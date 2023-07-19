@@ -109,7 +109,7 @@ class ColoredText:
             else:
                 try:
                     fg = colored.fg(color)  # type: ignore
-                except KeyError:
+                except Exception:
                     print(text, end="")
                     continue
                 print(colored.stylize(text, fg), end="")  # type: ignore

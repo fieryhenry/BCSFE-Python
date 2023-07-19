@@ -13,7 +13,10 @@ class ThemeHandler:
         file_path = core.Path("themes", True).add(self.theme_code + ".json")
         if not file_path.exists():
             return {}
-        return core.JsonFile.from_data(file_path.read()).get_json()
+        try:
+            return core.JsonFile.from_data(file_path.read()).get_json()
+        except Exception:
+            return {}
 
     def get_theme_info(self) -> dict[str, Any]:
         return self.get_theme_data().get("info", {})

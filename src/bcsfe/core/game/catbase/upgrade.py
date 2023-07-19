@@ -21,6 +21,12 @@ class Upgrade:
     def upgrade(self):
         self.base += 1
 
+    def increment_base(self, amount: int):
+        self.base += amount
+
+    def increment_plus(self, amount: int):
+        self.plus += amount
+
     def get_random_base(self) -> int:
         return random.randint(self.base_range[0], self.base_range[1])
 

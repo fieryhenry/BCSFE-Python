@@ -134,7 +134,7 @@ class ListOutput:
         strings: list[str],
         ints: list[int],
         dialog: str,
-        perameters: dict[str, Union[int, str]],
+        perameters: dict[str, Any],
     ):
         self.strings = strings
         self.ints = ints
@@ -211,7 +211,7 @@ class ChoiceInput:
             if user_input == core.local_manager.get_key("quit_key"):
                 return None
 
-    def get_input_locale(self) -> tuple[list[int], bool]:
+    def get_input_locale(self) -> tuple[Optional[list[int]], bool]:
         if len(self.strings) == 0:
             return [], False
         if len(self.strings) == 1:
@@ -229,9 +229,19 @@ class ChoiceInput:
         int_vals: list[int] = []
         for i in usr_input:
             try:
-                int_vals.append(int(i))
+                value = int(i)
+                if value > len(self.strings) or value < 1:
+                    raise ValueError
+                int_vals.append(value)
             except ValueError:
-                continue
+                if i == core.local_manager.get_key("quit_key"):
+                    return None, False
+                if i in self.strings:
+                    int_vals.append(self.strings.index(i) + 1)
+                    continue
+                color.ColoredText.localize(
+                    "invalid_input_int", min=1, max=len(self.strings)
+                )
         if len(self.strings) in int_vals and not self.is_single_choice:
             return list(range(1, len(self.strings))), True
 
@@ -240,13 +250,15 @@ class ChoiceInput:
 
         return int_vals, False
 
-    def get_input_locale_while(self) -> list[int]:
+    def get_input_locale_while(self) -> Optional[list[int]]:
         if len(self.strings) == 0:
             return []
         if len(self.strings) == 1:
             return [1]
         while True:
             int_vals, all_at_once = self.get_input_locale()
+            if int_vals is None:
+                return None
             if all_at_once:
                 return int_vals
             if len(int_vals) == 0:
@@ -255,8 +267,10 @@ class ChoiceInput:
                 return []
             return int_vals
 
-    def multiple_choice(self) -> tuple[list[int], bool]:
+    def multiple_choice(self) -> tuple[Optional[list[int]], bool]:
         user_input, all_at_once = self.get_input_locale()
+        if user_input is None:
+            return None, all_at_once
         return [i - 1 for i in user_input], all_at_once
 
     def single_choice(self) -> Optional[int]:
@@ -466,7 +480,7 @@ class StringInput:
 
     def get_input_locale(self, key: str, perameters: dict[str, Any]) -> Optional[str]:
         usr_input = color.ColoredInput().localize(key, **perameters)
-        if usr_input == "":
+        if usr_input == "" or usr_input == core.local_manager.get_key("quit_key"):
             return None
         return usr_input
 

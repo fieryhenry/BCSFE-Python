@@ -436,6 +436,7 @@ class SaveOrbs:
 
         color.ColoredText.localize(
             "edit_orbs_help",
+            escape=False,
             all_grades_str=all_grades_str,
             all_attributes_str=all_attributes_str,
             all_effects_str=all_effects_str,

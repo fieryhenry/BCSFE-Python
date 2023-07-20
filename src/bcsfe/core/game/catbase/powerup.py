@@ -10,9 +10,8 @@ class PowerUpHelper:
         self.unit_limit = self.save_file.cats.read_unitlimit(
             self.save_file
         ).get_unit_limit(self.cat.id)
-        self.unit_buy = self.save_file.cats.read_unitbuy(self.save_file).get_unit_buy(
-            self.cat.id
-        )
+        self.all_unit_buy = self.save_file.cats.read_unitbuy(self.save_file)
+        self.unit_buy = self.all_unit_buy.get_unit_buy(self.cat.id)
         self.rank_gifts = self.save_file.user_rank_rewards.read_rank_gifts(
             self.save_file
         )
@@ -43,7 +42,7 @@ class PowerUpHelper:
             return self.cat.max_upgrade_level.base
 
         rewards = self.save_file.user_rank_rewards
-        self.cat.max_upgrade_level.base = 0
+        self.cat.max_upgrade_level.reset()
 
         strict_upgrade = self.has_strict_upgrade()
 
@@ -59,6 +58,10 @@ class PowerUpHelper:
                     for limit in self.unit_limit.values:
                         if limit == present[0]:
                             self.cat.max_upgrade_level.increment_base(present[1])
+                elif present[0] >= 4000 and present[0] <= 4599:
+                    for limit in self.unit_limit.values:
+                        if limit == present[0]:
+                            self.cat.max_upgrade_level.increment_plus(present[1])
 
         return self.cat.max_upgrade_level.base
 
@@ -122,6 +125,30 @@ class PowerUpHelper:
                 return True
             return False
         return False
+
+    def get_max_max_base_upgrade_level(self) -> int:
+        max_level = 0
+        for unit_buy in self.all_unit_buy.unit_buy:
+            if unit_buy.max_upgrade_level_catseye > max_level:
+                max_level = unit_buy.max_upgrade_level_catseye
+        return max_level
+
+    def get_max_max_plus_upgrade_level(self) -> int:
+        max_level = 0
+        for unit_buy in self.all_unit_buy.unit_buy:
+            if unit_buy.max_plus_upgrade_level > max_level:
+                max_level = unit_buy.max_plus_upgrade_level
+        return max_level
+
+    def get_max_possible_base(self) -> int:
+        if self.unit_buy is None:
+            return 90
+        return self.unit_buy.max_upgrade_level_catseye
+
+    def get_max_possible_plus(self) -> int:
+        if self.unit_buy is None:
+            return 90
+        return self.unit_buy.max_plus_upgrade_level
 
     def reset_upgrade(self):
         self.cat.upgrade.base = 0

@@ -90,9 +90,9 @@ class BasicItems:
 
     @staticmethod
     def edit_catamins(save_file: "core.SaveFile"):
-        names = core.GatyaItemNames(save_file).names
+        names_o = core.GatyaItemNames(save_file)
         items = core.GatyaItemBuy(save_file).get_by_category(6)
-        names = [names[item.id] for item in items]
+        names = [names_o.get_name(item.id) for item in items]
         values = dialog_creator.MultiEditor.from_reduced(
             "catamins",
             names,
@@ -104,9 +104,9 @@ class BasicItems:
 
     @staticmethod
     def edit_catseyes(save_file: "core.SaveFile"):
-        names = core.GatyaItemNames(save_file).names
+        names_o = core.GatyaItemNames(save_file)
         items = core.GatyaItemBuy(save_file).get_by_category(5)
-        names = [names[item.id] for item in items]
+        names = [names_o.get_name(item.id) for item in items]
         values = dialog_creator.MultiEditor.from_reduced(
             "catseyes",
             names,
@@ -137,8 +137,7 @@ class BasicItems:
     @staticmethod
     def set_restart_pack(save_file: "core.SaveFile"):
         save_file.restart_pack = 1
-        names = core.GatyaItemNames(save_file).names
-        name = names[123]
+        name = core.GatyaItemNames(save_file).get_name(123)
         color.ColoredText.localize("value_gave", name=name)
 
     @staticmethod

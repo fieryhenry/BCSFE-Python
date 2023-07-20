@@ -507,9 +507,21 @@ class Cat:
 
     def set_form(self, form: int, set_current_form: bool = True):
         self.unlock()
-        self.unlocked_forms = max(self.unlocked_forms, form + 1)
+        self.unlocked_forms = form + 1
         if set_current_form:
             self.current_form = form
+
+    def set_form_true(self, total_forms: int, set_current_form: bool = True):
+        if total_forms == 4:
+            self.unlock_forth_form(set_current_form)
+        elif total_forms == 3:
+            self.true_form(set_current_form)
+        elif total_forms == 2:
+            self.unlocked_forms = 0
+            self.current_form = min(self.current_form, 1)
+        else:
+            self.unlocked_forms = 0
+            self.current_form = 0
 
     def remove_true_form(self):
         self.unlocked_forms = min(self.unlocked_forms, 2)
@@ -517,6 +529,7 @@ class Cat:
 
     def unlock_forth_form(self, set_current_form: bool = True):
         self.set_form(3, set_current_form)
+        self.forth_form = 1
 
     def remove_forth_form(self):
         self.unlocked_forms = min(self.unlocked_forms, 3)

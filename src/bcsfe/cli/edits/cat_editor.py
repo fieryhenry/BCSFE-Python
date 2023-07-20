@@ -222,10 +222,9 @@ class CatEditor:
             if force:
                 cat.true_form(set_current_form=set_current_forms)
             elif pic_book_cat is not None:
-                cat.set_form(
-                    pic_book_cat.total_forms - 1, set_current_form=set_current_forms
+                cat.set_form_true(
+                    pic_book_cat.total_forms, set_current_form=set_current_forms
                 )
-
         color.ColoredText.localize("true_form_success")
 
     def remove_true_form_cats(self, cats: list["core.Cat"]):

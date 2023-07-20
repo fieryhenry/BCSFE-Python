@@ -35,14 +35,14 @@ class Upgrade:
 
     @staticmethod
     def read(stream: "core.Data") -> "Upgrade":
-        plus = stream.read_short()
-        base = stream.read_short()
+        plus = stream.read_ushort()
+        base = stream.read_ushort()
 
         return Upgrade(plus, base)
 
     def write(self, stream: "core.Data"):
-        stream.write_short(self.plus)
-        stream.write_short(self.base)
+        stream.write_ushort(self.plus)
+        stream.write_ushort(self.base)
 
     def serialize(self) -> dict[str, Any]:
         return {
@@ -69,7 +69,10 @@ class Upgrade:
         return f"Upgrade(plus={self.plus}, base={self.base})"
 
     @staticmethod
-    def get_user_upgrade() -> tuple[Optional["Upgrade"], bool]:
+    def get_user_upgrade(
+        max_pos_base: int,
+        max_pos_plus: int,
+    ) -> tuple[Optional["Upgrade"], bool]:
         usr_input = color.ColoredInput().localize("upgrade_input")
         if usr_input == core.local_manager.get_key("quit_key"):
             return None, True
@@ -81,6 +84,7 @@ class Upgrade:
         # 5-10+20-30 = Upgrade(base=random.randint(4, 9), plus=random.randint(20, 30))
         # 5-10+ = Upgrade(base=random.randint(4, 9), plus=-1)
         # +20-30 = Upgrade(base=-1, plus=random.randint(20, 30))
+        # max+max = Upgrade(base=50000, plus=50000)
 
         parts = usr_input.split("+")
         if len(parts) == 1:
@@ -93,17 +97,23 @@ class Upgrade:
         min_base, max_base = None, None
         min_plus, max_plus = None, None
 
+        max_text = core.local_manager.get_key("max")
+
         if not base:
             base_int = -1
         else:
             range_parts = base.split("-")
             if len(range_parts) == 1:
-                try:
-                    min_base = int(range_parts[0]) - 1
-                    max_base = min_base
-                except ValueError:
-                    color.ColoredText.localize("invalid_upgrade_base", base=base)
-                    return None, False
+                if range_parts[0] == max_text:
+                    min_base = max_pos_base
+                    max_base = max_pos_base
+                else:
+                    try:
+                        min_base = int(range_parts[0]) - 1
+                        max_base = min_base
+                    except ValueError:
+                        color.ColoredText.localize("invalid_upgrade_base", base=base)
+                        return None, False
             else:
                 try:
                     min_base = int(range_parts[0]) - 1
@@ -123,12 +133,16 @@ class Upgrade:
         else:
             range_parts = plus.split("-")
             if len(range_parts) == 1:
-                try:
-                    min_plus = int(range_parts[0])
-                    max_plus = min_plus
-                except ValueError:
-                    color.ColoredText.localize("invalid_upgrade_plus", plus=plus)
-                    return None, False
+                if range_parts[0] == max_text:
+                    min_plus = max_pos_plus
+                    max_plus = max_pos_plus
+                else:
+                    try:
+                        min_plus = int(range_parts[0])
+                        max_plus = min_plus
+                    except ValueError:
+                        color.ColoredText.localize("invalid_upgrade_plus", plus=plus)
+                        return None, False
             else:
                 try:
                     min_plus = int(range_parts[0])

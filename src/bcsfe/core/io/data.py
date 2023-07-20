@@ -444,47 +444,20 @@ class Data:
             self.write_short(key)
             self.write_bool(item)
 
-    def pad_pkcs7(self, block_size: int = 16) -> "Data":
-        pad = block_size - (len(self.data) % block_size)
-        return Data(self.data + bytes([pad] * pad))
-
-    def unpad_pkcs7(self) -> "Data":
+    def unpad_pkcs7(self) -> Optional["Data"]:
         try:
             pad = self.data[-1]
         except IndexError:
-            raise ValueError("Cannot unpad empty data")
+            return None
         if pad > len(self.data):
-            raise ValueError("Invalid padding")
+            return None
         if self.data[-pad:] != bytes([pad] * pad):
-            raise ValueError("Invalid padding")
+            return None
         return Data(self.data[:-pad])
 
-    def pad_zeroes(self, block_size: int = 16) -> "Data":
-        pad = block_size - (len(self.data) % block_size)
-        return Data(self.data + bytes([0] * pad))
-
-    def unpad_zeroes(self) -> "Data":
-        try:
-            pad = self.data[-1]
-        except IndexError:
-            raise ValueError("Cannot unpad empty data")
-        if pad > len(self.data):
-            raise ValueError("Invalid padding")
-        if self.data[-pad:] != bytes([0] * pad):
-            raise ValueError("Invalid padding")
-        return Data(self.data[:-pad])
-
-    def pad(self, padding_type: "PaddingType", block_size: int = 16) -> "Data":
-        if padding_type == PaddingType.PKCS7:
-            return self.pad_pkcs7(block_size)
-        elif padding_type == PaddingType.ZERO:
-            return self.pad_zeroes(block_size)
-        else:
-            raise TypeError("Invalid padding type")
-
-    def split(self, separator: bytes) -> list["Data"]:
+    def split(self, separator: bytes, maxsplit: int = -1) -> list["Data"]:
         data_list: list[Data] = []
-        for line in self.data.split(separator):
+        for line in self.data.split(separator, maxsplit):
             data_list.append(Data(line))
         return data_list
 

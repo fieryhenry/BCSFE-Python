@@ -1,4 +1,5 @@
 """Module for handling logging"""
+import traceback
 from bcsfe import core
 import time
 
@@ -60,11 +61,23 @@ class Logger:
         self.log_data.append(core.Data(f"[ERROR]::{self.get_time()} - {message}"))
         self.write()
 
+    def log_exception(self, exception: Exception, extra_msg: str = ""):
+        tb = traceback.format_exc()
+        if tb == "NoneType: None\n":
+            try:
+                raise exception
+            except Exception:
+                tb = traceback.format_exc()
+
+        self.log_error(
+            f"{extra_msg}: {exception.__class__.__name__}: {exception}\n{tb}"
+        )
+
     def write(self):
         """
         Writes the log data to the log file
         """
-        self.log_file.write(core.Data.from_many(self.log_data, core.Data("\n")))
+        self.log_file.write(core.Data.from_many(self.log_data, core.Data("\n")).strip())
 
     def log_no_file_found(self, file_name: str):
         """

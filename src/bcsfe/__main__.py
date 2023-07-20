@@ -1,5 +1,6 @@
-from bcsfe import cli
 import traceback
+
+from bcsfe import cli
 
 try:
     cli.main.Main().main()

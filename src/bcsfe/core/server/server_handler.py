@@ -4,6 +4,24 @@ from typing import Any, Optional
 from bcsfe import core
 import jwt
 
+from bcsfe.cli import color
+
+
+class RequestResult:
+    def __init__(
+        self,
+        response: core.Response,
+        headers: dict[str, str],
+        data: str,
+        payload: Optional[dict[str, Any]] = None,
+        timestamp: Optional[str] = None,
+    ):
+        self.response = response
+        self.headers = headers
+        self.data = data
+        self.payload = payload
+        self.timestamp = timestamp
+
 
 class ServerHandler:
     auth_url = "https://nyanko-auth.ponosgames.com"
@@ -12,8 +30,9 @@ class ServerHandler:
     aws_url = "https://nyanko-service-data-prd.s3.amazonaws.com"
     managed_item_url = "https://nyanko-managed-item.ponosgames.com"
 
-    def __init__(self, save_file: "core.SaveFile"):
+    def __init__(self, save_file: "core.SaveFile", print: bool = True):
         self.save_file = save_file
+        self.print = print
         self.counter = 0
 
     @staticmethod
@@ -80,6 +99,8 @@ class ServerHandler:
         self.save_file.remove_string(ServerHandler.get_auth_token_key())
 
     def get_password_new(self) -> Optional[str]:
+        self.print_key("getting_password")
+
         url = f"{self.auth_url}/v1/users"
         data = {
             "accountCode": self.save_file.inquiry_code,
@@ -89,35 +110,51 @@ class ServerHandler:
         password = self.do_password_request(url, data)
         return password
 
+    @staticmethod
+    def log_error(url: str, key: str, result: RequestResult):
+        log_text = (
+            f"Error: {key}\n"
+            f"URL: {url}\n"
+            f"Response Headers: {result.response.headers}\n"
+            f"Response Body: {result.response.content.decode('utf-8')}\n"
+            f"Status Code: {result.response.status_code}\n"
+            f"Reason: {result.response.reason}\n"
+            f"Request Headers: {result.headers}\n"
+            f"Request Body: {result.data}\n"
+        )
+        core.logger.log_error(log_text)
+
     def do_password_request(self, url: str, dict_data: dict[str, Any]) -> Optional[str]:
-        response = self.do_request(url, dict_data)
-        if response is None:
+        result = self.do_request(url, dict_data)
+        if result.payload is None:
+            ServerHandler.log_error(url, "password_fail", result)
             return None
-        payload, timestamp = response
+        payload = result.payload
         password = payload.get("password", None)
         if password is None:
+            ServerHandler.log_error(url, "password_fail", result)
             self.remove_stored_password()
             return None
         password_refresh_token = payload.get("passwordRefreshToken", None)
         if password_refresh_token is None:
+            ServerHandler.log_error(url, "password_fail", result)
             self.remove_stored_password()
             return None
         account_code = payload.get("accountCode", None)
+        timestamp = result.timestamp
 
         self.save_file.password_refresh_token = password_refresh_token
         self.save_password(password)
         if account_code:
             self.save_file.inquiry_code = account_code
-            if timestamp:
-                self.save_file.account_created_timestamp = timestamp
+            if timestamp is not None:
+                self.save_file.account_created_timestamp = int(timestamp)
             if not self.update_managed_items():
                 return None
 
         return password
 
-    def do_request(
-        self, url: str, dict_data: dict[str, Any]
-    ) -> Optional[tuple[dict[str, Any], Optional[int]]]:
+    def do_request(self, url: str, dict_data: dict[str, Any]) -> RequestResult:
         data = (
             core.JsonFile.from_object(dict_data)
             .to_data(indent=None)
@@ -129,14 +166,16 @@ class ServerHandler:
         json: dict[str, Any] = response.json()
         status_code = json.get("statusCode", 0)
         if status_code != 1:
-            return None
+            return RequestResult(response, headers, data)
 
         timestamp = json.get("timestamp", None)
 
         payload = json.get("payload", {})
-        return payload, timestamp
+        return RequestResult(response, headers, data, payload, timestamp)
 
     def refresh_password(self) -> Optional[str]:
+        self.print_key("refreshing_password")
+
         url = f"{self.auth_url}/v1/user/password"
         data = {
             "accountCode": self.save_file.inquiry_code,
@@ -146,19 +185,23 @@ class ServerHandler:
         return self.do_password_request(url, data)
 
     def get_auth_token_new(self, password: str) -> Optional[str]:
+        self.print_key("getting_auth_token")
+
         url = f"{self.auth_url}/v1/tokens"
         data = core.ClientInfo.from_save_file(self.save_file).get_client_info()
         data["password"] = password
         data["accountCode"] = self.save_file.inquiry_code
 
-        response = self.do_request(url, data)
-        if response is None:
+        result = self.do_request(url, data)
+        if result.payload is None:
+            ServerHandler.log_error(url, "auth_token_fail", result)
             self.remove_stored_auth_token()
             self.remove_stored_password()
             return None
-        payload, _ = response
+        payload = result.payload
         auth_token = payload.get("token", None)
         if auth_token is None:
+            ServerHandler.log_error(url, "auth_token_fail", result)
             self.remove_stored_auth_token()
             self.remove_stored_password()
             return None
@@ -176,7 +219,9 @@ class ServerHandler:
         if password is not None:
             return password
         self.create_new_account()
-        return self.get_password(tries + 1) if tries < 1 else None
+        if tries >= 1:
+            return None
+        return self.get_password(tries + 1)
 
     def validate_auth_token(self, auth_token: str) -> bool:
         token = jwt.decode(
@@ -208,9 +253,10 @@ class ServerHandler:
         auth_token = self.get_auth_token_new(password)
         if auth_token is not None:
             return auth_token
-        return None
 
     def get_save_key_new(self, auth_token: str) -> Optional[dict[str, Any]]:
+        self.print_key("getting_save_key")
+
         nonce = core.Random.get_hex_string(32)
         url = f"{self.save_url}/v2/save/key?nonce={nonce}"
         headers = {
@@ -224,6 +270,9 @@ class ServerHandler:
         json: dict[str, Any] = response.json()
         status_code = json.get("statusCode", 0)
         if status_code != 1:
+            ServerHandler.log_error(
+                url, "save_key_fail", RequestResult(response, headers, "")
+            )
             self.remove_stored_auth_token()
             return None
         payload = json.get("payload", {})
@@ -243,7 +292,6 @@ class ServerHandler:
         save_key = self.get_save_key_new(auth_token)
         if save_key is not None:
             return save_key
-        return None
 
     def get_upload_request_body(self, boundary: str) -> Optional["core.Data"]:
         save_key = self.get_save_key()
@@ -283,6 +331,7 @@ class ServerHandler:
         return body
 
     def upload_save_data(self) -> bool:
+        self.print_key("uploading_save_file")
         boundary = (
             f"__-----------------------{core.Random.get_digits_string(9)}-2147483648"
         )
@@ -300,9 +349,23 @@ class ServerHandler:
         }
         response = core.RequestHandler(url, headers, body).post()
         if response.status_code != 204:
+            ServerHandler.log_error(
+                url,
+                "upload_fail_aws",
+                RequestResult(
+                    response,
+                    headers,
+                    body.split(b"Content-Type: application/octet-stream")[0].to_str(),
+                ),
+            )
+
             self.remove_stored_save_key_data()
             return False
         return True
+
+    def print_key(self, key: str, **kwargs: Any):
+        if self.print:
+            color.ColoredText.localize(key, **kwargs)
 
     def get_codes(self) -> Optional[tuple[str, str]]:
         self.save_file.show_ban_message = False
@@ -312,6 +375,8 @@ class ServerHandler:
         auth_token = self.get_auth_token()
         if auth_token is None:
             return None
+
+        self.print_key("getting_codes")
 
         bmd = core.BackupMetaData(self.save_file)
         meta_data = bmd.create()
@@ -324,15 +389,24 @@ class ServerHandler:
         json: dict[str, Any] = response.json()
         status_code = json.get("statusCode", 0)
         if status_code != 1:
+            ServerHandler.log_error(
+                url,
+                "upload_fail_transfers",
+                RequestResult(response, headers, meta_data),
+            )
             self.remove_stored_auth_token()
             return None
         payload = json.get("payload", {})
         transfer_code = payload.get("transferCode", None)
         confirmation_code = payload.get("pin", None)
         if transfer_code is None or confirmation_code is None:
+            ServerHandler.log_error(
+                url, "upload_fail_transfers", RequestResult(response, headers, "")
+            )
             self.remove_stored_auth_token()
             return None
         bmd.remove_managed_items()
+        print()
         return (transfer_code, confirmation_code)
 
     def upload_meta_data(self) -> bool:

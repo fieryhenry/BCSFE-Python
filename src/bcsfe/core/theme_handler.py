@@ -9,25 +9,27 @@ class ThemeHandler:
         else:
             self.theme_code = theme_code
 
+        self.theme_data = self.get_theme_data()
+
     def get_theme_data(self) -> dict[str, Any]:
         file_path = core.Path("themes", True).add(self.theme_code + ".json")
         if not file_path.exists():
             return {}
         try:
             return core.JsonFile.from_data(file_path.read()).get_json()
-        except Exception:
+        except core.JSONDecodeError:
             return {}
 
     def get_theme_info(self) -> dict[str, Any]:
-        return self.get_theme_data().get("info", {})
+        return self.theme_data.get("info", {})
 
     def get_theme_name(self) -> str:
-        return self.get_theme_info().get(
+        return self.theme_data.get(
             "name", core.local_manager.get_key("unknown_theme_name")
         )
 
     def get_theme_author(self) -> str:
-        return self.get_theme_info().get(
+        return self.theme_data.get(
             "author", core.local_manager.get_key("unknown_theme_author")
         )
 
@@ -35,7 +37,7 @@ class ThemeHandler:
         return core.Path("themes", True).add(self.theme_code + ".json")
 
     def get_theme_colors(self) -> dict[str, Any]:
-        return self.get_theme_data().get("colors", {})
+        return self.theme_data.get("colors", {})
 
     def get_theme_color(self, color_code: str) -> str:
         return self.get_theme_colors().get(color_code, "")

@@ -7,7 +7,6 @@ from bcsfe.cli import (
     file_dialog,
     color,
     feature_handler,
-    theme_handler,
     save_management,
 )
 from bcsfe import core
@@ -71,7 +70,7 @@ class Main:
                 sys.exit()
 
     def print_start_text(self):
-        theme_manager = theme_handler.ThemeHandler()
+        theme_manager = core.theme_manager
         color.ColoredText.localize(
             "welcome",
             config_path=core.Config.get_config_path(),
@@ -165,8 +164,16 @@ class Main:
         path = core.Path(path)
         if not path.exists():
             return None
-        json_data = core.JsonFile.from_data(path.read()).get_json()
-        save_file = core.SaveFile.from_dict(json_data)
+        try:
+            json_data = core.JsonFile.from_data(path.read()).get_json()
+        except core.JSONDecodeError as e:
+            color.ColoredText.localize("load_json_fail", error=str(e))
+            return None
+        try:
+            save_file = core.SaveFile.from_dict(json_data)
+        except core.SaveError as e:
+            color.ColoredText.localize("load_json_fail", error=str(e))
+            return None
         path = Main.save_save_dialog(save_file)
         if path is None:
             return None

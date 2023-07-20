@@ -1,5 +1,8 @@
 from typing import Optional
+
 from requests.exceptions import ConnectionError
+from requests import Response
+from json.decoder import JSONDecodeError
 
 from bcsfe.core import (
     country_code,
@@ -10,6 +13,7 @@ from bcsfe.core import (
     locale_handler,
     log,
     server,
+    theme_handler,
 )
 from bcsfe.core.country_code import CountryCode, CountryCodeType
 from bcsfe.core.crypto import Hash, HashAlgorithm, Hmac, NyankoSignature, Random
@@ -78,10 +82,12 @@ from bcsfe.core.server.managed_item import BackupMetaData, ManagedItem, ManagedI
 from bcsfe.core.server.request import RequestHandler
 from bcsfe.core.server.server_handler import ServerHandler
 from bcsfe.core.server.updater import Updater
+from bcsfe.core.theme_handler import ThemeHandler
 
 config = Config()
 logger = Logger()
 local_manager = LocalManager()
+theme_manager = ThemeHandler()
 game_data_getter: Optional[GameDataGetter] = None
 
 
@@ -107,6 +113,11 @@ def reload_local_manager() -> None:
     local_manager = LocalManager()
 
 
+def reload_theme_manager() -> None:
+    global theme_manager
+    theme_manager = ThemeHandler()
+
+
 def reload_game_data_getter(save: SaveFile) -> None:
     global game_data_getter
     game_data_getter = GameDataGetter(save)
@@ -116,6 +127,7 @@ def reload_all_handlers(save: SaveFile) -> None:
     reload_config()
     reload_logger()
     reload_local_manager()
+    reload_theme_manager()
     reload_game_data_getter(save)
 
 
@@ -128,4 +140,5 @@ __all__ = [
     "game_version",
     "crypto",
     "game",
+    "theme_handler",
 ]

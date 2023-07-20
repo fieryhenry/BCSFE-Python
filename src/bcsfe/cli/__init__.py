@@ -6,7 +6,6 @@ from bcsfe.cli import (
     feature_handler,
     save_management,
     server_cli,
-    theme_handler,
     edits,
 )
 
@@ -18,6 +17,5 @@ __all__ = [
     "feature_handler",
     "save_management",
     "server_cli",
-    "theme_handler",
     "edits",
 ]

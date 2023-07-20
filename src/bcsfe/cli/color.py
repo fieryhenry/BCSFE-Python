@@ -2,7 +2,6 @@ from typing import Any
 from aenum import NamedConstant  # type: ignore
 import colored  # type: ignore
 from bcsfe import core
-from bcsfe.cli import theme_handler
 
 
 class ColorHex(NamedConstant):
@@ -50,7 +49,7 @@ class ColorHex(NamedConstant):
 
 class ColorHelper:
     def __init__(self):
-        self.theme_handler = theme_handler.ThemeHandler()
+        self.theme_handler = core.theme_manager
 
     def get_color(self, color_name: str) -> str:
         try:
@@ -59,7 +58,7 @@ class ColorHelper:
             return ""
         if first_char == "#":
             return color_name
-        elif first_char == "@":
+        if first_char == "@":
             try:
                 second_char = color_name[1]
             except IndexError:
@@ -70,25 +69,23 @@ class ColorHelper:
                 third_char = ""
             if second_char == "p":
                 return self.theme_handler.get_primary_color()
-            elif second_char == "s" and third_char != "u":
+            if second_char == "s" and third_char != "u":
                 return self.theme_handler.get_secondary_color()
-            elif second_char == "t":
+            if second_char == "t":
                 return self.theme_handler.get_tertiary_color()
-            elif second_char == "q":
+            if second_char == "q":
                 return self.theme_handler.get_quaternary_color()
-            elif second_char == "e":
+            if second_char == "e":
                 return self.theme_handler.get_error_color()
-            elif second_char == "w":
+            if second_char == "w":
                 return self.theme_handler.get_warning_color()
-            elif second_char == "s" and third_char == "u":
+            if second_char == "s" and third_char == "u":
                 return self.theme_handler.get_success_color()
-            else:
-                return self.theme_handler.get_theme_color(color_name[1:])
-        else:
-            try:
-                return ColorHex.from_name(color_name)
-            except AttributeError:
-                return ""
+            return self.theme_handler.get_theme_color(color_name[1:])
+        try:
+            return ColorHex.from_name(color_name)
+        except AttributeError:
+            return ""
 
 
 class ColoredText:

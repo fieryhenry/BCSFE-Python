@@ -58,14 +58,19 @@ class Row:
         ...
 
     @typing.overload
-    def __getitem__(self, index: slice) -> list[Cell]:
+    def __getitem__(self, index: slice) -> "Row":
         ...
 
-    def __getitem__(self, index: Union[int, slice]) -> Union[Cell, list[Cell]]:
+    def __getitem__(self, index: Union[int, slice]) -> Union[Cell, "Row"]:
+        if isinstance(index, int):
+            try:
+                return self.cells[index]
+            except IndexError:
+                return Cell(core.Data(""))
         try:
-            return self.cells[index]
+            return Row(self.cells[index])
         except IndexError:
-            return Cell(core.Data())
+            return Row([])
 
     def __len__(self) -> int:
         return len(self.cells)

@@ -58,7 +58,6 @@ class GameDataGetter:
 
         if version is None:
             return None
-        print(version)
         pack_name = self.get_packname(pack_name)
         path = core.Path("game_data", is_relative=True).add(version).add(pack_name)
         path.generate_dirs()

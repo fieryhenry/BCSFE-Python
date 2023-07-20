@@ -53,13 +53,17 @@ class GameDataGetter:
             return f"{packname}_{self.lang}"
         return packname
 
+    @staticmethod
+    def get_game_data_dir() -> "core.Path":
+        return core.Path("game_data", is_relative=True)
+
     def get_file_path(self, pack_name: str, file_name: str) -> Optional["core.Path"]:
         version = self.latest_version
 
         if version is None:
             return None
         pack_name = self.get_packname(pack_name)
-        path = core.Path("game_data", is_relative=True).add(version).add(pack_name)
+        path = GameDataGetter.get_game_data_dir().add(version).add(pack_name)
         path.generate_dirs()
         path = path.add(file_name)
         return path
@@ -150,3 +154,29 @@ class GameDataGetter:
             else:
                 data_list.append((file_name, path.read()))
         return data_list
+
+    @staticmethod
+    def get_all_downloaded_versions() -> list[str]:
+        versions: list[str] = []
+        for version in GameDataGetter.get_game_data_dir().get_dirs():
+            if version.exists():
+                versions.append(version.basename())
+        return versions
+
+    @staticmethod
+    def delete_old_versions() -> None:
+        versions = GameDataGetter.get_all_downloaded_versions()
+        ccs: list[str] = []
+        for version in versions:
+            cc = version[-2:]
+            if cc not in ccs:
+                ccs.append(cc)
+
+        for cc in ccs:
+            versions_cc = list(filter(lambda x: x[-2:] == cc, versions))
+            if len(versions_cc) <= 1:
+                continue
+            versions_cc.sort(reverse=True)
+            for version in versions_cc[1:]:
+                path = GameDataGetter.get_game_data_dir().add(version)
+                path.remove()

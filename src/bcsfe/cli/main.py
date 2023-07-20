@@ -28,6 +28,7 @@ class Main:
     def main(self):
         """Main function for the CLI."""
         self.wipe_temp_save()
+        core.GameDataGetter.delete_old_versions()
         self.check_update()
         print()
         self.print_start_text()

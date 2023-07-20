@@ -107,7 +107,15 @@ class SaveManagement:
         SaveManagement.save_save(save_file)
         adb_handler = core.AdbHandler()
         adb_handler.select_device()
-        adb_handler.set_cc(save_file.real_cc)
+        if save_file.used_storage:
+            adb_handler.set_cc(save_file.real_cc)
+        else:
+            ccs = adb_handler.get_battlecats_ccs()
+            cc = core.CountryCode.select_from_ccs(ccs)
+            if cc is None:
+                color.ColoredText.localize("no_cc_error")
+                return adb_handler
+            adb_handler.set_cc(cc)
         if save_file.save_path is None:
             return adb_handler
         result = adb_handler.load_battlecats_save(save_file.save_path)
@@ -224,6 +232,7 @@ class SaveManagement:
 
         save_path = None
         cc: Optional[core.CountryCode] = None
+        used_storage = False
 
         if choice == 0:
             data = server_cli.ServerCLI().download_save()
@@ -261,6 +270,8 @@ class SaveManagement:
                     color.ColoredText.localize(
                         "adb_pull_fail", cc=cc, error=result.result
                     )
+            else:
+                used_storage = True
         elif choice == 3:
             data = main.Main.load_save_data_json()
             if data is not None:
@@ -277,6 +288,7 @@ class SaveManagement:
             save_file = core.SaveFile(save_path.read(), cc)
             save_file.save_path = save_path
             save_file.save_path.copy(save_file.get_default_path())
+            save_file.used_storage = used_storage
         except Exception as e:
             color.ColoredText.localize("parse_save_error", error=e)
             return None

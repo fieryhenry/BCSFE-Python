@@ -51,6 +51,8 @@ class SaveFile:
                 self.real_cc = cc
             else:
                 self.real_cc = detected_cc
+        
+        self.used_storage = False
 
         self.localizable: Optional[core.Localizable] = None
 

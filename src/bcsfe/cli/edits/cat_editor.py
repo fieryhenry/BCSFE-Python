@@ -260,16 +260,22 @@ class CatEditor:
                     base_level=cat.upgrade.base + 1,
                     plus_level=cat.upgrade.plus,
                 )
-                upgrade, should_exit = core.Upgrade.get_user_upgrade()
+                power_up = core.PowerUpHelper(cat, self.save_file)
+                upgrade, should_exit = core.Upgrade.get_user_upgrade(
+                    power_up.get_max_possible_base(), power_up.get_max_possible_plus()
+                )
                 if should_exit:
                     return
                 if upgrade is not None:
-                    power_up = core.PowerUpHelper(cat, self.save_file)
                     power_up.reset_upgrade()
                     power_up.upgrade_by(upgrade.base)
                     cat.set_plus_upgrade(upgrade.plus)
         else:
-            upgrade, should_exit = core.Upgrade.get_user_upgrade()
+            power_up = core.PowerUpHelper(self.save_file.cats.cats[0], self.save_file)
+            upgrade, should_exit = core.Upgrade.get_user_upgrade(
+                power_up.get_max_max_base_upgrade_level(),
+                power_up.get_max_max_plus_upgrade_level(),
+            )
             if upgrade is None or should_exit:
                 return
             for cat in cats:

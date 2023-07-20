@@ -131,7 +131,7 @@ class OrbInfo:
         Returns:
             str: The string representation of the OrbInfo with color
         """
-        return self.__str__()
+        return str(self)
 
     @staticmethod
     def create_unknown(orb_id: int) -> "OrbInfo":
@@ -190,13 +190,15 @@ class OrbInfoList:
         ):
             return None
         raw_orbs = OrbInfoList.parse_json_data(json_data_file)
+        if raw_orbs is None:
+            return None
         orbs = OrbInfoList.load_names(
             raw_orbs, grade_list_file, attribute_list_file, equipment_list_file
         )
         return OrbInfoList(orbs)
 
     @staticmethod
-    def parse_json_data(json_data: "core.Data") -> list[RawOrbInfo]:
+    def parse_json_data(json_data: "core.Data") -> Optional[list[RawOrbInfo]]:
         """Parse the json data of the equipment
 
         Args:
@@ -205,7 +207,10 @@ class OrbInfoList:
         Returns:
             list[RawOrbInfo]: The list of RawOrbInfo
         """
-        data: dict[str, Any] = core.JsonFile.from_data(json_data).get_json()
+        try:
+            data: dict[str, Any] = core.JsonFile.from_data(json_data).get_json()
+        except core.JSONDecodeError:
+            return None
         orb_info_list: list[RawOrbInfo] = []
         for id, orb in enumerate(data["ID"]):
             grade_id = orb["gradeID"]
@@ -238,9 +243,9 @@ class OrbInfoList:
         effect_csv = core.CSV(effect_data, "\t")
         orb_info_list: list[OrbInfo] = []
         for orb in raw_orb_info:
-            grade = grade_csv.lines[orb.grade_id][3].to_str()
-            attribute = attribute_tsv.lines[orb.attribute_id][0].to_str()
-            effect = effect_csv.lines[orb.effect_id][0].to_str()
+            grade = grade_csv[orb.grade_id][3].to_str()
+            attribute = attribute_tsv[orb.attribute_id][0].to_str()
+            effect = effect_csv[orb.effect_id][0].to_str()
             orb_info_list.append(OrbInfo(orb, grade, attribute, effect))
         return orb_info_list
 
@@ -253,9 +258,10 @@ class OrbInfoList:
         Returns:
             Optional[OrbInfo]: The OrbInfo
         """
-        if orb_id >= len(self.orb_info_list):
+        try:
+            return self.orb_info_list[orb_id]
+        except IndexError:
             return None
-        return self.orb_info_list[orb_id]
 
     def get_orb_from_components(
         self,

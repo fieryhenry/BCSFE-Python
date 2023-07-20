@@ -112,10 +112,12 @@ class CSV:
     ):
         self.file_data = file_data
         if remove_padding:
-            try:
-                self.file_data = self.file_data.unpad_pkcs7()
-            except ValueError:
-                pass
+            data = self.file_data.unpad_pkcs7()
+            if data is None:
+                self.file_data = self.file_data
+            else:
+                self.file_data = data
+
         self.delimeter = delimeter
         self.remove_comments = remove_comments
         self.remove_empty = remove_empty
@@ -147,6 +149,12 @@ class CSV:
             return self.lines[index]
         except IndexError:
             return Row([])
+
+    def __getitem__(self, index: int) -> Row:
+        return self.get_row(index)
+
+    def __len__(self) -> int:
+        return len(self.lines)
 
     @staticmethod
     def from_file(
@@ -181,12 +189,12 @@ class CSV:
             csv.append("\r\n")
         return core.Data("".join(csv))
 
-    def read_line(self, lg: bool = False) -> Optional[Row]:
-        if self.index >= len(self.lines):
-            if lg:
-                core.Logger().log_error("CSV read index out of range")
+    def read_line(self) -> Optional[Row]:
+        try:
+            line = self.lines[self.index]
+        except IndexError:
             return None
-        line = self.lines[self.index]
+
         self.index += 1
         return line
 

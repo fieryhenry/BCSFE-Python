@@ -1,7 +1,8 @@
+import enum
 from typing import Optional
+
 from bcsfe import core
 from bcsfe.cli import color, dialog_creator
-import enum
 
 
 class SelectMode(enum.Enum):
@@ -254,7 +255,7 @@ class CatEditor:
             localizable = self.save_file.get_localizable()
             for cat in cats:
                 color.ColoredText.localize(
-                    "selected_cat",
+                    "selected_cat_upgrades",
                     name=cat.get_names_cls(self.save_file, localizable)[0],
                     id=cat.id,
                     base_level=cat.upgrade.base + 1,
@@ -271,7 +272,7 @@ class CatEditor:
                     power_up.upgrade_by(upgrade.base)
                     cat.set_plus_upgrade(upgrade.plus)
         else:
-            power_up = core.PowerUpHelper(self.save_file.cats.cats[0], self.save_file)
+            power_up = core.PowerUpHelper(cats[0], self.save_file)
             upgrade, should_exit = core.Upgrade.get_user_upgrade(
                 power_up.get_max_max_base_upgrade_level(),
                 power_up.get_max_max_plus_upgrade_level(),
@@ -284,6 +285,98 @@ class CatEditor:
                 power_up.upgrade_by(upgrade.base)
                 cat.set_plus_upgrade(upgrade.plus)
         color.ColoredText.localize("upgrade_success")
+
+    def get_cat_talents(
+        self, talent_data: "core.TalentData", cat: "core.Cat"
+    ) -> Optional[tuple[list[str], list[int], list[int], list[int]]]:
+        talent_data_cat = talent_data.get_cat_skill(cat.id)
+        if talent_data_cat is None or cat.talents is None:
+            return None
+        save_talent_data = cat.talents
+        talent_names: list[str] = []
+        max_levels: list[int] = []
+        current_levels: list[int] = []
+        ids: list[int] = []
+        for talent in save_talent_data:
+            talent_data_t = talent_data.get_skill_from_cat(cat.id, talent.id)
+            name = talent_data.get_cat_skill_name(cat.id, talent.id)
+            if name is None:
+                continue
+            if talent_data_t is None:
+                continue
+
+            max_level = talent_data_t.max_lv
+            if max_level == 0:
+                max_level = 1
+
+            max_levels.append(max_level)
+            talent_names.append(name.split("<br>")[0])
+            current_levels.append(talent.level)
+            ids.append(talent.id)
+
+        return talent_names, max_levels, current_levels, ids
+
+    def upgrade_talents_cats(self, cats: list["core.Cat"]):
+        cats = self.get_save_cats(cats)
+        if not cats:
+            return
+        if len(cats) == 1:
+            option_id = 0
+        else:
+            options: list[str] = [
+                "talents_individual",
+                "talents_all",
+            ]
+            option_id = dialog_creator.ChoiceInput(
+                options, options, [], {}, "upgrade_talents_select_mod", True
+            ).single_choice()
+            if option_id is None:
+                return
+            option_id -= 1
+
+        talent_data = self.save_file.cats.read_talent_data(self.save_file)
+        if option_id == 0:
+            localizable = self.save_file.get_localizable()
+            for cat in cats:
+                if cat.talents is None:
+                    continue
+                color.ColoredText.localize(
+                    "selected_cat",
+                    name=cat.get_names_cls(self.save_file, localizable)[0],
+                    id=cat.id,
+                )
+                data = self.get_cat_talents(talent_data, cat)
+                if data is None:
+                    color.ColoredText.localize("no_talent_data", id=cat.id)
+                    continue
+                talent_names, max_levels, current_levels, ids = data
+                values = dialog_creator.MultiEditor.from_reduced(
+                    "talents",
+                    talent_names,
+                    current_levels,
+                    max_levels,
+                    group_name_localized=True,
+                ).edit()
+                current_levels = values
+                for i, id in enumerate(ids):
+                    talent = cat.get_talent_from_id(id)
+                    if talent is None:
+                        continue
+                    talent.level = current_levels[i]
+        else:
+            for cat in cats:
+                if cat.talents is None:
+                    continue
+                data = self.get_cat_talents(talent_data, cat)
+                if data is None:
+                    continue
+                talent_names, max_levels, current_levels, ids = data
+                for i, id in enumerate(ids):
+                    talent = cat.get_talent_from_id(id)
+                    if talent is None:
+                        continue
+                    talent.level = max_levels[i]
+        color.ColoredText.localize("talents_success")
 
     @staticmethod
     def edit_cats(save_file: "core.SaveFile"):
@@ -303,6 +396,7 @@ class CatEditor:
         if current_cats is None:
             return
         cat_editor.unlock_cats(current_cats)
+        CatEditor.set_rank_up_sale(save_file)
 
     @staticmethod
     def remove_cats_run(save_file: "core.SaveFile"):
@@ -335,6 +429,7 @@ class CatEditor:
         if current_cats is None:
             return
         cat_editor.upgrade_cats(current_cats)
+        CatEditor.set_rank_up_sale(save_file)
 
     @staticmethod
     def upgrade_talents_cats_run(save_file: "core.SaveFile"):
@@ -392,12 +487,15 @@ class CatEditor:
         elif option_id == 5:
             cat_editor.remove_true_form_cats(cats)
         elif option_id == 6:
-            raise NotImplementedError
-            # cat_editor.upgrade_talents_cats(cats)
+            cat_editor.upgrade_talents_cats(cats)
         elif option_id == 7:
             raise NotImplementedError
             # cat_editor.remove_talents_cats(cats)
-        save_file.rank_up_sale_value = 0x7FFFFFFF
+        CatEditor.set_rank_up_sale(save_file)
         if option_id == 8:
             return True, cats
         return False, cats
+
+    @staticmethod
+    def set_rank_up_sale(save_file: "core.SaveFile"):
+        save_file.rank_up_sale_value = 0x7FFFFFFF

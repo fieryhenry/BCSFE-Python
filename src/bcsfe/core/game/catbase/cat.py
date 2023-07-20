@@ -2,6 +2,211 @@ from typing import Any, Optional
 from bcsfe import core
 
 
+class SkillLevel:
+    def __init__(
+        self,
+        id: int,
+        levels: list[int],
+    ):
+        self.id = id
+        self.levels = levels
+
+    def get_total_levels(self) -> int:
+        return len(self.levels)
+
+    @staticmethod
+    def from_row(row: "core.Row"):
+        id = row[0].to_int()
+        levels = row[1:].to_int_list()
+        return SkillLevel(id, levels)
+
+
+class SkillLevelData:
+    def __init__(self, levels: list[SkillLevel]):
+        self.levels = levels
+
+    @staticmethod
+    def from_game_data(save_file: "core.SaveFile"):
+        gdg = core.get_game_data_getter(save_file)
+        data = gdg.download("DataLocal", "SkillLevel.csv")
+        if data is None:
+            return SkillLevelData([])
+        csv = core.CSV(data)
+        levels: list[SkillLevel] = []
+        for line in csv.lines[1:]:
+            levels.append(SkillLevel.from_row(line))
+        return SkillLevelData(levels)
+
+    def get_skill_level(self, id: int) -> Optional[SkillLevel]:
+        for level in self.levels:
+            if level.id == id:
+                return level
+        return None
+
+
+class Skill:
+    def __init__(
+        self,
+        ability_id: int,
+        max_lv: int,
+        min1: int,
+        max1: int,
+        min2: int,
+        max2: int,
+        min3: int,
+        max3: int,
+        min4: int,
+        max4: int,
+        text_id: int,
+        lvid: int,
+        name_id: int,
+        limit: int,
+    ):
+        self.ability_id = ability_id
+        self.max_lv = max_lv
+        self.min1 = min1
+        self.max1 = max1
+        self.min2 = min2
+        self.max2 = max2
+        self.min3 = min3
+        self.max3 = max3
+        self.min4 = min4
+        self.max4 = max4
+        self.text_id = text_id
+        self.lvid = lvid
+        self.name_id = name_id
+        self.limit = limit
+
+
+class CatSkill:
+    def __init__(
+        self,
+        cat_id: int,
+        type_id: int,
+        skills: list[Skill],
+    ):
+        self.cat_id = cat_id
+        self.type_id = type_id
+        self.skills = skills
+
+    @staticmethod
+    def from_row(row: "core.Row"):
+        cat_id = row[0].to_int()
+        type_id = row[1].to_int()
+        skills: list[Skill] = []
+        for i in range(2, len(row), 14):
+            skill = Skill(
+                row[i].to_int(),
+                row[i + 1].to_int(),
+                row[i + 2].to_int(),
+                row[i + 3].to_int(),
+                row[i + 4].to_int(),
+                row[i + 5].to_int(),
+                row[i + 6].to_int(),
+                row[i + 7].to_int(),
+                row[i + 8].to_int(),
+                row[i + 9].to_int(),
+                row[i + 10].to_int(),
+                row[i + 11].to_int(),
+                row[i + 12].to_int(),
+                row[i + 13].to_int(),
+            )
+            skills.append(skill)
+        return CatSkill(cat_id, type_id, skills)
+
+
+class CatSkills:
+    def __init__(self, skills: dict[int, CatSkill]):
+        self.skills = skills
+
+    @staticmethod
+    def from_game_data(save_file: "core.SaveFile"):
+        gdg = core.get_game_data_getter(save_file)
+        data = gdg.download("DataLocal", "SkillAcquisition.csv")
+        if data is None:
+            return CatSkills({})
+        csv = core.CSV(data)
+        skills: dict[int, CatSkill] = {}
+        for line in csv.lines[1:]:
+            skill = CatSkill.from_row(line)
+            skills[skill.cat_id] = skill
+        return CatSkills(skills)
+
+    def get_cat_skill(self, cat_id: int) -> Optional[CatSkill]:
+        return self.skills.get(cat_id)
+
+
+class SkillNames:
+    def __init__(self, names: dict[int, str]):
+        self.names = names
+
+    @staticmethod
+    def from_game_data(save_file: "core.SaveFile"):
+        gdg = core.get_game_data_getter(save_file)
+        data = gdg.download("resLocal", "SkillDescriptions.csv")
+        if data is None:
+            return SkillNames({})
+        csv = core.CSV(
+            data, delimeter=core.Delimeter.from_country_code_res(save_file.cc)
+        )
+        names: dict[int, str] = {}
+        for line in csv.lines[1:]:
+            names[line[0].to_int()] = line[1].to_str()
+        return SkillNames(names)
+
+    def get_skill_name(self, skill_id: int) -> Optional[str]:
+        return self.names.get(skill_id)
+
+
+class TalentData:
+    def __init__(
+        self,
+        skill_names: SkillNames,
+        skill_levels: SkillLevelData,
+        cats: CatSkills,
+    ):
+        self.skill_names = skill_names
+        self.skill_levels = skill_levels
+        self.cats = cats
+
+    @staticmethod
+    def from_game_data(save_file: "core.SaveFile"):
+        skill_names = SkillNames.from_game_data(save_file)
+        skill_levels = SkillLevelData.from_game_data(save_file)
+        cats = CatSkills.from_game_data(save_file)
+        return TalentData(skill_names, skill_levels, cats)
+
+    def get_skill_name(self, skill_id: int) -> Optional[str]:
+        return self.skill_names.get_skill_name(skill_id)
+
+    def get_skill_level(self, skill_id: int) -> Optional[SkillLevel]:
+        return self.skill_levels.get_skill_level(skill_id)
+
+    def get_cat_skill(self, cat_id: int) -> Optional[CatSkill]:
+        return self.cats.get_cat_skill(cat_id)
+
+    def get_skill_from_cat(self, cat_id: int, skill_id: int) -> Optional[Skill]:
+        cat_skill = self.get_cat_skill(cat_id)
+        if cat_skill is None:
+            return None
+        for skill in cat_skill.skills:
+            if skill.ability_id == skill_id:
+                return skill
+        return None
+
+    def get_cat_skill_name(self, cat_id: int, skill_id: int) -> Optional[str]:
+        skill = self.get_skill_from_cat(cat_id, skill_id)
+        if skill is None:
+            return None
+        return self.get_skill_name(skill.text_id)
+
+    def get_cat_skill_level(self, cat_id: int, skill_id: int) -> Optional[SkillLevel]:
+        skill = self.get_skill_from_cat(cat_id, skill_id)
+        if skill is None:
+            return None
+        return self.get_skill_level(skill.lvid)
+
+
 class Talent:
     def __init__(self, id: int, level: int):
         self.id = id
@@ -283,6 +488,12 @@ class Cat:
 
         self.names: Optional[list[str]] = None
 
+    def get_talent_from_id(self, id: int) -> Optional[Talent]:
+        for talent in self.talents or []:
+            if talent.id == id:
+                return talent
+        return None
+
     def unlock(self):
         self.unlocked = 1
 
@@ -528,6 +739,7 @@ class Cats:
         self.unit_buy: Optional[UnitBuy] = None
         self.unit_limit: Optional[UnitLimit] = None
         self.nyanko_picture_book: Optional[NyankoPictureBook] = None
+        self.talent_data: Optional[TalentData] = None
         self.bulk_downloaded = False
 
     @staticmethod
@@ -580,6 +792,11 @@ class Cats:
         if self.nyanko_picture_book is None:
             self.nyanko_picture_book = NyankoPictureBook(save_file)
         return self.nyanko_picture_book
+
+    def read_talent_data(self, save_file: "core.SaveFile") -> TalentData:
+        if self.talent_data is None:
+            self.talent_data = TalentData.from_game_data(save_file)
+        return self.talent_data
 
     def get_cats_rarity(self, save_file: "core.SaveFile", rarity: int) -> list[Cat]:
         unit_buy = self.read_unitbuy(save_file)

@@ -15,12 +15,13 @@ class PowerUpHelper:
         self.rank_gifts = self.save_file.user_rank_rewards.read_rank_gifts(
             self.save_file
         )
+        self.max_upgrade_level = self.__get_max_upgrade_level_check()
 
     def get_current_max_level(self) -> Optional[int]:
         if self.unit_buy is None:
             return None
         return min(
-            self.unit_buy.original_max_levels[0] + self.get_max_upgrade_level_check(),
+            self.unit_buy.original_max_levels[0] + self.max_upgrade_level,
             self.unit_buy.max_upgrade_level_catseye,
         )
 
@@ -37,7 +38,7 @@ class PowerUpHelper:
             return 1000000
         return self.save_file.calculate_user_rank()
 
-    def get_max_upgrade_level_check(self) -> int:
+    def __get_max_upgrade_level_check(self) -> int:
         if self.unit_limit is None:
             return self.cat.max_upgrade_level.base
 

@@ -51,7 +51,7 @@ class SaveFile:
                 self.real_cc = cc
             else:
                 self.real_cc = detected_cc
-        
+
         self.used_storage = False
 
         self.localizable: Optional[core.Localizable] = None
@@ -940,7 +940,7 @@ class SaveFile:
             self.ubl3 = self.data.read_bool_list(14)
 
             length = self.data.read_byte()
-            self.ushl5 = self.data.read_short_list(length)
+            self.labyrinth_medals = self.data.read_short_list(length)
 
             self.gv_111000 = self.data.read_int()
 
@@ -1748,8 +1748,8 @@ class SaveFile:
 
             self.data.write_bool_list(self.ubl3, write_length=False, length=14)
 
-            self.data.write_byte(len(self.ushl5))
-            self.data.write_short_list(self.ushl5, write_length=False)
+            self.data.write_byte(len(self.labyrinth_medals))
+            self.data.write_short_list(self.labyrinth_medals, write_length=False)
 
             self.data.write_int(self.gv_111000)
 
@@ -2127,7 +2127,7 @@ class SaveFile:
             "uby11": self.uby11,
             "ushl4": self.ushl4,
             "ubl3": self.ubl3,
-            "ushl5": self.ushl5,
+            "labyrinth_medals": self.labyrinth_medals,
             "gv_111000": self.gv_111000,
             "zero_legends": self.zero_legends.serialize(),
             "uby12": self.uby12,
@@ -2514,7 +2514,7 @@ class SaveFile:
         save_file.uby11 = data.get("uby11", 0)
         save_file.ushl4 = data.get("ushl4", [])
         save_file.ubl3 = data.get("ubl3", [])
-        save_file.ushl5 = data.get("ushl5", [])
+        save_file.labyrinth_medals = data.get("labyrinth_medals", [])
         save_file.gv_111000 = data.get("gv_111000", 111000)
         save_file.zero_legends = core.ZeroLegendsChapters.deserialize(
             data.get("zero_legends", [])
@@ -2771,7 +2771,6 @@ class SaveFile:
         self.ushl2 = []
         self.ushl3 = []
         self.ushl4 = []
-        self.ushl5 = []
         self.ushl6 = []
 
         self.utl1 = []
@@ -2833,6 +2832,7 @@ class SaveFile:
         self.reset_item_reward_flags = []
         self.announcements = [tuple([0, 0])] * 16
         self.event_capsules_3 = []
+        self.labyrinth_medals = []
 
         self.save_data_4_hash = ""
         self.player_id = ""

@@ -137,6 +137,7 @@ class Data:
         return i
 
     def write_variable_length_int(self, value: int):
+        value = int(value)
         i2 = 0
         i3 = 0
         while value >= 128:
@@ -252,21 +253,27 @@ class Data:
         self.pos += len(data)
 
     def write_int(self, value: int):
+        value = int(value)
         self.write_bytes(struct.pack(f"{self.endiness}i", value))
 
     def write_uint(self, value: int):
+        value = int(value)
         self.write_bytes(struct.pack(f"{self.endiness}I", value))
 
     def write_short(self, value: int):
+        value = int(value)
         self.write_bytes(struct.pack(f"{self.endiness}h", value))
 
     def write_ushort(self, value: int):
+        value = int(value)
         self.write_bytes(struct.pack(f"{self.endiness}H", value))
 
     def write_byte(self, value: int):
+        value = int(value)
         self.write_bytes(struct.pack(f"{self.endiness}b", value))
 
     def write_ubyte(self, value: int):
+        value = int(value)
         self.write_bytes(struct.pack(f"{self.endiness}B", value))
 
     def write_float(self, value: float):

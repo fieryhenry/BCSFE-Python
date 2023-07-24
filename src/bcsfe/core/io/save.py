@@ -968,6 +968,12 @@ class SaveFile:
 
             self.gv_120200 = self.data.read_int()
 
+        if self.game_version >= 120400:
+            self.ud11 = self.data.read_double()
+            self.ud12 = self.data.read_double()
+
+            self.gv_120400 = self.data.read_int()
+
         self.remaining_data = self.data.read_to_end(32)
 
     def save(self, data: "core.Data"):
@@ -1775,6 +1781,12 @@ class SaveFile:
 
             self.data.write_int(self.gv_120200)
 
+        if self.game_version >= 120400:
+            self.data.write_double(self.ud11)
+            self.data.write_double(self.ud12)
+
+            self.data.write_int(self.gv_120400)
+
         self.data.write_bytes(self.remaining_data)
 
     def to_data(self) -> "core.Data":
@@ -2138,6 +2150,9 @@ class SaveFile:
             "ush9": self.ush9,
             "ushshd": self.ushshd,
             "gv_120200": self.gv_120200,
+            "ud11": self.ud11,
+            "ud12": self.ud12,
+            "gv_120400": self.gv_120400,
             "remaining_data": base64.b64encode(self.remaining_data).decode("utf-8"),
         }
         return data
@@ -2527,6 +2542,10 @@ class SaveFile:
         save_file.ush9 = data.get("ush9", 0)
         save_file.ushshd = data.get("ushshd", {})
         save_file.gv_120200 = data.get("gv_120200", 120200)
+        save_file.ud11 = data.get("ud11", 0.0)
+        save_file.ud12 = data.get("ud12", 0.0)
+        save_file.gv_120400 = data.get("gv_120400", 120400)
+
         save_file.remaining_data = base64.b64decode(data.get("remaining_data", ""))
 
         return save_file
@@ -2670,6 +2689,7 @@ class SaveFile:
         self.gv_120000 = 120000
         self.gv_120100 = 120100
         self.gv_120200 = 120200
+        self.gv_120400 = 120400
 
         self.catfood = 0
         self.current_energy = 0
@@ -2717,6 +2737,8 @@ class SaveFile:
         self.ud8 = 0.0
         self.ud9 = 0.0
         self.ud10 = 0.0
+        self.ud11 = 0.0
+        self.ud12 = 0.0
 
         self.timestamp = 0.0
         self.g_timestamp = 0.0
@@ -3016,6 +3038,7 @@ class SaveFile:
             assert self.gv_120000 == 120000
             assert self.gv_120100 == 120100
             assert self.gv_120200 == 120200
+            assert self.gv_120400 == 120400
         except AssertionError:
             return False
         return True

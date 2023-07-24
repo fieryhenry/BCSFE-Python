@@ -51,7 +51,7 @@ class FeatureHandler:
                 "scheme_items": edits.basic_items.BasicItems.edit_scheme_items,
             },
             "cats": cat_features,
-            "ototo": {
+            "gamototo": {
                 "engineers": edits.basic_items.BasicItems.edit_engineers,
                 "base_materials": edits.basic_items.BasicItems.edit_base_materials,
             },

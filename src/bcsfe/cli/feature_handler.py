@@ -173,8 +173,7 @@ class FeatureHandler:
             feature = self.get_feature(feature)
 
             if isinstance(feature, Callable):
-                edits.clear_tutorial.clear_tutorial(self.save_file, False)
-                self.save_file.show_ban_message = False
+                self.do_save_actions()
 
                 feature(self.save_file)
 
@@ -182,3 +181,9 @@ class FeatureHandler:
 
                 features = self.get_features()
                 features = list(features.keys())
+
+    def do_save_actions(self):
+        if core.config.get_bool(core.ConfigKey.CLEAR_TUTORIAL_ON_LOAD):
+            edits.clear_tutorial.clear_tutorial(self.save_file, False)
+        if core.config.get_bool(core.ConfigKey.REMOVE_BAN_MESSAGE_ON_LOAD):
+            self.save_file.show_ban_message = False

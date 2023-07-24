@@ -18,6 +18,8 @@ class ConfigKey(enum.Enum):
     MAX_REQUEST_TIMEOUT = "max_request_timeout"
     GAME_DATA_REPO = "game_data_repo"
     FORCE_LANG_GAME_DATA = "force_lang_game_data"
+    CLEAR_TUTORIAL_ON_LOAD = "clear_tutorial_on_load"
+    REMOVE_BAN_MESSAGE_ON_LOAD = "remove_ban_message_on_load"
 
 
 class Config:
@@ -62,6 +64,8 @@ class Config:
             ConfigKey.MAX_REQUEST_TIMEOUT: 20,
             ConfigKey.GAME_DATA_REPO: "https://raw.githubusercontent.com/fieryhenry/BCData/master/",
             ConfigKey.FORCE_LANG_GAME_DATA: False,
+            ConfigKey.CLEAR_TUTORIAL_ON_LOAD: True,
+            ConfigKey.REMOVE_BAN_MESSAGE_ON_LOAD: True,
         }
         return initial_values
 

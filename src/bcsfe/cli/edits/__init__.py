@@ -3,6 +3,7 @@ from bcsfe.cli.edits import (
     cat_editor,
     talent_orbs,
     clear_tutorial,
+    rare_ticket_trade,
 )
 
 __all__ = [
@@ -10,4 +11,5 @@ __all__ = [
     "cat_editor",
     "talent_orbs",
     "clear_tutorial",
+    "rare_ticket_trade",
 ]

@@ -1,6 +1,5 @@
-from typing import Optional
 from bcsfe import core
-from bcsfe.cli import dialog_creator, color
+from bcsfe.cli import dialog_creator, color, edits
 
 
 class BasicItems:
@@ -70,7 +69,7 @@ class BasicItems:
         if option == 2:
             return
         if option == 1:
-            return BasicItems.rare_ticket_trade(save_file)
+            return edits.rare_ticket_trade.RareTicketTrade.rare_ticket_trade(save_file)
 
         original_amount = save_file.rare_tickets
         save_file.rare_tickets = dialog_creator.SingleEditor(
@@ -211,37 +210,3 @@ class BasicItems:
     @staticmethod
     def edit_base_materials(save_file: "core.SaveFile"):
         save_file.ototo.base_materials.edit_base_materials(save_file)
-
-    @staticmethod
-    def rare_ticket_trade(save_file: "core.SaveFile"):
-        current_amount = save_file.rare_tickets
-        max_amount = max(299 - current_amount, 0)
-        if max_amount == 0:
-            color.ColoredText.localize("rare_ticket_trade_maxed")
-            return
-        to_add = dialog_creator.IntInput(max_amount, 0).get_input_locale_while(
-            "rare_ticket_trade_enter", {"max": max_amount, "current": current_amount}
-        )
-        if to_add is None:
-            return
-
-        space = False
-        for storage_item in save_file.cats.storage_items:
-            if storage_item.item_type == 0 or (
-                storage_item.item_id == 1 and storage_item.item_type == 2
-            ):
-                storage_item.item_id = 1
-                storage_item.item_type = 2
-                space = True
-                break
-
-        if not space:
-            color.ColoredText.localize("rare_ticket_trade_storage_full")
-            return
-
-        amount = to_add * 5
-        save_file.gatya.trade_progress = amount
-
-        color.ColoredText.localize(
-            "rare_ticket_successfully_traded", rare_ticket_count=to_add
-        )

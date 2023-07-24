@@ -22,8 +22,7 @@ class Thread:
     def is_alive(self) -> bool:
         if self._thread is not None:
             return self._thread.is_alive()
-        else:
-            return False
+        return False
 
     @staticmethod
     def run(name: str, target: Callable[..., None], args: Any):

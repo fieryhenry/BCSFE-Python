@@ -27,6 +27,7 @@ from bcsfe.core.game.catbase.gatya_item import GatyaItemBuy, GatyaItemNames
 from bcsfe.core.game.catbase.item_pack import ItemPack
 from bcsfe.core.game.catbase.login_bonuses import LoginBonus
 from bcsfe.core.game.catbase.matatabi import Matatabi
+from bcsfe.core.game.catbase.drop_chara import CharaDrop
 from bcsfe.core.game.catbase.medals import Medals
 from bcsfe.core.game.catbase.mission import Missions
 from bcsfe.core.game.catbase.my_sale import MySale
@@ -91,6 +92,7 @@ theme_manager = ThemeHandler()
 game_data_getter: Optional[GameDataGetter] = None
 gatya_item_names: Optional[GatyaItemNames] = None
 gatya_item_buy: Optional[GatyaItemBuy] = None
+chara_drop: Optional[CharaDrop] = None
 
 
 def get_game_data_getter(save: SaveFile) -> GameDataGetter:
@@ -112,6 +114,13 @@ def get_gatya_item_buy(save: SaveFile) -> GatyaItemBuy:
     if gatya_item_buy is None:
         gatya_item_buy = GatyaItemBuy(save)
     return gatya_item_buy
+
+
+def get_chara_drop(save: SaveFile) -> CharaDrop:
+    global chara_drop
+    if chara_drop is None:
+        chara_drop = CharaDrop(save)
+    return chara_drop
 
 
 __all__ = [

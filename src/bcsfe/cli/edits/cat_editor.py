@@ -194,7 +194,7 @@ class CatEditor:
     def unlock_cats(self, cats: list["core.Cat"]):
         cats = self.get_save_cats(cats)
         for cat in cats:
-            cat.unlock()
+            cat.unlock(self.save_file)
         color.ColoredText.localize("unlock_success")
 
     def remove_cats(self, cats: list["core.Cat"]):
@@ -220,10 +220,12 @@ class CatEditor:
         for cat in cats:
             pic_book_cat = pic_book.get_cat(cat.id)
             if force:
-                cat.true_form(set_current_form=set_current_forms)
+                cat.true_form(self.save_file, set_current_form=set_current_forms)
             elif pic_book_cat is not None:
                 cat.set_form_true(
-                    pic_book_cat.total_forms, set_current_form=set_current_forms
+                    self.save_file,
+                    pic_book_cat.total_forms,
+                    set_current_form=set_current_forms,
                 )
         color.ColoredText.localize("true_form_success")
 
@@ -269,7 +271,7 @@ class CatEditor:
                 if upgrade is not None:
                     power_up.reset_upgrade()
                     power_up.upgrade_by(upgrade.base)
-                    cat.set_plus_upgrade(upgrade.plus)
+                    cat.set_plus_upgrade(self.save_file, upgrade.plus)
         else:
             power_up = core.PowerUpHelper(cats[0], self.save_file)
             upgrade, should_exit = core.Upgrade.get_user_upgrade(
@@ -282,7 +284,7 @@ class CatEditor:
                 power_up = core.PowerUpHelper(cat, self.save_file)
                 power_up.reset_upgrade()
                 power_up.upgrade_by(upgrade.base)
-                cat.set_plus_upgrade(upgrade.plus)
+                cat.set_plus_upgrade(self.save_file, upgrade.plus)
         color.ColoredText.localize("upgrade_success")
 
     def get_cat_talents(

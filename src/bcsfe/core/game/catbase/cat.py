@@ -494,29 +494,37 @@ class Cat:
                 return talent
         return None
 
-    def unlock(self):
+    def unlock(self, save_file: "core.SaveFile"):
         self.unlocked = 1
         self.gatya_seen = 1
+        core.get_chara_drop(save_file).unlock_drops_from_cat_id(self.id)
 
     def remove(self, reset: bool = False):
         self.unlocked = 0
         if reset:
             self.reset()
 
-    def true_form(self, set_current_form: bool = True):
-        self.set_form(2, set_current_form)
+    def true_form(self, save_file: "core.SaveFile", set_current_form: bool = True):
+        self.set_form(2, save_file, set_current_form)
 
-    def set_form(self, form: int, set_current_form: bool = True):
-        self.unlock()
+    def set_form(
+        self, form: int, save_file: "core.SaveFile", set_current_form: bool = True
+    ):
+        self.unlock(save_file)
         self.unlocked_forms = form + 1
         if set_current_form:
             self.current_form = form
 
-    def set_form_true(self, total_forms: int, set_current_form: bool = True):
+    def set_form_true(
+        self,
+        save_file: "core.SaveFile",
+        total_forms: int,
+        set_current_form: bool = True,
+    ):
         if total_forms == 4:
-            self.unlock_forth_form(set_current_form)
+            self.unlock_forth_form(save_file, set_current_form)
         elif total_forms == 3:
-            self.true_form(set_current_form)
+            self.true_form(save_file, set_current_form)
         elif total_forms == 2:
             self.unlocked_forms = 0
             self.current_form = min(self.current_form, 1)
@@ -528,16 +536,18 @@ class Cat:
         self.unlocked_forms = min(self.unlocked_forms, 2)
         self.current_form = min(self.current_form, 2)
 
-    def unlock_forth_form(self, set_current_form: bool = True):
-        self.set_form(3, set_current_form)
+    def unlock_forth_form(
+        self, save_file: "core.SaveFile", set_current_form: bool = True
+    ):
+        self.set_form(3, save_file, set_current_form)
         self.forth_form = 1
 
     def remove_forth_form(self):
         self.unlocked_forms = min(self.unlocked_forms, 3)
         self.current_form = min(self.current_form, 3)
 
-    def set_upgrade(self, upgrade: "core.Upgrade"):
-        self.unlock()
+    def set_upgrade(self, save_file: "core.SaveFile", upgrade: "core.Upgrade"):
+        self.unlock(save_file)
         base = upgrade.base
         plus = upgrade.plus
         if base != -1:
@@ -545,8 +555,8 @@ class Cat:
         if plus != -1:
             self.upgrade.plus = upgrade.get_random_plus()
 
-    def set_plus_upgrade(self, plus: int):
-        self.unlock()
+    def set_plus_upgrade(self, save_file: "core.SaveFile", plus: int):
+        self.unlock(save_file)
         self.upgrade.plus = plus
 
     def reset(self):

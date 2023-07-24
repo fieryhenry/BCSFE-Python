@@ -19,6 +19,7 @@ from bcsfe.core.game.catbase import (
     talent_orbs,
     matatabi,
     powerup,
+    drop_chara,
 )
 
 __all__ = [
@@ -42,4 +43,5 @@ __all__ = [
     "gatya_item",
     "matatabi",
     "powerup",
+    "drop_chara",
 ]

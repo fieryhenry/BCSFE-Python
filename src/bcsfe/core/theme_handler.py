@@ -24,12 +24,12 @@ class ThemeHandler:
         return self.theme_data.get("info", {})
 
     def get_theme_name(self) -> str:
-        return self.theme_data.get(
+        return self.get_theme_info().get(
             "name", core.local_manager.get_key("unknown_theme_name")
         )
 
     def get_theme_author(self) -> str:
-        return self.theme_data.get(
+        return self.get_theme_info().get(
             "author", core.local_manager.get_key("unknown_theme_author")
         )
 

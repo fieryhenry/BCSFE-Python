@@ -56,6 +56,7 @@ class FeatureHandler:
                 "unban_account": save_management.SaveManagement.unban_account,
                 "upload_items": save_management.SaveManagement.upload_items,
             },
+            "config": core.Config.edit_config,
             "exit": main.Main.exit_editor,
         }
         return features

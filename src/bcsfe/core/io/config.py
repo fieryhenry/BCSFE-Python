@@ -1,6 +1,7 @@
 import enum
 from typing import Any
 from bcsfe import core
+from bcsfe.cli import color, dialog_creator
 
 
 class ConfigKey(enum.Enum):
@@ -71,6 +72,10 @@ class Config:
 
     def get_default(self, key: ConfigKey) -> Any:
         value = Config.get_defaults()[key]
+        return value
+
+    def set_default(self, key: ConfigKey):
+        value = self.get_default(key)
         self.config[key] = value
         self.save()
         return value
@@ -91,25 +96,25 @@ class Config:
     def get(self, key: ConfigKey) -> Any:
         value = self.config[key]
         if value is None:
-            return self.get_default(key)
+            return self.set_default(key)
         return value
 
     def get_str(self, key: ConfigKey) -> str:
         value = self.get(key)
         if not isinstance(value, str):
-            return self.get_default(key)
+            return self.set_default(key)
         return value
 
     def get_bool(self, key: ConfigKey) -> bool:
         value = self.get(key)
         if not isinstance(value, bool):
-            return self.get_default(key)
+            return self.set_default(key)
         return value
 
     def get_int(self, key: ConfigKey) -> int:
         value = self.get(key)
         if not isinstance(value, int):
-            return self.get_default(key)
+            return self.set_default(key)
         return value
 
     def reset(self):
@@ -120,3 +125,65 @@ class Config:
     def set(self, key: ConfigKey, value: Any):
         self.config[key] = value
         self.save()
+
+    def get_bool_text(self, value: bool) -> str:
+        if value:
+            return core.local_manager.get_key("enabled")
+        return core.local_manager.get_key("disabled")
+
+    def edit_bool(self, key: ConfigKey):
+        value = self.get_bool(key)
+        color.ColoredText.localize(
+            key.value + "_desc",
+            current_value=self.get_bool_text(value),
+            default_value=self.get_bool_text(self.get_default(key)),
+            escape=False,
+        )
+        choice = dialog_creator.ChoiceInput(
+            ["enable", "disable"],
+            ["enable", "disable"],
+            [],
+            {},
+            "enable_disable_dialog",
+            True,
+        ).single_choice()
+        if choice is None:
+            return
+        choice -= 1
+        if choice == 0:
+            value = True
+        elif choice == 1:
+            value = False
+        self.set(key, value)
+        color.ColoredText.localize(
+            "config_success",
+        )
+
+    @staticmethod
+    def edit_config(_: Any):
+        features = [
+            ConfigKey.UPDATE_TO_BETA,
+            ConfigKey.DISABLE_MAXES,
+            ConfigKey.RESET_CAT_DATA,
+            ConfigKey.FILTER_CURRENT_CATS,
+            ConfigKey.SET_CAT_CURRENT_FORMS,
+            ConfigKey.STRICT_UPGRADE,
+            ConfigKey.SEPARATE_CAT_EDIT_OPTIONS,
+            ConfigKey.STRICT_BAN_PREVENTION,
+            ConfigKey.FORCE_LANG_GAME_DATA,
+            ConfigKey.CLEAR_TUTORIAL_ON_LOAD,
+            ConfigKey.REMOVE_BAN_MESSAGE_ON_LOAD,
+        ]
+
+        choice = dialog_creator.ChoiceInput(
+            [key.value for key in features],
+            [key.value for key in features],
+            [],
+            {},
+            "config_dialog",
+            True,
+        ).single_choice()
+        if choice is None:
+            return
+        choice -= 1
+        core.config.edit_bool(features[choice])

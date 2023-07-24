@@ -15,6 +15,7 @@ class FeatureHandler:
                 "remove_cats": edits.cat_editor.CatEditor.remove_cats_run,
                 "upgrade_cats": edits.cat_editor.CatEditor.upgrade_cats_run,
                 "true_form_cats": edits.cat_editor.CatEditor.true_form_cats_run,
+                "force_true_form_cats": edits.cat_editor.CatEditor.force_true_form_cats_run,
                 "remove_true_form_cats": edits.cat_editor.CatEditor.remove_true_form_cats_run,
                 "upgrade_talent_cats": edits.cat_editor.CatEditor.upgrade_talents_cats_run,
                 "remove_talents_cats": edits.cat_editor.CatEditor.remove_talents_cats_run,

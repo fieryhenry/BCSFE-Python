@@ -431,6 +431,14 @@ class CatEditor:
         cat_editor.true_form_cats(current_cats)
 
     @staticmethod
+    def force_true_form_cats_run(save_file: "core.SaveFile"):
+        color.ColoredText.localize("force_true_form_cats_warning")
+        cat_editor, current_cats = CatEditor.from_save_file(save_file)
+        if cat_editor is None:
+            return
+        cat_editor.true_form_cats(current_cats, force=True)
+
+    @staticmethod
     def remove_true_form_cats_run(save_file: "core.SaveFile"):
         cat_editor, current_cats = CatEditor.from_save_file(save_file)
         if cat_editor is None:
@@ -496,6 +504,7 @@ class CatEditor:
             "remove_cats",
             "upgrade_cats",
             "true_form_cats",
+            "force_true_form_cats",
             "remove_true_form_cats",
             "upgrade_talents_cats",
             "remove_talents_cats",
@@ -523,17 +532,20 @@ class CatEditor:
         elif option_id == 4:
             cat_editor.true_form_cats(cats)
         elif option_id == 5:
-            cat_editor.remove_true_form_cats(cats)
+            color.ColoredText.localize("force_true_form_cats_warning")
+            cat_editor.true_form_cats(cats, force=True)
         elif option_id == 6:
-            cat_editor.upgrade_talents_cats(cats)
+            cat_editor.remove_true_form_cats(cats)
         elif option_id == 7:
-            cat_editor.remove_talents_cats(cats)
+            cat_editor.upgrade_talents_cats(cats)
         elif option_id == 8:
-            cat_editor.unlock_cat_guide(cats)
+            cat_editor.remove_talents_cats(cats)
         elif option_id == 9:
+            cat_editor.unlock_cat_guide(cats)
+        elif option_id == 10:
             cat_editor.remove_cat_guide(cats)
         CatEditor.set_rank_up_sale(save_file)
-        if option_id == 10:
+        if option_id == 11:
             return True, cats
         return False, cats
 

@@ -286,12 +286,26 @@ class SaveManagement:
 
         try:
             save_file = core.SaveFile(save_path.read(), cc)
-            save_file.save_path = save_path
-            save_file.save_path.copy(save_file.get_default_path())
-            save_file.used_storage = used_storage
-        except Exception as e:
-            color.ColoredText.localize("parse_save_error", error=e)
+        except core.CantDetectSaveCCError:
+            color.ColoredText.localize("cant_detect_cc")
+            cc = core.CountryCode.select()
+            if cc is None:
+                return None
+            try:
+                save_file = core.SaveFile(save_path.read(), cc)
+            except Exception:
+                tb = core.logger.get_traceback()
+                color.ColoredText.localize("parse_save_error", error=tb)
+                return None
+
+        except Exception:
+            tb = core.logger.get_traceback()
+            color.ColoredText.localize("parse_save_error", error=tb)
             return None
+
+        save_file.save_path = save_path
+        save_file.save_path.copy(save_file.get_default_path())
+        save_file.used_storage = used_storage
 
         return save_file
 

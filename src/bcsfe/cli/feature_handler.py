@@ -18,6 +18,8 @@ class FeatureHandler:
                 "remove_true_form_cats": edits.cat_editor.CatEditor.remove_true_form_cats_run,
                 "upgrade_talent_cats": edits.cat_editor.CatEditor.upgrade_talents_cats_run,
                 "remove_talents_cats": edits.cat_editor.CatEditor.remove_talents_cats_run,
+                "unlock_cat_guide": edits.cat_editor.CatEditor.unlock_cat_guide_run,
+                "remove_cat_guide": edits.cat_editor.CatEditor.remove_cat_guide_run,
             }
 
         features: dict[str, Any] = {

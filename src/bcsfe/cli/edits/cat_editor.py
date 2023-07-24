@@ -323,6 +323,16 @@ class CatEditor:
                 talent.level = 0
         color.ColoredText.localize("talents_remove_success")
 
+    def unlock_cat_guide(self, cats: list["core.Cat"]):
+        for cat in cats:
+            cat.catguide_collected = True
+        color.ColoredText.localize("unlock_cat_guide_success")
+
+    def remove_cat_guide(self, cats: list["core.Cat"]):
+        for cat in cats:
+            cat.catguide_collected = False
+        color.ColoredText.localize("remove_cat_guide_success")
+
     def upgrade_talents_cats(self, cats: list["core.Cat"]):
         cats = self.get_save_cats(cats)
         if not cats:
@@ -398,61 +408,78 @@ class CatEditor:
 
     @staticmethod
     def unlock_cats_run(save_file: "core.SaveFile"):
-        cat_editor = CatEditor(save_file)
-        current_cats = cat_editor.select()
-        if current_cats is None:
+        cat_editor, current_cats = CatEditor.from_save_file(save_file)
+        if cat_editor is None:
             return
         cat_editor.unlock_cats(current_cats)
         CatEditor.set_rank_up_sale(save_file)
 
     @staticmethod
     def remove_cats_run(save_file: "core.SaveFile"):
-        cat_editor = CatEditor(save_file)
-        current_cats = cat_editor.select()
-        if current_cats is None:
+        cat_editor, current_cats = CatEditor.from_save_file(save_file)
+        if cat_editor is None:
             return
         cat_editor.remove_cats(current_cats)
 
     @staticmethod
     def true_form_cats_run(save_file: "core.SaveFile"):
-        cat_editor = CatEditor(save_file)
-        current_cats = cat_editor.select()
-        if current_cats is None:
+        cat_editor, current_cats = CatEditor.from_save_file(save_file)
+        if cat_editor is None:
             return
         cat_editor.true_form_cats(current_cats)
 
     @staticmethod
     def remove_true_form_cats_run(save_file: "core.SaveFile"):
-        cat_editor = CatEditor(save_file)
-        current_cats = cat_editor.select()
-        if current_cats is None:
+        cat_editor, current_cats = CatEditor.from_save_file(save_file)
+        if cat_editor is None:
             return
         cat_editor.remove_true_form_cats(current_cats)
 
     @staticmethod
     def upgrade_cats_run(save_file: "core.SaveFile"):
-        cat_editor = CatEditor(save_file)
-        current_cats = cat_editor.select()
-        if current_cats is None:
+        cat_editor, current_cats = CatEditor.from_save_file(save_file)
+        if cat_editor is None:
             return
         cat_editor.upgrade_cats(current_cats)
         CatEditor.set_rank_up_sale(save_file)
 
     @staticmethod
     def upgrade_talents_cats_run(save_file: "core.SaveFile"):
-        cat_editor = CatEditor(save_file)
-        current_cats = cat_editor.select()
-        if current_cats is None:
+        cat_editor, current_cats = CatEditor.from_save_file(save_file)
+        if cat_editor is None:
             return
         cat_editor.upgrade_talents_cats(current_cats)
 
     @staticmethod
     def remove_talents_cats_run(save_file: "core.SaveFile"):
+        cat_editor, current_cats = CatEditor.from_save_file(save_file)
+        if cat_editor is None:
+            return
+        cat_editor.remove_talents_cats(current_cats)
+
+    @staticmethod
+    def unlock_cat_guide_run(save_file: "core.SaveFile"):
+        cat_editor, current_cats = CatEditor.from_save_file(save_file)
+        if cat_editor is None:
+            return
+        cat_editor.unlock_cat_guide(current_cats)
+
+    @staticmethod
+    def remove_cat_guide_run(save_file: "core.SaveFile"):
+        cat_editor, current_cats = CatEditor.from_save_file(save_file)
+        if cat_editor is None:
+            return
+        cat_editor.remove_cat_guide(current_cats)
+
+    @staticmethod
+    def from_save_file(
+        save_file: "core.SaveFile",
+    ) -> tuple[Optional["CatEditor"], list["core.Cat"]]:
         cat_editor = CatEditor(save_file)
         current_cats = cat_editor.select()
         if current_cats is None:
-            return
-        cat_editor.remove_talents_cats(current_cats)
+            return None, []
+        return cat_editor, current_cats
 
     @staticmethod
     def run_edit_cats(
@@ -470,6 +497,8 @@ class CatEditor:
             "remove_true_form_cats",
             "upgrade_talents_cats",
             "remove_talents_cats",
+            "unlock_cat_guide",
+            "remove_cat_guide",
             "finish_edit_cats",
         ]
         option_id = dialog_creator.ChoiceInput(
@@ -497,8 +526,12 @@ class CatEditor:
             cat_editor.upgrade_talents_cats(cats)
         elif option_id == 7:
             cat_editor.remove_talents_cats(cats)
+        elif option_id == 8:
+            cat_editor.unlock_cat_guide(cats)
+        elif option_id == 9:
+            cat_editor.remove_cat_guide(cats)
         CatEditor.set_rank_up_sale(save_file)
-        if option_id == 8:
+        if option_id == 10:
             return True, cats
         return False, cats
 

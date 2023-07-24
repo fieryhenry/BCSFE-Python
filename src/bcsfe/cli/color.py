@@ -125,8 +125,10 @@ class ColoredText:
         return text
 
     @staticmethod
-    def localize(string: str, **kwargs: Any) -> "ColoredText":
-        return ColoredText(ColoredText.get_localized_text(string, **kwargs))
+    def localize(string: str, escape: bool = True, **kwargs: Any) -> "ColoredText":
+        return ColoredText(
+            ColoredText.get_localized_text(string, escape=escape, **kwargs)
+        )
 
     @staticmethod
     def get_special_chars() -> list[str]:

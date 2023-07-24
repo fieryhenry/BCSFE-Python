@@ -496,6 +496,7 @@ class Cat:
 
     def unlock(self):
         self.unlocked = 1
+        self.gatya_seen = 1
 
     def remove(self, reset: bool = False):
         self.unlocked = 0

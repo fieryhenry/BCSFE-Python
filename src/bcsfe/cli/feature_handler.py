@@ -48,6 +48,10 @@ class FeatureHandler:
                 "scheme_items": edits.basic_items.BasicItems.edit_scheme_items,
             },
             "cats": cat_features,
+            "ototo": {
+                "engineers": edits.basic_items.BasicItems.edit_engineers,
+                "base_materials": edits.basic_items.BasicItems.edit_base_materials,
+            },
             "account": {
                 "unban_account": save_management.SaveManagement.unban_account,
                 "upload_items": save_management.SaveManagement.upload_items,

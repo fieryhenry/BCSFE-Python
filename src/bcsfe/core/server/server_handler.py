@@ -444,7 +444,7 @@ class ServerHandler:
         self.remove_stored_auth_token()
         self.remove_stored_save_key_data()
         self.remove_stored_password()
-        self.save_file.password_refresh_token = ""
+        self.save_file.password_refresh_token = "A" * 40
         password = self.get_password()
         auth_token = self.get_auth_token()
         save_key_data = self.get_save_key()

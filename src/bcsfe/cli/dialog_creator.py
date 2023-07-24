@@ -133,16 +133,20 @@ class ListOutput:
         self,
         strings: list[str],
         ints: list[int],
-        dialog: str,
-        perameters: dict[str, Any],
+        dialog: Optional[str] = None,
+        perameters: Optional[dict[str, Any]] = None,
     ):
         self.strings = strings
         self.ints = ints
         self.dialog = dialog
+        if perameters is None:
+            perameters = {}
         self.perameters = perameters
 
-    def get_output(self, dialog: str, strings: list[str]) -> str:
-        end_string = color.ColoredText.get_localized_text(dialog, **self.perameters)
+    def get_output(self, dialog: Optional[str], strings: list[str]) -> str:
+        end_string = ""
+        if dialog is not None:
+            end_string = color.ColoredText.get_localized_text(dialog, **self.perameters)
         end_string += "\n"
         for i, string in enumerate(strings):
             try:
@@ -154,12 +158,14 @@ class ListOutput:
         end_string = end_string.strip("\n")
         return end_string
 
-    def display(self, dialog: str, strings: list[str]) -> None:
+    def display(self, dialog: Optional[str], strings: list[str]) -> None:
         output = self.get_output(dialog, strings)
         color.ColoredText(output)
 
     def display_locale(self, remove_alias: bool = False) -> None:
-        dialog = core.local_manager.get_key(self.dialog)
+        dialog = ""
+        if self.dialog is not None:
+            dialog = core.local_manager.get_key(self.dialog)
         new_strings: list[str] = []
         for string in self.strings:
             string_ = core.local_manager.get_key(string)
@@ -194,9 +200,7 @@ class ChoiceInput:
             return None, ""
         if len(self.strings) == 1:
             return 1, ""
-        ListOutput(
-            self.strings, self.ints, self.dialog, self.perameters
-        ).display_locale()
+        ListOutput(self.strings, self.ints).display_locale()
         return IntInput(len(self.strings), 1).get_input_locale(
             self.dialog, self.perameters
         )
@@ -218,9 +222,7 @@ class ChoiceInput:
             return [1], False
         if not self.is_single_choice:
             self.strings.append("all_at_once")
-        ListOutput(
-            self.strings, self.ints, self.dialog, self.perameters
-        ).display_locale()
+        ListOutput(self.strings, self.ints).display_locale()
         key = "input_many"
         if self.is_single_choice:
             key = "input_single"

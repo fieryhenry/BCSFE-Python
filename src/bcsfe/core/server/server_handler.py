@@ -112,6 +112,8 @@ class ServerHandler:
 
     @staticmethod
     def log_error(url: str, key: str, result: RequestResult):
+        if "EXPECT_THIS_TO_FAIL" in result.data:
+            return
         log_text = (
             f"Error: {key}\n"
             f"URL: {url}\n"

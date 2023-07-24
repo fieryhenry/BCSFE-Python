@@ -97,8 +97,8 @@ class BattleItems:
         return f"BattleItems({self.items})"
 
     def get_names(self, save_file: "core.SaveFile") -> list[str]:
-        names = core.GatyaItemNames(save_file).names
-        items = core.GatyaItemBuy(save_file).get_by_category(3)
+        names = core.get_gatya_item_names(save_file).names
+        items = core.get_gatya_item_buy(save_file).get_by_category(3)
         names = [names[item.id] for item in items]
         return names
 

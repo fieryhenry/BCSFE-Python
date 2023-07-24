@@ -198,7 +198,7 @@ class Ototo:
         return csv.lines[0][0].to_int()
 
     def edit_engineers(self, save_file: "core.SaveFile"):
-        name = core.GatyaItemNames(save_file).get_name(92)
+        name = core.get_gatya_item_names(save_file).get_name(92)
         self.engineers = dialog_creator.SingleEditor(
             name, self.engineers, Ototo.get_max_engineers(save_file)
         ).edit()

@@ -84,7 +84,7 @@ class SchemeItems:
         return self.__repr__()
 
     def edit(self, save_file: "core.SaveFile"):
-        item_names = core.GatyaItemNames(save_file)
+        item_names = core.get_gatya_item_names(save_file)
         localizable = save_file.get_localizable()
         scheme_data = core.get_game_data_getter(save_file).download(
             "DataLocal", "schemeItemData.tsv"

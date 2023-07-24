@@ -26,7 +26,7 @@ class Matatabi:
     def __init__(self, save_file: "core.SaveFile"):
         self.save_file = save_file
         self.matatabi = self.__get_matatabi()
-        self.gatya_item_names = core.GatyaItemNames(self.save_file)
+        self.gatya_item_names = core.get_gatya_item_names(self.save_file)
 
     def __get_matatabi(self) -> list[Fruit]:
         gdg = core.get_game_data_getter(self.save_file)

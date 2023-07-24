@@ -89,6 +89,8 @@ logger = Logger()
 local_manager = LocalManager()
 theme_manager = ThemeHandler()
 game_data_getter: Optional[GameDataGetter] = None
+gatya_item_names: Optional[GatyaItemNames] = None
+gatya_item_buy: Optional[GatyaItemBuy] = None
 
 
 def get_game_data_getter(save: SaveFile) -> GameDataGetter:
@@ -98,37 +100,18 @@ def get_game_data_getter(save: SaveFile) -> GameDataGetter:
     return game_data_getter
 
 
-def reload_config() -> None:
-    global config
-    config = Config()
+def get_gatya_item_names(save: SaveFile) -> GatyaItemNames:
+    global gatya_item_names
+    if gatya_item_names is None:
+        gatya_item_names = GatyaItemNames(save)
+    return gatya_item_names
 
 
-def reload_logger() -> None:
-    global logger
-    logger = Logger()
-
-
-def reload_local_manager() -> None:
-    global local_manager
-    local_manager = LocalManager()
-
-
-def reload_theme_manager() -> None:
-    global theme_manager
-    theme_manager = ThemeHandler()
-
-
-def reload_game_data_getter(save: SaveFile) -> None:
-    global game_data_getter
-    game_data_getter = GameDataGetter(save)
-
-
-def reload_all_handlers(save: SaveFile) -> None:
-    reload_config()
-    reload_logger()
-    reload_local_manager()
-    reload_theme_manager()
-    reload_game_data_getter(save)
+def get_gatya_item_buy(save: SaveFile) -> GatyaItemBuy:
+    global gatya_item_buy
+    if gatya_item_buy is None:
+        gatya_item_buy = GatyaItemBuy(save)
+    return gatya_item_buy
 
 
 __all__ = [

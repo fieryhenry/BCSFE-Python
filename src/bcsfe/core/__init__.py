@@ -71,7 +71,7 @@ from bcsfe.core.io.config import Config, ConfigKey
 from bcsfe.core.io.data import Data
 from bcsfe.core.io.json_file import JsonFile
 from bcsfe.core.io.path import Path
-from bcsfe.core.io.save import SaveError, SaveFile
+from bcsfe.core.io.save import SaveError, SaveFile, CantDetectSaveCCError
 from bcsfe.core.io.thread_helper import thread_run_many
 from bcsfe.core.io.yaml import YamlFile
 from bcsfe.core.locale_handler import LocalManager

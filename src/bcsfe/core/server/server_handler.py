@@ -444,7 +444,12 @@ class ServerHandler:
         self.remove_stored_auth_token()
         self.remove_stored_save_key_data()
         self.remove_stored_password()
-        self.save_file.password_refresh_token = "A" * 40
+        fail_text = "EXPECT_THIS_TO_FAIL"
+        start_count = (40 - len(fail_text)) // 2
+        end_count = 40 - len(fail_text) - start_count
+        self.save_file.password_refresh_token = (
+            "_" * start_count + fail_text + "_" * end_count
+        )
         password = self.get_password()
         auth_token = self.get_auth_token()
         save_key_data = self.get_save_key()

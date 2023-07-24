@@ -315,6 +315,14 @@ class CatEditor:
 
         return talent_names, max_levels, current_levels, ids
 
+    def remove_talents_cats(self, cats: list["core.Cat"]):
+        for cat in cats:
+            if cat.talents is None:
+                continue
+            for talent in cat.talents:
+                talent.level = 0
+        color.ColoredText.localize("talents_remove_success")
+
     def upgrade_talents_cats(self, cats: list["core.Cat"]):
         cats = self.get_save_cats(cats)
         if not cats:
@@ -488,8 +496,7 @@ class CatEditor:
         elif option_id == 6:
             cat_editor.upgrade_talents_cats(cats)
         elif option_id == 7:
-            raise NotImplementedError
-            # cat_editor.remove_talents_cats(cats)
+            cat_editor.remove_talents_cats(cats)
         CatEditor.set_rank_up_sale(save_file)
         if option_id == 8:
             return True, cats

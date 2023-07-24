@@ -167,13 +167,17 @@ class Main:
             return None
         try:
             json_data = core.JsonFile.from_data(path.read()).get_json()
-        except core.JSONDecodeError as e:
-            color.ColoredText.localize("load_json_fail", error=str(e))
+        except core.JSONDecodeError:
+            color.ColoredText.localize(
+                "load_json_fail", error=core.logger.get_traceback()
+            )
             return None
         try:
             save_file = core.SaveFile.from_dict(json_data)
-        except core.SaveError as e:
-            color.ColoredText.localize("load_json_fail", error=str(e))
+        except core.SaveError:
+            color.ColoredText.localize(
+                "load_json_fail", error=core.logger.get_traceback()
+            )
             return None
         path = Main.save_save_dialog(save_file)
         if path is None:

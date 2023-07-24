@@ -87,3 +87,16 @@ class Logger:
             fileName (str): The name of the file
         """
         self.log_warning(f"Could not find {file_name}")
+
+    @staticmethod
+    def get_traceback() -> str:
+        """
+        Gets the traceback of the last exception
+
+        Returns:
+            str: The traceback
+        """
+        tb = traceback.format_exc()
+        if tb == "NoneType: None\n":
+            return ""
+        return tb

@@ -38,9 +38,9 @@ branch of the save editor.
 - [ ] play time
 - [ ] enemy guide
 - [ ] missions
-- [ ] trade progress
+- [x] trade progress
 - [ ] gold pass
-- [ ] user rank rewwards
+- [ ] user rank rewards
 - [ ] cat shrine
 - [ ] fix time errors
 - [ ] unlock equip menu

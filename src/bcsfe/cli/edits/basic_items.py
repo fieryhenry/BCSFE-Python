@@ -1,3 +1,4 @@
+from typing import Optional
 from bcsfe import core
 from bcsfe.cli import dialog_creator, color
 
@@ -5,6 +6,10 @@ from bcsfe.cli import dialog_creator, color
 class BasicItems:
     @staticmethod
     def edit_catfood(save_file: "core.SaveFile"):
+        should_exit = not dialog_creator.YesNoInput().get_input_once("catfood_warning")
+        if should_exit:
+            return
+
         name = core.get_gatya_item_names(save_file).get_name(22)
         original_amount = save_file.catfood
         save_file.catfood = dialog_creator.SingleEditor(
@@ -28,8 +33,45 @@ class BasicItems:
         ).edit()
 
     @staticmethod
+    def get_bannable_feature_options(feature_name: str, safe_feature_name: str) -> int:
+        feature_name = core.local_manager.get_key(feature_name)
+        safe_feature_name = core.local_manager.get_key(safe_feature_name)
+
+        options = [
+            color.ColoredText.get_localized_text(
+                "continue_editing", feature_name=feature_name
+            ),
+            color.ColoredText.get_localized_text(
+                "go_to_safe_feature", safer_feature_name=safe_feature_name
+            ),
+            color.ColoredText.get_localized_text(
+                "cancel_editing", feature_name=feature_name
+            ),
+        ]
+        option = dialog_creator.ChoiceInput(
+            options,
+            options,
+            [],
+            {"feature_name": feature_name},
+            "select_an_option_to_continue",
+        ).single_choice()
+        if option is None:
+            return 2
+        option -= 1
+        return option
+
+    @staticmethod
     def edit_rare_tickets(save_file: "core.SaveFile"):
+        color.ColoredText.localize("rare_ticket_warning")
         name = core.get_gatya_item_names(save_file).get_name(21)
+        option = BasicItems.get_bannable_feature_options(
+            "rare_tickets_l", "rare_ticket_trade_l"
+        )
+        if option == 2:
+            return
+        if option == 1:
+            return BasicItems.rare_ticket_trade(save_file)
+
         original_amount = save_file.rare_tickets
         save_file.rare_tickets = dialog_creator.SingleEditor(
             name, save_file.rare_tickets, 299
@@ -53,6 +95,11 @@ class BasicItems:
 
     @staticmethod
     def edit_legend_tickets(save_file: "core.SaveFile"):
+        should_exit = not dialog_creator.YesNoInput().get_input_once(
+            "legend_ticket_warning"
+        )
+        if should_exit:
+            return
         name = core.get_gatya_item_names(save_file).get_name(145)
         original_amount = save_file.legend_tickets
         save_file.legend_tickets = dialog_creator.SingleEditor(
@@ -163,4 +210,38 @@ class BasicItems:
 
     @staticmethod
     def edit_base_materials(save_file: "core.SaveFile"):
-        save_file.ototo.edit_base_materials(save_file)
+        save_file.ototo.base_materials.edit_base_materials(save_file)
+
+    @staticmethod
+    def rare_ticket_trade(save_file: "core.SaveFile"):
+        current_amount = save_file.rare_tickets
+        max_amount = max(299 - current_amount, 0)
+        if max_amount == 0:
+            color.ColoredText.localize("rare_ticket_trade_maxed")
+            return
+        to_add = dialog_creator.IntInput(max_amount, 0).get_input_locale_while(
+            "rare_ticket_trade_enter", {"max": max_amount, "current": current_amount}
+        )
+        if to_add is None:
+            return
+
+        space = False
+        for storage_item in save_file.cats.storage_items:
+            if storage_item.item_type == 0 or (
+                storage_item.item_id == 1 and storage_item.item_type == 2
+            ):
+                storage_item.item_id = 1
+                storage_item.item_type = 2
+                space = True
+                break
+
+        if not space:
+            color.ColoredText.localize("rare_ticket_trade_storage_full")
+            return
+
+        amount = to_add * 5
+        save_file.gatya.trade_progress = amount
+
+        color.ColoredText.localize(
+            "rare_ticket_successfully_traded", rare_ticket_count=to_add
+        )

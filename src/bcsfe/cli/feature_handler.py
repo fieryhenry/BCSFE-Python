@@ -39,6 +39,7 @@ class FeatureHandler:
                 "xp": edits.basic_items.BasicItems.edit_xp,
                 "normal_tickets": edits.basic_items.BasicItems.edit_normal_tickets,
                 "rare_tickets": edits.basic_items.BasicItems.edit_rare_tickets,
+                "rare_ticket_trade_feature_name": edits.basic_items.BasicItems.rare_ticket_trade,
                 "platinum_tickets": edits.basic_items.BasicItems.edit_platinum_tickets,
                 "legend_tickets": edits.basic_items.BasicItems.edit_legend_tickets,
                 "platinum_shards": edits.basic_items.BasicItems.edit_platinum_shards,

@@ -521,9 +521,9 @@ class Cat:
         total_forms: int,
         set_current_form: bool = True,
     ):
-        if total_forms == 4:
+        if total_forms == 4 and self.unlocked_forms == 3:
             self.unlock_forth_form(save_file, set_current_form)
-        elif total_forms == 3:
+        elif total_forms >= 3:
             self.true_form(save_file, set_current_form)
         elif total_forms == 2:
             self.unlocked_forms = 0
@@ -533,8 +533,8 @@ class Cat:
             self.current_form = 0
 
     def remove_true_form(self):
-        self.unlocked_forms = min(self.unlocked_forms, 2)
-        self.current_form = min(self.current_form, 2)
+        self.unlocked_forms = 0
+        self.current_form = min(self.current_form, 1)
 
     def unlock_forth_form(
         self, save_file: "core.SaveFile", set_current_form: bool = True
@@ -544,7 +544,7 @@ class Cat:
 
     def remove_forth_form(self):
         self.unlocked_forms = min(self.unlocked_forms, 3)
-        self.current_form = min(self.current_form, 3)
+        self.current_form = min(self.current_form, 2)
 
     def set_upgrade(self, save_file: "core.SaveFile", upgrade: "core.Upgrade"):
         self.unlock(save_file)

@@ -512,7 +512,7 @@ class ServerHandler:
             return False
         data = {
             "catfoodAmount": self.save_file.catfood,
-            "isPaid": False,
+            "isPaid": True,
             "legendTicketAmount": self.save_file.legend_tickets,
             "nonce": core.Random.get_hex_string(32),
             "platinumTicketAmount": self.save_file.platinum_tickets,

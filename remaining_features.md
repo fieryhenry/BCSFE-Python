@@ -7,7 +7,7 @@ branch of the save editor.
 - [ ] gamatoto xp / level
 - [ ] ototo cat cannon
 - [ ] gamatoto helpers
-- [ ] fix gamatoto crashing
+- [x] fix gamatoto crashing
 - [ ] upgrade special skills
 - [ ] main story clear
 - [ ] main story treasures
@@ -42,6 +42,6 @@ branch of the save editor.
 - [ ] gold pass
 - [ ] user rank rewards
 - [ ] cat shrine
-- [ ] fix time errors
+- [x] fix time errors
 - [ ] unlock equip menu
 - [ ] edit config

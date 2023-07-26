@@ -6,7 +6,7 @@ branch of the save editor but are in the master branch.
 - [ ] save conversion
 - [x] gamatoto xp / level
 - [ ] ototo cat cannon
-- [ ] gamatoto helpers
+- [x] gamatoto helpers
 - [x] fix gamatoto crashing
 - [ ] upgrade special skills
 - [ ] main story clear

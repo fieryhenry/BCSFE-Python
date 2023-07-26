@@ -1,5 +1,5 @@
 import enum
-from typing import Optional
+from typing import Any, Optional
 
 from bcsfe import core
 from bcsfe.cli import color, dialog_creator
@@ -76,39 +76,24 @@ class CatEditor:
         else:
             should_filter_current = False
 
-        options: list[str] = [
-            "select_cats_all",
-            "select_cats_current",
-            "select_cats_obtainable",
-            "select_cats_id",
-            "select_cats_name",
-            "select_cats_rarity",
-            "select_cats_gatya_banner",
-        ]
+        options: dict[str, Any] = {
+            "select_cats_all": self.save_file.cats.get_all_cats,
+            "select_cats_current": self.get_current_cats,
+            "select_cats_obtainable": self.get_cats_obtainable,
+            "select_cats_id": self.select_id,
+            "select_cats_name": self.select_name,
+            "select_cats_rarity": self.select_rarity,
+            "select_cats_gatya_banner": self.select_gatya_banner,
+        }
         option_id = dialog_creator.ChoiceInput(
-            options, options, [], {}, "select_cats", True
+            list(options), list(options), [], {}, "select_cats", True
         ).single_choice()
         if option_id is None:
             return current_cats
         option_id -= 1
-        if option_id == 0:
-            cats = self.save_file.cats.cats
-            return cats
 
-        if option_id == 1:
-            new_cats = self.get_current_cats()
-        elif option_id == 2:
-            new_cats = self.select_obtainable()
-        elif option_id == 3:
-            new_cats = self.select_id()
-        elif option_id == 4:
-            new_cats = self.select_name()
-        elif option_id == 5:
-            new_cats = self.select_rarity()
-        elif option_id == 6:
-            new_cats = self.select_gatya_banner()
-        else:
-            new_cats = []
+        func = options[list(options)[option_id]]
+        new_cats = func()
 
         if new_cats is None:
             return None

@@ -11,16 +11,12 @@ class FeatureHandler:
         cat_features = edits.cat_editor.CatEditor.edit_cats
         if core.config.get_bool(core.ConfigKey.SEPARATE_CAT_EDIT_OPTIONS):
             cat_features = {
-                "unlock_cats": edits.cat_editor.CatEditor.unlock_cats_run,
-                "remove_cats": edits.cat_editor.CatEditor.remove_cats_run,
+                "unlock_remove_cats": edits.cat_editor.CatEditor.unlock_remove_cats_run,
                 "upgrade_cats": edits.cat_editor.CatEditor.upgrade_cats_run,
-                "true_form_cats": edits.cat_editor.CatEditor.true_form_cats_run,
+                "true_form_remove_form_cats": edits.cat_editor.CatEditor.true_form_remove_form_cats_run,
                 "force_true_form_cats": edits.cat_editor.CatEditor.force_true_form_cats_run,
-                "remove_true_form_cats": edits.cat_editor.CatEditor.remove_true_form_cats_run,
-                "upgrade_talent_cats": edits.cat_editor.CatEditor.upgrade_talents_cats_run,
-                "remove_talents_cats": edits.cat_editor.CatEditor.remove_talents_cats_run,
-                "unlock_cat_guide": edits.cat_editor.CatEditor.unlock_cat_guide_run,
-                "remove_cat_guide": edits.cat_editor.CatEditor.remove_cat_guide_run,
+                "upgrade_talents_remove_talents_cats": edits.cat_editor.CatEditor.upgrade_talents_remove_talents_cats_run,
+                "unlock_remove_cat_guide": edits.cat_editor.CatEditor.unlock_cat_guide_remove_guide_run,
             }
 
         features: dict[str, Any] = {

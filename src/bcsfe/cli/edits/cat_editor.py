@@ -410,26 +410,58 @@ class CatEditor:
                 break
 
     @staticmethod
-    def unlock_cats_run(save_file: "core.SaveFile"):
-        cat_editor, current_cats = CatEditor.from_save_file(save_file, True)
+    def unlock_remove_cats_run(
+        save_file: "core.SaveFile",
+        current_cats: Optional[list["core.Cat"]] = None,
+        cat_editor: Optional["CatEditor"] = None,
+    ):
+        if cat_editor is None or current_cats is None:
+            cat_editor, current_cats = CatEditor.from_save_file(save_file, True)
         if cat_editor is None:
             return
-        cat_editor.unlock_cats(current_cats)
+        choice = dialog_creator.ChoiceInput(
+            ["unlock_cats", "remove_cats"],
+            ["unlock_cats", "remove_cats"],
+            [],
+            {},
+            "unlock_remove_q",
+            True,
+            remove_alias=True,
+        ).single_choice()
+        if choice is None:
+            return
+        choice -= 1
+        if choice == 0:
+            cat_editor.unlock_cats(current_cats)
+        elif choice == 1:
+            cat_editor.remove_cats(current_cats)
         CatEditor.set_rank_up_sale(save_file)
 
     @staticmethod
-    def remove_cats_run(save_file: "core.SaveFile"):
-        cat_editor, current_cats = CatEditor.from_save_file(save_file)
+    def true_form_remove_form_cats_run(
+        save_file: "core.SaveFile",
+        current_cats: Optional[list["core.Cat"]] = None,
+        cat_editor: Optional["CatEditor"] = None,
+    ):
+        if cat_editor is None or current_cats is None:
+            cat_editor, current_cats = CatEditor.from_save_file(save_file)
         if cat_editor is None:
             return
-        cat_editor.remove_cats(current_cats)
-
-    @staticmethod
-    def true_form_cats_run(save_file: "core.SaveFile"):
-        cat_editor, current_cats = CatEditor.from_save_file(save_file)
-        if cat_editor is None:
+        choice = dialog_creator.ChoiceInput(
+            ["true_form_cats", "remove_true_form_cats"],
+            ["true_form_cats", "remove_true_form_cats"],
+            [],
+            {},
+            "true_form_remove_form_q",
+            True,
+        ).single_choice()
+        if choice is None:
             return
-        cat_editor.true_form_cats(current_cats)
+        choice -= 1
+        if choice == 0:
+            cat_editor.true_form_cats(current_cats)
+        elif choice == 1:
+            cat_editor.remove_true_form_cats(current_cats)
 
     @staticmethod
     def force_true_form_cats_run(save_file: "core.SaveFile"):
@@ -440,13 +472,6 @@ class CatEditor:
         cat_editor.true_form_cats(current_cats, force=True)
 
     @staticmethod
-    def remove_true_form_cats_run(save_file: "core.SaveFile"):
-        cat_editor, current_cats = CatEditor.from_save_file(save_file)
-        if cat_editor is None:
-            return
-        cat_editor.remove_true_form_cats(current_cats)
-
-    @staticmethod
     def upgrade_cats_run(save_file: "core.SaveFile"):
         cat_editor, current_cats = CatEditor.from_save_file(save_file)
         if cat_editor is None:
@@ -455,32 +480,56 @@ class CatEditor:
         CatEditor.set_rank_up_sale(save_file)
 
     @staticmethod
-    def upgrade_talents_cats_run(save_file: "core.SaveFile"):
-        cat_editor, current_cats = CatEditor.from_save_file(save_file)
+    def upgrade_talents_remove_talents_cats_run(
+        save_file: "core.SaveFile",
+        current_cats: Optional[list["core.Cat"]] = None,
+        cat_editor: Optional["CatEditor"] = None,
+    ):
+        if cat_editor is None or current_cats is None:
+            cat_editor, current_cats = CatEditor.from_save_file(save_file)
         if cat_editor is None:
             return
-        cat_editor.upgrade_talents_cats(current_cats)
+        choice = dialog_creator.ChoiceInput(
+            ["upgrade_talents_cats", "remove_talents_cats"],
+            ["upgrade_talents_cats", "remove_talents_cats"],
+            [],
+            {},
+            "upgrade_talents_remove_talents_q",
+            True,
+        ).single_choice()
+        if choice is None:
+            return
+        choice -= 1
+        if choice == 0:
+            cat_editor.upgrade_talents_cats(current_cats)
+        elif choice == 1:
+            cat_editor.remove_talents_cats(current_cats)
 
     @staticmethod
-    def remove_talents_cats_run(save_file: "core.SaveFile"):
-        cat_editor, current_cats = CatEditor.from_save_file(save_file)
+    def unlock_cat_guide_remove_guide_run(
+        save_file: "core.SaveFile",
+        current_cats: Optional[list["core.Cat"]] = None,
+        cat_editor: Optional["CatEditor"] = None,
+    ):
+        if cat_editor is None or current_cats is None:
+            cat_editor, current_cats = CatEditor.from_save_file(save_file)
         if cat_editor is None:
             return
-        cat_editor.remove_talents_cats(current_cats)
-
-    @staticmethod
-    def unlock_cat_guide_run(save_file: "core.SaveFile"):
-        cat_editor, current_cats = CatEditor.from_save_file(save_file)
-        if cat_editor is None:
+        choice = dialog_creator.ChoiceInput(
+            ["unlock_cat_guide", "remove_cat_guide"],
+            ["unlock_cat_guide", "remove_cat_guide"],
+            [],
+            {},
+            "unlock_cat_guide_remove_guide_q",
+            True,
+        ).single_choice()
+        if choice is None:
             return
-        cat_editor.unlock_cat_guide(current_cats)
-
-    @staticmethod
-    def remove_cat_guide_run(save_file: "core.SaveFile"):
-        cat_editor, current_cats = CatEditor.from_save_file(save_file)
-        if cat_editor is None:
-            return
-        cat_editor.remove_cat_guide(current_cats)
+        choice -= 1
+        if choice == 0:
+            cat_editor.unlock_cat_guide(current_cats)
+        elif choice == 1:
+            cat_editor.remove_cat_guide(current_cats)
 
     @staticmethod
     def from_save_file(
@@ -502,16 +551,12 @@ class CatEditor:
         cat_editor.print_selected_cats(cats)
         options: list[str] = [
             "select_cats_again",
-            "unlock_cats",
-            "remove_cats",
+            "unlock_remove_cats",
             "upgrade_cats",
-            "true_form_cats",
+            "true_form_remove_form_cats",
             "force_true_form_cats",
-            "remove_true_form_cats",
-            "upgrade_talents_cats",
-            "remove_talents_cats",
-            "unlock_cat_guide",
-            "remove_cat_guide",
+            "upgrade_talents_remove_talents_cats",
+            "unlock_remove_cat_guide",
             "finish_edit_cats",
         ]
         option_id = dialog_creator.ChoiceInput(
@@ -526,28 +571,22 @@ class CatEditor:
                 return False, cats
             cats = cats_
         elif option_id == 1:
-            cat_editor.unlock_cats(cats)
+            cat_editor.unlock_remove_cats_run(save_file, cats, cat_editor)
         elif option_id == 2:
-            cat_editor.remove_cats(cats)
-        elif option_id == 3:
             cat_editor.upgrade_cats(cats)
+        elif option_id == 3:
+            cat_editor.true_form_remove_form_cats_run(save_file, cats, cat_editor)
         elif option_id == 4:
-            cat_editor.true_form_cats(cats)
-        elif option_id == 5:
             color.ColoredText.localize("force_true_form_cats_warning")
             cat_editor.true_form_cats(cats, force=True)
+        elif option_id == 5:
+            cat_editor.upgrade_talents_remove_talents_cats_run(
+                save_file, cats, cat_editor
+            )
         elif option_id == 6:
-            cat_editor.remove_true_form_cats(cats)
-        elif option_id == 7:
-            cat_editor.upgrade_talents_cats(cats)
-        elif option_id == 8:
-            cat_editor.remove_talents_cats(cats)
-        elif option_id == 9:
-            cat_editor.unlock_cat_guide(cats)
-        elif option_id == 10:
-            cat_editor.remove_cat_guide(cats)
+            cat_editor.unlock_cat_guide_remove_guide_run(save_file, cats, cat_editor)
         CatEditor.set_rank_up_sale(save_file)
-        if option_id == 11:
+        if option_id == 7:
             return True, cats
         return False, cats
 

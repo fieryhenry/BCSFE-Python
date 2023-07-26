@@ -53,6 +53,7 @@ class FeatureHandler:
             "levels": {
                 "clear_tutorial": edits.clear_tutorial.clear_tutorial,
                 "challenge_score": core.game.map.challenge.edit_challenge_score,
+                "dojo_score": core.game.map.dojo.edit_dojo_score,
             },
             "gamototo": {
                 "engineers": edits.basic_items.BasicItems.edit_engineers,

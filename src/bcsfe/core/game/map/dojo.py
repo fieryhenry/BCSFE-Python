@@ -37,6 +37,11 @@ class Chapter:
     def __init__(self, stages: dict[int, Stage]):
         self.stages = stages
 
+    def get_stage(self, stage_id: int) -> Stage:
+        if stage_id not in self.stages:
+            self.stages[stage_id] = Stage.init()
+        return self.stages[stage_id]
+
     @staticmethod
     def init() -> "Chapter":
         return Chapter({})
@@ -77,6 +82,11 @@ class Chapter:
 class Chapters:
     def __init__(self, chapters: dict[int, Chapter]):
         self.chapters = chapters
+
+    def get_stage(self, chapter_id: int, stage_id: int) -> Stage:
+        if chapter_id not in self.chapters:
+            self.chapters[chapter_id] = Chapter.init()
+        return self.chapters[chapter_id].get_stage(stage_id)
 
     @staticmethod
     def init() -> "Chapters":
@@ -320,14 +330,14 @@ class Dojo:
         return self.__repr__()
 
     def edit_score(self):
-        if len(self.chapters.chapters) == 0:
-            self.chapters.chapters[0] = Chapter.init()
-        if len(self.chapters.chapters[0].stages) == 0:
-            self.chapters.chapters[0].stages[0] = Stage.init()
-
-        self.chapters.chapters[0].stages[0].score = dialog_creator.SingleEditor(
+        stage = self.chapters.get_stage(0, 0)
+        stage.score = dialog_creator.SingleEditor(
             "dojo_score",
-            self.chapters.chapters[0].stages[0].score,
+            stage.score,
             None,
             localized_item=True,
         ).edit()
+
+
+def edit_dojo_score(save_file: "core.SaveFile"):
+    save_file.dojo.edit_score()

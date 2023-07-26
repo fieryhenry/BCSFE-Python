@@ -24,7 +24,7 @@ branch of the save editor but are in the master branch.
 - [ ] itf timed scores
 - [x] challenge battle
 - [x] clear tutorial
-- [ ] catclaw dojo score
+- [x] catclaw dojo score
 - [ ] engima stages
 - [ ] filibuster stage reclearing
 - [ ] legend quest

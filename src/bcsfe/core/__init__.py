@@ -49,7 +49,7 @@ from bcsfe.core.game.catbase.upgrade import Upgrade
 from bcsfe.core.game.catbase.user_rank_rewards import UserRankRewards
 from bcsfe.core.game.gamoto.base_materials import BaseMaterials
 from bcsfe.core.game.gamoto.cat_shrine import CatShrine
-from bcsfe.core.game.gamoto.gamatoto import Gamatoto
+from bcsfe.core.game.gamoto.gamatoto import Gamatoto, GamatotoLevels
 from bcsfe.core.game.gamoto.ototo import Ototo
 from bcsfe.core.game.localizable import Localizable
 from bcsfe.core.game.map.aku import AkuChapters
@@ -101,6 +101,7 @@ game_data_getter: Optional[GameDataGetter] = None
 gatya_item_names: Optional[GatyaItemNames] = None
 gatya_item_buy: Optional[GatyaItemBuy] = None
 chara_drop: Optional[CharaDrop] = None
+gamatoto_levels: Optional[GamatotoLevels] = None
 
 
 def get_game_data_getter(save: SaveFile) -> GameDataGetter:
@@ -131,6 +132,13 @@ def get_chara_drop(save: SaveFile) -> CharaDrop:
     return chara_drop
 
 
+def get_gamatoto_levels(save: SaveFile) -> GamatotoLevels:
+    global gamatoto_levels
+    if gamatoto_levels is None:
+        gamatoto_levels = GamatotoLevels(save)
+    return gamatoto_levels
+
+
 __all__ = [
     "server",
     "io",
@@ -141,4 +149,5 @@ __all__ = [
     "crypto",
     "game",
     "theme_handler",
+    "max_value_helper",
 ]

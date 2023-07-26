@@ -1,10 +1,10 @@
 # Remaining Features
 
 The following is a list of features that are not yet implemented in the 3.0.0
-branch of the save editor.
+branch of the save editor but are in the master branch.
 
 - [ ] save conversion
-- [ ] gamatoto xp / level
+- [x] gamatoto xp / level
 - [ ] ototo cat cannon
 - [ ] gamatoto helpers
 - [x] fix gamatoto crashing

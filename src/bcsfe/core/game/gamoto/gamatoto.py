@@ -1,5 +1,90 @@
-from typing import Any
+from dataclasses import dataclass
+from typing import Any, Optional
 from bcsfe import core
+from bcsfe.cli import color, dialog_creator
+
+
+@dataclass
+class GamatotoLevel:
+    level: int
+    xp_needed: int
+    discovery_bonus: int
+    skin: int
+
+
+@dataclass
+class GamatotoLimit:
+    max_level: int
+    total_stages: int
+    total_helpers: int
+
+
+class GamatotoLevels:
+    def __init__(self, save_file: "core.SaveFile"):
+        self.save_file = save_file
+        self.levels = self.read_levels()
+        self.limit = self.read_max_level()
+
+    def read_levels(self) -> list[GamatotoLevel]:
+        levels: list[GamatotoLevel] = []
+        gdg = core.get_game_data_getter(self.save_file)
+        data = gdg.download("DataLocal", "GamatotoExpedition.csv")
+        if data is None:
+            return levels
+        csv = core.CSV(data)
+        for i, line in enumerate(csv):
+            levels.append(
+                GamatotoLevel(
+                    i + 1, line[0].to_int(), line[1].to_int(), line[2].to_int()
+                )
+            )
+        return levels
+
+    def read_max_level(self) -> GamatotoLimit:
+        gdg = core.get_game_data_getter(self.save_file)
+        data = gdg.download("DataLocal", "GamatotoExpedition_Limit.csv")
+        if data is None:
+            return GamatotoLimit(len(self.levels), 15, 10)
+        csv = core.CSV(data)
+        line = csv[0]
+        return GamatotoLimit(line[0].to_int(), line[1].to_int(), line[2].to_int())
+
+    def get_level(self, level: int) -> GamatotoLevel:
+        if level < 1:
+            raise ValueError("Level must be greater than 0")
+        return self.levels[level - 1]
+
+    def get_all_levels(self) -> list[GamatotoLevel]:
+        return self.levels
+
+    def get_level_from_xp(self, xp: int) -> GamatotoLevel:
+        if not self.levels:
+            raise ValueError("No levels found")
+        for level in self.levels:
+            if level.level >= self.limit.max_level:
+                break
+            if level.xp_needed == -1:
+                continue
+            if xp < level.xp_needed:
+                return level
+        if self.limit.max_level >= len(self.levels):
+            return self.levels[-1]
+        return self.levels[self.limit.max_level - 1]
+
+    def get_xp_from_level(self, level: int) -> int:
+        level -= 1
+        if level < 1:
+            return 0
+        return self.levels[level - 1].xp_needed
+
+    def get_max_level(self) -> int:
+        return self.limit.max_level
+
+    def get_total_stages(self) -> int:
+        return self.limit.total_stages
+
+    def get_total_helpers(self) -> int:
+        return self.limit.total_helpers
 
 
 class Helper:
@@ -203,3 +288,48 @@ class Gamatoto:
 
     def __str__(self):
         return self.__repr__()
+
+    def edit_xp(self, save_file: "core.SaveFile"):
+        gamatoto_levels = core.get_gamatoto_levels(save_file)
+        current_level = gamatoto_levels.get_level_from_xp(self.xp)
+        xp = self.xp
+
+        color.ColoredText.localize(
+            "gamatoto_level_current", level=current_level.level, xp=xp
+        )
+        choice = dialog_creator.ChoiceInput(
+            ["enter_raw_gamatoto_xp", "enter_gamatoto_level"],
+            ["enter_raw_gamatoto_xp", "enter_gamatoto_level"],
+            [],
+            {},
+            "edit_gamatoto_level_q",
+            single_choice=True,
+        ).single_choice()
+        if choice is None:
+            return
+        choice -= 1
+
+        if choice == 0:
+            xp = dialog_creator.SingleEditor(
+                "gamatoto_xp", self.xp, None, localized_item=True
+            ).edit()
+            current_level = gamatoto_levels.get_level_from_xp(xp)
+        elif choice == 1:
+            value = dialog_creator.SingleEditor(
+                "gamatoto_level",
+                current_level.level,
+                gamatoto_levels.get_max_level(),
+                localized_item=True,
+            ).edit()
+            xp = gamatoto_levels.get_xp_from_level(value)
+            current_level = gamatoto_levels.get_level(value)
+
+        self.xp = xp
+
+        color.ColoredText.localize(
+            "gamatoto_level_success", level=current_level.level, xp=xp
+        )
+
+
+def edit_xp(save_file: "core.SaveFile"):
+    save_file.gamatoto.edit_xp(save_file)

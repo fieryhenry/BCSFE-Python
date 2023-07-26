@@ -147,7 +147,7 @@ class SkillNames:
         if data is None:
             return SkillNames({})
         csv = core.CSV(
-            data, delimeter=core.Delimeter.from_country_code_res(save_file.cc)
+            data, delimiter=core.Delimeter.from_country_code_res(save_file.cc)
         )
         names: dict[int, str] = {}
         for line in csv.lines[1:]:

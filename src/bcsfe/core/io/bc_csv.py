@@ -14,9 +14,9 @@ class DelimeterType(enum.Enum):
 class Delimeter:
     def __init__(self, de: Union[DelimeterType, str]):
         if isinstance(de, str):
-            self.delimeter = DelimeterType(de)
+            self.delimiter = DelimeterType(de)
         else:
-            self.delimeter = de
+            self.delimiter = de
 
     @staticmethod
     def from_country_code_res(cc: "core.CountryCode") -> "Delimeter":
@@ -25,7 +25,7 @@ class Delimeter:
         return Delimeter(DelimeterType.PIPE)
 
     def __str__(self) -> str:
-        return self.delimeter.value
+        return self.delimiter.value
 
 
 class Cell:
@@ -110,7 +110,7 @@ class CSV:
     def __init__(
         self,
         file_data: "core.Data",
-        delimeter: Union[Delimeter, str] = Delimeter(DelimeterType.COMMA),
+        delimiter: Union[Delimeter, str] = Delimeter(DelimeterType.COMMA),
         remove_padding: bool = True,
         remove_comments: bool = True,
         remove_empty: bool = True,
@@ -123,7 +123,7 @@ class CSV:
             else:
                 self.file_data = data
 
-        self.delimeter = delimeter
+        self.delimiter = delimiter
         self.remove_comments = remove_comments
         self.remove_empty = remove_empty
         self.index = 0
@@ -132,15 +132,15 @@ class CSV:
     def parse(self):
         reader = csv_module.reader(
             self.file_data.data.decode("utf-8").splitlines(),
-            delimiter=str(self.delimeter),
+            delimiter=str(self.delimiter),
         )
         self.lines: list[Row] = []
         for row in reader:
             new_row: list["core.Data"] = []
-            full_row = f"{str(self.delimeter)}".join(row)
+            full_row = f"{str(self.delimiter)}".join(row)
             if self.remove_comments:
                 full_row = full_row.split("//")[0]
-            row = full_row.split(str(self.delimeter))
+            row = full_row.split(str(self.delimiter))
             if row or not self.remove_empty:
                 for item in row:
                     item = item.strip()
@@ -163,9 +163,9 @@ class CSV:
 
     @staticmethod
     def from_file(
-        pt: "core.Path", delimeter: Delimeter = Delimeter(DelimeterType.COMMA)
+        pt: "core.Path", delimiter: Delimeter = Delimeter(DelimeterType.COMMA)
     ) -> "CSV":
-        return CSV(pt.read(), delimeter)
+        return CSV(pt.read(), delimiter)
 
     def add_line(self, line: Union[list[Any], Any]):
         if not isinstance(line, list):
@@ -190,7 +190,7 @@ class CSV:
             for i, item in enumerate(line):
                 csv.append(str(item))
                 if i != len(line) - 1:
-                    csv.append(str(self.delimeter))
+                    csv.append(str(self.delimiter))
             csv.append("\r\n")
         return core.Data("".join(csv))
 

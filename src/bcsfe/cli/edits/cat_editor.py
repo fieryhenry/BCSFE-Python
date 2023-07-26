@@ -97,7 +97,7 @@ class CatEditor:
 
         if option_id == 1:
             new_cats = self.get_current_cats()
-        if option_id == 2:
+        elif option_id == 2:
             new_cats = self.select_obtainable()
         elif option_id == 3:
             new_cats = self.select_id()

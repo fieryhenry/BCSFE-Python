@@ -11,7 +11,6 @@ class ConfigKey(enum.Enum):
     MAX_BACKUPS = "max_backups"
     THEME = "theme"
     RESET_CAT_DATA = "reset_cat_data"
-    FILTER_CURRENT_CATS = "filter_current_cats"
     SET_CAT_CURRENT_FORMS = "set_cat_current_forms"
     STRICT_UPGRADE = "strict_upgrade"
     SEPARATE_CAT_EDIT_OPTIONS = "separate_cat_edit_options"
@@ -57,7 +56,6 @@ class Config:
             ConfigKey.MAX_BACKUPS: 50,
             ConfigKey.THEME: "default",
             ConfigKey.RESET_CAT_DATA: True,
-            ConfigKey.FILTER_CURRENT_CATS: True,
             ConfigKey.SET_CAT_CURRENT_FORMS: True,
             ConfigKey.STRICT_UPGRADE: False,
             ConfigKey.SEPARATE_CAT_EDIT_OPTIONS: True,
@@ -165,7 +163,6 @@ class Config:
             ConfigKey.UPDATE_TO_BETA,
             ConfigKey.DISABLE_MAXES,
             ConfigKey.RESET_CAT_DATA,
-            ConfigKey.FILTER_CURRENT_CATS,
             ConfigKey.SET_CAT_CURRENT_FORMS,
             ConfigKey.STRICT_UPGRADE,
             ConfigKey.SEPARATE_CAT_EDIT_OPTIONS,

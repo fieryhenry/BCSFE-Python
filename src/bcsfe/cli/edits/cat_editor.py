@@ -18,11 +18,6 @@ class CatEditor:
     def get_current_cats(self):
         return self.save_file.cats.get_unlocked_cats()
 
-    def check_and_filter(self, cats: list["core.Cat"]) -> list["core.Cat"]:
-        if core.config.get_bool(core.ConfigKey.FILTER_CURRENT_CATS):
-            return self.filter_cats(cats)
-        return cats
-
     def filter_cats(self, cats: list["core.Cat"]) -> list["core.Cat"]:
         unlocked_cats = self.get_current_cats()
         return [cat for cat in cats if cat in unlocked_cats]
@@ -59,10 +54,27 @@ class CatEditor:
     def select(
         self,
         current_cats: Optional[list["core.Cat"]] = None,
+        is_getting_cats: bool = False,
     ) -> Optional[list["core.Cat"]]:
         if current_cats is None:
             current_cats = []
         self.print_selected_cats(current_cats)
+
+        if not is_getting_cats:
+            choice = dialog_creator.ChoiceInput(
+                ["select_cats_currently_option", "select_cats_all_option"],
+                ["select_cats_currently_option", "select_cats_all_option"],
+                [],
+                {},
+                "filter_current_q",
+                True,
+            ).single_choice()
+            if choice is None:
+                return None
+            choice -= 1
+            should_filter_current = choice == 0
+        else:
+            should_filter_current = False
 
         options: list[str] = [
             "select_cats_all",
@@ -116,7 +128,8 @@ class CatEditor:
         else:
             mode = SelectMode.OR
 
-        new_cats = self.check_and_filter(new_cats)
+        if should_filter_current:
+            new_cats = self.filter_cats(new_cats)
 
         if mode == SelectMode.AND:
             return [cat for cat in new_cats if cat in current_cats]
@@ -327,6 +340,7 @@ class CatEditor:
 
     def unlock_cat_guide(self, cats: list["core.Cat"]):
         for cat in cats:
+            cat.unlock(self.save_file)
             cat.catguide_collected = True
         color.ColoredText.localize("unlock_cat_guide_success")
 
@@ -368,6 +382,7 @@ class CatEditor:
                 if data is None:
                     color.ColoredText.localize("no_talent_data", id=cat.id)
                     continue
+                cat.unlock(self.save_file)
                 talent_names, max_levels, current_levels, ids = data
                 values = dialog_creator.MultiEditor.from_reduced(
                     "talents",
@@ -389,6 +404,7 @@ class CatEditor:
                 data = self.get_cat_talents(talent_data, cat)
                 if data is None:
                     continue
+                cat.unlock(self.save_file)
                 talent_names, max_levels, current_levels, ids = data
                 for i, id in enumerate(ids):
                     talent = cat.get_talent_from_id(id)
@@ -410,7 +426,7 @@ class CatEditor:
 
     @staticmethod
     def unlock_cats_run(save_file: "core.SaveFile"):
-        cat_editor, current_cats = CatEditor.from_save_file(save_file)
+        cat_editor, current_cats = CatEditor.from_save_file(save_file, True)
         if cat_editor is None:
             return
         cat_editor.unlock_cats(current_cats)
@@ -484,9 +500,10 @@ class CatEditor:
     @staticmethod
     def from_save_file(
         save_file: "core.SaveFile",
+        is_getting_cats: bool = False,
     ) -> tuple[Optional["CatEditor"], list["core.Cat"]]:
         cat_editor = CatEditor(save_file)
-        current_cats = cat_editor.select()
+        current_cats = cat_editor.select(is_getting_cats=is_getting_cats)
         if current_cats is None:
             return None, []
         return cat_editor, current_cats

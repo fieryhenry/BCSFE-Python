@@ -210,3 +210,17 @@ class BasicItems:
     @staticmethod
     def edit_base_materials(save_file: "core.SaveFile"):
         save_file.ototo.base_materials.edit_base_materials(save_file)
+
+    @staticmethod
+    def edit_labyrinth_medals(save_file: "core.SaveFile"):
+        names_o = core.get_gatya_item_names(save_file)
+        items = core.get_gatya_item_buy(save_file).get_by_category(11)
+        names = [names_o.get_name(item.id) for item in items]
+        values = dialog_creator.MultiEditor.from_reduced(
+            "labyrinth_medals",
+            names,
+            save_file.labyrinth_medals,
+            9999,
+            group_name_localized=True,
+        ).edit()
+        save_file.labyrinth_medals = values

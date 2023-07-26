@@ -51,6 +51,7 @@ class FeatureHandler:
                 "talent_orbs": edits.talent_orbs.SaveOrbs.edit_talent_orbs,
                 "catamins": edits.basic_items.BasicItems.edit_catamins,
                 "scheme_items": edits.basic_items.BasicItems.edit_scheme_items,
+                "labyrinth_medals": edits.basic_items.BasicItems.edit_labyrinth_medals,
             },
             "cats": cat_features,
             "gamototo": {

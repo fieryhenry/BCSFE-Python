@@ -104,7 +104,7 @@ class ServerHandler:
         url = f"{self.auth_url}/v1/users"
         data = {
             "accountCode": self.save_file.inquiry_code,
-            "accountCreatedAt": int(self.save_file.account_created_timestamp),
+            "accountCreatedAt": int(self.save_file.energy_penalty_timestamp),
             "nonce": core.Random.get_hex_string(32),
         }
         password = self.do_password_request(url, data)
@@ -150,7 +150,7 @@ class ServerHandler:
         if account_code:
             self.save_file.inquiry_code = account_code
             if timestamp is not None:
-                self.save_file.account_created_timestamp = int(timestamp)
+                self.save_file.energy_penalty_timestamp = int(timestamp)
             if not self.update_managed_items():
                 return None
 

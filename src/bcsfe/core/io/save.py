@@ -492,7 +492,7 @@ class SaveFile:
         if self.game_version >= 35:
             self.outbreaks.read_current_outbreaks(self.data, self.game_version)
             self.first_locks = self.data.read_int_bool_dict()
-            self.account_created_timestamp = self.data.read_double()
+            self.energy_penalty_timestamp = self.data.read_double()
             self.gv_60 = self.data.read_int()
 
         if self.game_version >= 36:
@@ -1340,7 +1340,7 @@ class SaveFile:
         if self.game_version >= 35:
             self.outbreaks.write_current_outbreaks(self.data, self.game_version)
             self.data.write_int_bool_dict(self.first_locks)
-            self.data.write_double(self.account_created_timestamp)
+            self.data.write_double(self.energy_penalty_timestamp)
             self.data.write_int(self.gv_60)
 
         if self.game_version >= 36:
@@ -1973,7 +1973,7 @@ class SaveFile:
             "outbreaks": self.outbreaks.serialize(),
             "scheme_items": self.scheme_items.serialize(),
             "first_locks": self.first_locks,
-            "account_created_timestamp": self.account_created_timestamp,
+            "account_created_timestamp": self.energy_penalty_timestamp,
             "gv_60": self.gv_60,
             "shown_maxcollab_mg": self.shown_maxcollab_mg,
             "gv_61": self.gv_61,
@@ -2342,7 +2342,7 @@ class SaveFile:
             data.get("scheme_items", {})
         )
         save_file.first_locks = data.get("first_locks", {})
-        save_file.account_created_timestamp = data.get("account_created_timestamp", 0.0)
+        save_file.energy_penalty_timestamp = data.get("account_created_timestamp", 0.0)
         save_file.gv_60 = data.get("gv_60", 60)
         save_file.shown_maxcollab_mg = data.get("shown_maxcollab_mg", False)
         save_file.gv_61 = data.get("gv_61", 61)
@@ -2759,7 +2759,7 @@ class SaveFile:
         self.reward_remaining_time = 0.0
         self.last_checked_reward_time = 0.0
         self.last_checked_zombie_time = 0.0
-        self.account_created_timestamp = 0.0
+        self.energy_penalty_timestamp = 0.0
         self.last_checked_castle_time = 0.0
 
         self.date = datetime.datetime.fromtimestamp(0)

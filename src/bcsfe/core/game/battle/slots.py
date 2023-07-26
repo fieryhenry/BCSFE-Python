@@ -190,4 +190,5 @@ class LineUps:
             self.unlocked_slots,
             self.slot_names_length,
             localized_item=True,
+            remove_alias=True,
         ).edit()

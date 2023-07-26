@@ -426,9 +426,12 @@ class SingleEditor:
         min_value: int = 0,
         signed: bool = True,
         localized_item: bool = False,
+        remove_alias: bool = False,
     ):
         if localized_item:
             item = core.local_manager.get_key(item)
+        if remove_alias:
+            item = core.local_manager.get_all_aliases(item)[0]
         self.item = item
         self.value = value
         self.max_value = max_value

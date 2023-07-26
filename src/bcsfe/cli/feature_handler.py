@@ -72,6 +72,10 @@ class FeatureHandler:
                 "normal_gatya_seed": edits.basic_items.BasicItems.edit_rare_gatya_seed,
                 "event_gatya_seed": edits.basic_items.BasicItems.edit_event_gatya_seed,
             },
+            "fixes": {
+                "fix_gamatoto_crash": edits.fixes.Fixes.fix_gamatoto_crash,
+                "fix_time_errors": edits.fixes.Fixes.fix_time_errors,
+            },
             "other": {
                 "unlocked_slots": edits.basic_items.BasicItems.edit_unlocked_slots,
                 "restart_pack": edits.basic_items.BasicItems.set_restart_pack,

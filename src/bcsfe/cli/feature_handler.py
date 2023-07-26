@@ -61,6 +61,13 @@ class FeatureHandler:
             "account": {
                 "unban_account": save_management.SaveManagement.unban_account,
                 "upload_items": save_management.SaveManagement.upload_items,
+                "inquiry_code": edits.basic_items.BasicItems.edit_inquiry_code,
+                "password_refresh_token": edits.basic_items.BasicItems.edit_password_refresh_token,
+            },
+            "gatya": {
+                "rare_gatya_seed": edits.basic_items.BasicItems.edit_rare_gatya_seed,
+                "normal_gatya_seed": edits.basic_items.BasicItems.edit_rare_gatya_seed,
+                "event_gatya_seed": edits.basic_items.BasicItems.edit_event_gatya_seed,
             },
             "config": core.Config.edit_config,
             "exit": main.Main.exit_editor,

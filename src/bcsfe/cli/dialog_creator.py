@@ -187,6 +187,7 @@ class ChoiceInput:
         perameters: dict[str, Union[int, str]],
         dialog: str,
         single_choice: bool = False,
+        remove_alias: bool = False,
     ):
         self.items = items
         self.strings = strings
@@ -194,13 +195,14 @@ class ChoiceInput:
         self.perameters = perameters
         self.dialog = dialog
         self.is_single_choice = single_choice
+        self.remove_alias = remove_alias
 
     def get_input(self) -> tuple[Optional[int], str]:
         if len(self.strings) == 0:
             return None, ""
         if len(self.strings) == 1:
             return 1, ""
-        ListOutput(self.strings, self.ints).display_locale()
+        ListOutput(self.strings, self.ints).display_locale(self.remove_alias)
         return IntInput(len(self.strings), 1).get_input_locale(
             self.dialog, self.perameters
         )

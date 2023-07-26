@@ -530,7 +530,7 @@ class CatEditor:
             "finish_edit_cats",
         ]
         option_id = dialog_creator.ChoiceInput(
-            options, options, [], {}, "select_edit_cats_option", True
+            options, options, [], {}, "select_edit_cats_option", True, remove_alias=True
         ).single_choice()
         if option_id is None:
             return False, cats

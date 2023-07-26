@@ -205,6 +205,11 @@ class BasicItems:
 
     @staticmethod
     def edit_inquiry_code(save_file: "core.SaveFile"):
+        should_exit = not dialog_creator.YesNoInput().get_input_once(
+            "inquiry_code_warning"
+        )
+        if should_exit:
+            return
         item_name = save_file.get_localizable().get("autoSave_txt5").strip()
         save_file.inquiry_code = dialog_creator.StringEditor(
             item_name, save_file.inquiry_code
@@ -212,8 +217,15 @@ class BasicItems:
 
     @staticmethod
     def edit_password_refresh_token(save_file: "core.SaveFile"):
+        should_exit = not dialog_creator.YesNoInput().get_input_once(
+            "password_refresh_token_warning"
+        )
+        if should_exit:
+            return
         save_file.password_refresh_token = dialog_creator.StringEditor(
-            "password_refresh_token", save_file.password_refresh_token
+            "password_refresh_token",
+            save_file.password_refresh_token,
+            item_localized=True,
         ).edit()
 
     @staticmethod
@@ -227,6 +239,18 @@ class BasicItems:
     @staticmethod
     def edit_base_materials(save_file: "core.SaveFile"):
         save_file.ototo.base_materials.edit_base_materials(save_file)
+
+    @staticmethod
+    def edit_rare_gatya_seed(save_file: "core.SaveFile"):
+        save_file.gatya.edit_rare_gatya_seed()
+
+    @staticmethod
+    def edit_normal_gatya_seed(save_file: "core.SaveFile"):
+        save_file.gatya.edit_normal_gatya_seed()
+
+    @staticmethod
+    def edit_event_gatya_seed(save_file: "core.SaveFile"):
+        save_file.gatya.edit_event_gatya_seed()
 
     @staticmethod
     def edit_labyrinth_medals(save_file: "core.SaveFile"):

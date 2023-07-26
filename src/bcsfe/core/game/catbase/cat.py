@@ -772,6 +772,9 @@ class Cats:
         self.talent_data: Optional[TalentData] = None
         self.bulk_downloaded = False
 
+    def get_all_cats(self) -> list[Cat]:
+        return self.cats
+
     @staticmethod
     def init(gv: "core.GameVersion") -> "Cats":
         total_cats = Cats.get_gv_cats(gv)

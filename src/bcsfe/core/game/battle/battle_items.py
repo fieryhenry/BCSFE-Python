@@ -107,7 +107,10 @@ class BattleItems:
         item_names = self.get_names(save_file)
         current_values = [item.amount for item in self.items]
         values = dialog_creator.MultiEditor.from_reduced(
-            group_name, item_names, current_values, 9999
+            group_name,
+            item_names,
+            current_values,
+            core.max_value_manager.get("battle_items"),
         ).edit()
         for i, value in enumerate(values):
             self.items[i].amount = value

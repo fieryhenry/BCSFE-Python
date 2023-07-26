@@ -14,6 +14,7 @@ from bcsfe.core import (
     log,
     server,
     theme_handler,
+    max_value_helper,
 )
 from bcsfe.core.country_code import CountryCode, CountryCodeType
 from bcsfe.core.crypto import Hash, HashAlgorithm, Hmac, NyankoSignature, Random
@@ -89,11 +90,13 @@ from bcsfe.core.server.request import RequestHandler
 from bcsfe.core.server.server_handler import ServerHandler
 from bcsfe.core.server.updater import Updater
 from bcsfe.core.theme_handler import ThemeHandler
+from bcsfe.core.max_value_helper import MaxValueHelper
 
 config = Config()
 logger = Logger()
 local_manager = LocalManager()
 theme_manager = ThemeHandler()
+max_value_manager = MaxValueHelper()
 game_data_getter: Optional[GameDataGetter] = None
 gatya_item_names: Optional[GatyaItemNames] = None
 gatya_item_buy: Optional[GatyaItemBuy] = None

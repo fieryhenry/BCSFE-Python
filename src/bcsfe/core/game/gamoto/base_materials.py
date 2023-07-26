@@ -75,7 +75,7 @@ class BaseMaterials:
             "base_materials",
             names,
             base_materials,
-            9999,
+            core.max_value_manager.get("base_materials"),
             group_name_localized=True,
         ).edit()
         self.materials = [Material(value) for value in values]

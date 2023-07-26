@@ -23,7 +23,7 @@ branch of the save editor.
 - [ ] behemoth culling
 - [ ] itf timed scores
 - [ ] challenge battle
-- [ ] clear tutorial
+- [x] clear tutorial
 - [ ] catclaw dojo score
 - [ ] engima stages
 - [ ] filibuster stage reclearing

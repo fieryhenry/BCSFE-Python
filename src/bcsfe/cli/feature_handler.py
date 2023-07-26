@@ -54,6 +54,9 @@ class FeatureHandler:
                 "labyrinth_medals": edits.basic_items.BasicItems.edit_labyrinth_medals,
             },
             "cats": cat_features,
+            "levels": {
+                "clear_tutorial": edits.clear_tutorial.clear_tutorial,
+            },
             "gamototo": {
                 "engineers": edits.basic_items.BasicItems.edit_engineers,
                 "base_materials": edits.basic_items.BasicItems.edit_base_materials,

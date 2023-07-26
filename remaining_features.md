@@ -28,11 +28,11 @@ branch of the save editor.
 - [ ] engima stages
 - [ ] filibuster stage reclearing
 - [ ] legend quest
-- [ ] inquiry code
-- [ ] token
+- [x] inquiry code
+- [x] token
 - [ ] old fix elsewhere unban
 - [ ] unlocked slots
-- [ ] gatya seed changing
+- [x] gatya seed changing
 - [ ] restart pack
 - [ ] meow medals
 - [ ] play time

@@ -1973,7 +1973,7 @@ class SaveFile:
             "outbreaks": self.outbreaks.serialize(),
             "scheme_items": self.scheme_items.serialize(),
             "first_locks": self.first_locks,
-            "account_created_timestamp": self.energy_penalty_timestamp,
+            "energy_penalty_timestamp": self.energy_penalty_timestamp,
             "gv_60": self.gv_60,
             "shown_maxcollab_mg": self.shown_maxcollab_mg,
             "gv_61": self.gv_61,
@@ -2342,7 +2342,7 @@ class SaveFile:
             data.get("scheme_items", {})
         )
         save_file.first_locks = data.get("first_locks", {})
-        save_file.energy_penalty_timestamp = data.get("account_created_timestamp", 0.0)
+        save_file.energy_penalty_timestamp = data.get("energy_penalty_timestamp", 0.0)
         save_file.gv_60 = data.get("gv_60", 60)
         save_file.shown_maxcollab_mg = data.get("shown_maxcollab_mg", False)
         save_file.gv_61 = data.get("gv_61", 61)

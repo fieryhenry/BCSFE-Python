@@ -57,6 +57,7 @@ class FeatureHandler:
                 "engineers": edits.basic_items.BasicItems.edit_engineers,
                 "base_materials": edits.basic_items.BasicItems.edit_base_materials,
                 "gamatoto_xp_level": core.game.gamoto.gamatoto.edit_xp,
+                "gamatoto_helpers": core.game.gamoto.gamatoto.edit_helpers,
             },
             "account": {
                 "unban_account": save_management.SaveManagement.unban_account,

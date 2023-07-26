@@ -49,7 +49,11 @@ from bcsfe.core.game.catbase.upgrade import Upgrade
 from bcsfe.core.game.catbase.user_rank_rewards import UserRankRewards
 from bcsfe.core.game.gamoto.base_materials import BaseMaterials
 from bcsfe.core.game.gamoto.cat_shrine import CatShrine
-from bcsfe.core.game.gamoto.gamatoto import Gamatoto, GamatotoLevels
+from bcsfe.core.game.gamoto.gamatoto import (
+    Gamatoto,
+    GamatotoLevels,
+    GamatotoMembersName,
+)
 from bcsfe.core.game.gamoto.ototo import Ototo
 from bcsfe.core.game.localizable import Localizable
 from bcsfe.core.game.map.aku import AkuChapters
@@ -102,6 +106,8 @@ gatya_item_names: Optional[GatyaItemNames] = None
 gatya_item_buy: Optional[GatyaItemBuy] = None
 chara_drop: Optional[CharaDrop] = None
 gamatoto_levels: Optional[GamatotoLevels] = None
+gamatoto_members_name: Optional[GamatotoMembersName] = None
+localizable: Optional[Localizable] = None
 
 
 def get_game_data_getter(save: SaveFile) -> GameDataGetter:
@@ -137,6 +143,24 @@ def get_gamatoto_levels(save: SaveFile) -> GamatotoLevels:
     if gamatoto_levels is None:
         gamatoto_levels = GamatotoLevels(save)
     return gamatoto_levels
+
+
+def get_gamatoto_members_name(save: SaveFile) -> GamatotoMembersName:
+    global gamatoto_members_name
+    if gamatoto_members_name is None:
+        gamatoto_members_name = GamatotoMembersName(save)
+    return gamatoto_members_name
+
+
+def get_localizable(save: SaveFile) -> Localizable:
+    global localizable
+    if localizable is None:
+        localizable = Localizable(save)
+    return localizable
+
+
+def get_lang(save: SaveFile) -> str:
+    return get_localizable(save).get_lang()
 
 
 __all__ = [

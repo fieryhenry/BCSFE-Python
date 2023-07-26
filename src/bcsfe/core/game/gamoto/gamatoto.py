@@ -5,6 +5,74 @@ from bcsfe.cli import color, dialog_creator
 
 
 @dataclass
+class MemberName:
+    member_id: int
+    rarity: int
+    bonus: int
+    name: str
+    rarity_name: str
+    description: list[str]
+
+
+class GamatotoMembersName:
+    def __init__(self, save_file: "core.SaveFile"):
+        self.save_file = save_file
+        self.members = self.read_members()
+
+    def read_members(self) -> list[MemberName]:
+        members: list[MemberName] = []
+        gdg = core.get_game_data_getter(self.save_file)
+        data = gdg.download(
+            "resLocal",
+            f"GamatotoExpedition_Members_name_{core.get_lang(self.save_file)}.csv",
+        )
+        if data is None:
+            return members
+        csv = core.CSV(
+            data,
+            delimiter=core.Delimeter.from_country_code_res(self.save_file.cc),
+            remove_empty=False,
+        )
+        for line in csv.lines[1:]:
+            if line[0].to_int() == -1:
+                continue
+            members.append(
+                MemberName(
+                    line[0].to_int(),
+                    line[1].to_int(),
+                    line[2].to_int(),
+                    line[3].to_str(),
+                    line[4].to_str(),
+                    line[5:].to_str_list(),
+                )
+            )
+        return members
+
+    def get_member(self, member_id: int) -> MemberName:
+        for member in self.members:
+            if member.member_id == member_id:
+                return member
+        raise ValueError(f"Member ID {member_id} not found")
+
+    def get_members_from_ids(self, ids: list[int]) -> list[MemberName]:
+        return [self.get_member(id) for id in ids]
+
+    def get_all_rarity(self, rarity: int) -> list[MemberName]:
+        return [member for member in self.members if member.rarity == rarity]
+
+    def get_members_from_helpers(self, helpers: "Helpers") -> list[MemberName]:
+        return self.get_members_from_ids(
+            [helper.id for helper in helpers.helpers if helper.is_valid()]
+        )
+
+    def get_all_rarity_names(self) -> list[str]:
+        names: dict[int, str] = {}
+        for member in self.members:
+            names[member.rarity] = member.rarity_name
+        return [names[i] for i in range(len(names))]
+
+
+@dataclass
 class GamatotoLevel:
     level: int
     xp_needed: int
@@ -330,6 +398,55 @@ class Gamatoto:
             "gamatoto_level_success", level=current_level.level, xp=xp
         )
 
+    def edit_helpers(self, save_file: "core.SaveFile"):
+        members_name = core.get_gamatoto_members_name(save_file)
+
+        gamatoto_levels = core.get_gamatoto_levels(save_file)
+        max_helpers = gamatoto_levels.get_total_helpers()
+
+        members = members_name.get_members_from_helpers(self.helpers)
+        color.ColoredText.localize("current_gamatoto_helpers")
+        for member in members:
+            color.ColoredText.localize(
+                "gamatoto_helper", name=member.name, rarity_name=member.rarity_name
+            )
+        rarity_names = members_name.get_all_rarity_names()
+
+        total_rarity_amounts: list[int] = [0] * len(rarity_names)
+        for helper in self.helpers.helpers:
+            if not helper.is_valid():
+                continue
+            member = members_name.get_member(helper.id)
+            total_rarity_amounts[member.rarity] += 1
+
+        rarity_amounts = dialog_creator.MultiEditor.from_reduced(
+            "gamatoto_helpers",
+            rarity_names,
+            total_rarity_amounts,
+            max_helpers,
+            group_name_localized=True,
+            cumulative_max=True,
+        ).edit()
+
+        helpers: list[Helper] = []
+        for i, rarity_amount in enumerate(rarity_amounts):
+            rarity_members = members_name.get_all_rarity(i)
+            for _ in range(rarity_amount):
+                member = rarity_members.pop(0)
+                helpers.append(Helper(member.member_id))
+        self.helpers = Helpers(helpers)
+
+        members = members_name.get_members_from_helpers(self.helpers)
+        color.ColoredText.localize("new_gamatoto_helpers")
+        for member in members:
+            color.ColoredText.localize(
+                "gamatoto_helper", name=member.name, rarity_name=member.rarity_name
+            )
+
 
 def edit_xp(save_file: "core.SaveFile"):
     save_file.gamatoto.edit_xp(save_file)
+
+
+def edit_helpers(save_file: "core.SaveFile"):
+    save_file.gamatoto.edit_helpers(save_file)

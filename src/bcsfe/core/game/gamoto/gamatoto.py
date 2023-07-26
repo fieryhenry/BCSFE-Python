@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any
 from bcsfe import core
 from bcsfe.cli import color, dialog_creator
 

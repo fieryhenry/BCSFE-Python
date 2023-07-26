@@ -253,6 +253,10 @@ class BasicItems:
         save_file.gatya.edit_event_gatya_seed()
 
     @staticmethod
+    def edit_unlocked_slots(save_file: "core.SaveFile"):
+        save_file.lineups.edit_unlocked_slots()
+
+    @staticmethod
     def edit_labyrinth_medals(save_file: "core.SaveFile"):
         names_o = core.get_gatya_item_names(save_file)
         items = core.get_gatya_item_buy(save_file).get_by_category(11)

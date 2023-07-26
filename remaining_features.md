@@ -31,7 +31,7 @@ branch of the save editor.
 - [x] inquiry code
 - [x] token
 - [ ] old fix elsewhere unban
-- [ ] unlocked slots
+- [x] unlocked slots
 - [x] gatya seed changing
 - [ ] restart pack
 - [ ] meow medals

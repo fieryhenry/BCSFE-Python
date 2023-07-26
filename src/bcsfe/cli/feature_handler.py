@@ -69,6 +69,9 @@ class FeatureHandler:
                 "normal_gatya_seed": edits.basic_items.BasicItems.edit_rare_gatya_seed,
                 "event_gatya_seed": edits.basic_items.BasicItems.edit_event_gatya_seed,
             },
+            "other": {
+                "unlocked_slots": edits.basic_items.BasicItems.edit_unlocked_slots,
+            },
             "config": core.Config.edit_config,
             "exit": main.Main.exit_editor,
         }

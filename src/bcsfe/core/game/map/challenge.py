@@ -64,3 +64,9 @@ class ChallengeChapters:
         self.scores[0] = dialog_creator.SingleEditor(
             "challenge_score", self.scores[0], None, localized_item=True
         ).edit()
+        self.shown_popup = True
+        self.chapters.clear_stage(0, 0, 0, False)
+
+
+def edit_challenge_score(save_file: "core.SaveFile"):
+    save_file.challenge.edit_score()

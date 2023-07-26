@@ -52,6 +52,7 @@ class FeatureHandler:
             "cats": cat_features,
             "levels": {
                 "clear_tutorial": edits.clear_tutorial.clear_tutorial,
+                "challenge_score": core.game.map.challenge.edit_challenge_score,
             },
             "gamototo": {
                 "engineers": edits.basic_items.BasicItems.edit_engineers,

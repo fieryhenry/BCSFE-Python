@@ -22,7 +22,7 @@ branch of the save editor but are in the master branch.
 - [ ] towers
 - [ ] behemoth culling
 - [ ] itf timed scores
-- [ ] challenge battle
+- [x] challenge battle
 - [x] clear tutorial
 - [ ] catclaw dojo score
 - [ ] engima stages

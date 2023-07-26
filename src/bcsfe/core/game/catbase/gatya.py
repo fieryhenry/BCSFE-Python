@@ -142,6 +142,7 @@ class Gatya:
             self.rare_seed,
             None,
             localized_item=True,
+            signed=False,
         ).edit()
 
     def edit_normal_gatya_seed(self):
@@ -150,6 +151,7 @@ class Gatya:
             self.normal_seed,
             None,
             localized_item=True,
+            signed=False,
         ).edit()
 
     def edit_event_gatya_seed(self):
@@ -158,6 +160,7 @@ class Gatya:
             self.event_seed,
             None,
             localized_item=True,
+            signed=False,
         ).edit()
 
     def read_gatya_data_set(self, save_file: "core.SaveFile") -> "GatyaDataSet":

@@ -439,13 +439,14 @@ class SingleEditor:
         max_value = self.max_value
         if max_value is None:
             max_value = IntInput.get_max_value(max_value, self.signed)
-
-        if self.min_value != 0:
+        if self.max_value is None:
+            dialog = "input_non_max"
+        elif self.min_value != 0:
             dialog = "input_min"
         else:
             dialog = "input"
         usr_input = IntInput(
-            max_value, self.min_value, default=self.value
+            max_value, self.min_value, default=self.value, signed=self.signed
         ).get_input_locale_while(
             dialog,
             {

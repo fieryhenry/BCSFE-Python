@@ -71,6 +71,7 @@ class FeatureHandler:
             },
             "other": {
                 "unlocked_slots": edits.basic_items.BasicItems.edit_unlocked_slots,
+                "restart_pack": edits.basic_items.BasicItems.set_restart_pack,
             },
             "config": core.Config.edit_config,
             "exit": main.Main.exit_editor,

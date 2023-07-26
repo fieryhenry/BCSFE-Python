@@ -33,7 +33,7 @@ branch of the save editor.
 - [ ] old fix elsewhere unban
 - [x] unlocked slots
 - [x] gatya seed changing
-- [ ] restart pack
+- [x] restart pack
 - [ ] meow medals
 - [ ] play time
 - [ ] enemy guide

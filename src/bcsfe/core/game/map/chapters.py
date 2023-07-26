@@ -33,6 +33,12 @@ class Stage:
     def __str__(self):
         return self.__repr__()
 
+    def clear_stage(self, increment: bool = True):
+        if increment:
+            self.clear_times += 1
+        else:
+            self.clear_times = 1
+
 
 class Chapter:
     def __init__(self, selected_stage: int, total_stages: int = 0):
@@ -40,6 +46,10 @@ class Chapter:
         self.clear_progress = 0
         self.stages: list[Stage] = [Stage.init() for _ in range(total_stages)]
         self.chapter_unlock_state = 0
+
+    def clear_stage(self, index: int, increment: bool = True):
+        self.clear_progress = max(self.clear_progress, index + 1)
+        self.stages[index].clear_stage(increment)
 
     @staticmethod
     def init(total_stages: int) -> "Chapter":
@@ -99,6 +109,9 @@ class ChaptersStars:
     def __init__(self, chapters: list[Chapter]):
         self.chapters = chapters
 
+    def clear_stage(self, star: int, stage: int, increment: bool = True):
+        self.chapters[star].clear_stage(stage, increment)
+
     @staticmethod
     def init(total_stages: int, total_stars: int) -> "ChaptersStars":
         chapters = [Chapter.init(total_stages) for _ in range(total_stars)]
@@ -155,6 +168,9 @@ class ChaptersStars:
 class Chapters:
     def __init__(self, chapters: list[ChaptersStars]):
         self.chapters = chapters
+
+    def clear_stage(self, map: int, star: int, stage: int, increment: bool = True):
+        self.chapters[map].clear_stage(star, stage, increment)
 
     @staticmethod
     def init() -> "Chapters":

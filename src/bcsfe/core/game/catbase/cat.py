@@ -561,6 +561,10 @@ class Cat:
         self.unlock(save_file)
         self.upgrade.plus = plus
 
+    def upgrade_base(self, save_file: "core.SaveFile"):
+        self.unlock(save_file)
+        self.upgrade.upgrade()
+
     def reset(self):
         self.unlocked = 0
         self.current_form = 0

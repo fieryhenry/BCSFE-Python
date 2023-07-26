@@ -103,8 +103,7 @@ class PowerUpHelper:
 
     def upgrade_cat(self, force: bool = False) -> bool:
         if force:
-            self.cat.upgrade.upgrade()
-            self.cat.unlock(self.save_file)
+            self.cat.upgrade_base(self.save_file)
             return True
         if self.unit_buy is None:
             return False
@@ -113,8 +112,7 @@ class PowerUpHelper:
             return False
 
         if self.can_power_up():
-            self.cat.upgrade.upgrade()
-            self.cat.unlock(self.save_file)
+            self.cat.upgrade_base(self.save_file)
             return True
 
         if (
@@ -122,8 +120,7 @@ class PowerUpHelper:
             and self.unit_buy.max_upgrade_level_no_catseye <= current_max_level
         ):
             if self.cat.upgrade.get_base() < self.unit_buy.max_upgrade_level_catseye:
-                self.cat.upgrade.upgrade()
-                self.cat.unlock(self.save_file)
+                self.cat.upgrade_base(self.save_file)
                 self.cat.catseyes_used += 1
                 self.cat.max_upgrade_level.upgrade()
                 return True

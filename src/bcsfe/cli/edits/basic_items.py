@@ -39,13 +39,13 @@ class BasicItems:
         safe_feature_name = core.local_manager.get_key(safe_feature_name)
 
         options = [
-            color.ColoredText.get_localized_text(
+            color.core.local_manager.get_key(
                 "continue_editing", feature_name=feature_name
             ),
-            color.ColoredText.get_localized_text(
+            color.core.local_manager.get_key(
                 "go_to_safe_feature", safer_feature_name=safe_feature_name
             ),
-            color.ColoredText.get_localized_text(
+            color.core.local_manager.get_key(
                 "cancel_editing", feature_name=feature_name
             ),
         ]

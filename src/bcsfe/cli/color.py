@@ -112,33 +112,8 @@ class ColoredText:
                 print(colored.stylize(text, fg), end="")  # type: ignore
 
     @staticmethod
-    def get_localized_text(string: str, escape: bool = True, **kwargs: Any) -> str:
-        text = core.local_manager.get_key(string)
-        try:
-            for key, value in kwargs.items():
-                if escape:
-                    value = ColoredText.escape_string(str(value))
-
-                text = text.replace("{" + key + "}", value)
-        except TypeError:
-            pass
-        return text
-
-    @staticmethod
     def localize(string: str, escape: bool = True, **kwargs: Any) -> "ColoredText":
-        return ColoredText(
-            ColoredText.get_localized_text(string, escape=escape, **kwargs)
-        )
-
-    @staticmethod
-    def get_special_chars() -> list[str]:
-        return ["<", ">", "/"]
-
-    @staticmethod
-    def escape_string(string: str) -> str:
-        for char in ColoredText.get_special_chars():
-            string = string.replace(char, "\\" + char)
-        return string
+        return ColoredText(core.local_manager.get_key(string, escape=escape, **kwargs))
 
     def parse(self, txt: str) -> list[tuple[str, str]]:
         # example: "This is a <red>red</red> text"
@@ -159,7 +134,7 @@ class ColoredText:
         in_closing_tag = False
         tag_text = ""
         text = ""
-        special_chars = self.get_special_chars()
+        special_chars = core.LocalManager.get_special_chars()
         while i < len(txt):
             char = txt[i]
             if char == "\\" and i + 1 < len(txt) and txt[i + 1] in special_chars:
@@ -207,5 +182,5 @@ class ColoredInput:
         return input()
 
     def localize(self, string: str, **kwargs: Any) -> str:
-        text = ColoredText.get_localized_text(string, **kwargs)
+        text = core.local_manager.get_key(string, **kwargs)
         return self.get(text)

@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Any, Optional
 from bcsfe import core
 
 
@@ -70,7 +70,7 @@ class PropertySet:
         Returns:
             str: Value of the key.
         """
-        return self.properties.get(key, key).replace("\\n", "\n")
+        return self.properties.get(key, key).replace("\\n", "\n").replace("\\t", "\t")
 
     @staticmethod
     def from_config(property: str) -> "PropertySet":
@@ -124,7 +124,7 @@ class LocalManager:
                     property_set = PropertySet("en", file_name[:-11])
                     self.en_properties.update(property_set.properties)
 
-    def get_key(self, key: str) -> str:
+    def get_key(self, key: str, escape: bool = True, **kwargs: Any) -> str:
         """Gets a key from the property file.
 
         Args:
@@ -134,15 +134,32 @@ class LocalManager:
             str: Value of the key.
         """
         try:
-            return self.get_key_recursive(key)
+            text = self.get_key_recursive(key)
         except RecursionError:
-            return key
+            text = key
+
+        for kwarg_key, kwarg_value in kwargs.items():
+            value = str(kwarg_value)
+            if escape:
+                value = LocalManager.escape_string(value)
+            text = text.replace("{" + kwarg_key + "}", value)
+        return text
+
+    @staticmethod
+    def get_special_chars() -> list[str]:
+        return ["<", ">", "/"]
+
+    @staticmethod
+    def escape_string(string: str) -> str:
+        for char in LocalManager.get_special_chars():
+            string = string.replace(char, "\\" + char)
+        return string
 
     def get_key_recursive(self, key: str) -> str:
         value = self.all_properties.get(key)
         if value is None:
             value = self.en_properties.get(key, key)
-        value = value.replace("\\n", "\n")
+        value = value.replace("\\n", "\n").replace("\\t", "\t")
         # replace {{key}} with the value of the key
         char_index = 0
         while char_index < len(value):

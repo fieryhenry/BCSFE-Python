@@ -217,9 +217,7 @@ class Enigma:
         for id in keys:
             name = names[id]
             if name is None:
-                name = color.ColoredText.get_localized_text(
-                    "unknown_enigma_name", id=id
-                )
+                name = color.core.local_manager.get_key("unknown_enigma_name", id=id)
             names_list.append(name)
 
         base_level = 25000
@@ -228,7 +226,7 @@ class Enigma:
         for stage in self.stages:
             name = names[stage.stage_id - base_level]
             if name is None:
-                name = color.ColoredText.get_localized_text(
+                name = color.core.local_manager.get_key(
                     "unknown_enigma_name", id=stage.stage_id
                 )
             color.ColoredText.localize(

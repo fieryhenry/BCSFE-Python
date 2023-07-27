@@ -60,6 +60,9 @@ class Stage:
     def is_cleared(self) -> bool:
         return self.clear_times > 0
 
+    def set_treasure(self, treasure: int):
+        self.treasure = treasure
+
 
 class Chapter:
     def __init__(self, selected_stage: int):
@@ -80,6 +83,9 @@ class Chapter:
             self.progress = stage_id
         else:
             self.progress = max(self.progress, stage_id + 1)
+
+    def set_treasure(self, stage_id: int, treasure: int):
+        self.stages[stage_id].set_treasure(treasure)
 
     def is_stage_clear(self, stage_id: int) -> bool:
         return self.stages[stage_id].is_cleared()
@@ -202,6 +208,9 @@ class StoryChapters:
     ):
         self.chapters[chapter].clear_stage(stage, increase, overwrite_progress)
 
+    def set_treasure(self, chapter: int, stage: int, treasure: int):
+        self.chapters[chapter].set_treasure(stage, treasure)
+
     def is_stage_clear(self, chapter: int, stage: int) -> bool:
         return self.chapters[chapter].is_stage_clear(stage)
 
@@ -286,9 +295,12 @@ class StoryChapters:
 
     @staticmethod
     def clear_tutorial(save_file: "core.SaveFile"):
-        save_file.tutorial_state = 1
+        save_file.tutorial_state = max(save_file.tutorial_state, 1)
+        save_file.koreaSuperiorTreasureState = max(
+            save_file.koreaSuperiorTreasureState, 2
+        )
+        save_file.ui6 = max(save_file.ui6, 1)
+        save_file.new_dialogs_2[1] = max(save_file.new_dialogs_2[1], 2)
+        save_file.new_dialogs_2[5] = max(save_file.new_dialogs_2[5], 2)
         save_file.story.clear_stage(chapter=0, stage=0)
-
-    @staticmethod
-    def is_tutorial_clear(save_file: "core.SaveFile") -> bool:
-        return save_file.tutorial_state == 1
+        save_file.story.set_treasure(chapter=0, stage=0, treasure=3)

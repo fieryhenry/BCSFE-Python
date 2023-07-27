@@ -188,6 +188,7 @@ class ChoiceInput:
         dialog: str,
         single_choice: bool = False,
         remove_alias: bool = False,
+        display_all_at_once: bool = True,
     ):
         self.items = items
         self.strings = strings
@@ -196,6 +197,7 @@ class ChoiceInput:
         self.dialog = dialog
         self.is_single_choice = single_choice
         self.remove_alias = remove_alias
+        self.display_all_at_once = display_all_at_once
 
     def get_input(self) -> tuple[Optional[int], str]:
         if len(self.strings) == 0:
@@ -222,7 +224,7 @@ class ChoiceInput:
             return [], False
         if len(self.strings) == 1:
             return [1], False
-        if not self.is_single_choice:
+        if not self.is_single_choice and self.display_all_at_once:
             self.strings.append("all_at_once")
         ListOutput(self.strings, self.ints).display_locale()
         key = "input_many"
@@ -246,7 +248,11 @@ class ChoiceInput:
                 color.ColoredText.localize(
                     "invalid_input_int", min=1, max=len(self.strings)
                 )
-        if len(self.strings) in int_vals and not self.is_single_choice:
+        if (
+            len(self.strings) in int_vals
+            and not self.is_single_choice
+            and self.display_all_at_once
+        ):
             return list(range(1, len(self.strings))), True
 
         if self.is_single_choice and len(int_vals) > 1:

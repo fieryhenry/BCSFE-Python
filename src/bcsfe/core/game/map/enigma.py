@@ -1,5 +1,86 @@
-from typing import Any
+import time
+from typing import Any, Callable, Optional
 from bcsfe import core
+from bcsfe.cli import dialog_creator, color
+import bs4
+
+
+class EnigmaNames:
+    def __init__(self, save_file: "core.SaveFile"):
+        self.save_file = save_file
+        self.gdg = core.get_game_data_getter(self.save_file)
+        self.enigma_names: dict[int, Optional[str]] = {}
+        self.get_enigma_names()
+        self.save_enigma_names()
+
+    def get_file_path(self) -> "core.Path":
+        return (
+            core.Path("engima_names", True)
+            .generate_dirs()
+            .add(f"{self.gdg.cc.get_code()}.json")
+        )
+
+    def read_enigma_names(self) -> dict[int, Optional[str]]:
+        file_path = self.get_file_path()
+        if file_path.exists():
+            names = core.JsonFile(file_path.read()).get_json()
+            for id in names.keys():
+                self.enigma_names[int(id)] = names[id]
+            return names
+        return {}
+
+    def download_enigma_name(self, id: int):
+        file_name = f"H{str(id).zfill(3)}.html"
+        if self.gdg.cc != core.CountryCodeType.JP:
+            url = f"https://ponosgames.com/information/appli/battlecats/stage/{self.gdg.cc.get_code()}/{file_name}"
+        else:
+            url = (
+                f"https://ponosgames.com/information/appli/battlecats/stage/{file_name}"
+            )
+        data = core.RequestHandler(url).get()
+        if data.status_code == 404:
+            return None
+        html = data.text
+        bs = bs4.BeautifulSoup(html, "html.parser")
+        name = bs.find("h2")
+        if name is None:
+            return None
+        name = name.text.strip()
+        if name:
+            self.enigma_names[id] = name
+        else:
+            self.enigma_names[id] = None
+        return name
+
+    def get_enigma_names(self) -> dict[int, Optional[str]]:
+        names = self.read_enigma_names()
+        gdg = core.get_game_data_getter(self.save_file)
+        stage_names = gdg.download(
+            "resLocal", f"StageName_RH_{core.get_lang(self.save_file)}.csv"
+        )
+        if stage_names is None:
+            return {}
+        csv = core.CSV(
+            stage_names,
+            core.Delimeter.from_country_code_res(self.save_file.cc),
+        )
+        total_downloaded = len(names)
+        funcs: list[Callable[..., Any]] = []
+        args: list[tuple[Any]] = []
+        for i in range(len(csv)):
+            if i < total_downloaded:
+                continue
+            funcs.append(self.download_enigma_name)
+            args.append((i,))
+        core.thread_run_many(funcs, args)
+        return self.enigma_names
+
+    def save_enigma_names(self):
+        file_path = self.get_file_path()
+        self.enigma_names = dict(
+            sorted(self.enigma_names.items(), key=lambda item: item[0])
+        )
+        core.JsonFile.from_object(self.enigma_names).save(file_path)
 
 
 class Stage:
@@ -127,3 +208,55 @@ class Enigma:
 
     def __str__(self):
         return self.__repr__()
+
+    def edit_enigma(self, save_file: "core.SaveFile"):
+        names = EnigmaNames(save_file).enigma_names
+        names_list: list[str] = []
+        keys = list(names.keys())
+        keys.sort()
+        for id in keys:
+            name = names[id]
+            if name is None:
+                name = color.ColoredText.get_localized_text(
+                    "unknown_enigma_name", id=id
+                )
+            names_list.append(name)
+
+        base_level = 25000
+
+        color.ColoredText.localize("current_enigma_stages")
+        for stage in self.stages:
+            name = names[stage.stage_id - base_level]
+            if name is None:
+                name = color.ColoredText.get_localized_text(
+                    "unknown_enigma_name", id=stage.stage_id
+                )
+            color.ColoredText.localize(
+                "enigma_stage", name=name, id=stage.stage_id - base_level
+            )
+
+        if self.stages:
+            wipe = dialog_creator.YesNoInput().get_input_once("wipe_enigma")
+            if wipe:
+                self.stages = []
+
+        ids, _ = dialog_creator.ChoiceInput(
+            names_list,
+            names_list,
+            [],
+            {},
+            "enigma_select",
+        ).multiple_choice()
+        if ids is None:
+            return
+
+        for enigma_id in ids:
+            abs_id = enigma_id + base_level
+            stage = Stage(3, abs_id, 2, int(time.time()))
+            self.stages.append(stage)
+
+        color.ColoredText.localize("enigma_success")
+
+
+def edit_enigma(save_file: "core.SaveFile"):
+    save_file.enigma.edit_enigma(save_file)

@@ -5,8 +5,8 @@ __pychache__
 /tests/saves/*
 .*
 *.egg*
-tests.txt
 src/bcsfe/files/game_data
+src/bcsfe/files/engima_names
 pyrightconfig.json
 /test*.py
 /save.json

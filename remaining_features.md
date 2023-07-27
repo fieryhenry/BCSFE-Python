@@ -25,7 +25,7 @@ branch of the save editor but are in the master branch.
 - [x] challenge battle
 - [x] clear tutorial
 - [x] catclaw dojo score
-- [ ] engima stages
+- [x] enigma stages
 - [ ] filibuster stage reclearing
 - [ ] legend quest
 - [x] inquiry code

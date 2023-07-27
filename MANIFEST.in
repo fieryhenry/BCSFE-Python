@@ -1,2 +1,3 @@
 recursive-include src/bcsfe/files *
 recursive-exclude src/bcsfe/files/game_data *
+recursive-exclude src/bcsfe/files/enigma_names *

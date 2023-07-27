@@ -146,7 +146,7 @@ class ListOutput:
     def get_output(self, dialog: Optional[str], strings: list[str]) -> str:
         end_string = ""
         if dialog is not None:
-            end_string = color.ColoredText.get_localized_text(dialog, **self.perameters)
+            end_string = color.core.local_manager.get_key(dialog, **self.perameters)
         end_string += "\n"
         for i, string in enumerate(strings):
             try:
@@ -198,6 +198,33 @@ class ChoiceInput:
         self.is_single_choice = single_choice
         self.remove_alias = remove_alias
         self.display_all_at_once = display_all_at_once
+
+    @staticmethod
+    def from_reduced(
+        items: list[str],
+        ints: Optional[list[int]] = None,
+        perameters: Optional[dict[str, Union[int, str]]] = None,
+        dialog: Optional[str] = None,
+        single_choice: bool = False,
+        remove_alias: bool = False,
+        display_all_at_once: bool = True,
+    ) -> "ChoiceInput":
+        if perameters is None:
+            perameters = {}
+        if ints is None:
+            ints = []
+        if dialog is None:
+            dialog = ""
+        return ChoiceInput(
+            items,
+            items,
+            ints,
+            perameters,
+            dialog,
+            single_choice,
+            remove_alias,
+            display_all_at_once,
+        )
 
     def get_input(self) -> tuple[Optional[int], str]:
         if len(self.strings) == 0:
@@ -278,6 +305,7 @@ class ChoiceInput:
             return int_vals
 
     def multiple_choice(self) -> tuple[Optional[list[int]], bool]:
+        color.ColoredText.localize(self.dialog, True, **self.perameters)
         user_input, all_at_once = self.get_input_locale()
         if user_input is None:
             return None, all_at_once
@@ -298,7 +326,7 @@ class MultiEditor:
         group_name: str,
         items: list[str],
         strings: list[str],
-        ints: list[int],
+        ints: Optional[list[int]],
         max_values: Optional[Union[list[int], int]],
         perameters: Optional[dict[str, Union[int, str]]],
         dialog: str,
@@ -310,10 +338,14 @@ class MultiEditor:
         self.items = items
         self.strings = strings
         self.ints = ints
+        if self.ints is not None:
+            total_ints = len(self.ints)
+        else:
+            total_ints = len(self.strings)
         if max_values is None:
-            max_values_ = [None] * len(ints)
+            max_values_ = [None] * total_ints
         elif isinstance(max_values, int):
-            max_values_ = [max_values] * len(ints)
+            max_values_ = [max_values] * total_ints
         else:
             max_values_ = max_values
         self.max_values = max_values_
@@ -333,15 +365,22 @@ class MultiEditor:
     def from_reduced(
         group_name: str,
         items: list[str],
-        ints: list[int],
+        ints: Optional[list[int]],
         max_values: Optional[Union[list[int], int]],
         group_name_localized: bool = False,
         dialog: str = "input",
         cumulative_max: bool = False,
+        items_localized: bool = False,
     ):
+        if items_localized:
+            for i, item in enumerate(items):
+                items[i] = core.local_manager.get_key(item)
         text: list[str] = []
         for item_name in items:
-            text.append(f"{item_name} <@q>: {{int}}</>")
+            if ints is not None:
+                text.append(f"{item_name} <@q>: {{int}}</>")
+            else:
+                text.append(f"{item_name}")
         return MultiEditor(
             group_name,
             items,
@@ -356,10 +395,10 @@ class MultiEditor:
 
     def edit(self) -> list[int]:
         choices, all_at_once = ChoiceInput(
-            self.items, self.strings, self.ints, self.perameters, "select_edit"
+            self.items, self.strings, self.ints or [], self.perameters, "select_edit"
         ).get()
         if choices is None:
-            return self.ints
+            return self.ints or []
         if isinstance(choices, int):
             choices = [choices]
         if all_at_once:
@@ -383,44 +422,49 @@ class MultiEditor:
             },
         )
         if usr_input is None:
-            return self.ints
+            return self.ints or []
+        ints = self.ints or [0] * len(self.strings)
+
         for choice in choices:
             max_value = IntInput.get_max_value(self.max_values[choice], self.signed)
             value = min(usr_input, max_value)
-            self.ints[choice] = value
-            color.ColoredText.localize(
-                "value_changed",
-                name=self.items[choice],
-                value=value,
-            )
+            ints[choice] = value
+            if self.ints is not None:
+                color.ColoredText.localize(
+                    "value_changed",
+                    name=self.items[choice],
+                    value=value,
+                )
 
-        return self.ints
+        return ints
 
     def edit_one(self, choices: list[int]) -> list[int]:
+        ints = self.ints or [0] * len(self.strings)
+
         for choice in choices:
             max_value = self.max_values[choice]
             if max_value is None:
                 max_value = IntInput.get_max_value(max_value, self.signed)
 
             if self.cumulative_max:
-                max_value -= sum(self.ints) - self.ints[choice]
+                max_value -= sum(ints) - ints[choice]
 
             item = self.items[choice]
             usr_input = IntInput(
-                max_value, default=self.ints[choice]
+                max_value, default=ints[choice]
             ).get_input_locale_while(
                 self.dialog,
-                {"name": item, "value": self.ints[choice], "max": max_value},
+                {"name": item, "value": ints[choice], "max": max_value},
             )
             if usr_input is None:
                 continue
-            self.ints[choice] = usr_input
+            ints[choice] = usr_input
             color.ColoredText.localize(
                 "value_changed",
                 name=item,
-                value=self.ints[choice],
+                value=ints[choice],
             )
-        return self.ints
+        return ints
 
 
 class SingleEditor:

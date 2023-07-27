@@ -527,7 +527,7 @@ class Cat:
             self.true_form(save_file, set_current_form)
         elif total_forms == 2:
             self.unlocked_forms = 0
-            self.current_form = min(self.current_form, 1)
+            self.current_form = 1
         else:
             self.unlocked_forms = 0
             self.current_form = 0

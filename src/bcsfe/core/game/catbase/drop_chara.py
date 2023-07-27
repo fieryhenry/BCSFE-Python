@@ -24,16 +24,13 @@ class CharaDrop:
         csv = core.CSV(data)
         drops: list[Drop] = []
         for line in csv.lines[1:]:
-            try:
-                drops.append(
-                    Drop(
-                        stage_id=line[0].to_int(),
-                        save_id=line[1].to_int(),
-                        chara_id=line[2].to_int(),
-                    )
+            drops.append(
+                Drop(
+                    stage_id=line[0].to_int(),
+                    save_id=line[1].to_int(),
+                    chara_id=line[2].to_int(),
                 )
-            except IndexError:
-                pass
+            )
 
         return drops
 

@@ -196,7 +196,7 @@ class SaveFile:
         self.tutorial_state = self.data.read_int()
 
         self.ui3 = self.data.read_int()
-        self.tutorial_state_2 = self.data.read_int()
+        self.koreaSuperiorTreasureState = self.data.read_int()
 
         self.unlock_popups_11 = self.data.read_int_list(3)
         self.ui5 = self.data.read_int()
@@ -1018,7 +1018,7 @@ class SaveFile:
         self.data.write_int(self.tutorial_state)
 
         self.data.write_int(self.ui3)
-        self.data.write_int(self.tutorial_state_2)
+        self.data.write_int(self.koreaSuperiorTreasureState)
 
         self.data.write_int_list(self.unlock_popups_11, write_length=False, length=3)
         self.data.write_int(self.ui5)
@@ -1835,7 +1835,7 @@ class SaveFile:
             "xp": self.xp,
             "tutorial_state": self.tutorial_state,
             "ui3": self.ui3,
-            "tutorial_state_2": self.tutorial_state_2,
+            "koreaSuperiorTreasureState": self.koreaSuperiorTreasureState,
             "unlock_popups_11": self.unlock_popups_11,
             "ui5": self.ui5,
             "unlock_enemy_guide": self.unlock_enemy_guide,
@@ -2180,7 +2180,7 @@ class SaveFile:
         save_file.xp = data.get("xp", 0)
         save_file.tutorial_state = data.get("tutorial_state", 0)
         save_file.ui3 = data.get("ui3", 0)
-        save_file.tutorial_state_2 = data.get("tutorial_state_2", 0)
+        save_file.koreaSuperiorTreasureState = data.get("koreaSuperiorTreasureState", 0)
         save_file.unlock_popups_11 = data.get("unlock_popups_11", [])
         save_file.ui5 = data.get("ui5", 0)
         save_file.unlock_enemy_guide = data.get("unlock_enemy_guide", 0)
@@ -2700,7 +2700,7 @@ class SaveFile:
         self.upgrade_state = 0
         self.xp = 0
         self.tutorial_state = 0
-        self.tutorial_state_2 = 0
+        self.koreaSuperiorTreasureState = 0
         self.unlock_enemy_guide = 0
         self.cleared_eoc_1 = 0
         self.unlocked_ending = 0

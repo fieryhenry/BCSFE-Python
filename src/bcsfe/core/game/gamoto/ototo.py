@@ -155,6 +155,15 @@ class CannonDescriptions:
 
         return None
 
+    def get_longest_longest_part_name(self) -> str:
+        longest_part_name = ""
+        for cannon_description in self.cannon_descriptions:
+            l_name = cannon_description.get_longest_part_name()
+            if len(l_name) > len(longest_part_name):
+                longest_part_name = l_name
+
+        return longest_part_name
+
 
 class Cannon:
     def __init__(self, development: int, levels: list[int]):
@@ -369,6 +378,7 @@ class Ototo:
             self.cannons = Cannons.init(save_file.game_version)
 
         names: list[str] = []
+        longest_part_name = len(descriptions.get_longest_longest_part_name())
 
         for cannon_id, cannon in self.cannons.cannons.items():
             description = descriptions.get_cannon_description(cannon_id)
@@ -381,22 +391,23 @@ class Ototo:
             names.append(cannon_name)
             text = cannon_name
             if cannon_id != 0:
-                text += " "
+                cannon_name_length = len(cannon_name) - 10
+                buffer = " " * (longest_part_name - cannon_name_length)
                 text += color.core.local_manager.get_key(
                     "development",
                     development=Ototo.get_stage_name(cannon.development),
                     escape=False,
+                    buffer=buffer,
                 )
 
-            longest_part_name = len(description.get_longest_part_name())
             for part_id, level in enumerate(cannon.levels):
                 if part_id == 0:
                     level += 1
 
                 text += "\n"
-                text += "\t"
+                text += "        "
                 buffer = " " * (
-                    longest_part_name - len(description.get_part_name(part_id))
+                    longest_part_name - len(description.get_part_name(part_id)) + 2
                 )
                 name = description.get_part_name(part_id)
                 text += color.core.local_manager.get_key(

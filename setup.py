@@ -30,6 +30,7 @@ setuptools.setup(
         "pyjwt",
         "requests",
         "pyyaml",
+        "beautifulsoup4",
     ],
     include_package_data=True,
     package_data={"bcsfe": ["py.typed"]},

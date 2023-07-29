@@ -3,3 +3,4 @@ colored==1.4.4
 PyJWT==2.7.0
 PyYAML==6.0
 Requests==2.31.0
+beautifulsoup4=4.12.2

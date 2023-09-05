@@ -269,3 +269,7 @@ class BasicItems:
             group_name_localized=True,
         ).edit()
         save_file.labyrinth_medals = values
+
+    @staticmethod
+    def edit_special_skills(save_file: "core.SaveFile"):
+        save_file.special_skills.edit(save_file)

@@ -8,7 +8,7 @@ class FeatureHandler:
         self.save_file = save_file
 
     def get_features(self):
-        cat_features = edits.cat_editor.CatEditor.edit_cats
+        cat_features = {"cats": edits.cat_editor.CatEditor.edit_cats}
         if core.config.get_bool(core.ConfigKey.SEPARATE_CAT_EDIT_OPTIONS):
             cat_features = {
                 "unlock_remove_cats": edits.cat_editor.CatEditor.unlock_remove_cats_run,
@@ -18,6 +18,10 @@ class FeatureHandler:
                 "upgrade_talents_remove_talents_cats": edits.cat_editor.CatEditor.upgrade_talents_remove_talents_cats_run,
                 "unlock_remove_cat_guide": edits.cat_editor.CatEditor.unlock_cat_guide_remove_guide_run,
             }
+
+        cat_features[
+            "special_skills"
+        ] = edits.basic_items.BasicItems.edit_special_skills
 
         features: dict[str, Any] = {
             "save_management": {
@@ -49,7 +53,7 @@ class FeatureHandler:
                 "scheme_items": edits.basic_items.BasicItems.edit_scheme_items,
                 "labyrinth_medals": edits.basic_items.BasicItems.edit_labyrinth_medals,
             },
-            "cats": cat_features,
+            "cats_special_skills": cat_features,
             "levels": {
                 "clear_tutorial": edits.clear_tutorial.clear_tutorial,
                 "challenge_score": core.game.map.challenge.edit_challenge_score,
@@ -81,6 +85,7 @@ class FeatureHandler:
             "other": {
                 "unlocked_slots": edits.basic_items.BasicItems.edit_unlocked_slots,
                 "restart_pack": edits.basic_items.BasicItems.set_restart_pack,
+                "special_skills": edits.basic_items.BasicItems.edit_special_skills,
             },
             "config": core.Config.edit_config,
             "exit": main.Main.exit_editor,
@@ -188,6 +193,16 @@ class FeatureHandler:
 
         while True:
             features = self.select_features(features)
+
+            new_features: list[str] = []
+            found_strs: list[str] = []
+            for feature_ in features:
+                if feature_.split(".")[-1] in found_strs:
+                    continue
+                found_strs.append(feature_.split(".")[-1])
+                new_features.append(feature_)
+
+            features = new_features
             feature = None
             if len(features) == 1:
                 feature = features[0]

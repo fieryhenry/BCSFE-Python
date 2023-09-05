@@ -5,10 +5,10 @@ branch of the save editor but are in the master branch.
 
 - [ ] save conversion
 - [x] gamatoto xp / level
-- [ ] ototo cat cannon
+- [x] ototo cat cannon
 - [x] gamatoto helpers
 - [x] fix gamatoto crashing
-- [ ] upgrade special skills
+- [x] upgrade special skills
 - [ ] main story clear
 - [ ] main story treasures
 - [ ] zombie stages

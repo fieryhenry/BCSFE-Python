@@ -41,7 +41,11 @@ from bcsfe.core.game.catbase.nyanko_club import NyankoClub
 from bcsfe.core.game.catbase.officer_pass import OfficerPass
 from bcsfe.core.game.catbase.powerup import PowerUpHelper
 from bcsfe.core.game.catbase.scheme_items import SchemeItems
-from bcsfe.core.game.catbase.special_skill import SpecialSkills
+from bcsfe.core.game.catbase.special_skill import (
+    SpecialSkills,
+    AbilityData,
+    AbilityDataItem,
+)
 from bcsfe.core.game.catbase.stamp import StampData
 from bcsfe.core.game.catbase.talent_orbs import TalentOrb, TalentOrbs
 from bcsfe.core.game.catbase.unlock_popups import UnlockPopups
@@ -108,6 +112,7 @@ chara_drop: Optional[CharaDrop] = None
 gamatoto_levels: Optional[GamatotoLevels] = None
 gamatoto_members_name: Optional[GamatotoMembersName] = None
 localizable: Optional[Localizable] = None
+abilty_data: Optional[AbilityData] = None
 
 
 def get_game_data_getter(save: SaveFile) -> GameDataGetter:
@@ -157,6 +162,13 @@ def get_localizable(save: SaveFile) -> Localizable:
     if localizable is None:
         localizable = Localizable(save)
     return localizable
+
+
+def get_ability_data(save: SaveFile) -> AbilityData:
+    global abilty_data
+    if abilty_data is None:
+        abilty_data = AbilityData(save)
+    return abilty_data
 
 
 def get_lang(save: SaveFile) -> str:

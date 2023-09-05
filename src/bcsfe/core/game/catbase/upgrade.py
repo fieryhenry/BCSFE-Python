@@ -73,6 +73,9 @@ class Upgrade:
         max_pos_base: int,
         max_pos_plus: int,
     ) -> tuple[Optional["Upgrade"], bool]:
+        color.ColoredText.localize(
+            "max_upgrade", max_base=max_pos_base + 1, max_plus=max_pos_plus
+        )
         usr_input = color.ColoredInput().localize("upgrade_input")
         if usr_input == core.local_manager.get_key("quit_key"):
             return None, True

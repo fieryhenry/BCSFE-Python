@@ -156,6 +156,8 @@ class PowerUpHelper:
         self.cat.catseyes_used = 0
 
     def upgrade_by(self, amount: int):
+        if amount == -1:
+            return
         for _ in range(amount):
             did_upgrade = self.upgrade_cat()
             if not did_upgrade:

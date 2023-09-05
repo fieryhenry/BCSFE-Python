@@ -548,18 +548,19 @@ class Cat:
         self.current_form = min(self.current_form, 2)
         self.forth_form = 0
 
-    def set_upgrade(self, save_file: "core.SaveFile", upgrade: "core.Upgrade"):
+    def set_upgrade(
+        self,
+        save_file: "core.SaveFile",
+        upgrade: "core.Upgrade",
+        only_plus: bool = False,
+    ):
         self.unlock(save_file)
         base = upgrade.base
         plus = upgrade.plus
-        if base != -1:
+        if base != -1 and not only_plus:
             self.upgrade.base = upgrade.get_random_base()
         if plus != -1:
             self.upgrade.plus = upgrade.get_random_plus()
-
-    def set_plus_upgrade(self, save_file: "core.SaveFile", plus: int):
-        self.unlock(save_file)
-        self.upgrade.plus = plus
 
     def upgrade_base(self, save_file: "core.SaveFile"):
         self.unlock(save_file)

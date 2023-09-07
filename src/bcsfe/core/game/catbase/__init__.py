@@ -20,6 +20,7 @@ from bcsfe.core.game.catbase import (
     matatabi,
     powerup,
     drop_chara,
+    playtime,
 )
 
 __all__ = [
@@ -44,4 +45,5 @@ __all__ = [
     "matatabi",
     "powerup",
     "drop_chara",
+    "playtime",
 ]

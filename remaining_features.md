@@ -35,7 +35,7 @@ branch of the save editor but are in the master branch.
 - [x] gatya seed changing
 - [x] restart pack
 - [ ] meow medals
-- [ ] play time
+- [x] play time
 - [ ] enemy guide
 - [ ] missions
 - [x] trade progress

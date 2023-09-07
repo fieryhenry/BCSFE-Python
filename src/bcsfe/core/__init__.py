@@ -51,6 +51,7 @@ from bcsfe.core.game.catbase.talent_orbs import TalentOrb, TalentOrbs
 from bcsfe.core.game.catbase.unlock_popups import UnlockPopups
 from bcsfe.core.game.catbase.upgrade import Upgrade
 from bcsfe.core.game.catbase.user_rank_rewards import UserRankRewards
+from bcsfe.core.game.catbase.playtime import PlayTime
 from bcsfe.core.game.gamoto.base_materials import BaseMaterials
 from bcsfe.core.game.gamoto.cat_shrine import CatShrine
 from bcsfe.core.game.gamoto.gamatoto import (

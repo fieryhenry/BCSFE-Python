@@ -86,6 +86,7 @@ class FeatureHandler:
                 "unlocked_slots": edits.basic_items.BasicItems.edit_unlocked_slots,
                 "restart_pack": edits.basic_items.BasicItems.set_restart_pack,
                 "special_skills": edits.basic_items.BasicItems.edit_special_skills,
+                "playtime": core.game.catbase.playtime.edit,
             },
             "config": core.Config.edit_config,
             "exit": main.Main.exit_editor,

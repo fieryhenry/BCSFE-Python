@@ -134,7 +134,7 @@ class LocalManager:
             str: Value of the key.
         """
         try:
-            text = self.get_key_recursive(key)
+            text = self.get_key_recursive(key, kwargs)
         except RecursionError:
             text = key
 
@@ -143,7 +143,130 @@ class LocalManager:
             if escape:
                 value = LocalManager.escape_string(value)
             text = text.replace("{" + kwarg_key + "}", value)
+
+        if "$(" in text:
+            text = self.parse_condition(text, kwargs)
+
         return text
+
+    def parse_condition(self, text: str, kwargs: dict[str, Any]) -> str:
+        counter = 0
+        final_text = ""
+        in_expression = False
+        expression_text = ""
+        count_down = 0
+        while counter < len(text):
+            char = text[counter]
+            if counter == len(text) - 1:
+                final_text += char
+                break
+            next_char = text[counter + 1]
+            if char == "\\":
+                final_text += next_char
+                counter += 2
+                continue
+            if char == "$" and next_char == "(":
+                count_down = 0
+                in_expression = True
+            elif char == "/" and next_char == "$":
+                count_down = 2
+                in_expression = False
+                if len(expression_text) < 3:
+                    counter += 1
+                    continue
+                new_expression_text = expression_text[2:-1]
+                expression_text = ""
+                parts = new_expression_text.split(":")
+                if len(parts) < 2:
+                    counter += 1
+                    continue
+                keyword = parts[0].strip()
+                expression = parts[1].strip()
+                conditions = expression.split("$,")
+                string = ""
+                for i, condition in enumerate(conditions):
+                    condition = condition.strip()
+                    if not condition:
+                        continue
+                    if i == len(conditions) - 1:
+                        string = condition
+                        break
+                    condition_parts = condition.split("($")
+                    if len(condition_parts) < 2:
+                        continue
+                    logic = condition_parts[0].strip()
+                    word = condition_parts[1].strip()
+                    if not word:
+                        continue
+                    word = word[:-1]
+                    value = kwargs.get(keyword)
+                    if value is None:
+                        continue
+                    equality = None
+                    if logic.startswith("=="):
+                        equality = "=="
+                    elif logic.startswith("!="):
+                        equality = "!="
+                    elif logic.startswith(">="):
+                        equality = ">="
+                    elif logic.startswith("<="):
+                        equality = "<="
+                    elif logic.startswith(">"):
+                        equality = ">"
+                    elif logic.startswith("<"):
+                        equality = "<"
+                    if equality is None:
+                        continue
+                    logic_parts = logic.split(equality)
+                    if len(logic_parts) < 2:
+                        continue
+                    logic_value = logic_parts[1].strip()
+
+                    if isinstance(value, int):
+                        if not logic_value.isdigit():
+                            continue
+                        logic_value = int(logic_value)
+
+                    if equality == "==":
+                        if logic_value == value:
+                            string = word
+                            break
+                    elif equality == "!=":
+                        if logic_value != value:
+                            string = word
+                            break
+
+                    if isinstance(logic_value, int) and not string:
+                        if equality == ">":
+                            if logic_value > value:
+                                string = word
+                                break
+                        elif equality == ">=":
+                            if logic_value >= value:
+                                string = word
+                                break
+                        elif equality == "<":
+                            if logic_value < value:
+                                string = word
+                                break
+                        elif equality == "<=":
+                            if logic_value <= value:
+                                string = word
+                                break
+
+                final_text += string
+
+            if in_expression:
+                expression_text += char
+            else:
+                if count_down <= 0:
+                    final_text += char
+                else:
+                    count_down -= 1
+
+            counter += 1
+
+        return final_text
 
     @staticmethod
     def get_special_chars() -> list[str]:
@@ -155,12 +278,14 @@ class LocalManager:
             string = string.replace(char, "\\" + char)
         return string
 
-    def get_key_recursive(self, key: str) -> str:
+    def get_key_recursive(self, key: str, kwargs: dict[str, Any]) -> str:
         value = self.all_properties.get(key)
         if value is None:
             value = self.en_properties.get(key, key)
         value = value.replace("\\n", "\n").replace("\\t", "\t")
         # replace {{key}} with the value of the key
+        if "{{" not in value:
+            return value
         char_index = 0
         while char_index < len(value):
             if value[char_index] == "{" and value[char_index + 1] == "{":
@@ -172,7 +297,7 @@ class LocalManager:
 
                 if key_name != key:
                     value = value.replace(
-                        "{{" + key_name + "}}", self.get_key(key_name)
+                        "{{" + key_name + "}}", self.get_key(key_name, **kwargs)
                     )
             char_index += 1
 

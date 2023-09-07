@@ -116,16 +116,6 @@ class ColoredText:
         return ColoredText(core.local_manager.get_key(string, escape=escape, **kwargs))
 
     def parse(self, txt: str) -> list[tuple[str, str]]:
-        # example: "This is a <red>red</red> text"
-        # output: [("This is a ", ""), ("red", "#FF0000"), (" text", "")]
-        # example: "This is a <red>red</red> text with <green>green</green> text"
-        # output: [("This is a ", ""), ("red", "#FF0000"), (" text with ", ""), ("green", "#00FF00"), (" text", "")]
-        # example: "This is a <#FF0000>red</#FF0000> text with <#00FF00>green</#00FF00> text"
-        # output: [("This is a ", ""), ("red", "#FF0000"), (" text with ", ""), ("green", "#00FF00"), (" text", "")]
-        # example: "<red>This is a <white>white</white> red text</red>"
-        # output: [("This is a ", "#FF0000"), ("white", "#FFFFFF"), (" red text", "#FF0000")]
-
-        # allow escaping of < and > with \, so that \\<red\\> is not parsed as a color tag
         txt = "<@p>" + txt + "</>"
         output: list[tuple[str, str]] = []
         i = 0

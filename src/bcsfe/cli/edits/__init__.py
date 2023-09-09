@@ -6,6 +6,7 @@ from bcsfe.cli.edits import (
     rare_ticket_trade,
     fixes,
     enemy_editor,
+    aku_realm,
 )
 
 __all__ = [
@@ -16,4 +17,5 @@ __all__ = [
     "rare_ticket_trade",
     "fixes",
     "enemy_editor",
+    "aku_realm",
 ]

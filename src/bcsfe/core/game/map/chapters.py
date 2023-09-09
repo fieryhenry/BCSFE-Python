@@ -37,7 +37,7 @@ class Stage:
         if increment:
             self.clear_times += 1
         else:
-            self.clear_times = 1
+            self.clear_times = max(1, self.clear_times)
 
 
 class Chapter:

@@ -39,6 +39,12 @@ class EventStage:
     def __str__(self) -> str:
         return self.__repr__()
 
+    def clear_stage(self, increment: bool = True):
+        if increment:
+            self.clear_amount += 1
+        else:
+            self.clear_amount = max(1, self.clear_amount)
+
 
 class EventSubChapter:
     def __init__(self, selected_stage: int, total_stages: int = 0):
@@ -46,6 +52,19 @@ class EventSubChapter:
         self.clear_progress = 0
         self.stages = [EventStage.init() for _ in range(total_stages)]
         self.chapter_unlock_state = 0
+
+    def clear_stage(self, index: int, increment: bool = True) -> bool:
+        self.clear_progress = max(self.clear_progress, index + 1)
+        self.stages[index].clear_stage(increment)
+        if index == len(self.stages) - 1:
+            return True
+        return False
+
+    def clear_map(self, increment: bool = True) -> bool:
+        self.clear_progress = len(self.stages)
+        for stage in self.stages:
+            stage.clear_stage(increment)
+        return True
 
     @staticmethod
     def init(total_stages: int) -> "EventSubChapter":
@@ -128,6 +147,23 @@ class EventSubChapterStars:
         self.chapters = chapters
         self.legend_restriction = 0
 
+    def clear_stage(self, star: int, stage: int, increment: bool = True) -> bool:
+        finished = self.chapters[star].clear_stage(stage, increment)
+        if finished:
+            self.chapters[star + 1].chapter_unlock_state = 3
+        return finished
+
+    def clear_map(self, star: int, increment: bool = True) -> bool:
+        finished = self.chapters[star].clear_map(increment)
+        if finished:
+            self.chapters[star + 1].chapter_unlock_state = 3
+        return finished
+
+    def clear_chapter(self, increment: bool = True) -> bool:
+        for chapter in self.chapters:
+            chapter.clear_map(increment)
+        return True
+
     @staticmethod
     def init(total_stars: int) -> "EventSubChapterStars":
         return EventSubChapterStars(
@@ -204,6 +240,25 @@ class EventChapterGroup:
     def __init__(self, chapters: list[EventSubChapterStars]):
         self.chapters = chapters
 
+    def clear_stage(self, map: int, star: int, stage: int, increment: bool = True):
+        finished = self.chapters[map].clear_stage(star, stage, increment)
+        if finished:
+            self.chapters[map + 1].chapters[0].chapter_unlock_state = 3
+
+    def clear_map(self, map: int, star: int, increment: bool = True):
+        finished = self.chapters[map].clear_map(star, increment)
+        if finished:
+            self.chapters[map + 1].chapters[0].chapter_unlock_state = 3
+
+    def clear_chapter(self, map: int, increment: bool = True):
+        finished = self.chapters[map].clear_chapter(increment)
+        if finished:
+            self.chapters[map + 1].chapters[0].chapter_unlock_state = 3
+
+    def clear_group(self, increment: bool = True):
+        for chapter in self.chapters:
+            chapter.clear_chapter(increment)
+
     @staticmethod
     def init(total_subchapters: int, total_stars: int) -> "EventChapterGroup":
         return EventChapterGroup(
@@ -278,6 +333,20 @@ class EventChapters:
         self.displayed_cleared_limit_text: dict[int, bool] = {}
         self.event_start_dates: dict[int, int] = {}
         self.stages_reward_claimed: list[int] = []
+
+    def clear_stage(
+        self, type: int, map: int, star: int, stage: int, increment: bool = True
+    ):
+        self.chapters[type].clear_stage(map, star, stage, increment)
+
+    def clear_map(self, type: int, map: int, star: int, increment: bool = True):
+        self.chapters[type].clear_map(map, star, increment)
+
+    def clear_chapter(self, type: int, map: int, increment: bool = True):
+        self.chapters[type].clear_chapter(map, increment)
+
+    def clear_group(self, type: int, increment: bool = True):
+        self.chapters[type].clear_group(increment)
 
     @staticmethod
     def init(gv: "core.GameVersion") -> "EventChapters":

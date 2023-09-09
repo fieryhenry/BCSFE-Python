@@ -16,7 +16,7 @@ branch of the save editor but are in the master branch.
 - [ ] sol
 - [ ] uncanny legends
 - [ ] aku realm
-- [ ] unlock aku realm
+- [x] unlock aku realm
 - [ ] gauntlets
 - [ ] collab gauntlets
 - [ ] towers

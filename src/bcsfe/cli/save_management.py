@@ -134,6 +134,8 @@ class SaveManagement:
             save_file (core.SaveFile): The save file to push.
         """
         adb_handler = SaveManagement.adb_push(save_file)
+        if adb_handler.cc is None:
+            return
         result = adb_handler.rerun_game()
         if result.success:
             color.ColoredText.localize("adb_rerun_success")

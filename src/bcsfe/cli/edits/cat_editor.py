@@ -152,6 +152,7 @@ class CatEditor:
         cats = self.get_cats_name(usr_name)
         if not cats:
             color.ColoredText.localize("no_cats_found_name", name=usr_name)
+            return None
         localizable = self.save_file.get_localizable()
         cat_names: list[str] = []
         cat_list: list["core.Cat"] = []

@@ -36,7 +36,7 @@ branch of the save editor but are in the master branch.
 - [x] restart pack
 - [ ] meow medals
 - [x] play time
-- [ ] enemy guide
+- [x] enemy guide
 - [ ] missions
 - [x] trade progress
 - [ ] gold pass

@@ -21,6 +21,7 @@ from bcsfe.core.crypto import Hash, HashAlgorithm, Hmac, NyankoSignature, Random
 from bcsfe.core.game.battle.battle_items import BattleItems
 from bcsfe.core.game.battle.cleared_slots import ClearedSlots
 from bcsfe.core.game.battle.slots import LineUps
+from bcsfe.core.game.battle.enemy import Enemy, EnemyNames
 from bcsfe.core.game.catbase.beacon_base import BeaconEventListScene
 from bcsfe.core.game.catbase.cat import Cat, Cats, UnitBuy, TalentData
 from bcsfe.core.game.catbase.gatya import Gatya
@@ -114,6 +115,7 @@ gamatoto_levels: Optional[GamatotoLevels] = None
 gamatoto_members_name: Optional[GamatotoMembersName] = None
 localizable: Optional[Localizable] = None
 abilty_data: Optional[AbilityData] = None
+enemy_names: Optional[EnemyNames] = None
 
 
 def get_game_data_getter(save: SaveFile) -> GameDataGetter:
@@ -170,6 +172,13 @@ def get_ability_data(save: SaveFile) -> AbilityData:
     if abilty_data is None:
         abilty_data = AbilityData(save)
     return abilty_data
+
+
+def get_enemy_names(save: SaveFile) -> EnemyNames:
+    global enemy_names
+    if enemy_names is None:
+        enemy_names = EnemyNames(save)
+    return enemy_names
 
 
 def get_lang(save: SaveFile) -> str:

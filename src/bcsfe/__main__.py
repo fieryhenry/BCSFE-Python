@@ -9,4 +9,7 @@ except KeyboardInterrupt:
 except Exception as e:
     tb = traceback.format_exc()
     cli.color.ColoredText.localize("error", error=e, traceback=tb)
-    cli.main.Main.exit_editor()
+    try:
+        cli.main.Main.exit_editor()
+    except Exception:
+        pass

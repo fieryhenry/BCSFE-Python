@@ -117,9 +117,9 @@ class CatEditor:
             new_cats = self.filter_cats(new_cats)
 
         if mode == SelectMode.AND:
-            return [cat for cat in new_cats if cat in current_cats]
+            return list(set(current_cats) & set(new_cats))
         if mode == SelectMode.OR:
-            return list(set(current_cats + new_cats))
+            return list(set(current_cats) | set(new_cats))
         if mode == SelectMode.REPLACE:
             return new_cats
         return new_cats

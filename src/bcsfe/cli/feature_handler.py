@@ -89,6 +89,7 @@ class FeatureHandler:
                 "special_skills": edits.basic_items.BasicItems.edit_special_skills,
                 "playtime": core.game.catbase.playtime.edit,
                 "enemy_guide": edits.enemy_editor.EnemyEditor.edit_enemy_guide,
+                "user_rank_rewards": core.game.catbase.user_rank_rewards.edit_user_rank_rewards,
             },
             "config": core.Config.edit_config,
             "exit": main.Main.exit_editor,

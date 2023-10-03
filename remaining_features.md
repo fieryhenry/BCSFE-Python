@@ -40,7 +40,7 @@ branch of the save editor but are in the master branch.
 - [ ] missions
 - [x] trade progress
 - [ ] gold pass
-- [ ] user rank rewards
+- [x] user rank rewards
 - [ ] cat shrine
 - [x] fix time errors
 - [ ] unlock equip menu

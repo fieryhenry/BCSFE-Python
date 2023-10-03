@@ -51,7 +51,11 @@ from bcsfe.core.game.catbase.stamp import StampData
 from bcsfe.core.game.catbase.talent_orbs import TalentOrb, TalentOrbs
 from bcsfe.core.game.catbase.unlock_popups import UnlockPopups
 from bcsfe.core.game.catbase.upgrade import Upgrade
-from bcsfe.core.game.catbase.user_rank_rewards import UserRankRewards
+from bcsfe.core.game.catbase.user_rank_rewards import (
+    UserRankRewards,
+    RankGifts,
+    RankGiftDescriptions,
+)
 from bcsfe.core.game.catbase.playtime import PlayTime
 from bcsfe.core.game.gamoto.base_materials import BaseMaterials
 from bcsfe.core.game.gamoto.cat_shrine import CatShrine
@@ -116,6 +120,8 @@ gamatoto_members_name: Optional[GamatotoMembersName] = None
 localizable: Optional[Localizable] = None
 abilty_data: Optional[AbilityData] = None
 enemy_names: Optional[EnemyNames] = None
+rank_gift_descriptions: Optional[RankGiftDescriptions] = None
+rank_gifts: Optional[RankGifts] = None
 
 
 def get_game_data_getter(save: SaveFile) -> GameDataGetter:
@@ -179,6 +185,20 @@ def get_enemy_names(save: SaveFile) -> EnemyNames:
     if enemy_names is None:
         enemy_names = EnemyNames(save)
     return enemy_names
+
+
+def get_rank_gift_descriptions(save: SaveFile) -> RankGiftDescriptions:
+    global rank_gift_descriptions
+    if rank_gift_descriptions is None:
+        rank_gift_descriptions = RankGiftDescriptions(save)
+    return rank_gift_descriptions
+
+
+def get_rank_gifts(save: SaveFile) -> RankGifts:
+    global rank_gifts
+    if rank_gifts is None:
+        rank_gifts = RankGifts(save)
+    return rank_gifts
 
 
 def get_lang(save: SaveFile) -> str:

@@ -1,11 +1,16 @@
 from typing import Optional
 from bcsfe import core
+from bcsfe.cli import dialog_creator, color
 
 
 class RankGift:
-    def __init__(self, threshold: int, rewards: list[tuple[int, int]]):
+    def __init__(self, index: int, threshold: int, rewards: list[tuple[int, int]]):
+        self.index = index
         self.threshold = threshold
         self.rewards = rewards
+
+    def get_name(self, rank_gift_descriptions: "RankGiftDescriptions") -> str:
+        return rank_gift_descriptions.get_name(self.threshold)
 
 
 class RankGifts:
@@ -20,14 +25,14 @@ class RankGifts:
         if data is None:
             return rank_gift
         csv = core.CSV(data)
-        for line in csv:
+        for i, line in enumerate(csv):
             rewards: list[tuple[int, int]] = []
             for col in range(1, len(line), 2):
                 value = line[col].to_int()
                 if value == -1:
                     break
                 rewards.append((value, line[col + 1].to_int()))
-            rank_gift.append(RankGift(line[0].to_int(), rewards))
+            rank_gift.append(RankGift(i, line[0].to_int(), rewards))
         return rank_gift
 
     def get_rank_gift(self, user_rank: int) -> RankGift:
@@ -47,6 +52,45 @@ class RankGifts:
         if id >= len(self.rank_gift) or id < 0:
             return None
         return self.rank_gift[id]
+
+    def get_all_unlocked(self, user_rank: int) -> list[RankGift]:
+        return [
+            rank_gift
+            for rank_gift in self.rank_gift
+            if rank_gift.threshold <= user_rank
+        ]
+
+
+class RankGiftDescription:
+    def __init__(self, index: int, threshold: int, description: str):
+        self.index = index
+        self.threshold = threshold
+        self.description = description
+
+
+class RankGiftDescriptions:
+    def __init__(self, save_file: "core.SaveFile"):
+        self.save_file = save_file
+        self.rank_gift_descriptions = self.read_rank_gift_descriptions()
+
+    def read_rank_gift_descriptions(self) -> list[RankGiftDescription]:
+        rank_gift_descriptions: list[RankGiftDescription] = []
+        gdg = core.get_game_data_getter(self.save_file)
+        data = gdg.download("resLocal", "user_info.tsv")
+        if data is None:
+            return rank_gift_descriptions
+        csv = core.CSV(data, delimiter="\t")
+        for i, line in enumerate(csv):
+            rank_gift_descriptions.append(
+                RankGiftDescription(i, line[0].to_int(), line[1].to_str())
+            )
+        return rank_gift_descriptions
+
+    def get_name(self, user_rank: int) -> str:
+        for rank_gift_description in self.rank_gift_descriptions:
+            if rank_gift_description.threshold == user_rank:
+                return rank_gift_description.description
+        raise ValueError(f"RankGiftDescription not found for rank {user_rank}")
 
 
 class Reward:
@@ -126,3 +170,87 @@ class UserRankRewards:
 
     def __str__(self) -> str:
         return self.__repr__()
+
+    def set_claimed(self, index: int, claimed: bool):
+        self.rewards[index].claimed = claimed
+
+    def edit(self, save_file: "core.SaveFile"):
+        claim_choice = dialog_creator.ChoiceInput.from_reduced(
+            ["claim", "unclaim", "fix_claimed"],
+            dialog="claim_or_unclaim_ur",
+            single_choice=True,
+        ).single_choice()
+
+        if claim_choice is None:
+            return
+
+        claim_choice -= 1
+
+        rank_gifts = core.get_rank_gifts(save_file)
+
+        user_rank = save_file.calculate_user_rank()
+
+        if claim_choice == 2:
+            for rank_gift in rank_gifts.rank_gift:
+                reward = self.rewards[rank_gift.index]
+                if rank_gift.threshold > user_rank:
+                    reward.claimed = False
+
+            color.ColoredText.localize("ur_fix_claimed_success")
+            return
+
+        selected_rank_gifts: list[RankGift] = rank_gifts.rank_gift.copy()
+        descriptions = core.get_rank_gift_descriptions(save_file)
+
+        selected_rank_gifts.sort(key=lambda rank_gift: rank_gift.threshold)
+
+        new_selected_rank_gifts: list[RankGift] = []
+
+        for rank_gift in selected_rank_gifts:
+            reward = self.rewards[rank_gift.index]
+            if reward.claimed and claim_choice == 0:
+                continue
+            if not reward.claimed and claim_choice == 1:
+                continue
+            if rank_gift.threshold > user_rank:
+                continue
+            new_selected_rank_gifts.append(rank_gift)
+
+        selected_rank_gifts = new_selected_rank_gifts
+
+        selected_descriptions: list[str] = []
+        for rank_gift in selected_rank_gifts:
+            description = rank_gift.get_name(descriptions).replace("<br>", " ")
+            # remove span tags
+            start = description.find("<")
+            while start != -1:
+                end = description.find(">")
+                description = description[:start] + description[end + 1 :]
+                start = description.find("<")
+
+            selected_descriptions.append(
+                core.local_manager.get_key(
+                    "ur_string",
+                    description=description,
+                    rank=rank_gift.threshold,
+                )
+            )
+
+        ids, _ = dialog_creator.ChoiceInput.from_reduced(
+            selected_descriptions, dialog="select_ur"
+        ).multiple_choice()
+        if ids is None:
+            return
+        for id in ids:
+            index = selected_rank_gifts[id].index
+            self.set_claimed(index, claim_choice == 0)
+
+        if claim_choice == 0:
+            color.ColoredText.localize("ur_claimed_success")
+        else:
+            color.ColoredText.localize("ur_unclaimed_success")
+
+
+def edit_user_rank_rewards(save_file: "core.SaveFile"):
+    user_rank_rewards = save_file.user_rank_rewards
+    user_rank_rewards.edit(save_file)

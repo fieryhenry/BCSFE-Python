@@ -246,14 +246,22 @@ class ChoiceInput:
             if user_input == core.local_manager.get_key("quit_key"):
                 return None
 
-    def get_input_locale(self) -> tuple[Optional[list[int]], bool]:
+    def get_input_locale(
+        self, localized: bool = True
+    ) -> tuple[Optional[list[int]], bool]:
         if len(self.strings) == 0:
             return [], False
         if len(self.strings) == 1:
             return [1], False
         if not self.is_single_choice and self.display_all_at_once:
-            self.strings.append("all_at_once")
-        ListOutput(self.strings, self.ints).display_locale()
+            if localized:
+                self.strings.append("all_at_once")
+            else:
+                self.strings.append(core.local_manager.get_key("all_at_once"))
+        if localized:
+            ListOutput(self.strings, self.ints).display_locale()
+        else:
+            ListOutput(self.strings, self.ints).display_non_locale()
         key = "input_many"
         if self.is_single_choice:
             key = "input_single"
@@ -304,9 +312,11 @@ class ChoiceInput:
                 return []
             return int_vals
 
-    def multiple_choice(self) -> tuple[Optional[list[int]], bool]:
+    def multiple_choice(
+        self, localized_options: bool = True
+    ) -> tuple[Optional[list[int]], bool]:
         color.ColoredText.localize(self.dialog, True, **self.perameters)
-        user_input, all_at_once = self.get_input_locale()
+        user_input, all_at_once = self.get_input_locale(localized_options)
         if user_input is None:
             return None, all_at_once
         return [i - 1 for i in user_input], all_at_once

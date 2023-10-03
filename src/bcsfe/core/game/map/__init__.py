@@ -15,6 +15,7 @@ from bcsfe.core.game.map import (
     enigma,
     aku,
     zero_legends,
+    chapters,
 )
 
 __all__ = [
@@ -34,4 +35,5 @@ __all__ = [
     "enigma",
     "aku",
     "zero_legends",
+    "chapters",
 ]

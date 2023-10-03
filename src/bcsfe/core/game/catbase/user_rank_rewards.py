@@ -238,7 +238,7 @@ class UserRankRewards:
 
         ids, _ = dialog_creator.ChoiceInput.from_reduced(
             selected_descriptions, dialog="select_ur"
-        ).multiple_choice()
+        ).multiple_choice(localized_options=False)
         if ids is None:
             return
         for id in ids:

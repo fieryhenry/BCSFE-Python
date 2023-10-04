@@ -2,7 +2,7 @@
 
 import sys
 import traceback
-from typing import Any, Optional
+from typing import Any, NoReturn, Optional
 from bcsfe.cli import (
     file_dialog,
     color,
@@ -188,29 +188,53 @@ class Main:
     @staticmethod
     def exit_editor(
         save_file: Optional["core.SaveFile"] = None, check_temp: bool = True
-    ):
+    ) -> NoReturn:
         """Exit the editor."""
-        print()
-        if save_file is None and check_temp:
+        save_file_temp = None
+        if check_temp:
             temp_path = core.SaveFile.get_temp_path()
             if temp_path.exists():
                 try:
-                    save_file = core.SaveFile(temp_path.read())
+                    save_file_temp = core.SaveFile(temp_path.read())
                 except core.SaveError as e:
                     tb = traceback.format_exc()
                     color.ColoredText.localize(
                         "save_temp_fail", error=str(e), traceback=tb
                     )
-                    sys.exit()
-                color.ColoredText.localize("save_temp_success")
-            else:
-                color.ColoredText.localize("save_temp_not_found")
+                    Main.leave()
 
         if save_file is None:
-            sys.exit()
-        save = color.ColoredInput().localize("save_before_exit") == "y"
+            save_file = save_file_temp
+        if save_file is None:
+            if check_temp:
+                color.ColoredText.localize("save_temp_not_found")
+            Main.leave()
+        if save_file_temp is None:
+            save_file_temp = save_file
 
-        if save:
-            save_management.SaveManagement.save_save(save_file)
+        try:
+            print()
+            color.ColoredText.localize("checking_for_changes")
+            if save_file.save_path is None:
+                same = False
+            else:
+                same = save_file.save_path.read() == save_file.to_data()
+        except core.SaveError:
+            same = False
 
+        if not same:
+            color.ColoredText.localize("changes_found")
+            print()
+            save = color.ColoredInput().localize("save_before_exit") == "y"
+            if save:
+                save_management.SaveManagement.save_save(save_file)
+        else:
+            color.ColoredText.localize("no_changes")
+
+        Main.leave()
+
+    @staticmethod
+    def leave() -> NoReturn:
+        """Leave the editor."""
+        color.ColoredText.localize("leave")
         sys.exit()

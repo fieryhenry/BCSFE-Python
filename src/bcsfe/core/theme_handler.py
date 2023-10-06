@@ -16,7 +16,7 @@ class ThemeHandler:
         if not file_path.exists():
             return {}
         try:
-            return core.JsonFile.from_data(file_path.read()).get_json()
+            return core.JsonFile.from_data(file_path.read()).to_object()
         except core.JSONDecodeError:
             return {}
 

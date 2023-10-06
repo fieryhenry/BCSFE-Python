@@ -25,7 +25,7 @@ class JsonFile:
     def save(self, path: "core.Path") -> None:
         path.write(self.to_data())
 
-    def get_json(self) -> Any:
+    def to_object(self) -> Any:
         return self.json
 
     def get(self, key: str) -> Any:

@@ -166,7 +166,7 @@ class Main:
         if not path.exists():
             return None
         try:
-            json_data = core.JsonFile.from_data(path.read()).get_json()
+            json_data = core.JsonFile.from_data(path.read()).to_object()
         except core.JSONDecodeError:
             color.ColoredText.localize(
                 "load_json_fail", error=core.logger.get_traceback()

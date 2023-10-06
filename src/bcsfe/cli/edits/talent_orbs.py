@@ -208,7 +208,7 @@ class OrbInfoList:
             list[RawOrbInfo]: The list of RawOrbInfo
         """
         try:
-            data: dict[str, Any] = core.JsonFile.from_data(json_data).get_json()
+            data: dict[str, Any] = core.JsonFile.from_data(json_data).to_object()
         except core.JSONDecodeError:
             return None
         orb_info_list: list[RawOrbInfo] = []

@@ -23,7 +23,7 @@ class EnigmaNames:
     def read_enigma_names(self) -> dict[int, Optional[str]]:
         file_path = self.get_file_path()
         if file_path.exists():
-            names = core.JsonFile(file_path.read()).get_json()
+            names = core.JsonFile(file_path.read()).to_object()
             for id in names.keys():
                 self.enigma_names[int(id)] = names[id]
             return names

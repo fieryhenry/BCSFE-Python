@@ -129,13 +129,28 @@ class Config:
             return core.local_manager.get_key("enabled")
         return core.local_manager.get_key("disabled")
 
+    def get_full_input_localized(
+        self, key: ConfigKey, current_value: str, default_value: str
+    ) -> str:
+        return core.local_manager.get_key(
+            "config_full",
+            key_desc=core.local_manager.get_key(
+                Config.get_desc_key(key),
+                current_value=current_value,
+                default_value=default_value,
+                escape=False,
+            ),
+            escape=False,
+        )
+
     def edit_bool(self, key: ConfigKey):
         value = self.get_bool(key)
-        color.ColoredText.localize(
-            key.value + "_desc",
-            current_value=self.get_bool_text(value),
-            default_value=self.get_bool_text(self.get_default(key)),
-            escape=False,
+        color.ColoredText(
+            self.get_full_input_localized(
+                key,
+                self.get_bool_text(value),
+                self.get_bool_text(self.get_default(key)),
+            ),
         )
         choice = dialog_creator.ChoiceInput(
             ["enable", "disable"],
@@ -153,24 +168,119 @@ class Config:
         elif choice == 1:
             value = False
         self.set(key, value)
+        print()
         color.ColoredText.localize(
             "config_success",
         )
 
     @staticmethod
-    def edit_config(_: Any):
-        features = [
-            ConfigKey.UPDATE_TO_BETA,
-            ConfigKey.DISABLE_MAXES,
-            ConfigKey.RESET_CAT_DATA,
-            ConfigKey.SET_CAT_CURRENT_FORMS,
-            ConfigKey.STRICT_UPGRADE,
-            ConfigKey.SEPARATE_CAT_EDIT_OPTIONS,
-            ConfigKey.STRICT_BAN_PREVENTION,
-            ConfigKey.FORCE_LANG_GAME_DATA,
-            ConfigKey.CLEAR_TUTORIAL_ON_LOAD,
-            ConfigKey.REMOVE_BAN_MESSAGE_ON_LOAD,
-        ]
+    def get_desc_key(key: ConfigKey) -> str:
+        return key.value + "_desc"
+
+    def edit_int(self, key: ConfigKey):
+        text = self.get_full_input_localized(
+            key, str(self.get_int(key)), str(self.get_default(key))
+        )
+        color.ColoredText.localize(text)
+        value = dialog_creator.SingleEditor(
+            key.value, self.get_int(key), signed=False, localized_item=True
+        ).edit()
+        self.set(key, value)
+
+        color.ColoredText.localize(
+            "config_success",
+        )
+
+    def edit_locale(self):
+        text = self.get_full_input_localized(
+            ConfigKey.LOCALE,
+            self.get_str(ConfigKey.LOCALE),
+            self.get_default(ConfigKey.LOCALE),
+        )
+        color.ColoredText.localize(text)
+        all_locales = core.LocalManager.get_all_locales()
+        options = all_locales.copy() + ["add_locale", "remove_locale"]
+        value = dialog_creator.ChoiceInput.from_reduced(
+            options,
+            dialog="locale_dialog",
+            single_choice=True,
+        ).single_choice()
+        if value is None:
+            return
+        value -= 1
+        if value == len(all_locales) + 1:  # remove_locale
+            options: list[str] = []
+            for locale in all_locales:
+                if locale.startswith("ext-"):
+                    options.append(locale)
+
+            if not options:
+                color.ColoredText.localize(
+                    "no_external_locales",
+                )
+                return
+
+            options.append("cancel")
+
+            choices, _ = dialog_creator.ChoiceInput.from_reduced(
+                options, dialog="locale_remove_dialog"
+            ).multiple_choice()
+            if choices is None:
+                return
+            for choice in choices:
+                if choice == len(options) - 1:
+                    return
+                core.LocalManager.remove_locale(options[choice])
+                color.ColoredText.localize(
+                    "locale_removed",
+                    locale_name=options[choice],
+                )
+            return
+        elif value == len(all_locales):  # add_locale
+            if not core.GitHandler.is_git_installed():
+                color.ColoredText.localize(
+                    "git_not_installed",
+                )
+                return
+            git_repo = color.ColoredInput().localize("enter_locale_git_repo").strip()
+            external_locale = core.ExternalLocale.from_git_repo(git_repo)
+            if external_locale is None:
+                color.ColoredText.localize(
+                    "invalid_git_repo",
+                )
+                return
+            locale_name = external_locale.get_full_name()
+            if locale_name in all_locales:
+                if not dialog_creator.YesNoInput().get_input_once(
+                    "locale_already_exists",
+                    {"locale_name": locale_name},
+                ):
+                    color.ColoredText.localize(
+                        "locale_cancelled",
+                    )
+                    return
+
+            external_locale.save()
+
+            value = locale_name
+            color.ColoredText.localize(
+                "locale_added",
+            )
+        else:
+            value = all_locales[value]
+        self.set(ConfigKey.LOCALE, value)
+        color.ColoredText.localize(
+            "locale_changed",
+            locale_name=value,
+        )
+        color.ColoredText.localize(
+            "config_success",
+        )
+
+    @staticmethod
+    def edit_config(_: Any = None):
+        config = core.config
+        features = list(ConfigKey)
 
         choice = dialog_creator.ChoiceInput(
             [key.value for key in features],
@@ -183,4 +293,13 @@ class Config:
         if choice is None:
             return
         choice -= 1
-        core.config.edit_bool(features[choice])
+        feature = features[choice]
+        print()
+        if isinstance(config.get(feature), bool):
+            core.config.edit_bool(feature)
+        elif isinstance(config.get(feature), int):
+            core.config.edit_int(feature)
+        elif feature == ConfigKey.LOCALE:
+            core.config.edit_locale()
+
+        print()

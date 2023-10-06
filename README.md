@@ -153,3 +153,10 @@ If you want to use the editor again all you need to do is run the `py -m bcsfe` 
 
 Then if you want the latest changes you only need to run `git pull` in the downloaded
 `bcsfe` folder. (use `cd` to change the folder)
+
+## Documentation
+
+- [Custom Locales](https://github.com/fieryhenry/ExampleEditorLocale)
+
+I only have documentation for the locales atm, but I will probably add more
+documentation in the future

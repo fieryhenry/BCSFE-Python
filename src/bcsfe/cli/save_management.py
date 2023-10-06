@@ -201,11 +201,11 @@ class SaveManagement:
         SaveManagement.upload_items(save_file, check_strict)
 
     @staticmethod
-    def select_save(exit_option: bool = False) -> Optional["core.SaveFile"]:
+    def select_save(starting_options: bool = False) -> Optional["core.SaveFile"]:
         """Select a new save file.
 
         Args:
-            exit_option (bool, optional): Whether to add an exit option. Defaults to False.
+            starting_options (bool, optional): Whether to add the starting specific options. Defaults to False.
 
 
         Returns:
@@ -217,7 +217,9 @@ class SaveManagement:
             "adb_pull_save",
             "load_save_data_json",
         ]
-        if exit_option:
+        if starting_options:
+            options.append("edit_config")
+            options.append("update_locales")
             options.append("exit")
 
         root_handler = io.root_handler.RootHandler()
@@ -280,7 +282,11 @@ class SaveManagement:
                 save_path, cc = data
             else:
                 save_path = None
-        elif choice == 4 and exit_option:
+        elif choice == 4 and starting_options:
+            core.Config.edit_config()
+        elif choice == 5 and starting_options:
+            core.ExternalLocaleManager.update_all_external_locales()
+        elif choice == 6 and starting_options:
             main.Main.exit_editor(check_temp=False)
 
         if save_path is None or not save_path.exists():

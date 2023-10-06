@@ -565,7 +565,7 @@ class ExternalLocaleManager:
         print()
 
     @staticmethod
-    def update_all_external_locales():
+    def update_all_external_locales(_: Any = None):
         """Updates all external locales."""
         dirs = LocalManager.get_external_locales_folder().get_dirs()
         if not dirs:

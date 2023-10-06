@@ -92,6 +92,7 @@ class FeatureHandler:
                 "user_rank_rewards": core.game.catbase.user_rank_rewards.edit_user_rank_rewards,
             },
             "config": core.Config.edit_config,
+            "update_locales": core.ExternalLocaleManager.update_all_external_locales,
             "exit": main.Main.exit_editor,
         }
         return features

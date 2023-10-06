@@ -94,7 +94,12 @@ from bcsfe.core.io.path import Path
 from bcsfe.core.io.save import SaveError, SaveFile, CantDetectSaveCCError
 from bcsfe.core.io.thread_helper import thread_run_many
 from bcsfe.core.io.yaml import YamlFile
-from bcsfe.core.locale_handler import LocalManager
+from bcsfe.core.io.git_handler import GitHandler, Repo
+from bcsfe.core.locale_handler import (
+    LocalManager,
+    ExternalLocaleManager,
+    ExternalLocale,
+)
 from bcsfe.core.log import Logger
 from bcsfe.core.server.client_info import ClientInfo
 from bcsfe.core.server.game_data_getter import GameDataGetter

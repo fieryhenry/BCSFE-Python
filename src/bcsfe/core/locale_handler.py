@@ -1,5 +1,8 @@
+import dataclasses
+import tempfile
 from typing import Any, Optional
 from bcsfe import core
+from bcsfe.cli import color
 
 
 class PropertySet:
@@ -13,7 +16,7 @@ class PropertySet:
             property (str): Name of the property file.
         """
         self.locale = locale
-        self.path = core.Path("locales", True).add(locale).add(property + ".properties")
+        self.path = LocalManager.get_locale_folder(locale).add(property + ".properties")
         self.properties: dict[str, str] = {}
         self.parse()
 
@@ -100,11 +103,11 @@ class LocalManager:
             lc = locale
 
         self.locale = lc
-        self.path = core.Path("locales", True).add(lc)
+        self.path = LocalManager.get_locale_folder(lc)
         self.properties: dict[str, PropertySet] = {}
         self.all_properties: dict[str, str] = {}
         self.en_properties: dict[str, str] = {}
-        self.en_properties_path = core.Path("locales", True).add("en")
+        self.en_properties_path = LocalManager.get_locale_folder("en")
         self.parse()
         if self.locale == "en":
             self.en_properties = self.all_properties
@@ -134,7 +137,7 @@ class LocalManager:
             str: Value of the key.
         """
         try:
-            text = self.get_key_recursive(key, kwargs)
+            text = self.get_key_recursive(key, kwargs, escape)
         except RecursionError:
             text = key
 
@@ -278,7 +281,12 @@ class LocalManager:
             string = string.replace(char, "\\" + char)
         return string
 
-    def get_key_recursive(self, key: str, kwargs: dict[str, Any]) -> str:
+    def get_key_recursive(
+        self,
+        key: str,
+        kwargs: dict[str, Any],
+        escape: bool = True,
+    ) -> str:
         value = self.all_properties.get(key)
         if value is None:
             value = self.en_properties.get(key, key)
@@ -297,7 +305,7 @@ class LocalManager:
 
                 if key_name != key:
                     value = value.replace(
-                        "{{" + key_name + "}}", self.get_key(key_name, **kwargs)
+                        "{{" + key_name + "}}", self.get_key(key_name, escape, **kwargs)
                     )
             char_index += 1
 
@@ -350,3 +358,228 @@ class LocalManager:
                 if key in keys:
                     raise KeyError(f"Duplicate key {key}")
                 keys.add(key)
+
+    @staticmethod
+    def get_all_locales() -> list[str]:
+        """Gets all locales in the locales folder.
+
+        Returns:
+            list[str]: List of locales.
+        """
+        locales: list[str] = []
+        for folder in LocalManager.get_locales_folder().get_dirs():
+            locales.append(folder.basename())
+        for folder in LocalManager.get_external_locales_folder().get_dirs():
+            locales.append(folder.basename())
+        return locales
+
+    @staticmethod
+    def get_locales_folder() -> "core.Path":
+        """Gets the locales folder.
+
+        Returns:
+            core.Path: Path to the locales folder.
+        """
+        return core.Path("locales", True)
+
+    @staticmethod
+    def get_external_locales_folder() -> "core.Path":
+        """Gets the external locales folder.
+
+        Returns:
+            core.Path: Path to the external locales folder.
+        """
+        return core.Path.get_documents_folder().add("external_locales")
+
+    @staticmethod
+    def get_locale_folder(locale: str) -> "core.Path":
+        """Gets the folder for a locale.
+
+        Args:
+            locale (str): Language code of the locale.
+
+        Returns:
+            core.Path: Path to the locale folder.
+        """
+        if locale.startswith("ext-"):
+            return LocalManager.get_external_locales_folder().add(locale)
+        return LocalManager.get_locales_folder().add(locale)
+
+    @staticmethod
+    def remove_locale(locale: str):
+        """Removes a locale.
+
+        Args:
+            locale (str): Language code of the locale.
+        """
+        if locale not in LocalManager.get_all_locales():
+            return
+        if locale.startswith("ext-"):
+            LocalManager.get_external_locales_folder().add(locale).remove()
+        else:
+            LocalManager.get_locales_folder().add(locale).remove()
+
+        if core.config.get_str(core.ConfigKey.LOCALE) == locale:
+            core.config.set(core.ConfigKey.LOCALE, "en")
+
+
+@dataclasses.dataclass
+class ExternalLocale:
+    short_name: str
+    name: str
+    description: str
+    author: str
+    version: str
+    git_repo: Optional[str] = None
+
+    def to_json(self) -> dict[str, Any]:
+        return dataclasses.asdict(self)
+
+    @staticmethod
+    def from_json(json_data: dict[str, Any]) -> Optional["ExternalLocale"]:
+        short_name = json_data.get("short_name")
+        name = json_data.get("name")
+        description = json_data.get("description")
+        author = json_data.get("author")
+        version = json_data.get("version")
+        git_repo = json_data.get("git_repo")
+        if (
+            short_name is None
+            or name is None
+            or description is None
+            or author is None
+            or version is None
+        ):
+            return None
+        return ExternalLocale(
+            short_name,
+            name,
+            description,
+            author,
+            version,
+            git_repo,
+        )
+
+    @staticmethod
+    def from_git_repo(git_repo: str) -> Optional["ExternalLocale"]:
+        repo = core.GitHandler().get_repo(git_repo)
+        locale_json = repo.get_file(core.Path("locale.json"))
+        if locale_json is None:
+            return None
+        json_data = core.JsonFile.from_data(locale_json).to_object()
+        json_data["git_repo"] = git_repo
+        return ExternalLocale.from_json(json_data)
+
+    def get_new_version(self) -> bool:
+        if self.git_repo is None:
+            return False
+        repo = core.GitHandler().get_repo(self.git_repo)
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_dir = core.Path(temp_dir)
+            repo.clone_to_temp(temp_dir)
+            external_locale = ExternalLocaleManager.parse_external_locale(temp_dir)
+            if external_locale is None:
+                return False
+            version = external_locale.version
+
+            if version == self.version:
+                return False
+
+        repo.pull()
+        self.version = version
+        self.save()
+        return True
+
+    def save(self):
+        ExternalLocaleManager.save_locale(self)
+
+    def get_full_name(self) -> str:
+        return f"ext-{self.author}-{self.short_name}"
+
+
+class ExternalLocaleManager:
+    @staticmethod
+    def save_locale(
+        external_locale: ExternalLocale,
+    ):
+        """Saves an external locale.
+
+        Args:
+            external_locale (ExternalLocale): External locale to save.
+        """
+        if external_locale.git_repo is None:
+            return
+        folder = LocalManager.get_external_locales_folder().add(
+            external_locale.get_full_name()
+        )
+        folder.generate_dirs()
+
+        repo = core.GitHandler().get_repo(external_locale.git_repo)
+        files_dir = repo.get_folder(core.Path("files"))
+        if files_dir is None:
+            return
+
+        files_dir.copy_tree(folder)
+
+        json_data = external_locale.to_json()
+        folder.add("locale.json").write(core.JsonFile.from_object(json_data).to_data())
+
+    @staticmethod
+    def parse_external_locale(path: "core.Path") -> Optional[ExternalLocale]:
+        """Parses an external locale.
+
+        Args:
+            path (core.Path): Path to the external locale.
+
+        Returns:
+            ExternalLocale: External locale.
+        """
+        json_data = core.JsonFile.from_data(path.add("locale.json").read()).to_object()
+        return ExternalLocale.from_json(json_data)
+
+    @staticmethod
+    def update_external_locale(external_locale: ExternalLocale):
+        """Updates an external locale.
+
+        Args:
+            external_locale (ExternalLocale): External locale to update.
+        """
+        if external_locale.git_repo is None:
+            return
+        print()
+        color.ColoredText.localize(
+            "checking_for_locale_updates",
+            locale_name=external_locale.name,
+        )
+        updated = external_locale.get_new_version()
+        if updated:
+            color.ColoredText.localize(
+                "external_locale_updated",
+                locale_name=external_locale.name,
+            )
+        else:
+            color.ColoredText.localize(
+                "external_locale_no_update",
+                locale_name=external_locale.name,
+            )
+        print()
+
+    @staticmethod
+    def update_all_external_locales():
+        """Updates all external locales."""
+        dirs = LocalManager.get_external_locales_folder().get_dirs()
+        if not dirs:
+            color.ColoredText.localize(
+                "no_external_locales",
+            )
+            return
+        if not core.GitHandler.is_git_installed():
+            color.ColoredText.localize(
+                "git_not_installed",
+            )
+            return
+        for folder in dirs:
+            locale = ExternalLocaleManager.parse_external_locale(folder)
+            if locale is None:
+                continue
+            ExternalLocaleManager.update_external_locale(locale)

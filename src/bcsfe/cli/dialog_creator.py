@@ -216,10 +216,10 @@ class ChoiceInput:
         if dialog is None:
             dialog = ""
         return ChoiceInput(
-            items,
-            items,
-            ints,
-            perameters,
+            items.copy(),
+            items.copy(),
+            ints.copy(),
+            perameters.copy(),
             dialog,
             single_choice,
             remove_alias,
@@ -482,7 +482,7 @@ class SingleEditor:
         self,
         item: str,
         value: int,
-        max_value: Optional[int],
+        max_value: Optional[int] = None,
         min_value: int = 0,
         signed: bool = True,
         localized_item: bool = False,
@@ -521,6 +521,7 @@ class SingleEditor:
         )
         if usr_input is None:
             return self.value
+        print()
         color.ColoredText.localize(
             "value_changed",
             name=self.item,

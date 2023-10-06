@@ -10,6 +10,7 @@ from bcsfe.core.io import (
     thread_helper,
     root_handler,
     adb_handler,
+    git_handler,
 )
 
 __all__ = [
@@ -24,4 +25,5 @@ __all__ = [
     "thread_helper",
     "root_handler",
     "adb_handler",
+    "git_handler",
 ]

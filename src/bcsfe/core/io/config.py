@@ -385,13 +385,10 @@ class Config:
         config = core.config
         features = list(ConfigKey)
 
-        choice = dialog_creator.ChoiceInput(
+        choice = dialog_creator.ChoiceInput.from_reduced(
             [key.value for key in features],
-            [key.value for key in features],
-            [],
-            {},
-            "config_dialog",
-            True,
+            dialog="config_dialog",
+            single_choice=True,
         ).single_choice()
         if choice is None:
             return

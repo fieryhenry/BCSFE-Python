@@ -69,6 +69,11 @@ class ServerHandler:
         return save_key_data
 
     def validate_save_key_data(self, save_key_data: dict[str, Any]) -> bool:
+        key = save_key_data.get("key")
+        if key is None:
+            return False
+        if key.split("/")[2] != self.save_file.inquiry_code:
+            return False
         policy = save_key_data.get("policy")
         if policy is None:
             return False
@@ -149,6 +154,10 @@ class ServerHandler:
         self.save_password(password)
         if account_code:
             self.save_file.inquiry_code = account_code
+            self.remove_stored_auth_token()
+            self.remove_stored_save_key_data()
+            self.remove_stored_password()
+
             if timestamp is not None:
                 self.save_file.energy_penalty_timestamp = int(timestamp)
             if not self.update_managed_items():

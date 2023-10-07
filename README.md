@@ -157,6 +157,7 @@ Then if you want the latest changes you only need to run `git pull` in the downl
 ## Documentation
 
 - [Custom Locales](https://github.com/fieryhenry/ExampleEditorLocale)
+- [Custom Themes](https://github.com/fieryhenry/ExampleEditorTheme)
 
-I only have documentation for the locales atm, but I will probably add more
-documentation in the future
+I only have documentation for the locales and themes atm, but I will probably
+add more documentation in the future.

@@ -191,6 +191,23 @@ class Config:
             "config_success",
         )
 
+    def edit_game_data_repo(self):
+        text = self.get_full_input_localized(
+            ConfigKey.GAME_DATA_REPO,
+            self.get_str(ConfigKey.GAME_DATA_REPO),
+            self.get_default(ConfigKey.GAME_DATA_REPO),
+        )
+        color.ColoredText.localize(text)
+        value = dialog_creator.StringInput().get_input_locale(
+            "game_data_repo_dialog", {}
+        )
+        if value is None:
+            return
+        self.set(ConfigKey.GAME_DATA_REPO, value)
+        color.ColoredText.localize(
+            "config_success",
+        )
+
     def edit_locale(self):
         text = self.get_full_input_localized(
             ConfigKey.LOCALE,
@@ -389,5 +406,7 @@ class Config:
             core.config.edit_locale()
         elif feature == ConfigKey.THEME:
             core.config.edit_theme()
+        elif feature == ConfigKey.GAME_DATA_REPO:
+            core.config.edit_game_data_repo()
 
         print()

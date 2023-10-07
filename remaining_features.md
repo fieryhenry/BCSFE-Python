@@ -3,45 +3,24 @@
 The following is a list of features that are not yet implemented in the 3.0.0
 branch of the save editor but are in the master branch.
 
-- [ ] save conversion
-- [x] gamatoto xp / level
-- [x] ototo cat cannon
-- [x] gamatoto helpers
-- [x] fix gamatoto crashing
-- [x] upgrade special skills
-- [ ] main story clear
-- [ ] main story treasures
-- [ ] zombie stages
-- [ ] event stages
-- [ ] sol
-- [ ] uncanny legends
-- [ ] aku realm
-- [x] unlock aku realm
-- [ ] gauntlets
-- [ ] collab gauntlets
-- [ ] towers
-- [ ] behemoth culling
-- [ ] itf timed scores
-- [x] challenge battle
-- [x] clear tutorial
-- [x] catclaw dojo score
-- [x] enigma stages
-- [ ] filibuster stage reclearing
-- [ ] legend quest
-- [x] inquiry code
-- [x] token
-- [ ] old fix elsewhere unban
-- [x] unlocked slots
-- [x] gatya seed changing
-- [x] restart pack
-- [ ] meow medals
-- [x] play time
-- [x] enemy guide
-- [ ] missions
-- [x] trade progress
-- [ ] gold pass
-- [x] user rank rewards
-- [ ] cat shrine
-- [x] fix time errors
-- [ ] unlock equip menu
-- [x] edit config
+- save conversion
+- main story clear
+- main story treasures
+- zombie stages
+- event stages
+- sol
+- uncanny legends
+- aku realm
+- gauntlets
+- collab gauntlets
+- towers
+- behemoth culling
+- itf timed scores
+- filibuster stage reclearing
+- legend quest
+- old fix elsewhere unban
+- meow medals
+- missions
+- gold pass
+- cat shrine
+- unlock equip menu

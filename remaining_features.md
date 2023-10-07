@@ -44,4 +44,4 @@ branch of the save editor but are in the master branch.
 - [ ] cat shrine
 - [x] fix time errors
 - [ ] unlock equip menu
-- [ ] edit config
+- [x] edit config

@@ -485,8 +485,13 @@ class ExternalLocale:
             if version == self.version:
                 return False
 
+            self.name = external_locale.name
+            self.short_name = external_locale.short_name
+            self.description = external_locale.description
+            self.author = external_locale.author
+            self.version = version
+
         repo.pull()
-        self.version = version
         self.save()
         return True
 
@@ -546,7 +551,6 @@ class ExternalLocaleManager:
         """
         if external_locale.git_repo is None:
             return
-        print()
         color.ColoredText.localize(
             "checking_for_locale_updates",
             locale_name=external_locale.name,
@@ -556,11 +560,13 @@ class ExternalLocaleManager:
             color.ColoredText.localize(
                 "external_locale_updated",
                 locale_name=external_locale.name,
+                version=external_locale.version,
             )
         else:
             color.ColoredText.localize(
                 "external_locale_no_update",
                 locale_name=external_locale.name,
+                version=external_locale.version,
             )
         print()
 

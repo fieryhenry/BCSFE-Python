@@ -589,3 +589,18 @@ class ExternalLocaleManager:
             if locale is None:
                 continue
             ExternalLocaleManager.update_external_locale(locale)
+
+    @staticmethod
+    def get_external_locale_config() -> Optional[ExternalLocale]:
+        """Gets the external locale from the config.
+
+        Returns:
+            ExternalLocale: External locale.
+        """
+
+        locale = core.config.get_str(core.ConfigKey.LOCALE)
+        if not locale.startswith("ext-"):
+            return None
+        return ExternalLocaleManager.parse_external_locale(
+            LocalManager.get_locale_folder(locale)
+        )

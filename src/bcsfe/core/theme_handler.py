@@ -245,3 +245,18 @@ class ExternalThemeManager:
             if theme is None:
                 continue
             ExternalThemeManager.update_external_theme(theme)
+
+    @staticmethod
+    def get_external_theme_config() -> Optional[ExternalTheme]:
+        """Gets the external theme from the config.
+
+        Returns:
+            ExternalTheme: External theme.
+        """
+
+        theme = core.config.get_str(core.ConfigKey.THEME)
+        if not theme.startswith("ext-"):
+            return None
+        return ExternalThemeManager.parse_external_theme(
+            ThemeHandler.get_theme_path(theme)
+        )

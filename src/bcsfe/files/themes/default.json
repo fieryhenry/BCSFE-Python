@@ -1,8 +1,9 @@
 {
-    "info": {
-        "name": "Default",
-        "author": "fieryhenry"
-    },
+    "short_name": "default",
+    "name": "Default",
+    "description": "Default theme of the editor",
+    "author": "fieryhenry",
+    "version": "1.0.0",
     "colors": {
         "primary": "#FFFFFF",
         "secondary": "#FFFFFF",

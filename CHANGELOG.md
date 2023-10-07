@@ -115,6 +115,9 @@ if you think I take too long to update the game data
 
 - Lots more item names are taken from the game data instead of being hardcoded
 
+- Everyday, a github action will download new game data and any changes will be
+  automatically committed to the repo
+
 ## [2.7.2.3] - 2023-06-19
 
 ### Fixed

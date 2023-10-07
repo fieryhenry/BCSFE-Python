@@ -277,6 +277,92 @@ class Config:
             "config_success",
         )
 
+    def edit_theme(self):
+        themes = core.ThemeHandler.get_all_themes()
+        current_theme = self.get_str(ConfigKey.THEME)
+        if current_theme not in themes:
+            current_theme = "default"
+        text = self.get_full_input_localized(
+            ConfigKey.THEME,
+            current_theme,
+            self.get_default(ConfigKey.THEME),
+        )
+        color.ColoredText.localize(text)
+        options = themes.copy() + ["add_theme", "remove_theme"]
+        value = dialog_creator.ChoiceInput.from_reduced(
+            options,
+            dialog="theme_dialog",
+            single_choice=True,
+        ).single_choice()
+        if value is None:
+            return
+        value -= 1
+        if value == len(themes) + 1:  # remove_theme
+            options: list[str] = []
+            for theme in themes:
+                if theme.startswith("ext-"):
+                    options.append(theme)
+
+            if not options:
+                color.ColoredText.localize(
+                    "no_external_themes",
+                )
+                return
+
+            options.append("cancel")
+
+            choices, _ = dialog_creator.ChoiceInput.from_reduced(
+                options, dialog="theme_remove_dialog"
+            ).multiple_choice()
+            if choices is None:
+                return
+            for choice in choices:
+                if choice == len(options) - 1:
+                    return
+                core.ThemeHandler.remove_theme(options[choice])
+                color.ColoredText.localize(
+                    "theme_removed",
+                    theme_name=options[choice],
+                )
+            return
+        elif value == len(themes):  # add_theme
+            if not core.GitHandler.is_git_installed():
+                color.ColoredText.localize(
+                    "git_not_installed",
+                )
+                return
+            git_repo = color.ColoredInput().localize("enter_theme_git_repo").strip()
+            external_theme = core.ExternalTheme.from_git_repo(git_repo)
+            if external_theme is None:
+                color.ColoredText.localize(
+                    "invalid_git_repo",
+                )
+                return
+            theme_name = external_theme.get_full_name()
+            if theme_name in themes:
+                if not dialog_creator.YesNoInput().get_input_once(
+                    "theme_already_exists",
+                    {"theme_name": theme_name},
+                ):
+                    color.ColoredText.localize(
+                        "theme_cancelled",
+                    )
+                    return
+
+            external_theme.save()
+
+            value = theme_name
+            color.ColoredText.localize(
+                "theme_added",
+            )
+        else:
+            value = themes[value]
+        self.set(ConfigKey.THEME, value)
+        color.ColoredText.localize(
+            "theme_changed",
+            theme_name=value,
+        )
+
     @staticmethod
     def edit_config(_: Any = None):
         config = core.config
@@ -301,5 +387,7 @@ class Config:
             core.config.edit_int(feature)
         elif feature == ConfigKey.LOCALE:
             core.config.edit_locale()
+        elif feature == ConfigKey.THEME:
+            core.config.edit_theme()
 
         print()

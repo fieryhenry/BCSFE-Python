@@ -56,6 +56,7 @@ class FeatureHandler:
             "cats_special_skills": cat_features,
             "levels": {
                 "clear_tutorial": edits.clear_tutorial.clear_tutorial,
+                "clear_story": core.game.map.story.StoryChapters.clear_story,
                 "challenge_score": core.game.map.challenge.edit_challenge_score,
                 "dojo_score": core.game.map.dojo.edit_dojo_score,
                 "enigma": core.game.map.enigma.edit_enigma,

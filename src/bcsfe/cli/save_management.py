@@ -219,7 +219,7 @@ class SaveManagement:
         ]
         if starting_options:
             options.append("edit_config")
-            options.append("update_locales")
+            options.append("update_external")
             options.append("exit")
 
         root_handler = io.root_handler.RootHandler()
@@ -285,7 +285,7 @@ class SaveManagement:
         elif choice == 4 and starting_options:
             core.Config.edit_config()
         elif choice == 5 and starting_options:
-            core.ExternalLocaleManager.update_all_external_locales()
+            core.update_external_content()
         elif choice == 6 and starting_options:
             main.Main.exit_editor(check_temp=False)
 

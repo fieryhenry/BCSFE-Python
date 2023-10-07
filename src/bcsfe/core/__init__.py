@@ -1,8 +1,9 @@
-from typing import Optional
+from typing import Any, Optional
 
 from requests.exceptions import ConnectionError
 from requests import Response
 from json.decoder import JSONDecodeError
+from bcsfe.cli import color
 
 from bcsfe.core import (
     country_code,
@@ -108,7 +109,7 @@ from bcsfe.core.server.managed_item import BackupMetaData, ManagedItem, ManagedI
 from bcsfe.core.server.request import RequestHandler
 from bcsfe.core.server.server_handler import ServerHandler
 from bcsfe.core.server.updater import Updater
-from bcsfe.core.theme_handler import ThemeHandler
+from bcsfe.core.theme_handler import ThemeHandler, ExternalTheme, ExternalThemeManager
 from bcsfe.core.max_value_helper import MaxValueHelper
 
 config = Config()
@@ -208,6 +209,15 @@ def get_rank_gifts(save: SaveFile) -> RankGifts:
 
 def get_lang(save: SaveFile) -> str:
     return get_localizable(save).get_lang()
+
+
+def update_external_content(_: Any = None):
+    """Updates external content."""
+
+    color.ColoredText.localize("updating_external_content")
+    print()
+    ExternalThemeManager.update_all_external_themes()
+    ExternalLocaleManager.update_all_external_locales()
 
 
 __all__ = [

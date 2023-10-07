@@ -71,13 +71,48 @@ class Main:
                 sys.exit()
 
     def print_start_text(self):
-        theme_manager = core.theme_manager
+        external_theme = core.ExternalThemeManager.get_external_theme_config()
+        external_locale = core.ExternalLocaleManager.get_external_locale_config()
+        if external_theme is None:
+            theme_text = core.local_manager.get_key(
+                "default_theme_text",
+                theme_path=core.ThemeHandler.get_theme_path("default"),
+                escape=False,
+            )
+        else:
+            theme_text = core.local_manager.get_key(
+                "theme_text",
+                theme_name=external_theme.name,
+                theme_version=external_theme.version,
+                theme_author=external_theme.author,
+                theme_path=core.ThemeHandler.get_theme_path(
+                    external_theme.get_full_name()
+                ),
+                escape=False,
+            )
+        if external_locale is None:
+            locale_text = core.local_manager.get_key(
+                "default_locale_text",
+                path=core.LocalManager.get_locale_folder("en"),
+                escape=False,
+            )
+        else:
+            locale_text = core.local_manager.get_key(
+                "locale_text",
+                locale_name=external_locale.name,
+                locale_version=external_locale.version,
+                locale_author=external_locale.author,
+                locale_path=core.LocalManager.get_locale_folder(
+                    external_locale.get_full_name()
+                ),
+                escape=False,
+            )
         color.ColoredText.localize(
             "welcome",
             config_path=core.Config.get_config_path(),
-            theme_name=theme_manager.get_name(),
-            theme_author=theme_manager.get_author(),
-            theme_path=theme_manager.get_theme_path(theme_manager.theme_code),
+            locale_text=locale_text,
+            theme_text=theme_text,
+            escape=False,
         )
         print()
 

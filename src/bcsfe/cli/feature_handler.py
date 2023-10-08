@@ -230,6 +230,8 @@ class FeatureHandler:
                 features = self.get_features()
                 features = list(features.keys())
 
+                core.game_data_getter = None  # reset game data getter so that if an old version is removed, it will download the new version
+
     def do_save_actions(self):
         if core.config.get_bool(core.ConfigKey.CLEAR_TUTORIAL_ON_LOAD):
             edits.clear_tutorial.clear_tutorial(self.save_file, False)

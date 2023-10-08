@@ -156,7 +156,6 @@ class ServerHandler:
             self.save_file.inquiry_code = account_code
             self.remove_stored_auth_token()
             self.remove_stored_save_key_data()
-            self.remove_stored_password()
 
             if timestamp is not None:
                 self.save_file.energy_penalty_timestamp = int(timestamp)

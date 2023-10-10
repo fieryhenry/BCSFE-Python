@@ -79,7 +79,7 @@ from bcsfe.core.game.map.item_reward_stage import ItemRewardChapters
 from bcsfe.core.game.map.legend_quest import LegendQuestChapters
 from bcsfe.core.game.map.map_reset import MapResets
 from bcsfe.core.game.map.outbreaks import Outbreaks
-from bcsfe.core.game.map.story import StoryChapters
+from bcsfe.core.game.map.story import StoryChapters, TreasureText, StageNames
 from bcsfe.core.game.map.timed_score import TimedScoreChapters
 from bcsfe.core.game.map.tower import TowerChapters
 from bcsfe.core.game.map.uncanny import UncannyChapters
@@ -128,6 +128,7 @@ abilty_data: Optional[AbilityData] = None
 enemy_names: Optional[EnemyNames] = None
 rank_gift_descriptions: Optional[RankGiftDescriptions] = None
 rank_gifts: Optional[RankGifts] = None
+treasure_text: Optional[TreasureText] = None
 
 
 def get_game_data_getter(save: SaveFile) -> GameDataGetter:
@@ -205,6 +206,13 @@ def get_rank_gifts(save: SaveFile) -> RankGifts:
     if rank_gifts is None:
         rank_gifts = RankGifts(save)
     return rank_gifts
+
+
+def get_treasure_text(save: SaveFile) -> TreasureText:
+    global treasure_text
+    if treasure_text is None:
+        treasure_text = TreasureText(save)
+    return treasure_text
 
 
 def get_lang(save: SaveFile) -> str:

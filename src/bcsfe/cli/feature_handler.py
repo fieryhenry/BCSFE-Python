@@ -61,6 +61,7 @@ class FeatureHandler:
                 "dojo_score": core.game.map.dojo.edit_dojo_score,
                 "enigma": core.game.map.enigma.edit_enigma,
                 "unlock_aku_realm": edits.aku_realm.unlock_aku_realm,
+                "story_treasures": core.game.map.story.StoryChapters.edit_treasures,
             },
             "gamototo": {
                 "engineers": edits.basic_items.BasicItems.edit_engineers,

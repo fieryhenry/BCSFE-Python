@@ -98,8 +98,11 @@ class Chapter:
     def init() -> "Chapter":
         return Chapter(0)
 
-    def get_valid_treasure_stages(self) -> list[Stage]:
+    def get_treasure_stages(self) -> list[Stage]:
         return self.stages[:49]
+
+    def get_valid_treasure_stages(self) -> list[Stage]:
+        return self.stages[:48]
 
     @staticmethod
     def read_selected_stage(stream: "core.Data") -> "Chapter":
@@ -113,7 +116,7 @@ class Chapter:
         self.stages = [Stage.read_clear_times(stream) for _ in range(total_stages)]
 
     def read_treasure(self, stream: "core.Data"):
-        for stage in self.get_valid_treasure_stages():
+        for stage in self.get_treasure_stages():
             stage.read_treasure(stream)
 
     def read_time_until_treasure_chance(self, stream: "core.Data"):
@@ -146,7 +149,7 @@ class Chapter:
             stage.write_clear_times(stream)
 
     def write_treasure(self, stream: "core.Data"):
-        for stage in self.get_valid_treasure_stages():
+        for stage in self.get_treasure_stages():
             stage.write_treasure(stream)
 
     def write_time_until_treasure_chance(self, stream: "core.Data"):
@@ -326,7 +329,6 @@ class StoryChapters:
         save_file.new_dialogs_2[1] = max(save_file.new_dialogs_2[1], 2)
         save_file.new_dialogs_2[5] = max(save_file.new_dialogs_2[5], 2)
         save_file.story.clear_stage(chapter=0, stage=0)
-        save_file.story.set_treasure(chapter=0, stage=0, treasure=3)
 
     @staticmethod
     def get_chapter_names(save_file: "core.SaveFile"):
@@ -385,11 +387,11 @@ class StoryChapters:
         return progress != 0
 
     @staticmethod
-    def convert_index_stage_id_to_stage_id(index: int) -> int:
+    def convert_stage_id(index: int) -> int:
         if index == 46:
-            return 47
+            return 46
         if index == 47:
-            return 48
+            return 47
         index = 45 - index
         return index
 
@@ -399,9 +401,9 @@ class StoryChapters:
     ):
         chapter = save_file.story.get_real_chapters()[chapter_id]
         stage = chapter.stages[stage_id]
-        clear_count = dialog_creator.IntInput(min=0, max=9999).get_input_locale_while(
-            "edit_stage_clear_count", {}
-        )
+        clear_count = dialog_creator.IntInput(
+            min=0, max=core.max_value_manager.get("stage_clear_count")
+        ).get_input_locale_while("edit_stage_clear_count", {})
         if clear_count is None:
             return
         stage.clear_times = clear_count
@@ -448,6 +450,25 @@ class StoryChapters:
             chapters[7].clear_chapter()
 
     @staticmethod
+    def print_current_chapter(save_file: "core.SaveFile", chapter_id: int):
+        chapter_name = StoryChapters.get_chapter_names(save_file)[chapter_id]
+        color.ColoredText.localize("current_chapter", chapter_name=chapter_name)
+
+    @staticmethod
+    def print_current_treasure_group(
+        save_file: "core.SaveFile", chapter_id: int, treasure_group_id: int
+    ):
+        chapter_type = StoryChapters.get_chapter_type_from_index(chapter_id)
+
+        treasure_group_names = TreasureGroupNames(
+            save_file, chapter_type
+        ).treasure_group_names
+        treasure_group_name = treasure_group_names[treasure_group_id]
+        color.ColoredText.localize(
+            "current_treasure_group", treasure_group_name=treasure_group_name
+        )
+
+    @staticmethod
     def clear_story(save_file: "core.SaveFile"):
         story = save_file.story
         chapters = story.get_real_chapters()
@@ -472,6 +493,7 @@ class StoryChapters:
 
         if choice == 0:
             for chapter_id in selected_chapters:
+                StoryChapters.print_current_chapter(save_file, chapter_id)
                 chapter = chapters[chapter_id]
                 chapter_name = chapter_names[chapter_id]
                 cleared_stages = StoryChapters.edit_chapter_progress(
@@ -490,6 +512,231 @@ class StoryChapters:
                 chapter.apply_progress(progress)
 
         color.ColoredText.localize("story_cleared")
+
+    @staticmethod
+    def ask_treasure_level(save_file: "core.SaveFile") -> Optional[int]:
+        treasure_text = core.get_treasure_text(save_file).treasure_text
+        if len(treasure_text) < 3:
+            return None
+        options = [
+            "no_treasure",
+            treasure_text[0],
+            treasure_text[1],
+            treasure_text[2],
+            "custom_treasure_level",
+        ]
+        choice = dialog_creator.ChoiceInput.from_reduced(
+            options, dialog="treasure_level_dialog", single_choice=True
+        ).single_choice()
+        if choice is None:
+            return None
+        choice -= 1
+
+        max_treasure_level = core.max_value_manager.get("treasure_level")
+
+        if choice == 4:
+            treasure_level = dialog_creator.IntInput(
+                min=0, max=max_treasure_level
+            ).get_input_locale_while("custom_treasure_level_dialog", {})
+            if treasure_level is None:
+                return None
+            return treasure_level
+
+        return choice
+
+    @staticmethod
+    def get_per_chapter(chapters: list[int]) -> Optional[int]:
+        if len(chapters) == 1:
+            return 0
+
+        options = ["per_chapter", "all_selected_chapters"]
+        choice = dialog_creator.ChoiceInput.from_reduced(
+            options, dialog="treasure_dialog_per_chapter", single_choice=True
+        ).single_choice()
+        if choice is None:
+            return None
+        choice -= 1
+        return choice
+
+    @staticmethod
+    def edit_treasures_whole_chapters(save_file: "core.SaveFile", chapters: list[int]):
+        choice = StoryChapters.get_per_chapter(chapters)
+        if choice is None:
+            return
+
+        if choice == 0:
+            for chapter_id in chapters:
+                StoryChapters.print_current_chapter(save_file, chapter_id)
+                chapter = save_file.story.get_real_chapters()[chapter_id]
+                treasure_level = StoryChapters.ask_treasure_level(save_file)
+                if treasure_level is None:
+                    return
+                for stage in chapter.get_valid_treasure_stages():
+                    stage.set_treasure(treasure_level)
+        else:
+            treasure_level = StoryChapters.ask_treasure_level(save_file)
+            if treasure_level is None:
+                return
+            for chapter_id in chapters:
+                chapter = save_file.story.get_real_chapters()[chapter_id]
+                for stage in chapter.get_valid_treasure_stages():
+                    stage.set_treasure(treasure_level)
+
+    @staticmethod
+    def get_chapter_type_from_index(index: int) -> int:
+        if index < 3:
+            return 0
+        if index < 6:
+            return 1
+        return 2
+
+    @staticmethod
+    def select_stages(
+        save_file: "core.SaveFile", chapter_id: int
+    ) -> Optional[list[int]]:
+        options = ["select_stage_by_id", "select_stage_by_name"]
+        choice = dialog_creator.ChoiceInput.from_reduced(
+            options, dialog="select_stage_dialog", single_choice=True
+        ).single_choice()
+        if choice is None:
+            return None
+        choice -= 1
+
+        if choice == 0:
+            stage_ids = dialog_creator.RangeInput(48, 1).get_input_locale(
+                "select_stage_id", {}
+            )
+            if stage_ids is None:
+                return None
+            stage_ids = [stage_id - 1 for stage_id in stage_ids]
+            return stage_ids
+
+        chapter_type = StoryChapters.get_chapter_type_from_index(chapter_id)
+        stage_names = StageNames(save_file, str(chapter_type)).stage_names
+        if not stage_names:
+            return None
+        new_stage_names: list[str] = []
+        for i in range(48):
+            index_stage_id = StoryChapters.convert_stage_id(i)
+            new_stage_names.append(stage_names[index_stage_id])
+        selected_stages, _ = dialog_creator.ChoiceInput.from_reduced(
+            new_stage_names, dialog="select_stages_name"
+        ).multiple_choice(localized_options=False)
+
+        if not selected_stages:
+            return None
+
+        return selected_stages
+
+    @staticmethod
+    def edit_treasures_individual_stages(
+        save_file: "core.SaveFile", chapters: list[int]
+    ):
+        choice = StoryChapters.get_per_chapter(chapters)
+        if choice is None:
+            return
+        if choice == 0:
+            for chapter_id in chapters:
+                StoryChapters.print_current_chapter(save_file, chapter_id)
+                chapter = save_file.story.get_real_chapters()[chapter_id]
+                stage_ids = StoryChapters.select_stages(save_file, chapter_id)
+                if stage_ids is None:
+                    return
+                treasure_level = StoryChapters.ask_treasure_level(save_file)
+                if treasure_level is None:
+                    return
+                for stage_id in stage_ids:
+                    real_stage_id = StoryChapters.convert_stage_id(stage_id)
+                    chapter.set_treasure(real_stage_id, treasure_level)
+        else:
+            stage_ids = StoryChapters.select_stages(save_file, 0)
+            if stage_ids is None:
+                return
+            treasure_level = StoryChapters.ask_treasure_level(save_file)
+            if treasure_level is None:
+                return
+            for chapter_id in chapters:
+                chapter = save_file.story.get_real_chapters()[chapter_id]
+                for stage_id in stage_ids:
+                    real_stage_id = StoryChapters.convert_stage_id(stage_id)
+                    chapter.set_treasure(real_stage_id, treasure_level)
+
+    @staticmethod
+    def edit_treasures_groups(save_file: "core.SaveFile", chapters: list[int]):
+        for chapter_id in chapters:
+            StoryChapters.print_current_chapter(save_file, chapter_id)
+            chapter = save_file.story.get_real_chapters()[chapter_id]
+            chapter_type = StoryChapters.get_chapter_type_from_index(chapter_id)
+            treasure_group_data = TreasureGroupData(
+                save_file, chapter_type
+            ).treasure_group_data
+            treasure_group_names = TreasureGroupNames(
+                save_file, chapter_type
+            ).treasure_group_names
+            if not treasure_group_data or not treasure_group_names:
+                return
+            treasure_group_names_new: list[str] = []
+            for i in range(len(treasure_group_data)):
+                treasure_group_names_new.append(treasure_group_names[i])
+
+            selected_treasure_groups, _ = dialog_creator.ChoiceInput.from_reduced(
+                treasure_group_names_new, dialog="select_treasure_groups"
+            ).multiple_choice(localized_options=False)
+
+            if not selected_treasure_groups:
+                return
+
+            options = ["group_individual", "group_all_at_once"]
+            choice = dialog_creator.ChoiceInput.from_reduced(
+                options, dialog="select_treasure_groups_individual"
+            ).single_choice()
+            if choice is None:
+                return
+            choice -= 1
+
+            if choice == 0:
+                for treasure_group_id in selected_treasure_groups:
+                    StoryChapters.print_current_treasure_group(
+                        save_file, chapter_id, treasure_group_id
+                    )
+                    treasure_level = StoryChapters.ask_treasure_level(save_file)
+                    if treasure_level is None:
+                        return
+                    treasure_group = treasure_group_data[treasure_group_id]
+                    for stage_id in treasure_group:
+                        chapter.set_treasure(stage_id, treasure_level)
+
+            else:
+                treasure_level = StoryChapters.ask_treasure_level(save_file)
+                if treasure_level is None:
+                    return
+
+                for treasure_group_id in selected_treasure_groups:
+                    treasure_group = treasure_group_data[treasure_group_id]
+                    for stage_id in treasure_group:
+                        chapter.set_treasure(stage_id, treasure_level)
+
+    @staticmethod
+    def edit_treasures(save_file: "core.SaveFile"):
+        selected_chapters = StoryChapters.select_story_chapters(save_file)
+        if not selected_chapters:
+            return
+        options = ["whole_chapters", "individual_stages", "treasure_groups"]
+        choice = dialog_creator.ChoiceInput.from_reduced(
+            options, dialog="treasure_dialog", single_choice=True
+        ).single_choice()
+        if choice is None:
+            return
+        choice -= 1
+
+        if choice == 0:
+            StoryChapters.edit_treasures_whole_chapters(save_file, selected_chapters)
+        elif choice == 1:
+            StoryChapters.edit_treasures_individual_stages(save_file, selected_chapters)
+        elif choice == 2:
+            StoryChapters.edit_treasures_groups(save_file, selected_chapters)
+
+        color.ColoredText.localize("treasures_edited")
 
 
 class StageNames:
@@ -514,9 +761,94 @@ class StageNames:
             file, delimiter=core.Delimeter.from_country_code_res(self.save_file.cc)
         )
         stage_names: list[str] = []
-        for row in csv:
+        for row in csv.lines[:48]:
             stage_names.append(row[0].to_str())
         return stage_names
 
     def get_stage_name(self, stage_id: int) -> str:
         return self.stage_names[stage_id]
+
+
+class TreasureText:
+    def __init__(self, save_file: "core.SaveFile"):
+        self.save_file = save_file
+        self.treasure_text = self.get_treasure_text()
+
+    def get_tt_file_name(self) -> str:
+        localizable = core.get_localizable(self.save_file)
+        return f"Treasure2_{localizable.get_lang()}.csv"
+
+    def get_treasure_text(self) -> list[str]:
+        file_name = self.get_tt_file_name()
+        gdg = core.get_game_data_getter(self.save_file)
+        file = gdg.download("resLocal", file_name)
+        if file is None:
+            return []
+        csv = core.CSV(
+            file, delimiter=core.Delimeter.from_country_code_res(self.save_file.cc)
+        )
+        treasure_text: list[str] = []
+        for row in csv:
+            treasure_text.append(row[0].to_str())
+        return treasure_text
+
+
+class TreasureGroupData:
+    def __init__(self, save_file: "core.SaveFile", chapter_type: int):
+        self.save_file = save_file
+        self.chapter_type = chapter_type
+        self.treasure_group_data = self.get_treasure_group_data()
+
+    def get_tgd_file_name(self) -> str:
+        if self.chapter_type == 0:
+            return "treasureData0.csv"
+        if self.chapter_type == 1:
+            return "treasureData1.csv"
+        if self.chapter_type == 2:
+            return "treasureData2_0.csv"
+        return ""
+
+    def get_treasure_group_data(self) -> list[list[int]]:
+        gdg = core.get_game_data_getter(self.save_file)
+        file = gdg.download("DataLocal", self.get_tgd_file_name())
+        if file is None:
+            return []
+        csv = core.CSV(file)
+        treasure_group_data: list[list[int]] = []
+        for row in csv.lines[11:22]:
+            treasure_group_data.append(
+                [value.to_int() for value in row if value.to_int() != -1]
+            )
+
+        return treasure_group_data
+
+
+class TreasureGroupNames:
+    def __init__(self, save_file: "core.SaveFile", chapter_type: int):
+        self.save_file = save_file
+        self.chapter_type = chapter_type
+        self.treasure_group_names = self.get_treasure_group_names()
+
+    def get_tgn_file_name(self) -> str:
+        localizable = core.get_localizable(self.save_file)
+        lang = localizable.get_lang()
+        if self.chapter_type == 0:
+            return f"Treasure3_0_{lang}.csv"
+        if self.chapter_type == 1:
+            return f"Treasure3_1_{lang}.csv"
+        if self.chapter_type == 2:
+            return f"Treasure3_2_0_{lang}.csv"
+        return ""
+
+    def get_treasure_group_names(self) -> list[str]:
+        gdg = core.get_game_data_getter(self.save_file)
+        file = gdg.download("resLocal", self.get_tgn_file_name())
+        if file is None:
+            return []
+        csv = core.CSV(
+            file, delimiter=core.Delimeter.from_country_code_res(self.save_file.cc)
+        )
+        treasure_group_names: list[str] = []
+        for row in csv:
+            treasure_group_names.append(row[0].to_str())
+        return treasure_group_names

@@ -15,5 +15,8 @@
         "new": 998
     },
     "base_materials": 9999,
-    "labyrinth_medals": 9999
+    "labyrinth_medals": 9999,
+    "talent_orbs": 9999,
+    "treasure_level": 9999,
+    "stage_clear_count": 9999
 }

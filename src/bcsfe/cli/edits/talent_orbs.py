@@ -506,6 +506,8 @@ class SaveOrbs:
         for orb in orb_selection:
             color.ColoredText(orb.to_colortext())
 
+        max_orbs = core.max_value_manager.get("talent_orbs")
+
         individual = (
             color.ColoredInput().localize("edit_orbs_individually").lower() == "i"
         )
@@ -518,7 +520,7 @@ class SaveOrbs:
                     orb_count = 0
 
                 orb_count = color.ColoredInput().localize(
-                    "input", name=orb.to_colortext(), value=orb_count, max=9999
+                    "input", name=orb.to_colortext(), value=orb_count, max=max_orbs
                 )
                 if orb_count == core.local_manager.get_key("quit_key"):
                     break
@@ -526,12 +528,12 @@ class SaveOrbs:
                     orb_count = int(orb_count)
                 except ValueError:
                     continue
-                orb_count = min(orb_count, 9999)
+                orb_count = min(orb_count, max_orbs)
 
                 self.orbs[orb_id] = SaveOrb(orb, orb_count)
 
         else:
-            int_input = dialog_creator.IntInput(9999)
+            int_input = dialog_creator.IntInput(max_orbs)
             orb_count = int_input.get_input_locale_while("edit_orbs_all", {})
             if orb_count is None:
                 return

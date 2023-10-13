@@ -97,6 +97,7 @@ class FeatureHandler:
                 "enemy_guide": edits.enemy_editor.EnemyEditor.edit_enemy_guide,
                 "user_rank_rewards": core.game.catbase.user_rank_rewards.edit_user_rank_rewards,
                 "unlock_equip_menu": edits.basic_items.BasicItems.unlock_equip_menu,
+                "gold_pass": core.game.catbase.nyanko_club.NyankoClub.edit_gold_pass,
             },
             "config": core.Config.edit_config,
             "update_external": core.update_external_content,

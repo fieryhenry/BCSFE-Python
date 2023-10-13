@@ -17,4 +17,3 @@ branch of the save editor but are in the master branch.
 - old fix elsewhere unban
 - meow medals
 - missions
-- gold pass

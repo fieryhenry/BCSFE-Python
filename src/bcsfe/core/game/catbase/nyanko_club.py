@@ -1,6 +1,10 @@
+import datetime
+import random
+import time
 from typing import Any, Optional
 
 from bcsfe import core
+from bcsfe.cli import dialog_creator, color
 
 
 class NyankoClub:
@@ -158,3 +162,91 @@ class NyankoClub:
 
     def __str__(self):
         return f"NyankoClub {self.officer_id}"
+
+    def get_gold_pass(
+        self, officer_id: int, total_days: int, save_file: "core.SaveFile"
+    ):
+        self.officer_id = officer_id
+        start_date = int(time.time())
+        end_date = start_date + datetime.timedelta(days=total_days).total_seconds()
+        end_date_2 = (
+            start_date + datetime.timedelta(days=total_days * 2).total_seconds()
+        )
+
+        self.officer_id = officer_id
+        self.total_renewal_times += 1
+        self.total_renewal_times = max(2, self.total_renewal_times)
+        self.start_date = start_date
+        self.end_date = end_date
+
+        self.unknown_ts_1 = end_date
+        self.unknown_ts_2 = end_date_2
+
+        self.start_date_2 = start_date
+        self.end_date_2 = end_date_2
+
+        self.unknown_ts_3 = start_date
+
+        self.flag = 2
+
+        self.end_date_3 = end_date
+
+        self.unknown_ts_4 = 0.0
+        self.unknown_bool_1 = True
+        self.unknown_bool_2 = False
+
+        login = save_file.logins.get_login(5100)
+        if login is not None:
+            login.count = 0
+
+        self.claimed_rewards = {}
+
+    def remove_gold_pass(self, save_file: "core.SaveFile"):
+        self.officer_id = -1
+        self.total_renewal_times = 0
+        self.start_date = 0.0
+        self.end_date = 0.0
+        self.unknown_ts_1 = 0.0
+        self.unknown_ts_2 = 0.0
+        self.start_date_2 = 0.0
+        self.end_date_2 = 0.0
+        self.unknown_ts_3 = 0.0
+        self.flag = 0
+        self.end_date_3 = 0.0
+        self.unknown_ts_4 = 0.0
+        self.unknown_bool_1 = False
+        self.unknown_bool_2 = False
+
+        login = save_file.logins.get_login(5100)
+        if login is not None:
+            login.count = 0
+
+        self.claimed_rewards = {}
+
+    @staticmethod
+    def get_random_officer_id() -> int:
+        return random.randint(1, 2**16 - 1)
+
+    @staticmethod
+    def edit_gold_pass(save_file: "core.SaveFile"):
+        club = save_file.officer_pass.gold_pass
+
+        officer_id = color.ColoredInput().localize("gold_pass_dialog").strip()
+        if not officer_id:
+            officer_id = NyankoClub.get_random_officer_id()
+
+        if officer_id == "-1":
+            officer_id = -1
+        else:
+            try:
+                officer_id = int(officer_id)
+            except ValueError:
+                officer_id = NyankoClub.get_random_officer_id()
+            officer_id = dialog_creator.IntInput().clamp_value(officer_id)
+
+        if officer_id == -1:
+            club.remove_gold_pass(save_file)
+            color.ColoredText.localize("gold_pass_remove_success")
+        else:
+            club.get_gold_pass(officer_id, 30, save_file)
+            color.ColoredText.localize("gold_pass_get_success", id=officer_id)

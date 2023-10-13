@@ -368,8 +368,7 @@ class StoryChapters:
         return selected_chapters
 
     @staticmethod
-    def get_selected_chapter_progress() -> Optional[int]:
-        max_stages = 48
+    def get_selected_chapter_progress(max_stages: int = 48) -> Optional[int]:
         progress = dialog_creator.IntInput(
             min=0, max=max_stages
         ).get_input_locale_while("edit_chapter_progress_all", {"max": max_stages})
@@ -404,14 +403,31 @@ class StoryChapters:
         return index
 
     @staticmethod
+    def ask_clear_count() -> Optional[int]:
+        clear_count = dialog_creator.IntInput(
+            min=0, max=core.max_value_manager.get("stage_clear_count")
+        ).get_input_locale_while("edit_stage_clear_count", {})
+
+        return clear_count
+
+    @staticmethod
+    def ask_if_individual_clear_counts() -> Optional[bool]:
+        options = ["individual_clear_counts", "all_clear_counts"]
+        choice = dialog_creator.ChoiceInput.from_reduced(
+            options, dialog="individual_clear_counts_dialog", single_choice=True
+        ).single_choice()
+        if choice is None:
+            return None
+        choice -= 1
+        return choice == 0
+
+    @staticmethod
     def edit_stage_clear_count(
         save_file: "core.SaveFile", chapter_id: int, stage_id: int
     ):
         chapter = save_file.story.get_real_chapters()[chapter_id]
         stage = chapter.stages[stage_id]
-        clear_count = dialog_creator.IntInput(
-            min=0, max=core.max_value_manager.get("stage_clear_count")
-        ).get_input_locale_while("edit_stage_clear_count", {})
+        clear_count = StoryChapters.ask_clear_count()
         if clear_count is None:
             return
         stage.clear_times = clear_count
@@ -748,9 +764,10 @@ class StoryChapters:
 
 
 class StageNames:
-    def __init__(self, save_file: "core.SaveFile", chapter: str):
+    def __init__(self, save_file: "core.SaveFile", chapter: str, max_stages: int = 48):
         self.save_file = save_file
         self.chapter = chapter
+        self.max_stages = max_stages
         self.stage_names = self.get_stage_names()
 
     def get_file_name(self) -> str:
@@ -769,9 +786,14 @@ class StageNames:
             file, delimiter=core.Delimeter.from_country_code_res(self.save_file.cc)
         )
         stage_names: list[str] = []
-        for row in csv.lines[:48]:
-            stage_names.append(row[0].to_str())
-        return stage_names
+        if self.chapter.isdigit():
+            for row in csv:
+                stage_names.append(row[0].to_str())
+        else:
+            for row in csv:
+                for value in row:
+                    stage_names.append(value.to_str())
+        return stage_names[: self.max_stages]
 
     def get_stage_name(self, stage_id: int) -> str:
         return self.stage_names[stage_id]

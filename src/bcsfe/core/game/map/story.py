@@ -331,8 +331,14 @@ class StoryChapters:
         save_file.story.clear_stage(chapter=0, stage=0)
 
     @staticmethod
-    def get_chapter_names(save_file: "core.SaveFile"):
-        chapters = save_file.story.get_real_chapters()
+    def get_chapter_names(
+        save_file: "core.SaveFile", chapter_ids: Optional[list[int]] = None
+    ):
+        if chapter_ids is None:
+            chapters = save_file.story.get_real_chapters()
+        else:
+            chapters = [save_file.story.get_real_chapters()[i] for i in chapter_ids]
+
         chapter_names: list[str] = []
         localizable = core.get_localizable(save_file)
         eoc_name = localizable.get("everyplay_mapname_J")
@@ -350,8 +356,10 @@ class StoryChapters:
         return chapter_names
 
     @staticmethod
-    def select_story_chapters(save_file: "core.SaveFile") -> Optional[list[int]]:
-        chapter_names = StoryChapters.get_chapter_names(save_file)
+    def select_story_chapters(
+        save_file: "core.SaveFile", chapters: Optional[list[int]] = None
+    ) -> Optional[list[int]]:
+        chapter_names = StoryChapters.get_chapter_names(save_file, chapters)
 
         selected_chapters, _ = dialog_creator.ChoiceInput.from_reduced(
             chapter_names, dialog="select_story_chapters"

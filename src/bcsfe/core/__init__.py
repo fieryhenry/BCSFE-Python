@@ -59,7 +59,7 @@ from bcsfe.core.game.catbase.user_rank_rewards import (
 )
 from bcsfe.core.game.catbase.playtime import PlayTime
 from bcsfe.core.game.gamoto.base_materials import BaseMaterials
-from bcsfe.core.game.gamoto.cat_shrine import CatShrine
+from bcsfe.core.game.gamoto.cat_shrine import CatShrine, CatShrineLevels
 from bcsfe.core.game.gamoto.gamatoto import (
     Gamatoto,
     GamatotoLevels,
@@ -129,6 +129,7 @@ enemy_names: Optional[EnemyNames] = None
 rank_gift_descriptions: Optional[RankGiftDescriptions] = None
 rank_gifts: Optional[RankGifts] = None
 treasure_text: Optional[TreasureText] = None
+cat_shrine_levels: Optional[CatShrineLevels] = None
 
 
 def get_game_data_getter(save: SaveFile) -> GameDataGetter:
@@ -213,6 +214,13 @@ def get_treasure_text(save: SaveFile) -> TreasureText:
     if treasure_text is None:
         treasure_text = TreasureText(save)
     return treasure_text
+
+
+def get_cat_shrine_levels(save: SaveFile) -> CatShrineLevels:
+    global cat_shrine_levels
+    if cat_shrine_levels is None:
+        cat_shrine_levels = CatShrineLevels(save)
+    return cat_shrine_levels
 
 
 def get_lang(save: SaveFile) -> str:

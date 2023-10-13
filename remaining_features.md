@@ -18,4 +18,3 @@ branch of the save editor but are in the master branch.
 - meow medals
 - missions
 - gold pass
-- cat shrine

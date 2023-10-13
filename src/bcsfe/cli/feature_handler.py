@@ -71,6 +71,7 @@ class FeatureHandler:
                 "gamatoto_xp_level": core.game.gamoto.gamatoto.edit_xp,
                 "gamatoto_helpers": core.game.gamoto.gamatoto.edit_helpers,
                 "ototo_cat_cannon": core.game.gamoto.ototo.edit_cannon,
+                "cat_shrine": core.game.gamoto.cat_shrine.CatShrine.edit_catshrine,
             },
             "account": {
                 "unban_account": save_management.SaveManagement.unban_account,

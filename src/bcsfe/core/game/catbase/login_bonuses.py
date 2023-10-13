@@ -171,3 +171,9 @@ class LoginBonus:
 
     def __str__(self):
         return f"LoginBonus({self.old_logins}, {self.logins})"
+
+    def get_login(self, id: int) -> Optional[Login]:
+        if self.logins is not None:
+            return self.logins.get(id)
+        else:
+            return None

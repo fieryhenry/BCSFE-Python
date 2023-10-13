@@ -7,7 +7,6 @@ branch of the save editor but are in the master branch.
 - event stages
 - sol
 - uncanny legends
-- aku realm
 - gauntlets
 - collab gauntlets
 - towers

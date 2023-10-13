@@ -1,5 +1,6 @@
 from typing import Any
 from bcsfe import core
+from bcsfe.cli import color
 
 
 class Stage:
@@ -33,10 +34,13 @@ class Stage:
     def __str__(self):
         return self.__repr__()
 
+    def clear_stage(self, clear_count: int = 1):
+        self.clear_times = clear_count
+
 
 class Chapter:
-    def __init__(self, clear_progress: int, total_stages: int = 0):
-        self.clear_progress = clear_progress
+    def __init__(self, current_stage: int, total_stages: int = 0):
+        self.current_stage = current_stage
         self.stages: list[Stage] = [Stage.init() for _ in range(total_stages)]
 
     @staticmethod
@@ -44,12 +48,12 @@ class Chapter:
         return Chapter(0, total_stages)
 
     @staticmethod
-    def read_clear_progress(data: "core.Data"):
-        clear_progress = data.read_byte()
-        return Chapter(clear_progress)
+    def read_current_stage(data: "core.Data"):
+        current_stage = data.read_byte()
+        return Chapter(current_stage)
 
-    def write_clear_progress(self, data: "core.Data"):
-        data.write_byte(self.clear_progress)
+    def write_current_stage(self, data: "core.Data"):
+        data.write_byte(self.current_stage)
 
     def read_stages(self, data: "core.Data", total_stages: int):
         self.stages = [Stage.read(data) for _ in range(total_stages)]
@@ -60,18 +64,18 @@ class Chapter:
 
     def serialize(self) -> dict[str, Any]:
         return {
-            "clear_progress": self.clear_progress,
+            "current_stage": self.current_stage,
             "stages": [stage.serialize() for stage in self.stages],
         }
 
     @staticmethod
     def deserialize(data: dict[str, Any]) -> "Chapter":
-        chapter = Chapter(data.get("clear_progress", 0))
+        chapter = Chapter(data.get("current_stage", 0))
         chapter.stages = [Stage.deserialize(stage) for stage in data.get("stages", [])]
         return chapter
 
     def __repr__(self):
-        return f"Chapter({self.clear_progress}, {self.stages})"
+        return f"Chapter({self.current_stage}, {self.stages})"
 
     def __str__(self):
         return self.__repr__()
@@ -86,13 +90,13 @@ class ChaptersStars:
         return ChaptersStars([Chapter.init(total_stages) for _ in range(total_stars)])
 
     @staticmethod
-    def read_clear_progress(data: "core.Data", total_stars: int):
-        chapters = [Chapter.read_clear_progress(data) for _ in range(total_stars)]
+    def read_current_stage(data: "core.Data", total_stars: int):
+        chapters = [Chapter.read_current_stage(data) for _ in range(total_stars)]
         return ChaptersStars(chapters)
 
-    def write_clear_progress(self, data: "core.Data"):
+    def write_current_stage(self, data: "core.Data"):
         for chapter in self.chapters:
-            chapter.write_clear_progress(data)
+            chapter.write_current_stage(data)
 
     def read_stages(self, data: "core.Data", total_stages: int):
         for chapter in self.chapters:
@@ -132,7 +136,7 @@ class AkuChapters:
         total_stars = data.read_byte()
 
         chapters = [
-            ChaptersStars.read_clear_progress(data, total_stars)
+            ChaptersStars.read_current_stage(data, total_stars)
             for _ in range(total_chapters)
         ]
 
@@ -153,7 +157,7 @@ class AkuChapters:
             data.write_byte(0)
 
         for chapter in self.chapters:
-            chapter.write_clear_progress(data)
+            chapter.write_current_stage(data)
 
         for chapter in self.chapters:
             chapter.write_stages(data)
@@ -171,3 +175,42 @@ class AkuChapters:
 
     def __str__(self):
         return self.__repr__()
+
+    @staticmethod
+    def edit_aku_chapters(save_file: "core.SaveFile"):
+        aku = save_file.aku
+        chapter = aku.chapters[0].chapters[0]
+
+        clear_progress = core.StoryChapters.get_selected_chapter_progress(
+            max_stages=len(chapter.stages)
+        )
+        if clear_progress is None:
+            return
+
+        if clear_progress > 1:
+            individual_clear_count = core.StoryChapters.ask_if_individual_clear_counts()
+            if individual_clear_count is None:
+                return
+        else:
+            individual_clear_count = True
+
+        if individual_clear_count:
+            stage_names = core.StageNames(save_file, "DM", 49).stage_names
+            for i, stage in enumerate(chapter.stages[:clear_progress]):
+                stage_name = stage_names[i]
+                color.ColoredText.localize("aku_current_stage", name=stage_name, id=i)
+                clear_count = core.StoryChapters.ask_clear_count()
+                if clear_count is None:
+                    return
+                stage.clear_stage(clear_count)
+        else:
+            clear_count = core.StoryChapters.ask_clear_count()
+            if clear_count is None:
+                return
+            for stage in chapter.stages[:clear_progress]:
+                stage.clear_stage(clear_count)
+
+        for i in range(clear_progress, len(chapter.stages)):
+            chapter.stages[i].clear_stage(clear_count=0)
+
+        color.ColoredText.localize("aku_clear_success")

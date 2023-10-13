@@ -62,6 +62,7 @@ class FeatureHandler:
                 "enigma": core.game.map.enigma.edit_enigma,
                 "unlock_aku_realm": edits.aku_realm.unlock_aku_realm,
                 "story_treasures": core.game.map.story.StoryChapters.edit_treasures,
+                "outbreaks": core.game.map.outbreaks.Outbreaks.edit_outbreaks,
             },
             "gamototo": {
                 "engineers": edits.basic_items.BasicItems.edit_engineers,

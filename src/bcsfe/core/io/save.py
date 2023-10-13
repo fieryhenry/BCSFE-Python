@@ -974,6 +974,22 @@ class SaveFile:
 
             self.gv_120400 = self.data.read_int()
 
+        if self.game_version >= 120500:
+            self.ub32 = self.data.read_bool()
+            self.ub33 = self.data.read_bool()
+            self.ub34 = self.data.read_bool()
+
+            self.ui21 = self.data.read_int()
+            self.uby13 = self.data.read_byte()
+
+            self.gv_120500 = self.data.read_int()
+
+        if self.game_version >= 120600:
+            self.sound_effects_volume = self.data.read_byte()
+            self.background_music_volume = self.data.read_byte()
+
+            self.gv_120600 = self.data.read_int()
+
         self.remaining_data = self.data.read_to_end(32)
 
     def save(self, data: "core.Data"):
@@ -1787,6 +1803,21 @@ class SaveFile:
 
             self.data.write_int(self.gv_120400)
 
+        if self.game_version >= 120500:
+            self.data.write_bool(self.ub32)
+            self.data.write_bool(self.ub33)
+            self.data.write_bool(self.ub34)
+            self.data.write_int(self.ui21)
+            self.data.write_byte(self.uby13)
+
+            self.data.write_int(self.gv_120500)
+
+        if self.game_version >= 120600:
+            self.data.write_byte(self.sound_effects_volume)
+            self.data.write_byte(self.background_music_volume)
+
+            self.data.write_int(self.gv_120600)
+
         self.data.write_bytes(self.remaining_data)
 
     def to_data(self) -> "core.Data":
@@ -2153,6 +2184,15 @@ class SaveFile:
             "ud11": self.ud11,
             "ud12": self.ud12,
             "gv_120400": self.gv_120400,
+            "ub32": self.ub32,
+            "ub33": self.ub33,
+            "ub34": self.ub34,
+            "ui21": self.ui21,
+            "uby13": self.uby13,
+            "gv_120500": self.gv_120500,
+            "sound_effects_volume": self.sound_effects_volume,
+            "background_music_volume": self.background_music_volume,
+            "gv_120600": self.gv_120600,
             "remaining_data": base64.b64encode(self.remaining_data).decode("utf-8"),
         }
         return data
@@ -2545,6 +2585,15 @@ class SaveFile:
         save_file.ud11 = data.get("ud11", 0.0)
         save_file.ud12 = data.get("ud12", 0.0)
         save_file.gv_120400 = data.get("gv_120400", 120400)
+        save_file.ub32 = data.get("ub32", False)
+        save_file.ub33 = data.get("ub33", False)
+        save_file.ub34 = data.get("ub34", False)
+        save_file.ui21 = data.get("ui21", 0)
+        save_file.uby13 = data.get("uby13", 0)
+        save_file.gv_120500 = data.get("gv_120500", 120500)
+        save_file.sound_effects_volume = data.get("sound_effects_volume", 0)
+        save_file.background_music_volume = data.get("background_music_volume", 0)
+        save_file.gv_120600 = data.get("gv_120600", 120600)
 
         save_file.remaining_data = base64.b64decode(data.get("remaining_data", ""))
 
@@ -2591,6 +2640,9 @@ class SaveFile:
         self.ub29 = False
         self.ub30 = False
         self.ub31 = False
+        self.ub32 = False
+        self.ub33 = False
+        self.ub34 = False
 
         self.mute_bgm = False
         self.mute_se = False
@@ -2626,6 +2678,7 @@ class SaveFile:
         self.ui18 = 0
         self.ui19 = 0
         self.ui20 = 0
+        self.ui21 = 0
 
         self.gv_44 = 44
         self.gv_45 = 45
@@ -2690,6 +2743,8 @@ class SaveFile:
         self.gv_120100 = 120100
         self.gv_120200 = 120200
         self.gv_120400 = 120400
+        self.gv_120500 = 120500
+        self.gv_120600 = 120600
 
         self.catfood = 0
         self.current_energy = 0
@@ -2726,6 +2781,8 @@ class SaveFile:
         self.legend_tickets = 0
         self.date_int = 0
         self.platinum_shards = 0
+        self.sound_effects_volume = 0
+        self.background_music_volume = 0
 
         self.ud1 = 0.0
         self.ud2 = 0.0
@@ -2875,6 +2932,7 @@ class SaveFile:
         self.uby10 = 0
         self.uby11 = 0
         self.uby12 = 0
+        self.uby13 = 0
 
         self.has_account = 0
         self.filibuster_stage_id = 0
@@ -3039,6 +3097,8 @@ class SaveFile:
             assert self.gv_120100 == 120100
             assert self.gv_120200 == 120200
             assert self.gv_120400 == 120400
+            assert self.gv_120500 == 120500
+            assert self.gv_120600 == 120600
         except AssertionError:
             return False
         return True

@@ -498,6 +498,7 @@ class Cat:
         self.unlocked = 1
         self.gatya_seen = 1
         core.get_chara_drop(save_file).unlock_drops_from_cat_id(self.id)
+        save_file.unlock_equip_menu()
 
     def remove(self, reset: bool = False):
         self.unlocked = 0

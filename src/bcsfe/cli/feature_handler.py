@@ -86,6 +86,7 @@ class FeatureHandler:
             "fixes": {
                 "fix_gamatoto_crash": edits.fixes.Fixes.fix_gamatoto_crash,
                 "fix_time_errors": edits.fixes.Fixes.fix_time_errors,
+                "unlock_equip_menu": edits.basic_items.BasicItems.unlock_equip_menu,
             },
             "other": {
                 "unlocked_slots": edits.basic_items.BasicItems.edit_unlocked_slots,
@@ -94,6 +95,7 @@ class FeatureHandler:
                 "playtime": core.game.catbase.playtime.edit,
                 "enemy_guide": edits.enemy_editor.EnemyEditor.edit_enemy_guide,
                 "user_rank_rewards": core.game.catbase.user_rank_rewards.edit_user_rank_rewards,
+                "unlock_equip_menu": edits.basic_items.BasicItems.unlock_equip_menu,
             },
             "config": core.Config.edit_config,
             "update_external": core.update_external_content,

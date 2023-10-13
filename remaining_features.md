@@ -19,4 +19,3 @@ branch of the save editor but are in the master branch.
 - missions
 - gold pass
 - cat shrine
-- unlock equip menu

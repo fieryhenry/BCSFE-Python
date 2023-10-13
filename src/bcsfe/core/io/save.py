@@ -3237,3 +3237,6 @@ class SaveFile:
                 saves = inquiry.get_files()
                 if len(saves) == 0:
                     inquiry.remove()
+
+    def unlock_equip_menu(self):
+        self.menu_unlocks[2] = max(self.menu_unlocks[2], 1)

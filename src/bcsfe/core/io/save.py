@@ -770,7 +770,7 @@ class SaveFile:
         if self.game_version >= 100400:
             length = self.data.read_byte()
             self.uil8 = self.data.read_int_list(length)
-            self.ub14 = self.data.read_bool()
+            self.two_battle_lines = self.data.read_bool()
 
             self.gv_100400 = self.data.read_int()
 
@@ -1618,7 +1618,7 @@ class SaveFile:
         if self.game_version >= 100400:
             self.data.write_byte(len(self.uil8))
             self.data.write_int_list(self.uil8, write_length=False)
-            self.data.write_bool(self.ub14)
+            self.data.write_bool(self.two_battle_lines)
             self.data.write_int(self.gv_100400)
 
         if self.game_version >= 100600:
@@ -2079,7 +2079,7 @@ class SaveFile:
             "utl2": self.utl2,
             "gv_100300": self.gv_100300,
             "uil8": self.uil8,
-            "ub14": self.ub14,
+            "two_battle_lines": self.two_battle_lines,
             "gv_100400": self.gv_100400,
             "ud10": self.ud10,
             "platinum_shards": self.platinum_shards,
@@ -2467,7 +2467,7 @@ class SaveFile:
         save_file.utl2 = data.get("utl2", [(False, False, 0, 0.0, 0.0)] * 6)
         save_file.gv_100300 = data.get("gv_100300", 100300)
         save_file.uil8 = data.get("uil8", [])
-        save_file.ub14 = data.get("ub14", False)
+        save_file.two_battle_lines = data.get("two_battle_lines", False)
         save_file.gv_100400 = data.get("gv_100400", 100400)
         save_file.ud10 = data.get("ud10", 0.0)
         save_file.platinum_shards = data.get("platinum_shards", 0)
@@ -2573,7 +2573,7 @@ class SaveFile:
         self.ub11 = False
         self.ub12 = False
         self.ub13 = False
-        self.ub14 = False
+        self.two_battle_lines = False
         self.ub15 = False
         self.ub16 = False
         self.ub17 = False

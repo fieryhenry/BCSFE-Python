@@ -98,6 +98,7 @@ class FeatureHandler:
                 "user_rank_rewards": core.game.catbase.user_rank_rewards.edit_user_rank_rewards,
                 "unlock_equip_menu": edits.basic_items.BasicItems.unlock_equip_menu,
                 "gold_pass": core.game.catbase.nyanko_club.NyankoClub.edit_gold_pass,
+                "medals": core.game.catbase.medals.Medals.edit_medals,
             },
             "config": core.Config.edit_config,
             "update_external": core.update_external_content,

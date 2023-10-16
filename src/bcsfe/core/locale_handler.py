@@ -113,19 +113,18 @@ class LocalManager:
             self.en_properties = self.all_properties
 
     def parse(self):
-        """Parses all property files in the locale folder."""
-        for file in self.path.get_files():
-            file_name = file.basename()
-            if file_name.endswith(".properties"):
-                property_set = PropertySet(self.locale, file_name[:-11])
-                self.all_properties.update(property_set.properties)
-                self.properties[file_name[:-11]] = property_set
+        """Parses all property files in the locale folder recursively."""
+        for file in self.path.glob("**/*.properties", recursive=True):
+            file_name = file.strip_path_from(self.path).path
+            property_set = PropertySet(self.locale, file_name[:-11])
+            self.all_properties.update(property_set.properties)
+            self.properties[file_name[:-11]] = property_set
+
         if self.locale != "en":
-            for file in self.en_properties_path.get_files():
-                file_name = file.basename()
-                if file_name.endswith(".properties"):
-                    property_set = PropertySet("en", file_name[:-11])
-                    self.en_properties.update(property_set.properties)
+            for file in self.en_properties_path.glob("**/*.properties", recursive=True):
+                file_name = file.strip_path_from(self.en_properties_path).path
+                property_set = PropertySet("en", file_name[:-11])
+                self.en_properties.update(property_set.properties)
 
     def get_key(self, key: str, escape: bool = True, **kwargs: Any) -> str:
         """Gets a key from the property file.

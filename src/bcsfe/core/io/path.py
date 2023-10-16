@@ -199,8 +199,14 @@ class Path:
     def get_dirs(self) -> list["Path"]:
         return [file for file in self.get_files() if file.is_directory()]
 
-    def glob(self, pattern: str) -> list["Path"]:
-        return [Path(path) for path in glob.glob(self.add(pattern).path)]
+    def glob(self, pattern: str, recursive: bool = False) -> list["Path"]:
+        return [
+            Path(path)
+            for path in glob.glob(self.add(pattern).path, recursive=recursive)
+        ]
+
+    def strip_path_from(self, path: "Path") -> "Path":
+        return Path(self.path.replace(path.path, "").lstrip("/"))
 
     def is_directory(self) -> bool:
         return os.path.isdir(self.path)

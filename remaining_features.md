@@ -15,4 +15,3 @@ branch of the save editor but are in the master branch.
 - filibuster stage reclearing
 - legend quest
 - old fix elsewhere unban
-- missions

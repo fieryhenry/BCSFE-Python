@@ -37,7 +37,7 @@ from bcsfe.core.game.catbase.login_bonuses import LoginBonus
 from bcsfe.core.game.catbase.matatabi import Matatabi
 from bcsfe.core.game.catbase.drop_chara import CharaDrop
 from bcsfe.core.game.catbase.medals import Medals, MedalNames
-from bcsfe.core.game.catbase.mission import Missions
+from bcsfe.core.game.catbase.mission import Missions, MissionNames, MissionConditions
 from bcsfe.core.game.catbase.my_sale import MySale
 from bcsfe.core.game.catbase.nyanko_club import NyankoClub
 from bcsfe.core.game.catbase.officer_pass import OfficerPass
@@ -131,6 +131,8 @@ rank_gifts: Optional[RankGifts] = None
 treasure_text: Optional[TreasureText] = None
 cat_shrine_levels: Optional[CatShrineLevels] = None
 medal_names: Optional[MedalNames] = None
+mission_names: Optional[MissionNames] = None
+mission_conditions: Optional[MissionConditions] = None
 
 
 def get_game_data_getter(save: SaveFile) -> GameDataGetter:
@@ -229,6 +231,20 @@ def get_medal_names(save: SaveFile) -> MedalNames:
     if medal_names is None:
         medal_names = MedalNames(save)
     return medal_names
+
+
+def get_mission_names(save: SaveFile) -> MissionNames:
+    global mission_names
+    if mission_names is None:
+        mission_names = MissionNames(save)
+    return mission_names
+
+
+def get_mission_conditions(save: SaveFile) -> MissionConditions:
+    global mission_conditions
+    if mission_conditions is None:
+        mission_conditions = MissionConditions(save)
+    return mission_conditions
 
 
 def get_lang(save: SaveFile) -> str:

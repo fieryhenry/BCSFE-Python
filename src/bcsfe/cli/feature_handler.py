@@ -99,6 +99,7 @@ class FeatureHandler:
                 "unlock_equip_menu": edits.basic_items.BasicItems.unlock_equip_menu,
                 "gold_pass": core.game.catbase.nyanko_club.NyankoClub.edit_gold_pass,
                 "medals": core.game.catbase.medals.Medals.edit_medals,
+                "missions": core.game.catbase.mission.Missions.edit_missions,
             },
             "config": core.Config.edit_config,
             "update_external": core.update_external_content,

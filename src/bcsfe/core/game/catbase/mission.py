@@ -1,6 +1,7 @@
 from typing import Any, Optional, Union
 
 from bcsfe import core
+from bcsfe.cli import color, dialog_creator
 
 
 class Mission:
@@ -195,3 +196,119 @@ class Missions:
 
     def __str__(self):
         return self.__repr__()
+
+    @staticmethod
+    def edit_missions(save_file: "core.SaveFile"):
+        missions = save_file.missions
+
+        names = core.get_mission_names(save_file)
+        conditions = core.get_mission_conditions(save_file)
+        options: list[str] = []
+        mssion_ids: list[int] = []
+        for mission_id, name in names.names.items():
+            if mission_id in missions.clear_states:
+                name = name.split("<br>")[0]
+                condition = conditions.conditions.get(mission_id)
+                if not condition:
+                    continue
+                name = name.replace("%d", str(condition.progress_count))
+                if "%@" in name and len(condition.conditions_value) > 2:
+                    name = name.replace("%@", str(condition.conditions_value[2]))
+                options.append(name)
+                mssion_ids.append(mission_id)
+
+        re_claim = dialog_creator.ChoiceInput.from_reduced(
+            ["complete_reward", "complete_claim", "uncomplete"],
+            dialog="select_mission_claim",
+            single_choice=True,
+        ).single_choice()
+        if re_claim is None:
+            return
+        re_claim -= 1
+
+        choices, _ = dialog_creator.ChoiceInput.from_reduced(
+            options, dialog="select_missions"
+        ).multiple_choice(localized_options=False)
+        if choices is None:
+            return
+        for choice in choices:
+            mission_id = mssion_ids[choice]
+            if re_claim == 0:
+                missions.clear_states[mission_id] = 2
+                condition = conditions.get_condition(mission_id)
+                if condition is not None:
+                    missions.requirements[mission_id] = condition.progress_count
+            elif re_claim == 1:
+                missions.clear_states[mission_id] = 4
+                condition = conditions.get_condition(mission_id)
+                if condition is not None:
+                    missions.requirements[mission_id] = condition.progress_count
+            elif re_claim == 2:
+                missions.clear_states[mission_id] = 0
+                if mission_id in missions.requirements:
+                    missions.requirements[mission_id] = 0
+
+        color.ColoredText.localize("missions_edited")
+
+
+class MissionCondition:
+    def __init__(
+        self,
+        mission_id: int,
+        mission_type: int,
+        conditions_type: int,
+        progress_count: int,
+        conditions_value: list[int],
+    ):
+        self.mission_id = mission_id
+        self.mission_type = mission_type
+        self.conditions_type = conditions_type
+        self.progress_count = progress_count
+        self.conditions_value = conditions_value
+
+
+class MissionConditions:
+    def __init__(self, save: "core.SaveFile"):
+        self.save = save
+        self.conditions: dict[int, MissionCondition] = self.get_conditions()
+
+    def get_conditions(self) -> dict[int, MissionCondition]:
+        file_name = "Mission_Condition.csv"
+        gdg = core.get_game_data_getter(self.save)
+        file = gdg.download("DataLocal", file_name)
+        if file is None:
+            return {}
+        csv = core.CSV(file)
+        conditions: dict[int, MissionCondition] = {}
+        for row in csv:
+            conditions[row[0].to_int()] = MissionCondition(
+                row[0].to_int(),
+                row[1].to_int(),
+                row[2].to_int(),
+                row[3].to_int(),
+                row[4:].to_int_list(),
+            )
+        return conditions
+
+    def get_condition(self, mission_id: int) -> Optional[MissionCondition]:
+        return self.conditions.get(mission_id)
+
+
+class MissionNames:
+    def __init__(self, save: "core.SaveFile"):
+        self.save = save
+        self.names: dict[int, str] = self.get_names()
+
+    def get_names(self) -> dict[int, str]:
+        file_name = "Mission_Name.csv"
+        gdg = core.get_game_data_getter(self.save)
+        file = gdg.download("resLocal", file_name)
+        if file is None:
+            return {}
+        csv = core.CSV(
+            file, delimiter=core.Delimeter.from_country_code_res(self.save.cc)
+        )
+        names: dict[int, str] = {}
+        for row in csv:
+            names[row[0].to_int()] = row[1].to_str()
+        return names

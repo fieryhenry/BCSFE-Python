@@ -55,17 +55,13 @@ class CountryCode:
 
     @staticmethod
     def select() -> Optional["CountryCode"]:
-        index = dialog_creator.ChoiceInput(
+        index = dialog_creator.ChoiceInput.from_reduced(
             CountryCode.get_all_str(),
-            CountryCode.get_all_str(),
-            [],
-            {},
-            "country_code_select",
-            True,
-        ).get_input_locale_while()
+            dialog="country_code_select",
+            single_choice=True,
+        ).single_choice()
         if index is None:
             return None
-        index = index[0]
         return CountryCode.get_all()[index - 1]
 
     @staticmethod

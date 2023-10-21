@@ -1,3 +1,4 @@
+from typing import Optional
 from bcsfe import core
 
 
@@ -11,7 +12,7 @@ class Enemy:
     def reset_enemy_guide(self, save_file: "core.SaveFile"):
         save_file.enemy_guide[self.id] = 0
 
-    def get_name(self, save_file: "core.SaveFile") -> str:
+    def get_name(self, save_file: "core.SaveFile") -> Optional[str]:
         return core.get_enemy_names(save_file).get_name(self.id)
 
 
@@ -20,11 +21,11 @@ class EnemyNames:
         self.save_file = save_file
         self.names = self.get_names()
 
-    def get_names(self) -> list[str]:
+    def get_names(self) -> Optional[list[str]]:
         gdg = core.get_game_data_getter(self.save_file)
         data = gdg.download("resLocal", "Enemyname.tsv")
         if data is None:
-            return []
+            return None
         csv = core.CSV(
             data,
             "\t",
@@ -36,7 +37,9 @@ class EnemyNames:
 
         return names
 
-    def get_name(self, id: int):
+    def get_name(self, id: int) -> Optional[str]:
+        if self.names is None:
+            return None
         try:
             name = self.names[id]
             if not name:

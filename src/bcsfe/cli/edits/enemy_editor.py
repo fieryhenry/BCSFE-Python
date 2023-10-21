@@ -110,9 +110,15 @@ class EnemyEditor:
             return None
 
         enemy_names = [enemy.get_name(self.save_file) for enemy in enemies]
+        new_enemy_names: list[str] = []
+        for enemy_name in enemy_names:
+            if enemy_name is None:
+                return None
+
+            new_enemy_names.append(enemy_name)
 
         enemy_option_ids, _ = dialog_creator.ChoiceInput.from_reduced(
-            enemy_names, dialog="select_enemies", single_choice=False
+            new_enemy_names, dialog="select_enemies", single_choice=False
         ).multiple_choice()
         if enemy_option_ids is None:
             return None
@@ -124,7 +130,10 @@ class EnemyEditor:
     def get_enemies_by_name(self, name: str) -> list["core.Enemy"]:
         enemies: list["core.Enemy"] = []
         for enemy in self.get_all_enemies():
-            if name.lower() in enemy.get_name(self.save_file).lower():
+            enemy_name = enemy.get_name(self.save_file)
+            if enemy_name is None:
+                continue
+            if name.lower() in enemy_name.lower():
                 enemies.append(enemy)
         return enemies
 

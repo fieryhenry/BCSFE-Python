@@ -12,7 +12,10 @@ class GameDataGetter:
         self.real_cc = save_file.cc
         self.cc = self.cc if not self.cc.is_lang() else self.real_cc
         self.all_versions = self.get_versions()
-        self.latest_version = self.get_latest_version(self.all_versions, self.cc)
+        if self.all_versions is None:
+            self.latest_version = None
+        else:
+            self.latest_version = self.get_latest_version(self.all_versions, self.cc)
 
     def get_latest_version(
         self, versions: list[str], cc: "core.CountryCode"
@@ -28,8 +31,11 @@ class GameDataGetter:
             return versions[3]
         return None
 
-    def get_versions(self) -> list[str]:
-        versions = core.RequestHandler(self.url + "latest.txt").get().text.split("\n")
+    def get_versions(self) -> Optional[list[str]]:
+        response = core.RequestHandler(self.url + "latest.txt").get()
+        if response is None:
+            return None
+        versions = response.text.split("\n")
         return versions
 
     def get_file(self, pack_name: str, file_name: str) -> Optional["core.Data"]:
@@ -39,6 +45,8 @@ class GameDataGetter:
             return None
         url = self.url + f"{version}/{pack_name}/{file_name}"
         response = core.RequestHandler(url).get()
+        if response is None:
+            return None
         if response.status_code != 200:
             return None
         return core.Data(response.content)
@@ -116,6 +124,8 @@ class GameDataGetter:
         version = self.latest_version
 
         if version is None:
+            if display_text:
+                self.print_no_file(pack_name, file_name)
             return None
 
         if display_text:
@@ -127,7 +137,11 @@ class GameDataGetter:
             )
         data = self.save_file(pack_name, file_name)
         if data is None:
-            return self.download(pack_name, file_name, retries, display_text)
+            data = self.download(pack_name, file_name, retries, display_text)
+        if data is None:
+            if display_text:
+                self.print_no_file(pack_name, file_name)
+            return None
         return data
 
     def download_all(
@@ -180,3 +194,11 @@ class GameDataGetter:
             for version in versions_cc[1:]:
                 path = GameDataGetter.get_game_data_dir().add(version)
                 path.remove()
+
+    def print_no_file(self, packname: str, file_name: str) -> None:
+        color.ColoredText.localize(
+            "failed_to_download_game_data",
+            file_name=file_name,
+            pack_name=packname,
+            version=self.latest_version,
+        )

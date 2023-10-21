@@ -1,6 +1,6 @@
 from bcsfe import core
 
-from typing import Any
+from typing import Any, Optional
 
 from bcsfe.cli import dialog_creator, color
 
@@ -139,7 +139,14 @@ class SpecialSkills:
     def edit(self, save_file: "core.SaveFile"):
         names_o = core.get_gatya_item_names(save_file)
         items = core.get_gatya_item_buy(save_file).get_by_category(2)
-        names = [names_o.get_name(item.id) for item in items]
+        if items is None:
+            return
+        names: list[str] = []
+        for item in items:
+            name = names_o.get_name(item.id)
+            if name is None:
+                return
+            names.append(name)
         ids, _ = dialog_creator.ChoiceInput.from_reduced(
             names, [], {}, "special_skills_dialog"
         ).multiple_choice()
@@ -161,6 +168,8 @@ class SpecialSkills:
             option_id -= 1
 
         ability_data = core.get_ability_data(save_file)
+        if ability_data.ability_data is None:
+            return
         if option_id == 0:
             for id in ids:
                 color.ColoredText.localize(
@@ -170,6 +179,8 @@ class SpecialSkills:
                     plus_level=skills[id].upgrade.plus,
                 )
                 ability = ability_data.get_ability_data_item(id)
+                if ability is None:
+                    continue
                 upgrade, should_exit = core.Upgrade.get_user_upgrade(
                     ability.max_base_level - 1, ability.max_plus_level
                 )
@@ -231,11 +242,11 @@ class AbilityData:
         self.save_file = save_file
         self.ability_data = self.get_ability_data()
 
-    def get_ability_data(self) -> list[AbilityDataItem]:
+    def get_ability_data(self) -> Optional[list[AbilityDataItem]]:
         gdg = core.get_game_data_getter(self.save_file)
         data = gdg.download("DataLocal", "AbilityData.csv")
         if data is None:
-            return []
+            return None
         csv = core.CSV(data)
         ability_data: list[AbilityDataItem] = []
         for i, row in enumerate(csv):
@@ -251,5 +262,7 @@ class AbilityData:
             )
         return ability_data
 
-    def get_ability_data_item(self, item_id: int) -> AbilityDataItem:
+    def get_ability_data_item(self, item_id: int) -> Optional[AbilityDataItem]:
+        if self.ability_data is None:
+            return None
         return self.ability_data[item_id]

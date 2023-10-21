@@ -28,13 +28,15 @@ class CatEditor:
     def get_cats_name(self, name: str) -> list["core.Cat"]:
         return self.save_file.cats.get_cats_name(self.save_file, name)
 
-    def get_cats_obtainable(self) -> list["core.Cat"]:
+    def get_cats_obtainable(self) -> Optional[list["core.Cat"]]:
         return self.save_file.cats.get_cats_obtainable(self.save_file)
 
-    def get_cats_gatya_banner(self, gatya_id: int) -> list["core.Cat"]:
+    def get_cats_gatya_banner(self, gatya_id: int) -> Optional[list["core.Cat"]]:
         cat_ids = self.save_file.gatya.read_gatya_data_set(self.save_file).get_cat_ids(
             gatya_id
         )
+        if cat_ids is None:
+            return None
         return self.save_file.cats.get_cats_by_ids(cat_ids)
 
     def print_selected_cats(self, current_cats: list["core.Cat"]):
@@ -175,20 +177,23 @@ class CatEditor:
             cats_selected.append(cat_list[cat_option_id])
         return cats_selected
 
-    def select_obtainable(self) -> list["core.Cat"]:
-        cats = self.get_cats_obtainable()
-        return cats
+    def select_obtainable(self) -> Optional[list["core.Cat"]]:
+        return self.get_cats_obtainable()
 
     def select_gatya_banner(self) -> Optional[list["core.Cat"]]:
-        gatya_ids = dialog_creator.RangeInput(
-            len(self.save_file.gatya.read_gatya_data_set(self.save_file).gatya_data_set)
-            - 1
-        ).get_input_locale("select_gatya_banner", {})
+        gset = self.save_file.gatya.read_gatya_data_set(self.save_file).gatya_data_set
+        if gset is None:
+            return None
+        gatya_ids = dialog_creator.RangeInput(len(gset) - 1).get_input_locale(
+            "select_gatya_banner", {}
+        )
         if gatya_ids is None:
             return None
         cats: list["core.Cat"] = []
         for gatya_id in gatya_ids:
             gatya_cats = self.get_cats_gatya_banner(gatya_id)
+            if gatya_cats is None:
+                continue
             cats = list(set(cats + gatya_cats))
         return cats
 
@@ -256,9 +261,12 @@ class CatEditor:
         if option_id == 0:
             localizable = self.save_file.get_localizable()
             for cat in cats:
+                names = cat.get_names_cls(self.save_file, localizable)
+                if not names:
+                    names = [str(cat.id)]
                 color.ColoredText.localize(
                     "selected_cat_upgrades",
-                    name=cat.get_names_cls(self.save_file, localizable)[0],
+                    name=names[0],
                     id=cat.id,
                     base_level=cat.upgrade.base + 1,
                     plus_level=cat.upgrade.plus,
@@ -276,7 +284,7 @@ class CatEditor:
                     cat.set_upgrade(self.save_file, upgrade, True)
                     color.ColoredText.localize(
                         "selected_cat_upgraded",
-                        name=cat.get_names_cls(self.save_file, localizable)[0],
+                        name=names[0],
                         id=cat.id,
                         base_level=cat.upgrade.base + 1,
                         plus_level=cat.upgrade.plus,
@@ -364,14 +372,19 @@ class CatEditor:
             option_id -= 1
 
         talent_data = self.save_file.cats.read_talent_data(self.save_file)
+        if talent_data is None:
+            return
         if option_id == 0:
             localizable = self.save_file.get_localizable()
             for cat in cats:
                 if cat.talents is None:
                     continue
+                names = cat.get_names_cls(self.save_file, localizable)
+                if not names:
+                    names = [str(cat.id)]
                 color.ColoredText.localize(
                     "selected_cat",
-                    name=cat.get_names_cls(self.save_file, localizable)[0],
+                    name=names[0],
                     id=cat.id,
                 )
                 data = self.get_cat_talents(talent_data, cat)

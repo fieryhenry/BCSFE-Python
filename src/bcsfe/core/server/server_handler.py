@@ -10,7 +10,7 @@ from bcsfe.cli import color
 class RequestResult:
     def __init__(
         self,
-        response: core.Response,
+        response: Optional[core.Response],
         headers: dict[str, str],
         data: str,
         payload: Optional[dict[str, Any]] = None,
@@ -119,6 +119,10 @@ class ServerHandler:
     def log_error(url: str, key: str, result: RequestResult):
         if "EXPECT_THIS_TO_FAIL" in result.data:
             return
+        if result.response is None:
+            log_text = "Failed to make request. Check your internet connection."
+            core.logger.log_error(log_text)
+            return
         log_text = (
             f"Error: {key}\n"
             f"URL: {url}\n"
@@ -173,6 +177,9 @@ class ServerHandler:
         )
         headers = core.AccountHeaders(self.save_file, data).get_headers()
         response = core.RequestHandler(url, headers, core.Data(data)).post()
+        if response is None:
+            self.log_no_internet(url, RequestResult(None, headers, data))
+            return RequestResult(response, headers, data)
         json: dict[str, Any] = response.json()
         status_code = json.get("statusCode", 0)
         if status_code != 1:
@@ -264,6 +271,11 @@ class ServerHandler:
         if auth_token is not None:
             return auth_token
 
+    def log_no_internet(self, url: str, result: RequestResult):
+        ServerHandler.log_error(url, "no_internet", result)
+        if self.print:
+            core.print_no_internet()
+
     def get_save_key_new(self, auth_token: str) -> Optional[dict[str, Any]]:
         self.print_key("getting_save_key")
 
@@ -277,6 +289,9 @@ class ServerHandler:
             "user-agent": "Dalvik/2.1.0 (Linux; U; Android 9; SM-G955F Build/N2G48B)",
         }
         response = core.RequestHandler(url, headers).get()
+        if response is None:
+            self.log_no_internet(url, RequestResult(None, headers, ""))
+            return None
         json: dict[str, Any] = response.json()
         status_code = json.get("statusCode", 0)
         if status_code != 1:
@@ -358,6 +373,9 @@ class ServerHandler:
             "user-agent": "Dalvik/2.1.0 (Linux; U; Android 9; SM-G955F Build/N2G48B)",
         }
         response = core.RequestHandler(url, headers, body).post()
+        if response is None:
+            self.log_no_internet(url, RequestResult(None, headers, ""))
+            return False
         if response.status_code != 204:
             ServerHandler.log_error(
                 url,
@@ -396,6 +414,9 @@ class ServerHandler:
         headers["authorization"] = "Bearer " + auth_token
 
         response = core.RequestHandler(url, headers, core.Data(meta_data)).post()
+        if response is None:
+            self.log_no_internet(url, RequestResult(None, headers, meta_data))
+            return None
         json: dict[str, Any] = response.json()
         status_code = json.get("statusCode", 0)
         if status_code != 1:
@@ -433,6 +454,9 @@ class ServerHandler:
         headers["authorization"] = "Bearer " + auth_token
 
         response = core.RequestHandler(url, headers, core.Data(meta_data)).post()
+        if response is None:
+            self.log_no_internet(url, RequestResult(None, headers, meta_data))
+            return False
         json: dict[str, Any] = response.json()
         status_code = json.get("statusCode", 0)
         if status_code != 1:
@@ -441,16 +465,22 @@ class ServerHandler:
         bmd.remove_managed_items()
         return True
 
-    def get_new_inquiry_code(self) -> str:
+    def get_new_inquiry_code(self) -> Optional[str]:
         url = f"{self.backups_url}/?action=createAccount&referenceId="
 
         response = core.RequestHandler(url).get()
+        if response is None:
+            self.log_no_internet(url, RequestResult(None, {}, ""))
+            return None
         data = response.json()
         iq = data["accountId"]
         return iq
 
     def create_new_account(self) -> bool:
-        self.save_file.inquiry_code = self.get_new_inquiry_code()
+        new_iq = self.get_new_inquiry_code()
+        if new_iq is None:
+            return False
+        self.save_file.inquiry_code = new_iq
         self.remove_stored_auth_token()
         self.remove_stored_save_key_data()
         self.remove_stored_password()
@@ -493,6 +523,9 @@ class ServerHandler:
             "user-agent": "Dalvik/2.1.0 (Linux; U; Android 9; SM-G955F Build/N2G48B)",
         }
         response = core.RequestHandler(url, headers, core.Data(data_str)).post()
+        if response is None:
+            core.print_no_internet()
+            return None
         headers = response.headers
         content_type = headers.get("content-type", "")
         if content_type != "application/octet-stream":
@@ -536,6 +569,9 @@ class ServerHandler:
         headers = core.AccountHeaders(self.save_file, data_str).get_headers()
         headers["authorization"] = "Bearer " + auth_token
         response = core.RequestHandler(url, headers, core.Data(data_str)).post()
+        if response is None:
+            self.log_no_internet(url, RequestResult(None, headers, data_str))
+            return False
         json: dict[str, Any] = response.json()
         status_code = json.get("statusCode", 0)
         if status_code != 1:

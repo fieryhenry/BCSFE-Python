@@ -462,6 +462,8 @@ class ExternalLocale:
     @staticmethod
     def from_git_repo(git_repo: str) -> Optional["ExternalLocale"]:
         repo = core.GitHandler().get_repo(git_repo)
+        if repo is None:
+            return None
         locale_json = repo.get_file(core.Path("locale.json"))
         if locale_json is None:
             return None
@@ -473,9 +475,13 @@ class ExternalLocale:
         if self.git_repo is None:
             return False
         repo = core.GitHandler().get_repo(self.git_repo)
+        if repo is None:
+            return False
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_dir = core.Path(temp_dir)
-            repo.clone_to_temp(temp_dir)
+            success = repo.clone_to_temp(temp_dir)
+            if not success:
+                return False
             external_locale = ExternalLocaleManager.parse_external_locale(temp_dir)
             if external_locale is None:
                 return False
@@ -490,7 +496,9 @@ class ExternalLocale:
             self.author = external_locale.author
             self.version = version
 
-        repo.pull()
+        success = repo.pull()
+        if not success:
+            return False
         self.save()
         return True
 
@@ -519,6 +527,8 @@ class ExternalLocaleManager:
         folder.generate_dirs()
 
         repo = core.GitHandler().get_repo(external_locale.git_repo)
+        if repo is None:
+            return
         files_dir = repo.get_folder(core.Path("files"))
         if files_dir is None:
             return

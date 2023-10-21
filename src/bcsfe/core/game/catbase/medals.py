@@ -90,6 +90,8 @@ class Medals:
     def edit_medals(save_file: "core.SaveFile"):
         medals = save_file.medals
         medal_names = core.get_medal_names(save_file)
+        if medal_names.medal_names is None:
+            return
         options = ["add_medals", "remove_medals"]
         choice = dialog_creator.ChoiceInput.from_reduced(
             options, dialog="medal_add_remove_dialog", single_choice=True
@@ -146,21 +148,23 @@ class Medals:
 class MedalNames:
     def __init__(self, save_file: "core.SaveFile"):
         self.save_file = save_file
-        self.medal_names: list[list[str]] = self.get_medal_names()
+        self.medal_names = self.get_medal_names()
 
-    def get_medal_names(self) -> list[list[str]]:
+    def get_medal_names(self) -> Optional[list[list[str]]]:
         file_name = "medalname.tsv"
         gdg = core.get_game_data_getter(self.save_file)
         data = gdg.download("resLocal", file_name)
         if data is None:
-            return []
+            return None
         csv = core.CSV(data, delimiter="\t")
         names: list[list[str]] = []
         for row in csv:
             names.append(row.to_str_list())
         return names
 
-    def get_medal_name(self, medal_id: int) -> list[str]:
+    def get_medal_name(self, medal_id: int) -> Optional[list[str]]:
+        if self.medal_names is None:
+            return None
         if medal_id < 0 or medal_id >= len(self.medal_names):
             return []
         return self.medal_names[medal_id]

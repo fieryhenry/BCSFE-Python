@@ -126,6 +126,8 @@ class ExternalTheme:
     @staticmethod
     def from_git_repo(git_repo: str) -> Optional["ExternalTheme"]:
         repo = core.GitHandler().get_repo(git_repo)
+        if repo is None:
+            return None
         theme_json = repo.get_file(core.Path("theme.json"))
         if theme_json is None:
             return None
@@ -137,9 +139,13 @@ class ExternalTheme:
         if self.git_repo is None:
             return False
         repo = core.GitHandler().get_repo(self.git_repo)
+        if repo is None:
+            return False
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_dir = core.Path(temp_dir)
-            repo.clone_to_temp(temp_dir)
+            success = repo.clone_to_temp(temp_dir)
+            if not success:
+                return False
             external_theme = ExternalThemeManager.parse_external_theme(
                 temp_dir.add("theme.json")
             )
@@ -157,7 +163,9 @@ class ExternalTheme:
             self.colors = external_theme.colors
             self.version = version
 
-        repo.pull()
+        success = repo.pull()
+        if not success:
+            return False
         self.save()
         return True
 

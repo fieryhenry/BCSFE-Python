@@ -175,12 +175,12 @@ class GatyaDataSet:
         self.save_file = save_file
         self.gatya_data_set = self.load_gatya_data_set("R", 1)
 
-    def load_gatya_data_set(self, rarity: str, id: int) -> list[list[int]]:
+    def load_gatya_data_set(self, rarity: str, id: int) -> Optional[list[list[int]]]:
         file_name = f"GatyaDataSet{rarity.upper()[0]}{id}.csv"
         gdg = core.get_game_data_getter(self.save_file)
         data = gdg.download("DataLocal", file_name)
         if data is None:
-            return []
+            return None
         csv = core.CSV(data)
         dt: list[list[int]] = []
         for line in csv:
@@ -192,8 +192,10 @@ class GatyaDataSet:
             dt.append(cat_ids)
         return dt
 
-    def get_cat_ids(self, gatya_id: int) -> list[int]:
+    def get_cat_ids(self, gatya_id: int) -> Optional[list[int]]:
+        if self.gatya_data_set is None:
+            return None
         try:
             return self.gatya_data_set[gatya_id]
         except IndexError:
-            return []
+            return None

@@ -40,6 +40,9 @@ class Main:
         has_pre_release = updater.has_enabled_pre_release()
         local_version = updater.get_local_version()
         latest_version = updater.get_latest_version(has_pre_release)
+        if latest_version is None:
+            color.ColoredText.localize("update_check_fail")
+            return
 
         color.ColoredText.localize(
             "version_line",

@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Optional
 from bcsfe import core
 from bcsfe.cli import dialog_creator
 
@@ -96,15 +96,24 @@ class BattleItems:
     def __str__(self):
         return f"BattleItems({self.items})"
 
-    def get_names(self, save_file: "core.SaveFile") -> list[str]:
+    def get_names(self, save_file: "core.SaveFile") -> Optional[list[str]]:
         names = core.get_gatya_item_names(save_file).names
+        if names is None:
+            return None
         items = core.get_gatya_item_buy(save_file).get_by_category(3)
+        if items is None:
+            return None
+
         names = [names[item.id] for item in items]
         return names
 
     def edit(self, save_file: "core.SaveFile"):
         group_name = save_file.get_localizable().get("shop_category1")
+        if group_name is None:
+            group_name = core.local_manager.get_key("battle_items")
         item_names = self.get_names(save_file)
+        if item_names is None:
+            return
         current_values = [item.amount for item in self.items]
         values = dialog_creator.MultiEditor.from_reduced(
             group_name,

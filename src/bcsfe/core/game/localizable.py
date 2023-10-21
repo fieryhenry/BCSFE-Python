@@ -7,11 +7,11 @@ class Localizable:
         self.save_file = save_file
         self.localizable = self.get_localizable()
 
-    def get_localizable(self) -> dict[str, str]:
+    def get_localizable(self) -> Optional[dict[str, str]]:
         gdg = core.get_game_data_getter(self.save_file)
         data = gdg.download("resLocal", "localizable.tsv")
         if data is None:
-            return {}
+            return None
         csv = core.CSV(data, "\t")
         keys: dict[str, str] = {}
         for line in csv:
@@ -22,11 +22,10 @@ class Localizable:
 
         return keys
 
-    def get(self, key: str):
-        return self.localizable.get(key, key)
-
-    def get_optional(self, key: str) -> Optional[str]:
+    def get(self, key: str) -> Optional[str]:
+        if self.localizable is None:
+            return None
         return self.localizable.get(key)
 
-    def get_lang(self) -> str:
+    def get_lang(self) -> Optional[str]:
         return self.get("lang")

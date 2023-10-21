@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Optional
 from bcsfe import core
 
 
@@ -11,19 +11,27 @@ class Updater:
     def get_local_version(self) -> str:
         return core.Path("version.txt", is_relative=True).read().to_str().strip()
 
-    def get_pypi_json(self) -> dict[str, Any]:
+    def get_pypi_json(self) -> Optional[dict[str, Any]]:
         url = f"https://pypi.org/pypi/{self.package_name}/json"
-        try:
-            response = core.RequestHandler(url).get()
-        except core.ConnectionError:
-            return {}
+        response = core.RequestHandler(url).get()
+        if response is None:
+            return None
         return response.json()
 
-    def get_releases(self) -> list[str]:
-        return list(self.get_pypi_json()["releases"].keys())
+    def get_releases(self) -> Optional[list[str]]:
+        pypi_json = self.get_pypi_json()
+        if pypi_json is None:
+            return None
+        releases = pypi_json.get("releases")
+        if releases is None:
+            return None
+        return list(releases.keys())
 
-    def get_latest_version(self, prereleases: bool = False) -> str:
+    def get_latest_version(self, prereleases: bool = False) -> Optional[str]:
         releases = self.get_releases()
+        if releases is None:
+            return None
+
         releases.reverse()
         if prereleases:
             return releases[0]
@@ -33,8 +41,16 @@ class Updater:
                     return release
             return releases[0]
 
-    def get_latest_version_info(self, prereleases: bool = False) -> dict[str, Any]:
-        return self.get_pypi_json()["releases"][self.get_latest_version(prereleases)]
+    def get_latest_version_info(
+        self, prereleases: bool = False
+    ) -> Optional[dict[str, Any]]:
+        pypi_json = self.get_pypi_json()
+        if pypi_json is None:
+            return None
+        releases = pypi_json.get("releases")
+        if releases is None:
+            return None
+        return releases.get(self.get_latest_version(prereleases))
 
     def update(self, target_version: str) -> bool:
         python_aliases = ["py", "python", "python3"]

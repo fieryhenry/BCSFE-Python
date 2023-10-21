@@ -38,6 +38,8 @@ class EnigmaNames:
                 f"https://ponosgames.com/information/appli/battlecats/stage/{file_name}"
             )
         data = core.RequestHandler(url).get()
+        if data is None:
+            return None
         if data.status_code == 404:
             return None
         html = data.text
@@ -52,14 +54,14 @@ class EnigmaNames:
             self.enigma_names[id] = None
         return name
 
-    def get_enigma_names(self) -> dict[int, Optional[str]]:
+    def get_enigma_names(self) -> Optional[dict[int, Optional[str]]]:
         names = self.read_enigma_names()
         gdg = core.get_game_data_getter(self.save_file)
         stage_names = gdg.download(
             "resLocal", f"StageName_RH_{core.get_lang(self.save_file)}.csv"
         )
         if stage_names is None:
-            return {}
+            return None
         csv = core.CSV(
             stage_names,
             core.Delimeter.from_country_code_res(self.save_file.cc),

@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Optional
 from bcsfe import core
 from bcsfe.cli import color, dialog_creator
 
@@ -110,6 +110,8 @@ class CatShrine:
 
         if choice == 0:
             max_level = data.get_max_level()
+            if max_level is None:
+                return
             level = dialog_creator.IntInput(
                 min=1, max=max_level
             ).get_input_locale_while("shrine_level_dialog", {"max_level": max_level})
@@ -118,6 +120,8 @@ class CatShrine:
             shrine.xp_offering = data.get_xp_from_level(level)
         elif choice == 1:
             max_xp = data.get_max_xp()
+            if max_xp is None:
+                return
             xp = dialog_creator.IntInput(min=0, max=max_xp).get_input_locale_while(
                 "shrine_xp_dialog", {"max_xp": max_xp}
             )
@@ -126,7 +130,11 @@ class CatShrine:
             shrine.xp_offering = xp
 
         xp = shrine.xp_offering
+        if xp is None:
+            return
         level = data.get_level_from_xp(xp)
+        if level is None:
+            return
 
         shrine.dialogs = level - 1
         shrine.shrine_gone = False
@@ -143,12 +151,12 @@ class CatShrineLevels:
         self.save_file = save_file
         self.boundaries = self.get_boundaries()
 
-    def get_boundaries(self) -> list[int]:
+    def get_boundaries(self) -> Optional[list[int]]:
         file_name = "jinja_level.csv"
         gdg = core.get_game_data_getter(self.save_file)
         data = gdg.download("resLocal", file_name)
         if data is None:
-            return []
+            return None
         csv = core.CSV(
             data, delimiter=core.Delimeter.from_country_code_res(self.save_file.cc)
         )
@@ -161,21 +169,29 @@ class CatShrineLevels:
 
         return boundaries
 
-    def get_level_from_xp(self, xp: int) -> int:
+    def get_level_from_xp(self, xp: int) -> Optional[int]:
+        if self.boundaries is None:
+            return None
         for i, boundary in enumerate(self.boundaries):
             if xp < boundary:
                 return i + 1
         return len(self.boundaries)
 
-    def get_xp_from_level(self, level: int) -> int:
+    def get_xp_from_level(self, level: int) -> Optional[int]:
+        if self.boundaries is None:
+            return None
         if level < 1:
             return 0
         if level > len(self.boundaries):
             return self.get_max_xp()
         return self.boundaries[level - 2]
 
-    def get_max_level(self) -> int:
+    def get_max_level(self) -> Optional[int]:
+        if self.boundaries is None:
+            return None
         return len(self.boundaries)
 
-    def get_max_xp(self) -> int:
+    def get_max_xp(self) -> Optional[int]:
+        if self.boundaries is None:
+            return None
         return max(self.boundaries)

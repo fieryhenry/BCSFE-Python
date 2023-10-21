@@ -22,15 +22,15 @@ class SkillLevel:
 
 
 class SkillLevelData:
-    def __init__(self, levels: list[SkillLevel]):
+    def __init__(self, levels: Optional[list[SkillLevel]]):
         self.levels = levels
 
     @staticmethod
-    def from_game_data(save_file: "core.SaveFile"):
+    def from_game_data(save_file: "core.SaveFile") -> Optional["SkillLevelData"]:
         gdg = core.get_game_data_getter(save_file)
         data = gdg.download("DataLocal", "SkillLevel.csv")
         if data is None:
-            return SkillLevelData([])
+            return None
         csv = core.CSV(data)
         levels: list[SkillLevel] = []
         for line in csv.lines[1:]:
@@ -38,6 +38,8 @@ class SkillLevelData:
         return SkillLevelData(levels)
 
     def get_skill_level(self, id: int) -> Optional[SkillLevel]:
+        if self.levels is None:
+            return None
         for level in self.levels:
             if level.id == id:
                 return level
@@ -120,11 +122,11 @@ class CatSkills:
         self.skills = skills
 
     @staticmethod
-    def from_game_data(save_file: "core.SaveFile"):
+    def from_game_data(save_file: "core.SaveFile") -> Optional["CatSkills"]:
         gdg = core.get_game_data_getter(save_file)
         data = gdg.download("DataLocal", "SkillAcquisition.csv")
         if data is None:
-            return CatSkills({})
+            return None
         csv = core.CSV(data)
         skills: dict[int, CatSkill] = {}
         for line in csv.lines[1:]:
@@ -141,11 +143,11 @@ class SkillNames:
         self.names = names
 
     @staticmethod
-    def from_game_data(save_file: "core.SaveFile"):
+    def from_game_data(save_file: "core.SaveFile") -> Optional["SkillNames"]:
         gdg = core.get_game_data_getter(save_file)
         data = gdg.download("resLocal", "SkillDescriptions.csv")
         if data is None:
-            return SkillNames({})
+            return None
         csv = core.CSV(
             data, delimiter=core.Delimeter.from_country_code_res(save_file.cc)
         )
@@ -170,10 +172,13 @@ class TalentData:
         self.cats = cats
 
     @staticmethod
-    def from_game_data(save_file: "core.SaveFile"):
+    def from_game_data(save_file: "core.SaveFile") -> Optional["TalentData"]:
         skill_names = SkillNames.from_game_data(save_file)
         skill_levels = SkillLevelData.from_game_data(save_file)
         cats = CatSkills.from_game_data(save_file)
+        if skill_names is None or skill_levels is None or cats is None:
+            return None
+
         return TalentData(skill_names, skill_levels, cats)
 
     def get_skill_name(self, skill_id: int) -> Optional[str]:
@@ -276,11 +281,11 @@ class NyankoPictureBook:
         self.save_file = save_file
         self.cats = self.get_cats()
 
-    def get_cats(self) -> list[NyankoPictureBookCatData]:
+    def get_cats(self) -> Optional[list[NyankoPictureBookCatData]]:
         gdg = core.get_game_data_getter(self.save_file)
         data = gdg.download("DataLocal", "nyankoPictureBookData.csv")
         if data is None:
-            return []
+            return None
         csv = core.CSV(data)
         cats: list[NyankoPictureBookCatData] = []
         for i, line in enumerate(csv):
@@ -299,12 +304,16 @@ class NyankoPictureBook:
         return cats
 
     def get_cat(self, cat_id: int) -> Optional[NyankoPictureBookCatData]:
+        if self.cats is None:
+            return None
         for cat in self.cats:
             if cat.cat_id == cat_id:
                 return cat
         return None
 
-    def get_obtainable_cats(self) -> list[NyankoPictureBookCatData]:
+    def get_obtainable_cats(self) -> Optional[list[NyankoPictureBookCatData]]:
+        if self.cats is None:
+            return None
         return [cat for cat in self.cats if cat.is_displayed_in_catguide]
 
 
@@ -419,18 +428,20 @@ class UnitBuy:
         self.save_file = save_file
         self.unit_buy = self.read_unit_buy()
 
-    def read_unit_buy(self) -> list[UnitBuyCatData]:
+    def read_unit_buy(self) -> Optional[list[UnitBuyCatData]]:
         unit_buy: list[UnitBuyCatData] = []
         gdg = core.get_game_data_getter(self.save_file)
         data = gdg.download("DataLocal", "unitbuy.csv")
         if data is None:
-            return unit_buy
+            return None
         csv = core.CSV(data)
         for i, line in enumerate(csv):
             unit_buy.append(UnitBuyCatData(i, line))
         return unit_buy
 
     def get_unit_buy(self, id: int) -> Optional[UnitBuyCatData]:
+        if self.unit_buy is None:
+            return None
         try:
             return self.unit_buy[id]
         except IndexError:
@@ -454,18 +465,21 @@ class UnitLimit:
         self.save_file = save_file
         self.unit_limit = self.read_unit_limit()
 
-    def read_unit_limit(self) -> list[UnitLimitCatData]:
+    def read_unit_limit(self) -> Optional[list[UnitLimitCatData]]:
         unit_limit: list[UnitLimitCatData] = []
         gdg = core.get_game_data_getter(self.save_file)
         data = gdg.download("DataLocal", "unitlimit.csv")
         if data is None:
-            return unit_limit
+            return None
         csv = core.CSV(data)
         for i, line in enumerate(csv):
             unit_limit.append(UnitLimitCatData(i, line.to_int_list()))
         return unit_limit
 
     def get_unit_limit(self, id: int) -> Optional[UnitLimitCatData]:
+        if self.unit_limit is None:
+            return None
+
         try:
             return self.unit_limit[id]
         except IndexError:
@@ -694,7 +708,7 @@ class Cat:
 
     def get_names_cls(
         self, save_file: "core.SaveFile", localizable: "core.Localizable"
-    ) -> list[str]:
+    ) -> Optional[list[str]]:
         if self.names is None:
             self.names = Cat.get_names(self.id, save_file, localizable)
         return self.names
@@ -704,11 +718,11 @@ class Cat:
         id: int,
         save_file: "core.SaveFile",
         localizable: "core.Localizable",
-    ) -> list[str]:
+    ) -> Optional[list[str]]:
         file_name = f"Unit_Explanation{id+1}_{localizable.get_lang()}.csv"
         data = core.get_game_data_getter(save_file).download("resLocal", file_name)
         if data is None:
-            return []
+            return None
         csv = core.CSV(
             data,
             core.Delimeter.from_country_code_res(save_file.cc),
@@ -828,7 +842,7 @@ class Cats:
             self.nyanko_picture_book = NyankoPictureBook(save_file)
         return self.nyanko_picture_book
 
-    def read_talent_data(self, save_file: "core.SaveFile") -> TalentData:
+    def read_talent_data(self, save_file: "core.SaveFile") -> Optional[TalentData]:
         if self.talent_data is None:
             self.talent_data = TalentData.from_game_data(save_file)
         return self.talent_data
@@ -847,6 +861,8 @@ class Cats:
         cats: list[Cat] = []
         for cat in self.cats:
             names = cat.get_names_cls(save_file, localizable)
+            if names is None:
+                continue
             for name in names:
                 if search_name.lower() in name.lower():
                     cats.append(cat)
@@ -870,9 +886,12 @@ class Cats:
         core.get_game_data_getter(save_file).download_all("resLocal", file_names)
         self.bulk_downloaded = True
 
-    def get_cats_obtainable(self, save_file: "core.SaveFile") -> list[Cat]:
+    def get_cats_obtainable(self, save_file: "core.SaveFile") -> Optional[list[Cat]]:
         nyanko_picture_book = self.read_nyanko_picture_book(save_file)
-        ny_cats = [cat.cat_id for cat in nyanko_picture_book.get_obtainable_cats()]
+        obtainable_cats = nyanko_picture_book.get_obtainable_cats()
+        if obtainable_cats is None:
+            return None
+        ny_cats = [cat.cat_id for cat in obtainable_cats]
         cats: list[Cat] = []
         for cat in self.cats:
             if cat.id in ny_cats:
@@ -898,7 +917,7 @@ class Cats:
         rarity_names: list[str] = []
         rarity_index = 1
         while True:
-            rarity_name = localizable.get_optional(f"rarity_name_{rarity_index}")
+            rarity_name = localizable.get(f"rarity_name_{rarity_index}")
             if rarity_name is None:
                 break
             rarity_names.append(rarity_name)

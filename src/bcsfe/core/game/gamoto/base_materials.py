@@ -69,6 +69,10 @@ class BaseMaterials:
     def edit_base_materials(self, save_file: "core.SaveFile"):
         names = core.get_gatya_item_names(save_file).names
         items = core.get_gatya_item_buy(save_file).get_by_category(7)
+        if items is None:
+            return
+        if names is None:
+            return
         names = [names[item.id] for item in items]
         base_materials = [base_material.amount for base_material in self.materials]
         values = dialog_creator.MultiEditor.from_reduced(

@@ -33,9 +33,12 @@ class SchemeDataItem:
     def is_cat(self) -> bool:
         return self.type_id == 1
 
-    def get_name(self, localizable: "core.Localizable"):
+    def get_name(self, localizable: "core.Localizable") -> Optional[str]:
         key = f"scheme_popup_{self.id}"
-        return localizable.get(key).replace("<flash>,", "").replace("<flash>", "")
+        name = localizable.get(key)
+        if name is None:
+            return None
+        return name.replace("<flash>,", "").replace("<flash>", "")
 
 
 class SchemeItems:
@@ -111,25 +114,27 @@ class SchemeItems:
         options: list[str] = []
         for item in scheme_items.values():
             scheme_name = item.get_name(localizable)
+            if scheme_name is None:
+                return
             string = "\n\t"
             if item.is_cat():
                 cat_names = core.Cat.get_names(item.item_id, save_file, localizable)
-                if not cat_names:
-                    continue
-                cat_name = cat_names[0]
-                string += scheme_name.replace("%@", cat_name)
+                if cat_names:
+                    cat_name = cat_names[0]
+                    string += scheme_name.replace("%@", cat_name)
             else:
                 item_name = item_names.get_name(item.item_id)
-                string += scheme_name
-                first_index = string.find("%@")
-                second_index = string.find("%@", first_index + 1)
-                string = (
-                    string[:first_index]
-                    + str(item.number)
-                    + " "
-                    + item_name
-                    + string[second_index + 2 :]
-                )
+                if item_name:
+                    string += scheme_name
+                    first_index = string.find("%@")
+                    second_index = string.find("%@", first_index + 1)
+                    string = (
+                        string[:first_index]
+                        + str(item.number)
+                        + " "
+                        + item_name
+                        + string[second_index + 2 :]
+                    )
             string = string.replace("<br>", "\n\t")
             options.append(string)
 

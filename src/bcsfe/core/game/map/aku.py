@@ -196,6 +196,8 @@ class AkuChapters:
 
         if individual_clear_count:
             stage_names = core.StageNames(save_file, "DM", 49).stage_names
+            if stage_names is None:
+                return
             for i, stage in enumerate(chapter.stages[:clear_progress]):
                 stage_name = stage_names[i]
                 color.ColoredText.localize("aku_current_stage", name=stage_name, id=i)

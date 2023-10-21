@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Optional
 from bcsfe import core
 from bcsfe.cli import color, dialog_creator
 
@@ -19,7 +19,7 @@ class GamatotoMembersName:
         self.save_file = save_file
         self.members = self.read_members()
 
-    def read_members(self) -> list[MemberName]:
+    def read_members(self) -> Optional[list[MemberName]]:
         members: list[MemberName] = []
         gdg = core.get_game_data_getter(self.save_file)
         data = gdg.download(
@@ -27,7 +27,7 @@ class GamatotoMembersName:
             f"GamatotoExpedition_Members_name_{core.get_lang(self.save_file)}.csv",
         )
         if data is None:
-            return members
+            return None
         csv = core.CSV(
             data,
             delimiter=core.Delimeter.from_country_code_res(self.save_file.cc),
@@ -48,24 +48,33 @@ class GamatotoMembersName:
             )
         return members
 
-    def get_member(self, member_id: int) -> MemberName:
+    def get_member(self, member_id: int) -> Optional[MemberName]:
+        if self.members is None:
+            return None
         for member in self.members:
             if member.member_id == member_id:
                 return member
-        raise ValueError(f"Member ID {member_id} not found")
+        return None
 
-    def get_members_from_ids(self, ids: list[int]) -> list[MemberName]:
+    def get_members_from_ids(self, ids: list[int]) -> list[Optional[MemberName]]:
         return [self.get_member(id) for id in ids]
 
-    def get_all_rarity(self, rarity: int) -> list[MemberName]:
+    def get_all_rarity(self, rarity: int) -> Optional[list[MemberName]]:
+        if self.members is None:
+            return None
+
         return [member for member in self.members if member.rarity == rarity]
 
-    def get_members_from_helpers(self, helpers: "Helpers") -> list[MemberName]:
+    def get_members_from_helpers(
+        self, helpers: "Helpers"
+    ) -> list[Optional[MemberName]]:
         return self.get_members_from_ids(
             [helper.id for helper in helpers.helpers if helper.is_valid()]
         )
 
-    def get_all_rarity_names(self) -> list[str]:
+    def get_all_rarity_names(self) -> Optional[list[str]]:
+        if self.members is None:
+            return None
         names: dict[int, str] = {}
         for member in self.members:
             names[member.rarity] = member.rarity_name
@@ -93,12 +102,12 @@ class GamatotoLevels:
         self.levels = self.read_levels()
         self.limit = self.read_max_level()
 
-    def read_levels(self) -> list[GamatotoLevel]:
+    def read_levels(self) -> Optional[list[GamatotoLevel]]:
         levels: list[GamatotoLevel] = []
         gdg = core.get_game_data_getter(self.save_file)
         data = gdg.download("DataLocal", "GamatotoExpedition.csv")
         if data is None:
-            return levels
+            return None
         csv = core.CSV(data)
         for i, line in enumerate(csv):
             levels.append(
@@ -108,26 +117,28 @@ class GamatotoLevels:
             )
         return levels
 
-    def read_max_level(self) -> GamatotoLimit:
+    def read_max_level(self) -> Optional[GamatotoLimit]:
         gdg = core.get_game_data_getter(self.save_file)
         data = gdg.download("DataLocal", "GamatotoExpedition_Limit.csv")
         if data is None:
-            return GamatotoLimit(len(self.levels), 15, 10)
+            return None
         csv = core.CSV(data)
         line = csv[0]
         return GamatotoLimit(line[0].to_int(), line[1].to_int(), line[2].to_int())
 
-    def get_level(self, level: int) -> GamatotoLevel:
+    def get_level(self, level: int) -> Optional[GamatotoLevel]:
+        if self.levels is None:
+            return None
         if level < 1:
-            raise ValueError("Level must be greater than 0")
+            return None
         return self.levels[level - 1]
 
-    def get_all_levels(self) -> list[GamatotoLevel]:
+    def get_all_levels(self) -> Optional[list[GamatotoLevel]]:
         return self.levels
 
-    def get_level_from_xp(self, xp: int) -> GamatotoLevel:
-        if not self.levels:
-            raise ValueError("No levels found")
+    def get_level_from_xp(self, xp: int) -> Optional[GamatotoLevel]:
+        if self.levels is None or self.limit is None:
+            return None
         for level in self.levels:
             if level.level >= self.limit.max_level:
                 break
@@ -139,19 +150,27 @@ class GamatotoLevels:
             return self.levels[-1]
         return self.levels[self.limit.max_level - 1]
 
-    def get_xp_from_level(self, level: int) -> int:
+    def get_xp_from_level(self, level: int) -> Optional[int]:
+        if self.levels is None:
+            return None
         level -= 1
         if level < 1:
             return 0
         return self.levels[level - 1].xp_needed
 
-    def get_max_level(self) -> int:
+    def get_max_level(self) -> Optional[int]:
+        if self.limit is None:
+            return None
         return self.limit.max_level
 
-    def get_total_stages(self) -> int:
+    def get_total_stages(self) -> Optional[int]:
+        if self.limit is None:
+            return None
         return self.limit.total_stages
 
-    def get_total_helpers(self) -> int:
+    def get_total_helpers(self) -> Optional[int]:
+        if self.limit is None:
+            return None
         return self.limit.total_helpers
 
 
@@ -360,6 +379,8 @@ class Gamatoto:
     def edit_xp(self, save_file: "core.SaveFile"):
         gamatoto_levels = core.get_gamatoto_levels(save_file)
         current_level = gamatoto_levels.get_level_from_xp(self.xp)
+        if current_level is None:
+            return
         xp = self.xp
 
         color.ColoredText.localize(
@@ -392,7 +413,13 @@ class Gamatoto:
             xp = gamatoto_levels.get_xp_from_level(value)
             current_level = gamatoto_levels.get_level(value)
 
+        if xp is None:
+            return
+
         self.xp = xp
+
+        if current_level is None:
+            return
 
         color.ColoredText.localize(
             "gamatoto_level_success", level=current_level.level, xp=xp
@@ -407,16 +434,22 @@ class Gamatoto:
         members = members_name.get_members_from_helpers(self.helpers)
         color.ColoredText.localize("current_gamatoto_helpers")
         for member in members:
+            if member is None:
+                continue
             color.ColoredText.localize(
                 "gamatoto_helper", name=member.name, rarity_name=member.rarity_name
             )
         rarity_names = members_name.get_all_rarity_names()
+        if rarity_names is None:
+            return
 
         total_rarity_amounts: list[int] = [0] * len(rarity_names)
         for helper in self.helpers.helpers:
             if not helper.is_valid():
                 continue
             member = members_name.get_member(helper.id)
+            if member is None:
+                continue
             total_rarity_amounts[member.rarity] += 1
 
         rarity_amounts = dialog_creator.MultiEditor.from_reduced(
@@ -431,6 +464,8 @@ class Gamatoto:
         helpers: list[Helper] = []
         for i, rarity_amount in enumerate(rarity_amounts):
             rarity_members = members_name.get_all_rarity(i)
+            if rarity_members is None:
+                continue
             for _ in range(rarity_amount):
                 member = rarity_members.pop(0)
                 helpers.append(Helper(member.member_id))
@@ -439,6 +474,8 @@ class Gamatoto:
         members = members_name.get_members_from_helpers(self.helpers)
         color.ColoredText.localize("new_gamatoto_helpers")
         for member in members:
+            if member is None:
+                continue
             color.ColoredText.localize(
                 "gamatoto_helper", name=member.name, rarity_name=member.rarity_name
             )

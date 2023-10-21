@@ -19,11 +19,11 @@ class CastleRecipeUnlock:
         self.save_file = save_file
         self.level_part_recipe_unlocks = self.get_recipe_unlocks()
 
-    def get_recipe_unlocks(self) -> list[LevelPartRecipeUnlock]:
+    def get_recipe_unlocks(self) -> Optional[list[LevelPartRecipeUnlock]]:
         gdg = core.get_game_data_getter(self.save_file)
         data = gdg.download("DataLocal", "CastleRecipeUnlock.csv")
         if data is None:
-            return []
+            return None
         csv = core.CSV(data)
         level_part_recipe_unlocks: list[LevelPartRecipeUnlock] = []
         for i, line in enumerate(csv):
@@ -41,14 +41,19 @@ class CastleRecipeUnlock:
         return level_part_recipe_unlocks
 
     def get_recipe_unlock(self, index: int) -> Optional[LevelPartRecipeUnlock]:
+        if self.level_part_recipe_unlocks is None:
+            return None
         for recipe_unlock in self.level_part_recipe_unlocks:
             if recipe_unlock.index == index:
                 return recipe_unlock
 
         return None
 
-    def get_max_level(self, cannon_id: int, part_id: int) -> int:
+    def get_max_level(self, cannon_id: int, part_id: int) -> Optional[int]:
+        if self.level_part_recipe_unlocks is None:
+            return None
         max_level = 0
+
         for recipe_unlock in self.level_part_recipe_unlocks:
             if (
                 recipe_unlock.cannon_id == cannon_id
@@ -59,7 +64,9 @@ class CastleRecipeUnlock:
 
         return max_level
 
-    def get_max_part_level(self, part_id: int) -> int:
+    def get_max_part_level(self, part_id: int) -> Optional[int]:
+        if self.level_part_recipe_unlocks is None:
+            return None
         max_level = 0
         for recipe_unlock in self.level_part_recipe_unlocks:
             if recipe_unlock.part_id == part_id:
@@ -113,11 +120,11 @@ class CannonDescriptions:
         self.save_file = save_file
         self.cannon_descriptions = self.get_cannon_descriptions()
 
-    def get_cannon_descriptions(self) -> list[CannonDescription]:
+    def get_cannon_descriptions(self) -> Optional[list[CannonDescription]]:
         gdg = core.get_game_data_getter(self.save_file)
         data = gdg.download("resLocal", "CastleRecipeDescriptions.csv")
         if data is None:
-            return []
+            return None
         csv = core.CSV(
             data,
             delimiter=core.Delimeter.from_country_code_res(self.save_file.cc),
@@ -149,13 +156,17 @@ class CannonDescriptions:
         return cannon_descriptions
 
     def get_cannon_description(self, cannon_id: int) -> Optional[CannonDescription]:
+        if self.cannon_descriptions is None:
+            return None
         for cannon_description in self.cannon_descriptions:
             if cannon_description.cannon_id == cannon_id:
                 return cannon_description
 
         return None
 
-    def get_longest_longest_part_name(self) -> str:
+    def get_longest_longest_part_name(self) -> Optional[str]:
+        if self.cannon_descriptions is None:
+            return None
         longest_part_name = ""
         for cannon_description in self.cannon_descriptions:
             l_name = cannon_description.get_longest_part_name()
@@ -364,11 +375,21 @@ class Ototo:
 
     def edit_engineers(self, save_file: "core.SaveFile"):
         name = core.get_gatya_item_names(save_file).get_name(92)
+        if name is None:
+            name = "engineers"
+            localized_item = True
+        else:
+            localized_item = False
         self.engineers = dialog_creator.SingleEditor(
-            name, self.engineers, Ototo.get_max_engineers(save_file)
+            name,
+            self.engineers,
+            Ototo.get_max_engineers(save_file),
+            localized_item=localized_item,
         ).edit()
 
-    def display_current_cannons(self, save_file: "core.SaveFile") -> list[str]:
+    def display_current_cannons(
+        self, save_file: "core.SaveFile"
+    ) -> Optional[list[str]]:
         descriptions = CannonDescriptions(save_file)
         recipe_unlocks = CastleRecipeUnlock(save_file)
 
@@ -378,7 +399,10 @@ class Ototo:
             self.cannons = Cannons.init(save_file.game_version)
 
         names: list[str] = []
-        longest_part_name = len(descriptions.get_longest_longest_part_name())
+        longest_part_name = descriptions.get_longest_longest_part_name()
+        if longest_part_name is None:
+            return None
+        longest_part_name = len(longest_part_name)
 
         for cannon_id, cannon in self.cannons.cannons.items():
             description = descriptions.get_cannon_description(cannon_id)
@@ -425,6 +449,8 @@ class Ototo:
             self.cannons = Cannons.init(save_file.game_version)
 
         names = self.display_current_cannons(save_file)
+        if names is None:
+            return
 
         cannon_ids, all_at_once = dialog_creator.ChoiceInput.from_reduced(
             names, dialog="select_cannon"
@@ -516,14 +542,23 @@ class Ototo:
         cannon_descriptions = CannonDescriptions(save_file)
         cannon_recipe = CastleRecipeUnlock(save_file)
         if all_at_once:
+            max_part_level_0 = cannon_recipe.get_max_part_level(0)
+            max_part_level_1 = cannon_recipe.get_max_part_level(1)
+            max_part_level_2 = cannon_recipe.get_max_part_level(2)
+            if (
+                max_part_level_0 is None
+                or max_part_level_1 is None
+                or max_part_level_2 is None
+            ):
+                return
             levels = dialog_creator.MultiEditor.from_reduced(
                 "cannon_level",
                 ["effect", "improved_foundation", "improved_style"],
                 None,
                 max_values=[
-                    cannon_recipe.get_max_part_level(0),
-                    cannon_recipe.get_max_part_level(1),
-                    cannon_recipe.get_max_part_level(2),
+                    max_part_level_0,
+                    max_part_level_1,
+                    max_part_level_2,
                 ],
                 group_name_localized=True,
                 items_localized=True,
@@ -540,6 +575,8 @@ class Ototo:
                     if part_id == 0:
                         level -= 1
                     max_level = cannon_recipe.get_max_level(cannon_id, part_id)
+                    if max_level is None:
+                        continue
                     if part_id >= len(cannon.levels):
                         break
                     cannon.levels[part_id] = min(level, max_level)
@@ -558,14 +595,24 @@ class Ototo:
                 names = ["effect", "improved_foundation", "improved_style"]
                 if cannon_id == 0:
                     names = ["effect"]
+                max_part_level_0 = cannon_recipe.get_max_part_level(0)
+                max_part_level_1 = cannon_recipe.get_max_part_level(1)
+                max_part_level_2 = cannon_recipe.get_max_part_level(2)
+                if (
+                    max_part_level_0 is None
+                    or max_part_level_1 is None
+                    or max_part_level_2 is None
+                ):
+                    return
+
                 levels = dialog_creator.MultiEditor.from_reduced(
                     cannon_desc.get_cannon_name(),
                     names,
                     levels,
                     max_values=[
-                        cannon_recipe.get_max_level(cannon_id, 0),
-                        cannon_recipe.get_max_level(cannon_id, 1),
-                        cannon_recipe.get_max_level(cannon_id, 2),
+                        max_part_level_0,
+                        max_part_level_1,
+                        max_part_level_2,
                     ],
                     items_localized=True,
                 ).edit()

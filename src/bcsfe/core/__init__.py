@@ -260,6 +260,10 @@ def update_external_content(_: Any = None):
     ExternalLocaleManager.update_all_external_locales()
 
 
+def print_no_internet():
+    color.ColoredText.localize("no_internet")
+
+
 __all__ = [
     "server",
     "io",

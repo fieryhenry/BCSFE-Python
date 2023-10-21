@@ -1,3 +1,4 @@
+from typing import Optional
 from bcsfe import core
 
 
@@ -6,11 +7,11 @@ class GatyaItemNames:
         self.save_file = save_file
         self.names = self.__get_names()
 
-    def __get_names(self) -> list[str]:
+    def __get_names(self) -> Optional[list[str]]:
         gdg = core.get_game_data_getter(self.save_file)
         data = gdg.download("resLocal", "GatyaitemName.csv")
         if data is None:
-            return []
+            return None
         csv = core.CSV(data, core.Delimeter.from_country_code_res(self.save_file.cc))
         names: list[str] = []
         for line in csv:
@@ -18,11 +19,13 @@ class GatyaItemNames:
 
         return names
 
-    def get_name(self, index: int) -> str:
+    def get_name(self, index: int) -> Optional[str]:
+        if self.names is None:
+            return None
         try:
             return self.names[index]
         except IndexError:
-            return ""
+            return core.local_manager.get_key("gatya_item_unknown_name", index=index)
 
 
 class GatyaItemBuyItem:
@@ -62,11 +65,11 @@ class GatyaItemBuy:
         self.save_file = save_file
         self.buy = self.get_buy()
 
-    def get_buy(self) -> list[GatyaItemBuyItem]:
+    def get_buy(self) -> Optional[list[GatyaItemBuyItem]]:
         gdg = core.get_game_data_getter(self.save_file)
         data = gdg.download("DataLocal", "Gatyaitembuy.csv")
         if data is None:
-            return []
+            return None
         csv = core.CSV(data)
         buy: list[GatyaItemBuyItem] = []
         for i, line in enumerate(csv.lines[1:]):
@@ -97,7 +100,9 @@ class GatyaItemBuy:
         items.sort(key=lambda x: x.index)
         return items
 
-    def get_by_category(self, category: int) -> list[GatyaItemBuyItem]:
+    def get_by_category(self, category: int) -> Optional[list[GatyaItemBuyItem]]:
+        if self.buy is None:
+            return None
         return self.sort_by_index(
             [item for item in self.buy if item.category == category]
         )

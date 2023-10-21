@@ -333,7 +333,7 @@ class StoryChapters:
     @staticmethod
     def get_chapter_names(
         save_file: "core.SaveFile", chapter_ids: Optional[list[int]] = None
-    ):
+    ) -> Optional[list[str]]:
         if chapter_ids is None:
             chapters = save_file.story.get_real_chapters()
         else:
@@ -344,6 +344,8 @@ class StoryChapters:
         eoc_name = localizable.get("everyplay_mapname_J")
         itf_name = localizable.get("everyplay_mapname_W")
         cotc_name = localizable.get("everyplay_mapname_P")
+        if eoc_name is None or itf_name is None or cotc_name is None:
+            return None
 
         for i in range(len(chapters)):
             if i < 3:
@@ -360,6 +362,9 @@ class StoryChapters:
         save_file: "core.SaveFile", chapters: Optional[list[int]] = None
     ) -> Optional[list[int]]:
         chapter_names = StoryChapters.get_chapter_names(save_file, chapters)
+
+        if chapter_names is None:
+            return None
 
         selected_chapters, _ = dialog_creator.ChoiceInput.from_reduced(
             chapter_names, dialog="select_story_chapters"
@@ -475,7 +480,10 @@ class StoryChapters:
 
     @staticmethod
     def print_current_chapter(save_file: "core.SaveFile", chapter_id: int):
-        chapter_name = StoryChapters.get_chapter_names(save_file)[chapter_id]
+        chapter_names = StoryChapters.get_chapter_names(save_file)
+        if chapter_names is None:
+            return
+        chapter_name = chapter_names[chapter_id]
         color.ColoredText.localize("current_chapter", chapter_name=chapter_name)
 
     @staticmethod
@@ -487,6 +495,8 @@ class StoryChapters:
         treasure_group_names = TreasureGroupNames(
             save_file, chapter_type
         ).treasure_group_names
+        if treasure_group_names is None:
+            return
         treasure_group_name = treasure_group_names[treasure_group_id]
         color.ColoredText.localize(
             "current_treasure_group", treasure_group_name=treasure_group_name
@@ -514,6 +524,8 @@ class StoryChapters:
             choice = 0
 
         chapter_names = StoryChapters.get_chapter_names(save_file)
+        if chapter_names is None:
+            return
 
         if choice == 0:
             for chapter_id in selected_chapters:
@@ -540,6 +552,8 @@ class StoryChapters:
     @staticmethod
     def ask_treasure_level(save_file: "core.SaveFile") -> Optional[int]:
         treasure_text = core.get_treasure_text(save_file).treasure_text
+        if treasure_text is None:
+            return None
         if len(treasure_text) < 3:
             return None
         options = [
@@ -776,12 +790,12 @@ class StageNames:
             return f"StageName{self.chapter}_{localizable.get_lang()}.csv"
         return f"StageName_{self.chapter}_{localizable.get_lang()}.csv"
 
-    def get_stage_names(self) -> list[str]:
+    def get_stage_names(self) -> Optional[list[str]]:
         file_name = self.get_file_name()
         gdg = core.get_game_data_getter(self.save_file)
         file = gdg.download("resLocal", file_name)
         if file is None:
-            return []
+            return None
         csv = core.CSV(
             file, delimiter=core.Delimeter.from_country_code_res(self.save_file.cc)
         )
@@ -795,7 +809,9 @@ class StageNames:
                     stage_names.append(value.to_str())
         return stage_names[: self.max_stages]
 
-    def get_stage_name(self, stage_id: int) -> str:
+    def get_stage_name(self, stage_id: int) -> Optional[str]:
+        if self.stage_names is None:
+            return None
         return self.stage_names[stage_id]
 
 
@@ -808,12 +824,12 @@ class TreasureText:
         localizable = core.get_localizable(self.save_file)
         return f"Treasure2_{localizable.get_lang()}.csv"
 
-    def get_treasure_text(self) -> list[str]:
+    def get_treasure_text(self) -> Optional[list[str]]:
         file_name = self.get_tt_file_name()
         gdg = core.get_game_data_getter(self.save_file)
         file = gdg.download("resLocal", file_name)
         if file is None:
-            return []
+            return None
         csv = core.CSV(
             file, delimiter=core.Delimeter.from_country_code_res(self.save_file.cc)
         )
@@ -838,11 +854,11 @@ class TreasureGroupData:
             return "treasureData2_0.csv"
         return ""
 
-    def get_treasure_group_data(self) -> list[list[int]]:
+    def get_treasure_group_data(self) -> Optional[list[list[int]]]:
         gdg = core.get_game_data_getter(self.save_file)
         file = gdg.download("DataLocal", self.get_tgd_file_name())
         if file is None:
-            return []
+            return None
         csv = core.CSV(file)
         treasure_group_data: list[list[int]] = []
         for row in csv.lines[11:22]:
@@ -870,11 +886,11 @@ class TreasureGroupNames:
             return f"Treasure3_2_0_{lang}.csv"
         return ""
 
-    def get_treasure_group_names(self) -> list[str]:
+    def get_treasure_group_names(self) -> Optional[list[str]]:
         gdg = core.get_game_data_getter(self.save_file)
         file = gdg.download("resLocal", self.get_tgn_file_name())
         if file is None:
-            return []
+            return None
         csv = core.CSV(
             file, delimiter=core.Delimeter.from_country_code_res(self.save_file.cc)
         )

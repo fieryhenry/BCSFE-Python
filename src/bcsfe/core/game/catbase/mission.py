@@ -203,6 +203,8 @@ class Missions:
 
         names = core.get_mission_names(save_file)
         conditions = core.get_mission_conditions(save_file)
+        if names.names is None or conditions.conditions is None:
+            return
         options: list[str] = []
         mssion_ids: list[int] = []
         for mission_id, name in names.names.items():
@@ -270,14 +272,14 @@ class MissionCondition:
 class MissionConditions:
     def __init__(self, save: "core.SaveFile"):
         self.save = save
-        self.conditions: dict[int, MissionCondition] = self.get_conditions()
+        self.conditions = self.get_conditions()
 
-    def get_conditions(self) -> dict[int, MissionCondition]:
+    def get_conditions(self) -> Optional[dict[int, MissionCondition]]:
         file_name = "Mission_Condition.csv"
         gdg = core.get_game_data_getter(self.save)
         file = gdg.download("DataLocal", file_name)
         if file is None:
-            return {}
+            return None
         csv = core.CSV(file)
         conditions: dict[int, MissionCondition] = {}
         for row in csv:
@@ -291,20 +293,22 @@ class MissionConditions:
         return conditions
 
     def get_condition(self, mission_id: int) -> Optional[MissionCondition]:
+        if self.conditions is None:
+            return None
         return self.conditions.get(mission_id)
 
 
 class MissionNames:
     def __init__(self, save: "core.SaveFile"):
         self.save = save
-        self.names: dict[int, str] = self.get_names()
+        self.names = self.get_names()
 
-    def get_names(self) -> dict[int, str]:
+    def get_names(self) -> Optional[dict[int, str]]:
         file_name = "Mission_Name.csv"
         gdg = core.get_game_data_getter(self.save)
         file = gdg.download("resLocal", file_name)
         if file is None:
-            return {}
+            return None
         csv = core.CSV(
             file, delimiter=core.Delimeter.from_country_code_res(self.save.cc)
         )

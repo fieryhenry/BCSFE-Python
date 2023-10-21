@@ -16,11 +16,11 @@ class CharaDrop:
         self.save_file = save_file
         self.drops = self.get_drops()
 
-    def get_drops(self) -> list[Drop]:
+    def get_drops(self) -> Optional[list[Drop]]:
         gdg = core.get_game_data_getter(self.save_file)
         data = gdg.download("DataLocal", "drop_chara.csv")
         if data is None:
-            return []
+            return None
         csv = core.CSV(data)
         drops: list[Drop] = []
         for line in csv.lines[1:]:
@@ -35,13 +35,17 @@ class CharaDrop:
         return drops
 
     def get_drop(self, stage_id: int) -> Optional[Drop]:
+        if self.drops is None:
+            return None
         for drop in self.drops:
             if drop.stage_id == stage_id:
                 return drop
 
         return None
 
-    def get_drops_from_chara_id(self, chara_id: int) -> list[Drop]:
+    def get_drops_from_chara_id(self, chara_id: int) -> Optional[list[Drop]]:
+        if self.drops is None:
+            return None
         drops: list[Drop] = []
         for drop in self.drops:
             if drop.chara_id == chara_id:
@@ -51,6 +55,8 @@ class CharaDrop:
 
     def unlock_drops_from_cat_id(self, cat_id: int) -> None:
         drops = self.get_drops_from_chara_id(cat_id)
+        if drops is None:
+            return
         for drop in drops:
             try:
                 self.save_file.unit_drops[drop.save_id] = 1

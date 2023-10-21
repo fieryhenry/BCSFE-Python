@@ -1,11 +1,13 @@
 from typing import Optional
 from bcsfe import core
+from bcsfe.cli import color
 
 
 class Repo:
-    def __init__(self, url: str):
+    def __init__(self, url: str, output_error: bool = True):
         self.url = url
-        self.clone()
+        self.output_error = output_error
+        self.success = self.clone()
 
     def get_repo_name(self) -> str:
         return self.url.split("/")[-1]
@@ -15,23 +17,30 @@ class Repo:
         path.generate_dirs()
         return path
 
-    def clone_to_temp(self, path: "core.Path") -> None:
+    def run_cmd(self, cmd: str) -> bool:
+        result = core.Command(cmd).run()
+        success = result.exit_code == 0
+        if not success and self.output_error:
+            color.ColoredText.localize("failed_to_run_git_cmd", cmd=cmd)
+        return success
+
+    def clone_to_temp(self, path: "core.Path") -> bool:
         cmd = f"git clone {self.url} {path}"
-        core.Command(cmd).run()
+        return self.run_cmd(cmd)
 
-    def clone(self) -> None:
+    def clone(self) -> bool:
         if self.is_cloned():
-            return
+            return True
         cmd = f"git clone {self.url} {self.get_path()}"
-        core.Command(cmd).run()
+        return self.run_cmd(cmd)
 
-    def pull(self) -> None:
+    def pull(self) -> bool:
         cmd = f"git -C {self.get_path()} pull"
-        core.Command(cmd).run()
+        return self.run_cmd(cmd)
 
-    def fetch(self) -> None:
+    def fetch(self) -> bool:
         cmd = f"git -C {self.get_path()} fetch"
-        core.Command(cmd).run()
+        return self.run_cmd(cmd)
 
     def get_file(self, file_path: "core.Path") -> Optional["core.Data"]:
         path = self.get_path().add(file_path)
@@ -65,9 +74,13 @@ class GitHandler:
         repo_folder.generate_dirs()
         return repo_folder
 
-    def get_repo(self, repo_url: str) -> "Repo":
+    def get_repo(self, repo_url: str, output_error: bool = True) -> Optional["Repo"]:
         repo = Repo(repo_url)
-        return repo
+        if repo.success:
+            return repo
+        if output_error:
+            color.ColoredText.localize("failed_to_get_repo", url=repo_url)
+        return None
 
     @staticmethod
     def is_git_installed() -> bool:

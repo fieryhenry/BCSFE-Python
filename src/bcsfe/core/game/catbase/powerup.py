@@ -129,6 +129,8 @@ class PowerUpHelper:
 
     def get_max_max_base_upgrade_level(self) -> int:
         max_level = 0
+        if self.all_unit_buy.unit_buy is None:
+            return 90
         for unit_buy in self.all_unit_buy.unit_buy:
             if unit_buy.max_upgrade_level_catseye > max_level:
                 max_level = unit_buy.max_upgrade_level_catseye
@@ -136,6 +138,8 @@ class PowerUpHelper:
 
     def get_max_max_plus_upgrade_level(self) -> int:
         max_level = 0
+        if self.all_unit_buy.unit_buy is None:
+            return 90
         for unit_buy in self.all_unit_buy.unit_buy:
             if unit_buy.max_plus_upgrade_level > max_level:
                 max_level = unit_buy.max_plus_upgrade_level

@@ -27,27 +27,33 @@ class RequestHandler:
         self.headers = headers
         self.data = data
 
-    def get(self) -> requests.Response:
+    def get(self) -> Optional[requests.Response]:
         """Sends a GET request.
 
         Returns:
             requests.Response: Response from the server.
         """
-        return requests.get(
-            self.url,
-            headers=self.headers,
-            timeout=core.config.get_int(core.ConfigKey.MAX_REQUEST_TIMEOUT),
-        )
+        try:
+            return requests.get(
+                self.url,
+                headers=self.headers,
+                timeout=core.config.get_int(core.ConfigKey.MAX_REQUEST_TIMEOUT),
+            )
+        except requests.exceptions.ConnectionError:
+            return None
 
-    def post(self) -> requests.Response:
+    def post(self) -> Optional[requests.Response]:
         """Sends a POST request.
 
         Returns:
             requests.Response: Response from the server.
         """
-        return requests.post(
-            self.url,
-            headers=self.headers,
-            data=self.data.data,
-            timeout=core.config.get_int(core.ConfigKey.MAX_REQUEST_TIMEOUT),
-        )
+        try:
+            return requests.post(
+                self.url,
+                headers=self.headers,
+                data=self.data.data,
+                timeout=core.config.get_int(core.ConfigKey.MAX_REQUEST_TIMEOUT),
+            )
+        except requests.exceptions.ConnectionError:
+            return None

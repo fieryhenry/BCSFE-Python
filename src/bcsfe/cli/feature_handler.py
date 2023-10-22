@@ -66,6 +66,7 @@ class FeatureHandler:
                 "aku_chapters": core.game.map.aku.AkuChapters.edit_aku_chapters,
                 "itf_timed_scores": core.game.map.story.StoryChapters.edit_itf_timed_scores,
                 "filibuster_reclearing": edits.basic_items.BasicItems.allow_filibuster_stage_reclearing,
+                "sol": core.game.map.event.EventChapters.edit_sol_chapters,
             },
             "gamototo": {
                 "engineers": edits.basic_items.BasicItems.edit_engineers,

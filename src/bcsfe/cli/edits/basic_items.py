@@ -1,3 +1,4 @@
+import random
 from typing import Optional
 from bcsfe import core
 from bcsfe.cli import dialog_creator, color, edits
@@ -338,3 +339,9 @@ class BasicItems:
     def unlock_equip_menu(save_file: "core.SaveFile"):
         save_file.unlock_equip_menu()
         color.ColoredText.localize("equip_menu_unlocked")
+
+    @staticmethod
+    def allow_filibuster_stage_reclearing(save_file: "core.SaveFile"):
+        save_file.filibuster_stage_enabled = True
+        save_file.filibuster_stage_id = random.randint(0, 47)
+        color.ColoredText.localize("filibuster_stage_reclearing_allowed")

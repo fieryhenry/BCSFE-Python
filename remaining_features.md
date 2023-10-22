@@ -11,6 +11,5 @@ branch of the save editor but are in the master branch.
 - collab gauntlets
 - towers
 - behemoth culling
-- filibuster stage reclearing
 - legend quest
 - old fix elsewhere unban

@@ -6,7 +6,7 @@ __pychache__
 .*
 *.egg*
 src/bcsfe/files/game_data
-src/bcsfe/files/engima_names
+src/bcsfe/files/map_names
 pyrightconfig.json
 /test*.py
 /save.json

@@ -295,13 +295,24 @@ class StoryChapters:
             chapter.write_treasure_festival_type(stream)
 
     def read_itf_timed_scores(self, stream: "core.Data"):
+        # 0: eoc 1
+        # 1: eoc 2
+        # 2: eoc 3
+        # 3: _
+        # 4: itf 1
+        # 5: itf 2
+        # 6: itf 3
+        # 7: cotc 1
+        # 8: cotc 2
+        # 9: cotc 3
+
         for i, chapter in enumerate(self.chapters):
-            if i > 4 and i < 8:
+            if i > 3 and i < 7:
                 chapter.read_itf_timed_scores(stream)
 
     def write_itf_timed_scores(self, stream: "core.Data"):
         for i, chapter in enumerate(self.chapters):
-            if i > 4 and i < 8:
+            if i > 3 and i < 7:
                 chapter.write_itf_timed_scores(stream)
 
     def serialize(self) -> list[dict[str, Any]]:
@@ -335,9 +346,7 @@ class StoryChapters:
         save_file: "core.SaveFile", chapter_ids: Optional[list[int]] = None
     ) -> Optional[list[str]]:
         if chapter_ids is None:
-            chapters = save_file.story.get_real_chapters()
-        else:
-            chapters = [save_file.story.get_real_chapters()[i] for i in chapter_ids]
+            chapter_ids = [0, 1, 2, 3, 4, 5, 6, 7, 8]
 
         chapter_names: list[str] = []
         localizable = core.get_localizable(save_file)
@@ -347,13 +356,13 @@ class StoryChapters:
         if eoc_name is None or itf_name is None or cotc_name is None:
             return None
 
-        for i in range(len(chapters)):
-            if i < 3:
-                chapter_names.append(eoc_name.replace("%d", str(i + 1)))
-            elif i < 6:
-                chapter_names.append(itf_name.replace("%d", str(i - 2)))
+        for chapter_id in chapter_ids:
+            if chapter_id < 3:
+                chapter_names.append(eoc_name.replace("%d", str(chapter_id + 1)))
+            elif chapter_id < 6:
+                chapter_names.append(itf_name.replace("%d", str(chapter_id - 2)))
             else:
-                chapter_names.append(cotc_name.replace("%d", str(i - 5)))
+                chapter_names.append(cotc_name.replace("%d", str(chapter_id - 5)))
 
         return chapter_names
 
@@ -775,6 +784,149 @@ class StoryChapters:
             StoryChapters.edit_treasures_groups(save_file, selected_chapters)
 
         color.ColoredText.localize("treasures_edited")
+
+    @staticmethod
+    def edit_itf_timed_scores(save_file: "core.SaveFile"):
+        selected_chapters = StoryChapters.select_story_chapters(
+            save_file, chapters=[3, 4, 5]
+        )
+        if not selected_chapters:
+            return
+        options = ["whole_chapters", "individual_stages"]
+        choice = dialog_creator.ChoiceInput.from_reduced(
+            options, dialog="itf_timed_scores_dialog", single_choice=True
+        ).single_choice()
+        if choice is None:
+            return
+        choice -= 1
+
+        selected_chapters = [chapter_id + 3 for chapter_id in selected_chapters]
+
+        if choice == 0:
+            StoryChapters.edit_itf_timed_scores_whole_chapters(
+                save_file, selected_chapters
+            )
+        elif choice == 1:
+            StoryChapters.edit_itf_timed_scores_individual_stages(
+                save_file, selected_chapters
+            )
+
+        color.ColoredText.localize("itf_timed_scores_edited")
+
+    @staticmethod
+    def edit_itf_timed_scores_whole_chapters(
+        save_file: "core.SaveFile", chapters: list[int]
+    ):
+        choice = StoryChapters.get_per_chapter(chapters)
+        if choice is None:
+            return
+
+        if choice == 0:
+            for chapter_id in chapters:
+                print(chapter_id)
+                StoryChapters.print_current_chapter(save_file, chapter_id)
+                chapter = save_file.story.get_real_chapters()[chapter_id]
+                score = dialog_creator.IntInput(
+                    min=0, max=core.max_value_manager.get("itf_timed_score")
+                ).get_input_locale_while("itf_timed_score_dialog", {})
+                if score is None:
+                    return
+                for stage in chapter.get_valid_treasure_stages():
+                    stage.itf_timed_score = score
+        else:
+            score = dialog_creator.IntInput(
+                min=0, max=core.max_value_manager.get("itf_timed_score")
+            ).get_input_locale_while("itf_timed_score_dialog", {})
+            if score is None:
+                return
+            for chapter_id in chapters:
+                chapter = save_file.story.get_real_chapters()[chapter_id]
+                for stage in chapter.get_valid_treasure_stages():
+                    stage.itf_timed_score = score
+
+    @staticmethod
+    def print_current_stage(save_file: "core.SaveFile", chapter_id: int, stage_id: int):
+        chapter_names = StoryChapters.get_chapter_names(save_file)
+        if chapter_names is None:
+            return
+        chapter_name = chapter_names[chapter_id]
+        chapter_type = StoryChapters.get_chapter_type_from_index(chapter_id)
+        stage_names = StageNames(save_file, str(chapter_type)).stage_names
+        if stage_names is None:
+            return
+        stage_id = StoryChapters.convert_stage_id(stage_id)
+        stage_name = stage_names[stage_id]
+        color.ColoredText.localize(
+            "current_stage", chapter_name=chapter_name, stage_name=stage_name
+        )
+
+    @staticmethod
+    def edit_itf_timed_scores_individual_stages(
+        save_file: "core.SaveFile", chapters: list[int]
+    ):
+        choice = StoryChapters.get_per_chapter(chapters)
+        if choice is None:
+            return
+        options = ["individual_stages", "all_selected_stages"]
+        choice2 = dialog_creator.ChoiceInput.from_reduced(
+            options, dialog="itf_timed_scores_individual_dialog", single_choice=True
+        ).single_choice()
+        if choice2 is None:
+            return
+        choice2 -= 1
+
+        if choice == 0:
+            for chapter_id in chapters:
+                StoryChapters.print_current_chapter(save_file, chapter_id)
+                chapter = save_file.story.get_real_chapters()[chapter_id]
+                stage_ids = StoryChapters.select_stages(save_file, chapter_id)
+                if stage_ids is None:
+                    return
+                if choice2 == 0:
+                    for stage_id in stage_ids:
+                        StoryChapters.print_current_stage(
+                            save_file, chapter_id, stage_id
+                        )
+
+                        score = dialog_creator.IntInput(
+                            min=0, max=core.max_value_manager.get("itf_timed_score")
+                        ).get_input_locale_while("itf_timed_score_dialog", {})
+                        if score is None:
+                            return
+                        chapter.stages[stage_id].itf_timed_score = score
+                elif choice2 == 1:
+                    score = dialog_creator.IntInput(
+                        min=0, max=core.max_value_manager.get("itf_timed_score")
+                    ).get_input_locale_while("itf_timed_score_dialog", {})
+                    if score is None:
+                        return
+                    for stage_id in stage_ids:
+                        chapter.stages[stage_id].itf_timed_score = score
+        else:
+            stage_ids = StoryChapters.select_stages(save_file, 3)
+            if stage_ids is None:
+                return
+            if choice2 == 0:
+                for stage_id in stage_ids:
+                    StoryChapters.print_current_stage(save_file, 3, stage_id)
+                    score = dialog_creator.IntInput(
+                        min=0, max=core.max_value_manager.get("itf_timed_score")
+                    ).get_input_locale_while("itf_timed_score_dialog", {})
+                    if score is None:
+                        return
+                    for chapter_id in chapters:
+                        chapter = save_file.story.get_real_chapters()[chapter_id]
+                        chapter.stages[stage_id].itf_timed_score = score
+            elif choice2 == 1:
+                score = dialog_creator.IntInput(
+                    min=0, max=core.max_value_manager.get("itf_timed_score")
+                ).get_input_locale_while("itf_timed_score_dialog", {})
+                if score is None:
+                    return
+                for chapter_id in chapters:
+                    chapter = save_file.story.get_real_chapters()[chapter_id]
+                    for stage_id in stage_ids:
+                        chapter.stages[stage_id].itf_timed_score = score
 
 
 class StageNames:

@@ -11,7 +11,6 @@ branch of the save editor but are in the master branch.
 - collab gauntlets
 - towers
 - behemoth culling
-- itf timed scores
 - filibuster stage reclearing
 - legend quest
 - old fix elsewhere unban

@@ -64,6 +64,7 @@ class FeatureHandler:
                 "story_treasures": core.game.map.story.StoryChapters.edit_treasures,
                 "outbreaks": core.game.map.outbreaks.Outbreaks.edit_outbreaks,
                 "aku_chapters": core.game.map.aku.AkuChapters.edit_aku_chapters,
+                "itf_timed_scores": core.game.map.story.StoryChapters.edit_itf_timed_scores,
             },
             "gamototo": {
                 "engineers": edits.basic_items.BasicItems.edit_engineers,

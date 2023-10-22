@@ -35,8 +35,8 @@ If you only have an ios device: watch the
 
 1. Install python (You'll need version 3.9 and up) <https://www.python.org/downloads/>
 
-1. Enter the command: `pip install -U battle-cats-save-editor` into command
-prompt or another terminal to install the editor (**NOT the Windows Python app**).
+1. Follow the `Install from source` instructions below as 3.0.0 isn't on pypi
+   yet
 
 1. Enter the command: `py -m bcsfe` to run the editor. If that doesn't work
 then use `python3` or `python` instead of `py` in the command
@@ -126,7 +126,7 @@ download Termux from the Play Store because it does not work
 
 8. If that doesn't work then read this: <https://stackoverflow.com/a/71097459>
 
-9. Then run `python -m pip install -U bcsfe`
+9. Then follow the `Install from source` instructions below
 
 10. If that doesn't work then run `pkg upgrade` and try again
 

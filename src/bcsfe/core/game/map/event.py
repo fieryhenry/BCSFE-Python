@@ -714,21 +714,95 @@ class EventChapters:
 
     @staticmethod
     def edit_sol_chapters(save_file: "core.SaveFile"):
-        event_chapters = save_file.event_stages
-        map_names = core.MapNames(save_file, "N")
-        names = map_names.map_names
-        names_list: list[str] = []
-        keys = list(names.keys())
-        keys.sort()
-        for id in keys:
-            name = names[id]
-            if name is None:
-                name = core.local_manager.get_key("unknown_sol_name", id=id)
-            names_list.append(name)
+        EventChapters.edit_chapters(save_file, 0, "N")
 
-        map_choices, _ = dialog_creator.ChoiceInput.from_reduced(
-            names_list, dialog="edit_sol_chapters"
-        ).multiple_choice(False)
+    @staticmethod
+    def edit_event_chapters(save_file: "core.SaveFile"):
+        EventChapters.edit_chapters(save_file, 1, "S")
+
+    @staticmethod
+    def select_map_names(names_dict: dict[int, Optional[str]]) -> Optional[list[int]]:
+        map_ids: list[int] = []
+        names_list: list[str] = []
+        names_dict = dict(sorted(names_dict.items()))
+        ids = list(names_dict.keys())
+        for id, map_name in names_dict.items():
+            if map_name is None:
+                map_name = core.local_manager.get_key("unknown_map_name", id=id)
+            else:
+                map_name = core.local_manager.get_key("map_name", name=map_name, id=id)
+            names_list.append(map_name)
+
+        while True:
+            dialog_creator.ListOutput(names_list, [], "select_map").display_locale()
+            usr_input = (
+                color.ColoredInput()
+                .localize("select_map_dialog")
+                .lower()
+                .strip()
+                .replace(" ", "_")
+            )
+            if usr_input == "q":
+                return None
+            usr_ids = dialog_creator.RangeInput(max=len(names_list)).parse(usr_input)
+            if not usr_ids:
+                found_names: list[tuple[int, str]] = []
+                for i, name in enumerate(names_list):
+                    if usr_input in name.lower().strip().replace(" ", "_"):
+                        true_id = ids[i]
+                        found_names.append((i, name))
+
+                if len(found_names) == 0:
+                    color.ColoredText.localize("no_map_found", name=usr_input)
+                elif len(found_names) == 1:
+                    id = found_names[0][0]
+                    true_id = ids[id]
+                    if true_id not in map_ids:
+                        map_ids.append(true_id)
+                else:
+                    selected_ids, _ = dialog_creator.ChoiceInput.from_reduced(
+                        [name for _, name in found_names],
+                        dialog="select_map_from_names",
+                    ).multiple_choice(False)
+                    if selected_ids is None:
+                        continue
+                    for i in selected_ids:
+                        id = found_names[i][0]
+                        true_id = ids[id]
+                        if true_id not in map_ids:
+                            map_ids.append(true_id)
+            else:
+                for id in usr_ids:
+                    true_id = ids[id]
+                    if true_id not in map_ids:
+                        map_ids.append(true_id)
+
+            color.ColoredText.localize("current_maps", maps=map_ids)
+
+            for id in map_ids:
+                name = names_dict[id]
+                EventChapters.print_current_chapter(name, id)
+
+            finished = dialog_creator.YesNoInput().get_input_once(
+                "finished_selecting_maps"
+            )
+            if finished:
+                break
+        return map_ids
+
+    @staticmethod
+    def print_current_chapter(name: Optional[str], id: int):
+        if name is None:
+            name = core.local_manager.get_key("unknown_map_name", id=id)
+        color.ColoredText.localize("current_sol_chapter", name=name, id=id)
+
+    @staticmethod
+    def edit_chapters(save_file: "core.SaveFile", type: int, letter_code: str):
+        event_chapters = save_file.event_stages
+        map_names = core.MapNames(save_file, letter_code)
+        names = map_names.map_names
+
+        map_choices = EventChapters.select_map_names(names)
         if map_choices is None:
             return
 
@@ -752,7 +826,7 @@ class EventChapters:
             "modify_clear_amounts"
         )
         clear_amount = 1
-        clear_amount_type = 0
+        clear_amount_type = -1
         if modify_clear_amounts:
             options = ["clear_amount_chapter", "clear_amount_all"]
             if clear_type_choice == 1:
@@ -775,32 +849,32 @@ class EventChapters:
         else:
             stars = 0
 
-        for map in map_choices:
-            map_name = names[map]
-            stage_names = map_names.stage_names.get(map)
-            color.ColoredText.localize("current_sol_chapter", name=map_name, id=map)
+        for id in map_choices:
+            map_name = names[id]
+            stage_names = map_names.stage_names.get(id)
+            color.ColoredText.localize("current_sol_chapter", name=map_name, id=id)
             if stars_type_choice:
                 stars = EventChapters.ask_stars()
                 if stars is None:
                     return
             if clear_type_choice:
-                stages = EventChapters.ask_stages(map_names, map)
+                stages = EventChapters.ask_stages(map_names, id)
                 if stages is None:
                     return
             else:
-                stages = list(range(event_chapters.get_total_stages(0, map, 0)))
+                stages = list(range(event_chapters.get_total_stages(type, id, 0)))
 
             if clear_amount_type == 0:
                 clear_amount = EventChapters.ask_clear_amount()
                 if clear_amount is None:
                     return
 
-            for star in range(event_chapters.get_total_stars(0, map)):
-                for stage in range(event_chapters.get_total_stages(0, map, star)):
-                    save_file.event_stages.chapters[0].chapters[map].chapters[
+            for star in range(event_chapters.get_total_stars(type, id)):
+                for stage in range(event_chapters.get_total_stages(type, id, star)):
+                    save_file.event_stages.chapters[type].chapters[id].chapters[
                         star
                     ].stages[stage].clear_amount = 0
-                    save_file.event_stages.chapters[0].chapters[map].chapters[
+                    save_file.event_stages.chapters[type].chapters[id].chapters[
                         star
                     ].clear_progress = 0
 
@@ -819,12 +893,12 @@ class EventChapters:
                     if clear_amount_type == 2:
                         clear_amount = EventChapters.ask_clear_amount()
                     save_file.event_stages.clear_stage(
-                        0,
-                        map,
+                        type,
+                        id,
                         star,
                         stage,
                         overwrite_clear_progress=True,
                         clear_amount=clear_amount,
                     )
 
-        color.ColoredText.localize("sol_chapters_edited")
+        color.ColoredText.localize("map_chapters_edited")

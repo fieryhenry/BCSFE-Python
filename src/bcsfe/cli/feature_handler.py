@@ -67,6 +67,7 @@ class FeatureHandler:
                 "itf_timed_scores": core.game.map.story.StoryChapters.edit_itf_timed_scores,
                 "filibuster_reclearing": edits.basic_items.BasicItems.allow_filibuster_stage_reclearing,
                 "sol": core.game.map.event.EventChapters.edit_sol_chapters,
+                "event": core.game.map.event.EventChapters.edit_event_chapters,
             },
             "gamototo": {
                 "engineers": edits.basic_items.BasicItems.edit_engineers,

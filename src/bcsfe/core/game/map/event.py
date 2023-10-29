@@ -721,6 +721,10 @@ class EventChapters:
         EventChapters.edit_chapters(save_file, 1, "S")
 
     @staticmethod
+    def edit_collab_chapters(save_file: "core.SaveFile"):
+        EventChapters.edit_chapters(save_file, 2, "C")
+
+    @staticmethod
     def select_map_names(names_dict: dict[int, Optional[str]]) -> Optional[list[int]]:
         map_ids: list[int] = []
         names_list: list[str] = []

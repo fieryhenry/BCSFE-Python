@@ -77,13 +77,13 @@ class Main:
         external_theme = core.ExternalThemeManager.get_external_theme_config()
         external_locale = core.ExternalLocaleManager.get_external_locale_config()
         if external_theme is None:
-            theme_text = core.local_manager.get_key(
+            theme_text = core.core_data.local_manager.get_key(
                 "default_theme_text",
                 theme_path=core.ThemeHandler.get_theme_path("default"),
                 escape=False,
             )
         else:
-            theme_text = core.local_manager.get_key(
+            theme_text = core.core_data.local_manager.get_key(
                 "theme_text",
                 theme_name=external_theme.name,
                 theme_version=external_theme.version,
@@ -94,13 +94,13 @@ class Main:
                 escape=False,
             )
         if external_locale is None:
-            locale_text = core.local_manager.get_key(
+            locale_text = core.core_data.local_manager.get_key(
                 "default_locale_text",
                 path=core.LocalManager.get_locale_folder("en"),
                 escape=False,
             )
         else:
-            locale_text = core.local_manager.get_key(
+            locale_text = core.core_data.local_manager.get_key(
                 "locale_text",
                 locale_name=external_locale.name,
                 locale_version=external_locale.version,
@@ -112,7 +112,7 @@ class Main:
             )
         color.ColoredText.localize(
             "welcome",
-            config_path=core.Config.get_config_path(),
+            config_path=core.core_data.config.get_config_path(),
             locale_text=locale_text,
             theme_text=theme_text,
             escape=False,
@@ -167,7 +167,9 @@ class Main:
         Returns:
             core.Path: Path to save file.
         """
-        path = file_dialog.FileDialog().save_file("save_json_dialog")
+        path = file_dialog.FileDialog().save_file(
+            "save_json_dialog", initialfile="SAVE_DATA.json"
+        )
         if path is None:
             return None
         path = core.Path(path)
@@ -183,7 +185,9 @@ class Main:
             core.Path: Path to save file.
         """
         path = file_dialog.FileDialog().get_file(
-            "select_save_file", initialdir=core.SaveFile.get_saves_path().to_str()
+            "select_save_file",
+            initialdir=core.SaveFile.get_saves_path().to_str(),
+            initialfile="SAVE_DATA",
         )
         if path is None:
             return None
@@ -197,7 +201,9 @@ class Main:
         Returns:
             core.Path: Path to save file.
         """
-        path = file_dialog.FileDialog().get_file("load_save_data_json")
+        path = file_dialog.FileDialog().get_file(
+            "load_save_data_json", initialfile="SAVE_DATA.json"
+        )
         if path is None:
             return None
         path = core.Path(path)
@@ -207,14 +213,14 @@ class Main:
             json_data = core.JsonFile.from_data(path.read()).to_object()
         except core.JSONDecodeError:
             color.ColoredText.localize(
-                "load_json_fail", error=core.logger.get_traceback()
+                "load_json_fail", error=core.core_data.logger.get_traceback()
             )
             return None
         try:
             save_file = core.SaveFile.from_dict(json_data)
         except core.SaveError:
             color.ColoredText.localize(
-                "load_json_fail", error=core.logger.get_traceback()
+                "load_json_fail", error=core.core_data.logger.get_traceback()
             )
             return None
         path = Main.save_save_dialog(save_file)

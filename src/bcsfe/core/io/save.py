@@ -41,7 +41,7 @@ class SaveFile:
         if detected_cc is None:
             if cc is None:
                 raise CantDetectSaveCCError(
-                    core.local_manager.get_key("cant_detect_cc")
+                    core.core_data.local_manager.get_key("cant_detect_cc")
                 )
             self.cc = cc
             self.real_cc = cc
@@ -138,10 +138,12 @@ class SaveFile:
             self.load()
         except Exception as e:
             raise FailedToLoadError(
-                core.local_manager.get_key("failed_to_load_save")
+                core.core_data.local_manager.get_key("failed_to_load_save")
             ) from e
         if not self.verify_load():
-            raise SaveFileInvalid(core.local_manager.get_key("failed_to_load_save_gv"))
+            raise SaveFileInvalid(
+                core.core_data.local_manager.get_key("failed_to_load_save_gv")
+            )
 
     def set_gv(self, gv: "core.GameVersion"):
         self.game_version = gv
@@ -1831,7 +1833,7 @@ class SaveFile:
             self.save(data)
         except Exception as e:
             raise FailedToSaveError(
-                core.local_manager.get_key("failed_to_save_save")
+                core.core_data.local_manager.get_key("failed_to_save_save")
             ) from e
 
     def to_file(self, path: "core.Path") -> None:
@@ -2909,7 +2911,7 @@ class SaveFile:
         self.catamins = []
         self.unlock_popups_6 = []
         self.reset_item_reward_flags = []
-        self.announcements = [tuple([0, 0])] * 16
+        self.announcements: list[tuple[int, int]] = [(0, 0)] * 16
         self.event_capsules_3 = []
         self.labyrinth_medals = []
 
@@ -3208,7 +3210,7 @@ class SaveFile:
 
     @staticmethod
     def check_backups():
-        max_backups = core.config.get_int(core.ConfigKey.MAX_BACKUPS)
+        max_backups = core.core_data.config.get_int(core.ConfigKey.MAX_BACKUPS)
         if max_backups == -1:
             return
         saves_path = SaveFile.get_saves_path().add("backups")

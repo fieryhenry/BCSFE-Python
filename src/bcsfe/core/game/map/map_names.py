@@ -46,7 +46,7 @@ class MapNames:
             return None
         if data.status_code == 404:
             return None
-        html = data.text
+        html = data.content.decode("utf-8")
         bs = bs4.BeautifulSoup(html, "html.parser")
         name = bs.find("h2")
         if name is None:

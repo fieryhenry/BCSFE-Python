@@ -113,143 +113,113 @@ from bcsfe.core.server.updater import Updater
 from bcsfe.core.theme_handler import ThemeHandler, ExternalTheme, ExternalThemeManager
 from bcsfe.core.max_value_helper import MaxValueHelper
 
-config = Config()
-logger = Logger()
-local_manager = LocalManager()
-theme_manager = ThemeHandler()
-max_value_manager = MaxValueHelper()
-game_data_getter: Optional[GameDataGetter] = None
-gatya_item_names: Optional[GatyaItemNames] = None
-gatya_item_buy: Optional[GatyaItemBuy] = None
-chara_drop: Optional[CharaDrop] = None
-gamatoto_levels: Optional[GamatotoLevels] = None
-gamatoto_members_name: Optional[GamatotoMembersName] = None
-localizable: Optional[Localizable] = None
-abilty_data: Optional[AbilityData] = None
-enemy_names: Optional[EnemyNames] = None
-rank_gift_descriptions: Optional[RankGiftDescriptions] = None
-rank_gifts: Optional[RankGifts] = None
-treasure_text: Optional[TreasureText] = None
-cat_shrine_levels: Optional[CatShrineLevels] = None
-medal_names: Optional[MedalNames] = None
-mission_names: Optional[MissionNames] = None
-mission_conditions: Optional[MissionConditions] = None
 
+class CoreData:
+    def init_data(self):
+        self.config = Config()
+        self.logger = Logger()
+        self.local_manager = LocalManager()
+        self.theme_manager = ThemeHandler()
+        self.max_value_manager = MaxValueHelper()
+        self.game_data_getter: Optional[GameDataGetter] = None
+        self.gatya_item_names: Optional[GatyaItemNames] = None
+        self.gatya_item_buy: Optional[GatyaItemBuy] = None
+        self.chara_drop: Optional[CharaDrop] = None
+        self.gamatoto_levels: Optional[GamatotoLevels] = None
+        self.gamatoto_members_name: Optional[GamatotoMembersName] = None
+        self.localizable: Optional[Localizable] = None
+        self.abilty_data: Optional[AbilityData] = None
+        self.enemy_names: Optional[EnemyNames] = None
+        self.rank_gift_descriptions: Optional[RankGiftDescriptions] = None
+        self.rank_gifts: Optional[RankGifts] = None
+        self.treasure_text: Optional[TreasureText] = None
+        self.cat_shrine_levels: Optional[CatShrineLevels] = None
+        self.medal_names: Optional[MedalNames] = None
+        self.mission_names: Optional[MissionNames] = None
+        self.mission_conditions: Optional[MissionConditions] = None
 
-def get_game_data_getter(save: SaveFile) -> GameDataGetter:
-    global game_data_getter
-    if game_data_getter is None:
-        game_data_getter = GameDataGetter(save)
-    return game_data_getter
+    def get_game_data_getter(self, save: SaveFile) -> GameDataGetter:
+        if self.game_data_getter is None:
+            self.game_data_getter = GameDataGetter(save)
+        return self.game_data_getter
 
+    def get_gatya_item_names(self, save: SaveFile) -> GatyaItemNames:
+        if self.gatya_item_names is None:
+            self.gatya_item_names = GatyaItemNames(save)
+        return self.gatya_item_names
 
-def get_gatya_item_names(save: SaveFile) -> GatyaItemNames:
-    global gatya_item_names
-    if gatya_item_names is None:
-        gatya_item_names = GatyaItemNames(save)
-    return gatya_item_names
+    def get_gatya_item_buy(self, save: SaveFile) -> GatyaItemBuy:
+        if self.gatya_item_buy is None:
+            self.gatya_item_buy = GatyaItemBuy(save)
+        return self.gatya_item_buy
 
+    def get_chara_drop(self, save: SaveFile) -> CharaDrop:
+        if self.chara_drop is None:
+            self.chara_drop = CharaDrop(save)
+        return self.chara_drop
 
-def get_gatya_item_buy(save: SaveFile) -> GatyaItemBuy:
-    global gatya_item_buy
-    if gatya_item_buy is None:
-        gatya_item_buy = GatyaItemBuy(save)
-    return gatya_item_buy
+    def get_gamatoto_levels(self, save: SaveFile) -> GamatotoLevels:
+        if self.gamatoto_levels is None:
+            self.gamatoto_levels = GamatotoLevels(save)
+        return self.gamatoto_levels
 
+    def get_gamatoto_members_name(self, save: SaveFile) -> GamatotoMembersName:
+        if self.gamatoto_members_name is None:
+            self.gamatoto_members_name = GamatotoMembersName(save)
+        return self.gamatoto_members_name
 
-def get_chara_drop(save: SaveFile) -> CharaDrop:
-    global chara_drop
-    if chara_drop is None:
-        chara_drop = CharaDrop(save)
-    return chara_drop
+    def get_localizable(self, save: SaveFile) -> Localizable:
+        if self.localizable is None:
+            self.localizable = Localizable(save)
+        return self.localizable
 
+    def get_ability_data(self, save: SaveFile) -> AbilityData:
+        if self.abilty_data is None:
+            self.abilty_data = AbilityData(save)
+        return self.abilty_data
 
-def get_gamatoto_levels(save: SaveFile) -> GamatotoLevels:
-    global gamatoto_levels
-    if gamatoto_levels is None:
-        gamatoto_levels = GamatotoLevels(save)
-    return gamatoto_levels
+    def get_enemy_names(self, save: SaveFile) -> EnemyNames:
+        if self.enemy_names is None:
+            self.enemy_names = EnemyNames(save)
+        return self.enemy_names
 
+    def get_rank_gift_descriptions(self, save: SaveFile) -> RankGiftDescriptions:
+        if self.rank_gift_descriptions is None:
+            self.rank_gift_descriptions = RankGiftDescriptions(save)
+        return self.rank_gift_descriptions
 
-def get_gamatoto_members_name(save: SaveFile) -> GamatotoMembersName:
-    global gamatoto_members_name
-    if gamatoto_members_name is None:
-        gamatoto_members_name = GamatotoMembersName(save)
-    return gamatoto_members_name
+    def get_rank_gifts(self, save: SaveFile) -> RankGifts:
+        if self.rank_gifts is None:
+            self.rank_gifts = RankGifts(save)
+        return self.rank_gifts
 
+    def get_treasure_text(self, save: SaveFile) -> TreasureText:
+        if self.treasure_text is None:
+            self.treasure_text = TreasureText(save)
+        return self.treasure_text
 
-def get_localizable(save: SaveFile) -> Localizable:
-    global localizable
-    if localizable is None:
-        localizable = Localizable(save)
-    return localizable
+    def get_cat_shrine_levels(self, save: SaveFile) -> CatShrineLevels:
+        if self.cat_shrine_levels is None:
+            self.cat_shrine_levels = CatShrineLevels(save)
+        return self.cat_shrine_levels
 
+    def get_medal_names(self, save: SaveFile) -> MedalNames:
+        if self.medal_names is None:
+            self.medal_names = MedalNames(save)
+        return self.medal_names
 
-def get_ability_data(save: SaveFile) -> AbilityData:
-    global abilty_data
-    if abilty_data is None:
-        abilty_data = AbilityData(save)
-    return abilty_data
+    def get_mission_names(self, save: SaveFile) -> MissionNames:
+        if self.mission_names is None:
+            self.mission_names = MissionNames(save)
+        return self.mission_names
 
+    def get_mission_conditions(self, save: SaveFile) -> MissionConditions:
+        if self.mission_conditions is None:
+            self.mission_conditions = MissionConditions(save)
+        return self.mission_conditions
 
-def get_enemy_names(save: SaveFile) -> EnemyNames:
-    global enemy_names
-    if enemy_names is None:
-        enemy_names = EnemyNames(save)
-    return enemy_names
-
-
-def get_rank_gift_descriptions(save: SaveFile) -> RankGiftDescriptions:
-    global rank_gift_descriptions
-    if rank_gift_descriptions is None:
-        rank_gift_descriptions = RankGiftDescriptions(save)
-    return rank_gift_descriptions
-
-
-def get_rank_gifts(save: SaveFile) -> RankGifts:
-    global rank_gifts
-    if rank_gifts is None:
-        rank_gifts = RankGifts(save)
-    return rank_gifts
-
-
-def get_treasure_text(save: SaveFile) -> TreasureText:
-    global treasure_text
-    if treasure_text is None:
-        treasure_text = TreasureText(save)
-    return treasure_text
-
-
-def get_cat_shrine_levels(save: SaveFile) -> CatShrineLevels:
-    global cat_shrine_levels
-    if cat_shrine_levels is None:
-        cat_shrine_levels = CatShrineLevels(save)
-    return cat_shrine_levels
-
-
-def get_medal_names(save: SaveFile) -> MedalNames:
-    global medal_names
-    if medal_names is None:
-        medal_names = MedalNames(save)
-    return medal_names
-
-
-def get_mission_names(save: SaveFile) -> MissionNames:
-    global mission_names
-    if mission_names is None:
-        mission_names = MissionNames(save)
-    return mission_names
-
-
-def get_mission_conditions(save: SaveFile) -> MissionConditions:
-    global mission_conditions
-    if mission_conditions is None:
-        mission_conditions = MissionConditions(save)
-    return mission_conditions
-
-
-def get_lang(save: SaveFile) -> str:
-    return get_localizable(save).get_lang()
+    def get_lang(self, save: SaveFile) -> str:
+        return self.get_localizable(save).get_lang() or "en"
 
 
 def update_external_content(_: Any = None):
@@ -259,10 +229,15 @@ def update_external_content(_: Any = None):
     print()
     ExternalThemeManager.update_all_external_themes()
     ExternalLocaleManager.update_all_external_locales()
+    core_data.init_data()
 
 
 def print_no_internet():
     color.ColoredText.localize("no_internet")
+
+
+core_data = CoreData()
+core_data.init_data()
 
 
 __all__ = [

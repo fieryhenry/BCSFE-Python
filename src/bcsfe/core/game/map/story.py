@@ -349,7 +349,7 @@ class StoryChapters:
             chapter_ids = [0, 1, 2, 3, 4, 5, 6, 7, 8]
 
         chapter_names: list[str] = []
-        localizable = core.get_localizable(save_file)
+        localizable = core.core_data.get_localizable(save_file)
         eoc_name = localizable.get("everyplay_mapname_J")
         itf_name = localizable.get("everyplay_mapname_W")
         cotc_name = localizable.get("everyplay_mapname_P")
@@ -419,7 +419,7 @@ class StoryChapters:
     @staticmethod
     def ask_clear_count() -> Optional[int]:
         clear_count = dialog_creator.IntInput(
-            min=0, max=core.max_value_manager.get("stage_clear_count")
+            min=0, max=core.core_data.max_value_manager.get("stage_clear_count")
         ).get_input_locale_while("edit_stage_clear_count", {})
 
         return clear_count
@@ -560,7 +560,7 @@ class StoryChapters:
 
     @staticmethod
     def ask_treasure_level(save_file: "core.SaveFile") -> Optional[int]:
-        treasure_text = core.get_treasure_text(save_file).treasure_text
+        treasure_text = core.core_data.get_treasure_text(save_file).treasure_text
         if treasure_text is None:
             return None
         if len(treasure_text) < 3:
@@ -579,7 +579,7 @@ class StoryChapters:
             return None
         choice -= 1
 
-        max_treasure_level = core.max_value_manager.get("treasure_level")
+        max_treasure_level = core.core_data.max_value_manager.get("treasure_level")
 
         if choice == 4:
             treasure_level = dialog_creator.IntInput(
@@ -827,7 +827,7 @@ class StoryChapters:
                 StoryChapters.print_current_chapter(save_file, chapter_id)
                 chapter = save_file.story.get_real_chapters()[chapter_id]
                 score = dialog_creator.IntInput(
-                    min=0, max=core.max_value_manager.get("itf_timed_score")
+                    min=0, max=core.core_data.max_value_manager.get("itf_timed_score")
                 ).get_input_locale_while("itf_timed_score_dialog", {})
                 if score is None:
                     return
@@ -835,7 +835,7 @@ class StoryChapters:
                     stage.itf_timed_score = score
         else:
             score = dialog_creator.IntInput(
-                min=0, max=core.max_value_manager.get("itf_timed_score")
+                min=0, max=core.core_data.max_value_manager.get("itf_timed_score")
             ).get_input_locale_while("itf_timed_score_dialog", {})
             if score is None:
                 return
@@ -889,14 +889,16 @@ class StoryChapters:
                         )
 
                         score = dialog_creator.IntInput(
-                            min=0, max=core.max_value_manager.get("itf_timed_score")
+                            min=0,
+                            max=core.core_data.max_value_manager.get("itf_timed_score"),
                         ).get_input_locale_while("itf_timed_score_dialog", {})
                         if score is None:
                             return
                         chapter.stages[stage_id].itf_timed_score = score
                 elif choice2 == 1:
                     score = dialog_creator.IntInput(
-                        min=0, max=core.max_value_manager.get("itf_timed_score")
+                        min=0,
+                        max=core.core_data.max_value_manager.get("itf_timed_score"),
                     ).get_input_locale_while("itf_timed_score_dialog", {})
                     if score is None:
                         return
@@ -910,7 +912,8 @@ class StoryChapters:
                 for stage_id in stage_ids:
                     StoryChapters.print_current_stage(save_file, 3, stage_id)
                     score = dialog_creator.IntInput(
-                        min=0, max=core.max_value_manager.get("itf_timed_score")
+                        min=0,
+                        max=core.core_data.max_value_manager.get("itf_timed_score"),
                     ).get_input_locale_while("itf_timed_score_dialog", {})
                     if score is None:
                         return
@@ -919,7 +922,7 @@ class StoryChapters:
                         chapter.stages[stage_id].itf_timed_score = score
             elif choice2 == 1:
                 score = dialog_creator.IntInput(
-                    min=0, max=core.max_value_manager.get("itf_timed_score")
+                    min=0, max=core.core_data.max_value_manager.get("itf_timed_score")
                 ).get_input_locale_while("itf_timed_score_dialog", {})
                 if score is None:
                     return
@@ -937,14 +940,15 @@ class StageNames:
         self.stage_names = self.get_stage_names()
 
     def get_file_name(self) -> str:
-        localizable = core.get_localizable(self.save_file)
         if self.chapter.isdigit():
-            return f"StageName{self.chapter}_{localizable.get_lang()}.csv"
-        return f"StageName_{self.chapter}_{localizable.get_lang()}.csv"
+            return (
+                f"StageName{self.chapter}_{core.core_data.get_lang(self.save_file)}.csv"
+            )
+        return f"StageName_{self.chapter}_{core.core_data.get_lang(self.save_file)}.csv"
 
     def get_stage_names(self) -> Optional[list[str]]:
         file_name = self.get_file_name()
-        gdg = core.get_game_data_getter(self.save_file)
+        gdg = core.core_data.get_game_data_getter(self.save_file)
         file = gdg.download("resLocal", file_name)
         if file is None:
             return None
@@ -973,12 +977,11 @@ class TreasureText:
         self.treasure_text = self.get_treasure_text()
 
     def get_tt_file_name(self) -> str:
-        localizable = core.get_localizable(self.save_file)
-        return f"Treasure2_{localizable.get_lang()}.csv"
+        return f"Treasure2_{core.core_data.get_lang(self.save_file)}.csv"
 
     def get_treasure_text(self) -> Optional[list[str]]:
         file_name = self.get_tt_file_name()
-        gdg = core.get_game_data_getter(self.save_file)
+        gdg = core.core_data.get_game_data_getter(self.save_file)
         file = gdg.download("resLocal", file_name)
         if file is None:
             return None
@@ -1007,7 +1010,7 @@ class TreasureGroupData:
         return ""
 
     def get_treasure_group_data(self) -> Optional[list[list[int]]]:
-        gdg = core.get_game_data_getter(self.save_file)
+        gdg = core.core_data.get_game_data_getter(self.save_file)
         file = gdg.download("DataLocal", self.get_tgd_file_name())
         if file is None:
             return None
@@ -1028,8 +1031,7 @@ class TreasureGroupNames:
         self.treasure_group_names = self.get_treasure_group_names()
 
     def get_tgn_file_name(self) -> str:
-        localizable = core.get_localizable(self.save_file)
-        lang = localizable.get_lang()
+        lang = core.core_data.get_lang(self.save_file)
         if self.chapter_type == 0:
             return f"Treasure3_0_{lang}.csv"
         if self.chapter_type == 1:
@@ -1039,7 +1041,7 @@ class TreasureGroupNames:
         return ""
 
     def get_treasure_group_names(self) -> Optional[list[str]]:
-        gdg = core.get_game_data_getter(self.save_file)
+        gdg = core.core_data.get_game_data_getter(self.save_file)
         file = gdg.download("resLocal", self.get_tgn_file_name())
         if file is None:
             return None

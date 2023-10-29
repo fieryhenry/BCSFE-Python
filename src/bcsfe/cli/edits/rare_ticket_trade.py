@@ -7,7 +7,9 @@ class RareTicketTrade:
     @staticmethod
     def rare_ticket_trade(save_file: "core.SaveFile"):
         current_amount = save_file.rare_tickets
-        max_amount = max(core.max_value_manager.get("rare_tickets") - current_amount, 0)
+        max_amount = max(
+            core.core_data.max_value_manager.get("rare_tickets") - current_amount, 0
+        )
         if max_amount == 0:
             color.ColoredText.localize("rare_ticket_trade_maxed")
             return

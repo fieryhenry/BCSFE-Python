@@ -85,7 +85,9 @@ class PropertySet:
         Returns:
             PropertySet: PropertySet for the property file.
         """
-        return PropertySet(core.config.get_str(core.ConfigKey.LOCALE), property)
+        return PropertySet(
+            core.core_data.config.get_str(core.ConfigKey.LOCALE), property
+        )
 
 
 class LocalManager:
@@ -98,7 +100,7 @@ class LocalManager:
             locale (str): Language code of the locale.
         """
         if locale is None:
-            lc = core.config.get_str(core.ConfigKey.LOCALE)
+            lc = core.core_data.config.get_str(core.ConfigKey.LOCALE)
         else:
             lc = locale
 
@@ -343,7 +345,7 @@ class LocalManager:
         Returns:
             LocalManager: LocalManager for the locale.
         """
-        return LocalManager(core.config.get_str(core.ConfigKey.LOCALE))
+        return LocalManager(core.core_data.config.get_str(core.ConfigKey.LOCALE))
 
     def check_duplicates(self):
         """Checks for duplicate keys in all property files.
@@ -418,8 +420,8 @@ class LocalManager:
         else:
             LocalManager.get_locales_folder().add(locale).remove()
 
-        if core.config.get_str(core.ConfigKey.LOCALE) == locale:
-            core.config.set(core.ConfigKey.LOCALE, "en")
+        if core.core_data.config.get_str(core.ConfigKey.LOCALE) == locale:
+            core.core_data.config.set(core.ConfigKey.LOCALE, "en")
 
 
 @dataclasses.dataclass
@@ -607,7 +609,7 @@ class ExternalLocaleManager:
             ExternalLocale: External locale.
         """
 
-        locale = core.config.get_str(core.ConfigKey.LOCALE)
+        locale = core.core_data.config.get_str(core.ConfigKey.LOCALE)
         if not locale.startswith("ext-"):
             return None
         return ExternalLocaleManager.parse_external_locale(

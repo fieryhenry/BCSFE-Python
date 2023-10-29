@@ -10,7 +10,7 @@ class MapNames:
         self.save_file = save_file
         self.out = output
         self.code = code
-        self.gdg = core.get_game_data_getter(self.save_file)
+        self.gdg = core.core_data.get_game_data_getter(self.save_file)
         self.map_names: dict[int, Optional[str]] = {}
         self.stage_names: dict[int, list[str]] = {}
         self.get_map_names()
@@ -60,9 +60,10 @@ class MapNames:
 
     def get_map_names(self) -> Optional[dict[int, Optional[str]]]:
         names = self.read_map_names()
-        gdg = core.get_game_data_getter(self.save_file)
+        gdg = core.core_data.get_game_data_getter(self.save_file)
         stage_names = gdg.download(
-            "resLocal", f"StageName_R{self.code}_{core.get_lang(self.save_file)}.csv"
+            "resLocal",
+            f"StageName_R{self.code}_{core.core_data.get_lang(self.save_file)}.csv",
         )
         if stage_names is None:
             return None

@@ -137,8 +137,8 @@ class SpecialSkills:
         return f"Skills(skills={self.skills})"
 
     def edit(self, save_file: "core.SaveFile"):
-        names_o = core.get_gatya_item_names(save_file)
-        items = core.get_gatya_item_buy(save_file).get_by_category(2)
+        names_o = core.core_data.get_gatya_item_names(save_file)
+        items = core.core_data.get_gatya_item_buy(save_file).get_by_category(2)
         if items is None:
             return
         names: list[str] = []
@@ -167,7 +167,7 @@ class SpecialSkills:
                 return
             option_id -= 1
 
-        ability_data = core.get_ability_data(save_file)
+        ability_data = core.core_data.get_ability_data(save_file)
         if ability_data.ability_data is None:
             return
         if option_id == 0:
@@ -243,7 +243,7 @@ class AbilityData:
         self.ability_data = self.get_ability_data()
 
     def get_ability_data(self) -> Optional[list[AbilityDataItem]]:
-        gdg = core.get_game_data_getter(self.save_file)
+        gdg = core.core_data.get_game_data_getter(self.save_file)
         data = gdg.download("DataLocal", "AbilityData.csv")
         if data is None:
             return None

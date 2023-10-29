@@ -21,10 +21,10 @@ class GamatotoMembersName:
 
     def read_members(self) -> Optional[list[MemberName]]:
         members: list[MemberName] = []
-        gdg = core.get_game_data_getter(self.save_file)
+        gdg = core.core_data.get_game_data_getter(self.save_file)
         data = gdg.download(
             "resLocal",
-            f"GamatotoExpedition_Members_name_{core.get_lang(self.save_file)}.csv",
+            f"GamatotoExpedition_Members_name_{core.core_data.get_lang(self.save_file)}.csv",
         )
         if data is None:
             return None
@@ -104,7 +104,7 @@ class GamatotoLevels:
 
     def read_levels(self) -> Optional[list[GamatotoLevel]]:
         levels: list[GamatotoLevel] = []
-        gdg = core.get_game_data_getter(self.save_file)
+        gdg = core.core_data.get_game_data_getter(self.save_file)
         data = gdg.download("DataLocal", "GamatotoExpedition.csv")
         if data is None:
             return None
@@ -118,7 +118,7 @@ class GamatotoLevels:
         return levels
 
     def read_max_level(self) -> Optional[GamatotoLimit]:
-        gdg = core.get_game_data_getter(self.save_file)
+        gdg = core.core_data.get_game_data_getter(self.save_file)
         data = gdg.download("DataLocal", "GamatotoExpedition_Limit.csv")
         if data is None:
             return None
@@ -377,7 +377,7 @@ class Gamatoto:
         return self.__repr__()
 
     def edit_xp(self, save_file: "core.SaveFile"):
-        gamatoto_levels = core.get_gamatoto_levels(save_file)
+        gamatoto_levels = core.core_data.get_gamatoto_levels(save_file)
         current_level = gamatoto_levels.get_level_from_xp(self.xp)
         if current_level is None:
             return
@@ -426,9 +426,9 @@ class Gamatoto:
         )
 
     def edit_helpers(self, save_file: "core.SaveFile"):
-        members_name = core.get_gamatoto_members_name(save_file)
+        members_name = core.core_data.get_gamatoto_members_name(save_file)
 
-        gamatoto_levels = core.get_gamatoto_levels(save_file)
+        gamatoto_levels = core.core_data.get_gamatoto_levels(save_file)
         max_helpers = gamatoto_levels.get_total_helpers()
 
         members = members_name.get_members_from_helpers(self.helpers)

@@ -8,7 +8,7 @@ class GatyaItemNames:
         self.names = self.__get_names()
 
     def __get_names(self) -> Optional[list[str]]:
-        gdg = core.get_game_data_getter(self.save_file)
+        gdg = core.core_data.get_game_data_getter(self.save_file)
         data = gdg.download("resLocal", "GatyaitemName.csv")
         if data is None:
             return None
@@ -25,7 +25,9 @@ class GatyaItemNames:
         try:
             return self.names[index]
         except IndexError:
-            return core.local_manager.get_key("gatya_item_unknown_name", index=index)
+            return core.core_data.local_manager.get_key(
+                "gatya_item_unknown_name", index=index
+            )
 
 
 class GatyaItemBuyItem:
@@ -66,7 +68,7 @@ class GatyaItemBuy:
         self.buy = self.get_buy()
 
     def get_buy(self) -> Optional[list[GatyaItemBuyItem]]:
-        gdg = core.get_game_data_getter(self.save_file)
+        gdg = core.core_data.get_game_data_getter(self.save_file)
         data = gdg.download("DataLocal", "Gatyaitembuy.csv")
         if data is None:
             return None

@@ -8,7 +8,7 @@ from bcsfe.cli import color
 class ThemeHandler:
     def __init__(self, theme_code: Optional[str] = None):
         if theme_code is None:
-            self.theme_code = core.config.get_str(core.ConfigKey.THEME)
+            self.theme_code = core.core_data.config.get_str(core.ConfigKey.THEME)
         else:
             self.theme_code = theme_code
 
@@ -99,8 +99,8 @@ class ThemeHandler:
     @staticmethod
     def remove_theme(theme_code: str):
         ThemeHandler.get_theme_path(theme_code).remove()
-        if theme_code == core.config.get_str(core.ConfigKey.THEME):
-            core.config.set_default(core.ConfigKey.THEME)
+        if theme_code == core.core_data.config.get_str(core.ConfigKey.THEME):
+            core.core_data.config.set_default(core.ConfigKey.THEME)
 
 
 @dataclasses.dataclass
@@ -262,7 +262,7 @@ class ExternalThemeManager:
             ExternalTheme: External theme.
         """
 
-        theme = core.config.get_str(core.ConfigKey.THEME)
+        theme = core.core_data.config.get_str(core.ConfigKey.THEME)
         if not theme.startswith("ext-"):
             return None
         return ExternalThemeManager.parse_external_theme(

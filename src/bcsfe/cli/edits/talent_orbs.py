@@ -175,7 +175,7 @@ class OrbInfoList:
         Returns:
             Optional[OrbInfoList]: The OrbInfoList
         """
-        gdg = core.get_game_data_getter(save_file)
+        gdg = core.core_data.get_game_data_getter(save_file)
         json_data_file = gdg.download_from_path(OrbInfoList.equipment_data_file_name)
         grade_list_file = gdg.download_from_path(OrbInfoList.grade_list_file_name)
         attribute_list_file = gdg.download_from_path(
@@ -455,7 +455,7 @@ class SaveOrbs:
             .replace("angle", "angel")
             .split(",")
         )
-        if orb_input_selection == [core.local_manager.get_key("quit_key")]:
+        if orb_input_selection == [core.core_data.local_manager.get_key("quit_key")]:
             return
 
         orb_selection: list[OrbInfo] = []
@@ -506,7 +506,7 @@ class SaveOrbs:
         for orb in orb_selection:
             color.ColoredText(orb.to_colortext())
 
-        max_orbs = core.max_value_manager.get("talent_orbs")
+        max_orbs = core.core_data.max_value_manager.get("talent_orbs")
 
         individual = (
             color.ColoredInput().localize("edit_orbs_individually").lower() == "i"
@@ -522,7 +522,7 @@ class SaveOrbs:
                 orb_count = color.ColoredInput().localize(
                     "input", name=orb.to_colortext(), value=orb_count, max=max_orbs
                 )
-                if orb_count == core.local_manager.get_key("quit_key"):
+                if orb_count == core.core_data.local_manager.get_key("quit_key"):
                     break
                 try:
                     orb_count = int(orb_count)

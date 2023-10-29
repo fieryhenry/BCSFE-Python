@@ -13,7 +13,7 @@ class Enemy:
         save_file.enemy_guide[self.id] = 0
 
     def get_name(self, save_file: "core.SaveFile") -> Optional[str]:
-        return core.get_enemy_names(save_file).get_name(self.id)
+        return core.core_data.get_enemy_names(save_file).get_name(self.id)
 
 
 class EnemyNames:
@@ -22,7 +22,7 @@ class EnemyNames:
         self.names = self.get_names()
 
     def get_names(self) -> Optional[list[str]]:
-        gdg = core.get_game_data_getter(self.save_file)
+        gdg = core.core_data.get_game_data_getter(self.save_file)
         data = gdg.download("resLocal", "Enemyname.tsv")
         if data is None:
             return None
@@ -43,7 +43,9 @@ class EnemyNames:
         try:
             name = self.names[id]
             if not name:
-                return core.local_manager.get_key("enemy_not_in_name_list", id=id)
+                return core.core_data.local_manager.get_key(
+                    "enemy_not_in_name_list", id=id
+                )
         except IndexError:
-            return core.local_manager.get_key("enemy_unknown_name", id=id)
+            return core.core_data.local_manager.get_key("enemy_unknown_name", id=id)
         return name

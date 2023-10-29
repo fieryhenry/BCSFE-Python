@@ -20,7 +20,7 @@ class CastleRecipeUnlock:
         self.level_part_recipe_unlocks = self.get_recipe_unlocks()
 
     def get_recipe_unlocks(self) -> Optional[list[LevelPartRecipeUnlock]]:
-        gdg = core.get_game_data_getter(self.save_file)
+        gdg = core.core_data.get_game_data_getter(self.save_file)
         data = gdg.download("DataLocal", "CastleRecipeUnlock.csv")
         if data is None:
             return None
@@ -121,7 +121,7 @@ class CannonDescriptions:
         self.cannon_descriptions = self.get_cannon_descriptions()
 
     def get_cannon_descriptions(self) -> Optional[list[CannonDescription]]:
-        gdg = core.get_game_data_getter(self.save_file)
+        gdg = core.core_data.get_game_data_getter(self.save_file)
         data = gdg.download("resLocal", "CastleRecipeDescriptions.csv")
         if data is None:
             return None
@@ -365,7 +365,7 @@ class Ototo:
 
     @staticmethod
     def get_max_engineers(save_file: "core.SaveFile") -> int:
-        file = core.get_game_data_getter(save_file).download(
+        file = core.core_data.get_game_data_getter(save_file).download(
             "DataLocal", "CastleCustomLimit.csv"
         )
         if file is None:
@@ -374,7 +374,7 @@ class Ototo:
         return csv.lines[0][0].to_int()
 
     def edit_engineers(self, save_file: "core.SaveFile"):
-        name = core.get_gatya_item_names(save_file).get_name(92)
+        name = core.core_data.get_gatya_item_names(save_file).get_name(92)
         if name is None:
             name = "engineers"
             localized_item = True
@@ -417,7 +417,7 @@ class Ototo:
             if cannon_id != 0:
                 cannon_name_length = len(cannon_name) - 10
                 buffer = " " * (longest_part_name - cannon_name_length)
-                text += color.core.local_manager.get_key(
+                text += core.core_data.local_manager.get_key(
                     "development",
                     development=Ototo.get_stage_name(cannon.development),
                     escape=False,
@@ -434,7 +434,7 @@ class Ototo:
                     longest_part_name - len(description.get_part_name(part_id)) + 2
                 )
                 name = description.get_part_name(part_id)
-                text += color.core.local_manager.get_key(
+                text += core.core_data.local_manager.get_key(
                     "cannon_part", name=name, level=level, buffer=buffer
                 )
 
@@ -629,14 +629,14 @@ class Ototo:
     @staticmethod
     def get_stage_name(development: int) -> str:
         if development == 0:
-            return core.local_manager.get_key("none")
+            return core.core_data.local_manager.get_key("none")
         if development == 1:
-            return core.local_manager.get_key("foundation")
+            return core.core_data.local_manager.get_key("foundation")
         if development == 2:
-            return core.local_manager.get_key("style")
+            return core.core_data.local_manager.get_key("style")
         if development == 3:
-            return core.local_manager.get_key("effect")
-        return color.core.local_manager.get_key("unknown_stage", stage=development)
+            return core.core_data.local_manager.get_key("effect")
+        return core.core_data.local_manager.get_key("unknown_stage", stage=development)
 
 
 def edit_cannon(save_file: "core.SaveFile"):

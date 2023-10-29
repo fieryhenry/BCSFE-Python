@@ -32,7 +32,7 @@ class FileDialog:
     ) -> Optional[str]:
         if filetypes is None:
             filetypes = []
-        title = core.local_manager.get_key(title)
+        title = core.core_data.local_manager.get_key(title)
         if self.filedialog is None:
             path = color.ColoredInput().localize(title)
             return path if path else None
@@ -47,7 +47,7 @@ class FileDialog:
         )
 
     def get_directory(self, title: str, initialdir: str = "") -> Optional[str]:
-        title = core.local_manager.get_key(title)
+        title = core.core_data.local_manager.get_key(title)
         if self.filedialog is None:
             path = color.ColoredInput().localize(title)
             return path if path else None
@@ -74,7 +74,7 @@ class FileDialog:
         """
         if filetypes is None:
             filetypes = []
-        title = core.local_manager.get_key(title)
+        title = core.core_data.local_manager.get_key(title)
         if self.filedialog is None:
             path = color.ColoredInput().localize(title)
             return path if path else None

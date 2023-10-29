@@ -9,7 +9,7 @@ class FeatureHandler:
 
     def get_features(self):
         cat_features = {"cats": edits.cat_editor.CatEditor.edit_cats}
-        if core.config.get_bool(core.ConfigKey.SEPARATE_CAT_EDIT_OPTIONS):
+        if core.core_data.config.get_bool(core.ConfigKey.SEPARATE_CAT_EDIT_OPTIONS):
             cat_features = {
                 "unlock_remove_cats": edits.cat_editor.CatEditor.unlock_remove_cats_run,
                 "upgrade_cats": edits.cat_editor.CatEditor.upgrade_cats_run,
@@ -106,7 +106,7 @@ class FeatureHandler:
                 "medals": core.game.catbase.medals.Medals.edit_medals,
                 "missions": core.game.catbase.mission.Missions.edit_missions,
             },
-            "config": core.Config.edit_config,
+            "config": core.core_data.config.edit_config,
             "update_external": core.update_external_content,
             "exit": main.Main.exit_editor,
         }
@@ -135,7 +135,7 @@ class FeatureHandler:
             found_features = set()
 
         for feature_name_key, feature in features.items():
-            feature_name = core.local_manager.get_key(feature_name_key)
+            feature_name = core.core_data.local_manager.get_key(feature_name_key)
             path = (
                 f"{parent_path}.{feature_name_key}" if parent_path else feature_name_key
             )
@@ -244,10 +244,10 @@ class FeatureHandler:
                 features = self.get_features()
                 features = list(features.keys())
 
-                core.game_data_getter = None  # reset game data getter so that if an old version is removed, it will download the new version
+                core.core_data.game_data_getter = None  # reset game data getter so that if an old version is removed, it will download the new version
 
     def do_save_actions(self):
-        if core.config.get_bool(core.ConfigKey.CLEAR_TUTORIAL_ON_LOAD):
+        if core.core_data.config.get_bool(core.ConfigKey.CLEAR_TUTORIAL_ON_LOAD):
             edits.clear_tutorial.clear_tutorial(self.save_file, False)
-        if core.config.get_bool(core.ConfigKey.REMOVE_BAN_MESSAGE_ON_LOAD):
+        if core.core_data.config.get_bool(core.ConfigKey.REMOVE_BAN_MESSAGE_ON_LOAD):
             self.save_file.show_ban_message = False

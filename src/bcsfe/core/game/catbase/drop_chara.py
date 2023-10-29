@@ -17,7 +17,7 @@ class CharaDrop:
         self.drops = self.get_drops()
 
     def get_drops(self) -> Optional[list[Drop]]:
-        gdg = core.get_game_data_getter(self.save_file)
+        gdg = core.core_data.get_game_data_getter(self.save_file)
         data = gdg.download("DataLocal", "drop_chara.csv")
         if data is None:
             return None

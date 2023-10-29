@@ -121,7 +121,7 @@ class ServerHandler:
             return
         if result.response is None:
             log_text = "Failed to make request. Check your internet connection."
-            core.logger.log_error(log_text)
+            core.core_data.logger.log_error(log_text)
             return
         log_text = (
             f"Error: {key}\n"
@@ -133,7 +133,7 @@ class ServerHandler:
             f"Request Headers: {result.headers}\n"
             f"Request Body: {result.data}\n"
         )
-        core.logger.log_error(log_text)
+        core.core_data.logger.log_error(log_text)
 
     def do_password_request(self, url: str, dict_data: dict[str, Any]) -> Optional[str]:
         result = self.do_request(url, dict_data)

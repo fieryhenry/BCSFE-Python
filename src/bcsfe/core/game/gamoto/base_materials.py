@@ -67,8 +67,8 @@ class BaseMaterials:
         return self.__repr__()
 
     def edit_base_materials(self, save_file: "core.SaveFile"):
-        names = core.get_gatya_item_names(save_file).names
-        items = core.get_gatya_item_buy(save_file).get_by_category(7)
+        names = core.core_data.get_gatya_item_names(save_file).names
+        items = core.core_data.get_gatya_item_buy(save_file).get_by_category(7)
         if items is None:
             return
         if names is None:
@@ -79,7 +79,7 @@ class BaseMaterials:
             "base_materials",
             names,
             base_materials,
-            core.max_value_manager.get("base_materials"),
+            core.core_data.max_value_manager.get("base_materials"),
             group_name_localized=True,
         ).edit()
         self.materials = [Material(value) for value in values]

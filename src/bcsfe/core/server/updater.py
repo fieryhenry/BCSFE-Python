@@ -71,4 +71,4 @@ class Updater:
         return True
 
     def has_enabled_pre_release(self) -> bool:
-        return core.config.get_bool(core.ConfigKey.UPDATE_TO_BETA)
+        return core.core_data.config.get_bool(core.ConfigKey.UPDATE_TO_BETA)

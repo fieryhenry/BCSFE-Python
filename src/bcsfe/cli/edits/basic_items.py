@@ -8,7 +8,7 @@ class BasicItems:
     @staticmethod
     def get_name(name: Optional[str], key: str) -> str:
         if name is None:
-            return core.local_manager.get_key(key)
+            return core.core_data.local_manager.get_key(key)
         return name.strip()
 
     @staticmethod
@@ -17,12 +17,12 @@ class BasicItems:
         if should_exit:
             return
 
-        name = core.get_gatya_item_names(save_file).get_name(22)
+        name = core.core_data.get_gatya_item_names(save_file).get_name(22)
         original_amount = save_file.catfood
         save_file.catfood = dialog_creator.SingleEditor(
             BasicItems.get_name(name, "catfood"),
             save_file.catfood,
-            core.max_value_manager.get("catfood"),
+            core.core_data.max_value_manager.get("catfood"),
         ).edit()
         change = save_file.catfood - original_amount
         core.BackupMetaData(save_file).add_managed_item(
@@ -31,35 +31,35 @@ class BasicItems:
 
     @staticmethod
     def edit_xp(save_file: "core.SaveFile"):
-        name = core.get_gatya_item_names(save_file).get_name(6)
+        name = core.core_data.get_gatya_item_names(save_file).get_name(6)
         save_file.xp = dialog_creator.SingleEditor(
             BasicItems.get_name(name, "xp"),
             save_file.xp,
-            core.max_value_manager.get("xp"),
+            core.core_data.max_value_manager.get("xp"),
         ).edit()
 
     @staticmethod
     def edit_normal_tickets(save_file: "core.SaveFile"):
-        name = core.get_gatya_item_names(save_file).get_name(20)
+        name = core.core_data.get_gatya_item_names(save_file).get_name(20)
         save_file.normal_tickets = dialog_creator.SingleEditor(
             BasicItems.get_name(name, "normal_tickets"),
             save_file.normal_tickets,
-            core.max_value_manager.get("normal_tickets"),
+            core.core_data.max_value_manager.get("normal_tickets"),
         ).edit()
 
     @staticmethod
     def get_bannable_feature_options(feature_name: str, safe_feature_name: str) -> int:
-        feature_name = core.local_manager.get_key(feature_name)
-        safe_feature_name = core.local_manager.get_key(safe_feature_name)
+        feature_name = core.core_data.local_manager.get_key(feature_name)
+        safe_feature_name = core.core_data.local_manager.get_key(safe_feature_name)
 
         options = [
-            color.core.local_manager.get_key(
+            core.core_data.local_manager.get_key(
                 "continue_editing", feature_name=feature_name
             ),
-            color.core.local_manager.get_key(
+            core.core_data.local_manager.get_key(
                 "go_to_safe_feature", safer_feature_name=safe_feature_name
             ),
-            color.core.local_manager.get_key(
+            core.core_data.local_manager.get_key(
                 "cancel_editing", feature_name=feature_name
             ),
         ]
@@ -78,7 +78,7 @@ class BasicItems:
     @staticmethod
     def edit_rare_tickets(save_file: "core.SaveFile"):
         color.ColoredText.localize("rare_ticket_warning")
-        name = core.get_gatya_item_names(save_file).get_name(21)
+        name = core.core_data.get_gatya_item_names(save_file).get_name(21)
         option = BasicItems.get_bannable_feature_options(
             "rare_tickets_l", "rare_ticket_trade_l"
         )
@@ -91,7 +91,7 @@ class BasicItems:
         save_file.rare_tickets = dialog_creator.SingleEditor(
             BasicItems.get_name(name, "rare_tickets"),
             save_file.rare_tickets,
-            core.max_value_manager.get("rare_tickets"),
+            core.core_data.max_value_manager.get("rare_tickets"),
         ).edit()
         change = save_file.rare_tickets - original_amount
         core.BackupMetaData(save_file).add_managed_item(
@@ -101,7 +101,7 @@ class BasicItems:
     @staticmethod
     def edit_platinum_tickets(save_file: "core.SaveFile"):
         color.ColoredText.localize("platinum_ticket_warning")
-        name = core.get_gatya_item_names(save_file).get_name(29)
+        name = core.core_data.get_gatya_item_names(save_file).get_name(29)
         option = BasicItems.get_bannable_feature_options(
             "platinum_tickets_l", "platinum_shards_l"
         )
@@ -114,7 +114,7 @@ class BasicItems:
         save_file.platinum_tickets = dialog_creator.SingleEditor(
             BasicItems.get_name(name, "platinum_tickets"),
             save_file.platinum_tickets,
-            core.max_value_manager.get("platinum_tickets"),
+            core.core_data.max_value_manager.get("platinum_tickets"),
         ).edit()
         change = save_file.platinum_tickets - original_amount
         core.BackupMetaData(save_file).add_managed_item(
@@ -128,12 +128,12 @@ class BasicItems:
         )
         if should_exit:
             return
-        name = core.get_gatya_item_names(save_file).get_name(145)
+        name = core.core_data.get_gatya_item_names(save_file).get_name(145)
         original_amount = save_file.legend_tickets
         save_file.legend_tickets = dialog_creator.SingleEditor(
             BasicItems.get_name(name, "legend_tickets"),
             save_file.legend_tickets,
-            core.max_value_manager.get("legend_tickets"),
+            core.core_data.max_value_manager.get("legend_tickets"),
         ).edit()
         change = save_file.legend_tickets - original_amount
         core.BackupMetaData(save_file).add_managed_item(
@@ -142,10 +142,11 @@ class BasicItems:
 
     @staticmethod
     def edit_platinum_shards(save_file: "core.SaveFile"):
-        name = core.get_gatya_item_names(save_file).get_name(157)
+        name = core.core_data.get_gatya_item_names(save_file).get_name(157)
         platinum_ticket_amount = save_file.platinum_tickets
         max_value = (
-            core.max_value_manager.get("platinum_tickets") - platinum_ticket_amount
+            core.core_data.max_value_manager.get("platinum_tickets")
+            - platinum_ticket_amount
         ) * 10 + 9
         save_file.platinum_shards = dialog_creator.SingleEditor(
             BasicItems.get_name(name, "platinum_shards"),
@@ -155,20 +156,20 @@ class BasicItems:
 
     @staticmethod
     def edit_np(save_file: "core.SaveFile"):
-        name = core.get_gatya_item_names(save_file).get_name(7)
+        name = core.core_data.get_gatya_item_names(save_file).get_name(7)
         save_file.np = dialog_creator.SingleEditor(
             BasicItems.get_name(name, "np"),
             save_file.np,
-            core.max_value_manager.get("np"),
+            core.core_data.max_value_manager.get("np"),
         ).edit()
 
     @staticmethod
     def edit_leadership(save_file: "core.SaveFile"):
-        name = core.get_gatya_item_names(save_file).get_name(105)
+        name = core.core_data.get_gatya_item_names(save_file).get_name(105)
         save_file.leadership = dialog_creator.SingleEditor(
             BasicItems.get_name(name, "leadership"),
             save_file.leadership,
-            core.max_value_manager.get("leadership"),
+            core.core_data.max_value_manager.get("leadership"),
         ).edit()
 
     @staticmethod
@@ -177,15 +178,15 @@ class BasicItems:
 
     @staticmethod
     def edit_catamins(save_file: "core.SaveFile"):
-        names_o = core.get_gatya_item_names(save_file)
-        items = core.get_gatya_item_buy(save_file).get_by_category(6)
+        names_o = core.core_data.get_gatya_item_names(save_file)
+        items = core.core_data.get_gatya_item_buy(save_file).get_by_category(6)
         if items is None:
             return
         names: list[str] = []
         for item in items:
             name = names_o.get_name(item.id)
             if name is None:
-                name = color.core.local_manager.get_key(
+                name = core.core_data.local_manager.get_key(
                     "unknown_catamin_name", id=item.id
                 )
             names.append(name)
@@ -193,22 +194,22 @@ class BasicItems:
             "catamins",
             names,
             save_file.catamins,
-            core.max_value_manager.get("catamins"),
+            core.core_data.max_value_manager.get("catamins"),
             group_name_localized=True,
         ).edit()
         save_file.catamins = values
 
     @staticmethod
     def edit_catseyes(save_file: "core.SaveFile"):
-        names_o = core.get_gatya_item_names(save_file)
-        items = core.get_gatya_item_buy(save_file).get_by_category(5)
+        names_o = core.core_data.get_gatya_item_names(save_file)
+        items = core.core_data.get_gatya_item_buy(save_file).get_by_category(5)
         if items is None:
             return
         names: list[str] = []
         for item in items:
             name = names_o.get_name(item.id)
             if name is None:
-                name = color.core.local_manager.get_key(
+                name = core.core_data.local_manager.get_key(
                     "unknown_catseye_name", id=item.id
                 )
             names.append(name)
@@ -217,7 +218,7 @@ class BasicItems:
             "catseyes",
             names,
             save_file.catseyes,
-            core.max_value_manager.get("catseyes"),
+            core.core_data.max_value_manager.get("catseyes"),
             group_name_localized=True,
         ).edit()
         save_file.catseyes = values
@@ -230,13 +231,13 @@ class BasicItems:
         new_names: list[str] = []
         for name in names:
             if name is None:
-                name = color.core.local_manager.get_key("unknown_catfruit_name")
+                name = core.core_data.local_manager.get_key("unknown_catfruit_name")
             new_names.append(name)
         names = new_names
 
-        max_value = core.max_value_manager.get_new("catfruit")
+        max_value = core.core_data.max_value_manager.get_new("catfruit")
         if save_file.game_version < 110400:
-            max_value = core.max_value_manager.get_old("catfruit")
+            max_value = core.core_data.max_value_manager.get_old("catfruit")
 
         values = dialog_creator.MultiEditor.from_reduced(
             "catfruit",
@@ -251,7 +252,7 @@ class BasicItems:
     @staticmethod
     def set_restart_pack(save_file: "core.SaveFile"):
         save_file.restart_pack = 1
-        name = core.get_gatya_item_names(save_file).get_name(123)
+        name = core.core_data.get_gatya_item_names(save_file).get_name(123)
         color.ColoredText.localize("value_gave", name=name)
 
     @staticmethod
@@ -309,15 +310,15 @@ class BasicItems:
 
     @staticmethod
     def edit_labyrinth_medals(save_file: "core.SaveFile"):
-        names_o = core.get_gatya_item_names(save_file)
-        items = core.get_gatya_item_buy(save_file).get_by_category(11)
+        names_o = core.core_data.get_gatya_item_names(save_file)
+        items = core.core_data.get_gatya_item_buy(save_file).get_by_category(11)
         if items is None:
             return
         names: list[str] = []
         for item in items:
             name = names_o.get_name(item.id)
             if name is None:
-                name = color.core.local_manager.get_key(
+                name = core.core_data.local_manager.get_key(
                     "unknown_labyrinth_medal_name", id=item.id
                 )
             names.append(name)
@@ -326,7 +327,7 @@ class BasicItems:
             "labyrinth_medals",
             names,
             save_file.labyrinth_medals,
-            core.max_value_manager.get("labyrinth_medals"),
+            core.core_data.max_value_manager.get("labyrinth_medals"),
             group_name_localized=True,
         ).edit()
         save_file.labyrinth_medals = values

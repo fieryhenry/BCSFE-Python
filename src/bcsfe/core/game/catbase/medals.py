@@ -89,7 +89,7 @@ class Medals:
     @staticmethod
     def edit_medals(save_file: "core.SaveFile"):
         medals = save_file.medals
-        medal_names = core.get_medal_names(save_file)
+        medal_names = core.core_data.get_medal_names(save_file)
         if medal_names.medal_names is None:
             return
         options = ["add_medals", "remove_medals"]
@@ -108,7 +108,7 @@ class Medals:
             if medals.has_medal(i) == add_medals:
                 continue
             key = "medal_string"
-            string = core.local_manager.get_key(
+            string = core.core_data.local_manager.get_key(
                 key, medal_name=medal[0], medal_req=medal[1]
             )
             medals_to_choose_from.append((i, string))
@@ -152,7 +152,7 @@ class MedalNames:
 
     def get_medal_names(self) -> Optional[list[list[str]]]:
         file_name = "medalname.tsv"
-        gdg = core.get_game_data_getter(self.save_file)
+        gdg = core.core_data.get_game_data_getter(self.save_file)
         data = gdg.download("resLocal", file_name)
         if data is None:
             return None

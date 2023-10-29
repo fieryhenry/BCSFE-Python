@@ -8,7 +8,7 @@ class Localizable:
         self.localizable = self.get_localizable()
 
     def get_localizable(self) -> Optional[dict[str, str]]:
-        gdg = core.get_game_data_getter(self.save_file)
+        gdg = core.core_data.get_game_data_getter(self.save_file)
         data = gdg.download("resLocal", "localizable.tsv")
         if data is None:
             return None

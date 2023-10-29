@@ -27,7 +27,7 @@ class SkillLevelData:
 
     @staticmethod
     def from_game_data(save_file: "core.SaveFile") -> Optional["SkillLevelData"]:
-        gdg = core.get_game_data_getter(save_file)
+        gdg = core.core_data.get_game_data_getter(save_file)
         data = gdg.download("DataLocal", "SkillLevel.csv")
         if data is None:
             return None
@@ -123,7 +123,7 @@ class CatSkills:
 
     @staticmethod
     def from_game_data(save_file: "core.SaveFile") -> Optional["CatSkills"]:
-        gdg = core.get_game_data_getter(save_file)
+        gdg = core.core_data.get_game_data_getter(save_file)
         data = gdg.download("DataLocal", "SkillAcquisition.csv")
         if data is None:
             return None
@@ -144,7 +144,7 @@ class SkillNames:
 
     @staticmethod
     def from_game_data(save_file: "core.SaveFile") -> Optional["SkillNames"]:
-        gdg = core.get_game_data_getter(save_file)
+        gdg = core.core_data.get_game_data_getter(save_file)
         data = gdg.download("resLocal", "SkillDescriptions.csv")
         if data is None:
             return None
@@ -282,7 +282,7 @@ class NyankoPictureBook:
         self.cats = self.get_cats()
 
     def get_cats(self) -> Optional[list[NyankoPictureBookCatData]]:
-        gdg = core.get_game_data_getter(self.save_file)
+        gdg = core.core_data.get_game_data_getter(self.save_file)
         data = gdg.download("DataLocal", "nyankoPictureBookData.csv")
         if data is None:
             return None
@@ -430,7 +430,7 @@ class UnitBuy:
 
     def read_unit_buy(self) -> Optional[list[UnitBuyCatData]]:
         unit_buy: list[UnitBuyCatData] = []
-        gdg = core.get_game_data_getter(self.save_file)
+        gdg = core.core_data.get_game_data_getter(self.save_file)
         data = gdg.download("DataLocal", "unitbuy.csv")
         if data is None:
             return None
@@ -467,7 +467,7 @@ class UnitLimit:
 
     def read_unit_limit(self) -> Optional[list[UnitLimitCatData]]:
         unit_limit: list[UnitLimitCatData] = []
-        gdg = core.get_game_data_getter(self.save_file)
+        gdg = core.core_data.get_game_data_getter(self.save_file)
         data = gdg.download("DataLocal", "unitlimit.csv")
         if data is None:
             return None
@@ -511,7 +511,7 @@ class Cat:
     def unlock(self, save_file: "core.SaveFile"):
         self.unlocked = 1
         self.gatya_seen = 1
-        core.get_chara_drop(save_file).unlock_drops_from_cat_id(self.id)
+        core.core_data.get_chara_drop(save_file).unlock_drops_from_cat_id(self.id)
         save_file.unlock_equip_menu()
 
     def remove(self, reset: bool = False):
@@ -719,8 +719,10 @@ class Cat:
         save_file: "core.SaveFile",
         localizable: "core.Localizable",
     ) -> Optional[list[str]]:
-        file_name = f"Unit_Explanation{id+1}_{localizable.get_lang()}.csv"
-        data = core.get_game_data_getter(save_file).download("resLocal", file_name)
+        file_name = f"Unit_Explanation{id+1}_{core.core_data.get_lang(save_file)}.csv"
+        data = core.core_data.get_game_data_getter(save_file).download(
+            "resLocal", file_name
+        )
         if data is None:
             return None
         csv = core.CSV(
@@ -872,18 +874,19 @@ class Cats:
     def bulk_download_names(self, save_file: "core.SaveFile"):
         if self.bulk_downloaded:
             return
-        localizable = save_file.get_localizable()
         file_names: list[str] = []
-        gdg = core.get_game_data_getter(save_file)
+        gdg = core.core_data.get_game_data_getter(save_file)
         for cat in self.cats:
             if cat.names is None:
-                file_name = f"Unit_Explanation{cat.id+1}_{localizable.get_lang()}.csv"
+                file_name = f"Unit_Explanation{cat.id+1}_{core.core_data.get_lang(save_file)}.csv"
                 if gdg.is_downloaded("resLocal", file_name):
                     continue
                 file_names.append(file_name)
                 cat.names = []
 
-        core.get_game_data_getter(save_file).download_all("resLocal", file_names)
+        core.core_data.get_game_data_getter(save_file).download_all(
+            "resLocal", file_names
+        )
         self.bulk_downloaded = True
 
     def get_cats_obtainable(self, save_file: "core.SaveFile") -> Optional[list[Cat]]:

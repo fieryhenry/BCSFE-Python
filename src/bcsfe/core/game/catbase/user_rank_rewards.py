@@ -20,7 +20,7 @@ class RankGifts:
 
     def read_rank_gift(self) -> Optional[list[RankGift]]:
         rank_gift: list[RankGift] = []
-        gdg = core.get_game_data_getter(self.save_file)
+        gdg = core.core_data.get_game_data_getter(self.save_file)
         data = gdg.download("DataLocal", "rankGift.csv")
         if data is None:
             return None
@@ -84,7 +84,7 @@ class RankGiftDescriptions:
 
     def read_rank_gift_descriptions(self) -> Optional[list[RankGiftDescription]]:
         rank_gift_descriptions: list[RankGiftDescription] = []
-        gdg = core.get_game_data_getter(self.save_file)
+        gdg = core.core_data.get_game_data_getter(self.save_file)
         data = gdg.download("resLocal", "user_info.tsv")
         if data is None:
             return None
@@ -197,7 +197,7 @@ class UserRankRewards:
 
         claim_choice -= 1
 
-        rank_gifts = core.get_rank_gifts(save_file)
+        rank_gifts = core.core_data.get_rank_gifts(save_file)
         if rank_gifts.rank_gift is None:
             return
 
@@ -213,7 +213,7 @@ class UserRankRewards:
             return
 
         selected_rank_gifts: list[RankGift] = rank_gifts.rank_gift.copy()
-        descriptions = core.get_rank_gift_descriptions(save_file)
+        descriptions = core.core_data.get_rank_gift_descriptions(save_file)
 
         selected_rank_gifts.sort(key=lambda rank_gift: rank_gift.threshold)
 
@@ -245,7 +245,7 @@ class UserRankRewards:
                 start = description.find("<")
 
             selected_descriptions.append(
-                core.local_manager.get_key(
+                core.core_data.local_manager.get_key(
                     "ur_string",
                     description=description,
                     rank=rank_gift.threshold,

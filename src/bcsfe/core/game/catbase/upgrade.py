@@ -77,7 +77,7 @@ class Upgrade:
             "max_upgrade", max_base=max_pos_base + 1, max_plus=max_pos_plus
         )
         usr_input = color.ColoredInput().localize("upgrade_input")
-        if usr_input == core.local_manager.get_key("quit_key"):
+        if usr_input == core.core_data.local_manager.get_key("quit_key"):
             return None, True
         # example:
         # 10+20 = Upgrade(base=9, plus=20)
@@ -100,7 +100,7 @@ class Upgrade:
         min_base, max_base = None, None
         min_plus, max_plus = None, None
 
-        max_text = core.local_manager.get_key("max")
+        max_text = core.core_data.local_manager.get_key("max")
 
         if not base:
             base_int = -1

@@ -201,8 +201,8 @@ class Missions:
     def edit_missions(save_file: "core.SaveFile"):
         missions = save_file.missions
 
-        names = core.get_mission_names(save_file)
-        conditions = core.get_mission_conditions(save_file)
+        names = core.core_data.get_mission_names(save_file)
+        conditions = core.core_data.get_mission_conditions(save_file)
         if names.names is None or conditions.conditions is None:
             return
         options: list[str] = []
@@ -276,7 +276,7 @@ class MissionConditions:
 
     def get_conditions(self) -> Optional[dict[int, MissionCondition]]:
         file_name = "Mission_Condition.csv"
-        gdg = core.get_game_data_getter(self.save)
+        gdg = core.core_data.get_game_data_getter(self.save)
         file = gdg.download("DataLocal", file_name)
         if file is None:
             return None
@@ -305,7 +305,7 @@ class MissionNames:
 
     def get_names(self) -> Optional[dict[int, str]]:
         file_name = "Mission_Name.csv"
-        gdg = core.get_game_data_getter(self.save)
+        gdg = core.core_data.get_game_data_getter(self.save)
         file = gdg.download("resLocal", file_name)
         if file is None:
             return None

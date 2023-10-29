@@ -37,7 +37,9 @@ class RequestHandler:
             return requests.get(
                 self.url,
                 headers=self.headers,
-                timeout=core.config.get_int(core.ConfigKey.MAX_REQUEST_TIMEOUT),
+                timeout=core.core_data.config.get_int(
+                    core.ConfigKey.MAX_REQUEST_TIMEOUT
+                ),
             )
         except requests.exceptions.ConnectionError:
             return None
@@ -53,7 +55,9 @@ class RequestHandler:
                 self.url,
                 headers=self.headers,
                 data=self.data.data,
-                timeout=core.config.get_int(core.ConfigKey.MAX_REQUEST_TIMEOUT),
+                timeout=core.core_data.config.get_int(
+                    core.ConfigKey.MAX_REQUEST_TIMEOUT
+                ),
             )
         except requests.exceptions.ConnectionError:
             return None

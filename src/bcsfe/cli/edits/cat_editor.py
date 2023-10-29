@@ -204,7 +204,7 @@ class CatEditor:
         color.ColoredText.localize("unlock_success")
 
     def remove_cats(self, cats: list["core.Cat"]):
-        reset = core.config.get_bool(core.ConfigKey.RESET_CAT_DATA)
+        reset = core.core_data.config.get_bool(core.ConfigKey.RESET_CAT_DATA)
         cats = self.get_save_cats(cats)
         for cat in cats:
             cat.remove(reset=reset)
@@ -222,7 +222,9 @@ class CatEditor:
     def true_form_cats(self, cats: list["core.Cat"], force: bool = False):
         cats = self.get_save_cats(cats)
         pic_book = self.save_file.cats.read_nyanko_picture_book(self.save_file)
-        set_current_forms = core.config.get_bool(core.ConfigKey.SET_CAT_CURRENT_FORMS)
+        set_current_forms = core.core_data.config.get_bool(
+            core.ConfigKey.SET_CAT_CURRENT_FORMS
+        )
         for cat in cats:
             pic_book_cat = pic_book.get_cat(cat.id)
             if force:

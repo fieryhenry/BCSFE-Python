@@ -126,15 +126,15 @@ class Config:
 
     def get_bool_text(self, value: bool) -> str:
         if value:
-            return core.local_manager.get_key("enabled")
-        return core.local_manager.get_key("disabled")
+            return core.core_data.local_manager.get_key("enabled")
+        return core.core_data.local_manager.get_key("disabled")
 
     def get_full_input_localized(
         self, key: ConfigKey, current_value: str, default_value: str
     ) -> str:
-        return core.local_manager.get_key(
+        return core.core_data.local_manager.get_key(
             "config_full",
-            key_desc=core.local_manager.get_key(
+            key_desc=core.core_data.local_manager.get_key(
                 Config.get_desc_key(key),
                 current_value=current_value,
                 default_value=default_value,
@@ -382,7 +382,7 @@ class Config:
 
     @staticmethod
     def edit_config(_: Any = None):
-        config = core.config
+        config = core.core_data.config
         features = list(ConfigKey)
 
         choice = dialog_creator.ChoiceInput.from_reduced(
@@ -396,14 +396,14 @@ class Config:
         feature = features[choice]
         print()
         if isinstance(config.get(feature), bool):
-            core.config.edit_bool(feature)
+            core.core_data.config.edit_bool(feature)
         elif isinstance(config.get(feature), int):
-            core.config.edit_int(feature)
+            core.core_data.config.edit_int(feature)
         elif feature == ConfigKey.LOCALE:
-            core.config.edit_locale()
+            core.core_data.config.edit_locale()
         elif feature == ConfigKey.THEME:
-            core.config.edit_theme()
+            core.core_data.config.edit_theme()
         elif feature == ConfigKey.GAME_DATA_REPO:
-            core.config.edit_game_data_repo()
+            core.core_data.config.edit_game_data_repo()
 
         print()

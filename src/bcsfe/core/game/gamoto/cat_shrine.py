@@ -101,7 +101,7 @@ class CatShrine:
             return
         choice -= 1
 
-        data = core.get_cat_shrine_levels(save_file)
+        data = core.core_data.get_cat_shrine_levels(save_file)
 
         xp = shrine.xp_offering
         level = data.get_level_from_xp(xp)
@@ -153,7 +153,7 @@ class CatShrineLevels:
 
     def get_boundaries(self) -> Optional[list[int]]:
         file_name = "jinja_level.csv"
-        gdg = core.get_game_data_getter(self.save_file)
+        gdg = core.core_data.get_game_data_getter(self.save_file)
         data = gdg.download("resLocal", file_name)
         if data is None:
             return None

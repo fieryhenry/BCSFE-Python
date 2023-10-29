@@ -26,7 +26,7 @@ class PowerUpHelper:
         )
 
     def has_strict_upgrade(self) -> bool:
-        return core.config.get_bool(core.ConfigKey.STRICT_UPGRADE)
+        return core.core_data.config.get_bool(core.ConfigKey.STRICT_UPGRADE)
 
     def get_upgrade_state_check(self) -> int:
         if not self.has_strict_upgrade():

@@ -50,7 +50,7 @@ class SaveManagement:
         Args:
             save_file (core.SaveFile): The save file to save.
         """
-        if core.config.get_bool(core.ConfigKey.STRICT_BAN_PREVENTION):
+        if core.core_data.config.get_bool(core.ConfigKey.STRICT_BAN_PREVENTION):
             color.ColoredText.localize("strict_ban_prevention_enabled")
             SaveManagement.create_new_account(save_file)
 
@@ -177,7 +177,10 @@ class SaveManagement:
         Args:
             save_file (core.SaveFile): The save file to upload.
         """
-        if core.config.get_bool(core.ConfigKey.STRICT_BAN_PREVENTION) and check_strict:
+        if (
+            core.core_data.config.get_bool(core.ConfigKey.STRICT_BAN_PREVENTION)
+            and check_strict
+        ):
             color.ColoredText.localize("strict_ban_prevention_enabled")
             SaveManagement.create_new_account(save_file)
 
@@ -283,7 +286,7 @@ class SaveManagement:
             else:
                 save_path = None
         elif choice == 4 and starting_options:
-            core.Config.edit_config()
+            core.core_data.config.edit_config()
         elif choice == 5 and starting_options:
             core.update_external_content()
         elif choice == 6 and starting_options:
@@ -302,12 +305,12 @@ class SaveManagement:
             try:
                 save_file = core.SaveFile(save_path.read(), cc)
             except Exception:
-                tb = core.logger.get_traceback()
+                tb = core.core_data.logger.get_traceback()
                 color.ColoredText.localize("parse_save_error", error=tb)
                 return None
 
         except Exception:
-            tb = core.logger.get_traceback()
+            tb = core.core_data.logger.get_traceback()
             color.ColoredText.localize("parse_save_error", error=tb)
             return None
 

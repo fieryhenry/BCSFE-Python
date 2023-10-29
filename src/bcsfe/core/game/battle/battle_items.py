@@ -97,10 +97,10 @@ class BattleItems:
         return f"BattleItems({self.items})"
 
     def get_names(self, save_file: "core.SaveFile") -> Optional[list[str]]:
-        names = core.get_gatya_item_names(save_file).names
+        names = core.core_data.get_gatya_item_names(save_file).names
         if names is None:
             return None
-        items = core.get_gatya_item_buy(save_file).get_by_category(3)
+        items = core.core_data.get_gatya_item_buy(save_file).get_by_category(3)
         if items is None:
             return None
 
@@ -110,7 +110,7 @@ class BattleItems:
     def edit(self, save_file: "core.SaveFile"):
         group_name = save_file.get_localizable().get("shop_category1")
         if group_name is None:
-            group_name = core.local_manager.get_key("battle_items")
+            group_name = core.core_data.local_manager.get_key("battle_items")
         item_names = self.get_names(save_file)
         if item_names is None:
             return
@@ -119,7 +119,7 @@ class BattleItems:
             group_name,
             item_names,
             current_values,
-            core.max_value_manager.get("battle_items"),
+            core.core_data.max_value_manager.get("battle_items"),
         ).edit()
         for i, value in enumerate(values):
             self.items[i].amount = value

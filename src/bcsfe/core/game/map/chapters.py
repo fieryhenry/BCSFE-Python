@@ -33,11 +33,8 @@ class Stage:
     def __str__(self):
         return self.__repr__()
 
-    def clear_stage(self, increment: bool = True):
-        if increment:
-            self.clear_times += 1
-        else:
-            self.clear_times = max(1, self.clear_times)
+    def clear_stage(self, clear_amount: int = 1):
+        self.clear_times = clear_amount
 
 
 class Chapter:
@@ -47,9 +44,17 @@ class Chapter:
         self.stages: list[Stage] = [Stage.init() for _ in range(total_stages)]
         self.chapter_unlock_state = 0
 
-    def clear_stage(self, index: int, increment: bool = True):
-        self.clear_progress = max(self.clear_progress, index + 1)
-        self.stages[index].clear_stage(increment)
+    def clear_stage(
+        self, index: int, clear_amount: int = 1, overwrite_clear_progress: bool = False
+    ) -> bool:
+        if overwrite_clear_progress:
+            self.clear_progress = index + 1
+        else:
+            self.clear_progress = max(self.clear_progress, index + 1)
+        self.stages[index].clear_stage(clear_amount)
+        if index == len(self.stages) - 1:
+            return True
+        return False
 
     @staticmethod
     def init(total_stages: int) -> "Chapter":
@@ -109,8 +114,20 @@ class ChaptersStars:
     def __init__(self, chapters: list[Chapter]):
         self.chapters = chapters
 
-    def clear_stage(self, star: int, stage: int, increment: bool = True):
-        self.chapters[star].clear_stage(stage, increment)
+    def clear_stage(
+        self,
+        star: int,
+        stage: int,
+        clear_amount: int = 1,
+        overwrite_clear_progress: bool = False,
+    ) -> bool:
+        finished = self.chapters[star].clear_stage(
+            stage, clear_amount, overwrite_clear_progress
+        )
+        if finished:
+            if star + 1 < len(self.chapters):
+                self.chapters[star + 1].chapter_unlock_state = 3
+        return finished
 
     @staticmethod
     def init(total_stages: int, total_stars: int) -> "ChaptersStars":
@@ -169,8 +186,19 @@ class Chapters:
     def __init__(self, chapters: list[ChaptersStars]):
         self.chapters = chapters
 
-    def clear_stage(self, map: int, star: int, stage: int, increment: bool = True):
-        self.chapters[map].clear_stage(star, stage, increment)
+    def clear_stage(
+        self,
+        map: int,
+        star: int,
+        stage: int,
+        clear_amount: int = 1,
+        overwrite_clear_progress: bool = False,
+    ):
+        finished = self.chapters[map].clear_stage(
+            star, stage, clear_amount, overwrite_clear_progress
+        )
+        if finished:
+            self.chapters[map + 1].chapters[0].chapter_unlock_state = 3
 
     @staticmethod
     def init() -> "Chapters":

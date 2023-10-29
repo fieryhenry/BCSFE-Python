@@ -732,16 +732,24 @@ class EventChapters:
         ids = list(names_dict.keys())
         for id, map_name in names_dict.items():
             if map_name is None:
-                map_name = core.local_manager.get_key("unknown_map_name", id=id)
+                map_name = core.core_data.local_manager.get_key(
+                    "unknown_map_name", id=id
+                )
             else:
-                map_name = core.local_manager.get_key("map_name", name=map_name, id=id)
+                map_name = core.core_data.local_manager.get_key(
+                    "map_name", name=map_name, id=id
+                )
             names_list.append(map_name)
 
         while True:
             dialog_creator.ListOutput(names_list, [], "select_map").display_locale()
+            if names_list:
+                example_name = names_list[0]
+            else:
+                example_name = ""
             usr_input = (
                 color.ColoredInput()
-                .localize("select_map_dialog")
+                .localize("select_map_dialog", example=example_name, escape=False)
                 .lower()
                 .strip()
                 .replace(" ", "_")
@@ -797,7 +805,7 @@ class EventChapters:
     @staticmethod
     def print_current_chapter(name: Optional[str], id: int):
         if name is None:
-            name = core.local_manager.get_key("unknown_map_name", id=id)
+            name = core.core_data.local_manager.get_key("unknown_map_name", id=id)
         color.ColoredText.localize("current_sol_chapter", name=name, id=id)
 
     @staticmethod

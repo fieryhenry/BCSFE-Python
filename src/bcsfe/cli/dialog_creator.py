@@ -14,19 +14,24 @@ class RangeInput:
         return max(min(value, self.max), self.min)
 
     def get_input_locale(
-        self, dialog: str, perameters: dict[str, Union[int, str]]
+        self,
+        dialog: str,
+        perameters: dict[str, Union[int, str]],
+        escape: bool = True,
     ) -> Optional[list[int]]:
-        user_input = color.ColoredInput(end="").localize(dialog, **perameters)
+        user_input = color.ColoredInput(end="").localize(
+            dialog, escape=escape, **perameters
+        )
         return self.parse(user_input)
 
     def parse(self, user_input: str) -> Optional[list[int]]:
         if user_input == "":
             return []
-        if user_input == core.local_manager.get_key("quit_key"):
+        if user_input == core.core_data.local_manager.get_key("quit_key"):
             return None
         parts = user_input.split(" ")
         ids: list[int] = []
-        all_text = core.local_manager.get_key("all")
+        all_text = core.core_data.local_manager.get_key("all")
         for part in parts:
             if "-" in part and len(part.split("-")) == 2:
                 lower, upper = part.split("-")
@@ -74,7 +79,7 @@ class IntInput:
 
     @staticmethod
     def get_max_value(max: Optional[int], signed: bool = True) -> int:
-        disable_maxes = core.config.get_bool(core.ConfigKey.DISABLE_MAXES)
+        disable_maxes = core.core_data.config.get_bool(core.ConfigKey.DISABLE_MAXES)
         if signed:
             max_int = 2**31 - 1
         else:
@@ -87,9 +92,14 @@ class IntInput:
         return max(min(value, self.max), self.min)
 
     def get_input(
-        self, localization_key: str, perameters: dict[str, Union[int, str]]
+        self,
+        localization_key: str,
+        perameters: dict[str, Union[int, str]],
+        escape: bool = True,
     ) -> tuple[Optional[int], str]:
-        user_input = color.ColoredInput(end="").localize(localization_key, **perameters)
+        user_input = color.ColoredInput(end="").localize(
+            localization_key, escape=escape, **perameters
+        )
         if user_input == "" and self.default is not None:
             return self.default, user_input
         try:
@@ -106,7 +116,7 @@ class IntInput:
             int_val, user_input = self.get_input(dialog, perameters)
             if int_val is not None:
                 return int_val
-            if user_input == core.local_manager.get_key("quit_key"):
+            if user_input == core.core_data.local_manager.get_key("quit_key"):
                 return None
 
     def get_input_locale(
@@ -149,7 +159,7 @@ class ListOutput:
     def get_output(self, dialog: Optional[str], strings: list[str]) -> str:
         end_string = ""
         if dialog is not None:
-            end_string = color.core.local_manager.get_key(dialog, **self.perameters)
+            end_string = core.core_data.local_manager.get_key(dialog, **self.perameters)
         end_string += "\n"
         for i, string in enumerate(strings):
             try:
@@ -168,12 +178,12 @@ class ListOutput:
     def display_locale(self, remove_alias: bool = False) -> None:
         dialog = ""
         if self.dialog is not None:
-            dialog = core.local_manager.get_key(self.dialog)
+            dialog = core.core_data.local_manager.get_key(self.dialog)
         new_strings: list[str] = []
         for string in self.strings:
-            string_ = core.local_manager.get_key(string)
+            string_ = core.core_data.local_manager.get_key(string)
             if remove_alias:
-                string_ = core.local_manager.get_all_aliases(string_)[0]
+                string_ = core.core_data.local_manager.get_all_aliases(string_)[0]
             new_strings.append(string_)
         self.display(dialog, new_strings)
 
@@ -246,7 +256,7 @@ class ChoiceInput:
             int_val, user_input = self.get_input()
             if int_val is not None:
                 return int_val
-            if user_input == core.local_manager.get_key("quit_key"):
+            if user_input == core.core_data.local_manager.get_key("quit_key"):
                 return None
 
     def get_input_locale(
@@ -260,7 +270,7 @@ class ChoiceInput:
             if localized:
                 self.strings.append("all_at_once")
             else:
-                self.strings.append(core.local_manager.get_key("all_at_once"))
+                self.strings.append(core.core_data.local_manager.get_key("all_at_once"))
         if localized:
             ListOutput(self.strings, self.ints).display_locale()
         else:
@@ -268,7 +278,9 @@ class ChoiceInput:
         key = "input_many"
         if self.is_single_choice:
             key = "input_single"
-        dialog = core.local_manager.get_key(key).format(min=1, max=len(self.strings))
+        dialog = core.core_data.local_manager.get_key(key).format(
+            min=1, max=len(self.strings)
+        )
         usr_input = color.ColoredInput().get(dialog).split(" ")
         int_vals: list[int] = []
         for i in usr_input:
@@ -278,7 +290,7 @@ class ChoiceInput:
                     raise ValueError
                 int_vals.append(value)
             except ValueError:
-                if i == core.local_manager.get_key("quit_key"):
+                if i == core.core_data.local_manager.get_key("quit_key"):
                     return None, False
                 if i in self.strings:
                     int_vals.append(self.strings.index(i) + 1)
@@ -366,7 +378,9 @@ class MultiEditor:
             perameters = {}
         self.perameters = perameters
         if group_name_localized:
-            self.perameters["group_name"] = core.local_manager.get_key(group_name)
+            self.perameters["group_name"] = core.core_data.local_manager.get_key(
+                group_name
+            )
         else:
             self.perameters["group_name"] = group_name
         self.dialog = dialog
@@ -387,7 +401,7 @@ class MultiEditor:
     ):
         if items_localized:
             for i, item in enumerate(items):
-                items[i] = core.local_manager.get_key(item)
+                items[i] = core.core_data.local_manager.get_key(item)
         text: list[str] = []
         for item_name in items:
             if ints is not None:
@@ -492,9 +506,9 @@ class SingleEditor:
         remove_alias: bool = False,
     ):
         if localized_item:
-            item = core.local_manager.get_key(item)
+            item = core.core_data.local_manager.get_key(item)
         if remove_alias:
-            item = core.local_manager.get_all_aliases(item)[0]
+            item = core.core_data.local_manager.get_all_aliases(item)[0]
         self.item = item
         self.value = value
         self.max_value = max_value
@@ -552,7 +566,9 @@ class StringInput:
 
     def get_input_locale(self, key: str, perameters: dict[str, Any]) -> Optional[str]:
         usr_input = color.ColoredInput().localize(key, **perameters)
-        if usr_input == "" or usr_input == core.local_manager.get_key("quit_key"):
+        if usr_input == "" or usr_input == core.core_data.local_manager.get_key(
+            "quit_key"
+        ):
             return None
         return usr_input
 
@@ -560,7 +576,7 @@ class StringInput:
 class StringEditor:
     def __init__(self, item: str, value: str, item_localized: bool = False):
         if item_localized:
-            item = core.local_manager.get_key(item)
+            item = core.core_data.local_manager.get_key(item)
         self.item = item
         self.value = value
 
@@ -588,15 +604,19 @@ class YesNoInput:
             usr_input = self.get_input_locale(key, perameters)
             if usr_input is None:
                 return self.default
-            if usr_input == "" or usr_input == core.local_manager.get_key("quit_key"):
+            if usr_input == "" or usr_input == core.core_data.local_manager.get_key(
+                "quit_key"
+            ):
                 return self.default
             if usr_input == " ":
                 continue
-            return usr_input == core.local_manager.get_key("yes_key")
+            return usr_input == core.core_data.local_manager.get_key("yes_key")
 
     def get_input_locale(self, key: str, perameters: dict[str, Any]) -> Optional[str]:
         usr_input = color.ColoredInput().get(key, **perameters)
-        if usr_input == "" or usr_input == core.local_manager.get_key("quit_key"):
+        if usr_input == "" or usr_input == core.core_data.local_manager.get_key(
+            "quit_key"
+        ):
             return None
         return usr_input
 
@@ -606,9 +626,11 @@ class YesNoInput:
         if perameters is None:
             perameters = {}
         usr_input = color.ColoredInput().localize(key, **perameters)
-        if usr_input == "" or usr_input == core.local_manager.get_key("quit_key"):
+        if usr_input == "" or usr_input == core.core_data.local_manager.get_key(
+            "quit_key"
+        ):
             return self.default
-        return usr_input == core.local_manager.get_key("yes_key")
+        return usr_input == core.core_data.local_manager.get_key("yes_key")
 
 
 class DialogBuilder:

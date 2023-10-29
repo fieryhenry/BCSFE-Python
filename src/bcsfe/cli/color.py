@@ -49,7 +49,7 @@ class ColorHex(NamedConstant):
 
 class ColorHelper:
     def __init__(self):
-        self.theme_handler = core.theme_manager
+        self.theme_handler = core.core_data.theme_manager
 
     def get_color(self, color_name: str) -> str:
         try:
@@ -113,7 +113,9 @@ class ColoredText:
 
     @staticmethod
     def localize(string: str, escape: bool = True, **kwargs: Any) -> "ColoredText":
-        return ColoredText(core.local_manager.get_key(string, escape=escape, **kwargs))
+        return ColoredText(
+            core.core_data.local_manager.get_key(string, escape=escape, **kwargs)
+        )
 
     def parse(self, txt: str) -> list[tuple[str, str]]:
         txt = "<@p>" + txt + "</>"
@@ -171,6 +173,6 @@ class ColoredInput:
         ColoredText(display_string, end=self.end)
         return input()
 
-    def localize(self, string: str, **kwargs: Any) -> str:
-        text = core.local_manager.get_key(string, **kwargs)
+    def localize(self, string: str, escape: bool = True, **kwargs: Any) -> str:
+        text = core.core_data.local_manager.get_key(string, escape=escape, **kwargs)
         return self.get(text)

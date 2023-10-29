@@ -17,6 +17,9 @@ class RangeInput:
         self, dialog: str, perameters: dict[str, Union[int, str]]
     ) -> Optional[list[int]]:
         user_input = color.ColoredInput(end="").localize(dialog, **perameters)
+        return self.parse(user_input)
+
+    def parse(self, user_input: str) -> Optional[list[int]]:
         if user_input == "":
             return []
         if user_input == core.local_manager.get_key("quit_key"):

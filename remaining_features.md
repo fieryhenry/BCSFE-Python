@@ -5,8 +5,6 @@ branch of the save editor but are in the master branch.
 
 - save conversion
 - uncanny legends
-- gauntlets
-- collab gauntlets
 - towers
 - behemoth culling
 - legend quest

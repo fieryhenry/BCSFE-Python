@@ -756,7 +756,9 @@ class EventChapters:
             )
             if usr_input == "q":
                 return None
-            usr_ids = dialog_creator.RangeInput(max=len(names_list)).parse(usr_input)
+            usr_ids = dialog_creator.RangeInput(max=len(names_list), min=1).parse(
+                usr_input
+            )
             if not usr_ids:
                 found_names: list[tuple[int, str]] = []
                 for i, name in enumerate(names_list):
@@ -785,6 +787,7 @@ class EventChapters:
                             map_ids.append(true_id)
             else:
                 for id in usr_ids:
+                    id -= 1
                     true_id = ids[id]
                     if true_id not in map_ids:
                         map_ids.append(true_id)

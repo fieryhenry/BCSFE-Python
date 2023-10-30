@@ -133,6 +133,9 @@ class Path:
         _paths: list[str] = [str(path) for path in paths]
         return Path(os.path.join(self.path, *_paths))
 
+    def strip_leading_slash(self) -> "Path":
+        return Path(self.path.lstrip("/").lstrip("\\"))
+
     def __str__(self) -> str:
         return self.path
 
@@ -206,7 +209,7 @@ class Path:
         ]
 
     def strip_path_from(self, path: "Path") -> "Path":
-        return Path(self.path.replace(path.path, "").lstrip("/"))
+        return Path(self.path.replace(path.path, "")).strip_leading_slash()
 
     def is_directory(self) -> bool:
         return os.path.isdir(self.path)

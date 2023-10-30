@@ -144,8 +144,10 @@ If you want the latest features then you can install the editor from the github.
 2. Run the following commands: (You may have to replace `py` with `python` or `python3`)
 
 ```batch
-git clone https://github.com/fieryhenry/bcsfe.git
-pip install -e bcsfe/
+git clone https://github.com/fieryhenry/BCSFE-Python.git
+cd BCSFE-Python
+git checkout 3.0.0
+pip install -e .
 py -m bcsfe
 ```
 

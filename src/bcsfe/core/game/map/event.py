@@ -752,7 +752,6 @@ class EventChapters:
                 .localize("select_map_dialog", example=example_name, escape=False)
                 .lower()
                 .strip()
-                .replace(" ", "_")
             )
             if usr_input == "q":
                 return None
@@ -762,7 +761,9 @@ class EventChapters:
             if not usr_ids:
                 found_names: list[tuple[int, str]] = []
                 for i, name in enumerate(names_list):
-                    if usr_input in name.lower().strip().replace(" ", "_"):
+                    if usr_input.replace(" ", "_") in name.lower().strip().replace(
+                        " ", "_"
+                    ):
                         true_id = ids[i]
                         found_names.append((i, name))
 

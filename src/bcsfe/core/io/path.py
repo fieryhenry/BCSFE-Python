@@ -262,3 +262,6 @@ class Path:
 
     def get_absolute_path(self) -> "Path":
         return Path(os.path.abspath(self.path))
+
+    def copy_object(self) -> "Path":
+        return Path(self.path)

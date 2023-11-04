@@ -1837,6 +1837,9 @@ class SaveFile:
                 core.core_data.local_manager.get_key("failed_to_save_save")
             ) from e
 
+    def to_file_thread(self, path: "core.Path"):
+        core.Thread("to_file", self.to_file, [path]).start()
+
     def to_file(self, path: "core.Path") -> None:
         dt = self.to_data()
         dt.to_file(path)

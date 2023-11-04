@@ -215,7 +215,7 @@ class FeatureHandler:
     def select_features_run(self):
         features = self.get_features()
         features = list(features.keys())
-        self.save_file.to_file(self.save_file.get_temp_path())
+        self.save_file.to_file_thread(self.save_file.get_temp_path())
         edits.clear_tutorial.clear_tutorial(self.save_file, False)
         self.save_file.show_ban_message = False
 
@@ -247,7 +247,7 @@ class FeatureHandler:
 
                 feature(self.save_file)
 
-                self.save_file.to_file(self.save_file.get_temp_path())
+                self.save_file.to_file_thread(self.save_file.get_temp_path())
 
                 features = self.get_features()
                 features = list(features.keys())

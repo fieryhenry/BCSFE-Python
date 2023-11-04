@@ -271,17 +271,17 @@ class EventChapterGroup:
         finished = self.chapters[map].clear_stage(
             star, stage, clear_amount, overwrite_clear_progress
         )
-        if finished:
+        if finished and map + 1 < len(self.chapters):
             self.chapters[map + 1].chapters[0].chapter_unlock_state = 3
 
     def clear_map(self, map: int, star: int, increment: bool = True):
         finished = self.chapters[map].clear_map(star, increment)
-        if finished:
+        if finished and map + 1 < len(self.chapters):
             self.chapters[map + 1].chapters[0].chapter_unlock_state = 3
 
     def clear_chapter(self, map: int, increment: bool = True):
         finished = self.chapters[map].clear_chapter(increment)
-        if finished:
+        if finished and map + 1 < len(self.chapters):
             self.chapters[map + 1].chapters[0].chapter_unlock_state = 3
 
     def clear_group(self, increment: bool = True):
@@ -682,9 +682,9 @@ class EventChapters:
         return len(self.chapters[type].chapters[map].chapters[star].stages)
 
     @staticmethod
-    def ask_stars() -> Optional[int]:
-        stars = dialog_creator.IntInput(min=0, max=4).get_basic_input_locale(
-            "custom_star_count_per_chapter", {}
+    def ask_stars(max_stars: int) -> Optional[int]:
+        stars = dialog_creator.IntInput(min=0, max=max_stars).get_basic_input_locale(
+            "custom_star_count_per_chapter", {"max": max_stars}
         )
         if stars is None:
             return None
@@ -859,7 +859,7 @@ class EventChapters:
                     return
 
         if not stars_type_choice:
-            stars = EventChapters.ask_stars()
+            stars = EventChapters.ask_stars(event_chapters.get_total_stars(type, 0))
             if stars is None:
                 return
         else:
@@ -870,7 +870,9 @@ class EventChapters:
             stage_names = map_names.stage_names.get(id)
             color.ColoredText.localize("current_sol_chapter", name=map_name, id=id)
             if stars_type_choice:
-                stars = EventChapters.ask_stars()
+                stars = EventChapters.ask_stars(
+                    event_chapters.get_total_stars(type, id)
+                )
                 if stars is None:
                     return
             if clear_type_choice:
@@ -885,8 +887,10 @@ class EventChapters:
                 if clear_amount is None:
                     return
 
-            for star in range(event_chapters.get_total_stars(type, id)):
-                for stage in range(event_chapters.get_total_stages(type, id, star)):
+            for star in range(stars, event_chapters.get_total_stars(type, id)):
+                for stage in range(
+                    max(stages), event_chapters.get_total_stages(type, id, star)
+                ):
                     save_file.event_stages.chapters[type].chapters[id].chapters[
                         star
                     ].stages[stage].clear_amount = 0

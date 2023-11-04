@@ -62,12 +62,14 @@ class EventSubChapter:
         else:
             self.clear_progress = max(self.clear_progress, index + 1)
         self.stages[index].clear_stage(clear_amount)
+        self.chapter_unlock_state = 3
         if index == len(self.stages) - 1:
             return True
         return False
 
     def clear_map(self, increment: bool = True) -> bool:
         self.clear_progress = len(self.stages)
+        self.chapter_unlock_state = 3
         for stage in self.stages:
             stage.clear_stage(increment)
         return True
@@ -165,14 +167,14 @@ class EventSubChapterStars:
         )
         if finished:
             if star + 1 < len(self.chapters):
-                self.chapters[star + 1].chapter_unlock_state = 3
+                self.chapters[star + 1].chapter_unlock_state = 1
         return finished
 
     def clear_map(self, star: int, increment: bool = True) -> bool:
         finished = self.chapters[star].clear_map(increment)
         if finished:
             if star + 1 < len(self.chapters):
-                self.chapters[star + 1].chapter_unlock_state = 3
+                self.chapters[star + 1].chapter_unlock_state = 1
         return finished
 
     def clear_chapter(self, increment: bool = True) -> bool:
@@ -272,17 +274,17 @@ class EventChapterGroup:
             star, stage, clear_amount, overwrite_clear_progress
         )
         if finished and map + 1 < len(self.chapters):
-            self.chapters[map + 1].chapters[0].chapter_unlock_state = 3
+            self.chapters[map + 1].chapters[0].chapter_unlock_state = 1
 
     def clear_map(self, map: int, star: int, increment: bool = True):
         finished = self.chapters[map].clear_map(star, increment)
         if finished and map + 1 < len(self.chapters):
-            self.chapters[map + 1].chapters[0].chapter_unlock_state = 3
+            self.chapters[map + 1].chapters[0].chapter_unlock_state = 1
 
     def clear_chapter(self, map: int, increment: bool = True):
         finished = self.chapters[map].clear_chapter(increment)
         if finished and map + 1 < len(self.chapters):
-            self.chapters[map + 1].chapters[0].chapter_unlock_state = 3
+            self.chapters[map + 1].chapters[0].chapter_unlock_state = 1
 
     def clear_group(self, increment: bool = True):
         for chapter in self.chapters:

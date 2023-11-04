@@ -52,6 +52,7 @@ class Chapter:
             self.clear_progress = index + 1
         else:
             self.clear_progress = max(self.clear_progress, index + 1)
+        self.chapter_unlock_state = 3
         self.stages[index].clear_stage(clear_amount)
         if index == len(self.stages) - 1:
             return True
@@ -127,7 +128,7 @@ class ChaptersStars:
         )
         if finished:
             if star + 1 < len(self.chapters):
-                self.chapters[star + 1].chapter_unlock_state = 3
+                self.chapters[star + 1].chapter_unlock_state = 1
         return finished
 
     @staticmethod
@@ -207,7 +208,7 @@ class Chapters:
             star, stage, clear_amount, overwrite_clear_progress
         )
         if finished and map + 1 < len(self.chapters):
-            self.chapters[map + 1].chapters[0].chapter_unlock_state = 3
+            self.chapters[map + 1].chapters[0].chapter_unlock_state = 1
 
     @staticmethod
     def init() -> "Chapters":

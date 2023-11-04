@@ -3,10 +3,15 @@ import threading
 
 
 class Thread:
-    def __init__(self, name: str, target: Callable[..., Any], args: Iterable[Any]):
+    def __init__(
+        self,
+        name: str,
+        target: Callable[..., Any],
+        args: Optional[Iterable[Any]] = None,
+    ):
         self.name = name
         self.target = target
-        self.args = args
+        self.args: Iterable[Any] = args if args is not None else []
         self._thread: Optional[threading.Thread] = None
 
     def start(self):

@@ -39,3 +39,8 @@ class UncannyChapters:
 
     def __str__(self):
         return self.__repr__()
+
+    @staticmethod
+    def edit_uncanny(save_file: "core.SaveFile"):
+        uncanny = save_file.uncanny
+        uncanny.chapters.edit_chapters(save_file, "NA")

@@ -71,6 +71,7 @@ class FeatureHandler:
                 "collab": core.game.map.event.EventChapters.edit_collab_chapters,
                 "gauntlets": core.game.map.gauntlets.GauntletChapters.edit_gauntlets,
                 "collab_gauntlets": core.game.map.gauntlets.GauntletChapters.edit_collab_gauntlets,
+                "uncanny": core.game.map.uncanny.UncannyChapters.edit_uncanny,
                 # "towers": core.game.map.tower.TowerChapters.edit_towers,
             },
             "gamototo": {

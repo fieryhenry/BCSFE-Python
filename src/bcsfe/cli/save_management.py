@@ -333,3 +333,29 @@ class SaveManagement:
             return
         save_file.load_save_file(new_save_file)
         color.ColoredText.localize("load_save_success")
+
+    @staticmethod
+    def convert_save_cc(save_file: "core.SaveFile"):
+        color.ColoredText.localize("cc_warning", current=save_file.cc)
+        ccs_to_select = core.CountryCode.get_all()
+        cc = core.CountryCode.select_from_ccs(ccs_to_select)
+        if cc is None:
+            return
+        save_file.set_cc(cc)
+        core.ServerHandler(save_file).create_new_account()
+        color.ColoredText.localize("country_code_set", cc=cc)
+
+    @staticmethod
+    def convert_save_gv(save_file: "core.SaveFile"):
+        color.ColoredText.localize(
+            "gv_warning", current=save_file.game_version.to_string()
+        )
+        try:
+            gv = core.GameVersion.from_string(
+                color.ColoredInput().localize("game_version_dialog")
+            )
+        except ValueError:
+            color.ColoredText.localize("invalid_game_version")
+            return
+        save_file.set_gv(gv)
+        color.ColoredText.localize("game_version_set", version=gv.to_string())

@@ -1,9 +1,9 @@
-from typing import Callable, Any, Optional
+from typing import Callable, Any, Iterable, Optional
 import threading
 
 
 class Thread:
-    def __init__(self, name: str, target: Callable[..., Any], args: Any):
+    def __init__(self, name: str, target: Callable[..., Any], args: Iterable[Any]):
         self.name = name
         self.target = target
         self.args = args

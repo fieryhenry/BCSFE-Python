@@ -15,7 +15,7 @@ class PaddingType(enum.Enum):
 
 
 class Data:
-    def __init__(self, data: Union[bytes, str, None, int, bool, "Data"] = None):
+    def __init__(self, data: Union[bytes, str, None, int, bool, "Data", Any] = None):
         if isinstance(data, str):
             self.data = data.encode("utf-8")
         elif isinstance(data, bytes):
@@ -29,12 +29,17 @@ class Data:
             self.data = data.data
         elif data is None:
             self.data = b""
+        elif hasattr(data, "__bytes__"):
+            self.data = bytes(data)
         else:
             raise TypeError(
                 f"data must be bytes, str, int, bool, Data, or None, not {type(data)}"
             )
         self.pos = 0
         self.set_little_endiness()
+
+    def __bytes__(self) -> bytes:
+        return self.data
 
     @staticmethod
     def from_hex(hex: str) -> "Data":

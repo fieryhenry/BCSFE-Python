@@ -169,6 +169,9 @@ class Path:
         else:
             raise FileNotFoundError(f"File not found: {self.path}")
 
+    def copy_thread(self, target: "Path"):
+        core.Thread("copy", self.copy, (target,)).start()
+
     def copy_tree(self, target: "Path"):
         if target.exists():
             target.remove_tree()

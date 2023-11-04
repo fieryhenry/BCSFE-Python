@@ -315,7 +315,7 @@ class SaveManagement:
             return None
 
         save_file.save_path = save_path
-        save_file.save_path.copy(save_file.get_default_path())
+        save_file.save_path.copy_thread(save_file.get_default_path())
         save_file.used_storage = used_storage
 
         return save_file

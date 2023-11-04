@@ -154,7 +154,7 @@ py -m bcsfe
 If you want to use the editor again all you need to do is run the `py -m bcsfe` command
 
 Then if you want the latest changes you only need to run `git pull` in the downloaded
-`bcsfe` folder. (use `cd` to change the folder)
+`BCSFE-Python` folder. (use `cd` to change the folder)
 
 ## Documentation
 

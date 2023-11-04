@@ -76,7 +76,7 @@ class FeatureHandler:
                 "uncanny": core.game.map.uncanny.UncannyChapters.edit_uncanny,
                 "behemoth_culling": core.game.map.gauntlets.GauntletChapters.edit_behemoth_culling,
                 "legend_quest": core.game.map.legend_quest.LegendQuestChapters.edit_legend_quest,
-                # "towers": core.game.map.tower.TowerChapters.edit_towers,
+                "towers": core.game.map.tower.TowerChapters.edit_towers,
             },
             "gamototo": {
                 "engineers": edits.basic_items.BasicItems.edit_engineers,

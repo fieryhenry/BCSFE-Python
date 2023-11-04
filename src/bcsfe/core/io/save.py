@@ -150,6 +150,7 @@ class SaveFile:
 
     def set_cc(self, cc: "core.CountryCode"):
         self.cc = cc
+        self.real_cc = cc
 
     def load(self):
         """Load the save file. For most of this stuff I have no idea what it is used for"""

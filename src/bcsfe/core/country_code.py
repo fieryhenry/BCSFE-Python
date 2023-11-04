@@ -66,17 +66,13 @@ class CountryCode:
 
     @staticmethod
     def select_from_ccs(ccs: list["CountryCode"]) -> Optional["CountryCode"]:
-        index = dialog_creator.ChoiceInput(
+        index = dialog_creator.ChoiceInput.from_reduced(
             [cc.get_code() for cc in ccs],
-            [cc.get_code() for cc in ccs],
-            [],
-            {},
-            "country_code_select",
-            True,
-        ).get_input_locale_while()
-        if not index:
+            dialog="country_code_select",
+            single_choice=True,
+        ).single_choice()
+        if index is None:
             return None
-        index = index[0]
         return ccs[index - 1]
 
     def __eq__(self, o: object) -> bool:

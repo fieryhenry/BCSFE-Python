@@ -999,6 +999,7 @@ class SaveFile:
         self.data = data
         self.dst_index = 0
         self.data.clear()
+        self.data.enable_buffer()
 
         self.data.write_int(self.game_version.game_version)
 
@@ -1822,6 +1823,8 @@ class SaveFile:
             self.data.write_int(self.gv_120600)
 
         self.data.write_bytes(self.remaining_data)
+
+        self.data.end_buffer()
 
     def to_data(self) -> "core.Data":
         dt = core.Data()
@@ -3199,7 +3202,7 @@ class SaveFile:
         return core.Path.get_documents_folder().add("saves")
 
     def get_default_path(self) -> "core.Path":
-        SaveFile.check_backups()
+        core.Thread("check-backups", SaveFile.check_backups, []).start()
         date = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         local_path = (
             self.get_saves_path()

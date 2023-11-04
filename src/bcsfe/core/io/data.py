@@ -40,6 +40,15 @@ class Data:
     def from_hex(hex: str) -> "Data":
         return Data(bytes.fromhex(hex))
 
+    def enable_buffer(self):
+        self.data_buffer: list[bytes] = []
+        self.buffer_enabled = True
+
+    def end_buffer(self):
+        self.buffer_enabled = False
+        self.data = b"".join(self.data_buffer)
+        self.data_buffer = []
+
     def set_endiness(self, endiness: Literal["<", ">"]):
         self.endiness = endiness
 
@@ -249,7 +258,10 @@ class Data:
         self.write_int(date.second)
 
     def write_bytes(self, data: bytes):
-        self.data += data
+        if self.buffer_enabled:
+            self.data_buffer.append(data)
+        else:
+            self.data += data
         self.pos += len(data)
 
     def write_int(self, value: int):

@@ -5,6 +5,5 @@ branch of the save editor but are in the master branch.
 
 - save conversion
 - towers
-- behemoth culling
 - legend quest
 - old fix elsewhere unban

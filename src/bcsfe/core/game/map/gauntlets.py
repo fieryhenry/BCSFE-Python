@@ -298,6 +298,11 @@ class GauntletChapters:
         gauntlets = save_file.collab_gauntlets
         gauntlets.edit_chapters(save_file, "CA")
 
+    @staticmethod
+    def edit_behemoth_culling(save_file: "core.SaveFile"):
+        gauntlets = save_file.behemoth_culling
+        gauntlets.edit_chapters(save_file, "Q")
+
     def edit_chapters(self, save_file: "core.SaveFile", letter_code: str):
         map_names = core.MapNames(save_file, letter_code)
         names = map_names.map_names

@@ -153,12 +153,14 @@ class ChaptersStars:
             chapter.write_clear_progress(data)
 
     def read_stages(self, data: "core.Data", total_stages: int):
-        for chapter in self.chapters:
-            chapter.read_stages(data, total_stages)
+        for _ in range(total_stages):
+            for chapter in self.chapters:
+                chapter.stages.append(Stage.read(data))
 
     def write_stages(self, data: "core.Data"):
-        for chapter in self.chapters:
-            chapter.write_stages(data)
+        for i in range(len(self.chapters[0].stages)):
+            for chapter in self.chapters:
+                chapter.stages[i].write(data)
 
     def read_chapter_unlock_state(self, data: "core.Data"):
         for chapter in self.chapters:
@@ -204,7 +206,7 @@ class Chapters:
         finished = self.chapters[map].clear_stage(
             star, stage, clear_amount, overwrite_clear_progress
         )
-        if finished:
+        if finished and map + 1 < len(self.chapters):
             self.chapters[map + 1].chapters[0].chapter_unlock_state = 3
 
     @staticmethod
@@ -317,7 +319,7 @@ class Chapters:
         names = map_names.map_names
 
         map_choices = core.EventChapters.select_map_names(names)
-        if map_choices is None:
+        if not map_choices:
             return
 
         clear_type_choice = dialog_creator.ChoiceInput.from_reduced(
@@ -357,7 +359,7 @@ class Chapters:
                     return
 
         if not stars_type_choice:
-            stars = core.EventChapters.ask_stars()
+            stars = core.EventChapters.ask_stars(self.get_total_stars(0))
             if stars is None:
                 return
         else:
@@ -368,7 +370,7 @@ class Chapters:
             stage_names = map_names.stage_names.get(id)
             color.ColoredText.localize("current_sol_chapter", name=map_name, id=id)
             if stars_type_choice:
-                stars = core.EventChapters.ask_stars()
+                stars = core.EventChapters.ask_stars(self.get_total_stars(id))
                 if stars is None:
                     return
             if clear_type_choice:
@@ -383,8 +385,8 @@ class Chapters:
                 if clear_amount is None:
                     return
 
-            for star in range(self.get_total_stars(id)):
-                for stage in range(self.get_total_stages(id, star)):
+            for star in range(stars, self.get_total_stars(id)):
+                for stage in range(max(stages), self.get_total_stages(id, star)):
                     self.chapters[id].chapters[star].stages[stage].clear_times = 0
                     self.chapters[id].chapters[star].clear_progress = 0
             for star in range(stars):

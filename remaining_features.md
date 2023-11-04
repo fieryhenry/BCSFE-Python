@@ -5,5 +5,4 @@ branch of the save editor but are in the master branch.
 
 - save conversion
 - towers
-- legend quest
 - old fix elsewhere unban

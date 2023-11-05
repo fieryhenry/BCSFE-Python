@@ -77,6 +77,7 @@ class FeatureHandler:
                 "behemoth_culling": core.game.map.gauntlets.GauntletChapters.edit_behemoth_culling,
                 "legend_quest": core.game.map.legend_quest.LegendQuestChapters.edit_legend_quest,
                 "towers": core.game.map.tower.TowerChapters.edit_towers,
+                "zero_legends": core.game.map.zero_legends.ZeroLegendsChapters.edit_zero_legends,
             },
             "gamototo": {
                 "engineers": edits.basic_items.BasicItems.edit_engineers,

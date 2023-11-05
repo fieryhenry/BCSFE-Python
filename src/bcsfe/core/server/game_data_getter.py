@@ -5,7 +5,7 @@ from bcsfe import core
 
 
 class GameDataGetter:
-    def __init__(self, cc: core.CountryCode):
+    def __init__(self, cc: "core.CountryCode"):
         self.url = core.core_data.config.get_str(core.ConfigKey.GAME_DATA_REPO)
         self.lang = core.core_data.config.get_str(core.ConfigKey.LOCALE)
         self.cc = cc.get_cc_lang()

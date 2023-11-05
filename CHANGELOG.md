@@ -2,51 +2,14 @@
 
 ## [3.0.0] - ???
 
-### Overview
+### Added
 
-- A full rewrite of the code, separated core and cli code more, making it easier
-  for people to use the core code in their own projects
-
-- Changed lots of features
-
-- There are too many changes to list here so I'll just list some of the main
-  ones
-
-### ADB
-
-#### Added
-
-- A way to select a specific device if multiple devices are connected through adb
-at the same time
-
-#### Fixed
-
-- Not pushing to the correct game version if the save file is from a custom
-apk with a custom package name
-
-- Pulling and pushing not working on production android builds
-
-### Editor interface
-
-#### Added
+- A way to select a specific device if multiple devices are connected through
+  adb at the same time
 
 - Custom color themes
 
 - Way to create / load custom color schemes and locales
-
-#### Changed
-
-- All printed strings are taken from .properties files so they can be translated
-
-- Text colors are now specified within the text of the localized strings and
-aren't hardcoded
-
-- Improved / Changed the way many features work, e.g when clearing stages, you
-  can now clear based on map names and stage names
-
-### Save Management
-
-#### Added
 
 - Theoretical support for all game versions (not tested on all versions yet). If
 you have any issues with a specific version please report it to the discord
@@ -61,21 +24,6 @@ created in your Documents folder with the following path format
 
 - Feature to change version of the game (e.g 12.7.0 -> 12.6.0)
 
-#### Changed
-
-- The save file is now saved to your Documents folder by default instead of the
-current working directory
-
-- Improved success rate of changing save country code.
-
-#### Removed
-
-- Lots of unknown save values, especially before version 7.0.0
-
-### Cats
-
-#### Added
-
 - A way to randomize the upgrades of a cat e.g randomize plus level to be
 between 40 and 50. (it was requested, i guess to make it less obvious that you
 save edited)
@@ -87,7 +35,54 @@ save edited)
   - When enabled, you first select your cats, then you edit
   them.
 
-#### Changed
+- Config option `strict_ban_prevention` which, when enabled, generates a new
+inquiry code and token whenever you upload your save data / managed items to
+the servers. This should reduce the chance of bans if you don't mind having a
+new inquiry code every time you upload your save data
+
+- Config option `game_data_repo` to specify where to download game data from.
+Useful if you have your own custom apk and want to use the editor with it, or
+if you think I take too long to update the game data
+
+- Game data for it, fr, es, th, de, tw, kr
+
+- Outbreaks for CotC 2
+
+- Feature to add labyrinth medals
+
+- Feature to clear zero legends
+
+- Way to specifiy how many times you want to clear a stage
+
+### Fixed
+
+- Not pushing to the correct game version if the save file is from a custom
+apk with a custom package name using adb
+
+- ADB pulling and pushing not working on production android builds
+
+- Uploading save data not always working
+
+- Uploading managed items not always working (ban risk should be reduced)
+
+- Ototo cat cannon crashing the game
+
+- Uploading save data failing too often
+
+### Changed
+
+- All printed strings are taken from .properties files so they can be translated
+
+- Text colors are now specified within the text of the localized strings and
+aren't hardcoded
+
+- Improved / Changed the way many features work, e.g when clearing stages, you
+  can now clear based on map names and stage names
+
+- The save file is now saved to your Documents folder by default instead of the
+current working directory
+
+- Improved success rate of changing save country code.
 
 - When doing any cat operations (e.g upgrading or true forming), the cat will be
 unlocked if it isn't already
@@ -101,38 +96,9 @@ from level 39 to 40
 selecting all rare cats to upgrade, it will only select the rare cats you have
 unlocked). This does not apply to the `all` option and when unlocking cats
 
-### Server stuff
-
-#### Added
-
-- Config option `strict_ban_prevention` which, when enabled, generates a new
-inquiry code and token whenever you upload your save data / managed items to
-the servers. This should reduce the chance of bans if you don't mind having a
-new inquiry code every time you upload your save data
-
-#### Changed
-
 - Important save information such as password and auth token is now saved within
 the save file instead of in a separate file which should make it less likely that
 uploading save data will fail
-
-#### Fixed
-
-- Uploading save data not always working
-
-- Uploading managed items not always working (ban risk should be reduced)
-
-### Game data
-
-#### Added
-
-- Config option `game_data_repo` to specify where to download game data from.
-Useful if you have your own custom apk and want to use the editor with it, or
-if you think I take too long to update the game data
-
-- Game data for it, fr, es, th, de, tw, kr
-
-#### Changed
 
 - Lots more item names are taken from the game data instead of being hardcoded
 

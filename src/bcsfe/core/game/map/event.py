@@ -709,10 +709,25 @@ class EventChapters:
         return choices
 
     @staticmethod
+    def ask_stages_stage_names(stage_names: list[str]) -> Optional[list[int]]:
+        new_stage_names: list[str] = []
+        for stage in stage_names:
+            if stage == "＠":
+                continue
+            new_stage_names.append(stage)
+        stage_names = new_stage_names
+        choice = dialog_creator.ChoiceInput.from_reduced(
+            stage_names, dialog="select_stage_progress", single_choice=True
+        ).single_choice()
+        if choice is None:
+            return None
+        return list(range(choice))
+
+    @staticmethod
     def ask_clear_amount() -> Optional[int]:
-        return dialog_creator.IntInput().get_basic_input_locale(
-            "clear_amount_enter", {}
-        )
+        return dialog_creator.IntInput(
+            max=core.core_data.max_value_manager.get("stage_clear_count")
+        ).get_basic_input_locale("clear_amount_enter", {})
 
     @staticmethod
     def edit_sol_chapters(save_file: "core.SaveFile"):

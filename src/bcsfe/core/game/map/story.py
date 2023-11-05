@@ -52,11 +52,8 @@ class Stage:
     def __str__(self):
         return self.__repr__()
 
-    def clear_stage(self, increase: bool = False):
-        if increase:
-            self.clear_times += 1
-        else:
-            self.clear_times = max(self.clear_times, 1)
+    def clear_stage(self, clear_amount: int = 1):
+        self.clear_times = clear_amount
 
     def unclear_stage(self):
         self.clear_times = 0
@@ -80,13 +77,13 @@ class Chapter:
         self.treasure_festival_type = 0
 
     def clear_stage(
-        self, stage_id: int, increase: bool = False, overwrite_progress: bool = False
+        self, index: int, clear_amount: int = 1, overwrite_clear_progress: bool = False
     ):
-        self.stages[stage_id].clear_stage(increase)
-        if overwrite_progress:
-            self.progress = stage_id
+        if overwrite_clear_progress:
+            self.progress = index + 1
         else:
-            self.progress = max(self.progress, stage_id + 1)
+            self.progress = max(self.progress, index + 1)
+        self.stages[index].clear_stage(clear_amount)
 
     def set_treasure(self, stage_id: int, treasure: int):
         self.stages[stage_id].set_treasure(treasure)
@@ -201,13 +198,16 @@ class Chapter:
     def __str__(self):
         return f"Chapter({self.selected_stage}, {self.progress}, {self.stages}, {self.time_until_treasure_chance}, {self.treasure_chance_duration}, {self.treasure_chance_value}, {self.treasure_chance_stage_id}, {self.treasure_festival_type})"
 
-    def apply_progress(self, progress: int):
+    def apply_progress(self, progress: int, clear_times: Optional[list[int]] = None):
+        if clear_times is None:
+            clear_times = [1] * progress
+
         self.progress = progress
         for i in range(progress + 1, 48):
             self.stages[i].unclear_stage()
 
         for i in range(progress):
-            self.stages[i].clear_stage()
+            self.stages[i].clear_stage(clear_times[i])
 
     def clear_chapter(self):
         self.apply_progress(48)
@@ -227,12 +227,15 @@ class StoryChapters:
 
     def clear_stage(
         self,
-        chapter: int,
+        map: int,
         stage: int,
-        increase: bool = False,
-        overwrite_progress: bool = False,
+        clear_amount: int = 1,
+        overwrite_clear_progress: bool = False,
+        chapters: Optional[list[Chapter]] = None,
     ):
-        self.chapters[chapter].clear_stage(stage, increase, overwrite_progress)
+        if chapters is None:
+            chapters = self.chapters
+        chapters[map].clear_stage(stage, clear_amount, overwrite_clear_progress)
 
     def set_treasure(self, chapter: int, stage: int, treasure: int):
         self.chapters[chapter].set_treasure(stage, treasure)
@@ -339,7 +342,8 @@ class StoryChapters:
         save_file.ui6 = max(save_file.ui6, 1)
         save_file.new_dialogs_2[1] = max(save_file.new_dialogs_2[1], 2)
         save_file.new_dialogs_2[5] = max(save_file.new_dialogs_2[5], 2)
-        save_file.story.clear_stage(chapter=0, stage=0)
+        if save_file.story.chapters[0].stages[0].clear_times == 0:
+            save_file.story.clear_stage(0, 0)
 
     @staticmethod
     def get_chapter_names(
@@ -393,7 +397,11 @@ class StoryChapters:
 
     @staticmethod
     def edit_chapter_progress(
-        save_file: "core.SaveFile", chapter_id: int, chapter_name: str
+        save_file: "core.SaveFile",
+        chapter_id: int,
+        chapter_name: str,
+        clear_amount: int,
+        clear_amount_choose: int,
     ) -> bool:
         max_stages = 48
         chapter = save_file.story.get_real_chapters()[chapter_id]
@@ -404,7 +412,23 @@ class StoryChapters:
         )
         if progress is None:
             return False
-        chapter.apply_progress(progress)
+        clear_amounts = [1] * progress
+        if clear_amount_choose == 0:
+            clear_amount2 = core.EventChapters.ask_clear_amount()
+            if clear_amount2 is None:
+                return False
+            clear_amounts = [clear_amount2] * progress
+        elif clear_amount_choose == 1:
+            clear_amounts = [clear_amount] * progress
+        elif clear_amount_choose == 2:
+            for i in range(progress):
+                StoryChapters.print_current_stage(save_file, chapter_id, i)
+                clear_amount2 = core.EventChapters.ask_clear_amount()
+                if clear_amount2 is None:
+                    return False
+                clear_amounts[i] = clear_amount2
+
+        chapter.apply_progress(progress, clear_amounts)
         return progress != 0
 
     @staticmethod
@@ -512,7 +536,7 @@ class StoryChapters:
         )
 
     @staticmethod
-    def clear_story(save_file: "core.SaveFile"):
+    def clear_story2(save_file: "core.SaveFile"):
         story = save_file.story
         chapters = story.get_real_chapters()
 
@@ -536,13 +560,35 @@ class StoryChapters:
         if chapter_names is None:
             return
 
+        modify_clear_amounts = dialog_creator.YesNoInput().get_input_once(
+            "modify_clear_amounts"
+        )
+        clear_amount = 1
+        clear_amount_type = -1
+        if modify_clear_amounts:
+            options = [
+                "clear_amount_chapter",
+                "clear_amount_all",
+                "clear_amount_stages",
+            ]
+            clear_amount_type = dialog_creator.ChoiceInput.from_reduced(
+                options, dialog="select_clear_amount_type", single_choice=True
+            ).single_choice()
+            if clear_amount_type is None:
+                return
+            clear_amount_type -= 1
+            if clear_amount_type == 1:
+                clear_amount = core.EventChapters.ask_clear_amount()
+                if clear_amount is None:
+                    return
+
         if choice == 0:
             for chapter_id in selected_chapters:
                 StoryChapters.print_current_chapter(save_file, chapter_id)
                 chapter = chapters[chapter_id]
                 chapter_name = chapter_names[chapter_id]
                 cleared_stages = StoryChapters.edit_chapter_progress(
-                    save_file, chapter_id, chapter_name
+                    save_file, chapter_id, chapter_name, clear_amount, clear_amount_type
                 )
                 if cleared_stages:
                     story.clear_previous_chapters(chapter_id)
@@ -554,9 +600,126 @@ class StoryChapters:
                 chapter = chapters[chapter_id]
                 if progress != 0:
                     story.clear_previous_chapters(chapter_id)
-                chapter.apply_progress(progress)
+
+                clear_amounts = [1] * progress
+                if clear_amount_type == 0:
+                    clear_amount = core.EventChapters.ask_clear_amount()
+                    if clear_amount is None:
+                        return
+                    clear_amounts = [clear_amount] * progress
+                elif clear_amount_type == 1:
+                    clear_amounts = [clear_amount] * progress
+                elif clear_amount_type == 2:
+                    for i in range(progress):
+                        StoryChapters.print_current_stage(save_file, chapter_id, i)
+                        clear_amount2 = core.EventChapters.ask_clear_amount()
+                        if clear_amount2 is None:
+                            return
+                        clear_amounts[i] = clear_amount2
+
+                chapter.apply_progress(progress, clear_amounts)
 
         color.ColoredText.localize("story_cleared")
+
+    @staticmethod
+    def clear_story(save_file: "core.SaveFile"):
+        story = save_file.story
+        story.edit_chapters(
+            save_file,
+        )
+
+    def edit_chapters(self, save_file: "core.SaveFile"):
+        chapters = self.get_real_chapters()
+        names = StoryChapters.get_chapter_names(save_file)
+        if names is None:
+            return
+
+        map_choices = StoryChapters.select_story_chapters(save_file)
+        if not map_choices:
+            return
+
+        clear_type_choice = dialog_creator.ChoiceInput.from_reduced(
+            ["clear_whole_chapters", "clear_specific_stages"],
+            dialog="select_clear_type",
+            single_choice=True,
+        ).single_choice()
+        if clear_type_choice is None:
+            return
+        clear_type_choice -= 1
+
+        modify_clear_amounts = dialog_creator.YesNoInput().get_input_once(
+            "modify_clear_amounts"
+        )
+        clear_amount = 1
+        clear_amount_type = -1
+        if modify_clear_amounts:
+            options = ["clear_amount_chapter", "clear_amount_all"]
+            if clear_type_choice == 1:
+                options.append("clear_amount_stages")
+            clear_amount_type = dialog_creator.ChoiceInput.from_reduced(
+                options, dialog="select_clear_amount_type", single_choice=True
+            ).single_choice()
+            if clear_amount_type is None:
+                return
+            clear_amount_type -= 1
+            if clear_amount_type == 1:
+                clear_amount = core.EventChapters.ask_clear_amount()
+                if clear_amount is None:
+                    return
+
+        unclear_other_stages = dialog_creator.YesNoInput().get_input_once(
+            "unclear_other_stages"
+        )
+
+        for id in map_choices:
+            stage_names = StageNames(
+                save_file, chapter=str(self.get_chapter_type_from_index(id))
+            )
+            stage_names = stage_names.stage_names
+            if stage_names is None:
+                return
+
+            new_stage_names: list[str] = []
+            for i in range(48):
+                index_stage_id = StoryChapters.convert_stage_id(i)
+                new_stage_names.append(stage_names[index_stage_id])
+            stage_names = new_stage_names
+            map_name = names[id]
+            color.ColoredText.localize("current_sol_chapter", name=map_name, id=id)
+            if clear_type_choice:
+                stages = core.EventChapters.ask_stages_stage_names(stage_names)
+                if stages is None:
+                    return
+            else:
+                stages = list(range(48))
+
+            if clear_amount_type == 0:
+                clear_amount = core.EventChapters.ask_clear_amount()
+                if clear_amount is None:
+                    return
+
+            if unclear_other_stages:
+                for stage in range(max(stages), 48):
+                    chapters[id].stages[stage].clear_times = 0
+                    chapters[id].progress = 0
+
+            for stage in stages:
+                if clear_amount_type == 2:
+                    stage_name = stage_names[stage]
+                    color.ColoredText.localize(
+                        "current_sol_stage", name=stage_name, id=stage
+                    )
+                if clear_amount_type == 2:
+                    clear_amount = core.EventChapters.ask_clear_amount()
+                self.clear_stage(
+                    id,
+                    stage,
+                    overwrite_clear_progress=True,
+                    clear_amount=clear_amount,
+                    chapters=chapters,
+                )
+
+        color.ColoredText.localize("map_chapters_edited")
 
     @staticmethod
     def ask_treasure_level(save_file: "core.SaveFile") -> Optional[int]:

@@ -45,7 +45,7 @@ class Cell:
         return f"Cell({self.data})"
 
     def __str__(self) -> str:
-        return self.__repr__()
+        return self.data.to_str()
 
 
 class Row:

@@ -2,6 +2,16 @@
 
 ## [3.0.0] - ???
 
+### Overview
+
+- A full rewrite of the code, separated core and cli code more, making it easier
+  for people to use the core code in their own projects
+
+- Changed lots of features
+
+- There are too many changes to list here so I'll just list some of the main
+  ones
+
 ### ADB
 
 #### Added
@@ -14,11 +24,15 @@ at the same time
 - Not pushing to the correct game version if the save file is from a custom
 apk with a custom package name
 
+- Pulling and pushing not working on production android builds
+
 ### Editor interface
 
 #### Added
 
 - Custom color themes
+
+- Way to create / load custom color schemes and locales
 
 #### Changed
 
@@ -26,6 +40,9 @@ apk with a custom package name
 
 - Text colors are now specified within the text of the localized strings and
 aren't hardcoded
+
+- Improved / Changed the way many features work, e.g when clearing stages, you
+  can now clear based on map names and stage names
 
 ### Save Management
 
@@ -42,10 +59,14 @@ created in your Documents folder with the following path format
 
 - Option to create a blank save file
 
+- Feature to change version of the game (e.g 12.7.0 -> 12.6.0)
+
 #### Changed
 
 - The save file is now saved to your Documents folder by default instead of the
 current working directory
+
+- Improved success rate of changing save country code.
 
 #### Removed
 
@@ -114,9 +135,6 @@ if you think I take too long to update the game data
 #### Changed
 
 - Lots more item names are taken from the game data instead of being hardcoded
-
-- Everyday, a github action will download new game data and any changes will be
-  automatically committed to the repo
 
 ## [2.7.2.3] - 2023-06-19
 

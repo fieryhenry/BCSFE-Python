@@ -138,9 +138,15 @@ class CoreData:
         self.mission_names: Optional[MissionNames] = None
         self.mission_conditions: Optional[MissionConditions] = None
 
-    def get_game_data_getter(self, save: SaveFile) -> GameDataGetter:
+    def get_game_data_getter(
+        self, save: Optional[SaveFile] = None, cc: Optional[CountryCode] = None
+    ) -> GameDataGetter:
         if self.game_data_getter is None:
-            self.game_data_getter = GameDataGetter(save)
+            if cc is None and save is not None:
+                cc = save.cc
+            if cc is None:
+                raise ValueError("cc must be provided if save is not provided")
+            self.game_data_getter = GameDataGetter(cc)
         return self.game_data_getter
 
     def get_gatya_item_names(self, save: SaveFile) -> GatyaItemNames:

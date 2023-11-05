@@ -5,11 +5,11 @@ from bcsfe import core
 
 
 class GameDataGetter:
-    def __init__(self, save_file: "core.SaveFile"):
+    def __init__(self, cc: core.CountryCode):
         self.url = core.core_data.config.get_str(core.ConfigKey.GAME_DATA_REPO)
         self.lang = core.core_data.config.get_str(core.ConfigKey.LOCALE)
-        self.cc = save_file.cc.get_cc_lang()
-        self.real_cc = save_file.cc
+        self.cc = cc.get_cc_lang()
+        self.real_cc = cc
         self.cc = self.cc if not self.cc.is_lang() else self.real_cc
         self.all_versions = self.get_versions()
         if self.all_versions is None:

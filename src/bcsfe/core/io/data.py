@@ -237,6 +237,24 @@ class Data:
         result = self.read_bytes(length).decode("utf-8")
         return result
 
+    def read_utf8_string_by_char_length(self, length: Optional[int] = None) -> str:
+        if length is None:
+            length = self.read_int()
+        if length == 0:
+            return ""
+        result_bytes = b""
+        result_str = ""
+        while True:
+            byte = self.read_bytes(1)[0]
+            result_bytes += bytes([byte])
+            try:
+                result_str = result_bytes.decode("utf-8")
+            except UnicodeDecodeError:
+                continue
+            if len(result_str) == length:
+                break
+        return result_str
+
     def read_long(self) -> int:
         result = struct.unpack(f"{self.endiness}q", self.read_bytes(8))[0]
         return result
@@ -301,7 +319,7 @@ class Data:
 
     def write_string(self, value: str, write_length: bool = True):
         if write_length:
-            self.write_int(len(value))
+            self.write_int(len(value.encode("utf-8")))
         self.write_bytes(value.encode("utf-8"))
 
     def write_long(self, value: int):

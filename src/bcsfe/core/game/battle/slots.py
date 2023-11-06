@@ -50,7 +50,12 @@ class EquipSlots:
             slot.write(stream)
 
     def read_name(self, stream: "core.Data"):
-        self.name = stream.read_string()
+        length = stream.read_int()
+        try:
+            self.name = stream.read_string(length)
+        except UnicodeDecodeError:
+            stream.pos -= length
+            self.name = stream.read_utf8_string_by_char_length(length)
 
     def write_name(self, stream: "core.Data"):
         stream.write_string(self.name)

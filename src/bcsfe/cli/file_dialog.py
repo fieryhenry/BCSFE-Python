@@ -19,7 +19,14 @@ class FileDialog:
     def __init__(self):
         self.load_tk()
         if self.tk is not None:
-            self.root = self.tk.Tk()
+            try:
+                self.root = self.tk.Tk()
+            except self.tk.TclError:
+                self.tk = None
+                self.filedialog = None
+                color.ColoredText.localize("tkinter_not_found")
+                return
+
             self.root.withdraw()
             self.root.wm_attributes("-topmost", 1)  # type: ignore
 
@@ -34,8 +41,11 @@ class FileDialog:
             filetypes = []
         title = core.core_data.local_manager.get_key(title)
         if self.filedialog is None:
-            path = color.ColoredInput().localize(title)
-            return path if path else None
+            color.ColoredText.localize(title)
+            path = color.ColoredInput().localize(
+                "tkinter_not_found_enter_path_file", initialfile=initialfile
+            )
+            return path.strip().strip("'").strip('"') if path else None
         return (
             self.filedialog.askopenfilename(
                 title=title,
@@ -49,8 +59,11 @@ class FileDialog:
     def get_directory(self, title: str, initialdir: str = "") -> Optional[str]:
         title = core.core_data.local_manager.get_key(title)
         if self.filedialog is None:
-            path = color.ColoredInput().localize(title)
-            return path if path else None
+            color.ColoredText.localize(title)
+            path = color.ColoredInput().localize(
+                "tkinter_not_found_enter_path_dir", initialdir=initialdir
+            )
+            return path.strip().strip("'").strip('"') if path else None
 
         return self.filedialog.askdirectory(title=title, initialdir=initialdir) or None
 
@@ -76,8 +89,11 @@ class FileDialog:
             filetypes = []
         title = core.core_data.local_manager.get_key(title)
         if self.filedialog is None:
-            path = color.ColoredInput().localize(title)
-            return path if path else None
+            color.ColoredText.localize(title)
+            path = color.ColoredInput().localize(
+                "tkinter_not_found_enter_path_file", initialfile=initialfile
+            )
+            return path.strip().strip("'").strip('"') if path else None
         return (
             self.filedialog.asksaveasfilename(
                 title=title,

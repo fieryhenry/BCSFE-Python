@@ -20,10 +20,16 @@ class CountryCode:
         return self.value
 
     def get_client_info_code(self) -> str:
-        return self.get_code().replace("jp", "ja")
+        code = self.get_code()
+        if code == "jp":
+            return "ja"
+        return code
 
     def get_patching_code(self) -> str:
-        return self.get_code().replace("jp", "")
+        code = self.get_code()
+        if code == "jp":
+            return ""
+        return code
 
     @staticmethod
     def from_patching_code(code: str) -> "CountryCode":

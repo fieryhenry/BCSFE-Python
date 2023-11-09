@@ -85,7 +85,6 @@ class ServerHandler:
         expiration = int(
             time.mktime(time.strptime(expiration, "%Y-%m-%dT%H:%M:%S.%fZ"))
         )
-        expiration += 3600
         if expiration < time.time():
             return False
         return True
@@ -305,24 +304,22 @@ class ServerHandler:
         return payload
 
     def get_save_key(self) -> Optional[dict[str, Any]]:
-        save_key = self.get_stored_save_key_data()
-        if save_key and save_key.get("key", None):
-            return save_key
+        # save_key = self.get_stored_save_key_data()
+        # if save_key and save_key.get("key", None):
+        #    return save_key
         auth_token = self.get_auth_token()
         if auth_token is None:
             return None
-        save_key = self.get_stored_save_key_data()
-        if save_key:
-            return save_key
+        # save_key = self.get_stored_save_key_data()
+        # if save_key:
+        #    return save_key
         save_key = self.get_save_key_new(auth_token)
         if save_key is not None:
             return save_key
 
-    def get_upload_request_body(self, boundary: str) -> Optional["core.Data"]:
-        save_key = self.get_save_key()
-        if save_key is None:
-            self.remove_stored_save_key_data()
-            return None
+    def get_upload_request_body(
+        self, save_key: dict[str, Any], boundary: str
+    ) -> Optional["core.Data"]:
         save_data = self.save_file.to_data()
         body = core.Data()
         keys = [
@@ -355,13 +352,13 @@ class ServerHandler:
         body.add_line(f"--{boundary}--")
         return body
 
-    def upload_save_data(self) -> bool:
+    def upload_save_data(self, save_key: dict[str, Any]) -> bool:
         self.print_key("uploading_save_file")
         boundary = (
             f"__-----------------------{core.Random.get_digits_string(9)}-2147483648"
         )
 
-        body = self.get_upload_request_body(boundary)
+        body = self.get_upload_request_body(save_key, boundary)
         if body is None:
             self.remove_stored_save_key_data()
             return False
@@ -398,16 +395,23 @@ class ServerHandler:
     def get_codes(self) -> Optional[tuple[str, str]]:
         self.save_file.show_ban_message = False
 
-        if not self.upload_save_data():
-            return None
         auth_token = self.get_auth_token()
         if auth_token is None:
+            return None
+
+        save_key = self.get_save_key()
+
+        if save_key is None:
+            self.remove_stored_save_key_data()
+            return None
+
+        if not self.upload_save_data(save_key):
             return None
 
         self.print_key("getting_codes")
 
         bmd = core.BackupMetaData(self.save_file)
-        meta_data = bmd.create()
+        meta_data = bmd.create(save_key["key"])
 
         url = f"{self.save_url}/v2/transfers"
         headers = core.AccountHeaders(self.save_file, meta_data).get_headers()
@@ -441,13 +445,20 @@ class ServerHandler:
         return (transfer_code, confirmation_code)
 
     def upload_meta_data(self) -> bool:
-        if not self.upload_save_data():
-            return False
         auth_token = self.get_auth_token()
         if auth_token is None:
             return False
+
+        save_key = self.get_save_key()
+        if save_key is None:
+            self.remove_stored_save_key_data()
+            return False
+
+        if not self.upload_save_data(save_key):
+            return False
+
         bmd = core.BackupMetaData(self.save_file)
-        meta_data = bmd.create()
+        meta_data = bmd.create(save_key["key"])
 
         url = f"{self.save_url}/v2/backups"
         headers = core.AccountHeaders(self.save_file, meta_data).get_headers()

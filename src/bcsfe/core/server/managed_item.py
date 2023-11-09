@@ -1,7 +1,7 @@
 """ManagedItem class for bcsfe."""
 
 from enum import Enum
-from typing import Any
+from typing import Any, Optional
 import uuid
 import time
 from bcsfe import core
@@ -69,7 +69,7 @@ class ManagedItem:
     def to_short_form(self) -> str:
         """Convert the managed item to a short form."""
 
-        return f"{self.amount}_{self.detail_created_at}_{self.managed_item_type.value}"
+        return f"{self.amount}_{self.detail_created_at}_{self.managed_item_type.value}_{self.detail_type.value}"
 
     @staticmethod
     def from_short_form(short_form: str) -> "ManagedItem":
@@ -91,7 +91,13 @@ class ManagedItem:
         except IndexError:
             managed_item_type = ManagedItemType.CATFOOD.value
 
-        detail_type = DetailType.GET if amount > 0 else DetailType.USE
+        try:
+            detail_type = values[3]
+        except IndexError:
+            detail_type = DetailType.GET.value
+
+        detail_type = DetailType(detail_type)
+
         managed_item_type = ManagedItemType(managed_item_type)
         managed_item = ManagedItem(
             amount, detail_type, managed_item_type, detail_created_at=detail_created_at
@@ -133,7 +139,7 @@ class BackupMetaData:
     def remove_managed_items(self) -> None:
         self.save_file.remove_strings(self.identifier)
 
-    def create(self) -> str:
+    def create(self, save_key: Optional[str] = None) -> str:
         """Create the backup metadata."""
 
         managed_items: list[dict[str, Any]] = []
@@ -157,9 +163,8 @@ class BackupMetaData:
                 self.save_file.inquiry_code, managed_items_str
             ).generate_signature_v1(),
         }
-        save_key = core.ServerHandler(self.save_file).get_save_key()
         if save_key is not None:
-            backup_metadata["saveKey"] = save_key["key"]
+            backup_metadata["saveKey"] = save_key
         return (
             core.JsonFile.from_object(backup_metadata)
             .to_data(indent=None)

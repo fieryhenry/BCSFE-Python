@@ -55,8 +55,8 @@ class SaveManagement:
             SaveManagement.create_new_account(save_file)
 
         result = core.ServerHandler(save_file).get_codes()
-        SaveManagement.save_save(save_file, check_strict=False)
         if result is not None:
+            SaveManagement.save_save(save_file, check_strict=False)
             transfer_code, confirmation_code = result
             color.ColoredText.localize(
                 "upload_result",
@@ -65,6 +65,7 @@ class SaveManagement:
             )
         else:
             color.ColoredText.localize("upload_fail")
+            SaveManagement.save_save(save_file, check_strict=False)
 
     @staticmethod
     def unban_account(save_file: "core.SaveFile"):

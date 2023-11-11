@@ -33,11 +33,16 @@ class LoadSaveParserBase:
 
 class AdbPullSave(LoadSaveParserBase):
     def load(self) -> "core.SaveFile":
+        adb_handler = core.AdbHandler()
         device = scripting.handle_string_field(self.data, "device")
         if device is None:
-            raise scripting.ParsingError(
-                core.core_data.local_manager.get_key("s!_missing_device_pull")
-            )
+            connected_devices = adb_handler.get_connected_devices()
+            if len(connected_devices) == 0:
+                raise scripting.ParsingError(
+                    core.core_data.local_manager.get_key("s!_no_connected_devices")
+                )
+            device = connected_devices[0]
+
         cc = scripting.handle_string_field(self.data, "cc")
         if cc is None:
             raise scripting.ParsingError(
@@ -45,7 +50,6 @@ class AdbPullSave(LoadSaveParserBase):
             )
         cc = core.CountryCode.from_code(cc)
 
-        adb_handler = core.AdbHandler()
         adb_handler.set_device(device)
         adb_handler.set_cc(cc)
         save_path, result = adb_handler.save_locally()

@@ -44,6 +44,8 @@ class Parser:
 def call_function(name: str) -> Optional[str]:
     if name == "get_xp":
         return str(scripting.context.get_save().xp)
+    if name == "get_catfood":
+        return str(scripting.context.get_save().catfood)
     if name == "get_iq":
         return str(scripting.context.get_save().inquiry_code)
     return None

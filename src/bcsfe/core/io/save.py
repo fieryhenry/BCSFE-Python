@@ -3249,3 +3249,15 @@ class SaveFile:
 
     def unlock_equip_menu(self):
         self.menu_unlocks[2] = max(self.menu_unlocks[2], 1)
+
+    def get_xp(self) -> int:
+        return self.xp
+    
+    def set_xp(self, xp: int):
+        self.xp = xp
+    
+    def get_catfood(self) -> int:
+        return self.catfood
+    
+    def set_catfood(self, catfood: int):
+        self.catfood = catfood

@@ -4,19 +4,26 @@ actions:
   - print: "loading save with adb"
   - load-save:
       method: "adb-pull"
-      device: "localhost:4444"
-      cc: "!input"
-  - print: "finished loading save {get_iq()}"
+      cc: "en"
+  - print: "finished loading save {get_iq()}\n"
 
   - print: "making edits"
   - edits:
     - print: "setting xp"
     - xp:
         amount: "!input"
-        should_set: true
-    - print: "set xp to {get_xp()}"
+    - print: "set xp to {get_xp()}\n"
+    - print: "setting catfood"
+    - catfood:
+        amount: "!input"
+    - print: "set catfood to {get_catfood()}\n"
 
   - print: "saving save with adb"
   - save-save:
       method: "adb-push"
       device: "localhost:4444"
+      rerun: true
+      managed-items: 
+        upload: true
+        print: true
+        allow-iq-change: true

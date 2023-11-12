@@ -3,7 +3,7 @@ from bcsfe import core
 
 
 class Updater:
-    package_name = "battle-cats-save-editor"
+    package_name = "bcsfe"
 
     def __init__(self):
         pass

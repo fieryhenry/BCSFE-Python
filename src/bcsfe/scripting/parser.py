@@ -18,7 +18,29 @@ class Parser:
                 raise e
 
     def load(self) -> None:
-        self.schema = self.data.get("schema", 0)
+        self.schema_version = self.data.get("schema-version")
+        if self.schema_version is None:
+            raise scripting.ParsingError(
+                core.core_data.local_manager.get_key("s!_missing_schema")
+            )
+        if self.schema_version != 0:
+            raise scripting.ParsingError(
+                core.core_data.local_manager.get_key(
+                    "s!_unknown_schema", schema=self.schema_version, valid_schemas=[0]
+                )
+            )
+
+        self.package = self.data.get("package")
+        if self.package is None:
+            raise scripting.ParsingError(
+                core.core_data.local_manager.get_key("s!_missing_package")
+            )
+        if self.package != "bcsfe":
+            raise scripting.ParsingError(
+                core.core_data.local_manager.get_key(
+                    "s!_unknown_package", package=self.package, valid_packages=["bcsfe"]
+                )
+            )
 
         for action in self.data.get("actions", []):
             name = list(action.keys())[0]

@@ -54,6 +54,8 @@ if you think I take too long to update the game data
 
 - Way to specifiy how many times you want to clear a stage
 
+- Ultra forms
+
 ### Fixed
 
 - Not pushing to the correct game version if the save file is from a custom

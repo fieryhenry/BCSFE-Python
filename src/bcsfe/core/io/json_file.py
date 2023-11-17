@@ -22,7 +22,7 @@ class JsonFile:
     def to_data(self, indent: Optional[int] = 4) -> "core.Data":
         return core.Data(json.dumps(self.json, indent=indent))
 
-    def save(self, path: "core.Path") -> None:
+    def to_file(self, path: "core.Path") -> None:
         path.write(self.to_data())
 
     def to_object(self) -> Any:

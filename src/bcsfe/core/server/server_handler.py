@@ -441,7 +441,8 @@ class ServerHandler:
             self.remove_stored_auth_token()
             return None
         bmd.remove_managed_items()
-        print()
+        if self.print:
+            print()
         return (transfer_code, confirmation_code)
 
     def upload_meta_data(self) -> bool:

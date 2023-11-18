@@ -266,4 +266,7 @@ __all__ = [
     "GameVersion",
     "SaveFile",
     "JsonFile",
+    "ManagedItem",
+    "ManagedItemType",
+    "BackupMetaData",
 ]

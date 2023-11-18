@@ -10,3 +10,4 @@ src/bcsfe/files/map_names
 pyrightconfig.json
 /test*.py
 /save.json
+src/bcsfe/ui

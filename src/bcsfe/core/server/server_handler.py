@@ -445,6 +445,13 @@ class ServerHandler:
             print()
         return (transfer_code, confirmation_code)
 
+    def has_managed_items(self) -> bool:
+        bmd = core.BackupMetaData(self.save_file)
+        managed_items = bmd.get_managed_items()
+        if len(managed_items) == 0:
+            return False
+        return True
+
     def upload_meta_data(self) -> bool:
         auth_token = self.get_auth_token()
         if auth_token is None:

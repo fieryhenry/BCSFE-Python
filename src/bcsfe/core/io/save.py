@@ -3252,12 +3252,54 @@ class SaveFile:
 
     def get_xp(self) -> int:
         return self.xp
-    
+
     def set_xp(self, xp: int):
         self.xp = xp
-    
+
     def get_catfood(self) -> int:
         return self.catfood
-    
+
     def set_catfood(self, catfood: int):
         self.catfood = catfood
+
+    def get_normal_tickets(self) -> int:
+        return self.normal_tickets
+
+    def set_normal_tickets(self, normal_tickets: int):
+        self.normal_tickets = normal_tickets
+
+    def get_rare_tickets(self) -> int:
+        return self.rare_tickets
+
+    def set_rare_tickets(self, rare_tickets: int):
+        self.rare_tickets = rare_tickets
+
+    def get_platinum_tickets(self) -> int:
+        return self.platinum_tickets
+
+    def set_platinum_tickets(self, platinum_tickets: int):
+        self.platinum_tickets = platinum_tickets
+
+    def get_legend_tickets(self) -> int:
+        return self.legend_tickets
+
+    def set_legend_tickets(self, legend_tickets: int):
+        self.legend_tickets = legend_tickets
+
+    def get_platinum_shards(self) -> int:
+        return self.platinum_shards
+
+    def set_platinum_shards(self, platinum_shards: int):
+        self.platinum_shards = platinum_shards
+
+    def get_np(self) -> int:
+        return self.np
+
+    def set_np(self, np: int):
+        self.np = np
+
+    def get_leadership(self) -> int:
+        return self.leadership
+
+    def set_leadership(self, leadership: int):
+        self.leadership = leadership

@@ -3,9 +3,10 @@ from PyQt5 import QtCore, QtWidgets
 
 
 class Thread(QtCore.QThread):
+    error = QtCore.pyqtSignal(Exception)
+
     def __init__(self, parent: Optional[QtWidgets.QWidget] = None) -> None:
         super().__init__(parent)
-        self.error = QtCore.pyqtBoundSignal()
         self.func: Callable[..., Any] = lambda: None
         self.result: Any = None
 

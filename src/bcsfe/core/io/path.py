@@ -6,6 +6,8 @@ import typing
 from bcsfe import core
 import re
 
+from typing import Optional
+
 
 class Path:
     def __init__(self, path: str = "", is_relative: bool = False):
@@ -69,8 +71,7 @@ class Path:
         return self.path.replace("\\", "/")
 
     @staticmethod
-    def get_documents_folder() -> "Path":
-        app_name = "bcsfe"
+    def get_documents_folder(app_name: Optional[str] = "bcsfe") -> "Path":
         os_name = os.name
         if os_name == "nt":
             path = Path.join(os.environ["USERPROFILE"], "Documents", app_name)

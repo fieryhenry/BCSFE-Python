@@ -524,6 +524,7 @@ class ServerHandler:
         confirmation_code: str,
         cc: "core.CountryCode",
         gv: "core.GameVersion",
+        print: bool = True,
     ) -> Optional["ServerHandler"]:
         url = f"{ServerHandler.save_url}/v2/transfers/{transfer_code}/reception"
         data = core.ClientInfo(cc, gv).get_client_info()
@@ -543,7 +544,8 @@ class ServerHandler:
         }
         response = core.RequestHandler(url, headers, core.Data(data_str)).post()
         if response is None:
-            core.print_no_internet()
+            if print:
+                core.print_no_internet()
             return None
         headers = response.headers
         content_type = headers.get("content-type", "")

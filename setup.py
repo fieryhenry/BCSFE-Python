@@ -32,6 +32,9 @@ setuptools.setup(
         "pyyaml",
         "beautifulsoup4",
     ],
+    extras_require={
+        "ui": ["PyQt5"],
+    },
     include_package_data=True,
     package_data={"bcsfe": ["py.typed"]},
 )

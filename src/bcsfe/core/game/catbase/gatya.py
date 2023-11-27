@@ -1,6 +1,6 @@
-from typing import Any, Optional
+from typing import Any, Callable, Optional
 from bcsfe import core
-from bcsfe.cli import dialog_creator
+from bcsfe.cli import dialog_creator, color
 
 
 class Gatya:
@@ -199,3 +199,167 @@ class GatyaDataSet:
             return self.gatya_data_set[gatya_id]
         except IndexError:
             return None
+
+
+class GatyaInfo:
+    def __init__(self, gatya_id: int, cc: "core.CountryCode", type_str: str = "R"):
+        self.gatya_id = gatya_id
+        self.cc = cc
+        self.gatya_data_set: Optional[GatyaDataSet] = None
+        self.type = type_str
+        self.data: Optional["core.Data"] = None
+
+    def get_id_str(self) -> str:
+        return f"{self.gatya_id:03}"
+
+    def get_cc_str(self) -> str:
+        if self.cc == core.CountryCode("jp"):
+            return ""
+        return self.cc.get_patching_code() + "/"
+
+    def get_url(self) -> str:
+        return f"https://ponosgames.com/information/appli/battlecats/gacha/rare/{self.get_cc_str()}{self.type}{self.get_id_str()}.html"
+
+    def download_data(
+        self, name_only_optimization: bool = False
+    ) -> Optional["core.Data"]:
+        url = self.get_url()
+
+        if name_only_optimization:
+            stream = core.RequestHandler(url).get(stream=True)
+            if stream is None:
+                return
+            # read bytes
+            data = core.Data()
+            for chunk in stream.iter_lines():
+                chunk_str = chunk.decode("utf-8")
+                if "h2" in chunk_str:
+                    data.write_bytes(chunk)
+                    break
+        else:
+            response = core.RequestHandler(url).get()
+            if response is None:
+                return
+            data = core.Data(response.content)
+
+        self.save_data(data)
+        return data
+
+    def get_file_path(self) -> "core.Path":
+        return (
+            core.Path.get_documents_folder()
+            .add("other_game_data")
+            .add(self.cc.get_code())
+            .add("gatya_info")
+            .generate_dirs()
+            .add(f"{self.type}{self.get_id_str()}.html")
+        )
+
+    def save_data(self, data: "core.Data"):
+        data.to_file(self.get_file_path())
+        self.data = data
+
+    def load_data_from_file(
+        self, name_only_optimization: bool = False
+    ) -> Optional["core.Data"]:
+        if not self.get_file_path().exists():
+            return None
+        data = core.Data.from_file(self.get_file_path())
+        if len(data) < 400 and not name_only_optimization:
+            data = None
+        return data
+
+    def get_data(self, name_only_optimization: bool = False) -> Optional["core.Data"]:
+        if self.data is not None:
+            return self.data
+        data = self.load_data_from_file(name_only_optimization)
+        if data is None:
+            data = self.download_data(name_only_optimization)
+        return data
+
+    def get_name(self, name_only_optimization: bool = False) -> Optional[str]:
+        data = self.get_data(name_only_optimization)
+        if data is None:
+            return None
+        # find <h2>...</h2>
+        data = data.get_bytes()
+        h2 = data.find(b"<h2>")
+        if h2 == -1:
+            return None
+        h2_end = data.find(b"</h2>", h2)
+        if h2_end == -1:
+            return None
+        text = data[h2 + 4 : h2_end].decode("utf-8")
+        # remove <span...</span>
+        span = text.find("<span")
+        if span == -1:
+            return text
+        span_end = text.find("</span>", span)
+        if span_end == -1:
+            return text
+        return text[:span] + text[span_end + 7 :]
+
+
+class GatyaInfos:
+    def __init__(
+        self, save_file: "core.SaveFile", type_str: str = "R", set_id: int = 1
+    ):
+        self.save_file = save_file
+        self.type = type_str
+        self.set_id = set_id
+        self.gatya_data_set = GatyaDataSet(save_file).load_gatya_data_set(
+            type_str, set_id
+        )
+        self.infos: list[GatyaInfo] = []
+        self.got_all = False
+
+    def get_all(
+        self, threaded: bool = True, print_progress: bool = True, max_threads: int = 16
+    ):
+        if self.gatya_data_set is None:
+            return
+        all_ids = len(self.gatya_data_set)
+        if threaded:
+            funcs: list[Callable[..., Any]] = []
+            args: list[list[Any]] = []
+            for id in range(all_ids):
+                funcs.append(self.get)
+                args.append([id, print_progress])
+            core.thread_run_many(funcs, args, max_threads=max_threads)
+
+        else:
+            for id in range(all_ids):
+                self.infos.append(self.get(id, print_progress=print_progress))
+
+        self.got_all = True
+
+    def get(self, gatya_id: int, print_progress: bool):
+        if print_progress:
+            color.ColoredText.localize(
+                "gatya_info_progress",
+                current=len(self.infos or []) + 1,
+                total=len(self.gatya_data_set or []),
+            )
+        info = GatyaInfo(gatya_id, self.save_file.cc, self.type)
+        info.get_data()
+        self.infos.append(info)
+        return info
+
+    def get_info(self, gatya_id: int) -> Optional[GatyaInfo]:
+        if self.infos:
+            return self.infos[gatya_id]
+        return None
+
+    def get_all_names(self, name_only_optimization: bool = False) -> dict[int, str]:
+        if not self.got_all:
+            max_threads = 64 if name_only_optimization else 16
+            self.get_all(name_only_optimization, max_threads=max_threads)
+        names: dict[int, str] = {}
+        for info in self.infos:
+            names[
+                info.gatya_id
+            ] = info.get_name() or core.core_data.local_manager.get_key(
+                "unknown_banner"
+            )
+
+        return names

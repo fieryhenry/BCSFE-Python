@@ -37,6 +37,7 @@ class Data:
             )
         self.pos = 0
         self.set_little_endiness()
+        self.buffer_enabled = False
 
     def __bytes__(self) -> bytes:
         return self.data
@@ -514,7 +515,7 @@ class Data:
 
     def to_str(self) -> str:
         try:
-            return self.data.decode()
+            return self.data.decode(encoding="utf-8")
         except UnicodeDecodeError:
             return ""
 

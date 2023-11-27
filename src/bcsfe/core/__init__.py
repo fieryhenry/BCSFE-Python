@@ -25,7 +25,7 @@ from bcsfe.core.game.battle.slots import LineUps
 from bcsfe.core.game.battle.enemy import Enemy, EnemyNames
 from bcsfe.core.game.catbase.beacon_base import BeaconEventListScene
 from bcsfe.core.game.catbase.cat import Cat, Cats, UnitBuy, TalentData
-from bcsfe.core.game.catbase.gatya import Gatya
+from bcsfe.core.game.catbase.gatya import Gatya, GatyaInfos, GatyaDataSet
 from bcsfe.core.game.catbase.gatya_item import GatyaItemBuy, GatyaItemNames
 from bcsfe.core.game.catbase.item_pack import (
     ItemPack,

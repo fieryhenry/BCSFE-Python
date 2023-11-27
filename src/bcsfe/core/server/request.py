@@ -27,7 +27,7 @@ class RequestHandler:
         self.headers = headers
         self.data = data
 
-    def get(self) -> Optional[requests.Response]:
+    def get(self, stream: bool = False) -> Optional[requests.Response]:
         """Sends a GET request.
 
         Returns:
@@ -40,6 +40,7 @@ class RequestHandler:
                 timeout=core.core_data.config.get_int(
                     core.ConfigKey.MAX_REQUEST_TIMEOUT
                 ),
+                stream=stream,
             )
         except requests.exceptions.ConnectionError:
             return None

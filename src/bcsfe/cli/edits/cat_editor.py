@@ -1,5 +1,5 @@
 import enum
-from typing import Any, Optional
+from typing import Any, Callable, Optional
 
 from bcsfe import core
 from bcsfe.cli import color, dialog_creator
@@ -78,7 +78,7 @@ class CatEditor:
         else:
             should_filter_current = False
 
-        options: dict[str, Any] = {
+        options: dict[str, Callable[[], Any]] = {
             "select_cats_all": self.save_file.cats.get_all_cats,
             "select_cats_current": self.get_current_cats,
             "select_cats_obtainable": self.get_cats_obtainable,
@@ -184,11 +184,55 @@ class CatEditor:
         gset = self.save_file.gatya.read_gatya_data_set(self.save_file).gatya_data_set
         if gset is None:
             return None
-        gatya_ids = dialog_creator.RangeInput(len(gset) - 1).get_input_locale(
-            "select_gatya_banner", {}
+
+        filter_down = dialog_creator.YesNoInput().get_input_once("filter_down_q_gatya")
+        all_names = core.GatyaInfos(self.save_file).get_all_names(
+            name_only_optimization=True
         )
-        if gatya_ids is None:
+        ids = list(all_names.keys())
+        ids.sort()
+        names: list[str] = []
+        for id in ids:
+            names.append(all_names[id])
+        new_names: list[str] = []
+        new_ids: list[int] = []
+
+        unknown_name = core.core_data.local_manager.get_key("unknown_banner")
+
+        if filter_down:
+            for id in ids:
+                name = all_names[id]
+                if name in new_names or name == unknown_name:
+                    continue
+                new_names.append(name)
+                new_ids.append(id)
+        else:
+            new_names = names
+            new_ids = ids
+
+        ids = new_ids
+
+        formatted_names: list[str] = []
+
+        for name in new_names:
+            formatted_name = core.core_data.local_manager.get_key(
+                "banner_txt", name=name
+            )
+            formatted_names.append(formatted_name)
+        gatya_option_ids, _ = dialog_creator.ChoiceInput.from_reduced(
+            formatted_names, ints=ids, dialog="select_gatya_banner", start_index=0
+        ).multiple_choice(False)
+        if gatya_option_ids is None:
             return None
+        gatya_ids: list[int] = []
+        for gatya_option_id in gatya_option_ids:
+            gatya_ids.append(ids[gatya_option_id])
+
+        # gatya_ids = dialog_creator.RangeInput(len(gset) - 1).get_input_locale(
+        #    "select_gatya_banner", {}
+        # )
+        # if gatya_ids is None:
+        #    return None
         cats: list["core.Cat"] = []
         for gatya_id in gatya_ids:
             gatya_cats = self.get_cats_gatya_banner(gatya_id)

@@ -148,6 +148,7 @@ class ListOutput:
         ints: list[int],
         dialog: Optional[str] = None,
         perameters: Optional[dict[str, Any]] = None,
+        start_index: int = 1,
     ):
         self.strings = strings
         self.ints = ints
@@ -155,6 +156,7 @@ class ListOutput:
         if perameters is None:
             perameters = {}
         self.perameters = perameters
+        self.start_index = start_index
 
     def get_output(self, dialog: Optional[str], strings: list[str]) -> str:
         end_string = ""
@@ -167,7 +169,7 @@ class ListOutput:
             except IndexError:
                 int_string = ""
             string = string.format(int=int_string)
-            end_string += f" <@s>{i+1}.</> <@t>{string}</>\n"
+            end_string += f" <@s>{i+self.start_index}.</> <@t>{string}</>\n"
         end_string = end_string.strip("\n")
         return end_string
 
@@ -202,6 +204,7 @@ class ChoiceInput:
         single_choice: bool = False,
         remove_alias: bool = False,
         display_all_at_once: bool = True,
+        start_index: int = 1,
     ):
         self.items = items
         self.strings = strings
@@ -211,6 +214,7 @@ class ChoiceInput:
         self.is_single_choice = single_choice
         self.remove_alias = remove_alias
         self.display_all_at_once = display_all_at_once
+        self.start_index = start_index
 
     @staticmethod
     def from_reduced(
@@ -221,6 +225,7 @@ class ChoiceInput:
         single_choice: bool = False,
         remove_alias: bool = False,
         display_all_at_once: bool = True,
+        start_index: int = 1,
     ) -> "ChoiceInput":
         if perameters is None:
             perameters = {}
@@ -237,15 +242,18 @@ class ChoiceInput:
             single_choice,
             remove_alias,
             display_all_at_once,
+            start_index,
         )
 
     def get_input(self) -> tuple[Optional[int], str]:
         if len(self.strings) == 0:
             return None, ""
         if len(self.strings) == 1:
-            return 1, ""
-        ListOutput(self.strings, self.ints).display_locale(self.remove_alias)
-        return IntInput(len(self.strings), 1).get_input_locale(
+            return self.get_min_value(), ""
+        ListOutput(
+            self.strings, self.ints, start_index=self.start_index
+        ).display_locale(self.remove_alias)
+        return IntInput(self.get_max_value(), self.get_min_value()).get_input_locale(
             self.dialog, self.perameters
         )
 
@@ -259,51 +267,63 @@ class ChoiceInput:
             if user_input == core.core_data.local_manager.get_key("quit_key"):
                 return None
 
+    def get_max_value(self) -> int:
+        return len(self.strings) + self.start_index - 1
+
+    def get_min_value(self) -> int:
+        return self.start_index
+
     def get_input_locale(
         self, localized: bool = True
     ) -> tuple[Optional[list[int]], bool]:
         if len(self.strings) == 0:
             return [], False
         if len(self.strings) == 1:
-            return [1], False
+            return [self.get_min_value()], False
         if not self.is_single_choice and self.display_all_at_once:
             if localized:
                 self.strings.append("all_at_once")
             else:
                 self.strings.append(core.core_data.local_manager.get_key("all_at_once"))
         if localized:
-            ListOutput(self.strings, self.ints).display_locale()
+            ListOutput(
+                self.strings, self.ints, start_index=self.start_index
+            ).display_locale()
         else:
-            ListOutput(self.strings, self.ints).display_non_locale()
+            ListOutput(
+                self.strings, self.ints, start_index=self.start_index
+            ).display_non_locale()
         key = "input_many"
         if self.is_single_choice:
             key = "input_single"
         dialog = core.core_data.local_manager.get_key(key).format(
-            min=1, max=len(self.strings)
+            min=self.get_min_value(), max=self.get_max_value()
         )
         usr_input = color.ColoredInput().get(dialog).split(" ")
         int_vals: list[int] = []
-        for i in usr_input:
+        for inp in usr_input:
             try:
-                value = int(i)
-                if value > len(self.strings) or value < 1:
+                value = int(inp)
+                if value > self.get_max_value() or value < self.get_min_value():
                     raise ValueError
                 int_vals.append(value)
             except ValueError:
-                if i == core.core_data.local_manager.get_key("quit_key"):
+                if inp == core.core_data.local_manager.get_key("quit_key"):
                     return None, False
-                if i in self.strings:
-                    int_vals.append(self.strings.index(i) + 1)
+                if inp in self.strings:
+                    int_vals.append(self.strings.index(inp) + self.start_index)
                     continue
                 color.ColoredText.localize(
-                    "invalid_input_int", min=1, max=len(self.strings)
+                    "invalid_input_int",
+                    min=self.get_min_value(),
+                    max=self.get_max_value(),
                 )
         if (
-            len(self.strings) in int_vals
+            self.get_max_value() in int_vals
             and not self.is_single_choice
             and self.display_all_at_once
         ):
-            return list(range(1, len(self.strings))), True
+            return list(range(self.get_min_value(), self.get_max_value())), True
 
         if self.is_single_choice and len(int_vals) > 1:
             int_vals = [int_vals[0]]
@@ -314,7 +334,7 @@ class ChoiceInput:
         if len(self.strings) == 0:
             return []
         if len(self.strings) == 1:
-            return [1]
+            return [self.get_min_value()]
         while True:
             int_vals, all_at_once = self.get_input_locale()
             if int_vals is None:
@@ -334,7 +354,7 @@ class ChoiceInput:
         user_input, all_at_once = self.get_input_locale(localized_options)
         if user_input is None:
             return None, all_at_once
-        return [i - 1 for i in user_input], all_at_once
+        return [i - self.start_index for i in user_input], all_at_once
 
     def single_choice(self) -> Optional[int]:
         return self.get_input_while()

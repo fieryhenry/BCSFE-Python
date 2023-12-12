@@ -32,7 +32,10 @@ class Repo:
         if self.is_cloned():
             return True
         cmd = f"git clone {self.url} {self.get_path()}"
-        return self.run_cmd(cmd)
+        success = self.run_cmd(cmd)
+        if not success:
+            self.get_path().remove()
+        return success
 
     def pull(self) -> bool:
         cmd = f"git -C {self.get_path()} pull"

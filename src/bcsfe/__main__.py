@@ -22,3 +22,5 @@ except Exception as e:
         cli.main.Main.exit_editor()
     except Exception:
         pass
+    except KeyboardInterrupt:
+        pass

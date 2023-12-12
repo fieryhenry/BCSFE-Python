@@ -416,6 +416,9 @@ class LocalManager:
         if locale not in LocalManager.get_all_locales():
             return
         if locale.startswith("ext-"):
+            extern = ExternalLocaleManager.get_external_locale(locale)
+            if extern is not None:
+                ExternalLocaleManager.delete_locale(extern)
             LocalManager.get_external_locales_folder().add(locale).remove()
         else:
             LocalManager.get_locales_folder().add(locale).remove()
@@ -513,6 +516,15 @@ class ExternalLocale:
 
 class ExternalLocaleManager:
     @staticmethod
+    def delete_locale(external_locale: ExternalLocale):
+        if external_locale.git_repo is None:
+            return
+        folder = core.GitHandler.get_repo_folder().add(
+            external_locale.git_repo.split("/")[-1]
+        )
+        folder.remove()
+
+    @staticmethod
     def save_locale(
         external_locale: ExternalLocale,
     ):
@@ -550,6 +562,8 @@ class ExternalLocaleManager:
         Returns:
             ExternalLocale: External locale.
         """
+        if not path.exists():
+            return None
         json_data = core.JsonFile.from_data(path.add("locale.json").read()).to_object()
         return ExternalLocale.from_json(json_data)
 
@@ -610,6 +624,20 @@ class ExternalLocaleManager:
         """
 
         locale = core.core_data.config.get_str(core.ConfigKey.LOCALE)
+        if not locale.startswith("ext-"):
+            return None
+        return ExternalLocaleManager.parse_external_locale(
+            LocalManager.get_locale_folder(locale)
+        )
+
+    @staticmethod
+    def get_external_locale(locale: str) -> Optional[ExternalLocale]:
+        """Gets the external locale from the code.
+
+        Returns:
+            ExternalLocale: External locale.
+        """
+
         if not locale.startswith("ext-"):
             return None
         return ExternalLocaleManager.parse_external_locale(

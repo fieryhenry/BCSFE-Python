@@ -98,6 +98,10 @@ class ThemeHandler:
 
     @staticmethod
     def remove_theme(theme_code: str):
+        extern = ExternalThemeManager.get_external_theme(theme_code)
+        if extern is not None:
+            ExternalThemeManager.delete_theme(extern)
+
         ThemeHandler.get_theme_path(theme_code).remove()
         if theme_code == core.core_data.config.get_str(core.ConfigKey.THEME):
             core.core_data.config.set_default(core.ConfigKey.THEME)
@@ -177,6 +181,15 @@ class ExternalTheme:
 
 
 class ExternalThemeManager:
+    @staticmethod
+    def delete_theme(external_theme: ExternalTheme):
+        if external_theme.git_repo is None:
+            return
+        folder = core.GitHandler.get_repo_folder().add(
+            external_theme.git_repo.split("/")[-1]
+        )
+        folder.remove()
+
     @staticmethod
     def save_theme(
         external_theme: ExternalTheme,
@@ -263,6 +276,20 @@ class ExternalThemeManager:
         """
 
         theme = core.core_data.config.get_str(core.ConfigKey.THEME)
+        if not theme.startswith("ext-"):
+            return None
+        return ExternalThemeManager.parse_external_theme(
+            ThemeHandler.get_theme_path(theme)
+        )
+
+    @staticmethod
+    def get_external_theme(theme: str) -> Optional[ExternalTheme]:
+        """Gets the external theme from the theme code.
+
+        Returns:
+            ExternalTheme: External theme.
+        """
+
         if not theme.startswith("ext-"):
             return None
         return ExternalThemeManager.parse_external_theme(

@@ -107,7 +107,9 @@ class SaveManagement:
         """
         SaveManagement.save_save(save_file)
         adb_handler = core.AdbHandler()
-        adb_handler.select_device()
+        success = adb_handler.select_device()
+        if not success:
+            return adb_handler
         if save_file.used_storage:
             adb_handler.set_cc(save_file.real_cc)
         else:

@@ -186,6 +186,7 @@ class ZeroLegendsChapters:
         clear_amount: int = 1,
         overwrite_clear_progress: bool = False,
     ):
+        self.create(map)
         finished = self.chapters[map].clear_stage(
             star, stage, clear_amount, overwrite_clear_progress
         )
@@ -229,6 +230,16 @@ class ZeroLegendsChapters:
 
     def get_total_stages(self, chapter_id: int, star: int) -> int:
         return len(self.chapters[chapter_id].chapters[star].stages)
+
+    def create(self, chapter_id: int):
+        diff = chapter_id - len(self.chapters)
+
+        if diff >= 0:
+            for i in range(diff + 1):
+                stages = [Stage(0)] * self.get_total_stages(0, 0)
+                chapters = [Chapter(0, 0, 0, stages)] * self.get_total_stars(0)
+                chapters_stars = ChaptersStars(0, chapters)
+                self.chapters.append(chapters_stars)
 
     @staticmethod
     def edit_zero_legends(save_file: "core.SaveFile"):
@@ -287,6 +298,7 @@ class ZeroLegendsChapters:
             stars = 0
 
         for id in map_choices:
+            self.create(id)
             map_name = names[id]
             stage_names = map_names.stage_names.get(id)
             color.ColoredText.localize("current_sol_chapter", name=map_name, id=id)

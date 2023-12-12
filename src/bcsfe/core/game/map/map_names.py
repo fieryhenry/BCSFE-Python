@@ -94,4 +94,4 @@ class MapNames:
     def save_map_names(self):
         file_path = self.get_file_path()
         self.map_names = dict(sorted(self.map_names.items(), key=lambda item: item[0]))
-        core.JsonFile.from_object(self.map_names).save(file_path)
+        core.JsonFile.from_object(self.map_names).to_file(file_path)

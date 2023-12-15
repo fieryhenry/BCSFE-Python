@@ -2631,7 +2631,6 @@ class SaveFile:
         self.ub11 = False
         self.ub12 = False
         self.ub13 = False
-        self.two_battle_lines = False
         self.ub15 = False
         self.ub16 = False
         self.ub17 = False
@@ -2664,6 +2663,7 @@ class SaveFile:
         self.event_update_flags = False
         self.filibuster_stage_enabled = False
         self.dojo_3x_speed = False
+        self.two_battle_lines = False
 
         self.uim1 = 0
         self.ui0 = 0

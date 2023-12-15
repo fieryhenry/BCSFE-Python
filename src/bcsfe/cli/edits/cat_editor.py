@@ -417,7 +417,8 @@ class CatEditor:
 
     def unlock_cat_guide(self, cats: list["core.Cat"]):
         for cat in cats:
-            cat.unlock(self.save_file)
+            if core.core_data.config.get_bool(core.ConfigKey.UNLOCK_CAT_ON_EDIT):
+                cat.unlock(self.save_file)
             cat.catguide_collected = True
         color.ColoredText.localize("unlock_cat_guide_success")
 
@@ -464,7 +465,8 @@ class CatEditor:
                 if data is None:
                     color.ColoredText.localize("no_talent_data", id=cat.id)
                     continue
-                cat.unlock(self.save_file)
+                if core.core_data.config.get_bool(core.ConfigKey.UNLOCK_CAT_ON_EDIT):
+                    cat.unlock(self.save_file)
                 talent_names, max_levels, current_levels, ids = data
                 values = dialog_creator.MultiEditor.from_reduced(
                     "talents",
@@ -486,7 +488,8 @@ class CatEditor:
                 data = self.get_cat_talents(talent_data, cat)
                 if data is None:
                     continue
-                cat.unlock(self.save_file)
+                if core.core_data.config.get_bool(core.ConfigKey.UNLOCK_CAT_ON_EDIT):
+                    cat.unlock(self.save_file)
                 talent_names, max_levels, current_levels, ids = data
                 for i, id in enumerate(ids):
                     talent = cat.get_talent_from_id(id)

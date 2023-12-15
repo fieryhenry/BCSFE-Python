@@ -20,6 +20,7 @@ class ConfigKey(enum.Enum):
     FORCE_LANG_GAME_DATA = "force_lang_game_data"
     CLEAR_TUTORIAL_ON_LOAD = "clear_tutorial_on_load"
     REMOVE_BAN_MESSAGE_ON_LOAD = "remove_ban_message_on_load"
+    UNLOCK_CAT_ON_EDIT = "unlock_cat_on_edit"
 
 
 class Config:
@@ -65,6 +66,7 @@ class Config:
             ConfigKey.FORCE_LANG_GAME_DATA: False,
             ConfigKey.CLEAR_TUTORIAL_ON_LOAD: True,
             ConfigKey.REMOVE_BAN_MESSAGE_ON_LOAD: True,
+            ConfigKey.UNLOCK_CAT_ON_EDIT: True,
         }
         return initial_values
 

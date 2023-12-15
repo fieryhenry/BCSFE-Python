@@ -525,7 +525,8 @@ class Cat:
     def set_form(
         self, form: int, save_file: "core.SaveFile", set_current_form: bool = True
     ):
-        self.unlock(save_file)
+        if core.core_data.config.get_bool(core.ConfigKey.UNLOCK_CAT_ON_EDIT):
+            self.unlock(save_file)
         self.unlocked_forms = form + 1
         if set_current_form:
             self.current_form = form
@@ -558,7 +559,8 @@ class Cat:
     ):
         if set_current_form:
             self.current_form = 3
-        self.unlock(save_file)
+        if core.core_data.config.get_bool(core.ConfigKey.UNLOCK_CAT_ON_EDIT):
+            self.unlock(save_file)
         self.forth_form = 2
 
     def remove_forth_form(self):
@@ -571,7 +573,8 @@ class Cat:
         upgrade: "core.Upgrade",
         only_plus: bool = False,
     ):
-        self.unlock(save_file)
+        if core.core_data.config.get_bool(core.ConfigKey.UNLOCK_CAT_ON_EDIT):
+            self.unlock(save_file)
         base = upgrade.base
         plus = upgrade.plus
         if base != -1 and not only_plus:
@@ -580,7 +583,8 @@ class Cat:
             self.upgrade.plus = upgrade.get_random_plus()
 
     def upgrade_base(self, save_file: "core.SaveFile"):
-        self.unlock(save_file)
+        if core.core_data.config.get_bool(core.ConfigKey.UNLOCK_CAT_ON_EDIT):
+            self.unlock(save_file)
         self.upgrade.upgrade()
 
     def reset(self):

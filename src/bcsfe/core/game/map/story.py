@@ -340,6 +340,10 @@ class StoryChapters:
             save_file.koreaSuperiorTreasureState, 2
         )
         save_file.ui6 = max(save_file.ui6, 1)
+        new_length = len(save_file.new_dialogs_2)
+        if new_length < 6:
+            save_file.new_dialogs_2.extend([0] * (6 - new_length))
+
         save_file.new_dialogs_2[1] = max(save_file.new_dialogs_2[1], 2)
         save_file.new_dialogs_2[5] = max(save_file.new_dialogs_2[5], 2)
         if save_file.story.chapters[0].stages[0].clear_times == 0:

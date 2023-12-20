@@ -222,6 +222,7 @@ class SaveManagement:
             "select_save_file",
             "adb_pull_save",
             "load_save_data_json",
+            "create_new_save",
         ]
         if starting_options:
             options.append("edit_config")
@@ -288,11 +289,32 @@ class SaveManagement:
                 save_path, cc = data
             else:
                 save_path = None
-        elif choice == 4 and starting_options:
-            core.core_data.config.edit_config()
+        elif choice == 4:
+            color.ColoredText.localize("create_new_save_warning")
+            cc = core.CountryCode.select()
+            if cc is None:
+                return None
+            try:
+                gv = core.GameVersion.from_string(
+                    color.ColoredInput().localize(
+                        "game_version_dialog",
+                    )
+                )
+            except ValueError:
+                color.ColoredText.localize("invalid_game_version")
+                return
+            save = core.SaveFile(cc=cc, gv=gv, load=False)
+            save_path = main.Main.save_save_dialog(save)
+            if save_path is None:
+                return None
+            save.to_file(save_path)
+            color.ColoredText.localize("create_new_save_success")
+
         elif choice == 5 and starting_options:
-            core.update_external_content()
+            core.core_data.config.edit_config()
         elif choice == 6 and starting_options:
+            core.update_external_content()
+        elif choice == 7 and starting_options:
             main.Main.exit_editor(check_temp=False)
 
         if save_path is None or not save_path.exists():

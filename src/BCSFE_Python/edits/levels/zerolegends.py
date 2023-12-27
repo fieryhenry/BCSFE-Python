@@ -9,8 +9,21 @@ def count_chapters(save_stats) -> int:
     count = len(data1)
     return count
     
-def set_zl(stage_data, ids, lengths):
+def count_stages(data) -> int:
+    data1 = data.get("stages", {})
+    count = len(data1)
+    return count
     
+def set_zl(stage_data, ids, lengths):
+    for stage_id in ids:
+        chapter_index = int(stage_id - 1)
+        chapter_stages_count = count_stages(stage_data[chapter_index]["stars"][0])
+        stage_data[chapter_index]["stars"][0]["stages_cleared"] = chapter_stages_count #stage count
+        stage_data[chapter_index]["stars"][0]["unlock_next"] = 3 #idk what this means, but when i cleared stages myself, value was 3.
+        for i in range(0, (chapter_stages_count - 1)):
+            stage_data[chapter_index]["stars"][0]["stages"][i] = 1 #how many you cleared this stage
+            i += 1
+    return stage_data
 
 def edit_zl(save_stats: dict[str, Any]) -> dict[str, Any]:
     """Handler for editting zero legends"""
@@ -23,6 +36,6 @@ def edit_zl(save_stats: dict[str, Any]) -> dict[str, Any]:
         ),
         lengths,
     )
-    stage_data = set_zl(stage_data, ids, lengths)
+    save_stats["zero_legends"] = set_zl(stage_data, ids, lengths)
 
     return save_stats

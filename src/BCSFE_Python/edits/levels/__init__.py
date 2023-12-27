@@ -15,4 +15,5 @@ from . import (
     unlock_aku_realm,
     behemoth_culling,
     legend_quest,
+    zerolegends,
 )

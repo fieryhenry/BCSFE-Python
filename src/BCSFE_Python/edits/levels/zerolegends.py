@@ -37,5 +37,5 @@ def edit_zl(save_stats: dict[str, Any]) -> dict[str, Any]:
         lengths,
     )
     save_stats["zero_legends"] = set_zl(stage_data, ids, lengths)
-
+    print("Successfully set Zero Legend Chapters.")
     return save_stats

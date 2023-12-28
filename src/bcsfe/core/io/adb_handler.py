@@ -15,7 +15,7 @@ class AdbHandler(io.root_handler.RootHandler):
         self.adb_path = adb_path
         self.start_server()
         self.device_id = None
-        self.cc = None
+        self.package_name = None
 
     def adb_root_success(self) -> bool:
         return (
@@ -98,19 +98,24 @@ class AdbHandler(io.root_handler.RootHandler):
 
         return result
 
-    def get_packages(self) -> list[str]:
-        return self.run_shell("pm list packages").result.split("\n")
+    def stat_file(self, device_path: "core.Path") -> "core.CommandResult":
+        return self.run_shell(f"stat {device_path.to_str_forwards()}")
 
-    def get_package_name(self, package: str) -> str:
-        return package.split(":")[1]
+    def does_file_exist(self, device_path: "core.Path") -> bool:
+        return self.stat_file(device_path).success
 
     def get_battlecats_packages(self) -> list[str]:
-        packages = self.get_packages()
-        return [
-            self.get_package_name(package)
-            for package in packages
-            if "jp.co.ponos.battlecats" in package
-        ]
+        cmd = "find /data/data/ | grep files/SAVE_DATA$"
+        result = self.run_shell(cmd)
+        if not result.success:
+            return []
+        packages: list[str] = []
+        for package in result.result.split("\n"):
+            parts = package.split("/")
+            if len(parts) < 4:
+                continue
+            packages.append(package.split("/")[3])
+        return packages
 
     def save_battlecats_save(self, local_path: "core.Path") -> "core.CommandResult":
         result = self.pull_file(self.get_battlecats_save_path(), local_path)
@@ -120,11 +125,11 @@ class AdbHandler(io.root_handler.RootHandler):
         return self.push_file(local_path, self.get_battlecats_save_path())
 
     def close_game(self) -> "core.CommandResult":
-        return self.run_shell(f"am force-stop {self.get_battlecats_package_name()}")
+        return self.run_shell(f"am force-stop {self.get_package_name()}")
 
     def run_game(self) -> "core.CommandResult":
         return self.run_shell(
-            f"monkey -p {self.get_battlecats_package_name()} -c android.intent.category.LAUNCHER 1"
+            f"monkey -p {self.get_package_name()} -c android.intent.category.LAUNCHER 1"
         )
 
     def select_device(self) -> bool:

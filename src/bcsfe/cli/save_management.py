@@ -110,15 +110,15 @@ class SaveManagement:
         success = adb_handler.select_device()
         if not success:
             return adb_handler
-        if save_file.used_storage:
-            adb_handler.set_cc(save_file.real_cc)
+        if save_file.used_storage and save_file.package_name is not None:
+            adb_handler.set_package_name(save_file.package_name)
         else:
-            ccs = adb_handler.get_battlecats_ccs()
-            cc = core.CountryCode.select_from_ccs(ccs)
-            if cc is None:
-                color.ColoredText.localize("no_cc_error")
+            packages = adb_handler.get_battlecats_packages()
+            package_name = SaveManagement.select_package_name(packages)
+            if package_name is None:
+                color.ColoredText.localize("no_package_name_error")
                 return adb_handler
-            adb_handler.set_cc(cc)
+            adb_handler.set_package_name(package_name)
         if save_file.save_path is None:
             return adb_handler
         result = adb_handler.load_battlecats_save(save_file.save_path)
@@ -137,7 +137,7 @@ class SaveManagement:
             save_file (core.SaveFile): The save file to push.
         """
         adb_handler = SaveManagement.adb_push(save_file)
-        if adb_handler.cc is None:
+        if adb_handler.package_name is None:
             return
         result = adb_handler.rerun_game()
         if result.success:
@@ -244,6 +244,7 @@ class SaveManagement:
         save_path = None
         cc: Optional[core.CountryCode] = None
         used_storage = False
+        package_name = None
 
         if choice == 0:
             data = server_cli.ServerCLI().download_save()
@@ -260,26 +261,29 @@ class SaveManagement:
                 if not handler.select_device():
                     return None
 
-            ccs = handler.get_battlecats_ccs()
-            cc = core.CountryCode.select_from_ccs(ccs)
-            if cc is None:
-                color.ColoredText.localize("no_cc_error")
+            package_names = handler.get_battlecats_packages()
+
+            package_name = SaveManagement.select_package_name(package_names)
+            if package_name is None:
+                color.ColoredText.localize("no_package_name_error")
                 return None
-            handler.set_cc(cc)
+            handler.set_package_name(package_name)
             if root_handler.is_android():
                 key = "storage_pulling"
             else:
                 key = "adb_pulling"
-            color.ColoredText.localize(key, cc=cc)
+            color.ColoredText.localize(key, package_name=package_name)
             save_path, result = handler.save_locally()
             if save_path is None:
                 if root_handler.is_android():
                     color.ColoredText.localize(
-                        "storage_pull_fail", cc=cc, error=result.result
+                        "storage_pull_fail",
+                        package_name=package_name,
+                        error=result.result,
                     )
                 else:
                     color.ColoredText.localize(
-                        "adb_pull_fail", cc=cc, error=result.result
+                        "adb_pull_fail", package_name=package_name, error=result.result
                     )
             else:
                 used_storage = True
@@ -321,7 +325,7 @@ class SaveManagement:
             return None
 
         try:
-            save_file = core.SaveFile(save_path.read(), cc)
+            save_file = core.SaveFile(save_path.read(), cc, package_name=package_name)
         except core.CantDetectSaveCCError:
             color.ColoredText.localize("cant_detect_cc")
             cc = core.CountryCode.select()
@@ -344,6 +348,15 @@ class SaveManagement:
         save_file.used_storage = used_storage
 
         return save_file
+
+    @staticmethod
+    def select_package_name(package_names: list[str]) -> Optional[str]:
+        choice = dialog_creator.ChoiceInput.from_reduced(
+            package_names, dialog="select_package_name", single_choice=True
+        ).single_choice()
+        if choice is None:
+            return None
+        return package_names[choice - 1]
 
     @staticmethod
     def load_save(save_file: "core.SaveFile"):

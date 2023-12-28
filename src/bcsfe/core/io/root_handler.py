@@ -3,54 +3,36 @@ from bcsfe import core
 import tempfile
 
 
-class CCNotSet(Exception):
+class PackageNameNotSet(Exception):
     pass
 
 
 class RootHandler:
     def __init__(self):
-        self.cc = None
+        self.package_name = None
 
     def is_android(self) -> bool:
         return core.Path.get_root().add("system").exists()
 
-    def get_cc(self) -> "core.CountryCode":
-        if self.cc is None:
-            raise CCNotSet("Country Code is not set")
-        return self.cc
-
-    def set_cc(self, cc: "core.CountryCode"):
-        self.cc = cc
+    def set_package_name(self, package_name: str):
+        self.package_name = package_name
 
     def get_battlecats_packages(self) -> list[str]:
         packages = core.Path.get_root().add("data").add("data").get_dirs()
         packages = [
             package.basename()
             for package in packages
-            if "jp.co.ponos.battlecats" in package.basename()
+            if package.add("files").add("SAVE_DATA").exists()
         ]
         return packages
 
-    def get_battlecats_cc(self, package_name: str) -> "core.CountryCode":
-        cc = package_name.replace("jp.co.ponos.battlecats", "")
-        cc = core.CountryCode.from_patching_code(cc)
-        return cc
-
-    def get_battlecats_ccs(self) -> list["core.CountryCode"]:
-        packages = self.get_battlecats_packages()
-        return [self.get_battlecats_cc(package) for package in packages]
-
-    def get_battlecats_package_name(self) -> str:
-        cc = self.get_cc()
-        return f"jp.co.ponos.battlecats{cc.get_patching_code()}"
+    def get_package_name(self) -> str:
+        if self.package_name is None:
+            raise PackageNameNotSet("Package name is not set")
+        return self.package_name
 
     def get_battlecats_path(self) -> "core.Path":
-        return (
-            core.Path.get_root()
-            .add("data")
-            .add("data")
-            .add(self.get_battlecats_package_name())
-        )
+        return core.Path.get_root().add("data").add("data").add(self.get_package_name())
 
     def get_battlecats_save_path(self) -> "core.Path":
         return self.get_battlecats_path().add("files").add("SAVE_DATA")
@@ -65,13 +47,13 @@ class RootHandler:
 
     def close_game(self) -> "core.CommandResult":
         cmd = core.Command(
-            f"sudo pkill -f {self.get_battlecats_package_name()}",
+            f"sudo pkill -f {self.get_package_name()}",
         )
         return cmd.run()
 
     def run_game(self) -> "core.CommandResult":
         cmd = core.Command(
-            f"sudo monkey -p {self.get_battlecats_package_name()} -c android.intent.category.LAUNCHER 1",
+            f"sudo monkey -p {self.get_package_name()} -c android.intent.category.LAUNCHER 1",
         )
         return cmd.run()
 
@@ -93,14 +75,6 @@ class RootHandler:
             return None, result
 
         return local_path, result
-
-    def get_save_file(
-        self,
-    ) -> tuple[Optional["core.SaveFile"], "core.CommandResult"]:
-        path, result = self.save_locally()
-        if path is None:
-            return None, result
-        return core.SaveFile(path.read()), result
 
     def load_locally(self, local_path: "core.Path") -> "core.CommandResult":
         success = self.load_battlecats_save(local_path)

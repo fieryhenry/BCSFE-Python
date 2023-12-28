@@ -31,7 +31,9 @@ class SaveFile:
         cc: Optional["core.CountryCode"] = None,
         load: bool = True,
         gv: Optional["core.GameVersion"] = None,
+        package_name: Optional[str] = None,
     ):
+        self.package_name = package_name
         self.save_path: Optional[core.Path] = None
         if dt is None:
             self.data = core.Data()
@@ -44,13 +46,8 @@ class SaveFile:
                     core.core_data.local_manager.get_key("cant_detect_cc")
                 )
             self.cc = cc
-            self.real_cc = cc
         else:
             self.cc = detected_cc
-            if cc is not None:
-                self.real_cc = cc
-            else:
-                self.real_cc = detected_cc
 
         self.used_storage = False
 
@@ -150,7 +147,10 @@ class SaveFile:
 
     def set_cc(self, cc: "core.CountryCode"):
         self.cc = cc
-        self.real_cc = cc
+        self.set_package_name(None)
+
+    def set_package_name(self, package_name: Optional[str]):
+        self.package_name = package_name
 
     def load(self):
         """Load the save file. For most of this stuff I have no idea what it is used for"""

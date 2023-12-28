@@ -27,11 +27,17 @@ class Upgrade:
     def increment_plus(self, amount: int):
         self.plus += amount
 
-    def get_random_base(self) -> int:
-        return random.randint(self.base_range[0], self.base_range[1])
+    def get_random_base(self, max_base: Optional[int] = None) -> int:
+        base = random.randint(self.base_range[0], self.base_range[1])
+        if max_base is not None:
+            base = min(base, max_base)
+        return base
 
-    def get_random_plus(self) -> int:
-        return random.randint(self.plus_range[0], self.plus_range[1])
+    def get_random_plus(self, max_plus: Optional[int] = None) -> int:
+        plus = random.randint(self.plus_range[0], self.plus_range[1])
+        if max_plus is not None:
+            plus = min(plus, max_plus)
+        return plus
 
     @staticmethod
     def read(stream: "core.Data") -> "Upgrade":
@@ -164,3 +170,9 @@ class Upgrade:
         upgrade.base_range = (min_base or base_int, max_base or base_int)
         upgrade.plus_range = (min_plus or plus_int, max_plus or plus_int)
         return upgrade, False
+
+    def copy(self) -> "Upgrade":
+        upgrade = Upgrade(self.plus, self.base)
+        upgrade.base_range = self.base_range
+        upgrade.plus_range = self.plus_range
+        return upgrade

@@ -62,13 +62,21 @@ class Skill:
         self,
         upgrade: "core.Upgrade",
         only_plus: bool = False,
+        max_base: Optional[int] = None,
+        max_plus: Optional[int] = None,
     ):
+        if max_base is not None:
+            upgrade.base = min(upgrade.base, max_base)
+        if max_plus is not None:
+            upgrade.plus = min(upgrade.plus, max_plus)
+
         base = upgrade.base
         plus = upgrade.plus
+
         if base != -1 and not only_plus:
-            self.upgrade.base = upgrade.get_random_base()
+            self.upgrade.base = upgrade.get_random_base(max_base)
         if plus != -1:
-            self.upgrade.plus = upgrade.get_random_plus()
+            self.upgrade.plus = upgrade.get_random_plus(max_plus)
 
 
 class SpecialSkills:
@@ -207,7 +215,12 @@ class SpecialSkills:
             if should_exit or upgrade is None:
                 return
             for id in ids:
-                skills[id].set_upgrade(upgrade)
+                max_base_level = ability_data.ability_data[id].max_base_level
+                max_plus_level = ability_data.ability_data[id].max_plus_level
+
+                skills[id].set_upgrade(
+                    upgrade.copy(), max_base=max_base_level - 1, max_plus=max_plus_level
+                )
 
                 color.ColoredText.localize(
                     "selected_skill_upgraded",

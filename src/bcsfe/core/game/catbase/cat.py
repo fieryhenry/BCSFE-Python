@@ -835,6 +835,9 @@ class Cats:
     def get_unlocked_cats(self) -> list[Cat]:
         return [cat for cat in self.cats if cat.unlocked]
 
+    def get_non_unlocked_cats(self) -> list[Cat]:
+        return [cat for cat in self.cats if not cat.unlocked]
+
     def read_unitbuy(self, save_file: "core.SaveFile") -> UnitBuy:
         if self.unit_buy is None:
             self.unit_buy = UnitBuy(save_file)

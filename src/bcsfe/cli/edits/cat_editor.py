@@ -18,6 +18,9 @@ class CatEditor:
     def get_current_cats(self):
         return self.save_file.cats.get_unlocked_cats()
 
+    def get_non_unlocked_cats(self):
+        return self.save_file.cats.get_non_unlocked_cats()
+
     def filter_cats(self, cats: list["core.Cat"]) -> list["core.Cat"]:
         unlocked_cats = self.get_current_cats()
         return [cat for cat in cats if cat in unlocked_cats]
@@ -86,6 +89,7 @@ class CatEditor:
             "select_cats_name": self.select_name,
             "select_cats_rarity": self.select_rarity,
             "select_cats_gatya_banner": self.select_gatya_banner,
+            "select_cats_not_unlocked": self.get_non_unlocked_cats,
         }
         option_id = dialog_creator.ChoiceInput(
             list(options), list(options), [], {}, "select_cats", True

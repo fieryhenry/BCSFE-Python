@@ -1,5 +1,5 @@
 from typing import Optional
-from bcsfe.cli import dialog_creator, main, color
+from bcsfe.cli import dialog_creator, main, color, file_dialog
 from bcsfe import core
 
 
@@ -43,7 +43,10 @@ class ServerCLI:
             return
 
         save_file = server_handler.save_file
-        path = main.Main().save_save_dialog(save_file)
+        if file_dialog.FileDialog().filedialog is None:
+            path = core.SaveFile.get_saves_path().add("SAVE_DATA")
+        else:
+            path = main.Main().save_save_dialog(save_file)
         if path is None:
             return None
 

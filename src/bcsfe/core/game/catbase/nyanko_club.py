@@ -12,35 +12,35 @@ class NyankoClub:
         self,
         officer_id: int,
         total_renewal_times: int,
-        start_date: float,
-        end_date: float,
-        unknown_ts_1: float,
-        unknown_ts_2: float,
-        start_date_2: float,
-        end_date_2: float,
-        unknown_ts_3: float,
-        flag: int,
-        end_date_3: float,
+        start_date_now: float,
+        end_date_now: float,
+        start_date_next: float,
+        end_date_next: float,
+        start_date_total: float,
+        end_date_total: float,
+        time_error_end: float,
+        total_state_updates: int,
+        login_bonus_date: float,
         claimed_rewards: dict[int, int],
-        unknown_ts_4: float,
-        unknown_bool_1: bool,
-        unknown_bool_2: Optional[bool] = None,
+        remaing_days_popup: float,
+        first_popup_flag: bool,
+        badge_flag: Optional[bool] = None,
     ):
         self.officer_id = officer_id
         self.total_renewal_times = total_renewal_times
-        self.start_date = start_date
-        self.end_date = end_date
-        self.unknown_ts_1 = unknown_ts_1
-        self.unknown_ts_2 = unknown_ts_2
-        self.start_date_2 = start_date_2
-        self.end_date_2 = end_date_2
-        self.unknown_ts_3 = unknown_ts_3
-        self.flag = flag
-        self.end_date_3 = end_date_3
+        self.start_date_now = start_date_now
+        self.end_date_now = end_date_now
+        self.start_date_next = start_date_next
+        self.end_date_next = end_date_next
+        self.start_date_total = start_date_total
+        self.end_date_total = end_date_total
+        self.time_error_end = time_error_end
+        self.total_state_updates = total_state_updates
+        self.login_bonus_date = login_bonus_date
         self.claimed_rewards = claimed_rewards
-        self.unknown_ts_4 = unknown_ts_4
-        self.unknown_bool_1 = unknown_bool_1
-        self.unknown_bool_2 = unknown_bool_2
+        self.remaing_days_popup = remaing_days_popup
+        self.first_popup_flag = first_popup_flag
+        self.badge_flag = badge_flag
 
     @staticmethod
     def init() -> "NyankoClub":
@@ -66,75 +66,75 @@ class NyankoClub:
     def read(data: "core.Data", gv: "core.GameVersion") -> "NyankoClub":
         officer_id = data.read_int()
         total_renewal_times = data.read_int()
-        start_date = data.read_double()
-        end_date = data.read_double()
-        unknown_ts_1 = data.read_double()
-        unknown_ts_2 = data.read_double()
-        start_date_2 = data.read_double()
-        end_date_2 = data.read_double()
-        unknown_ts_3 = data.read_double()
-        flag = data.read_int()
-        end_date_3 = data.read_double()
+        start_date_now = data.read_double()
+        end_date_now = data.read_double()
+        start_date_next = data.read_double()
+        end_date_next = data.read_double()
+        start_date_total = data.read_double()
+        end_date_total = data.read_double()
+        time_error_end = data.read_double()
+        total_state_updates = data.read_int()
+        login_bonus_date = data.read_double()
         claimed_rewards = data.read_int_int_dict()
-        unknown_ts_4 = data.read_double()
-        unknown_bool_1 = data.read_bool()
+        remaing_days_popup = data.read_double()
+        first_popup_flag = data.read_bool()
         if gv >= 80100:
-            unknown_bool_2 = data.read_bool()
+            badge_flag = data.read_bool()
         else:
-            unknown_bool_2 = None
+            badge_flag = None
         return NyankoClub(
             officer_id,
             total_renewal_times,
-            start_date,
-            end_date,
-            unknown_ts_1,
-            unknown_ts_2,
-            start_date_2,
-            end_date_2,
-            unknown_ts_3,
-            flag,
-            end_date_3,
+            start_date_now,
+            end_date_now,
+            start_date_next,
+            end_date_next,
+            start_date_total,
+            end_date_total,
+            time_error_end,
+            total_state_updates,
+            login_bonus_date,
             claimed_rewards,
-            unknown_ts_4,
-            unknown_bool_1,
-            unknown_bool_2,
+            remaing_days_popup,
+            first_popup_flag,
+            badge_flag,
         )
 
     def write(self, data: "core.Data", gv: "core.GameVersion"):
         data.write_int(self.officer_id)
         data.write_int(self.total_renewal_times)
-        data.write_double(self.start_date)
-        data.write_double(self.end_date)
-        data.write_double(self.unknown_ts_1)
-        data.write_double(self.unknown_ts_2)
-        data.write_double(self.start_date_2)
-        data.write_double(self.end_date_2)
-        data.write_double(self.unknown_ts_3)
-        data.write_int(self.flag)
-        data.write_double(self.end_date_3)
+        data.write_double(self.start_date_now)
+        data.write_double(self.end_date_now)
+        data.write_double(self.start_date_next)
+        data.write_double(self.end_date_next)
+        data.write_double(self.start_date_total)
+        data.write_double(self.end_date_total)
+        data.write_double(self.time_error_end)
+        data.write_int(self.total_state_updates)
+        data.write_double(self.login_bonus_date)
         data.write_int_int_dict(self.claimed_rewards)
-        data.write_double(self.unknown_ts_4)
-        data.write_bool(self.unknown_bool_1)
+        data.write_double(self.remaing_days_popup)
+        data.write_bool(self.first_popup_flag)
         if gv >= 80100:
-            data.write_bool(self.unknown_bool_2 or False)
+            data.write_bool(self.badge_flag or False)
 
     def serialize(self) -> dict[str, Any]:
         return {
             "officer_id": self.officer_id,
             "total_renewal_times": self.total_renewal_times,
-            "start_date": self.start_date,
-            "end_date": self.end_date,
-            "unknown_ts_1": self.unknown_ts_1,
-            "unknown_ts_2": self.unknown_ts_2,
-            "start_date_2": self.start_date_2,
-            "end_date_2": self.end_date_2,
-            "unknown_ts_3": self.unknown_ts_3,
-            "flag": self.flag,
-            "end_date_3": self.end_date_3,
+            "start_date_now": self.start_date_now,
+            "end_date_now": self.end_date_now,
+            "start_date_next": self.start_date_next,
+            "end_date_next": self.end_date_next,
+            "start_date_total": self.start_date_total,
+            "end_date_total": self.end_date_total,
+            "time_error_end": self.time_error_end,
+            "total_state_updates": self.total_state_updates,
+            "login_bonus_date": self.login_bonus_date,
             "claimed_rewards": self.claimed_rewards,
-            "unknown_ts_4": self.unknown_ts_4,
-            "unknown_bool_1": self.unknown_bool_1,
-            "unknown_bool_2": self.unknown_bool_2,
+            "remaing_days_popup": self.remaing_days_popup,
+            "first_popup_flag": self.first_popup_flag,
+            "badge_flag": self.badge_flag,
         }
 
     @staticmethod
@@ -142,19 +142,19 @@ class NyankoClub:
         return NyankoClub(
             data.get("officer_id", 0),
             data.get("total_renewal_times", 0),
-            data.get("start_date", 0.0),
-            data.get("end_date", 0.0),
-            data.get("unknown_ts_1", 0.0),
-            data.get("unknown_ts_2", 0.0),
-            data.get("start_date_2", 0.0),
-            data.get("end_date_2", 0.0),
-            data.get("unknown_ts_3", 0.0),
-            data.get("flag", 0),
-            data.get("end_date_3", 0.0),
+            data.get("start_date_now", 0.0),
+            data.get("end_date_now", 0.0),
+            data.get("start_date_next", 0.0),
+            data.get("end_date_next", 0.0),
+            data.get("start_date_total", 0.0),
+            data.get("end_date_total", 0.0),
+            data.get("time_error_end", 0.0),
+            data.get("total_state_updates", 0),
+            data.get("login_bonus_date", 0.0),
             data.get("claimed_rewards", {}),
-            data.get("unknown_ts_4", 0.0),
-            data.get("unknown_bool_1", False),
-            data.get("unknown_bool_2", False),
+            data.get("remaing_days_popup", 0.0),
+            data.get("first_popup_flag", False),
+            data.get("badge_flag", False),
         )
 
     def __repr__(self):
@@ -167,33 +167,33 @@ class NyankoClub:
         self, officer_id: int, total_days: int, save_file: "core.SaveFile"
     ):
         self.officer_id = officer_id
-        start_date = int(time.time())
-        end_date = start_date + datetime.timedelta(days=total_days).total_seconds()
-        end_date_2 = (
-            start_date + datetime.timedelta(days=total_days * 2).total_seconds()
+        start_date_now = int(time.time())
+        end_date_now = (
+            start_date_now + datetime.timedelta(days=total_days).total_seconds()
+        )
+        end_date_total = (
+            start_date_now + datetime.timedelta(days=total_days * 2).total_seconds()
         )
 
-        self.officer_id = officer_id
-        self.total_renewal_times += 1
-        self.total_renewal_times = max(2, self.total_renewal_times)
-        self.start_date = start_date
-        self.end_date = end_date
+        self.total_renewal_times = 2
+        self.start_date_now = start_date_now
+        self.end_date_now = end_date_now
 
-        self.unknown_ts_1 = end_date
-        self.unknown_ts_2 = end_date_2
+        self.start_date_next = end_date_now
+        self.end_date_next = end_date_total
 
-        self.start_date_2 = start_date
-        self.end_date_2 = end_date_2
+        self.start_date_total = start_date_now
+        self.end_date_total = end_date_total
 
-        self.unknown_ts_3 = start_date
+        self.time_error_end = start_date_now
 
-        self.flag = 2
+        self.total_state_updates = 2
 
-        self.end_date_3 = end_date
+        self.login_bonus_date = end_date_now
 
-        self.unknown_ts_4 = 0.0
-        self.unknown_bool_1 = True
-        self.unknown_bool_2 = False
+        self.remaing_days_popup = 0.0
+        self.first_popup_flag = True
+        self.badge_flag = False
 
         login = save_file.logins.get_login(5100)
         if login is not None:
@@ -204,18 +204,18 @@ class NyankoClub:
     def remove_gold_pass(self, save_file: "core.SaveFile"):
         self.officer_id = -1
         self.total_renewal_times = 0
-        self.start_date = 0.0
-        self.end_date = 0.0
-        self.unknown_ts_1 = 0.0
-        self.unknown_ts_2 = 0.0
-        self.start_date_2 = 0.0
-        self.end_date_2 = 0.0
-        self.unknown_ts_3 = 0.0
-        self.flag = 0
-        self.end_date_3 = 0.0
-        self.unknown_ts_4 = 0.0
-        self.unknown_bool_1 = False
-        self.unknown_bool_2 = False
+        self.start_date_now = 0.0
+        self.end_date_now = 0.0
+        self.start_date_next = 0.0
+        self.end_date_next = 0.0
+        self.start_date_total = 0.0
+        self.end_date_total = 0.0
+        self.time_error_end = 0.0
+        self.total_state_updates = 0
+        self.login_bonus_date = 0.0
+        self.remaing_days_popup = 0.0
+        self.first_popup_flag = False
+        self.badge_flag = False
 
         login = save_file.logins.get_login(5100)
         if login is not None:

@@ -113,7 +113,7 @@ class Upgrade:
         else:
             range_parts = base.split("-")
             if len(range_parts) == 1:
-                if range_parts[0] == max_text:
+                if range_parts[0].strip() == max_text:
                     min_base = max_pos_base
                     max_base = max_pos_base
                 else:
@@ -142,7 +142,7 @@ class Upgrade:
         else:
             range_parts = plus.split("-")
             if len(range_parts) == 1:
-                if range_parts[0] == max_text:
+                if range_parts[0].strip() == max_text:
                     min_plus = max_pos_plus
                     max_plus = max_pos_plus
                 else:

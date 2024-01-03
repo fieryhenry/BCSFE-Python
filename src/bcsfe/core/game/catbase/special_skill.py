@@ -178,6 +178,7 @@ class SpecialSkills:
         ability_data = core.core_data.get_ability_data(save_file)
         if ability_data.ability_data is None:
             return
+        success = False
         if option_id == 0:
             for id in ids:
                 color.ColoredText.localize(
@@ -192,15 +193,17 @@ class SpecialSkills:
                 upgrade, should_exit = core.Upgrade.get_user_upgrade(
                     ability.max_base_level - 1, ability.max_plus_level
                 )
-                if should_exit or upgrade is None:
+                if should_exit:
                     return
-                skills[id].set_upgrade(upgrade)
-                color.ColoredText.localize(
-                    "selected_skill_upgraded",
-                    name=names[id],
-                    base_level=skills[id].upgrade.base + 1,
-                    plus_level=skills[id].upgrade.plus,
-                )
+                if upgrade is not None:
+                    skills[id].set_upgrade(upgrade)
+                    color.ColoredText.localize(
+                        "selected_skill_upgraded",
+                        name=names[id],
+                        base_level=skills[id].upgrade.base + 1,
+                        plus_level=skills[id].upgrade.plus,
+                    )
+                    success = True
 
         elif option_id == 1:
             max_base_level = max(
@@ -228,8 +231,10 @@ class SpecialSkills:
                     base_level=skills[id].upgrade.base + 1,
                     plus_level=skills[id].upgrade.plus,
                 )
+            success = True
 
-        color.ColoredText.localize("skills_edited")
+        if success:
+            color.ColoredText.localize("skills_edited")
 
 
 class AbilityDataItem:

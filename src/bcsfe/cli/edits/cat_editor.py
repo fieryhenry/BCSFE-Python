@@ -335,6 +335,7 @@ class CatEditor:
             if option_id is None:
                 return
             option_id -= 1
+        success = False
         if option_id == 0:
             localizable = self.save_file.get_localizable()
             for cat in cats:
@@ -366,6 +367,7 @@ class CatEditor:
                         base_level=cat.upgrade.base + 1,
                         plus_level=cat.upgrade.plus,
                     )
+                    success = True
         else:
             power_up = core.PowerUpHelper(cats[0], self.save_file)
             upgrade, should_exit = core.Upgrade.get_user_upgrade(
@@ -374,12 +376,14 @@ class CatEditor:
             )
             if upgrade is None or should_exit:
                 return
+            success = True
             for cat in cats:
                 power_up = core.PowerUpHelper(cat, self.save_file)
                 power_up.reset_upgrade()
                 power_up.upgrade_by(upgrade.base)
                 cat.set_upgrade(self.save_file, upgrade, True)
-        color.ColoredText.localize("upgrade_success")
+        if success:
+            color.ColoredText.localize("upgrade_success")
 
     def get_cat_talents(
         self, talent_data: "core.TalentData", cat: "core.Cat"

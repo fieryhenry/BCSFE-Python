@@ -28,8 +28,10 @@ or scroll down for a text tutorial
 
 If you only have an android device: read the [Android text tutorial](https://github.com/fieryhenry/BCSFE-Python#android-tutorial)
 
-If you only have an ios device: watch the
-[IOS tutorial video](https://www.youtube.com/watch?v=xw-uOqQRYJ8) (Made by Viarules)
+If you only have an ios device: watch the [IOS tutorial
+video](https://www.youtube.com/watch?v=xw-uOqQRYJ8) (Made by Viarules, NOTE:
+Some people have said that ish is really slow, and you should use a-shell
+instead)
 
 ## Main tutorial
 

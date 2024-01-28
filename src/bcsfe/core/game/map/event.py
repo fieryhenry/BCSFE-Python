@@ -71,7 +71,11 @@ class EventSubChapter:
         self.clear_progress = len(self.stages)
         self.chapter_unlock_state = 3
         for stage in self.stages:
-            stage.clear_stage(increment)
+            if increment:
+                clear_amount = stage.clear_amount + 1
+            else:
+                clear_amount = stage.clear_amount or 1
+            stage.clear_stage(clear_amount)
         return True
 
     @staticmethod
@@ -610,14 +614,14 @@ class EventChapters:
         if gv < 20:
             return
         if gv < 33:
-            total_map_types = 3
-            total_subchapters = 150
+            total_map_types = 3  # type: ignore
+            total_subchapters = 150  # type: ignore
         elif gv < 41:
-            total_map_types = 4
-            total_subchapters = 150
+            total_map_types = 4  # type: ignore
+            total_subchapters = 150  # type: ignore
         else:
-            total_map_types = data.read_int()
-            total_subchapters = data.read_int()
+            total_map_types = data.read_int()  # type: ignore
+            total_subchapters = data.read_int()  # type: ignore
 
         for chapter in self.chapters:
             chapter.read_legend_restrictions(data)

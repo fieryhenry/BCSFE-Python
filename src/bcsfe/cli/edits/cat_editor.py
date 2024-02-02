@@ -171,6 +171,8 @@ class CatEditor:
                     cat_names.append(name)
                     cat_list.append(cat)
                     break
+        if len(cat_names) == 1:
+            color.ColoredText(f"<@t>{cat_names[0]}</>")
         cat_option_ids, _ = dialog_creator.ChoiceInput(
             cat_names, cat_names, [], {}, "select_name"
         ).multiple_choice()
@@ -255,7 +257,7 @@ class CatEditor:
         reset = core.core_data.config.get_bool(core.ConfigKey.RESET_CAT_DATA)
         cats = self.get_save_cats(cats)
         for cat in cats:
-            cat.remove(reset=reset)
+            cat.remove(reset=reset, save_file=self.save_file)
         color.ColoredText.localize("remove_success")
 
     def get_save_cats(self, cats: list["core.Cat"]):

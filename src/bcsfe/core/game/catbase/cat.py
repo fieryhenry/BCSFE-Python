@@ -520,6 +520,9 @@ class Cat:
             self.reset()
             if save_file is not None:
                 save_file.cats.chara_new_flags[self.id] = 0
+                core.core_data.get_chara_drop(save_file).remove_drops_from_cat_id(
+                    self.id
+                )
 
     def true_form(self, save_file: "core.SaveFile", set_current_form: bool = True):
         self.set_form(2, save_file, set_current_form)

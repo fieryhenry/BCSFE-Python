@@ -62,3 +62,13 @@ class CharaDrop:
                 self.save_file.unit_drops[drop.save_id] = 1
             except IndexError:
                 pass
+
+    def remove_drops_from_cat_id(self, cat_id: int) -> None:
+        drops = self.get_drops_from_chara_id(cat_id)
+        if drops is None:
+            return
+        for drop in drops:
+            try:
+                self.save_file.unit_drops[drop.save_id] = 0
+            except IndexError:
+                pass

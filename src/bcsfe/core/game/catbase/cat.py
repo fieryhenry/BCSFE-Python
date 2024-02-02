@@ -514,10 +514,12 @@ class Cat:
         core.core_data.get_chara_drop(save_file).unlock_drops_from_cat_id(self.id)
         save_file.unlock_equip_menu()
 
-    def remove(self, reset: bool = False):
+    def remove(self, reset: bool = False, save_file: Optional["core.SaveFile"] = None):
         self.unlocked = 0
         if reset:
             self.reset()
+            if save_file is not None:
+                save_file.cats.chara_new_flags[self.id] = 0
 
     def true_form(self, save_file: "core.SaveFile", set_current_form: bool = True):
         self.set_form(2, save_file, set_current_form)
@@ -671,9 +673,11 @@ class Cat:
             "catguide_collected": self.catguide_collected,
             "forth_form": self.forth_form,
             "catseyes_used": self.catseyes_used,
-            "talents": [talent.serialize() for talent in self.talents]
-            if self.talents is not None
-            else None,
+            "talents": (
+                [talent.serialize() for talent in self.talents]
+                if self.talents is not None
+                else None
+            ),
         }
 
     @staticmethod

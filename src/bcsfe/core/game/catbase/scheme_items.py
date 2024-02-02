@@ -138,12 +138,28 @@ class SchemeItems:
             string = string.replace("<br>", "\n\t")
             options.append(string)
 
-        scheme_ids, _ = dialog_creator.ChoiceInput(
+        choice = dialog_creator.ChoiceInput.from_reduced(
+            ["gain_scheme_items", "remove_scheme_items"],
+            dialog="gain_remove_scheme_items",
+        ).single_choice()
+        if choice is None:
+            return
+
+        choice -= 1
+
+        if choice == 0:
+            self.add_scheme_items(options, scheme_items)
+        elif choice == 1:
+            self.remove_scheme_items(options, scheme_items)
+
+    def add_scheme_items(
+        self,
+        options: list[str],
+        scheme_items: dict[int, SchemeDataItem],
+    ):
+        scheme_ids, _ = dialog_creator.ChoiceInput.from_reduced(
             options,
-            options,
-            [],
-            {},
-            "scheme_items_select",
+            dialog="scheme_items_select_gain",
         ).multiple_choice()
         if scheme_ids is None:
             return
@@ -151,6 +167,26 @@ class SchemeItems:
             scheme_id = list(scheme_items.keys())[option_id]
             if scheme_id not in self.to_obtain:
                 self.to_obtain.append(scheme_id)
+            if scheme_id in self.received:
+                self.received.remove(scheme_id)
+
+        color.ColoredText.localize("scheme_items_edit_success")
+
+    def remove_scheme_items(
+        self,
+        options: list[str],
+        scheme_items: dict[int, SchemeDataItem],
+    ):
+        scheme_ids, _ = dialog_creator.ChoiceInput.from_reduced(
+            options,
+            dialog="scheme_items_select_remove",
+        ).multiple_choice()
+        if scheme_ids is None:
+            return
+        for option_id in scheme_ids:
+            scheme_id = list(scheme_items.keys())[option_id]
+            if scheme_id in self.to_obtain:
+                self.to_obtain.remove(scheme_id)
             if scheme_id in self.received:
                 self.received.remove(scheme_id)
 

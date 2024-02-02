@@ -12,7 +12,7 @@ def get_available_chapters(outbreaks: dict[int, Any]) -> list[str]:
     for chapter_index in outbreaks:
         if chapter_index > 2:
             chapter_index -= 1
-        if chapter_index > 6:
+        if chapter_index > 7:
             continue
         available_chapters.append(main_story.CHAPTERS[chapter_index])
     return available_chapters

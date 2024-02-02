@@ -117,6 +117,7 @@ FEATURES: dict[str, Any] = {
         "Event Stages": levels.event_stages.event_stages,
         "Stories of Legend": levels.event_stages.stories_of_legend,
         "Uncanny Legends": levels.uncanny.edit_uncanny,
+        "Zero Legends": levels.zerolegends.edit_zl,
         "Aku Realm/Gates Clearing": levels.aku.edit_aku,
         "Unlock the Aku Realm/Gates": levels.unlock_aku_realm.unlock_aku_realm,
         "Gauntlets": levels.gauntlet.edit_gauntlet,

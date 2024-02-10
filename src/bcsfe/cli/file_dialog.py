@@ -91,7 +91,7 @@ class FileDialog:
         if self.filedialog is None:
             color.ColoredText.localize(title)
             path = color.ColoredInput().localize(
-                "tkinter_not_found_enter_path_file", initialfile=initialfile
+                "tkinter_not_found_enter_path_file_save", initialfile=initialfile
             )
             return path.strip().strip("'").strip('"') if path else None
         return (

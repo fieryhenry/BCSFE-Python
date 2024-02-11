@@ -235,9 +235,14 @@ class BasicItems:
             new_names.append(name)
         names = new_names
 
-        max_value = core.core_data.max_value_manager.get_new("catfruit")
         if save_file.game_version < 110400:
             max_value = core.core_data.max_value_manager.get_old("catfruit")
+            cumulative_max = True
+        else:
+            max_value = core.core_data.max_value_manager.get_new("catfruit")
+            cumulative_max = False
+
+        names = names[: len(save_file.catfruit)]
 
         values = dialog_creator.MultiEditor.from_reduced(
             "catfruit",
@@ -245,7 +250,7 @@ class BasicItems:
             save_file.catfruit,
             max_value,
             group_name_localized=True,
-            cumulative_max=True,
+            cumulative_max=cumulative_max,
         ).edit()
         save_file.catfruit = values
 

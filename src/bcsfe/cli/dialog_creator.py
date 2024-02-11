@@ -495,6 +495,7 @@ class MultiEditor:
 
             if self.cumulative_max:
                 max_value -= sum(ints) - ints[choice]
+                max_value = max(max_value, 0)
 
             item = self.items[choice]
             usr_input = IntInput(

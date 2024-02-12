@@ -1844,6 +1844,7 @@ class SaveFile:
         core.Thread("to_file", self.to_file, [path]).start()
 
     def to_file(self, path: "core.Path") -> None:
+        path.parent().generate_dirs()
         dt = self.to_data()
         dt.to_file(path)
 
@@ -3136,9 +3137,9 @@ class SaveFile:
         if overwrite:
             for i, order in enumerate(self.order_ids):
                 if order.startswith(SaveFile.get_string_identifier(identifier)):
-                    self.order_ids[
-                        i
-                    ] = f"{SaveFile.get_string_identifier(identifier)}:{string}"
+                    self.order_ids[i] = (
+                        f"{SaveFile.get_string_identifier(identifier)}:{string}"
+                    )
                     return
         self.order_ids.append(f"{SaveFile.get_string_identifier(identifier)}:{string}")
 
@@ -3199,7 +3200,7 @@ class SaveFile:
 
     @staticmethod
     def get_saves_path() -> "core.Path":
-        return core.Path.get_documents_folder().add("saves")
+        return core.Path.get_documents_folder().add("saves").generate_dirs()
 
     def get_default_path(self) -> "core.Path":
         core.Thread("check-backups", SaveFile.check_backups, []).start()

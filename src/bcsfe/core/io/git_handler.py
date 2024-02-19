@@ -66,7 +66,8 @@ class Repo:
 
     def is_cloned(self) -> bool:
         return (
-            len(self.get_path().get_dirs()) > 0 or len(self.get_path().get_files()) > 0
+            len(self.get_path().get_dirs()) > 0
+            or len(self.get_path().get_paths_dir()) > 0
         )
 
 

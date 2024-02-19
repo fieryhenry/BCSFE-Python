@@ -1,4 +1,3 @@
-from typing import Optional
 from bcsfe import core
 from bcsfe.core import io
 from bcsfe.cli import dialog_creator, color
@@ -8,14 +7,29 @@ class DeviceIDNotSet(Exception):
     pass
 
 
+class AdbNotInstalled(Exception):
+    pass
+
+
 class AdbHandler(io.root_handler.RootHandler):
-    def __init__(self, adb_path: Optional["core.Path"] = None):
-        if adb_path is None:
-            adb_path = core.Path("adb")
+    def __init__(self):
+        adb_path = core.Path(core.core_data.config.get_str(core.ConfigKey.ADB_PATH))
+        if not self.is_adb_installed(adb_path):
+            raise AdbNotInstalled("Adb is not in PATH environment variable.")
         self.adb_path = adb_path
         self.start_server()
         self.device_id = None
         self.package_name = None
+
+    @staticmethod
+    def display_no_adb_error():
+        color.ColoredText.localize(
+            "adb_not_installed",
+            path=core.core_data.config.get_str(core.ConfigKey.ADB_PATH),
+        )
+
+    def is_adb_installed(self, path: "core.Path") -> bool:
+        return path.run("version").success
 
     def adb_root_success(self) -> bool:
         return (

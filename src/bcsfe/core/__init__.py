@@ -86,7 +86,7 @@ from bcsfe.core.game.map.uncanny import UncannyChapters
 from bcsfe.core.game.map.zero_legends import ZeroLegendsChapters
 from bcsfe.core.game.map.map_names import MapNames
 from bcsfe.core.game_version import GameVersion
-from bcsfe.core.io.adb_handler import AdbHandler
+from bcsfe.core.io.adb_handler import AdbHandler, AdbNotInstalled
 from bcsfe.core.io.bc_csv import CSV, Delimeter, Row
 from bcsfe.core.io.command import Command, CommandResult
 from bcsfe.core.io.config import Config, ConfigKey
@@ -258,6 +258,7 @@ __all__ = [
     "theme_handler",
     "max_value_helper",
     "AdbHandler",
+    "AdbNotInstalled",
     "CountryCode",
     "Path",
     "Data",

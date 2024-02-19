@@ -96,7 +96,7 @@ class SaveManagement:
             color.ColoredText.localize("create_new_account_fail")
 
     @staticmethod
-    def adb_push(save_file: "core.SaveFile") -> "core.AdbHandler":
+    def adb_push(save_file: "core.SaveFile") -> Optional["core.AdbHandler"]:
         """Push the save file to the device.
 
         Args:
@@ -106,7 +106,11 @@ class SaveManagement:
             core.AdbHandler: The AdbHandler instance.
         """
         SaveManagement.save_save(save_file)
-        adb_handler = core.AdbHandler()
+        try:
+            adb_handler = core.AdbHandler()
+        except core.AdbNotInstalled:
+            core.AdbHandler.display_no_adb_error()
+            return None
         success = adb_handler.select_device()
         if not success:
             return adb_handler
@@ -137,6 +141,8 @@ class SaveManagement:
             save_file (core.SaveFile): The save file to push.
         """
         adb_handler = SaveManagement.adb_push(save_file)
+        if not adb_handler:
+            return
         if adb_handler.package_name is None:
             return
         result = adb_handler.rerun_game()
@@ -257,7 +263,11 @@ class SaveManagement:
         elif choice == 2:
             handler = root_handler
             if not root_handler.is_android():
-                handler = core.AdbHandler()
+                try:
+                    handler = core.AdbHandler()
+                except core.AdbNotInstalled:
+                    core.AdbHandler.display_no_adb_error()
+                    return None
                 if not handler.select_device():
                     return None
 

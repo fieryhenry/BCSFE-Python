@@ -1,5 +1,6 @@
 from typing import Any, Optional
 from bcsfe import core
+import bcsfe
 
 
 class Updater:
@@ -9,7 +10,7 @@ class Updater:
         pass
 
     def get_local_version(self) -> str:
-        return core.Path("version.txt", is_relative=True).read().to_str().strip()
+        return bcsfe.__version__
 
     def get_pypi_json(self) -> Optional[dict[str, Any]]:
         url = f"https://pypi.org/pypi/{self.package_name}/json"

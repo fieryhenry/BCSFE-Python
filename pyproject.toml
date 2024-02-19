@@ -1,10 +1,42 @@
 [build-system]
-requires = ["setuptools>=42", "wheel"]
+requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
-[tool.pytest.ini_options]
-addopts = ["--cov=bcsfe"]
-testpaths = ["tests"]
+[project]
+name = "bcsfe"
+authors = [{ name = "fieryhenry" }]
+description = "A save file editor for The Battle Cats"
+license = { text = "MIT License" }
+readme = "README.md"
+requires-python = ">=3.9"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: End Users/Desktop",
+    "Topic :: Utilities",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "aenum",
+    "colored==1.4.4",
+    "pyjwt",
+    "requests",
+    "pyyaml",
+    "beautifulsoup4",
+]
+dynamic = ["version"]
+keywords = ["battle cats", "save editor", "hacking"]
 
-[tool.mypi]
-mypi_path = "src"
+[project.urls]
+Homepage = "https://github.com/fieryhenry/BCSFE-Python"
+Repository = "https://github.com/fieryhenry/BCSFE-Python"
+Issues = "https://github.com/fieryhenry/BCSFE-Python/issues"
+Changelog = "https://github.com/fieryhenry/BCSFE-Python/blob/master/CHANGELOG.md"
+
+[tool.setuptools.dynamic]
+version = { attr = "bcsfe.__version__" }
+
+[tool.setuptools]
+package-dir = { "" = "src" }

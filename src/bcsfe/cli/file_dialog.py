@@ -1,5 +1,5 @@
 from bcsfe import core
-from bcsfe.cli import color
+from bcsfe.cli import color, dialog_creator
 from typing import Optional
 
 
@@ -14,7 +14,6 @@ class FileDialog:
         except ImportError:
             self.tk = None
             self.filedialog = None
-            color.ColoredText.localize("tkinter_not_found")
 
     def __init__(self):
         self.load_tk()
@@ -24,30 +23,87 @@ class FileDialog:
             except self.tk.TclError:
                 self.tk = None
                 self.filedialog = None
-                color.ColoredText.localize("tkinter_not_found")
                 return
 
             self.root.withdraw()
             self.root.wm_attributes("-topmost", 1)  # type: ignore
 
+    def select_files_in_dir(
+        self, path: "core.Path", ignore_json: bool
+    ) -> Optional[str]:
+        """Print current files in directory.
+
+        Args:
+            path (core.Path): Path to directory.
+        """
+        color.ColoredText.localize("current_files_dir", dir=path)
+        path.generate_dirs()
+        files = path.get_files()
+        if not files:
+            color.ColoredText.localize("no_files_dir")
+
+        files.sort(key=lambda file: file.basename())
+
+        # remove files with .json extension
+        if ignore_json:
+            files = [file for file in files if file.get_extension() != "json"]
+
+        files_str_ls = [file.basename() for file in files]
+        options = files_str_ls + ["other_dir", "another_path"]
+
+        choice = dialog_creator.ChoiceInput.from_reduced(
+            options, dialog="select_files_dir", single_choice=True
+        ).single_choice()
+        if choice is None:
+            return
+
+        choice -= 1
+        if choice == len(files):
+            path_input = color.ColoredInput().localize("enter_path_dir")
+            path_obj = core.Path(path_input)
+            if path_obj.is_relative():
+                path_obj = path.add(path_obj)
+            if not path_obj.exists():
+                color.ColoredText.localize("path_not_exists", path=path_obj)
+                return self.select_files_in_dir(path, ignore_json)
+            return self.select_files_in_dir(path_obj, ignore_json)
+        if choice == len(files) + 1:
+            path_input = color.ColoredInput().localize("enter_path")
+            return path_input or None
+        return files[choice].to_str()
+
+    def use_tk(self) -> bool:
+        return (
+            self.tk is not None
+            and self.filedialog is not None
+            and core.core_data.config.get_bool(core.ConfigKey.USE_FILE_DIALOG)
+        )
+
     def get_file(
         self,
         title: str,
+        initialdir: str,
+        initialfile: str,
         filetypes: Optional[list[tuple[str, str]]] = None,
-        initialdir: str = "",
-        initialfile: str = "",
+        ignore_json: bool = False,
     ) -> Optional[str]:
         if filetypes is None:
             filetypes = []
         title = core.core_data.local_manager.get_key(title)
-        if self.filedialog is None:
+        if not self.use_tk():
+            curr_path = core.Path(initialdir).add(initialfile)
             color.ColoredText.localize(title)
-            path = color.ColoredInput().localize(
-                "tkinter_not_found_enter_path_file", initialfile=initialfile
-            )
-            return path.strip().strip("'").strip('"') if path else None
+            file = self.select_files_in_dir(curr_path.parent(), ignore_json)
+            if file is None:
+                return None
+            path_obj = core.Path(file)
+            if path_obj.exists():
+                return file
+            color.ColoredText.localize("path_not_exists", path=path_obj)
+            return None
+
         return (
-            self.filedialog.askopenfilename(
+            self.filedialog.askopenfilename(  # type: ignore
                 title=title,
                 filetypes=filetypes,
                 initialdir=initialdir,
@@ -56,23 +112,12 @@ class FileDialog:
             or None
         )
 
-    def get_directory(self, title: str, initialdir: str = "") -> Optional[str]:
-        title = core.core_data.local_manager.get_key(title)
-        if self.filedialog is None:
-            color.ColoredText.localize(title)
-            path = color.ColoredInput().localize(
-                "tkinter_not_found_enter_path_dir", initialdir=initialdir
-            )
-            return path.strip().strip("'").strip('"') if path else None
-
-        return self.filedialog.askdirectory(title=title, initialdir=initialdir) or None
-
     def save_file(
         self,
         title: str,
+        initialdir: str,
+        initialfile: str,
         filetypes: Optional[list[tuple[str, str]]] = None,
-        initialdir: str = "",
-        initialfile: str = "",
     ) -> Optional[str]:
         """Save file dialog
 
@@ -88,14 +133,13 @@ class FileDialog:
         if filetypes is None:
             filetypes = []
         title = core.core_data.local_manager.get_key(title)
-        if self.filedialog is None:
+        if not self.use_tk():
+            def_path = core.Path(initialdir).add(initialfile).to_str()
             color.ColoredText.localize(title)
-            path = color.ColoredInput().localize(
-                "tkinter_not_found_enter_path_file_save", initialfile=initialfile
-            )
-            return path.strip().strip("'").strip('"') if path else None
+            path = color.ColoredInput().localize("enter_path_default", default=def_path)
+            return path.strip().strip("'").strip('"') if path else def_path
         return (
-            self.filedialog.asksaveasfilename(
+            self.filedialog.asksaveasfilename(  # type: ignore
                 title=title,
                 filetypes=filetypes,
                 initialdir=initialdir,

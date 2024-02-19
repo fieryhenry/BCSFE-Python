@@ -168,7 +168,9 @@ class Main:
             core.Path: Path to save file.
         """
         path = file_dialog.FileDialog().save_file(
-            "save_json_dialog", initialfile="SAVE_DATA.json"
+            "save_json_dialog",
+            initialfile="SAVE_DATA.json",
+            initialdir=core.SaveFile.get_saves_path().to_str(),
         )
         if path is None:
             return None
@@ -188,6 +190,7 @@ class Main:
             "select_save_file",
             initialdir=core.SaveFile.get_saves_path().to_str(),
             initialfile="SAVE_DATA",
+            ignore_json=True,
         )
         if path is None:
             return None
@@ -202,7 +205,9 @@ class Main:
             core.Path: Path to save file.
         """
         path = file_dialog.FileDialog().get_file(
-            "load_save_data_json", initialfile="SAVE_DATA.json"
+            "load_save_data_json",
+            initialfile="SAVE_DATA.json",
+            initialdir=core.SaveFile.get_saves_path().to_str(),
         )
         if path is None:
             return None

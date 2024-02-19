@@ -3226,7 +3226,7 @@ class SaveFile:
         all_saves: list[tuple[core.Path, datetime.datetime]] = []
         for cc in saves_path.get_dirs():
             for inquiry in cc.get_dirs():
-                for save in inquiry.get_files():
+                for save in inquiry.get_paths_dir():
                     name = save.basename()
                     try:
                         date = datetime.datetime.strptime(name, "%Y-%m-%d_%H-%M-%S")
@@ -3244,7 +3244,7 @@ class SaveFile:
             if len(dirs) == 0:
                 cc.remove()
             for inquiry in dirs:
-                saves = inquiry.get_files()
+                saves = inquiry.get_paths_dir()
                 if len(saves) == 0:
                     inquiry.remove()
 

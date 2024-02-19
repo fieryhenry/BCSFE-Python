@@ -86,11 +86,13 @@ class ThemeHandler:
     def get_all_themes() -> list[str]:
         themes = [
             file.get_file_name_without_extension()
-            for file in ThemeHandler.get_themes_folder().get_files(regex=r".*\.json")
+            for file in ThemeHandler.get_themes_folder().get_paths_dir(
+                regex=r".*\.json"
+            )
         ]
         themes += [
             folder.get_file_name_without_extension()
-            for folder in ThemeHandler.get_external_themes_folder().get_files(
+            for folder in ThemeHandler.get_external_themes_folder().get_paths_dir(
                 regex=r".*\.json"
             )
         ]
@@ -250,7 +252,7 @@ class ExternalThemeManager:
     @staticmethod
     def update_all_external_themes(_: Any = None):
         """Updates all external themes."""
-        files = ThemeHandler.get_external_themes_folder().get_files()
+        files = ThemeHandler.get_external_themes_folder().get_paths_dir()
         if not files:
             color.ColoredText.localize(
                 "no_external_themes",

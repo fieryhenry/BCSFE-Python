@@ -16,6 +16,9 @@ class Path:
         else:
             self.path = path
 
+    def is_relative(self) -> bool:
+        return not os.path.isabs(self.path)
+
     @staticmethod
     def get_root() -> "Path":
         return Path(os.sep)
@@ -109,13 +112,11 @@ class Path:
 
     @staticmethod
     @typing.overload
-    def join(*paths: str) -> "Path":
-        ...
+    def join(*paths: str) -> "Path": ...
 
     @staticmethod
     @typing.overload
-    def join(*paths: "Path") -> "Path":
-        ...
+    def join(*paths: "Path") -> "Path": ...
 
     @staticmethod
     def join(*paths: typing.Union[str, "Path"]) -> "Path":
@@ -123,12 +124,10 @@ class Path:
         return Path(os.path.join(*_paths))
 
     @typing.overload
-    def add(self, *paths: "Path") -> "Path":
-        ...
+    def add(self, *paths: "Path") -> "Path": ...
 
     @typing.overload
-    def add(self, *paths: str) -> "Path":
-        ...
+    def add(self, *paths: str) -> "Path": ...
 
     def add(self, *paths: typing.Union[str, "Path"]) -> "Path":
         _paths: list[str] = [str(path) for path in paths]
@@ -191,7 +190,7 @@ class Path:
     def write(self, data: "core.Data"):
         data.to_file(self)
 
-    def get_files(self, regex: typing.Optional[str] = None) -> list["Path"]:
+    def get_paths_dir(self, regex: typing.Optional[str] = None) -> list["Path"]:
         if self.exists():
             if regex is None:
                 return [self.add(file) for file in os.listdir(self.path)]
@@ -203,8 +202,14 @@ class Path:
                 return files
         return []
 
+    def get_files(self, regex: typing.Optional[str] = None) -> list["Path"]:
+        return [file for file in self.get_paths_dir(regex) if file.is_file()]
+
+    def is_file(self) -> bool:
+        return os.path.isfile(self.path)
+
     def get_dirs(self) -> list["Path"]:
-        return [file for file in self.get_files() if file.is_directory()]
+        return [file for file in self.get_paths_dir() if file.is_directory()]
 
     def glob(self, pattern: str, recursive: bool = False) -> list["Path"]:
         return [

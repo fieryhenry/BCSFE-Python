@@ -90,9 +90,9 @@ class FileDialog:
         if filetypes is None:
             filetypes = []
         title = core.core_data.local_manager.get_key(title)
+        color.ColoredText.localize(title)
         if not self.use_tk():
             curr_path = core.Path(initialdir).add(initialfile)
-            color.ColoredText.localize(title)
             file = self.select_files_in_dir(curr_path.parent(), ignore_json)
             if file is None:
                 return None
@@ -133,9 +133,9 @@ class FileDialog:
         if filetypes is None:
             filetypes = []
         title = core.core_data.local_manager.get_key(title)
+        color.ColoredText.localize(title)
         if not self.use_tk():
             def_path = core.Path(initialdir).add(initialfile).to_str()
-            color.ColoredText.localize(title)
             path = color.ColoredInput().localize("enter_path_default", default=def_path)
             return path.strip().strip("'").strip('"') if path else def_path
         return (

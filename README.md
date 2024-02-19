@@ -43,9 +43,6 @@ instead)
 1. Enter the command: `py -m bcsfe` to run the editor. If that doesn't work
 then use `python3` or `python` instead of `py` in the command
 
-1. Look below for the tutorial or watch [here](https://www.youtube.com/watch?v=Kr6VaLTXOSY)
-for a video
-
 1. Go into the in-game transfer system in `Settings-> Data Transfer` and
 click `Begin Data Transfer`
 
@@ -57,25 +54,41 @@ confirmation code` (enter the corresponding number, not the name itself)
 1. Enter your confirmation code
 
 1. Select the country code that you are using, `en`=english,
-`kr`=korean, `jp`=japanese, `tw`=taiwan.
+`kr`=korean, `jp`=japanese, `tw`=taiwanese.
 
 1. Edit what you want
 
 1. Go into the `Save Management` option and select `Save changes and upload to
-game servers (get transfer and confirmation codes)`. It may take some time
+game servers (get transfer and confirmation codes)`. It may take some time, it
+may also fail, if it does then try again
 
 1. Enter those codes into the game's transfer system (click on
 `Resume Data Transfer`) (You may need to `Cancel Data Transfer`
 in-game before doing so)
 
-### Using a rooted device
+### Using a rooted device via adb
 
-If you can't upload your save data using the in-game system you will need
-direct access to the save data or a copy of it.
+1. Add adb to your PATH environment variable, or edit the config to set ADB path
+  to the full path of the adb executable. You can download adb from
+  [adb](https://developer.android.com/studio/releases/platform-tools)
 
 1. Open the editor and select the option named `Pull save file from device
 using adb` and enter your game version, or select the option named
 `Select save file from file` and select a copy of your save data
+
+1. Edit what you want
+
+1. Go into save management and select an option to push save data to the game
+
+1. Enter the game and you should see changes
+
+### Using a rooted device directly
+
+1. You need to be running the editor on the device itself, so you'll need to
+follow the [Android tutorial](#android-tutorial) to install the editor
+
+1. Open the editor and select the option named `Pull save file from root
+   storage`
 
 1. Edit what you want
 
@@ -114,28 +127,31 @@ If you don't have a pc to install and run the editor you can use Termux.
 Termux apk directly but then it won't automatically update. You cannot
 download Termux from the Play Store because it does not work
 
-2. Install F-Droid
+1. Install F-Droid
 
-3. Open it and wait for it to finish `Updating repositories`
+1. Open it and wait for it to finish `Updating repositories`
 
-4. Tap the green search button in the bottom right and search for `Termux`
+1. Tap the green search button in the bottom right and search for `Termux`
 
-5. Tap `Termux Terminal emulator with packages`
+1. Tap `Termux Terminal emulator with packages`
 
-6. Tap `INSTALL` and then `OPEN` once installed
+1. Tap `INSTALL` and then `OPEN` once installed
 
-7. Once opened enter the command `pkg install python`
+1. Once opened enter the command `pkg install python`
 
-8. If that doesn't work then read this: <https://stackoverflow.com/a/71097459>
+1. If that doesn't work then read this: <https://stackoverflow.com/a/71097459>
 
-9. Then follow the `Install from source` instructions below
+1. Then follow the `Install from source` instructions below
 
-10. If that doesn't work then run `pkg upgrade` and try again
+1. If that doesn't work then run `pkg upgrade` and try again
 
-11. Then run `python -m bcsfe`
+1. Then run `python -m bcsfe`
 
-12. You can then use the editor like normal (If asked to enter the path to a
-save file, then just enter `SAVE_DATA`)
+1. Note that the editor might complain about not being to run tkinter, but you
+can ignore that and just enter `SAVE_DATA` when asked to enter the path to a
+save file
+
+1. You can then use the editor like normal
 
 ### Install from source
 

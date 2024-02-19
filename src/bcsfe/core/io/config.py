@@ -22,6 +22,7 @@ class ConfigKey(enum.Enum):
     REMOVE_BAN_MESSAGE_ON_LOAD = "remove_ban_message_on_load"
     UNLOCK_CAT_ON_EDIT = "unlock_cat_on_edit"
     USE_FILE_DIALOG = "use_file_dialog"
+    ADB_PATH = "adb_path"
 
 
 class Config:
@@ -69,6 +70,7 @@ class Config:
             ConfigKey.REMOVE_BAN_MESSAGE_ON_LOAD: True,
             ConfigKey.UNLOCK_CAT_ON_EDIT: True,
             ConfigKey.USE_FILE_DIALOG: True,
+            ConfigKey.ADB_PATH: "adb",
         }
         return initial_values
 
@@ -211,6 +213,26 @@ class Config:
         color.ColoredText.localize(
             "config_success",
         )
+
+    def edit_str(self, key: ConfigKey):
+        text = self.get_full_input_localized(
+            key,
+            self.get_str(key),
+            self.get_default(key),
+        )
+
+        color.ColoredText.localize(text)
+
+        str_val = core.core_data.local_manager.get_key(key.value)
+
+        value = dialog_creator.StringInput().get_input_locale(
+            "string_config_dialog", {"val": str_val}
+        )
+        if value is None:
+            return
+
+        self.set(key, value)
+        color.ColoredText.localize("config_success")
 
     def edit_locale(self):
         text = self.get_full_input_localized(
@@ -409,5 +431,6 @@ class Config:
             core.core_data.config.edit_theme()
         elif feature == ConfigKey.GAME_DATA_REPO:
             core.core_data.config.edit_game_data_repo()
-
+        elif isinstance(config.get(feature), str):
+            core.core_data.config.edit_str(feature)
         print()

@@ -585,8 +585,15 @@ class StringInput:
                 continue
             return usr_input
 
-    def get_input_locale(self, key: str, perameters: dict[str, Any]) -> Optional[str]:
-        usr_input = color.ColoredInput().localize(key, **perameters)
+    def get_input_locale(
+        self,
+        key: str,
+        perameters: Optional[dict[str, Any]] = None,
+        escape: bool = True,
+    ) -> Optional[str]:
+        if perameters is None:
+            perameters = {}
+        usr_input = color.ColoredInput().localize(key, escape, **perameters)
         if usr_input == "" or usr_input == core.core_data.local_manager.get_key(
             "quit_key"
         ):

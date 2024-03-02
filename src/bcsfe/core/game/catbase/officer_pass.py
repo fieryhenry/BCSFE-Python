@@ -19,6 +19,8 @@ class OfficerPass:
         return OfficerPass(play_time)
 
     def write(self, data: "core.Data"):
+        if self.play_time > 2**31 - 1:
+            self.play_time = 2**31 - 1
         data.write_int(self.play_time)
 
     def read_gold_pass(self, data: "core.Data", gv: "core.GameVersion"):

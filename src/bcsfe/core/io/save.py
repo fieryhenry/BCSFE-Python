@@ -437,7 +437,7 @@ class SaveFile:
             self.last_checked_expedition_time = self.data.read_double()
 
             self.catfruit = self.data.read_int_list()
-            self.cats.read_forth_forms(self.data)
+            self.cats.read_fourth_forms(self.data)
             self.cats.read_catseyes_used(self.data)
             self.catseyes = self.data.read_int_list()
             self.catamins = self.data.read_int_list()
@@ -1296,7 +1296,7 @@ class SaveFile:
             self.data.write_double(self.last_checked_expedition_time)
 
             self.data.write_int_list(self.catfruit)
-            self.cats.write_forth_forms(self.data)
+            self.cats.write_fourth_forms(self.data)
             self.cats.write_catseyes_used(self.data)
             self.data.write_int_list(self.catseyes)
             self.data.write_int_list(self.catamins)

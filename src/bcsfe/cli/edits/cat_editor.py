@@ -287,7 +287,7 @@ class CatEditor:
                 )
         color.ColoredText.localize("true_form_success")
 
-    def forth_form_cats(self, cats: list["core.Cat"], force: bool = False):
+    def fourth_form_cats(self, cats: list["core.Cat"], force: bool = False):
         cats = self.get_save_cats(cats)
         pic_book = self.save_file.cats.read_nyanko_picture_book(self.save_file)
         set_current_forms = core.core_data.config.get_bool(
@@ -296,7 +296,7 @@ class CatEditor:
         for cat in cats:
             pic_book_cat = pic_book.get_cat(cat.id)
             if force:
-                cat.unlock_forth_form(
+                cat.unlock_fourth_form(
                     self.save_file, set_current_form=set_current_forms
                 )
             elif pic_book_cat is not None:
@@ -304,9 +304,9 @@ class CatEditor:
                     self.save_file,
                     pic_book_cat.total_forms,
                     set_current_form=set_current_forms,
-                    forth_form=True,
+                    fourth_form=True,
                 )
-        color.ColoredText.localize("forth_form_success")
+        color.ColoredText.localize("fourth_form_success")
 
     def remove_true_form_cats(self, cats: list["core.Cat"]):
         cats = self.get_save_cats(cats)
@@ -314,11 +314,11 @@ class CatEditor:
             cat.remove_true_form()
         color.ColoredText.localize("remove_true_form_success")
 
-    def remove_forth_form_cats(self, cats: list["core.Cat"]):
+    def remove_fourth_form_cats(self, cats: list["core.Cat"]):
         cats = self.get_save_cats(cats)
         for cat in cats:
-            cat.remove_forth_form()
-        color.ColoredText.localize("remove_forth_form_success")
+            cat.remove_fourth_form()
+        color.ColoredText.localize("remove_fourth_form_success")
 
     def upgrade_cats(self, cats: list["core.Cat"]):
         cats = self.get_save_cats(cats)
@@ -571,7 +571,7 @@ class CatEditor:
             cat_editor.remove_true_form_cats(current_cats)
 
     @staticmethod
-    def forth_form_remove_form_cats_run(
+    def fourth_form_remove_form_cats_run(
         save_file: "core.SaveFile",
         current_cats: Optional[list["core.Cat"]] = None,
         cat_editor: Optional["CatEditor"] = None,
@@ -581,17 +581,17 @@ class CatEditor:
         if cat_editor is None:
             return
         choice = dialog_creator.ChoiceInput.from_reduced(
-            ["forth_form_cats", "remove_forth_form_cats"],
-            dialog="forth_form_remove_form_q",
+            ["fourth_form_cats", "remove_fourth_form_cats"],
+            dialog="fourth_form_remove_form_q",
             single_choice=True,
         ).single_choice()
         if choice is None:
             return
         choice -= 1
         if choice == 0:
-            cat_editor.forth_form_cats(current_cats)
+            cat_editor.fourth_form_cats(current_cats)
         elif choice == 1:
-            cat_editor.remove_forth_form_cats(current_cats)
+            cat_editor.remove_fourth_form_cats(current_cats)
 
     @staticmethod
     def force_true_form_cats_run(save_file: "core.SaveFile"):
@@ -602,12 +602,12 @@ class CatEditor:
         cat_editor.true_form_cats(current_cats, force=True)
 
     @staticmethod
-    def force_forth_form_cats_run(save_file: "core.SaveFile"):
-        color.ColoredText.localize("force_forth_form_cats_warning")
+    def force_fourth_form_cats_run(save_file: "core.SaveFile"):
+        color.ColoredText.localize("force_fourth_form_cats_warning")
         cat_editor, current_cats = CatEditor.from_save_file(save_file)
         if cat_editor is None:
             return
-        cat_editor.forth_form_cats(current_cats, force=True)
+        cat_editor.fourth_form_cats(current_cats, force=True)
 
     @staticmethod
     def upgrade_cats_run(save_file: "core.SaveFile"):
@@ -693,8 +693,8 @@ class CatEditor:
             "upgrade_cats",
             "true_form_remove_form_cats",
             "force_true_form_cats",
-            "forth_form_remove_form_cats",
-            "force_forth_form_cats",
+            "fourth_form_remove_form_cats",
+            "force_fourth_form_cats",
             "upgrade_talents_remove_talents_cats",
             "unlock_remove_cat_guide",
             "finish_edit_cats",
@@ -720,10 +720,10 @@ class CatEditor:
             color.ColoredText.localize("force_true_form_cats_warning")
             cat_editor.true_form_cats(cats, force=True)
         elif option_id == 5:
-            cat_editor.forth_form_remove_form_cats_run(save_file, cats, cat_editor)
+            cat_editor.fourth_form_remove_form_cats_run(save_file, cats, cat_editor)
         elif option_id == 6:
-            color.ColoredText.localize("force_forth_form_cats_warning")
-            cat_editor.forth_form_cats(cats, force=True)
+            color.ColoredText.localize("force_fourth_form_cats_warning")
+            cat_editor.fourth_form_cats(cats, force=True)
         elif option_id == 7:
             cat_editor.upgrade_talents_remove_talents_cats_run(
                 save_file, cats, cat_editor

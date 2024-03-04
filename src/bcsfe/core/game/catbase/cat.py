@@ -497,7 +497,7 @@ class Cat:
         self.gatya_seen: int = 0
         self.max_upgrade_level: "core.Upgrade" = core.Upgrade.init()
         self.catguide_collected: bool = False
-        self.forth_form: int = 0
+        self.fourth_form: int = 0
         self.catseyes_used: int = 0
 
         self.names: Optional[list[str]] = None
@@ -541,10 +541,10 @@ class Cat:
         save_file: "core.SaveFile",
         total_forms: int,
         set_current_form: bool = True,
-        forth_form: bool = False,
+        fourth_form: bool = False,
     ):
-        if total_forms == 4 and self.unlocked_forms == 3 and forth_form:
-            self.unlock_forth_form(save_file, set_current_form)
+        if total_forms == 4 and self.unlocked_forms == 3 and fourth_form:
+            self.unlock_fourth_form(save_file, set_current_form)
         elif total_forms >= 3:
             self.true_form(save_file, set_current_form)
         elif total_forms == 2:
@@ -557,20 +557,20 @@ class Cat:
     def remove_true_form(self):
         self.unlocked_forms = 0
         self.current_form = min(self.current_form, 1)
-        self.forth_form = 0
+        self.fourth_form = 0
 
-    def unlock_forth_form(
+    def unlock_fourth_form(
         self, save_file: "core.SaveFile", set_current_form: bool = True
     ):
         if set_current_form:
             self.current_form = 3
         if core.core_data.config.get_bool(core.ConfigKey.UNLOCK_CAT_ON_EDIT):
             self.unlock(save_file)
-        self.forth_form = 2
+        self.fourth_form = 2
 
-    def remove_forth_form(self):
+    def remove_fourth_form(self):
         self.current_form = min(self.current_form, 2)
-        self.forth_form = 0
+        self.fourth_form = 0
 
     def set_upgrade(
         self,
@@ -598,7 +598,7 @@ class Cat:
         self.unlocked_forms = 0
         self.gatya_seen = 0
         self.catguide_collected = False
-        self.forth_form = 0
+        self.fourth_form = 0
         self.catseyes_used = 0
         self.upgrade.reset()
         for talent in self.talents or []:
@@ -652,11 +652,11 @@ class Cat:
     def write_catguide_collected(self, stream: "core.Data"):
         stream.write_bool(self.catguide_collected)
 
-    def read_forth_form(self, stream: "core.Data"):
-        self.forth_form = stream.read_int()
+    def read_fourth_form(self, stream: "core.Data"):
+        self.fourth_form = stream.read_int()
 
-    def write_forth_form(self, stream: "core.Data"):
-        stream.write_int(self.forth_form)
+    def write_fourth_form(self, stream: "core.Data"):
+        stream.write_int(self.fourth_form)
 
     def read_catseyes_used(self, stream: "core.Data"):
         self.catseyes_used = stream.read_int()
@@ -674,7 +674,7 @@ class Cat:
             "gatya_seen": self.gatya_seen,
             "max_upgrade_level": self.max_upgrade_level.serialize(),
             "catguide_collected": self.catguide_collected,
-            "forth_form": self.forth_form,
+            "fourth_form": self.fourth_form,
             "catseyes_used": self.catseyes_used,
             "talents": (
                 [talent.serialize() for talent in self.talents]
@@ -692,7 +692,7 @@ class Cat:
         cat.gatya_seen = data["gatya_seen"]
         cat.max_upgrade_level = core.Upgrade.deserialize(data["max_upgrade_level"])
         cat.catguide_collected = data["catguide_collected"]
-        cat.forth_form = data["forth_form"]
+        cat.fourth_form = data["fourth_form"]
         cat.catseyes_used = data["catseyes_used"]
         cat.talents = (
             [Talent.deserialize(talent) for talent in data["talents"]]
@@ -702,7 +702,7 @@ class Cat:
         return cat
 
     def __repr__(self) -> str:
-        return f"Cat(id={id}, unlocked={self.unlocked}, upgrade={self.upgrade}, current_form={self.current_form}, unlocked_forms={self.unlocked_forms}, gatya_seen={self.gatya_seen}, max_upgrade_level={self.max_upgrade_level}, catguide_collected={self.catguide_collected}, forth_form={self.forth_form}, catseyes_used={self.catseyes_used}, talents={self.talents})"
+        return f"Cat(id={id}, unlocked={self.unlocked}, upgrade={self.upgrade}, current_form={self.current_form}, unlocked_forms={self.unlocked_forms}, gatya_seen={self.gatya_seen}, max_upgrade_level={self.max_upgrade_level}, catguide_collected={self.catguide_collected}, fourth_form={self.fourth_form}, catseyes_used={self.catseyes_used}, talents={self.talents})"
 
     def __str__(self) -> str:
         return self.__repr__()
@@ -1059,10 +1059,10 @@ class Cats:
         for cat in self.cats:
             cat.write_catguide_collected(stream)
 
-    def read_forth_forms(self, stream: "core.Data"):
+    def read_fourth_forms(self, stream: "core.Data"):
         total_cats = stream.read_int()
         for i in range(total_cats):
-            self.cats[i].read_forth_form(stream)
+            self.cats[i].read_fourth_form(stream)
 
     def read_catseyes_used(self, stream: "core.Data"):
         total_cats = stream.read_int()
@@ -1074,10 +1074,10 @@ class Cats:
         for cat in self.cats:
             cat.write_catseyes_used(stream)
 
-    def write_forth_forms(self, stream: "core.Data"):
+    def write_fourth_forms(self, stream: "core.Data"):
         stream.write_int(len(self.cats))
         for cat in self.cats:
-            cat.write_forth_form(stream)
+            cat.write_fourth_form(stream)
 
     def read_favorites(self, stream: "core.Data"):
         self.favourites: dict[int, bool] = {}

@@ -15,15 +15,15 @@ class FeatureHandler:
                 "upgrade_cats": edits.cat_editor.CatEditor.upgrade_cats_run,
                 "true_form_remove_form_cats": edits.cat_editor.CatEditor.true_form_remove_form_cats_run,
                 "force_true_form_cats": edits.cat_editor.CatEditor.force_true_form_cats_run,
-                "forth_form_remove_form_cats": edits.cat_editor.CatEditor.forth_form_remove_form_cats_run,
-                "force_forth_form_cats": edits.cat_editor.CatEditor.force_forth_form_cats_run,
+                "fourth_form_remove_form_cats": edits.cat_editor.CatEditor.fourth_form_remove_form_cats_run,
+                "force_fourth_form_cats": edits.cat_editor.CatEditor.force_fourth_form_cats_run,
                 "upgrade_talents_remove_talents_cats": edits.cat_editor.CatEditor.upgrade_talents_remove_talents_cats_run,
                 "unlock_remove_cat_guide": edits.cat_editor.CatEditor.unlock_cat_guide_remove_guide_run,
             }
 
-        cat_features[
-            "special_skills"
-        ] = edits.basic_items.BasicItems.edit_special_skills
+        cat_features["special_skills"] = (
+            edits.basic_items.BasicItems.edit_special_skills
+        )
 
         features: dict[str, Any] = {
             "save_management": {

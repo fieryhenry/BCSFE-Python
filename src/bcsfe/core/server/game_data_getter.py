@@ -17,6 +17,12 @@ class GameDataGetter:
         else:
             self.latest_version = self.get_latest_version(self.all_versions, self.cc)
 
+    def does_save_version_match(self, save_file: "core.SaveFile") -> bool:
+        if self.latest_version is None:
+            return False
+
+        return save_file.game_version == self.latest_version[:-2]
+
     def get_latest_version(
         self, versions: list[str], cc: "core.CountryCode"
     ) -> Optional[str]:

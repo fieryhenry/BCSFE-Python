@@ -116,7 +116,10 @@ class GameDataGetter:
             path = self.get_file_path(pack_name, file_name)
             if path is None:
                 return None
-            return path.read()
+            try:
+                return path.read()
+            except FileNotFoundError:
+                return None
 
         if retries == 0:
             return None

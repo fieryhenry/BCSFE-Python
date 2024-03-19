@@ -32,14 +32,30 @@ class ServerCLI:
             country_code=cc,
         )
 
-        server_handler = core.ServerHandler.from_codes(
+        result = core.ServerHandler.from_codes(
             transfer_code,
             confirmation_code,
             cc,
             gv,
         )
-        if server_handler is None:
+        if result is None:
+            return
+        if isinstance(result, core.ServerHandler):
+            server_handler = result
+        else:
             color.ColoredText.localize("invalid_codes_error")
+            if dialog_creator.YesNoInput().get_input_once(
+                "display_response_debug_info_q"
+            ):
+                if result.response is not None:
+                    color.ColoredText.localize(
+                        "response_text_display",
+                        url=result.url,
+                        request_headers=result.headers,
+                        request_body=result.data,
+                        response_headers=result.response.headers,
+                        response_body=result.response.text,
+                    )
             return
 
         save_file = server_handler.save_file

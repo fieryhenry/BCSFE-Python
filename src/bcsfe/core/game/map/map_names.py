@@ -44,7 +44,7 @@ class MapNames:
         data = core.RequestHandler(url).get()
         if data is None:
             return None
-        if data.status_code == 404:
+        if data.status_code != 200:
             return None
         html = data.content.decode("utf-8")
         bs = bs4.BeautifulSoup(html, "html.parser")

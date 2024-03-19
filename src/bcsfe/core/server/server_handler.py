@@ -1,6 +1,7 @@
 import base64
 import time
-from typing import Any, Optional
+from typing import Any, Optional, Union
+
 from bcsfe import core
 import jwt
 
@@ -10,12 +11,14 @@ from bcsfe.cli import color
 class RequestResult:
     def __init__(
         self,
+        url: str,
         response: Optional[core.Response],
         headers: dict[str, str],
         data: str,
         payload: Optional[dict[str, Any]] = None,
         timestamp: Optional[str] = None,
     ):
+        self.url = url
         self.response = response
         self.headers = headers
         self.data = data
@@ -115,7 +118,7 @@ class ServerHandler:
         return password
 
     @staticmethod
-    def log_error(url: str, key: str, result: RequestResult):
+    def log_error(key: str, result: RequestResult):
         if "EXPECT_THIS_TO_FAIL" in result.data:
             return
         if result.response is None:
@@ -124,7 +127,7 @@ class ServerHandler:
             return
         log_text = (
             f"Error: {key}\n"
-            f"URL: {url}\n"
+            f"URL: {result.url}\n"
             f"Response Headers: {result.response.headers}\n"
             f"Response Body: {result.response.content.decode('utf-8')}\n"
             f"Status Code: {result.response.status_code}\n"
@@ -137,17 +140,17 @@ class ServerHandler:
     def do_password_request(self, url: str, dict_data: dict[str, Any]) -> Optional[str]:
         result = self.do_request(url, dict_data)
         if result.payload is None:
-            ServerHandler.log_error(url, "password_fail", result)
+            ServerHandler.log_error("password_fail", result)
             return None
         payload = result.payload
         password = payload.get("password", None)
         if password is None:
-            ServerHandler.log_error(url, "password_fail", result)
+            ServerHandler.log_error("password_fail", result)
             self.remove_stored_password()
             return None
         password_refresh_token = payload.get("passwordRefreshToken", None)
         if password_refresh_token is None:
-            ServerHandler.log_error(url, "password_fail", result)
+            ServerHandler.log_error("password_fail", result)
             self.remove_stored_password()
             return None
         account_code = payload.get("accountCode", None)
@@ -177,17 +180,17 @@ class ServerHandler:
         headers = core.AccountHeaders(self.save_file, data).get_headers()
         response = core.RequestHandler(url, headers, core.Data(data)).post()
         if response is None:
-            self.log_no_internet(url, RequestResult(None, headers, data))
-            return RequestResult(response, headers, data)
+            self.log_no_internet(RequestResult(url, None, headers, data))
+            return RequestResult(url, response, headers, data)
         json: dict[str, Any] = response.json()
         status_code = json.get("statusCode", 0)
         if status_code != 1:
-            return RequestResult(response, headers, data)
+            return RequestResult(url, response, headers, data)
 
         timestamp = json.get("timestamp", None)
 
         payload = json.get("payload", {})
-        return RequestResult(response, headers, data, payload, timestamp)
+        return RequestResult(url, response, headers, data, payload, timestamp)
 
     def refresh_password(self) -> Optional[str]:
         self.print_key("refreshing_password")
@@ -210,14 +213,14 @@ class ServerHandler:
 
         result = self.do_request(url, data)
         if result.payload is None:
-            ServerHandler.log_error(url, "auth_token_fail", result)
+            ServerHandler.log_error("auth_token_fail", result)
             self.remove_stored_auth_token()
             self.remove_stored_password()
             return None
         payload = result.payload
         auth_token = payload.get("token", None)
         if auth_token is None:
-            ServerHandler.log_error(url, "auth_token_fail", result)
+            ServerHandler.log_error("auth_token_fail", result)
             self.remove_stored_auth_token()
             self.remove_stored_password()
             return None
@@ -240,7 +243,7 @@ class ServerHandler:
         return self.get_password(tries + 1)
 
     def validate_auth_token(self, auth_token: str) -> bool:
-        token = jwt.decode(
+        token = jwt.decode(  # type: ignore
             auth_token,
             algorithms=["HS256"],
             options={"verify_signature": False},
@@ -270,8 +273,8 @@ class ServerHandler:
         if auth_token is not None:
             return auth_token
 
-    def log_no_internet(self, url: str, result: RequestResult):
-        ServerHandler.log_error(url, "no_internet", result)
+    def log_no_internet(self, result: RequestResult):
+        ServerHandler.log_error("no_internet", result)
         if self.print:
             core.print_no_internet()
 
@@ -289,13 +292,13 @@ class ServerHandler:
         }
         response = core.RequestHandler(url, headers).get()
         if response is None:
-            self.log_no_internet(url, RequestResult(None, headers, ""))
+            self.log_no_internet(RequestResult(url, None, headers, ""))
             return None
         json: dict[str, Any] = response.json()
         status_code = json.get("statusCode", 0)
         if status_code != 1:
             ServerHandler.log_error(
-                url, "save_key_fail", RequestResult(response, headers, "")
+                "save_key_fail", RequestResult(url, response, headers, "")
             )
             self.remove_stored_auth_token()
             return None
@@ -371,13 +374,13 @@ class ServerHandler:
         }
         response = core.RequestHandler(url, headers, body).post()
         if response is None:
-            self.log_no_internet(url, RequestResult(None, headers, ""))
+            self.log_no_internet(RequestResult(url, None, headers, ""))
             return False
         if response.status_code != 204:
             ServerHandler.log_error(
-                url,
                 "upload_fail_aws",
                 RequestResult(
+                    url,
                     response,
                     headers,
                     body.split(b"Content-Type: application/octet-stream")[0].to_str(),
@@ -419,15 +422,14 @@ class ServerHandler:
 
         response = core.RequestHandler(url, headers, core.Data(meta_data)).post()
         if response is None:
-            self.log_no_internet(url, RequestResult(None, headers, meta_data))
+            self.log_no_internet(RequestResult(url, None, headers, meta_data))
             return None
         json: dict[str, Any] = response.json()
         status_code = json.get("statusCode", 0)
         if status_code != 1:
             ServerHandler.log_error(
-                url,
                 "upload_fail_transfers",
-                RequestResult(response, headers, meta_data),
+                RequestResult(url, response, headers, meta_data),
             )
             self.remove_stored_auth_token()
             return None
@@ -436,7 +438,7 @@ class ServerHandler:
         confirmation_code = payload.get("pin", None)
         if transfer_code is None or confirmation_code is None:
             ServerHandler.log_error(
-                url, "upload_fail_transfers", RequestResult(response, headers, "")
+                "upload_fail_transfers", RequestResult(url, response, headers, "")
             )
             self.remove_stored_auth_token()
             return None
@@ -474,7 +476,7 @@ class ServerHandler:
 
         response = core.RequestHandler(url, headers, core.Data(meta_data)).post()
         if response is None:
-            self.log_no_internet(url, RequestResult(None, headers, meta_data))
+            self.log_no_internet(RequestResult(url, None, headers, meta_data))
             return False
         json: dict[str, Any] = response.json()
         status_code = json.get("statusCode", 0)
@@ -489,7 +491,7 @@ class ServerHandler:
 
         response = core.RequestHandler(url).get()
         if response is None:
-            self.log_no_internet(url, RequestResult(None, {}, ""))
+            self.log_no_internet(RequestResult(url, None, {}, ""))
             return None
         data = response.json()
         iq = data["accountId"]
@@ -524,8 +526,8 @@ class ServerHandler:
         confirmation_code: str,
         cc: "core.CountryCode",
         gv: "core.GameVersion",
-        print: bool = True,
-    ) -> Optional["ServerHandler"]:
+        print_no_internet: bool = True,
+    ) -> Optional[Union["ServerHandler", RequestResult]]:
         url = f"{ServerHandler.save_url}/v2/transfers/{transfer_code}/reception"
         data = core.ClientInfo(cc, gv).get_client_info()
         data["pin"] = confirmation_code
@@ -544,27 +546,25 @@ class ServerHandler:
         }
         response = core.RequestHandler(url, headers, core.Data(data_str)).post()
         if response is None:
-            if print:
+            if print_no_internet:
                 core.print_no_internet()
             return None
-        headers = response.headers
+        resp_headers = response.headers
         content_type = headers.get("content-type", "")
         if content_type != "application/octet-stream":
-            return None
+            return RequestResult(url, response, headers, data_str)
 
         save_data = response.content
         save_file = core.SaveFile(core.Data(save_data))
 
-        password_refresh_token = headers.get("Nyanko-Password-Refresh-Token")
-        if password_refresh_token is None:
-            return None
-        save_file.password_refresh_token = password_refresh_token
+        password_refresh_token = resp_headers.get("Nyanko-Password-Refresh-Token")
+        if password_refresh_token is not None:
+            save_file.password_refresh_token = password_refresh_token
 
         server_handler = ServerHandler(save_file)
-        password = headers.get("Nyanko-Password")
-        if password is None:
-            return None
-        server_handler.save_password(password)
+        password = resp_headers.get("Nyanko-Password")
+        if password is not None:
+            server_handler.save_password(password)
 
         return server_handler
 
@@ -591,7 +591,7 @@ class ServerHandler:
         headers["authorization"] = "Bearer " + auth_token
         response = core.RequestHandler(url, headers, core.Data(data_str)).post()
         if response is None:
-            self.log_no_internet(url, RequestResult(None, headers, data_str))
+            self.log_no_internet(RequestResult(url, None, headers, data_str))
             return False
         json: dict[str, Any] = response.json()
         status_code = json.get("statusCode", 0)

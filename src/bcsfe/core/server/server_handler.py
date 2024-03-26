@@ -550,7 +550,7 @@ class ServerHandler:
                 core.print_no_internet()
             return None
         resp_headers = response.headers
-        content_type = headers.get("content-type", "")
+        content_type = resp_headers.get("content-type", "")
         if content_type != "application/octet-stream":
             return RequestResult(url, response, headers, data_str)
 

@@ -56,7 +56,8 @@ confirmation code` (enter the corresponding number, not the name itself)
 1. Select the country code that you are using, `en`=english,
 `kr`=korean, `jp`=japanese, `tw`=taiwanese.
 
-1. Edit what you want
+1. Edit what you want. Note that in most cases, if you want to exit the current
+   input you can enter `q` and press enter to go back to the previous menu
 
 1. Go into the `Save Management` option and select `Save changes and upload to
 game servers (get transfer and confirmation codes)`. It may take some time, it

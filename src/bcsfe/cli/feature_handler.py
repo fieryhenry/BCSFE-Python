@@ -30,6 +30,7 @@ class FeatureHandler:
                 "save_save": save_management.SaveManagement.save_save,
                 "save_upload": save_management.SaveManagement.save_upload,
                 "save_save_file": save_management.SaveManagement.save_save_dialog,
+                "save_save_documents": save_management.SaveManagement.save_save_documents,
                 "adb_push": save_management.SaveManagement.adb_push,
                 "adb_push_rerun": save_management.SaveManagement.adb_push_rerun,
                 "export_save": save_management.SaveManagement.export_save,

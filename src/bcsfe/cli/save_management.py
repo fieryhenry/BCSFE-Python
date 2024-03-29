@@ -44,6 +44,18 @@ class SaveManagement:
         color.ColoredText.localize("save_success", path=save_file.save_path)
 
     @staticmethod
+    def save_save_documents(save_file: "core.SaveFile"):
+        """Save the save file to the documents folder.
+
+        Args:
+            save_file (core.SaveFile): The save file to save.
+        """
+        SaveManagement.upload_items_checker(save_file)
+        save_file.save_path = core.SaveFile.get_saves_path().add("SAVE_DATA")
+        save_file.to_file(save_file.save_path)
+        color.ColoredText.localize("save_success", path=save_file.save_path)
+
+    @staticmethod
     def save_upload(save_file: "core.SaveFile"):
         """Save the save file and upload it to the server.
 
@@ -226,6 +238,7 @@ class SaveManagement:
         options = [
             "download_save",
             "select_save_file",
+            "load_from_documents",
             "adb_pull_save",
             "load_save_data_json",
             "create_new_save",
@@ -261,6 +274,11 @@ class SaveManagement:
         elif choice == 1:
             save_path = main.Main.load_save_file()
         elif choice == 2:
+            save_path = core.SaveFile.get_saves_path().add("SAVE_DATA")
+            if not save_path.exists():
+                color.ColoredText.localize("save_file_not_found")
+                return None
+        elif choice == 3:
             handler = root_handler
             if not root_handler.is_android():
                 try:
@@ -297,13 +315,13 @@ class SaveManagement:
                     )
             else:
                 used_storage = True
-        elif choice == 3:
+        elif choice == 4:
             data = main.Main.load_save_data_json()
             if data is not None:
                 save_path, cc = data
             else:
                 save_path = None
-        elif choice == 4:
+        elif choice == 5:
             color.ColoredText.localize("create_new_save_warning")
             cc = core.CountryCode.select()
             if cc is None:
@@ -324,15 +342,17 @@ class SaveManagement:
             save.to_file(save_path)
             color.ColoredText.localize("create_new_save_success")
 
-        elif choice == 5 and starting_options:
-            core.core_data.config.edit_config()
         elif choice == 6 and starting_options:
-            core.update_external_content()
+            core.core_data.config.edit_config()
         elif choice == 7 and starting_options:
+            core.update_external_content()
+        elif choice == 8 and starting_options:
             main.Main.exit_editor(check_temp=False)
 
         if save_path is None or not save_path.exists():
             return None
+
+        color.ColoredText.localize("save_file_found", path=save_path)
 
         try:
             save_file = core.SaveFile(save_path.read(), cc, package_name=package_name)

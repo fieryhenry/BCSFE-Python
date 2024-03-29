@@ -162,7 +162,8 @@ class SaveFile:
 
         self.game_version = core.GameVersion(self.data.read_int())
 
-        self.ub1 = self.data.read_bool()
+        if self.game_version >= 10 or self.not_jp():
+            self.ub1 = self.data.read_bool()
 
         self.mute_bgm = self.data.read_bool()
         self.mute_se = self.data.read_bool()
@@ -683,7 +684,7 @@ class SaveFile:
             self.ud2 = self.data.read_double()
             self.ud3 = self.data.read_double()
             self.ui16 = self.data.read_int()
-            if 100299 < self.game_version:
+            if self.game_version >= 100300:
                 self.uby3 = self.data.read_byte()
                 self.ub9 = self.data.read_bool()
                 self.ud4 = self.data.read_double()
@@ -993,6 +994,31 @@ class SaveFile:
 
             self.gv_120600 = self.data.read_int()
 
+        if (self.not_jp() and self.game_version >= 120700) or (
+            self.is_jp() and self.game_version >= 130000
+        ):
+            length = self.data.read_byte()
+            self.ustl1: list[tuple[str, str]] = []
+            for _ in range(length):
+                s1 = self.data.read_string()
+                s2 = self.data.read_string()
+                self.ustl1.append((s1, s2))
+
+            if self.not_jp():
+                self.gv_120700 = self.data.read_int()
+            else:
+                self.gv_130000 = self.data.read_int()
+
+        if self.game_version >= 130100:
+            length = self.data.read_int()
+            self.uiltl1: list[tuple[int, int]] = []
+            for _ in range(length):
+                i1 = self.data.read_int()
+                i2 = self.data.read_long()
+                self.uiltl1.append((i1, i2))
+
+            self.gv_130100 = self.data.read_int()
+
         self.remaining_data = self.data.read_to_end(32)
 
     def save(self, data: "core.Data"):
@@ -1003,7 +1029,8 @@ class SaveFile:
 
         self.data.write_int(self.game_version.game_version)
 
-        self.data.write_bool(self.ub1)
+        if self.game_version >= 10 or self.not_jp():
+            self.data.write_bool(self.ub1)
 
         self.data.write_bool(self.mute_bgm)
         self.data.write_bool(self.mute_se)
@@ -1200,7 +1227,7 @@ class SaveFile:
 
         self.user_rank_rewards.write(self.data, self.game_version)
 
-        if not self.not_jp():
+        if self.is_jp():
             self.data.write_double(self.m_dGetTimeSave2)
 
         self.cats.write_unlocked_forms(self.data, self.game_version)
@@ -1253,7 +1280,7 @@ class SaveFile:
             self.data.write_int(self.gv_48)
 
         if 23 <= self.game_version:
-            if not self.not_jp():
+            if self.is_jp():
                 self.data.write_bool(self.energy_notification)
 
             self.data.write_double(self.m_dGetTimeSave3)
@@ -1546,7 +1573,7 @@ class SaveFile:
             self.data.write_double(self.ud2)
             self.data.write_double(self.ud3)
             self.data.write_int(self.ui16)
-            if 100299 < self.game_version:
+            if self.game_version >= 100300:
                 self.data.write_byte(self.uby3)
                 self.data.write_bool(self.ub9)
                 self.data.write_double(self.ud4)
@@ -1821,6 +1848,27 @@ class SaveFile:
             self.data.write_byte(self.background_music_volume)
 
             self.data.write_int(self.gv_120600)
+
+        if (self.not_jp() and self.game_version >= 120700) or (
+            self.is_jp() and self.game_version >= 130000
+        ):
+            self.data.write_byte(len(self.ustl1))
+            for str1, str2 in self.ustl1:
+                self.data.write_string(str1)
+                self.data.write_string(str2)
+
+            if self.not_jp():
+                self.data.write_int(self.gv_120700)
+            else:
+                self.data.write_int(self.gv_130000)
+
+        if self.game_version >= 130100:
+            self.data.write_int(len(self.uiltl1))
+            for i, l in self.uiltl1:
+                self.data.write_int(i)
+                self.data.write_long(l)
+
+            self.data.write_int(self.gv_130100)
 
         self.data.write_bytes(self.remaining_data)
 
@@ -2203,6 +2251,11 @@ class SaveFile:
             "sound_effects_volume": self.sound_effects_volume,
             "background_music_volume": self.background_music_volume,
             "gv_120600": self.gv_120600,
+            "ustl1": self.ustl1,
+            "gv_120700": self.gv_120700,
+            "gv_130000": self.gv_130000,
+            "uiltl1": self.uiltl1,
+            "gv_130100": self.gv_130100,
             "remaining_data": base64.b64encode(self.remaining_data).decode("utf-8"),
         }
         return data
@@ -2450,7 +2503,7 @@ class SaveFile:
         save_file.uiid1 = data.get("uiid1", {})
         save_file.gv_80700 = data.get("gv_80700", 80700)
         save_file.uby2 = data.get("uby2", 0)
-        save_file.gv_100600 = data.get("gv_100600", 10600)
+        save_file.gv_100600 = data.get("gv_100600", 100600)
         save_file.restart_pack = data.get("restart_pack", 0)
         save_file.gv_81000 = data.get("gv_81000", 81000)
         save_file.medals = core.Medals.deserialize(data.get("medals", {}))
@@ -2604,6 +2657,11 @@ class SaveFile:
         save_file.sound_effects_volume = data.get("sound_effects_volume", 0)
         save_file.background_music_volume = data.get("background_music_volume", 0)
         save_file.gv_120600 = data.get("gv_120600", 120600)
+        save_file.ustl1 = data.get("ustl1", [])
+        save_file.gv_120700 = data.get("gv_120700", 120700)
+        save_file.gv_130000 = data.get("gv_130000", 130000)
+        save_file.uiltl1 = data.get("uiltl1", [])
+        save_file.gv_130100 = data.get("gv_130100", 130100)
 
         save_file.remaining_data = base64.b64decode(data.get("remaining_data", ""))
 
@@ -2755,6 +2813,9 @@ class SaveFile:
         self.gv_120400 = 120400
         self.gv_120500 = 120500
         self.gv_120600 = 120600
+        self.gv_120700 = 120700
+        self.gv_130000 = 130000
+        self.gv_130100 = 130100
 
         self.catfood = 0
         self.current_energy = 0
@@ -2847,6 +2908,10 @@ class SaveFile:
 
         self.usl1 = []
         self.usl2 = []
+
+        self.ustl1 = []
+
+        self.uiltl1 = []
 
         if 20 <= gv and gv <= 25:
             self.ubl1 = [False] * 12
@@ -3022,6 +3087,9 @@ class SaveFile:
 
         self.remaining_data = b""
 
+    def is_jp(self) -> bool:
+        return self.cc == core.CountryCodeType.JP
+
     def not_jp(self) -> bool:
         return self.cc != core.CountryCodeType.JP
 
@@ -3029,7 +3097,9 @@ class SaveFile:
         return self.cc == core.CountryCodeType.EN
 
     def should_read_dst(self) -> bool:
-        return self.not_jp() and self.game_version >= 49
+        if self.is_jp():
+            return False
+        return self.game_version >= 49
 
     def read_dst(self):
         if self.should_read_dst():
@@ -3109,6 +3179,9 @@ class SaveFile:
             assert self.gv_120400 == 120400
             assert self.gv_120500 == 120500
             assert self.gv_120600 == 120600
+            assert self.gv_120700 == 120700
+            assert self.gv_130000 == 130000
+            assert self.gv_130100 == 130100
         except AssertionError:
             return False
         return True

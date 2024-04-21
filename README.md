@@ -97,7 +97,7 @@ follow the [Android tutorial](#android-tutorial) to install the editor
 
 1. Enter the game and you should see changes
 
-### How to uban yourself
+### How to unban your account
 
 1. Select the option in `Account` to `Unban account` or
 just upload the save data to the game servers again

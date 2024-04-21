@@ -540,92 +540,6 @@ class StoryChapters:
         )
 
     @staticmethod
-    def clear_story2(save_file: "core.SaveFile"):
-        story = save_file.story
-        chapters = story.get_real_chapters()
-
-        selected_chapters = StoryChapters.select_story_chapters(save_file)
-
-        if not selected_chapters:
-            return
-
-        if len(selected_chapters) != 1:
-            options = ["individual_chapters", "all_chapters"]
-            choice = dialog_creator.ChoiceInput.from_reduced(
-                options, dialog="individual_chapters_dialog", single_choice=True
-            ).single_choice()
-            if choice is None:
-                return
-            choice -= 1
-        else:
-            choice = 0
-
-        chapter_names = StoryChapters.get_chapter_names(save_file)
-        if chapter_names is None:
-            return
-
-        modify_clear_amounts = dialog_creator.YesNoInput().get_input_once(
-            "modify_clear_amounts"
-        )
-        clear_amount = 1
-        clear_amount_type = -1
-        if modify_clear_amounts:
-            options = [
-                "clear_amount_chapter",
-                "clear_amount_all",
-                "clear_amount_stages",
-            ]
-            clear_amount_type = dialog_creator.ChoiceInput.from_reduced(
-                options, dialog="select_clear_amount_type", single_choice=True
-            ).single_choice()
-            if clear_amount_type is None:
-                return
-            clear_amount_type -= 1
-            if clear_amount_type == 1:
-                clear_amount = core.EventChapters.ask_clear_amount()
-                if clear_amount is None:
-                    return
-
-        if choice == 0:
-            for chapter_id in selected_chapters:
-                StoryChapters.print_current_chapter(save_file, chapter_id)
-                chapter = chapters[chapter_id]
-                chapter_name = chapter_names[chapter_id]
-                cleared_stages = StoryChapters.edit_chapter_progress(
-                    save_file, chapter_id, chapter_name, clear_amount, clear_amount_type
-                )
-                if cleared_stages:
-                    story.clear_previous_chapters(chapter_id)
-        else:
-            progress = StoryChapters.get_selected_chapter_progress()
-            if progress is None:
-                return
-            for chapter_id in selected_chapters:
-                chapter = chapters[chapter_id]
-                if progress != 0:
-                    story.clear_previous_chapters(chapter_id)
-
-                clear_amounts = [1] * progress
-                if clear_amount_type == 0:
-                    clear_amount = core.EventChapters.ask_clear_amount()
-                    if clear_amount is None:
-                        return
-                    clear_amounts = [clear_amount] * progress
-                elif clear_amount_type == 1:
-                    clear_amounts = [clear_amount] * progress
-                elif clear_amount_type == 2:
-                    for i in range(progress):
-                        StoryChapters.print_current_stage(save_file, chapter_id, i)
-                        clear_amount2 = core.EventChapters.ask_clear_amount()
-                        if clear_amount2 is None:
-                            return
-                        clear_amounts[i] = clear_amount2
-
-                chapter.apply_progress(progress, clear_amounts)
-
-        color.ColoredText.localize("story_cleared")
-
-    @staticmethod
     def clear_story(save_file: "core.SaveFile"):
         story = save_file.story
         story.edit_chapters(
@@ -654,6 +568,8 @@ class StoryChapters:
         modify_clear_amounts = dialog_creator.YesNoInput().get_input_once(
             "modify_clear_amounts"
         )
+        if modify_clear_amounts is None:
+            return
         clear_amount = 1
         clear_amount_type = -1
         if modify_clear_amounts:
@@ -674,6 +590,8 @@ class StoryChapters:
         unclear_other_stages = dialog_creator.YesNoInput().get_input_once(
             "unclear_other_stages"
         )
+        if unclear_other_stages is None:
+            return
 
         for id in map_choices:
             stage_names = StageNames(

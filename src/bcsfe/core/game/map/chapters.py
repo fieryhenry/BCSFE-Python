@@ -339,9 +339,15 @@ class Chapters:
         else:
             stars_type_choice = False
 
+        if stars_type_choice is None:
+            return
+
         modify_clear_amounts = dialog_creator.YesNoInput().get_input_once(
             "modify_clear_amounts"
         )
+        if modify_clear_amounts is None:
+            return
+
         clear_amount = 1
         clear_amount_type = -1
         if modify_clear_amounts:

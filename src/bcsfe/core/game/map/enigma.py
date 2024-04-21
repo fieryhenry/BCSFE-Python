@@ -158,6 +158,8 @@ class Enigma:
 
         if self.stages:
             wipe = dialog_creator.YesNoInput().get_input_once("wipe_enigma")
+            if wipe is None:
+                return
             if wipe:
                 self.stages = []
 

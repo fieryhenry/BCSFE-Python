@@ -627,37 +627,17 @@ class YesNoInput:
     def __init__(self, default: bool = False):
         self.default = default
 
-    def get_input_locale_while(self, key: str, perameters: dict[str, Any]) -> bool:
-        while True:
-            usr_input = self.get_input_locale(key, perameters)
-            if usr_input is None:
-                return self.default
-            if usr_input == "" or usr_input == core.core_data.local_manager.get_key(
-                "quit_key"
-            ):
-                return self.default
-            if usr_input == " ":
-                continue
-            return usr_input == core.core_data.local_manager.get_key("yes_key")
-
-    def get_input_locale(self, key: str, perameters: dict[str, Any]) -> Optional[str]:
-        usr_input = color.ColoredInput().get(key, **perameters)
-        if usr_input == "" or usr_input == core.core_data.local_manager.get_key(
-            "quit_key"
-        ):
-            return None
-        return usr_input
-
     def get_input_once(
         self, key: str, perameters: Optional[dict[str, Any]] = None
-    ) -> bool:
+    ) -> Optional[bool]:
         if perameters is None:
             perameters = {}
         usr_input = color.ColoredInput().localize(key, **perameters)
-        if usr_input == "" or usr_input == core.core_data.local_manager.get_key(
-            "quit_key"
-        ):
+        if usr_input == "":
             return self.default
+
+        if usr_input == core.core_data.local_manager.get_key("quit_key"):
+            return None
         return usr_input == core.core_data.local_manager.get_key("yes_key")
 
 

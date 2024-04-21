@@ -1,6 +1,5 @@
 from typing import Any
 from bcsfe import core
-from bcsfe.cli import color, dialog_creator
 
 
 class Stage:
@@ -37,6 +36,9 @@ class Stage:
     def clear_stage(self, clear_amount: int = 1):
         self.clear_times = clear_amount
 
+    def unclear_stage(self):
+        self.clear_times = 0
+
 
 class Chapter:
     def __init__(
@@ -60,6 +62,13 @@ class Chapter:
             self.clear_progress = max(self.clear_progress, index + 1)
         self.stages[index].clear_stage(clear_amount)
         self.chapter_unlock_state = 3
+        if index == len(self.stages) - 1:
+            return True
+        return False
+
+    def unclear_stage(self, index: int) -> bool:
+        self.clear_progress = min(self.clear_progress, index)
+        self.stages[index].unclear_stage()
         if index == len(self.stages) - 1:
             return True
         return False
@@ -134,6 +143,13 @@ class ChaptersStars:
                 self.chapters[star + 1].chapter_unlock_state = 1
         return finished
 
+    def unclear_stage(self, star: int, stage: int) -> bool:
+        finished = self.chapters[star].unclear_stage(stage)
+        if finished and star + 1 < len(self.chapters):
+            for chapter in self.chapters[star + 1 :]:
+                chapter.chapter_unlock_state = 0
+        return finished
+
     @staticmethod
     def init() -> "ChaptersStars":
         return ChaptersStars(0, [])
@@ -193,6 +209,13 @@ class ZeroLegendsChapters:
         if finished and map + 1 < len(self.chapters):
             self.chapters[map + 1].chapters[0].chapter_unlock_state = 1
 
+    def unclear_stage(self, map: int, star: int, stage: int):
+        self.create(map)
+        finished = self.chapters[map].unclear_stage(star, stage)
+        if finished and map + 1 < len(self.chapters):
+            for chapter in self.chapters[map + 1].chapters:
+                chapter.chapter_unlock_state = 0
+
     @staticmethod
     def init() -> "ZeroLegendsChapters":
         return ZeroLegendsChapters([])
@@ -235,7 +258,7 @@ class ZeroLegendsChapters:
         diff = chapter_id - len(self.chapters)
 
         if diff >= 0:
-            for i in range(diff + 1):
+            for _ in range(diff + 1):
                 stages = [Stage(0)] * self.get_total_stages(0, 0)
                 chapters = [Chapter(0, 0, 0, stages)] * self.get_total_stars(0)
                 chapters_stars = ChaptersStars(0, chapters)
@@ -247,101 +270,10 @@ class ZeroLegendsChapters:
         zero_legends_chapters.edit_chapters(save_file, "ND")
 
     def edit_chapters(self, save_file: "core.SaveFile", letter_code: str):
-        map_names = core.MapNames(save_file, letter_code)
-        names = map_names.map_names
+        core.edit_chapters(save_file, self, letter_code)
 
-        map_choices = core.EventChapters.select_map_names(names)
-        if not map_choices:
-            return
-
-        clear_type_choice = dialog_creator.ChoiceInput.from_reduced(
-            ["clear_whole_chapters", "clear_specific_stages"],
-            dialog="select_clear_type",
-            single_choice=True,
-        ).single_choice()
-        if clear_type_choice is None:
-            return
-        clear_type_choice -= 1
-
-        if len(map_choices) > 1:
-            stars_type_choice = dialog_creator.YesNoInput().get_input_once(
-                "custom_star_count_per_chapter_yn"
-            )
-        else:
-            stars_type_choice = False
-
-        modify_clear_amounts = dialog_creator.YesNoInput().get_input_once(
-            "modify_clear_amounts"
-        )
-        clear_amount = 1
-        clear_amount_type = -1
-        if modify_clear_amounts:
-            options = ["clear_amount_chapter", "clear_amount_all"]
-            if clear_type_choice == 1:
-                options.append("clear_amount_stages")
-            clear_amount_type = dialog_creator.ChoiceInput.from_reduced(
-                options, dialog="select_clear_amount_type", single_choice=True
-            ).single_choice()
-            if clear_amount_type is None:
-                return
-            clear_amount_type -= 1
-            if clear_amount_type == 1:
-                clear_amount = core.EventChapters.ask_clear_amount()
-                if clear_amount is None:
-                    return
-
-        if not stars_type_choice:
-            stars = core.EventChapters.ask_stars(self.get_total_stars(0))
-            if stars is None:
-                return
-        else:
-            stars = 0
-
-        for id in map_choices:
-            self.create(id)
-            map_name = names[id]
-            stage_names = map_names.stage_names.get(id)
-            color.ColoredText.localize("current_sol_chapter", name=map_name, id=id)
-            if stars_type_choice:
-                stars = core.EventChapters.ask_stars(self.get_total_stars(id))
-                if stars is None:
-                    return
-            if clear_type_choice:
-                stages = core.EventChapters.ask_stages(map_names, id)
-                if stages is None:
-                    return
-            else:
-                stages = list(range(self.get_total_stages(id, 0)))
-
-            if clear_amount_type == 0:
-                clear_amount = core.EventChapters.ask_clear_amount()
-                if clear_amount is None:
-                    return
-
-            for star in range(stars, self.get_total_stars(id)):
-                for stage in range(max(stages), self.get_total_stages(id, star)):
-                    self.chapters[id].chapters[star].stages[stage].clear_times = 0
-                    self.chapters[id].chapters[star].clear_progress = 0
-            for star in range(stars):
-                if clear_amount_type == 2:
-                    color.ColoredText.localize("current_sol_star", star=star + 1)
-                for stage in stages:
-                    if clear_amount_type == 2:
-                        if stage_names is None:
-                            continue
-                        stage_name = stage_names[stage]
-                        color.ColoredText.localize(
-                            "current_sol_stage", name=stage_name, id=stage
-                        )
-
-                    if clear_amount_type == 2:
-                        clear_amount = core.EventChapters.ask_clear_amount()
-                    self.clear_stage(
-                        id,
-                        star,
-                        stage,
-                        overwrite_clear_progress=True,
-                        clear_amount=clear_amount,
-                    )
-
-        color.ColoredText.localize("map_chapters_edited")
+    def unclear_rest(self, stages: list[int], stars: int, id: int):
+        for star in range(stars, self.get_total_stars(id)):
+            for stage in range(max(stages), self.get_total_stages(id, star)):
+                self.chapters[id].chapters[star].stages[stage].clear_times = 0
+                self.chapters[id].chapters[star].clear_progress = 0

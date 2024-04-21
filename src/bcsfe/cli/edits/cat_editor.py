@@ -192,6 +192,9 @@ class CatEditor:
             return None
 
         filter_down = dialog_creator.YesNoInput().get_input_once("filter_down_q_gatya")
+        if filter_down is None:
+            return None
+
         all_names = core.GatyaInfos(self.save_file).get_all_names(
             name_only_optimization=True
         )

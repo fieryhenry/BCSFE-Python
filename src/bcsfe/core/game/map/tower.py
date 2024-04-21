@@ -1,6 +1,5 @@
 from typing import Any
 from bcsfe import core
-from bcsfe.cli import color, dialog_creator
 
 
 class TowerChapters:

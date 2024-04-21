@@ -66,12 +66,15 @@ class AdbHandler(io.root_handler.RootHandler):
     def run_shell(self, command: str) -> "core.CommandResult":
         return self.adb_path.run(f'-s {self.get_device()} shell "{command}"')
 
+    def run_root_shell(self, command: str) -> "core.CommandResult":
+        return self.run_shell(f"su -c '{command}'")
+
     def pull_file(
         self, device_path: "core.Path", local_path: "core.Path"
     ) -> "core.CommandResult":
         if not self.adb_root_success():
-            result = self.run_shell(
-                f"su -c 'cp {device_path.to_str_forwards()} /sdcard/ && chmod o+rw /sdcard/{device_path.basename()}'"
+            result = self.run_root_shell(
+                f"cp {device_path.to_str_forwards()} /sdcard/ && chmod o+rw /sdcard/{device_path.basename()}"
             )
             if result.exit_code != 0:
                 return result
@@ -83,7 +86,7 @@ class AdbHandler(io.root_handler.RootHandler):
         if not result.success:
             return result
         if not self.adb_root_success():
-            result2 = self.run_shell(f"su -c 'rm /sdcard/{device_path.basename()}'")
+            result2 = self.run_shell(f"rm /sdcard/{device_path.basename()}")
             if result2.exit_code != 0:
                 return result2
         return result
@@ -101,12 +104,12 @@ class AdbHandler(io.root_handler.RootHandler):
         if not result.success:
             return result
         if not self.adb_root_success():
-            result2 = self.run_shell(
-                f"su -c 'cp /sdcard/{device_path.basename()} {orignal_device_path.to_str_forwards()} && chmod o+rw {orignal_device_path.to_str_forwards()}'"
+            result2 = self.run_root_shell(
+                f"cp '/sdcard/{device_path.basename()}' '{orignal_device_path.to_str_forwards()}' && chmod o+rw '{orignal_device_path.to_str_forwards()}'"
             )
+            result3 = self.run_shell(f"rm '/sdcard/{device_path.basename()}'")
             if result2.exit_code != 0:
                 return result2
-            result3 = self.run_shell(f"su -c 'rm /sdcard/{device_path.basename()}'")
             if result3.exit_code != 0:
                 return result3
 
@@ -119,8 +122,8 @@ class AdbHandler(io.root_handler.RootHandler):
         return self.stat_file(device_path).success
 
     def get_battlecats_packages(self) -> list[str]:
-        cmd = "find /data/data/ | grep files/SAVE_DATA$"
-        result = self.run_shell(cmd)
+        cmd = "find /data/data/*/files/SAVE_DATA"
+        result = self.run_root_shell(cmd)
         if not result.success:
             return []
         packages: list[str] = []

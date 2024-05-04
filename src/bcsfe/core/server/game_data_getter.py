@@ -205,9 +205,12 @@ class GameDataGetter:
                 path.remove()
 
     def print_no_file(self, packname: str, file_name: str) -> None:
-        color.ColoredText.localize(
-            "failed_to_download_game_data",
-            file_name=file_name,
-            pack_name=packname,
-            version=self.latest_version,
-        )
+        if self.latest_version is None:
+            color.ColoredText.localize("failed_to_get_latest_version")
+        else:
+            color.ColoredText.localize(
+                "failed_to_download_game_data",
+                file_name=file_name,
+                pack_name=packname,
+                version=self.latest_version,
+            )

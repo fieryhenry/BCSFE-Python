@@ -66,16 +66,24 @@ class EventSubChapter:
             self.clear_progress = max(self.clear_progress, index + 1)
         self.stages[index].clear_stage(clear_amount)
         self.chapter_unlock_state = 3
-        if index == len(self.stages) - 1:
+        if (
+            index
+            == len(self.stages) - 1  # TODO: check game files to get actual stage count
+        ):
             return True
         return False
 
     def unclear_stage(self, index: int) -> bool:
         self.clear_progress = min(self.clear_progress, index)
         self.stages[index].unclear_stage()
-        if index == len(self.stages) - 1:
-            return True
-        return False
+
+        return True
+
+        # if (
+        #     index == len(self.stages) - 1
+        # ):  # TODO: check game files to get actual stage count
+        #     return True
+        # return False
 
     def clear_map(self, increment: bool = True) -> bool:
         self.clear_progress = len(self.stages)
@@ -299,7 +307,7 @@ class EventChapterGroup:
 
     def unclear_stage(self, map: int, star: int, stage: int):
         finished = self.chapters[map].unclear_stage(star, stage)
-        if finished and map + 1 < len(self.chapters):
+        if finished and map + 1 < len(self.chapters) and star == 0:
             for chapter in self.chapters[map + 1].chapters:
                 chapter.chapter_unlock_state = 0
 
@@ -714,9 +722,11 @@ class EventChapters:
         return len(self.chapters[type].chapters[map].chapters[star].stages)
 
     @staticmethod
-    def ask_stars(max_stars: int) -> Optional[int]:
+    def ask_stars(
+        max_stars: int, prompt: str = "custom_star_count_per_chapter"
+    ) -> Optional[int]:
         stars = dialog_creator.IntInput(min=0, max=max_stars).get_basic_input_locale(
-            "custom_star_count_per_chapter", {"max": max_stars}
+            prompt, {"max": max_stars}
         )
         if stars is None:
             return None

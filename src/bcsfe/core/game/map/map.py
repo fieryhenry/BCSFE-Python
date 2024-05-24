@@ -106,8 +106,10 @@ def edit_chapters(
 
     if clear:
         clear_txt = "clear"
+        star_prompt = "custom_star_count_per_chapter"
     else:
         clear_txt = "unclear"
+        star_prompt = "custom_star_count_per_chapter_unclear"
 
     map_choices = core.EventChapters.select_map_names(names)
     if not map_choices:
@@ -159,7 +161,10 @@ def edit_chapters(
                 return
 
     if not stars_type_choice:
-        stars = core.EventChapters.ask_stars(get_total_stars(chapters, 0, type))
+        stars = core.EventChapters.ask_stars(
+            get_total_stars(chapters, 0, type),
+            prompt=star_prompt,
+        )
         if stars is None:
             return
     else:
@@ -170,7 +175,9 @@ def edit_chapters(
         stage_names = map_names.stage_names.get(id)
         color.ColoredText.localize("current_sol_chapter", name=map_name, id=id)
         if stars_type_choice:
-            stars = core.EventChapters.ask_stars(get_total_stars(chapters, id, type))
+            stars = core.EventChapters.ask_stars(
+                get_total_stars(chapters, id, type), prompt=star_prompt
+            )
             if stars is None:
                 return
         if clear_type_choice:
@@ -185,9 +192,15 @@ def edit_chapters(
             if clear_amount is None:
                 return
 
-        unclear_rest(chapters, stages, stars, id, type)
+        if not clear:
+            start = stars - 1
+            end = get_total_stars(chapters, id, type)
+        else:
+            start = 0
+            end = stars
+            unclear_rest(chapters, stages, stars, id, type)
 
-        for star in range(stars):
+        for star in range(start, end):
             if clear_amount_type == 2:
                 color.ColoredText.localize("current_sol_star", star=star + 1)
             for stage in stages:

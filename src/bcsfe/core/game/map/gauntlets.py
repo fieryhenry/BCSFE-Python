@@ -63,9 +63,10 @@ class Chapter:
     def unclear_stage(self, index: int):
         self.clear_progress = min(self.clear_progress, index)
         self.stages[index].unclear_stage()
-        if index == len(self.stages) - 1:
-            return True
-        return False
+        return True
+        # if index == len(self.stages) - 1:
+        #    return True
+        # return False
 
     @staticmethod
     def init(total_stages: int) -> "Chapter":
@@ -222,7 +223,7 @@ class GauntletChapters:
 
     def unclear_stage(self, map: int, star: int, stage: int):
         finished = self.chapters[map].unclear_stage(star, stage)
-        if finished and map + 1 < len(self.chapters):
+        if finished and map + 1 < len(self.chapters) and star == 0:
             for chapter in self.chapters[map + 1].chapters:
                 chapter.chapter_unlock_state = 0
 

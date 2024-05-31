@@ -1,5 +1,6 @@
 from typing import Any
 from bcsfe import core
+from bcsfe.cli import edits
 
 
 class Stage:
@@ -60,6 +61,8 @@ class Chapter:
         self.stages: list[Stage] = [Stage.init() for _ in range(total_stages)]
         self.chapter_unlock_state = 0
 
+        self.total_stages = 0
+
     def clear_stage(
         self, index: int, clear_amount: int = 1, overwrite_clear_progress: bool = False
     ) -> bool:
@@ -69,7 +72,7 @@ class Chapter:
             self.clear_progress = max(self.clear_progress, index + 1)
         self.stages[index].clear_stage(clear_amount)
         self.chapter_unlock_state = 3
-        if index == len(self.stages) - 1:
+        if index == self.total_stages - 1:
             return True
         return False
 
@@ -77,9 +80,6 @@ class Chapter:
         self.clear_progress = min(self.clear_progress, index)
         self.stages[index].unclear_stage()
         return True
-        # if index == len(self.stages) - 1:
-        #    return True
-        # return False
 
     @staticmethod
     def init(total_stages: int) -> "Chapter":
@@ -357,10 +357,14 @@ class LegendQuestChapters:
         legend_quest.edit_chapters(save_file, "D")
 
     def edit_chapters(self, save_file: "core.SaveFile", letter_code: str):
-        core.edit_chapters(save_file, self, letter_code)
+        edits.map.edit_chapters(save_file, self, letter_code)
 
     def unclear_rest(self, stages: list[int], stars: int, id: int):
         for star in range(stars, self.get_total_stars(id)):
             for stage in range(max(stages), self.get_total_stages(id, star)):
                 self.chapters[id].chapters[star].stages[stage].clear_times = 0
                 self.chapters[id].chapters[star].clear_progress = 0
+
+    def set_total_stages(self, map: int, total_stages: int):
+        for chapter in self.chapters[map].chapters:
+            chapter.total_stages = total_stages

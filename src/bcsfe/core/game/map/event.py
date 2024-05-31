@@ -1,6 +1,6 @@
 from typing import Any, Optional
 from bcsfe import core
-from bcsfe.cli import color, dialog_creator
+from bcsfe.cli import color, dialog_creator, edits
 
 
 class EventStage:
@@ -53,6 +53,7 @@ class EventSubChapter:
         self.clear_progress = 0
         self.stages = [EventStage.init() for _ in range(total_stages)]
         self.chapter_unlock_state = 0
+        self.total_stages = 0
 
     def clear_stage(
         self,
@@ -66,10 +67,7 @@ class EventSubChapter:
             self.clear_progress = max(self.clear_progress, index + 1)
         self.stages[index].clear_stage(clear_amount)
         self.chapter_unlock_state = 3
-        if (
-            index
-            == len(self.stages) - 1  # TODO: check game files to get actual stage count
-        ):
+        if index == self.total_stages - 1:
             return True
         return False
 
@@ -78,12 +76,6 @@ class EventSubChapter:
         self.stages[index].unclear_stage()
 
         return True
-
-        # if (
-        #     index == len(self.stages) - 1
-        # ):  # TODO: check game files to get actual stage count
-        #     return True
-        # return False
 
     def clear_map(self, increment: bool = True) -> bool:
         self.clear_progress = len(self.stages)
@@ -873,7 +865,7 @@ class EventChapters:
 
     @staticmethod
     def edit_chapters(save_file: "core.SaveFile", type: int, letter_code: str):
-        core.edit_chapters(save_file, save_file.event_stages, letter_code, type)
+        edits.map.edit_chapters(save_file, save_file.event_stages, letter_code, type)
 
     def unclear_rest(
         self,
@@ -888,3 +880,7 @@ class EventChapters:
                     stage
                 ].clear_amount = 0
                 self.chapters[type].chapters[id].chapters[star].clear_progress = 0
+
+    def set_total_stages(self, map: int, type: int, total_stages: int):
+        for chapter in self.chapters[type].chapters[map].chapters:
+            chapter.total_stages = total_stages

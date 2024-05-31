@@ -9,8 +9,8 @@ class Upgrade:
         self.plus = plus
         self.base = base
 
-        self.base_range = (0, 0)
-        self.plus_range = (0, 0)
+        self.base_range = None
+        self.plus_range = None
 
     def get_base(self) -> int:
         return self.base + 1
@@ -28,12 +28,16 @@ class Upgrade:
         self.plus += amount
 
     def get_random_base(self, max_base: Optional[int] = None) -> int:
+        if self.base_range is None:
+            return self.base
         base = random.randint(self.base_range[0], self.base_range[1])
         if max_base is not None:
             base = min(base, max_base)
         return base
 
     def get_random_plus(self, max_plus: Optional[int] = None) -> int:
+        if self.plus_range is None:
+            return self.plus
         plus = random.randint(self.plus_range[0], self.plus_range[1])
         if max_plus is not None:
             plus = min(plus, max_plus)

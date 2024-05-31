@@ -269,41 +269,22 @@ class CatEditor:
 
     def true_form_cats(self, cats: list["core.Cat"], force: bool = False):
         cats = self.get_save_cats(cats)
-        pic_book = self.save_file.cats.read_nyanko_picture_book(self.save_file)
         set_current_forms = core.core_data.config.get_bool(
             core.ConfigKey.SET_CAT_CURRENT_FORMS
         )
-        for cat in cats:
-            pic_book_cat = pic_book.get_cat(cat.id)
-            if force:
-                cat.true_form(self.save_file, set_current_form=set_current_forms)
-            elif pic_book_cat is not None:
-                cat.set_form_true(
-                    self.save_file,
-                    pic_book_cat.total_forms,
-                    set_current_form=set_current_forms,
-                )
+        self.save_file.cats.true_form_cats(
+            self.save_file, cats, force, set_current_forms
+        )
         color.ColoredText.localize("true_form_success")
 
     def fourth_form_cats(self, cats: list["core.Cat"], force: bool = False):
         cats = self.get_save_cats(cats)
-        pic_book = self.save_file.cats.read_nyanko_picture_book(self.save_file)
         set_current_forms = core.core_data.config.get_bool(
             core.ConfigKey.SET_CAT_CURRENT_FORMS
         )
-        for cat in cats:
-            pic_book_cat = pic_book.get_cat(cat.id)
-            if force:
-                cat.unlock_fourth_form(
-                    self.save_file, set_current_form=set_current_forms
-                )
-            elif pic_book_cat is not None:
-                cat.set_form_true(
-                    self.save_file,
-                    pic_book_cat.total_forms,
-                    set_current_form=set_current_forms,
-                    fourth_form=True,
-                )
+        self.save_file.cats.fourth_form_cats(
+            self.save_file, cats, force, set_current_forms
+        )
         color.ColoredText.localize("fourth_form_success")
 
     def remove_true_form_cats(self, cats: list["core.Cat"]):

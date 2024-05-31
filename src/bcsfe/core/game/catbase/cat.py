@@ -920,12 +920,49 @@ class Cats:
     def get_cats_gatya_banner(
         self, save_file: "core.SaveFile", gatya_id: int
     ) -> Optional[list["core.Cat"]]:
-        cat_ids = save_file.gatya.read_gatya_data_set(save_file).get_cat_ids(
-            gatya_id
-        )
+        cat_ids = save_file.gatya.read_gatya_data_set(save_file).get_cat_ids(gatya_id)
         if cat_ids is None:
             return None
         return self.get_cats_by_ids(cat_ids)
+
+    def true_form_cats(
+        self,
+        save_file: "core.SaveFile",
+        cats: list[Cat],
+        force: bool = False,
+        set_current_forms: bool = True,
+    ):
+        pic_book = self.read_nyanko_picture_book(save_file)
+        for cat in cats:
+            pic_book_cat = pic_book.get_cat(cat.id)
+            if force:
+                cat.true_form(save_file, set_current_form=set_current_forms)
+            elif pic_book_cat is not None:
+                cat.set_form_true(
+                    save_file,
+                    pic_book_cat.total_forms,
+                    set_current_form=set_current_forms,
+                )
+
+    def fourth_form_cats(
+        self,
+        save_file: "core.SaveFile",
+        cats: list[Cat],
+        force: bool = False,
+        set_current_forms: bool = True,
+    ):
+        pic_book = self.read_nyanko_picture_book(save_file)
+        for cat in cats:
+            pic_book_cat = pic_book.get_cat(cat.id)
+            if force:
+                cat.unlock_fourth_form(save_file, set_current_form=set_current_forms)
+            elif pic_book_cat is not None:
+                cat.set_form_true(
+                    save_file,
+                    pic_book_cat.total_forms,
+                    set_current_form=set_current_forms,
+                    fourth_form=True,
+                )
 
     def get_cats_by_ids(self, ids: list[int]) -> list[Cat]:
         cats: list[Cat] = []

@@ -76,13 +76,11 @@ class ManagedItem:
         values = short_form.split("_")
         try:
             amount = int(values[0])
-            amount = int(amount)
         except (IndexError, ValueError):
             amount = 0
 
         try:
             detail_created_at = int(values[1])
-            detail_created_at = int(detail_created_at)
         except (IndexError, ValueError):
             detail_created_at = 0
 

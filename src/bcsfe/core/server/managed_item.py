@@ -139,14 +139,17 @@ class BackupMetaData:
     def remove_managed_items(self) -> None:
         self.save_file.remove_strings(self.identifier)
 
-    def create(self, save_key: Optional[str] = None) -> str:
+    def create(
+        self, save_key: Optional[str] = None, add_managed_items: bool = True
+    ) -> str:
         """Create the backup metadata."""
 
         managed_items: list[dict[str, Any]] = []
-        for managed_item in self.get_managed_items():
-            if managed_item.amount == 0:
-                continue
-            managed_items.append(managed_item.to_dict())
+        if add_managed_items:
+            for managed_item in self.get_managed_items():
+                if managed_item.amount == 0:
+                    continue
+                managed_items.append(managed_item.to_dict())
 
         managed_items_str = core.JsonFile.from_object(managed_items)
         managed_items_str = (

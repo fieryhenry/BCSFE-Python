@@ -395,7 +395,7 @@ class ServerHandler:
         if self.print:
             color.ColoredText.localize(key, **kwargs)
 
-    def get_codes(self) -> Optional[tuple[str, str]]:
+    def get_codes(self, upload_managed_items: bool = True) -> Optional[tuple[str, str]]:
         self.save_file.show_ban_message = False
 
         auth_token = self.get_auth_token()
@@ -414,7 +414,7 @@ class ServerHandler:
         self.print_key("getting_codes")
 
         bmd = core.BackupMetaData(self.save_file)
-        meta_data = bmd.create(save_key["key"])
+        meta_data = bmd.create(save_key["key"], upload_managed_items)
 
         url = f"{self.save_url}/v2/transfers"
         headers = core.AccountHeaders(self.save_file, meta_data).get_headers()

@@ -1,6 +1,6 @@
 import base64
 import time
-from typing import Any, Optional, Union
+from typing import Any, Optional
 
 from bcsfe import core
 import jwt
@@ -527,7 +527,7 @@ class ServerHandler:
         cc: "core.CountryCode",
         gv: "core.GameVersion",
         print_no_internet: bool = True,
-    ) -> Optional[Union["ServerHandler", RequestResult]]:
+    ) -> tuple[Optional["ServerHandler"], Optional[RequestResult]]:
         url = f"{ServerHandler.save_url}/v2/transfers/{transfer_code}/reception"
         data = core.ClientInfo(cc, gv).get_client_info()
         data["pin"] = confirmation_code
@@ -548,11 +548,11 @@ class ServerHandler:
         if response is None:
             if print_no_internet:
                 core.print_no_internet()
-            return None
+            return None, None
         resp_headers = response.headers
         content_type = resp_headers.get("content-type", "")
         if content_type != "application/octet-stream":
-            return RequestResult(url, response, headers, data_str)
+            return None, RequestResult(url, response, headers, data_str)
 
         save_data = response.content
         save_file = core.SaveFile(core.Data(save_data))
@@ -566,7 +566,7 @@ class ServerHandler:
         if password is not None:
             server_handler.save_password(password)
 
-        return server_handler
+        return server_handler, None
 
     def update_managed_items(self) -> bool:
         auth_token = self.get_auth_token()

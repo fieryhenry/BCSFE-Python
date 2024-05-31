@@ -102,6 +102,16 @@ class ManagedItem:
         )
         return managed_item
 
+    def __str__(self) -> str:
+        return (
+            f"{self.amount} {self.managed_item_type.value} ({self.detail_type.value})"
+        )
+
+    def __repr__(self) -> str:
+        return (
+            f"{self.amount} {self.managed_item_type.value} ({self.detail_type.value})"
+        )
+
 
 class BackupMetaData:
     def __init__(

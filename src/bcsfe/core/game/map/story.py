@@ -633,6 +633,8 @@ class StoryChapters:
                     )
                 if clear_amount_type == 2:
                     clear_amount = core.EventChapters.ask_clear_amount()
+                    if clear_amount is None:
+                        return
                 self.clear_stage(
                     id,
                     stage,

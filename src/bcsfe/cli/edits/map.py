@@ -7,6 +7,7 @@ chapters_type = Union[
     "core.GauntletChapters",
     "core.LegendQuestChapters",
     "core.ZeroLegendsChapters",
+    "core.Chapters",
 ]
 
 
@@ -173,6 +174,19 @@ def edit_chapters(
     for id in map_choices:
         map_name = names[id]
         stage_names = map_names.stage_names.get(id)
+        stage_names = [
+            stage_name
+            for stage_name in stage_names or []
+            if stage_name and stage_name != "＠"
+        ]
+        total_stages = len(stage_names)
+        if isinstance(chapters, core.EventChapters):
+            if type is None:
+                raise ValueError("Type must be specified for EventChapters!")
+            chapters.set_total_stages(id, type, total_stages)
+        else:
+            chapters.set_total_stages(id, total_stages)
+
         color.ColoredText.localize("current_sol_chapter", name=map_name, id=id)
         if stars_type_choice:
             stars = core.EventChapters.ask_stars(
@@ -205,8 +219,6 @@ def edit_chapters(
                 color.ColoredText.localize("current_sol_star", star=star + 1)
             for stage in stages:
                 if clear_amount_type == 2:
-                    if stage_names is None:
-                        continue
                     stage_name = stage_names[stage]
                     color.ColoredText.localize(
                         "current_sol_stage", name=stage_name, id=stage

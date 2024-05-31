@@ -272,4 +272,7 @@ __all__ = [
     "ManagedItem",
     "ManagedItemType",
     "BackupMetaData",
+    "Cat",
+    "Upgrade",
+    "PowerUpHelper",
 ]

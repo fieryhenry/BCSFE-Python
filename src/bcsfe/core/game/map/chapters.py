@@ -146,6 +146,7 @@ class ChaptersStars:
         if finished and star + 1 < len(self.chapters):
             for chapter in self.chapters[star + 1 :]:
                 chapter.chapter_unlock_state = 0
+        return finished
 
     @staticmethod
     def init(total_stages: int, total_stars: int) -> "ChaptersStars":

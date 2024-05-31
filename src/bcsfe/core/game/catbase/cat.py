@@ -917,6 +917,20 @@ class Cats:
                 cats.append(cat)
         return cats
 
+    def get_cats_non_obtainable(
+        self, save_file: "core.SaveFile"
+    ) -> Optional[list[Cat]]:
+        nyanko_picture_book = self.read_nyanko_picture_book(save_file)
+        obtainable_cats = nyanko_picture_book.get_obtainable_cats()
+        if obtainable_cats is None:
+            return None
+        ny_cats = [cat.cat_id for cat in obtainable_cats]
+        cats: list[Cat] = []
+        for cat in self.cats:
+            if cat.id not in ny_cats:
+                cats.append(cat)
+        return cats
+
     def get_cats_gatya_banner(
         self, save_file: "core.SaveFile", gatya_id: int
     ) -> Optional[list["core.Cat"]]:

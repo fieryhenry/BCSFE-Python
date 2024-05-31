@@ -917,6 +917,16 @@ class Cats:
                 cats.append(cat)
         return cats
 
+    def get_cats_gatya_banner(
+        self, save_file: "core.SaveFile", gatya_id: int
+    ) -> Optional[list["core.Cat"]]:
+        cat_ids = save_file.gatya.read_gatya_data_set(save_file).get_cat_ids(
+            gatya_id
+        )
+        if cat_ids is None:
+            return None
+        return self.get_cats_by_ids(cat_ids)
+
     def get_cats_by_ids(self, ids: list[int]) -> list[Cat]:
         cats: list[Cat] = []
         for cat in self.cats:

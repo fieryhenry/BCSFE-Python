@@ -3377,3 +3377,6 @@ class SaveFile:
 
     def set_leadership(self, leadership: int):
         self.leadership = leadership
+
+    def max_rank_up_sale(self):
+        self.rank_up_sale_value = 0x7FFFFFFF

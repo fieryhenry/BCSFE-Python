@@ -35,12 +35,7 @@ class CatEditor:
         return self.save_file.cats.get_cats_obtainable(self.save_file)
 
     def get_cats_gatya_banner(self, gatya_id: int) -> Optional[list["core.Cat"]]:
-        cat_ids = self.save_file.gatya.read_gatya_data_set(self.save_file).get_cat_ids(
-            gatya_id
-        )
-        if cat_ids is None:
-            return None
-        return self.save_file.cats.get_cats_by_ids(cat_ids)
+        return self.save_file.cats.get_cats_gatya_banner(self.save_file, gatya_id)
 
     def print_selected_cats(self, current_cats: list["core.Cat"]):
         if not current_cats:

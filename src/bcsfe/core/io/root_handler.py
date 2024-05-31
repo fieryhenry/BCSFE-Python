@@ -67,8 +67,11 @@ class RootHandler:
 
         return core.CommandResult.create_success()
 
-    def save_locally(self) -> tuple[Optional["core.Path"], "core.CommandResult"]:
-        local_path = core.Path.get_documents_folder().add("saves").add("SAVE_DATA")
+    def save_locally(
+        self, local_path: Optional["core.Path"] = None
+    ) -> tuple[Optional["core.Path"], "core.CommandResult"]:
+        if local_path is None:
+            local_path = core.Path.get_documents_folder().add("saves").add("SAVE_DATA")
         local_path.parent().generate_dirs()
         result = self.save_battlecats_save(local_path)
         if not result.success:

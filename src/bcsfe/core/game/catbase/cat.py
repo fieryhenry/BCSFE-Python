@@ -200,6 +200,15 @@ class TalentData:
                 return skill
         return None
 
+    def get_talent_from_cat_skill(self, cat: core.Cat, skill_id: int) -> Talent | None:
+        talents = cat.talents
+        if talents is None:
+            return None
+        for talent in talents:
+            if talent.id == skill_id:
+                return talent
+        return None
+
     def get_cat_skill_name(self, cat_id: int, skill_id: int) -> str | None:
         skill = self.get_skill_from_cat(cat_id, skill_id)
         if skill is None:
@@ -211,6 +220,34 @@ class TalentData:
         if skill is None:
             return None
         return self.get_skill_level(skill.lvid)
+
+    def get_cat_talents(
+        self, cat: core.Cat
+    ) -> tuple[list[str], list[int], list[int], list[int]] | None:
+        talent_data_cat = self.get_cat_skill(cat.id)
+        if talent_data_cat is None or cat.talents is None:
+            return None
+        save_talent_data = cat.talents
+        talent_names: list[str] = []
+        max_levels: list[int] = []
+        current_levels: list[int] = []
+        ids: list[int] = []
+        for skill in talent_data_cat.skills:
+            name = self.get_skill_name(skill.text_id)
+            talent = self.get_talent_from_cat_skill(cat, skill.ability_id)
+            if name is None or talent is None:
+                continue
+
+            max_level = skill.max_lv
+            if max_level == 0:
+                max_level = 1
+
+            max_levels.append(max_level)
+            talent_names.append(name.split("<br>")[0])
+            current_levels.append(talent.level)
+            ids.append(skill.ability_id)
+
+        return talent_names, max_levels, current_levels, ids
 
 
 class Talent:

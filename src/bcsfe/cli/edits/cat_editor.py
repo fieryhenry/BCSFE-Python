@@ -367,36 +367,6 @@ class CatEditor:
         if success:
             color.ColoredText.localize("upgrade_success")
 
-    def get_cat_talents(
-        self, talent_data: core.TalentData, cat: core.Cat
-    ) -> tuple[list[str], list[int], list[int], list[int]] | None:
-        talent_data_cat = talent_data.get_cat_skill(cat.id)
-        if talent_data_cat is None or cat.talents is None:
-            return None
-        save_talent_data = cat.talents
-        talent_names: list[str] = []
-        max_levels: list[int] = []
-        current_levels: list[int] = []
-        ids: list[int] = []
-        for talent in save_talent_data:
-            talent_data_t = talent_data.get_skill_from_cat(cat.id, talent.id)
-            name = talent_data.get_cat_skill_name(cat.id, talent.id)
-            if name is None:
-                continue
-            if talent_data_t is None:
-                continue
-
-            max_level = talent_data_t.max_lv
-            if max_level == 0:
-                max_level = 1
-
-            max_levels.append(max_level)
-            talent_names.append(name.split("<br>")[0])
-            current_levels.append(talent.level)
-            ids.append(talent.id)
-
-        return talent_names, max_levels, current_levels, ids
-
     def remove_talents_cats(self, cats: list[core.Cat]):
         for cat in cats:
             if cat.talents is None:
@@ -467,7 +437,7 @@ class CatEditor:
                     name=names[0],
                     id=cat.id,
                 )
-                data = self.get_cat_talents(talent_data, cat)
+                data = talent_data.get_cat_talents(cat)
                 if data is None:
                     color.ColoredText.localize("no_talent_data", id=cat.id)
                     continue
@@ -491,7 +461,7 @@ class CatEditor:
             for cat in cats:
                 if cat.talents is None:
                     continue
-                data = self.get_cat_talents(talent_data, cat)
+                data = talent_data.get_cat_talents(cat)
                 if data is None:
                     continue
                 if core.core_data.config.get_bool(core.ConfigKey.UNLOCK_CAT_ON_EDIT):

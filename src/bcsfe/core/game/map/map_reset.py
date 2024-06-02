@@ -1,3 +1,4 @@
+from __future__ import annotations
 from bcsfe import core
 
 
@@ -15,7 +16,7 @@ class MapResetData:
         self.daily_end_timestamp = daily_end_timestamp
 
     @staticmethod
-    def init() -> "MapResetData":
+    def init() -> MapResetData:
         return MapResetData(
             0.0,
             0.0,
@@ -24,7 +25,7 @@ class MapResetData:
         )
 
     @staticmethod
-    def read(stream: "core.Data") -> "MapResetData":
+    def read(stream: core.Data) -> MapResetData:
         yearly_end_timestamp = stream.read_double()
         monthly_end_timestamp = stream.read_double()
         weekly_end_timestamp = stream.read_double()
@@ -36,7 +37,7 @@ class MapResetData:
             daily_end_timestamp,
         )
 
-    def write(self, stream: "core.Data"):
+    def write(self, stream: core.Data):
         stream.write_double(self.yearly_end_timestamp)
         stream.write_double(self.monthly_end_timestamp)
         stream.write_double(self.weekly_end_timestamp)
@@ -51,7 +52,7 @@ class MapResetData:
         }
 
     @staticmethod
-    def deserialize(data: dict[str, float]) -> "MapResetData":
+    def deserialize(data: dict[str, float]) -> MapResetData:
         return MapResetData(
             data.get("yearly_end_timestamp", 0.0),
             data.get("monthly_end_timestamp", 0.0),
@@ -71,11 +72,11 @@ class MapResets:
         self.data = data
 
     @staticmethod
-    def init() -> "MapResets":
+    def init() -> MapResets:
         return MapResets({})
 
     @staticmethod
-    def read(stream: "core.Data") -> "MapResets":
+    def read(stream: core.Data) -> MapResets:
         data: dict[int, list[MapResetData]] = {}
         for _ in range(stream.read_int()):
             key = stream.read_int()
@@ -85,7 +86,7 @@ class MapResets:
             data[key] = value
         return MapResets(data)
 
-    def write(self, stream: "core.Data"):
+    def write(self, stream: core.Data):
         stream.write_int(len(self.data))
         for key, value in self.data.items():
             stream.write_int(key)
@@ -100,7 +101,7 @@ class MapResets:
         }
 
     @staticmethod
-    def deserialize(data: dict[int, list[dict[str, float]]]) -> "MapResets":
+    def deserialize(data: dict[int, list[dict[str, float]]]) -> MapResets:
         return MapResets(
             {
                 key: [MapResetData.deserialize(item) for item in value]

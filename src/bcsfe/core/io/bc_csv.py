@@ -1,6 +1,7 @@
+from __future__ import annotations
 import csv as csv_module
 import enum
-from typing import Any, Optional, Union
+from typing import Any
 import typing
 from bcsfe import core
 
@@ -12,14 +13,14 @@ class DelimeterType(enum.Enum):
 
 
 class Delimeter:
-    def __init__(self, de: Union[DelimeterType, str]):
+    def __init__(self, de: DelimeterType | str):
         if isinstance(de, str):
             self.delimiter = DelimeterType(de)
         else:
             self.delimiter = de
 
     @staticmethod
-    def from_country_code_res(cc: "core.CountryCode") -> "Delimeter":
+    def from_country_code_res(cc: core.CountryCode) -> Delimeter:
         if cc.get_cc_lang() == core.CountryCodeType.JP:
             return Delimeter(DelimeterType.COMMA)
         return Delimeter(DelimeterType.PIPE)
@@ -29,7 +30,7 @@ class Delimeter:
 
 
 class Cell:
-    def __init__(self, dt: "core.Data"):
+    def __init__(self, dt: core.Data):
         self.data = dt
 
     def to_str(self) -> str:
@@ -54,14 +55,12 @@ class Row:
         self.index = 0
 
     @typing.overload
-    def __getitem__(self, index: int) -> Cell:
-        ...
+    def __getitem__(self, index: int) -> Cell: ...
 
     @typing.overload
-    def __getitem__(self, index: slice) -> "Row":
-        ...
+    def __getitem__(self, index: slice) -> Row: ...
 
-    def __getitem__(self, index: Union[int, slice]) -> Union[Cell, "Row"]:
+    def __getitem__(self, index: int | slice) -> Cell | Row:
         if isinstance(index, int):
             try:
                 return self.cells[index]
@@ -76,7 +75,7 @@ class Row:
         return len(self.cells)
 
     @staticmethod
-    def from_list(dt: list["core.Data"]) -> "Row":
+    def from_list(dt: list[core.Data]) -> Row:
         cells: list[Cell] = []
         for item in dt:
             cells.append(Cell(item))
@@ -109,8 +108,8 @@ class Row:
 class CSV:
     def __init__(
         self,
-        file_data: "core.Data",
-        delimiter: Union[Delimeter, str] = Delimeter(DelimeterType.COMMA),
+        file_data: core.Data,
+        delimiter: Delimeter | str = Delimeter(DelimeterType.COMMA),
         remove_padding: bool = True,
         remove_comments: bool = True,
         remove_empty: bool = True,
@@ -136,7 +135,7 @@ class CSV:
         )
         self.lines: list[Row] = []
         for row in reader:
-            new_row: list["core.Data"] = []
+            new_row: list[core.Data] = []
             full_row = f"{str(self.delimiter)}".join(row)
             if self.remove_comments:
                 full_row = full_row.split("//")[0]
@@ -163,20 +162,20 @@ class CSV:
 
     @staticmethod
     def from_file(
-        pt: "core.Path", delimiter: Delimeter = Delimeter(DelimeterType.COMMA)
-    ) -> "CSV":
+        pt: core.Path, delimiter: Delimeter = Delimeter(DelimeterType.COMMA)
+    ) -> CSV:
         return CSV(pt.read(), delimiter)
 
-    def add_line(self, line: Union[list[Any], Any]):
+    def add_line(self, line: list[Any] | Any):
         if not isinstance(line, list):
             line = [line]
-        new_line: list["core.Data"] = []
+        new_line: list[core.Data] = []
         for item in line:
             new_line.append(core.Data(str(item)))
         self.lines.append(Row.from_list(new_line))
 
     def set_line(self, index: int, line: list[Any]):
-        new_line: list["core.Data"] = []
+        new_line: list[core.Data] = []
         for item in line:
             new_line.append(core.Data(item))
         try:
@@ -184,7 +183,7 @@ class CSV:
         except IndexError:
             self.lines.append(Row.from_list(new_line))
 
-    def to_data(self) -> "core.Data":
+    def to_data(self) -> core.Data:
         csv: list[str] = []
         for line in self.lines:
             for i, item in enumerate(line):
@@ -194,7 +193,7 @@ class CSV:
             csv.append("\r\n")
         return core.Data("".join(csv))
 
-    def read_line(self) -> Optional[Row]:
+    def read_line(self) -> Row | None:
         try:
             line = self.lines[self.index]
         except IndexError:

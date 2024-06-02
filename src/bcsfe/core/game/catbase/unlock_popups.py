@@ -1,3 +1,4 @@
+from __future__ import annotations
 from bcsfe import core
 
 
@@ -6,22 +7,22 @@ class Popup:
         self.seen = seen
 
     @staticmethod
-    def init() -> "Popup":
+    def init() -> Popup:
         return Popup(False)
 
     @staticmethod
-    def read(stream: "core.Data") -> "Popup":
+    def read(stream: core.Data) -> Popup:
         seen = stream.read_bool()
         return Popup(seen)
 
-    def write(self, stream: "core.Data"):
+    def write(self, stream: core.Data):
         stream.write_bool(self.seen)
 
     def serialize(self) -> bool:
         return self.seen
 
     @staticmethod
-    def deserialize(data: bool) -> "Popup":
+    def deserialize(data: bool) -> Popup:
         return Popup(data)
 
     def __repr__(self) -> str:
@@ -36,11 +37,11 @@ class UnlockPopups:
         self.popups = popups
 
     @staticmethod
-    def init() -> "UnlockPopups":
+    def init() -> UnlockPopups:
         return UnlockPopups({})
 
     @staticmethod
-    def read(stream: "core.Data") -> "UnlockPopups":
+    def read(stream: core.Data) -> UnlockPopups:
         total = stream.read_int()
         popups: dict[int, Popup] = {}
         for _ in range(total):
@@ -48,7 +49,7 @@ class UnlockPopups:
             popups[key] = Popup.read(stream)
         return UnlockPopups(popups)
 
-    def write(self, stream: "core.Data"):
+    def write(self, stream: core.Data):
         stream.write_int(len(self.popups))
         for key, popup in self.popups.items():
             stream.write_int(key)
@@ -58,7 +59,7 @@ class UnlockPopups:
         return {key: popup.serialize() for key, popup in self.popups.items()}
 
     @staticmethod
-    def deserialize(data: dict[int, bool]) -> "UnlockPopups":
+    def deserialize(data: dict[int, bool]) -> UnlockPopups:
         return UnlockPopups(
             {int(key): Popup.deserialize(popup) for key, popup in data.items()}
         )

@@ -1,5 +1,6 @@
+from __future__ import annotations
 import base64
-from typing import Any, Optional, Union
+from typing import Any
 from bcsfe import core
 import datetime
 
@@ -27,14 +28,14 @@ class FailedToSaveError(SaveError):
 class SaveFile:
     def __init__(
         self,
-        dt: Optional["core.Data"] = None,
-        cc: Optional["core.CountryCode"] = None,
+        dt: core.Data | None = None,
+        cc: core.CountryCode | None = None,
         load: bool = True,
-        gv: Optional["core.GameVersion"] = None,
-        package_name: Optional[str] = None,
+        gv: core.GameVersion | None = None,
+        package_name: str | None = None,
     ):
         self.package_name = package_name
-        self.save_path: Optional[core.Path] = None
+        self.save_path: core.Path | None = None
         if dt is None:
             self.data = core.Data()
         else:
@@ -51,26 +52,26 @@ class SaveFile:
 
         self.used_storage = False
 
-        self.localizable: Optional[core.Localizable] = None
+        self.localizable: core.Localizable | None = None
 
         self.init_save(gv)
 
         if dt is not None and load:
             self.load_wrapper()
 
-    def get_localizable(self) -> "core.Localizable":
+    def get_localizable(self) -> core.Localizable:
         if self.localizable is None:
             self.localizable = core.Localizable(self)
         return self.localizable
 
-    def load_save_file(self, other: "SaveFile"):
+    def load_save_file(self, other: SaveFile):
         self.data = other.data
         self.cc = other.cc
         self.game_version = other.game_version
         self.init_save(other.game_version)
         self.load_wrapper()
 
-    def detect_cc(self) -> Optional["core.CountryCode"]:
+    def detect_cc(self) -> core.CountryCode | None:
         for cc in core.CountryCode.get_all():
             self.cc = cc
             if self.verify_hash():
@@ -109,8 +110,8 @@ class SaveFile:
             data_to_hash = self.data.read_bytes(len(self.data) - 32)
         else:
             data_to_hash = self.data.read_bytes(len(self.data))
-        data_to_hash = core.Data(salt.encode("utf-8") + data_to_hash)
-        hash = core.Hash(core.HashAlgorithm.MD5).get_hash(data_to_hash)
+        salted_data = core.Data(salt.encode("utf-8") + data_to_hash)
+        hash = core.Hash(core.HashAlgorithm.MD5).get_hash(salted_data)
         return hash.to_hex()
 
     def set_hash(self, add: bool = False):
@@ -142,14 +143,14 @@ class SaveFile:
                 core.core_data.local_manager.get_key("failed_to_load_save_gv")
             )
 
-    def set_gv(self, gv: "core.GameVersion"):
+    def set_gv(self, gv: core.GameVersion):
         self.game_version = gv
 
-    def set_cc(self, cc: "core.CountryCode"):
+    def set_cc(self, cc: core.CountryCode):
         self.cc = cc
         self.set_package_name(None)
 
-    def set_package_name(self, package_name: Optional[str]):
+    def set_package_name(self, package_name: str | None):
         self.package_name = package_name
 
     def load(self):
@@ -632,7 +633,7 @@ class SaveFile:
                     self.uidiid1[key] = {}
 
             length = self.data.read_short()
-            self.uiid2: dict[int, Union[int, float]] = {}
+            self.uiid2: dict[int, int | float] = {}
             for _ in range(length):
                 key = self.data.read_short()
                 if self.game_version < 90100:
@@ -804,7 +805,7 @@ class SaveFile:
                     self.ushdshd[key] = {}
 
             length = self.data.read_short()
-            self.ushid: dict[int, Union[int, float]] = {}
+            self.ushid: dict[int, int | float] = {}
             for _ in range(length):
                 key = self.data.read_short()
                 if self.game_version < 90100:
@@ -1021,7 +1022,7 @@ class SaveFile:
 
         self.remaining_data = self.data.read_to_end(32)
 
-    def save(self, data: "core.Data"):
+    def save(self, data: core.Data):
         self.data = data
         self.dst_index = 0
         self.data.clear()
@@ -1874,13 +1875,13 @@ class SaveFile:
 
         self.data.end_buffer()
 
-    def to_data(self) -> "core.Data":
+    def to_data(self) -> core.Data:
         dt = core.Data()
         self.save_wrapper(dt)
         self.set_hash(add=True)
         return dt
 
-    def save_wrapper(self, data: "core.Data") -> None:
+    def save_wrapper(self, data: core.Data) -> None:
         try:
             self.save(data)
         except Exception as e:
@@ -1888,16 +1889,16 @@ class SaveFile:
                 core.core_data.local_manager.get_key("failed_to_save_save")
             ) from e
 
-    def to_file_thread(self, path: "core.Path"):
+    def to_file_thread(self, path: core.Path):
         core.Thread("to_file", self.to_file, [path]).start()
 
-    def to_file(self, path: "core.Path") -> None:
+    def to_file(self, path: core.Path) -> None:
         path.parent().generate_dirs()
         dt = self.to_data()
         dt.to_file(path)
 
     @staticmethod
-    def get_temp_path() -> "core.Path":
+    def get_temp_path() -> core.Path:
         save_temp_path = core.Path.get_documents_folder().add("save.temp")
         save_temp_path.parent().generate_dirs()
         return save_temp_path
@@ -2667,7 +2668,7 @@ class SaveFile:
 
         return save_file
 
-    def init_save(self, gv: Optional["core.GameVersion"] = None):
+    def init_save(self, gv: core.GameVersion | None = None):
         self.dsts = []
         self.dst_index = 0
         if gv is None:
@@ -3216,7 +3217,7 @@ class SaveFile:
                     return
         self.order_ids.append(f"{SaveFile.get_string_identifier(identifier)}:{string}")
 
-    def get_string(self, identifier: str) -> Optional[str]:
+    def get_string(self, identifier: str) -> str | None:
         for order in self.order_ids:
             if order.startswith(SaveFile.get_string_identifier(identifier)):
                 return order.split(":")[2]
@@ -3256,7 +3257,7 @@ class SaveFile:
                 f"{SaveFile.get_string_identifier(identifier)}:{key}:{value}"
             )
 
-    def get_dict(self, identifier: str) -> Optional[dict[str, str]]:
+    def get_dict(self, identifier: str) -> dict[str, str] | None:
         dictionary: dict[str, str] = {}
         for order in self.order_ids:
             if order.startswith(SaveFile.get_string_identifier(identifier)):
@@ -3272,10 +3273,10 @@ class SaveFile:
         self.order_ids = new_order_ids
 
     @staticmethod
-    def get_saves_path() -> "core.Path":
+    def get_saves_path() -> core.Path:
         return core.Path.get_documents_folder().add("saves").generate_dirs()
 
-    def get_default_path(self) -> "core.Path":
+    def get_default_path(self) -> core.Path:
         core.Thread("check-backups", SaveFile.check_backups, []).start()
         date = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         local_path = (

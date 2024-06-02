@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import Any
 from aenum import NamedConstant  # type: ignore
 import colored  # type: ignore
@@ -112,7 +113,7 @@ class ColoredText:
                 print(colored.stylize(text, fg), end="")  # type: ignore
 
     @staticmethod
-    def localize(string: str, escape: bool = True, **kwargs: Any) -> "ColoredText":
+    def localize(string: str, escape: bool = True, **kwargs: Any) -> ColoredText:
         return ColoredText(
             core.core_data.local_manager.get_key(string, escape=escape, **kwargs)
         )

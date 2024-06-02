@@ -1,9 +1,10 @@
+from __future__ import annotations
 import time
 from bcsfe import core
 
 
 class AccountHeaders:
-    def __init__(self, save_file: "core.SaveFile", data: str):
+    def __init__(self, save_file: core.SaveFile, data: str):
         self.save_file = save_file
         self.data = data
 

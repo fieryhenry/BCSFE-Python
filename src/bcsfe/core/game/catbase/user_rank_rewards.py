@@ -1,4 +1,4 @@
-from typing import Optional
+from __future__ import annotations
 from bcsfe import core
 from bcsfe.cli import dialog_creator, color
 
@@ -9,16 +9,16 @@ class RankGift:
         self.threshold = threshold
         self.rewards = rewards
 
-    def get_name(self, rank_gift_descriptions: "RankGiftDescriptions") -> Optional[str]:
+    def get_name(self, rank_gift_descriptions: RankGiftDescriptions) -> str | None:
         return rank_gift_descriptions.get_name(self.threshold)
 
 
 class RankGifts:
-    def __init__(self, save_file: "core.SaveFile"):
+    def __init__(self, save_file: core.SaveFile):
         self.save_file = save_file
         self.rank_gift = self.read_rank_gift()
 
-    def read_rank_gift(self) -> Optional[list[RankGift]]:
+    def read_rank_gift(self) -> list[RankGift] | None:
         rank_gift: list[RankGift] = []
         gdg = core.core_data.get_game_data_getter(self.save_file)
         data = gdg.download("DataLocal", "rankGift.csv")
@@ -35,7 +35,7 @@ class RankGifts:
             rank_gift.append(RankGift(i, line[0].to_int(), rewards))
         return rank_gift
 
-    def get_rank_gift(self, user_rank: int) -> Optional[RankGift]:
+    def get_rank_gift(self, user_rank: int) -> RankGift | None:
         if self.rank_gift is None:
             return None
         for rank_gift in self.rank_gift:
@@ -43,7 +43,7 @@ class RankGifts:
                 return rank_gift
         return None
 
-    def get_all_rank_gifts(self, user_rank: int) -> Optional[list[RankGift]]:
+    def get_all_rank_gifts(self, user_rank: int) -> list[RankGift] | None:
         if self.rank_gift is None:
             return None
         return [
@@ -52,14 +52,14 @@ class RankGifts:
             if rank_gift.threshold <= user_rank
         ]
 
-    def get_by_id(self, id: int) -> Optional[RankGift]:
+    def get_by_id(self, id: int) -> RankGift | None:
         if self.rank_gift is None:
             return None
         if id >= len(self.rank_gift) or id < 0:
             return None
         return self.rank_gift[id]
 
-    def get_all_unlocked(self, user_rank: int) -> Optional[list[RankGift]]:
+    def get_all_unlocked(self, user_rank: int) -> list[RankGift] | None:
         if self.rank_gift is None:
             return None
 
@@ -78,11 +78,11 @@ class RankGiftDescription:
 
 
 class RankGiftDescriptions:
-    def __init__(self, save_file: "core.SaveFile"):
+    def __init__(self, save_file: core.SaveFile):
         self.save_file = save_file
         self.rank_gift_descriptions = self.read_rank_gift_descriptions()
 
-    def read_rank_gift_descriptions(self) -> Optional[list[RankGiftDescription]]:
+    def read_rank_gift_descriptions(self) -> list[RankGiftDescription] | None:
         rank_gift_descriptions: list[RankGiftDescription] = []
         gdg = core.core_data.get_game_data_getter(self.save_file)
         data = gdg.download("resLocal", "user_info.tsv")
@@ -95,7 +95,7 @@ class RankGiftDescriptions:
             )
         return rank_gift_descriptions
 
-    def get_name(self, user_rank: int) -> Optional[str]:
+    def get_name(self, user_rank: int) -> str | None:
         if self.rank_gift_descriptions is None:
             return None
         for rank_gift_description in self.rank_gift_descriptions:
@@ -109,21 +109,21 @@ class Reward:
         self.claimed = claimed
 
     @staticmethod
-    def init() -> "Reward":
+    def init() -> Reward:
         return Reward(False)
 
     @staticmethod
-    def read(stream: "core.Data") -> "Reward":
+    def read(stream: core.Data) -> Reward:
         return Reward(stream.read_bool())
 
-    def write(self, stream: "core.Data"):
+    def write(self, stream: core.Data):
         stream.write_bool(self.claimed)
 
     def serialize(self) -> bool:
         return self.claimed
 
     @staticmethod
-    def deserialize(data: bool) -> "Reward":
+    def deserialize(data: bool) -> Reward:
         return Reward(data)
 
     def __repr__(self) -> str:
@@ -136,15 +136,15 @@ class Reward:
 class UserRankRewards:
     def __init__(self, rewards: list[Reward]):
         self.rewards = rewards
-        self.rank_gifts: Optional[RankGifts] = None
+        self.rank_gifts: RankGifts | None = None
 
-    def read_rank_gifts(self, save_file: "core.SaveFile") -> RankGifts:
+    def read_rank_gifts(self, save_file: core.SaveFile) -> RankGifts:
         if self.rank_gifts is None:
             self.rank_gifts = RankGifts(save_file)
         return self.rank_gifts
 
     @staticmethod
-    def init(gv: "core.GameVersion") -> "UserRankRewards":
+    def init(gv: core.GameVersion) -> UserRankRewards:
         if gv >= 30:
             total = 0
         else:
@@ -153,7 +153,7 @@ class UserRankRewards:
         return UserRankRewards(rewards)
 
     @staticmethod
-    def read(stream: "core.Data", gv: "core.GameVersion") -> "UserRankRewards":
+    def read(stream: core.Data, gv: core.GameVersion) -> UserRankRewards:
         if gv >= 30:
             total = stream.read_int()
         else:
@@ -163,7 +163,7 @@ class UserRankRewards:
             rewards.append(Reward.read(stream))
         return UserRankRewards(rewards)
 
-    def write(self, stream: "core.Data", gv: "core.GameVersion"):
+    def write(self, stream: core.Data, gv: core.GameVersion):
         if gv >= 30:
             stream.write_int(len(self.rewards))
         for reward in self.rewards:
@@ -173,7 +173,7 @@ class UserRankRewards:
         return [reward.serialize() for reward in self.rewards]
 
     @staticmethod
-    def deserialize(data: list[bool]) -> "UserRankRewards":
+    def deserialize(data: list[bool]) -> UserRankRewards:
         return UserRankRewards([Reward.deserialize(reward) for reward in data])
 
     def __repr__(self) -> str:
@@ -185,7 +185,7 @@ class UserRankRewards:
     def set_claimed(self, index: int, claimed: bool):
         self.rewards[index].claimed = claimed
 
-    def edit(self, save_file: "core.SaveFile"):
+    def edit(self, save_file: core.SaveFile):
         claim_choice = dialog_creator.ChoiceInput.from_reduced(
             ["claim", "unclaim", "fix_claimed"],
             dialog="claim_or_unclaim_ur",
@@ -267,6 +267,6 @@ class UserRankRewards:
             color.ColoredText.localize("ur_unclaimed_success")
 
 
-def edit_user_rank_rewards(save_file: "core.SaveFile"):
+def edit_user_rank_rewards(save_file: core.SaveFile):
     user_rank_rewards = save_file.user_rank_rewards
     user_rank_rewards.edit(save_file)

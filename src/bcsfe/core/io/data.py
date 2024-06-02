@@ -1,9 +1,10 @@
+from __future__ import annotations
 import base64
 import enum
 from io import BytesIO
 import struct
 import typing
-from typing import Any, Literal, Optional, Union
+from typing import Any, Literal
 from bcsfe import core
 import datetime
 
@@ -15,7 +16,7 @@ class PaddingType(enum.Enum):
 
 
 class Data:
-    def __init__(self, data: Union[bytes, str, None, int, bool, "Data", Any] = None):
+    def __init__(self, data: bytes | str | None | int | bool | Data | Any = None):
         if isinstance(data, str):
             self.data = data.encode("utf-8")
         elif isinstance(data, bytes):
@@ -43,7 +44,7 @@ class Data:
         return self.data
 
     @staticmethod
-    def from_hex(hex: str) -> "Data":
+    def from_hex(hex: str) -> Data:
         return Data(bytes.fromhex(hex))
 
     def enable_buffer(self):
@@ -67,15 +68,15 @@ class Data:
     def is_empty(self) -> bool:
         return len(self.data) == 0
 
-    def to_file(self, path: "core.Path"):
+    def to_file(self, path: core.Path):
         with open(path.path, "wb") as f:
             f.write(self.data)
 
-    def copy(self) -> "Data":
+    def copy(self) -> Data:
         return Data(self.data)
 
     @staticmethod
-    def from_file(path: "core.Path") -> "Data":
+    def from_file(path: core.Path) -> Data:
         with open(path.path, "rb") as f:
             return Data(f.read())
 
@@ -100,7 +101,7 @@ class Data:
     def __len__(self) -> int:
         return len(self.data)
 
-    def __add__(self, other: "Data") -> "Data":
+    def __add__(self, other: Data) -> Data:
         return Data(self.data + other.data)
 
     @typing.overload
@@ -108,10 +109,10 @@ class Data:
         pass
 
     @typing.overload
-    def __getitem__(self, key: slice) -> "Data":
+    def __getitem__(self, key: slice) -> Data:
         pass
 
-    def __getitem__(self, key: Union[int, slice]) -> Union[int, "Data"]:
+    def __getitem__(self, key: int | slice) -> int | Data:
         if isinstance(key, int):
             return self.data[key]
         elif isinstance(key, slice):  # type: ignore
@@ -164,7 +165,7 @@ class Data:
         for i6 in range(i5):
             self.write_ubyte((i4 >> (((i5 - i6) - 1) * 8)) & 0xFF)
 
-    def read_int_list(self, length: Optional[int] = None) -> list[int]:
+    def read_int_list(self, length: int | None = None) -> list[int]:
         if length is None:
             length = self.read_int()
         result: list[int] = []
@@ -172,7 +173,7 @@ class Data:
             result.append(self.read_int())
         return result
 
-    def read_bool_list(self, length: Optional[int] = None) -> list[bool]:
+    def read_bool_list(self, length: int | None = None) -> list[bool]:
         if length is None:
             length = self.read_int()
         result: list[bool] = []
@@ -180,7 +181,7 @@ class Data:
             result.append(self.read_bool())
         return result
 
-    def read_string_list(self, length: Optional[int] = None) -> list[str]:
+    def read_string_list(self, length: int | None = None) -> list[str]:
         if length is None:
             length = self.read_int()
         result: list[str] = []
@@ -188,7 +189,7 @@ class Data:
             result.append(self.read_string())
         return result
 
-    def read_byte_list(self, length: Optional[int] = None) -> list[int]:
+    def read_byte_list(self, length: int | None = None) -> list[int]:
         if length is None:
             length = self.read_int()
         result: list[int] = []
@@ -196,7 +197,7 @@ class Data:
             result.append(self.read_byte())
         return result
 
-    def read_short_list(self, length: Optional[int] = None) -> list[int]:
+    def read_short_list(self, length: int | None = None) -> list[int]:
         if length is None:
             length = self.read_int()
         result: list[int] = []
@@ -232,13 +233,13 @@ class Data:
         result = struct.unpack(f"{self.endiness}d", self.read_bytes(8))[0]
         return result
 
-    def read_string(self, length: Optional[int] = None) -> str:
+    def read_string(self, length: int | None = None) -> str:
         if length is None:
             length = self.read_int()
         result = self.read_bytes(length).decode("utf-8")
         return result
 
-    def read_utf8_string_by_char_length(self, length: Optional[int] = None) -> str:
+    def read_utf8_string_by_char_length(self, length: int | None = None) -> str:
         if length is None:
             length = self.read_int()
         if length == 0:
@@ -335,7 +336,7 @@ class Data:
         data_type: str,
         empty_value: Any = None,
         write_length: bool = True,
-        length: Optional[int] = None,
+        length: int | None = None,
     ):
         if length is None:
             length = len(value)
@@ -352,7 +353,7 @@ class Data:
         self,
         value: list[int],
         write_length: bool = True,
-        length: Optional[int] = None,
+        length: int | None = None,
     ):
         self.write_list(value, "int", 0, write_length, length)
 
@@ -360,7 +361,7 @@ class Data:
         self,
         value: list[bool],
         write_length: bool = True,
-        length: Optional[int] = None,
+        length: int | None = None,
     ):
         self.write_list(value, "bool", False, write_length, length)
 
@@ -368,7 +369,7 @@ class Data:
         self,
         value: list[str],
         write_length: bool = True,
-        length: Optional[int] = None,
+        length: int | None = None,
     ):
         self.write_list(value, "string", "", write_length, length)
 
@@ -376,7 +377,7 @@ class Data:
         self,
         value: list[int],
         write_length: bool = True,
-        length: Optional[int] = None,
+        length: int | None = None,
     ):
         self.write_list(value, "byte", 0, write_length, length)
 
@@ -384,7 +385,7 @@ class Data:
         self,
         value: list[int],
         write_length: bool = True,
-        length: Optional[int] = None,
+        length: int | None = None,
     ):
         self.write_list(value, "short", 0, write_length, length)
 
@@ -397,9 +398,7 @@ class Data:
     def read_int_tuple(self) -> tuple[int, int]:
         return self.read_int(), self.read_int()
 
-    def read_int_tuple_list(
-        self, length: Optional[int] = None
-    ) -> list[tuple[int, int]]:
+    def read_int_tuple_list(self, length: int | None = None) -> list[tuple[int, int]]:
         if length is None:
             length = self.read_int()
         result: list[tuple[int, int]] = []
@@ -415,11 +414,11 @@ class Data:
         self,
         value: list[tuple[int, int]],
         write_length: bool = True,
-        length: Optional[int] = None,
+        length: int | None = None,
     ):
         self.write_list(value, "int_tuple", (0, 0), write_length, length)
 
-    def read_int_bool_dict(self, length: Optional[int] = None) -> dict[int, bool]:
+    def read_int_bool_dict(self, length: int | None = None) -> dict[int, bool]:
         if length is None:
             length = self.read_int()
         result: dict[int, bool] = {}
@@ -436,7 +435,7 @@ class Data:
             self.write_int(key)
             self.write_bool(item)
 
-    def read_int_int_dict(self, length: Optional[int] = None) -> dict[int, int]:
+    def read_int_int_dict(self, length: int | None = None) -> dict[int, int]:
         if length is None:
             length = self.read_int()
         result: dict[int, int] = {}
@@ -453,7 +452,7 @@ class Data:
             self.write_int(key)
             self.write_int(item)
 
-    def read_int_double_dict(self, length: Optional[int] = None) -> dict[int, float]:
+    def read_int_double_dict(self, length: int | None = None) -> dict[int, float]:
         if length is None:
             length = self.read_int()
         result: dict[int, float] = {}
@@ -470,7 +469,7 @@ class Data:
             self.write_int(key)
             self.write_double(item)
 
-    def read_short_bool_dict(self, length: Optional[int] = None) -> dict[int, bool]:
+    def read_short_bool_dict(self, length: int | None = None) -> dict[int, bool]:
         if length is None:
             length = self.read_int()
         result: dict[int, bool] = {}
@@ -487,7 +486,7 @@ class Data:
             self.write_short(key)
             self.write_bool(item)
 
-    def unpad_pkcs7(self) -> Optional["Data"]:
+    def unpad_pkcs7(self) -> Data | None:
         try:
             pad = self.data[-1]
         except IndexError:
@@ -498,7 +497,7 @@ class Data:
             return None
         return Data(self.data[:-pad])
 
-    def split(self, separator: bytes, maxsplit: int = -1) -> list["Data"]:
+    def split(self, separator: bytes, maxsplit: int = -1) -> list[Data]:
         data_list: list[Data] = []
         for line in self.data.split(separator, maxsplit):
             data_list.append(Data(line))
@@ -523,28 +522,28 @@ class Data:
         return bool(self.to_int())
 
     @staticmethod
-    def int_list_data_list(int_list: list[int]) -> list["Data"]:
+    def int_list_data_list(int_list: list[int]) -> list[Data]:
         data_list: list[Data] = []
         for integer in int_list:
             data_list.append(Data(str(integer)))
         return data_list
 
     @staticmethod
-    def string_list_data_list(string_list: list[Any]) -> list["Data"]:
+    def string_list_data_list(string_list: list[Any]) -> list[Data]:
         data_list: list[Data] = []
         for string in string_list:
             data_list.append(Data(str(string)))
         return data_list
 
     @staticmethod
-    def data_list_int_list(data_list: list["Data"]) -> list[int]:
+    def data_list_int_list(data_list: list[Data]) -> list[int]:
         int_list: list[int] = []
         for data in data_list:
             int_list.append(data.to_int())
         return int_list
 
     @staticmethod
-    def data_list_string_list(data_list: list["Data"]) -> list[str]:
+    def data_list_string_list(data_list: list[Data]) -> list[str]:
         string_list: list[str] = []
         for data in data_list:
             string_list.append(data.to_str())
@@ -554,7 +553,7 @@ class Data:
         return self.data
 
     @staticmethod
-    def from_many(others: list["Data"], joiner: Optional["Data"] = None) -> "Data":
+    def from_many(others: list[Data], joiner: Data | None = None) -> Data:
         data_lst: list[bytes] = []
         for other in others:
             data_lst.append(other.data)
@@ -564,21 +563,19 @@ class Data:
             return Data(joiner.data.join(data_lst))
 
     @staticmethod
-    def from_int_list(
-        int_list: list[int], endianess: Literal["little", "big"]
-    ) -> "Data":
+    def from_int_list(int_list: list[int], endianess: Literal["little", "big"]) -> Data:
         bytes_data = b""
         for integer in int_list:
             bytes_data += integer.to_bytes(4, endianess)
         return Data(bytes_data)
 
-    def strip(self) -> "Data":
+    def strip(self) -> Data:
         return Data(self.data.strip())
 
-    def replace(self, old_data: "Data", new_data: "Data") -> "Data":
+    def replace(self, old_data: Data, new_data: Data) -> Data:
         return Data(self.data.replace(old_data.data, new_data.data))
 
-    def set(self, value: Union[bytes, str, None, int, bool]) -> None:
+    def set(self, value: bytes | str | None | int | bool) -> None:
         self.data = Data(value).data
 
     def to_bytes_io(self) -> BytesIO:
@@ -594,18 +591,16 @@ class Data:
         return base64.b64encode(self.data).decode()
 
     @staticmethod
-    def from_base_64(string: str) -> "Data":
+    def from_base_64(string: str) -> Data:
         return Data(base64.b64decode(string))
 
-    def to_csv(self, *args: Any, **kwargs: Any) -> "core.CSV":
+    def to_csv(self, *args: Any, **kwargs: Any) -> core.CSV:
         return core.CSV(self, *args, **kwargs)
 
-    def search(self, search_data: "Data", start: int = 0) -> int:
+    def search(self, search_data: Data, start: int = 0) -> int:
         return self.data.find(search_data.data, start)
 
-    def add_line(
-        self, line: Union["Data", str, None, bytes, int, bool] = None
-    ) -> "Data":
+    def add_line(self, line: Data | str | None | bytes | int | bool = None) -> Data:
         line = Data(line)
         self.data += line.data + b"\r\n"
         return self

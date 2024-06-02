@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import Any
 from bcsfe import core
 from bcsfe.cli import dialog_creator
@@ -8,17 +9,17 @@ class EquipSlot:
         self.cat_id = cat_id
 
     @staticmethod
-    def read(stream: "core.Data") -> "EquipSlot":
+    def read(stream: core.Data) -> EquipSlot:
         return EquipSlot(stream.read_int())
 
-    def write(self, stream: "core.Data"):
+    def write(self, stream: core.Data):
         stream.write_int(self.cat_id)
 
     def serialize(self) -> int:
         return self.cat_id
 
     @staticmethod
-    def deserialize(data: int) -> "EquipSlot":
+    def deserialize(data: int) -> EquipSlot:
         return EquipSlot(data)
 
     def __repr__(self):
@@ -34,22 +35,22 @@ class EquipSlots:
         self.name = ""
 
     @staticmethod
-    def read(stream: "core.Data") -> "EquipSlots":
+    def read(stream: core.Data) -> EquipSlots:
         length = 10
         slots = [EquipSlot.read(stream) for _ in range(length)]
         return EquipSlots(slots)
 
     @staticmethod
-    def init() -> "EquipSlots":
+    def init() -> EquipSlots:
         length = 10
         slots = [EquipSlot(-1) for _ in range(length)]
         return EquipSlots(slots)
 
-    def write(self, stream: "core.Data"):
+    def write(self, stream: core.Data):
         for slot in self.slots:
             slot.write(stream)
 
-    def read_name(self, stream: "core.Data"):
+    def read_name(self, stream: core.Data):
         length = stream.read_int()
         try:
             self.name = stream.read_string(length)
@@ -57,7 +58,7 @@ class EquipSlots:
             stream.pos -= length
             self.name = stream.read_utf8_string_by_char_length(length)
 
-    def write_name(self, stream: "core.Data"):
+    def write_name(self, stream: core.Data):
         stream.write_string(self.name)
 
     def serialize(self) -> dict[str, Any]:
@@ -67,7 +68,7 @@ class EquipSlots:
         }
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "EquipSlots":
+    def deserialize(data: dict[str, Any]) -> EquipSlots:
         slots = EquipSlots(
             [EquipSlot.deserialize(slot) for slot in data.get("slots", [])]
         )
@@ -89,7 +90,7 @@ class LineUps:
         self.slot_names_length = total_slots
 
     @staticmethod
-    def init(gv: "core.GameVersion") -> "LineUps":
+    def init(gv: core.GameVersion) -> LineUps:
         if gv < 90700:
             length = 10
         else:
@@ -98,7 +99,7 @@ class LineUps:
         return LineUps(slots, length)
 
     @staticmethod
-    def read(stream: "core.Data", gv: "core.GameVersion") -> "LineUps":
+    def read(stream: core.Data, gv: core.GameVersion) -> LineUps:
         if gv < 90700:
             length = 10
         else:
@@ -106,7 +107,7 @@ class LineUps:
         slots = [EquipSlots.read(stream) for _ in range(length)]
         return LineUps(slots)
 
-    def write(self, stream: "core.Data", gv: "core.GameVersion"):
+    def write(self, stream: core.Data, gv: core.GameVersion):
         if gv >= 90700:
             stream.write_byte(len(self.slots))
             length = len(self.slots)
@@ -119,7 +120,7 @@ class LineUps:
         for slot in self.slots:
             slot.write(stream)
 
-    def read_2(self, stream: "core.Data", gv: "core.GameVersion"):
+    def read_2(self, stream: core.Data, gv: core.GameVersion):
         self.selected_slot = stream.read_int()
         if gv < 90700:
             unlocked_slots_l = stream.read_bool_list(10)
@@ -128,7 +129,7 @@ class LineUps:
             unlocked_slots = stream.read_byte()
         self.unlocked_slots = unlocked_slots
 
-    def write_2(self, stream: "core.Data", gv: "core.GameVersion"):
+    def write_2(self, stream: core.Data, gv: core.GameVersion):
         stream.write_int(self.selected_slot)
         if gv < 90700:
             unlocked_slots_l = [False] * 10
@@ -139,7 +140,7 @@ class LineUps:
         else:
             stream.write_byte(self.unlocked_slots)
 
-    def read_slot_names(self, stream: "core.Data", gv: "core.GameVersion"):
+    def read_slot_names(self, stream: core.Data, gv: core.GameVersion):
         if gv >= 110600:
             total_slots = stream.read_byte()
         else:
@@ -154,7 +155,7 @@ class LineUps:
 
         self.slot_names_length = total_slots
 
-    def write_slot_names(self, stream: "core.Data", gv: "core.GameVersion"):
+    def write_slot_names(self, stream: core.Data, gv: core.GameVersion):
         if gv >= 110600:
             stream.write_byte(self.slot_names_length)
         for i in range(self.slot_names_length):
@@ -174,7 +175,7 @@ class LineUps:
         }
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "LineUps":
+    def deserialize(data: dict[str, Any]) -> LineUps:
         line_ups = LineUps(
             [EquipSlots.deserialize(slot) for slot in data.get("slots", [])]
         )

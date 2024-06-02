@@ -1,4 +1,5 @@
-from typing import Any, Optional
+from __future__ import annotations
+from typing import Any
 from bcsfe import core
 from bcsfe.cli import color, dialog_creator
 
@@ -10,26 +11,26 @@ class Stage:
         self.itf_timed_score = 0
 
     @staticmethod
-    def init() -> "Stage":
+    def init() -> Stage:
         return Stage(0)
 
     @staticmethod
-    def read_clear_times(stream: "core.Data") -> "Stage":
+    def read_clear_times(stream: core.Data) -> Stage:
         return Stage(stream.read_int())
 
-    def read_treasure(self, stream: "core.Data"):
+    def read_treasure(self, stream: core.Data):
         self.treasure = stream.read_int()
 
-    def read_itf_timed_score(self, stream: "core.Data"):
+    def read_itf_timed_score(self, stream: core.Data):
         self.itf_timed_score = stream.read_int()
 
-    def write_clear_times(self, stream: "core.Data"):
+    def write_clear_times(self, stream: core.Data):
         stream.write_int(self.clear_times)
 
-    def write_treasure(self, stream: "core.Data"):
+    def write_treasure(self, stream: core.Data):
         stream.write_int(self.treasure)
 
-    def write_itf_timed_score(self, stream: "core.Data"):
+    def write_itf_timed_score(self, stream: core.Data):
         stream.write_int(self.itf_timed_score)
 
     def serialize(self) -> dict[str, Any]:
@@ -40,7 +41,7 @@ class Stage:
         }
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "Stage":
+    def deserialize(data: dict[str, Any]) -> Stage:
         stage = Stage(data.get("clear_times", 0))
         stage.treasure = data.get("treasure", 0)
         stage.itf_timed_score = data.get("itf_timed_score", 0)
@@ -92,7 +93,7 @@ class Chapter:
         return self.stages[stage_id].is_cleared()
 
     @staticmethod
-    def init() -> "Chapter":
+    def init() -> Chapter:
         return Chapter(0)
 
     def get_treasure_stages(self) -> list[Stage]:
@@ -102,69 +103,69 @@ class Chapter:
         return self.stages[:48]
 
     @staticmethod
-    def read_selected_stage(stream: "core.Data") -> "Chapter":
+    def read_selected_stage(stream: core.Data) -> Chapter:
         return Chapter(stream.read_int())
 
-    def read_progress(self, stream: "core.Data"):
+    def read_progress(self, stream: core.Data):
         self.progress = stream.read_int()
 
-    def read_clear_times(self, stream: "core.Data"):
+    def read_clear_times(self, stream: core.Data):
         total_stages = 51
         self.stages = [Stage.read_clear_times(stream) for _ in range(total_stages)]
 
-    def read_treasure(self, stream: "core.Data"):
+    def read_treasure(self, stream: core.Data):
         for stage in self.get_treasure_stages():
             stage.read_treasure(stream)
 
-    def read_time_until_treasure_chance(self, stream: "core.Data"):
+    def read_time_until_treasure_chance(self, stream: core.Data):
         self.time_until_treasure_chance = stream.read_int()
 
-    def read_treasure_chance_duration(self, stream: "core.Data"):
+    def read_treasure_chance_duration(self, stream: core.Data):
         self.treasure_chance_duration = stream.read_int()
 
-    def read_treasure_chance_value(self, stream: "core.Data"):
+    def read_treasure_chance_value(self, stream: core.Data):
         self.treasure_chance_value = stream.read_int()
 
-    def read_treasure_chance_stage_id(self, stream: "core.Data"):
+    def read_treasure_chance_stage_id(self, stream: core.Data):
         self.treasure_chance_stage_id = stream.read_int()
 
-    def read_treasure_festival_type(self, stream: "core.Data"):
+    def read_treasure_festival_type(self, stream: core.Data):
         self.treasure_festival_type = stream.read_int()
 
-    def read_itf_timed_scores(self, stream: "core.Data"):
+    def read_itf_timed_scores(self, stream: core.Data):
         for stage in self.stages:
             stage.read_itf_timed_score(stream)
 
-    def write_selected_stage(self, stream: "core.Data"):
+    def write_selected_stage(self, stream: core.Data):
         stream.write_int(self.selected_stage)
 
-    def write_progress(self, stream: "core.Data"):
+    def write_progress(self, stream: core.Data):
         stream.write_int(self.progress)
 
-    def write_clear_times(self, stream: "core.Data"):
+    def write_clear_times(self, stream: core.Data):
         for stage in self.stages:
             stage.write_clear_times(stream)
 
-    def write_treasure(self, stream: "core.Data"):
+    def write_treasure(self, stream: core.Data):
         for stage in self.get_treasure_stages():
             stage.write_treasure(stream)
 
-    def write_time_until_treasure_chance(self, stream: "core.Data"):
+    def write_time_until_treasure_chance(self, stream: core.Data):
         stream.write_int(self.time_until_treasure_chance)
 
-    def write_treasure_chance_duration(self, stream: "core.Data"):
+    def write_treasure_chance_duration(self, stream: core.Data):
         stream.write_int(self.treasure_chance_duration)
 
-    def write_treasure_chance_value(self, stream: "core.Data"):
+    def write_treasure_chance_value(self, stream: core.Data):
         stream.write_int(self.treasure_chance_value)
 
-    def write_treasure_chance_stage_id(self, stream: "core.Data"):
+    def write_treasure_chance_stage_id(self, stream: core.Data):
         stream.write_int(self.treasure_chance_stage_id)
 
-    def write_treasure_festival_type(self, stream: "core.Data"):
+    def write_treasure_festival_type(self, stream: core.Data):
         stream.write_int(self.treasure_festival_type)
 
-    def write_itf_timed_scores(self, stream: "core.Data"):
+    def write_itf_timed_scores(self, stream: core.Data):
         for stage in self.stages:
             stage.write_itf_timed_score(stream)
 
@@ -181,7 +182,7 @@ class Chapter:
         }
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "Chapter":
+    def deserialize(data: dict[str, Any]) -> Chapter:
         chapter = Chapter(data.get("selected_stage", 0))
         chapter.progress = data.get("progress", 0)
         chapter.stages = [Stage.deserialize(stage) for stage in data.get("stages", [])]
@@ -198,7 +199,7 @@ class Chapter:
     def __str__(self):
         return f"Chapter({self.selected_stage}, {self.progress}, {self.stages}, {self.time_until_treasure_chance}, {self.treasure_chance_duration}, {self.treasure_chance_value}, {self.treasure_chance_stage_id}, {self.treasure_festival_type})"
 
-    def apply_progress(self, progress: int, clear_times: Optional[list[int]] = None):
+    def apply_progress(self, progress: int, clear_times: list[int] | None = None):
         if clear_times is None:
             clear_times = [1] * progress
 
@@ -231,7 +232,7 @@ class StoryChapters:
         stage: int,
         clear_amount: int = 1,
         overwrite_clear_progress: bool = False,
-        chapters: Optional[list[Chapter]] = None,
+        chapters: list[Chapter] | None = None,
     ):
         if chapters is None:
             chapters = self.chapters
@@ -244,12 +245,12 @@ class StoryChapters:
         return self.chapters[chapter].is_stage_clear(stage)
 
     @staticmethod
-    def init() -> "StoryChapters":
+    def init() -> StoryChapters:
         chapters = [Chapter.init() for _ in range(10)]
         return StoryChapters(chapters)
 
     @staticmethod
-    def read(stream: "core.Data") -> "StoryChapters":
+    def read(stream: core.Data) -> StoryChapters:
         total_chapters = 10
         chapters_l = [
             Chapter.read_selected_stage(stream) for _ in range(total_chapters)
@@ -263,7 +264,7 @@ class StoryChapters:
             chapter.read_treasure(stream)
         return chapters
 
-    def read_treasure_festival(self, stream: "core.Data"):
+    def read_treasure_festival(self, stream: core.Data):
         for chapter in self.chapters:
             chapter.read_time_until_treasure_chance(stream)
         for chapter in self.chapters:
@@ -275,7 +276,7 @@ class StoryChapters:
         for chapter in self.chapters:
             chapter.read_treasure_festival_type(stream)
 
-    def write(self, stream: "core.Data"):
+    def write(self, stream: core.Data):
         for chapter in self.chapters:
             chapter.write_selected_stage(stream)
         for chapter in self.chapters:
@@ -285,7 +286,7 @@ class StoryChapters:
         for chapter in self.chapters:
             chapter.write_treasure(stream)
 
-    def write_treasure_festival(self, stream: "core.Data"):
+    def write_treasure_festival(self, stream: core.Data):
         for chapter in self.chapters:
             chapter.write_time_until_treasure_chance(stream)
         for chapter in self.chapters:
@@ -297,7 +298,7 @@ class StoryChapters:
         for chapter in self.chapters:
             chapter.write_treasure_festival_type(stream)
 
-    def read_itf_timed_scores(self, stream: "core.Data"):
+    def read_itf_timed_scores(self, stream: core.Data):
         # 0: eoc 1
         # 1: eoc 2
         # 2: eoc 3
@@ -313,7 +314,7 @@ class StoryChapters:
             if i > 3 and i < 7:
                 chapter.read_itf_timed_scores(stream)
 
-    def write_itf_timed_scores(self, stream: "core.Data"):
+    def write_itf_timed_scores(self, stream: core.Data):
         for i, chapter in enumerate(self.chapters):
             if i > 3 and i < 7:
                 chapter.write_itf_timed_scores(stream)
@@ -323,7 +324,7 @@ class StoryChapters:
         return chapters
 
     @staticmethod
-    def deserialize(data: list[dict[str, Any]]) -> "StoryChapters":
+    def deserialize(data: list[dict[str, Any]]) -> StoryChapters:
         chapters = StoryChapters([Chapter.deserialize(chapter) for chapter in data])
         return chapters
 
@@ -334,7 +335,7 @@ class StoryChapters:
         return f"Chapters({self.chapters})"
 
     @staticmethod
-    def clear_tutorial(save_file: "core.SaveFile"):
+    def clear_tutorial(save_file: core.SaveFile):
         save_file.tutorial_state = max(save_file.tutorial_state, 1)
         save_file.koreaSuperiorTreasureState = max(
             save_file.koreaSuperiorTreasureState, 2
@@ -351,8 +352,8 @@ class StoryChapters:
 
     @staticmethod
     def get_chapter_names(
-        save_file: "core.SaveFile", chapter_ids: Optional[list[int]] = None
-    ) -> Optional[list[str]]:
+        save_file: core.SaveFile, chapter_ids: list[int] | None = None
+    ) -> list[str] | None:
         if chapter_ids is None:
             chapter_ids = [0, 1, 2, 3, 4, 5, 6, 7, 8]
 
@@ -376,8 +377,8 @@ class StoryChapters:
 
     @staticmethod
     def select_story_chapters(
-        save_file: "core.SaveFile", chapters: Optional[list[int]] = None
-    ) -> Optional[list[int]]:
+        save_file: core.SaveFile, chapters: list[int] | None = None
+    ) -> list[int] | None:
         chapter_names = StoryChapters.get_chapter_names(save_file, chapters)
 
         if chapter_names is None:
@@ -390,7 +391,7 @@ class StoryChapters:
         return selected_chapters
 
     @staticmethod
-    def get_selected_chapter_progress(max_stages: int = 48) -> Optional[int]:
+    def get_selected_chapter_progress(max_stages: int = 48) -> int | None:
         progress = dialog_creator.IntInput(
             min=0, max=max_stages
         ).get_input_locale_while("edit_chapter_progress_all", {"max": max_stages})
@@ -401,7 +402,7 @@ class StoryChapters:
 
     @staticmethod
     def edit_chapter_progress(
-        save_file: "core.SaveFile",
+        save_file: core.SaveFile,
         chapter_id: int,
         chapter_name: str,
         clear_amount: int,
@@ -445,7 +446,7 @@ class StoryChapters:
         return index
 
     @staticmethod
-    def ask_clear_count() -> Optional[int]:
+    def ask_clear_count() -> int | None:
         clear_count = dialog_creator.IntInput(
             min=0, max=core.core_data.max_value_manager.get("stage_clear_count")
         ).get_input_locale_while("edit_stage_clear_count", {})
@@ -453,7 +454,7 @@ class StoryChapters:
         return clear_count
 
     @staticmethod
-    def ask_if_individual_clear_counts() -> Optional[bool]:
+    def ask_if_individual_clear_counts() -> bool | None:
         options = ["individual_clear_counts", "all_clear_counts"]
         choice = dialog_creator.ChoiceInput.from_reduced(
             options, dialog="individual_clear_counts_dialog", single_choice=True
@@ -465,7 +466,7 @@ class StoryChapters:
 
     @staticmethod
     def edit_stage_clear_count(
-        save_file: "core.SaveFile", chapter_id: int, stage_id: int
+        save_file: core.SaveFile, chapter_id: int, stage_id: int
     ):
         chapter = save_file.story.get_real_chapters()[chapter_id]
         stage = chapter.stages[stage_id]
@@ -516,7 +517,7 @@ class StoryChapters:
             chapters[7].clear_chapter()
 
     @staticmethod
-    def print_current_chapter(save_file: "core.SaveFile", chapter_id: int):
+    def print_current_chapter(save_file: core.SaveFile, chapter_id: int):
         chapter_names = StoryChapters.get_chapter_names(save_file)
         if chapter_names is None:
             return
@@ -525,7 +526,7 @@ class StoryChapters:
 
     @staticmethod
     def print_current_treasure_group(
-        save_file: "core.SaveFile", chapter_id: int, treasure_group_id: int
+        save_file: core.SaveFile, chapter_id: int, treasure_group_id: int
     ):
         chapter_type = StoryChapters.get_chapter_type_from_index(chapter_id)
 
@@ -540,13 +541,13 @@ class StoryChapters:
         )
 
     @staticmethod
-    def clear_story(save_file: "core.SaveFile"):
+    def clear_story(save_file: core.SaveFile):
         story = save_file.story
         story.edit_chapters(
             save_file,
         )
 
-    def edit_chapters(self, save_file: "core.SaveFile"):
+    def edit_chapters(self, save_file: core.SaveFile):
         chapters = self.get_real_chapters()
         names = StoryChapters.get_chapter_names(save_file)
         if names is None:
@@ -646,7 +647,7 @@ class StoryChapters:
         color.ColoredText.localize("map_chapters_edited")
 
     @staticmethod
-    def ask_treasure_level(save_file: "core.SaveFile") -> Optional[int]:
+    def ask_treasure_level(save_file: core.SaveFile) -> int | None:
         treasure_text = core.core_data.get_treasure_text(save_file).treasure_text
         if treasure_text is None:
             return None
@@ -679,7 +680,7 @@ class StoryChapters:
         return choice
 
     @staticmethod
-    def get_per_chapter(chapters: list[int]) -> Optional[int]:
+    def get_per_chapter(chapters: list[int]) -> int | None:
         if len(chapters) == 1:
             return 0
 
@@ -693,7 +694,7 @@ class StoryChapters:
         return choice
 
     @staticmethod
-    def edit_treasures_whole_chapters(save_file: "core.SaveFile", chapters: list[int]):
+    def edit_treasures_whole_chapters(save_file: core.SaveFile, chapters: list[int]):
         choice = StoryChapters.get_per_chapter(chapters)
         if choice is None:
             return
@@ -725,9 +726,7 @@ class StoryChapters:
         return 2
 
     @staticmethod
-    def select_stages(
-        save_file: "core.SaveFile", chapter_id: int
-    ) -> Optional[list[int]]:
+    def select_stages(save_file: core.SaveFile, chapter_id: int) -> list[int] | None:
         options = ["select_stage_by_id", "select_stage_by_name"]
         choice = dialog_creator.ChoiceInput.from_reduced(
             options, dialog="select_stage_dialog", single_choice=True
@@ -763,9 +762,7 @@ class StoryChapters:
         return selected_stages
 
     @staticmethod
-    def edit_treasures_individual_stages(
-        save_file: "core.SaveFile", chapters: list[int]
-    ):
+    def edit_treasures_individual_stages(save_file: core.SaveFile, chapters: list[int]):
         choice = StoryChapters.get_per_chapter(chapters)
         if choice is None:
             return
@@ -796,7 +793,7 @@ class StoryChapters:
                     chapter.set_treasure(real_stage_id, treasure_level)
 
     @staticmethod
-    def edit_treasures_groups(save_file: "core.SaveFile", chapters: list[int]):
+    def edit_treasures_groups(save_file: core.SaveFile, chapters: list[int]):
         for chapter_id in chapters:
             StoryChapters.print_current_chapter(save_file, chapter_id)
             chapter = save_file.story.get_real_chapters()[chapter_id]
@@ -851,7 +848,7 @@ class StoryChapters:
                         chapter.set_treasure(stage_id, treasure_level)
 
     @staticmethod
-    def edit_treasures(save_file: "core.SaveFile"):
+    def edit_treasures(save_file: core.SaveFile):
         selected_chapters = StoryChapters.select_story_chapters(save_file)
         if not selected_chapters:
             return
@@ -873,7 +870,7 @@ class StoryChapters:
         color.ColoredText.localize("treasures_edited")
 
     @staticmethod
-    def edit_itf_timed_scores(save_file: "core.SaveFile"):
+    def edit_itf_timed_scores(save_file: core.SaveFile):
         selected_chapters = StoryChapters.select_story_chapters(
             save_file, chapters=[3, 4, 5]
         )
@@ -902,7 +899,7 @@ class StoryChapters:
 
     @staticmethod
     def edit_itf_timed_scores_whole_chapters(
-        save_file: "core.SaveFile", chapters: list[int]
+        save_file: core.SaveFile, chapters: list[int]
     ):
         choice = StoryChapters.get_per_chapter(chapters)
         if choice is None:
@@ -932,7 +929,7 @@ class StoryChapters:
                     stage.itf_timed_score = score
 
     @staticmethod
-    def print_current_stage(save_file: "core.SaveFile", chapter_id: int, stage_id: int):
+    def print_current_stage(save_file: core.SaveFile, chapter_id: int, stage_id: int):
         chapter_names = StoryChapters.get_chapter_names(save_file)
         if chapter_names is None:
             return
@@ -949,7 +946,7 @@ class StoryChapters:
 
     @staticmethod
     def edit_itf_timed_scores_individual_stages(
-        save_file: "core.SaveFile", chapters: list[int]
+        save_file: core.SaveFile, chapters: list[int]
     ):
         choice = StoryChapters.get_per_chapter(chapters)
         if choice is None:
@@ -1020,7 +1017,7 @@ class StoryChapters:
 
 
 class StageNames:
-    def __init__(self, save_file: "core.SaveFile", chapter: str, max_stages: int = 48):
+    def __init__(self, save_file: core.SaveFile, chapter: str, max_stages: int = 48):
         self.save_file = save_file
         self.chapter = chapter
         self.max_stages = max_stages
@@ -1033,7 +1030,7 @@ class StageNames:
             )
         return f"StageName_{self.chapter}_{core.core_data.get_lang(self.save_file)}.csv"
 
-    def get_stage_names(self) -> Optional[list[str]]:
+    def get_stage_names(self) -> list[str] | None:
         file_name = self.get_file_name()
         gdg = core.core_data.get_game_data_getter(self.save_file)
         file = gdg.download("resLocal", file_name)
@@ -1052,21 +1049,21 @@ class StageNames:
                     stage_names.append(value.to_str())
         return stage_names[: self.max_stages]
 
-    def get_stage_name(self, stage_id: int) -> Optional[str]:
+    def get_stage_name(self, stage_id: int) -> str | None:
         if self.stage_names is None:
             return None
         return self.stage_names[stage_id]
 
 
 class TreasureText:
-    def __init__(self, save_file: "core.SaveFile"):
+    def __init__(self, save_file: core.SaveFile):
         self.save_file = save_file
         self.treasure_text = self.get_treasure_text()
 
     def get_tt_file_name(self) -> str:
         return f"Treasure2_{core.core_data.get_lang(self.save_file)}.csv"
 
-    def get_treasure_text(self) -> Optional[list[str]]:
+    def get_treasure_text(self) -> list[str] | None:
         file_name = self.get_tt_file_name()
         gdg = core.core_data.get_game_data_getter(self.save_file)
         file = gdg.download("resLocal", file_name)
@@ -1082,7 +1079,7 @@ class TreasureText:
 
 
 class TreasureGroupData:
-    def __init__(self, save_file: "core.SaveFile", chapter_type: int):
+    def __init__(self, save_file: core.SaveFile, chapter_type: int):
         self.save_file = save_file
         self.chapter_type = chapter_type
         self.treasure_group_data = self.get_treasure_group_data()
@@ -1096,7 +1093,7 @@ class TreasureGroupData:
             return "treasureData2_0.csv"
         return ""
 
-    def get_treasure_group_data(self) -> Optional[list[list[int]]]:
+    def get_treasure_group_data(self) -> list[list[int]] | None:
         gdg = core.core_data.get_game_data_getter(self.save_file)
         file = gdg.download("DataLocal", self.get_tgd_file_name())
         if file is None:
@@ -1112,7 +1109,7 @@ class TreasureGroupData:
 
 
 class TreasureGroupNames:
-    def __init__(self, save_file: "core.SaveFile", chapter_type: int):
+    def __init__(self, save_file: core.SaveFile, chapter_type: int):
         self.save_file = save_file
         self.chapter_type = chapter_type
         self.treasure_group_names = self.get_treasure_group_names()
@@ -1127,7 +1124,7 @@ class TreasureGroupNames:
             return f"Treasure3_2_0_{lang}.csv"
         return ""
 
-    def get_treasure_group_names(self) -> Optional[list[str]]:
+    def get_treasure_group_names(self) -> list[str] | None:
         gdg = core.core_data.get_game_data_getter(self.save_file)
         file = gdg.download("resLocal", self.get_tgn_file_name())
         if file is None:

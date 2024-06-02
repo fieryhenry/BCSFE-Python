@@ -1,26 +1,27 @@
-from typing import Any, Optional
+from __future__ import annotations
+from typing import Any
 from bcsfe import core
 from bcsfe.cli import color, dialog_creator
 from bcsfe.cli.edits.cat_editor import SelectMode
 
 
 class EnemyEditor:
-    def __init__(self, save_file: "core.SaveFile") -> None:
+    def __init__(self, save_file: core.SaveFile) -> None:
         self.save_file = save_file
 
-    def unlock_enemy_guide(self, enemies: list["core.Enemy"]):
+    def unlock_enemy_guide(self, enemies: list[core.Enemy]):
         for enemy in enemies:
             enemy.unlock_enemy_guide(self.save_file)
 
         color.ColoredText.localize("unlock_enemy_guide_success")
 
-    def remove_enemy_guide(self, enemies: list["core.Enemy"]):
+    def remove_enemy_guide(self, enemies: list[core.Enemy]):
         for enemy in enemies:
             enemy.reset_enemy_guide(self.save_file)
 
         color.ColoredText.localize("remove_enemy_guide_success")
 
-    def print_selected_enemies(self, enemies: list["core.Enemy"]):
+    def print_selected_enemies(self, enemies: list[core.Enemy]):
         if not enemies:
             return
         if len(enemies) > 50:
@@ -33,7 +34,7 @@ class EnemyEditor:
                     name=enemy.get_name(self.save_file),
                 )
 
-    def select(self, current_enemies: Optional[list["core.Enemy"]]):
+    def select(self, current_enemies: list[core.Enemy] | None):
         if current_enemies is None:
             current_enemies = []
         self.print_selected_enemies(current_enemies)
@@ -78,13 +79,13 @@ class EnemyEditor:
             return new_enemies
         return new_enemies
 
-    def get_all_enemies(self) -> list["core.Enemy"]:
-        enemies: list["core.Enemy"] = []
+    def get_all_enemies(self) -> list[core.Enemy]:
+        enemies: list[core.Enemy] = []
         for i in range(len(self.save_file.enemy_guide)):
             enemies.append(core.Enemy(i))
         return enemies
 
-    def select_id(self) -> Optional[list["core.Enemy"]]:
+    def select_id(self) -> list[core.Enemy] | None:
         enemy_ids = dialog_creator.RangeInput(
             len(self.save_file.enemy_guide) - 1
         ).get_input_locale("enter_enemy_ids", {})
@@ -93,14 +94,14 @@ class EnemyEditor:
         enemy_ids = [enemy_id - 2 for enemy_id in enemy_ids]
         return self.get_enemies_by_id(enemy_ids)
 
-    def get_enemies_by_id(self, ids: list[int]) -> list["core.Enemy"]:
-        enemies: list["core.Enemy"] = []
+    def get_enemies_by_id(self, ids: list[int]) -> list[core.Enemy]:
+        enemies: list[core.Enemy] = []
         for enemy in self.get_all_enemies():
             if enemy.id in ids:
                 enemies.append(enemy)
         return enemies
 
-    def select_name(self) -> Optional[list["core.Enemy"]]:
+    def select_name(self) -> list[core.Enemy] | None:
         usr_name = dialog_creator.StringInput().get_input_locale("enter_enemy_name", {})
         if usr_name is None:
             return None
@@ -122,13 +123,13 @@ class EnemyEditor:
         ).multiple_choice()
         if enemy_option_ids is None:
             return None
-        enemies_selected: list["core.Enemy"] = []
+        enemies_selected: list[core.Enemy] = []
         for enemy_option_id in enemy_option_ids:
             enemies_selected.append(enemies[enemy_option_id])
         return enemies_selected
 
-    def get_enemies_by_name(self, name: str) -> list["core.Enemy"]:
-        enemies: list["core.Enemy"] = []
+    def get_enemies_by_name(self, name: str) -> list[core.Enemy]:
+        enemies: list[core.Enemy] = []
         for enemy in self.get_all_enemies():
             enemy_name = enemy.get_name(self.save_file)
             if enemy_name is None:
@@ -139,8 +140,8 @@ class EnemyEditor:
 
     @staticmethod
     def from_save_file(
-        save_file: "core.SaveFile",
-    ) -> tuple[Optional["EnemyEditor"], list["core.Enemy"]]:
+        save_file: core.SaveFile,
+    ) -> tuple[EnemyEditor | None, list[core.Enemy]]:
         enemy_editor = EnemyEditor(save_file)
         current_enemies = enemy_editor.select([])
         if current_enemies is None:
@@ -149,9 +150,9 @@ class EnemyEditor:
 
     @staticmethod
     def edit_enemy_guide(
-        save_file: "core.SaveFile",
-        current_enemies: Optional[list["core.Enemy"]] = None,
-        enemy_editor: Optional["EnemyEditor"] = None,
+        save_file: core.SaveFile,
+        current_enemies: list[core.Enemy] | None = None,
+        enemy_editor: EnemyEditor | None = None,
     ):
         if enemy_editor is None or current_enemies is None:
             enemy_editor, current_enemies = EnemyEditor.from_save_file(save_file)

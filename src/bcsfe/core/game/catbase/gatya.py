@@ -1,4 +1,5 @@
-from typing import Any, Callable, Optional
+from __future__ import annotations
+from typing import Any, Callable
 from bcsfe import core
 from bcsfe.cli import dialog_creator, color
 
@@ -20,32 +21,32 @@ class Gatya:
         self.step_up_stages: dict[int, int] = {}
         self.stepup_durations: dict[int, float] = {}
 
-        self.gatya_data_set: Optional[GatyaDataSet] = None
+        self.gatya_data_set: GatyaDataSet | None = None
 
     @staticmethod
-    def init() -> "Gatya":
+    def init() -> Gatya:
         return Gatya(0, 0)
 
     @staticmethod
-    def read_rare_normal_seed(data: "core.Data", gv: "core.GameVersion") -> "Gatya":
+    def read_rare_normal_seed(data: core.Data, gv: core.GameVersion) -> Gatya:
         if gv < 33:
             return Gatya(data.read_ulong(), data.read_ulong())
         return Gatya(data.read_uint(), data.read_uint())
 
-    def read_event_seed(self, data: "core.Data", gv: "core.GameVersion"):
+    def read_event_seed(self, data: core.Data, gv: core.GameVersion):
         if gv < 33:
             self.event_seed = data.read_ulong()
         else:
             self.event_seed = data.read_uint()
 
-    def write_rare_normal_seed(self, data: "core.Data"):
+    def write_rare_normal_seed(self, data: core.Data):
         data.write_uint(self.rare_seed)
         data.write_uint(self.normal_seed)
 
-    def write_event_seed(self, data: "core.Data"):
+    def write_event_seed(self, data: core.Data):
         data.write_uint(self.event_seed)
 
-    def read2(self, data: "core.Data"):
+    def read2(self, data: core.Data):
         self.stepup_stage_3_cooldown = data.read_int()
         self.previous_normal_roll = data.read_int()
         self.previous_normal_roll_type = data.read_int()
@@ -55,7 +56,7 @@ class Gatya:
         self.roll_single = data.read_bool()
         self.roll_multi = data.read_bool()
 
-    def write2(self, data: "core.Data"):
+    def write2(self, data: core.Data):
         data.write_int(self.stepup_stage_3_cooldown)
         data.write_int(self.previous_normal_roll)
         data.write_int(self.previous_normal_roll_type)
@@ -65,13 +66,13 @@ class Gatya:
         data.write_bool(self.roll_single)
         data.write_bool(self.roll_multi)
 
-    def read_trade_progress(self, data: "core.Data"):
+    def read_trade_progress(self, data: core.Data):
         self.trade_progress = data.read_int()
 
-    def write_trade_progress(self, data: "core.Data"):
+    def write_trade_progress(self, data: core.Data):
         data.write_int(self.trade_progress)
 
-    def read_stepup(self, data: "core.Data"):
+    def read_stepup(self, data: core.Data):
         self.step_up_stages: dict[int, int] = {}
         total = data.read_int()
         for _ in range(total):
@@ -84,7 +85,7 @@ class Gatya:
             key = data.read_int()
             self.stepup_durations[key] = data.read_double()
 
-    def write_stepup(self, data: "core.Data"):
+    def write_stepup(self, data: core.Data):
         data.write_int(len(self.step_up_stages))
         for id, stage in self.step_up_stages.items():
             data.write_int(id)
@@ -114,7 +115,7 @@ class Gatya:
         }
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "Gatya":
+    def deserialize(data: dict[str, Any]) -> Gatya:
         gatya = Gatya(data.get("rare_seed", 0), data.get("normal_seed", 0))
         gatya.stepup_stage_3_cooldown = data.get("stepup_stage_3_cooldown", 0)
         gatya.previous_normal_roll = data.get("previous_normal_roll", 0)
@@ -163,7 +164,7 @@ class Gatya:
             signed=False,
         ).edit()
 
-    def read_gatya_data_set(self, save_file: "core.SaveFile") -> "GatyaDataSet":
+    def read_gatya_data_set(self, save_file: core.SaveFile) -> GatyaDataSet:
         if self.gatya_data_set is not None:
             return self.gatya_data_set
         self.gatya_data_set = GatyaDataSet(save_file)
@@ -171,11 +172,11 @@ class Gatya:
 
 
 class GatyaDataSet:
-    def __init__(self, save_file: "core.SaveFile"):
+    def __init__(self, save_file: core.SaveFile):
         self.save_file = save_file
         self.gatya_data_set = self.load_gatya_data_set("R", 1)
 
-    def load_gatya_data_set(self, rarity: str, id: int) -> Optional[list[list[int]]]:
+    def load_gatya_data_set(self, rarity: str, id: int) -> list[list[int]] | None:
         file_name = f"GatyaDataSet{rarity.upper()[0]}{id}.csv"
         gdg = core.core_data.get_game_data_getter(self.save_file)
         data = gdg.download("DataLocal", file_name)
@@ -192,7 +193,7 @@ class GatyaDataSet:
             dt.append(cat_ids)
         return dt
 
-    def get_cat_ids(self, gatya_id: int) -> Optional[list[int]]:
+    def get_cat_ids(self, gatya_id: int) -> list[int] | None:
         if self.gatya_data_set is None:
             return None
         try:
@@ -202,12 +203,12 @@ class GatyaDataSet:
 
 
 class GatyaInfo:
-    def __init__(self, gatya_id: int, cc: "core.CountryCode", type_str: str = "R"):
+    def __init__(self, gatya_id: int, cc: core.CountryCode, type_str: str = "R"):
         self.gatya_id = gatya_id
         self.cc = cc
-        self.gatya_data_set: Optional[GatyaDataSet] = None
+        self.gatya_data_set: GatyaDataSet | None = None
         self.type = type_str
-        self.data: Optional["core.Data"] = None
+        self.data: core.Data | None = None
 
     def get_id_str(self) -> str:
         return f"{self.gatya_id:03}"
@@ -220,9 +221,7 @@ class GatyaInfo:
     def get_url(self) -> str:
         return f"https://ponosgames.com/information/appli/battlecats/gacha/rare/{self.get_cc_str()}{self.type}{self.get_id_str()}.html"
 
-    def download_data(
-        self, name_only_optimization: bool = False
-    ) -> Optional["core.Data"]:
+    def download_data(self, name_only_optimization: bool = False) -> core.Data | None:
         url = self.get_url()
 
         if name_only_optimization:
@@ -245,7 +244,7 @@ class GatyaInfo:
         self.save_data(data)
         return data
 
-    def get_file_path(self) -> "core.Path":
+    def get_file_path(self) -> core.Path:
         return (
             core.Path.get_documents_folder()
             .add("other_game_data")
@@ -255,13 +254,13 @@ class GatyaInfo:
             .add(f"{self.type}{self.get_id_str()}.html")
         )
 
-    def save_data(self, data: "core.Data"):
+    def save_data(self, data: core.Data):
         data.to_file(self.get_file_path())
         self.data = data
 
     def load_data_from_file(
         self, name_only_optimization: bool = False
-    ) -> Optional["core.Data"]:
+    ) -> core.Data | None:
         if not self.get_file_path().exists():
             return None
         data = core.Data.from_file(self.get_file_path())
@@ -269,7 +268,7 @@ class GatyaInfo:
             data = None
         return data
 
-    def get_data(self, name_only_optimization: bool = False) -> Optional["core.Data"]:
+    def get_data(self, name_only_optimization: bool = False) -> core.Data | None:
         if self.data is not None:
             return self.data
         data = self.load_data_from_file(name_only_optimization)
@@ -277,7 +276,7 @@ class GatyaInfo:
             data = self.download_data(name_only_optimization)
         return data
 
-    def get_name(self, name_only_optimization: bool = False) -> Optional[str]:
+    def get_name(self, name_only_optimization: bool = False) -> str | None:
         data = self.get_data(name_only_optimization)
         if data is None:
             return None
@@ -301,9 +300,7 @@ class GatyaInfo:
 
 
 class GatyaInfos:
-    def __init__(
-        self, save_file: "core.SaveFile", type_str: str = "R", set_id: int = 1
-    ):
+    def __init__(self, save_file: core.SaveFile, type_str: str = "R", set_id: int = 1):
         self.save_file = save_file
         self.type = type_str
         self.set_id = set_id
@@ -345,7 +342,7 @@ class GatyaInfos:
         self.infos.append(info)
         return info
 
-    def get_info(self, gatya_id: int) -> Optional[GatyaInfo]:
+    def get_info(self, gatya_id: int) -> GatyaInfo | None:
         if self.infos:
             return self.infos[gatya_id]
         return None

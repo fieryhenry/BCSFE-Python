@@ -1,4 +1,4 @@
-from typing import Optional
+from __future__ import annotations
 
 import requests
 
@@ -11,15 +11,15 @@ class RequestHandler:
     def __init__(
         self,
         url: str,
-        headers: Optional[dict[str, str]] = None,
-        data: Optional["core.Data"] = None,
+        headers: dict[str, str] | None = None,
+        data: core.Data | None = None,
     ):
         """Initializes a new instance of the RequestHandler class.
 
         Args:
             url (str): URL to request.
-            headers (Optional[dict[str, str]], optional): Headers to send with the request. Defaults to None.
-            data (Optional[core.Data], optional): Data to send with the request. Defaults to None.
+            headers (dict[str, str] | None, optional): Headers to send with the request. Defaults to None.
+            data (core.Data | None, optional): Data to send with the request. Defaults to None.
         """
         if data is None:
             data = core.Data()
@@ -27,7 +27,7 @@ class RequestHandler:
         self.headers = headers
         self.data = data
 
-    def get(self, stream: bool = False) -> Optional[requests.Response]:
+    def get(self, stream: bool = False) -> requests.Response | None:
         """Sends a GET request.
 
         Returns:
@@ -45,7 +45,7 @@ class RequestHandler:
         except requests.exceptions.ConnectionError:
             return None
 
-    def post(self) -> Optional[requests.Response]:
+    def post(self) -> requests.Response | None:
         """Sends a POST request.
 
         Returns:

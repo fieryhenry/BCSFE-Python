@@ -1,4 +1,5 @@
-from typing import Any, Optional
+from __future__ import annotations
+from typing import Any
 from bcsfe import core
 import bcsfe
 
@@ -12,14 +13,14 @@ class Updater:
     def get_local_version(self) -> str:
         return bcsfe.__version__
 
-    def get_pypi_json(self) -> Optional[dict[str, Any]]:
+    def get_pypi_json(self) -> dict[str, Any] | None:
         url = f"https://pypi.org/pypi/{self.package_name}/json"
         response = core.RequestHandler(url).get()
         if response is None:
             return None
         return response.json()
 
-    def get_releases(self) -> Optional[list[str]]:
+    def get_releases(self) -> list[str] | None:
         pypi_json = self.get_pypi_json()
         if pypi_json is None:
             return None
@@ -28,7 +29,7 @@ class Updater:
             return None
         return list(releases.keys())
 
-    def get_latest_version(self, prereleases: bool = False) -> Optional[str]:
+    def get_latest_version(self, prereleases: bool = False) -> str | None:
         releases = self.get_releases()
         if releases is None:
             return None
@@ -44,7 +45,7 @@ class Updater:
 
     def get_latest_version_info(
         self, prereleases: bool = False
-    ) -> Optional[dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         pypi_json = self.get_pypi_json()
         if pypi_json is None:
             return None

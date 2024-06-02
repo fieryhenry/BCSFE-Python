@@ -1,12 +1,13 @@
+from __future__ import annotations
 import dataclasses
 import tempfile
-from typing import Any, Optional
+from typing import Any
 from bcsfe import core
 from bcsfe.cli import color
 
 
 class ThemeHandler:
-    def __init__(self, theme_code: Optional[str] = None):
+    def __init__(self, theme_code: str | None = None):
         if theme_code is None:
             self.theme_code = core.core_data.config.get_str(core.ConfigKey.THEME)
         else:
@@ -15,15 +16,15 @@ class ThemeHandler:
         self.theme_data = self.get_theme_data()
 
     @staticmethod
-    def get_themes_folder() -> "core.Path":
+    def get_themes_folder() -> core.Path:
         return core.Path("themes", True).generate_dirs()
 
     @staticmethod
-    def get_external_themes_folder() -> "core.Path":
+    def get_external_themes_folder() -> core.Path:
         return core.Path.get_documents_folder().add("external_themes").generate_dirs()
 
     @staticmethod
-    def get_theme_path(theme_code: str) -> "core.Path":
+    def get_theme_path(theme_code: str) -> core.Path:
         if theme_code.startswith("ext-"):
             return ThemeHandler.get_external_themes_folder().add(theme_code + ".json")
         return ThemeHandler.get_themes_folder().add(theme_code + ".json")
@@ -52,7 +53,7 @@ class ThemeHandler:
     def get_version(self) -> str:
         return self.theme_data.get("version", "")
 
-    def get_git_repo(self) -> Optional[str]:
+    def get_git_repo(self) -> str | None:
         return self.theme_data.get("git_repo", None)
 
     def get_theme_colors(self) -> dict[str, Any]:
@@ -117,20 +118,20 @@ class ExternalTheme:
     author: str
     version: str
     colors: dict[str, Any]
-    git_repo: Optional[str] = None
+    git_repo: str | None = None
 
     def to_json(self) -> dict[str, Any]:
         return dataclasses.asdict(self)
 
     @staticmethod
-    def from_json(json_data: dict[str, Any]) -> Optional["ExternalTheme"]:
+    def from_json(json_data: dict[str, Any]) -> ExternalTheme | None:
         try:
             return ExternalTheme(**json_data)
         except TypeError:
             return None
 
     @staticmethod
-    def from_git_repo(git_repo: str) -> Optional["ExternalTheme"]:
+    def from_git_repo(git_repo: str) -> ExternalTheme | None:
         repo = core.GitHandler().get_repo(git_repo)
         if repo is None:
             return None
@@ -147,8 +148,8 @@ class ExternalTheme:
         repo = core.GitHandler().get_repo(self.git_repo)
         if repo is None:
             return False
-        with tempfile.TemporaryDirectory() as temp_dir:
-            temp_dir = core.Path(temp_dir)
+        with tempfile.TemporaryDirectory() as tmp:
+            temp_dir = core.Path(tmp)
             success = repo.clone_to_temp(temp_dir)
             if not success:
                 return False
@@ -209,7 +210,7 @@ class ExternalThemeManager:
         file.write(core.JsonFile.from_object(json_data).to_data())
 
     @staticmethod
-    def parse_external_theme(path: "core.Path") -> Optional[ExternalTheme]:
+    def parse_external_theme(path: core.Path) -> ExternalTheme | None:
         """Parses an external theme.
 
         Args:
@@ -270,7 +271,7 @@ class ExternalThemeManager:
             ExternalThemeManager.update_external_theme(theme)
 
     @staticmethod
-    def get_external_theme_config() -> Optional[ExternalTheme]:
+    def get_external_theme_config() -> ExternalTheme | None:
         """Gets the external theme from the config.
 
         Returns:
@@ -285,7 +286,7 @@ class ExternalThemeManager:
         )
 
     @staticmethod
-    def get_external_theme(theme: str) -> Optional[ExternalTheme]:
+    def get_external_theme(theme: str) -> ExternalTheme | None:
         """Gets the external theme from the theme code.
 
         Returns:

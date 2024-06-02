@@ -1,3 +1,4 @@
+from __future__ import annotations
 from bcsfe import core
 
 from bcsfe.cli import color, dialog_creator
@@ -5,7 +6,7 @@ from bcsfe.cli import color, dialog_creator
 
 class RareTicketTrade:
     @staticmethod
-    def rare_ticket_trade(save_file: "core.SaveFile"):
+    def rare_ticket_trade(save_file: core.SaveFile):
         current_amount = save_file.rare_tickets
         max_amount = max(
             core.core_data.max_value_manager.get("rare_tickets") - current_amount, 0

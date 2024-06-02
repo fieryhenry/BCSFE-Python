@@ -1,5 +1,5 @@
+from __future__ import annotations
 import enum
-from typing import Optional, Union
 from bcsfe.cli import dialog_creator
 from bcsfe import core
 
@@ -12,7 +12,7 @@ class CountryCodeType(enum.Enum):
 
 
 class CountryCode:
-    def __init__(self, cc: Union[str, CountryCodeType]):
+    def __init__(self, cc: str | CountryCodeType):
         self.value = cc.value if isinstance(cc, CountryCodeType) else cc
         self.value = self.value.lower()
 
@@ -32,13 +32,13 @@ class CountryCode:
         return code
 
     @staticmethod
-    def from_patching_code(code: str) -> "CountryCode":
+    def from_patching_code(code: str) -> CountryCode:
         if code == "":
             return CountryCode(CountryCodeType.JP)
         return CountryCode(code)
 
     @staticmethod
-    def from_code(code: str) -> "CountryCode":
+    def from_code(code: str) -> CountryCode:
         return CountryCode(code)
 
     @staticmethod
@@ -56,11 +56,11 @@ class CountryCode:
     def __repr__(self) -> str:
         return self.get_code()
 
-    def copy(self) -> "CountryCode":
+    def copy(self) -> CountryCode:
         return self
 
     @staticmethod
-    def select() -> Optional["CountryCode"]:
+    def select() -> CountryCode | None:
         index = dialog_creator.ChoiceInput.from_reduced(
             CountryCode.get_all_str(),
             dialog="country_code_select",
@@ -71,7 +71,7 @@ class CountryCode:
         return CountryCode.get_all()[index - 1]
 
     @staticmethod
-    def select_from_ccs(ccs: list["CountryCode"]) -> Optional["CountryCode"]:
+    def select_from_ccs(ccs: list[CountryCode]) -> CountryCode | None:
         index = dialog_creator.ChoiceInput.from_reduced(
             [cc.get_code() for cc in ccs],
             dialog="country_code_select",
@@ -90,7 +90,7 @@ class CountryCode:
             return self.get_code() == o.value
         return False
 
-    def get_cc_lang(self) -> "core.CountryCode":
+    def get_cc_lang(self) -> core.CountryCode:
         if core.core_data.config.get_bool(core.ConfigKey.FORCE_LANG_GAME_DATA):
             locale = core.core_data.config.get_str(core.ConfigKey.LOCALE)
             return core.CountryCode.from_code(locale)

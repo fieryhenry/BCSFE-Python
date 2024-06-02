@@ -1,4 +1,5 @@
-from typing import Any, Optional
+from __future__ import annotations
+from typing import Any
 from bcsfe import core
 from bcsfe.cli import color, dialog_creator
 
@@ -22,11 +23,11 @@ class CatShrine:
         self.dialogs = 0
 
     @staticmethod
-    def init() -> "CatShrine":
+    def init() -> CatShrine:
         return CatShrine(False, 0.0, 0.0, False, [], 0)
 
     @staticmethod
-    def read(stream: "core.Data") -> "CatShrine":
+    def read(stream: core.Data) -> CatShrine:
         unknown = stream.read_bool()
         stamp_1 = stream.read_double()
         stamp_2 = stream.read_double()
@@ -35,7 +36,7 @@ class CatShrine:
         xp_offering = stream.read_long()
         return CatShrine(unknown, stamp_1, stamp_2, shrine_gone, flags, xp_offering)
 
-    def write(self, stream: "core.Data"):
+    def write(self, stream: core.Data):
         stream.write_bool(self.unknown)
         stream.write_double(self.stamp_1)
         stream.write_double(self.stamp_2)
@@ -44,10 +45,10 @@ class CatShrine:
         stream.write_byte_list(self.flags, write_length=False)
         stream.write_long(self.xp_offering)
 
-    def read_dialogs(self, stream: "core.Data"):
+    def read_dialogs(self, stream: core.Data):
         self.dialogs = stream.read_int()
 
-    def write_dialogs(self, stream: "core.Data"):
+    def write_dialogs(self, stream: core.Data):
         stream.write_int(self.dialogs)
 
     def serialize(self) -> dict[str, Any]:
@@ -62,7 +63,7 @@ class CatShrine:
         }
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "CatShrine":
+    def deserialize(data: dict[str, Any]) -> CatShrine:
         shrine = CatShrine(
             data.get("unknown", False),
             data.get("stamp_1", 0.0),
@@ -91,7 +92,7 @@ class CatShrine:
         return self.__repr__()
 
     @staticmethod
-    def edit_catshrine(save_file: "core.SaveFile"):
+    def edit_catshrine(save_file: core.SaveFile):
         shrine = save_file.cat_shrine
         options = ["shrine_level", "shrine_xp"]
         choice = dialog_creator.ChoiceInput.from_reduced(
@@ -147,11 +148,11 @@ class CatShrine:
 
 
 class CatShrineLevels:
-    def __init__(self, save_file: "core.SaveFile"):
+    def __init__(self, save_file: core.SaveFile):
         self.save_file = save_file
         self.boundaries = self.get_boundaries()
 
-    def get_boundaries(self) -> Optional[list[int]]:
+    def get_boundaries(self) -> list[int] | None:
         file_name = "jinja_level.csv"
         gdg = core.core_data.get_game_data_getter(self.save_file)
         data = gdg.download("resLocal", file_name)
@@ -169,7 +170,7 @@ class CatShrineLevels:
 
         return boundaries
 
-    def get_level_from_xp(self, xp: int) -> Optional[int]:
+    def get_level_from_xp(self, xp: int) -> int | None:
         if self.boundaries is None:
             return None
         for i, boundary in enumerate(self.boundaries):
@@ -177,7 +178,7 @@ class CatShrineLevels:
                 return i + 1
         return len(self.boundaries)
 
-    def get_xp_from_level(self, level: int) -> Optional[int]:
+    def get_xp_from_level(self, level: int) -> int | None:
         if self.boundaries is None:
             return None
         if level < 1:
@@ -186,12 +187,12 @@ class CatShrineLevels:
             return self.get_max_xp()
         return self.boundaries[level - 2]
 
-    def get_max_level(self) -> Optional[int]:
+    def get_max_level(self) -> int | None:
         if self.boundaries is None:
             return None
         return len(self.boundaries)
 
-    def get_max_xp(self) -> Optional[int]:
+    def get_max_xp(self) -> int | None:
         if self.boundaries is None:
             return None
         return max(self.boundaries)

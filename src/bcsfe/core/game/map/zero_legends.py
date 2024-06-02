@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import Any
 from bcsfe import core
 from bcsfe.cli import edits
@@ -8,22 +9,22 @@ class Stage:
         self.clear_times = clear_times
 
     @staticmethod
-    def init() -> "Stage":
+    def init() -> Stage:
         return Stage(0)
 
     @staticmethod
-    def read(data: "core.Data") -> "Stage":
+    def read(data: core.Data) -> Stage:
         clear_times = data.read_short()
         return Stage(clear_times)
 
-    def write(self, data: "core.Data"):
+    def write(self, data: core.Data):
         data.write_short(self.clear_times)
 
     def serialize(self) -> int:
         return self.clear_times
 
     @staticmethod
-    def deserialize(data: int) -> "Stage":
+    def deserialize(data: int) -> Stage:
         return Stage(
             data,
         )
@@ -75,11 +76,11 @@ class Chapter:
         return True
 
     @staticmethod
-    def init() -> "Chapter":
+    def init() -> Chapter:
         return Chapter(0, 0, 0, [])
 
     @staticmethod
-    def read(data: "core.Data") -> "Chapter":
+    def read(data: core.Data) -> Chapter:
         selected_stage = data.read_byte()
         clear_progress = data.read_byte()
         unlock_state = data.read_byte()
@@ -92,7 +93,7 @@ class Chapter:
             stages,
         )
 
-    def write(self, data: "core.Data"):
+    def write(self, data: core.Data):
         data.write_byte(self.selected_stage)
         data.write_byte(self.clear_progress)
         data.write_byte(self.unlock_state)
@@ -109,7 +110,7 @@ class Chapter:
         }
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "Chapter":
+    def deserialize(data: dict[str, Any]) -> Chapter:
         return Chapter(
             data.get("selected_stage", 0),
             data.get("clear_progress", 0),
@@ -152,11 +153,11 @@ class ChaptersStars:
         return finished
 
     @staticmethod
-    def init() -> "ChaptersStars":
+    def init() -> ChaptersStars:
         return ChaptersStars(0, [])
 
     @staticmethod
-    def read(data: "core.Data") -> "ChaptersStars":
+    def read(data: core.Data) -> ChaptersStars:
         unknown = data.read_byte()
         total_stars = data.read_byte()
         chapters = [Chapter.read(data) for _ in range(total_stars)]
@@ -165,7 +166,7 @@ class ChaptersStars:
             chapters,
         )
 
-    def write(self, data: "core.Data"):
+    def write(self, data: core.Data):
         data.write_byte(self.unknown)
         data.write_byte(len(self.chapters))
         for chapter in self.chapters:
@@ -178,7 +179,7 @@ class ChaptersStars:
         }
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "ChaptersStars":
+    def deserialize(data: dict[str, Any]) -> ChaptersStars:
         return ChaptersStars(
             data.get("unknown", 0),
             [Chapter.deserialize(chapter) for chapter in data.get("chapters", [])],
@@ -218,18 +219,18 @@ class ZeroLegendsChapters:
                 chapter.chapter_unlock_state = 0
 
     @staticmethod
-    def init() -> "ZeroLegendsChapters":
+    def init() -> ZeroLegendsChapters:
         return ZeroLegendsChapters([])
 
     @staticmethod
-    def read(data: "core.Data") -> "ZeroLegendsChapters":
+    def read(data: core.Data) -> ZeroLegendsChapters:
         total_chapters = data.read_short()
         chapters = [ChaptersStars.read(data) for _ in range(total_chapters)]
         return ZeroLegendsChapters(
             chapters,
         )
 
-    def write(self, data: "core.Data"):
+    def write(self, data: core.Data):
         data.write_short(len(self.chapters))
         for chapter in self.chapters:
             chapter.write(data)
@@ -238,7 +239,7 @@ class ZeroLegendsChapters:
         return [chapter.serialize() for chapter in self.chapters]
 
     @staticmethod
-    def deserialize(data: list[dict[str, Any]]) -> "ZeroLegendsChapters":
+    def deserialize(data: list[dict[str, Any]]) -> ZeroLegendsChapters:
         return ZeroLegendsChapters(
             [ChaptersStars.deserialize(chapter) for chapter in data],
         )
@@ -266,11 +267,11 @@ class ZeroLegendsChapters:
                 self.chapters.append(chapters_stars)
 
     @staticmethod
-    def edit_zero_legends(save_file: "core.SaveFile"):
+    def edit_zero_legends(save_file: core.SaveFile):
         zero_legends_chapters = save_file.zero_legends
         zero_legends_chapters.edit_chapters(save_file, "ND")
 
-    def edit_chapters(self, save_file: "core.SaveFile", letter_code: str):
+    def edit_chapters(self, save_file: core.SaveFile, letter_code: str):
         edits.map.edit_chapters(save_file, self, letter_code)
 
     def unclear_rest(self, stages: list[int], stars: int, id: int):

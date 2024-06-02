@@ -1,3 +1,4 @@
+from __future__ import annotations
 from bcsfe import core
 
 
@@ -6,21 +7,21 @@ class Stage:
         self.score = score
 
     @staticmethod
-    def init() -> "Stage":
+    def init() -> Stage:
         return Stage(0)
 
     @staticmethod
-    def read(stream: "core.Data") -> "Stage":
+    def read(stream: core.Data) -> Stage:
         return Stage(stream.read_int())
 
-    def write(self, stream: "core.Data"):
+    def write(self, stream: core.Data):
         stream.write_int(self.score)
 
     def serialize(self) -> int:
         return self.score
 
     @staticmethod
-    def deserialize(data: int) -> "Stage":
+    def deserialize(data: int) -> Stage:
         return Stage(data)
 
     def __repr__(self) -> str:
@@ -35,17 +36,17 @@ class SubChapter:
         self.stages = stages
 
     @staticmethod
-    def init(total_stages: int) -> "SubChapter":
+    def init(total_stages: int) -> SubChapter:
         return SubChapter([Stage.init() for _ in range(total_stages)])
 
     @staticmethod
-    def read(stream: "core.Data", total_stages: int) -> "SubChapter":
+    def read(stream: core.Data, total_stages: int) -> SubChapter:
         stages: list[Stage] = []
         for _ in range(total_stages):
             stages.append(Stage.read(stream))
         return SubChapter(stages)
 
-    def write(self, stream: "core.Data"):
+    def write(self, stream: core.Data):
         for stage in self.stages:
             stage.write(stream)
 
@@ -53,7 +54,7 @@ class SubChapter:
         return [stage.serialize() for stage in self.stages]
 
     @staticmethod
-    def deserialize(data: list[int]) -> "SubChapter":
+    def deserialize(data: list[int]) -> SubChapter:
         return SubChapter([Stage.deserialize(stage) for stage in data])
 
     def __repr__(self) -> str:
@@ -68,21 +69,23 @@ class SubChapterStars:
         self.sub_chapters = sub_chapters
 
     @staticmethod
-    def init(total_stages: int, total_stars: int) -> "SubChapterStars":
+    def init(total_stages: int, total_stars: int) -> SubChapterStars:
         return SubChapterStars(
             [SubChapter.init(total_stages) for _ in range(total_stars)]
         )
 
     @staticmethod
     def read(
-        stream: "core.Data", total_stages: int, total_stars: int
-    ) -> "SubChapterStars":
+        stream: core.Data,
+        total_stages: int,
+        total_stars: int,
+    ) -> SubChapterStars:
         sub_chapters: list[SubChapter] = []
         for _ in range(total_stars):
             sub_chapters.append(SubChapter.read(stream, total_stages))
         return SubChapterStars(sub_chapters)
 
-    def write(self, stream: "core.Data"):
+    def write(self, stream: core.Data):
         for sub_chapter in self.sub_chapters:
             sub_chapter.write(stream)
 
@@ -90,7 +93,7 @@ class SubChapterStars:
         return [sub_chapter.serialize() for sub_chapter in self.sub_chapters]
 
     @staticmethod
-    def deserialize(data: list[list[int]]) -> "SubChapterStars":
+    def deserialize(data: list[list[int]]) -> SubChapterStars:
         return SubChapterStars(
             [SubChapter.deserialize(sub_chapter) for sub_chapter in data]
         )
@@ -107,7 +110,7 @@ class TimedScoreChapters:
         self.sub_chapters = sub_chapters
 
     @staticmethod
-    def init(gv: "core.GameVersion") -> "TimedScoreChapters":
+    def init(gv: core.GameVersion) -> TimedScoreChapters:
         if gv < 20:
             return TimedScoreChapters([])
         if gv <= 33:
@@ -130,7 +133,7 @@ class TimedScoreChapters:
         )
 
     @staticmethod
-    def read(stream: "core.Data", gv: "core.GameVersion") -> "TimedScoreChapters":
+    def read(stream: core.Data, gv: core.GameVersion) -> TimedScoreChapters:
         if gv < 20:
             return TimedScoreChapters([])
         if gv <= 33:
@@ -150,7 +153,7 @@ class TimedScoreChapters:
             sub_chapters.append(SubChapterStars.read(stream, total_stages, total_stars))
         return TimedScoreChapters(sub_chapters)
 
-    def write(self, stream: "core.Data", gv: "core.GameVersion"):
+    def write(self, stream: core.Data, gv: core.GameVersion):
         if gv < 20:
             return
         if gv <= 33:
@@ -174,7 +177,7 @@ class TimedScoreChapters:
         return [sub_chapter.serialize() for sub_chapter in self.sub_chapters]
 
     @staticmethod
-    def deserialize(data: list[list[list[int]]]) -> "TimedScoreChapters":
+    def deserialize(data: list[list[list[int]]]) -> TimedScoreChapters:
         return TimedScoreChapters(
             [SubChapterStars.deserialize(sub_chapter) for sub_chapter in data]
         )

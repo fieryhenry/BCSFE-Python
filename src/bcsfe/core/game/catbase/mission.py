@@ -1,4 +1,5 @@
-from typing import Any, Optional, Union
+from __future__ import annotations
+from typing import Any
 
 from bcsfe import core
 from bcsfe.cli import color, dialog_creator
@@ -7,14 +8,14 @@ from bcsfe.cli import color, dialog_creator
 class Mission:
     def __init__(
         self,
-        clear_state: Optional[int] = None,
-        requirement: Optional[int] = None,
-        progress_type: Optional[int] = None,
-        gamatoto_value: Optional[int] = None,
-        nyancombo_value: Optional[int] = None,
-        user_rank_value: Optional[int] = None,
-        expiry_value: Optional[int] = None,
-        preparing_value: Optional[Union[int, bool]] = None,
+        clear_state: int | None = None,
+        requirement: int | None = None,
+        progress_type: int | None = None,
+        gamatoto_value: int | None = None,
+        nyancombo_value: int | None = None,
+        user_rank_value: int | None = None,
+        expiry_value: int | None = None,
+        preparing_value: int | bool | None = None,
     ):
         self.clear_state = clear_state
         self.requirement = requirement
@@ -26,7 +27,7 @@ class Mission:
         self.preparing_value = preparing_value
 
     @staticmethod
-    def init() -> "Mission":
+    def init() -> Mission:
         return Mission(
             None,
             None,
@@ -51,7 +52,7 @@ class Mission:
         }
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "Mission":
+    def deserialize(data: dict[str, Any]) -> Mission:
         return Mission(
             data["clear_state"],
             data["requirement"],
@@ -80,7 +81,7 @@ class Missions:
         nyancombo_values: dict[int, int],
         user_rank_values: dict[int, int],
         expiry_values: dict[int, int],
-        preparing_values: dict[int, Union[int, bool]],
+        preparing_values: dict[int, int | bool],
     ):
         self.clear_states = clear_states
         self.requirements = requirements
@@ -93,7 +94,7 @@ class Missions:
         self.weekly_missions: dict[int, bool] = {}
 
     @staticmethod
-    def init() -> "Missions":
+    def init() -> Missions:
         return Missions(
             {},
             {},
@@ -106,7 +107,7 @@ class Missions:
         )
 
     @staticmethod
-    def read(stream: "core.Data", gv: "core.GameVersion") -> "Missions":
+    def read(stream: core.Data, gv: core.GameVersion) -> Missions:
         clear_states: dict[int, int] = stream.read_int_int_dict()
         requirements: dict[int, int] = stream.read_int_int_dict()
         progress_types: dict[int, int] = stream.read_int_int_dict()
@@ -114,7 +115,7 @@ class Missions:
         nyancombo_values: dict[int, int] = stream.read_int_int_dict()
         user_rank_values: dict[int, int] = stream.read_int_int_dict()
         expiry_values: dict[int, int] = stream.read_int_int_dict()
-        preparing_values: dict[int, Union[int, bool]] = {}
+        preparing_values: dict[int, int | bool] = {}
 
         for _ in range(stream.read_int()):
             key = stream.read_int()
@@ -134,7 +135,7 @@ class Missions:
             preparing_values,
         )
 
-    def write(self, stream: "core.Data", gv: "core.GameVersion"):
+    def write(self, stream: core.Data, gv: core.GameVersion):
         stream.write_int_int_dict(self.clear_states)
         stream.write_int_int_dict(self.requirements)
         stream.write_int_int_dict(self.progress_types)
@@ -151,13 +152,13 @@ class Missions:
             else:
                 stream.write_int(int(value))
 
-    def read_weekly_missions(self, stream: "core.Data"):
+    def read_weekly_missions(self, stream: core.Data):
         self.weekly_missions: dict[int, bool] = {}
         for _ in range(stream.read_int()):
             key = stream.read_int()
             self.weekly_missions[key] = stream.read_bool()
 
-    def write_weekly_missions(self, stream: "core.Data"):
+    def write_weekly_missions(self, stream: core.Data):
         stream.write_int(len(self.weekly_missions))
         for key, value in self.weekly_missions.items():
             stream.write_int(key)
@@ -198,7 +199,7 @@ class Missions:
         return self.__repr__()
 
     @staticmethod
-    def edit_missions(save_file: "core.SaveFile"):
+    def edit_missions(save_file: core.SaveFile):
         missions = save_file.missions
 
         names = core.core_data.get_mission_names(save_file)
@@ -270,11 +271,11 @@ class MissionCondition:
 
 
 class MissionConditions:
-    def __init__(self, save: "core.SaveFile"):
+    def __init__(self, save: core.SaveFile):
         self.save = save
         self.conditions = self.get_conditions()
 
-    def get_conditions(self) -> Optional[dict[int, MissionCondition]]:
+    def get_conditions(self) -> dict[int, MissionCondition] | None:
         file_name = "Mission_Condition.csv"
         gdg = core.core_data.get_game_data_getter(self.save)
         file = gdg.download("DataLocal", file_name)
@@ -292,18 +293,18 @@ class MissionConditions:
             )
         return conditions
 
-    def get_condition(self, mission_id: int) -> Optional[MissionCondition]:
+    def get_condition(self, mission_id: int) -> MissionCondition | None:
         if self.conditions is None:
             return None
         return self.conditions.get(mission_id)
 
 
 class MissionNames:
-    def __init__(self, save: "core.SaveFile"):
+    def __init__(self, save: core.SaveFile):
         self.save = save
         self.names = self.get_names()
 
-    def get_names(self) -> Optional[dict[int, str]]:
+    def get_names(self) -> dict[int, str] | None:
         file_name = "Mission_Name.csv"
         gdg = core.core_data.get_game_data_getter(self.save)
         file = gdg.download("resLocal", file_name)

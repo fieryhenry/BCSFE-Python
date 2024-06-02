@@ -1,13 +1,13 @@
-from typing import Optional
+from __future__ import annotations
 from bcsfe import core
 
 
 class GatyaItemNames:
-    def __init__(self, save_file: "core.SaveFile"):
+    def __init__(self, save_file: core.SaveFile):
         self.save_file = save_file
         self.names = self.__get_names()
 
-    def __get_names(self) -> Optional[list[str]]:
+    def __get_names(self) -> list[str] | None:
         gdg = core.core_data.get_game_data_getter(self.save_file)
         data = gdg.download("resLocal", "GatyaitemName.csv")
         if data is None:
@@ -19,7 +19,7 @@ class GatyaItemNames:
 
         return names
 
-    def get_name(self, index: int) -> Optional[str]:
+    def get_name(self, index: int) -> str | None:
         if self.names is None:
             return None
         try:
@@ -63,11 +63,11 @@ class GatyaItemBuyItem:
 
 
 class GatyaItemBuy:
-    def __init__(self, save_file: "core.SaveFile"):
+    def __init__(self, save_file: core.SaveFile):
         self.save_file = save_file
         self.buy = self.get_buy()
 
-    def get_buy(self) -> Optional[list[GatyaItemBuyItem]]:
+    def get_buy(self) -> list[GatyaItemBuyItem] | None:
         gdg = core.core_data.get_game_data_getter(self.save_file)
         data = gdg.download("DataLocal", "Gatyaitembuy.csv")
         if data is None:
@@ -102,7 +102,7 @@ class GatyaItemBuy:
         items.sort(key=lambda x: x.index)
         return items
 
-    def get_by_category(self, category: int) -> Optional[list[GatyaItemBuyItem]]:
+    def get_by_category(self, category: int) -> list[GatyaItemBuyItem] | None:
         if self.buy is None:
             return None
         return self.sort_by_index(

@@ -1,4 +1,5 @@
-from typing import Callable, Any, Iterable, Optional
+from __future__ import annotations
+from typing import Callable, Any, Iterable
 import threading
 
 
@@ -7,12 +8,12 @@ class Thread:
         self,
         name: str,
         target: Callable[..., Any],
-        args: Optional[Iterable[Any]] = None,
+        args: Iterable[Any] | None = None,
     ):
         self.name = name
         self.target = target
         self.args: Iterable[Any] = args if args is not None else []
-        self._thread: Optional[threading.Thread] = None
+        self._thread: threading.Thread | None = None
 
     def start(self):
         self._thread = threading.Thread(

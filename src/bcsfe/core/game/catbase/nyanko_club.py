@@ -1,7 +1,8 @@
+from __future__ import annotations
 import datetime
 import random
 import time
-from typing import Any, Optional
+from typing import Any
 
 from bcsfe import core
 from bcsfe.cli import dialog_creator, color
@@ -24,7 +25,7 @@ class NyankoClub:
         claimed_rewards: dict[int, int],
         remaing_days_popup: float,
         first_popup_flag: bool,
-        badge_flag: Optional[bool] = None,
+        badge_flag: bool | None = None,
     ):
         self.officer_id = officer_id
         self.total_renewal_times = total_renewal_times
@@ -43,7 +44,7 @@ class NyankoClub:
         self.badge_flag = badge_flag
 
     @staticmethod
-    def init() -> "NyankoClub":
+    def init() -> NyankoClub:
         return NyankoClub(
             0,
             0,
@@ -63,7 +64,7 @@ class NyankoClub:
         )
 
     @staticmethod
-    def read(data: "core.Data", gv: "core.GameVersion") -> "NyankoClub":
+    def read(data: core.Data, gv: core.GameVersion) -> NyankoClub:
         officer_id = data.read_int()
         total_renewal_times = data.read_int()
         start_date_now = data.read_double()
@@ -100,7 +101,7 @@ class NyankoClub:
             badge_flag,
         )
 
-    def write(self, data: "core.Data", gv: "core.GameVersion"):
+    def write(self, data: core.Data, gv: core.GameVersion):
         data.write_int(self.officer_id)
         data.write_int(self.total_renewal_times)
         data.write_double(self.start_date_now)
@@ -138,7 +139,7 @@ class NyankoClub:
         }
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "NyankoClub":
+    def deserialize(data: dict[str, Any]) -> NyankoClub:
         return NyankoClub(
             data.get("officer_id", 0),
             data.get("total_renewal_times", 0),
@@ -163,9 +164,7 @@ class NyankoClub:
     def __str__(self):
         return f"NyankoClub {self.officer_id}"
 
-    def get_gold_pass(
-        self, officer_id: int, total_days: int, save_file: "core.SaveFile"
-    ):
+    def get_gold_pass(self, officer_id: int, total_days: int, save_file: core.SaveFile):
         self.officer_id = officer_id
         start_date_now = int(time.time())
         end_date_now = (
@@ -201,7 +200,7 @@ class NyankoClub:
 
         self.claimed_rewards = {}
 
-    def remove_gold_pass(self, save_file: "core.SaveFile"):
+    def remove_gold_pass(self, save_file: core.SaveFile):
         self.officer_id = -1
         self.total_renewal_times = 0
         self.start_date_now = 0.0
@@ -228,7 +227,7 @@ class NyankoClub:
         return random.randint(1, 2**16 - 1)
 
     @staticmethod
-    def edit_gold_pass(save_file: "core.SaveFile"):
+    def edit_gold_pass(save_file: core.SaveFile):
         club = save_file.officer_pass.gold_pass
 
         officer_id = color.ColoredInput().localize("gold_pass_dialog").strip()

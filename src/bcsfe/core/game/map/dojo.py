@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import Any
 from bcsfe import core
 from bcsfe.cli import dialog_creator
@@ -8,22 +9,22 @@ class Stage:
         self.score = score
 
     @staticmethod
-    def init() -> "Stage":
+    def init() -> Stage:
         return Stage(0)
 
     @staticmethod
-    def read(stream: "core.Data") -> "Stage":
+    def read(stream: core.Data) -> Stage:
         score = stream.read_int()
         return Stage(score)
 
-    def write(self, stream: "core.Data"):
+    def write(self, stream: core.Data):
         stream.write_int(self.score)
 
     def serialize(self) -> int:
         return self.score
 
     @staticmethod
-    def deserialize(data: int) -> "Stage":
+    def deserialize(data: int) -> Stage:
         return Stage(data)
 
     def __repr__(self) -> str:
@@ -43,11 +44,11 @@ class Chapter:
         return self.stages[stage_id]
 
     @staticmethod
-    def init() -> "Chapter":
+    def init() -> Chapter:
         return Chapter({})
 
     @staticmethod
-    def read(stream: "core.Data") -> "Chapter":
+    def read(stream: core.Data) -> Chapter:
         total = stream.read_int()
         stages: dict[int, Stage] = {}
         for _ in range(total):
@@ -57,7 +58,7 @@ class Chapter:
 
         return Chapter(stages)
 
-    def write(self, stream: "core.Data"):
+    def write(self, stream: core.Data):
         stream.write_int(len(self.stages))
         for stage_id, stage in self.stages.items():
             stream.write_int(stage_id)
@@ -67,7 +68,7 @@ class Chapter:
         return {stage_id: stage.serialize() for stage_id, stage in self.stages.items()}
 
     @staticmethod
-    def deserialize(data: dict[int, Any]) -> "Chapter":
+    def deserialize(data: dict[int, Any]) -> Chapter:
         return Chapter(
             {stage_id: Stage.deserialize(stage) for stage_id, stage in data.items()}
         )
@@ -89,11 +90,11 @@ class Chapters:
         return self.chapters[chapter_id].get_stage(stage_id)
 
     @staticmethod
-    def init() -> "Chapters":
+    def init() -> Chapters:
         return Chapters({})
 
     @staticmethod
-    def read(stream: "core.Data") -> "Chapters":
+    def read(stream: core.Data) -> Chapters:
         total = stream.read_int()
         chapters: dict[int, Chapter] = {}
         for _ in range(total):
@@ -103,7 +104,7 @@ class Chapters:
 
         return Chapters(chapters)
 
-    def write(self, stream: "core.Data"):
+    def write(self, stream: core.Data):
         stream.write_int(len(self.chapters))
         for chapter_id, chapter in self.chapters.items():
             stream.write_int(chapter_id)
@@ -116,7 +117,7 @@ class Chapters:
         }
 
     @staticmethod
-    def deserialize(data: dict[int, Any]) -> "Chapters":
+    def deserialize(data: dict[int, Any]) -> Chapters:
         return Chapters(
             {
                 chapter_id: Chapter.deserialize(chapter)
@@ -160,7 +161,7 @@ class Ranking:
         self.did_win_rewards = False
 
     @staticmethod
-    def init() -> "Ranking":
+    def init() -> Ranking:
         return Ranking(
             0,
             0,
@@ -176,7 +177,7 @@ class Ranking:
         )
 
     @staticmethod
-    def read(stream: "core.Data") -> "Ranking":
+    def read(stream: core.Data) -> Ranking:
         score = stream.read_int()
         ranking = stream.read_int()
         has_submitted = stream.read_bool()
@@ -202,7 +203,7 @@ class Ranking:
             submit_error_flag,
         )
 
-    def write(self, stream: "core.Data"):
+    def write(self, stream: core.Data):
         stream.write_int(self.score)
         stream.write_int(self.ranking)
         stream.write_bool(self.has_submitted)
@@ -215,10 +216,10 @@ class Ranking:
         stream.write_bool(self.should_show_start_message)
         stream.write_bool(self.submit_error_flag)
 
-    def read_did_win_rewards(self, stream: "core.Data"):
+    def read_did_win_rewards(self, stream: core.Data):
         self.did_win_rewards = stream.read_bool()
 
-    def write_did_win_rewards(self, stream: "core.Data"):
+    def write_did_win_rewards(self, stream: core.Data):
         stream.write_bool(self.did_win_rewards)
 
     def serialize(self) -> dict[str, Any]:
@@ -238,7 +239,7 @@ class Ranking:
         }
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "Ranking":
+    def deserialize(data: dict[str, Any]) -> Ranking:
         ranking = Ranking(
             data.get("score", 0),
             data.get("ranking", 0),
@@ -279,29 +280,29 @@ class Dojo:
         self.ranking = Ranking.init()
 
     @staticmethod
-    def init() -> "Dojo":
+    def init() -> Dojo:
         return Dojo(Chapters.init())
 
     @staticmethod
-    def read_chapters(stream: "core.Data") -> "Dojo":
+    def read_chapters(stream: core.Data) -> Dojo:
         chapters = Chapters.read(stream)
         return Dojo(chapters)
 
-    def write_chapters(self, stream: "core.Data"):
+    def write_chapters(self, stream: core.Data):
         self.chapters.write(stream)
 
-    def read_item_locks(self, stream: "core.Data"):
+    def read_item_locks(self, stream: core.Data):
         self.item_lock_flags = stream.read_bool()
         self.item_locks = stream.read_bool_list(6)
 
-    def write_item_locks(self, stream: "core.Data"):
+    def write_item_locks(self, stream: core.Data):
         stream.write_bool(self.item_lock_flags)
         stream.write_bool_list(self.item_locks, write_length=False, length=6)
 
-    def read_ranking(self, stream: "core.Data"):
+    def read_ranking(self, stream: core.Data):
         self.ranking = Ranking.read(stream)
 
-    def write_ranking(self, stream: "core.Data"):
+    def write_ranking(self, stream: core.Data):
         self.ranking.write(stream)
 
     def serialize(self) -> dict[str, Any]:
@@ -313,7 +314,7 @@ class Dojo:
         }
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "Dojo":
+    def deserialize(data: dict[str, Any]) -> Dojo:
         chapters = Chapters.deserialize(data.get("chapters", {}))
         item_locks = data.get("item_locks", [])
         item_lock_flags = data.get("item_lock_flags", False)
@@ -339,5 +340,5 @@ class Dojo:
         ).edit()
 
 
-def edit_dojo_score(save_file: "core.SaveFile"):
+def edit_dojo_score(save_file: core.SaveFile):
     save_file.dojo.edit_score()

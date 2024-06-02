@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import Any
 from bcsfe import core
 
@@ -16,18 +17,18 @@ class StampData:
         self.daily_reward = daily_reward
 
     @staticmethod
-    def init() -> "StampData":
+    def init() -> StampData:
         return StampData(0, [0] * 30, 0, 0)
 
     @staticmethod
-    def read(stream: "core.Data") -> "StampData":
+    def read(stream: core.Data) -> StampData:
         current_stamp = stream.read_int()
         collected_stamp = stream.read_int_list(30)
         unknown = stream.read_int()
         daily_reward = stream.read_int()
         return StampData(current_stamp, collected_stamp, unknown, daily_reward)
 
-    def write(self, stream: "core.Data"):
+    def write(self, stream: core.Data):
         stream.write_int(self.current_stamp)
         stream.write_int_list(self.collected_stamp, write_length=False)
         stream.write_int(self.unknown)
@@ -42,7 +43,7 @@ class StampData:
         }
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "StampData":
+    def deserialize(data: dict[str, Any]) -> StampData:
         return StampData(
             data.get("current_stamp", 0),
             data.get("collected_stamp", []),

@@ -1,8 +1,8 @@
+from __future__ import annotations
 import enum
 import hashlib
 import hmac
 import random
-from typing import Optional
 from bcsfe import core
 
 
@@ -27,14 +27,14 @@ class Hash:
 
     def get_hash(
         self,
-        data: "core.Data",
-        length: Optional[int] = None,
-    ) -> "core.Data":
+        data: core.Data,
+        length: int | None = None,
+    ) -> core.Data:
         """Gets the hash of the given data.
 
         Args:
             data (core.Data): The data to hash.
-            length (Optional[int], optional): The length of the hash. Defaults to None.
+            length (int | None, optional): The length of the hash. Defaults to None.
 
         Raises:
             ValueError: Invalid hash algorithm.
@@ -115,7 +115,7 @@ class Hmac:
     def __init__(self, algorithm: HashAlgorithm):
         self.algorithm = algorithm
 
-    def get_hmac(self, key: "core.Data", data: "core.Data") -> "core.Data":
+    def get_hmac(self, key: core.Data, data: core.Data) -> core.Data:
         if self.algorithm == HashAlgorithm.MD5:
             alg = hashlib.md5
         elif self.algorithm == HashAlgorithm.SHA1:

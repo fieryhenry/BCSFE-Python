@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import Any
 from bcsfe import core
 from bcsfe.cli import edits
@@ -8,21 +9,21 @@ class Stage:
         self.clear_times = clear_times
 
     @staticmethod
-    def init() -> "Stage":
+    def init() -> Stage:
         return Stage(0)
 
     @staticmethod
-    def read(data: "core.Data") -> "Stage":
+    def read(data: core.Data) -> Stage:
         clear_times = data.read_short()
         return Stage(clear_times)
 
-    def write(self, data: "core.Data"):
+    def write(self, data: core.Data):
         data.write_short(self.clear_times)
 
-    def read_tries(self, data: "core.Data"):
+    def read_tries(self, data: core.Data):
         self.tries = data.read_short()
 
-    def write_tries(self, data: "core.Data"):
+    def write_tries(self, data: core.Data):
         data.write_short(self.tries)
 
     def serialize(self) -> dict[str, Any]:
@@ -32,7 +33,7 @@ class Stage:
         }
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "Stage":
+    def deserialize(data: dict[str, Any]) -> Stage:
         stage = Stage(
             data.get("clear_times", 0),
         )
@@ -82,39 +83,39 @@ class Chapter:
         return True
 
     @staticmethod
-    def init(total_stages: int) -> "Chapter":
+    def init(total_stages: int) -> Chapter:
         return Chapter(0, total_stages)
 
     @staticmethod
-    def read_selected_stage(data: "core.Data") -> "Chapter":
+    def read_selected_stage(data: core.Data) -> Chapter:
         selected_stage = data.read_byte()
         return Chapter(selected_stage)
 
-    def write_selected_stage(self, data: "core.Data"):
+    def write_selected_stage(self, data: core.Data):
         data.write_byte(self.selected_stage)
 
-    def read_clear_progress(self, data: "core.Data"):
+    def read_clear_progress(self, data: core.Data):
         self.clear_progress = data.read_byte()
 
-    def write_clear_progress(self, data: "core.Data"):
+    def write_clear_progress(self, data: core.Data):
         data.write_byte(self.clear_progress)
 
-    def read_stages(self, data: "core.Data", total_stages: int):
+    def read_stages(self, data: core.Data, total_stages: int):
         self.stages = [Stage.read(data) for _ in range(total_stages)]
         for stage in self.stages:
             stage.read_tries(data)
 
-    def write_stages(self, data: "core.Data"):
+    def write_stages(self, data: core.Data):
         for stage in self.stages:
             stage.write(data)
 
         for stage in self.stages:
             stage.write_tries(data)
 
-    def read_chapter_unlock_state(self, data: "core.Data"):
+    def read_chapter_unlock_state(self, data: core.Data):
         self.chapter_unlock_state = data.read_byte()
 
-    def write_chapter_unlock_state(self, data: "core.Data"):
+    def write_chapter_unlock_state(self, data: core.Data):
         data.write_byte(self.chapter_unlock_state)
 
     def serialize(self) -> dict[str, Any]:
@@ -126,7 +127,7 @@ class Chapter:
         }
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "Chapter":
+    def deserialize(data: dict[str, Any]) -> Chapter:
         chapter = Chapter(
             data.get("selected_stage", 0),
         )
@@ -169,28 +170,28 @@ class ChaptersStars:
         return finished
 
     @staticmethod
-    def init(total_stages: int, total_stars: int) -> "ChaptersStars":
+    def init(total_stages: int, total_stars: int) -> ChaptersStars:
         chapters = [Chapter.init(total_stages) for _ in range(total_stars)]
         return ChaptersStars(chapters)
 
     @staticmethod
-    def read_selected_stage(data: "core.Data", total_stars: int) -> "ChaptersStars":
+    def read_selected_stage(data: core.Data, total_stars: int) -> ChaptersStars:
         chapters = [Chapter.read_selected_stage(data) for _ in range(total_stars)]
         return ChaptersStars(chapters)
 
-    def write_selected_stage(self, data: "core.Data"):
+    def write_selected_stage(self, data: core.Data):
         for chapter in self.chapters:
             chapter.write_selected_stage(data)
 
-    def read_clear_progress(self, data: "core.Data"):
+    def read_clear_progress(self, data: core.Data):
         for chapter in self.chapters:
             chapter.read_clear_progress(data)
 
-    def write_clear_progress(self, data: "core.Data"):
+    def write_clear_progress(self, data: core.Data):
         for chapter in self.chapters:
             chapter.write_clear_progress(data)
 
-    def read_stages(self, data: "core.Data", total_stages: int):
+    def read_stages(self, data: core.Data, total_stages: int):
         for _ in range(total_stages):
             for chapter in self.chapters:
                 chapter.stages.append(Stage.read(data))
@@ -199,7 +200,7 @@ class ChaptersStars:
             for chapter in self.chapters:
                 chapter.stages[i].read_tries(data)
 
-    def write_stages(self, data: "core.Data"):
+    def write_stages(self, data: core.Data):
         for i in range(len(self.chapters[0].stages)):
             for chapter in self.chapters:
                 chapter.stages[i].write(data)
@@ -208,11 +209,11 @@ class ChaptersStars:
             for chapter in self.chapters:
                 chapter.stages[i].write_tries(data)
 
-    def read_chapter_unlock_state(self, data: "core.Data"):
+    def read_chapter_unlock_state(self, data: core.Data):
         for chapter in self.chapters:
             chapter.read_chapter_unlock_state(data)
 
-    def write_chapter_unlock_state(self, data: "core.Data"):
+    def write_chapter_unlock_state(self, data: core.Data):
         for chapter in self.chapters:
             chapter.write_chapter_unlock_state(data)
 
@@ -220,7 +221,7 @@ class ChaptersStars:
         return [chapter.serialize() for chapter in self.chapters]
 
     @staticmethod
-    def deserialize(data: list[dict[str, Any]]) -> "ChaptersStars":
+    def deserialize(data: list[dict[str, Any]]) -> ChaptersStars:
         chapters = [Chapter.deserialize(chapter) for chapter in data]
         return ChaptersStars(chapters)
 
@@ -260,11 +261,11 @@ class LegendQuestChapters:
                 chapter.chapter_unlock_state = 0
 
     @staticmethod
-    def init() -> "LegendQuestChapters":
+    def init() -> LegendQuestChapters:
         return LegendQuestChapters([], [], [])
 
     @staticmethod
-    def read(data: "core.Data") -> "LegendQuestChapters":
+    def read(data: core.Data) -> LegendQuestChapters:
         total_chapters = data.read_byte()
         total_stages = data.read_byte()
         total_stars = data.read_byte()
@@ -288,7 +289,7 @@ class LegendQuestChapters:
 
         return LegendQuestChapters(chapters, unknown, ids)
 
-    def write(self, data: "core.Data"):
+    def write(self, data: core.Data):
         data.write_byte(len(self.chapters))
         try:
             data.write_byte(len(self.chapters[0].chapters[0].stages))
@@ -325,7 +326,7 @@ class LegendQuestChapters:
         }
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "LegendQuestChapters":
+    def deserialize(data: dict[str, Any]) -> LegendQuestChapters:
         chapters = [
             ChaptersStars.deserialize(chapter) for chapter in data.get("chapters", [])
         ]
@@ -352,11 +353,11 @@ class LegendQuestChapters:
             return 0
 
     @staticmethod
-    def edit_legend_quest(save_file: "core.SaveFile"):
+    def edit_legend_quest(save_file: core.SaveFile):
         legend_quest = save_file.legend_quest
         legend_quest.edit_chapters(save_file, "D")
 
-    def edit_chapters(self, save_file: "core.SaveFile", letter_code: str):
+    def edit_chapters(self, save_file: core.SaveFile, letter_code: str):
         edits.map.edit_chapters(save_file, self, letter_code)
 
     def unclear_rest(self, stages: list[int], stars: int, id: int):

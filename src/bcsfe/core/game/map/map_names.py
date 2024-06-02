@@ -1,4 +1,5 @@
-from typing import Any, Callable, Optional
+from __future__ import annotations
+from typing import Any, Callable
 
 import bs4
 from bcsfe import core
@@ -6,17 +7,17 @@ from bcsfe.cli import color
 
 
 class MapNames:
-    def __init__(self, save_file: "core.SaveFile", code: str, output: bool = True):
+    def __init__(self, save_file: core.SaveFile, code: str, output: bool = True):
         self.save_file = save_file
         self.out = output
         self.code = code
         self.gdg = core.core_data.get_game_data_getter(self.save_file)
-        self.map_names: dict[int, Optional[str]] = {}
+        self.map_names: dict[int, str | None] = {}
         self.stage_names: dict[int, list[str]] = {}
         self.get_map_names()
         self.save_map_names()
 
-    def get_file_path(self) -> "core.Path":
+    def get_file_path(self) -> core.Path:
         return (
             core.Path("map_names", True)
             .add(self.code)
@@ -24,7 +25,7 @@ class MapNames:
             .add(f"{self.gdg.cc.get_code()}.json")
         )
 
-    def read_map_names(self) -> dict[int, Optional[str]]:
+    def read_map_names(self) -> dict[int, str | None]:
         file_path = self.get_file_path()
         if file_path.exists():
             names = core.JsonFile(file_path.read()).to_object()
@@ -58,7 +59,7 @@ class MapNames:
             self.map_names[id] = None
         return name
 
-    def get_map_names(self) -> Optional[dict[int, Optional[str]]]:
+    def get_map_names(self) -> dict[int, str | None] | None:
         names = self.read_map_names()
         gdg = core.core_data.get_game_data_getter(self.save_file)
         stage_names = gdg.download(

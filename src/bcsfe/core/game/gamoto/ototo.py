@@ -1,5 +1,6 @@
+from __future__ import annotations
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any
 from bcsfe import core
 from bcsfe.cli import dialog_creator, color
 
@@ -15,11 +16,11 @@ class LevelPartRecipeUnlock:
 
 
 class CastleRecipeUnlock:
-    def __init__(self, save_file: "core.SaveFile"):
+    def __init__(self, save_file: core.SaveFile):
         self.save_file = save_file
         self.level_part_recipe_unlocks = self.get_recipe_unlocks()
 
-    def get_recipe_unlocks(self) -> Optional[list[LevelPartRecipeUnlock]]:
+    def get_recipe_unlocks(self) -> list[LevelPartRecipeUnlock] | None:
         gdg = core.core_data.get_game_data_getter(self.save_file)
         data = gdg.download("DataLocal", "CastleRecipeUnlock.csv")
         if data is None:
@@ -40,7 +41,7 @@ class CastleRecipeUnlock:
 
         return level_part_recipe_unlocks
 
-    def get_recipe_unlock(self, index: int) -> Optional[LevelPartRecipeUnlock]:
+    def get_recipe_unlock(self, index: int) -> LevelPartRecipeUnlock | None:
         if self.level_part_recipe_unlocks is None:
             return None
         for recipe_unlock in self.level_part_recipe_unlocks:
@@ -49,7 +50,7 @@ class CastleRecipeUnlock:
 
         return None
 
-    def get_max_level(self, cannon_id: int, part_id: int) -> Optional[int]:
+    def get_max_level(self, cannon_id: int, part_id: int) -> int | None:
         if self.level_part_recipe_unlocks is None:
             return None
         max_level = 0
@@ -64,7 +65,7 @@ class CastleRecipeUnlock:
 
         return max_level
 
-    def get_max_part_level(self, part_id: int) -> Optional[int]:
+    def get_max_part_level(self, part_id: int) -> int | None:
         if self.level_part_recipe_unlocks is None:
             return None
         max_level = 0
@@ -116,11 +117,11 @@ class CannonDescription:
 
 
 class CannonDescriptions:
-    def __init__(self, save_file: "core.SaveFile"):
+    def __init__(self, save_file: core.SaveFile):
         self.save_file = save_file
         self.cannon_descriptions = self.get_cannon_descriptions()
 
-    def get_cannon_descriptions(self) -> Optional[list[CannonDescription]]:
+    def get_cannon_descriptions(self) -> list[CannonDescription] | None:
         gdg = core.core_data.get_game_data_getter(self.save_file)
         data = gdg.download("resLocal", "CastleRecipeDescriptions.csv")
         if data is None:
@@ -155,7 +156,7 @@ class CannonDescriptions:
 
         return cannon_descriptions
 
-    def get_cannon_description(self, cannon_id: int) -> Optional[CannonDescription]:
+    def get_cannon_description(self, cannon_id: int) -> CannonDescription | None:
         if self.cannon_descriptions is None:
             return None
         for cannon_description in self.cannon_descriptions:
@@ -164,7 +165,7 @@ class CannonDescriptions:
 
         return None
 
-    def get_longest_longest_part_name(self) -> Optional[str]:
+    def get_longest_longest_part_name(self) -> str | None:
         if self.cannon_descriptions is None:
             return None
         longest_part_name = ""
@@ -182,11 +183,11 @@ class Cannon:
         self.levels = levels
 
     @staticmethod
-    def init() -> "Cannon":
+    def init() -> Cannon:
         return Cannon(0, [])
 
     @staticmethod
-    def read(stream: "core.Data") -> "Cannon":
+    def read(stream: core.Data) -> Cannon:
         total = stream.read_int()
         levels: list[int] = []
         development = stream.read_int()
@@ -194,7 +195,7 @@ class Cannon:
             levels.append(stream.read_int())
         return Cannon(development, levels)
 
-    def write(self, stream: "core.Data"):
+    def write(self, stream: core.Data):
         stream.write_int(len(self.levels) + 1)
         stream.write_int(self.development)
         for level in self.levels:
@@ -204,7 +205,7 @@ class Cannon:
         return [self.development] + self.levels
 
     @staticmethod
-    def deserialize(data: list[int]) -> "Cannon":
+    def deserialize(data: list[int]) -> Cannon:
         return Cannon(data[0], data[1:])
 
     def __repr__(self):
@@ -220,7 +221,7 @@ class Cannons:
         self.selected_parts = selected_parts
 
     @staticmethod
-    def init(gv: "core.GameVersion") -> "Cannons":
+    def init(gv: core.GameVersion) -> Cannons:
         cannnons = {}
         if gv < 80200:
             selected_parts = [[0, 0, 0]]
@@ -234,7 +235,7 @@ class Cannons:
         return Cannons(cannnons, selected_parts)
 
     @staticmethod
-    def read(stream: "core.Data", gv: "core.GameVersion") -> "Cannons":
+    def read(stream: core.Data, gv: core.GameVersion) -> Cannons:
         total = stream.read_int()
         cannons: dict[int, Cannon] = {}
         for _ in range(total):
@@ -255,7 +256,7 @@ class Cannons:
 
         return Cannons(cannons, selected_parts)
 
-    def write(self, stream: "core.Data", gv: "core.GameVersion"):
+    def write(self, stream: core.Data, gv: core.GameVersion):
         stream.write_int(len(self.cannons))
         for cannon_id, cannon in self.cannons.items():
             stream.write_int(cannon_id)
@@ -279,7 +280,7 @@ class Cannons:
         }
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "Cannons":
+    def deserialize(data: dict[str, Any]) -> Cannons:
         return Cannons(
             {
                 cannon_id: Cannon.deserialize(cannon)
@@ -298,8 +299,8 @@ class Cannons:
 class Ototo:
     def __init__(
         self,
-        base_materials: "core.BaseMaterials",
-        game_version: Optional["core.GameVersion"] = None,
+        base_materials: core.BaseMaterials,
+        game_version: core.GameVersion | None = None,
     ):
         self.base_materials = base_materials
         self.remaining_seconds = 0.0
@@ -309,25 +310,25 @@ class Ototo:
         self.cannons = Cannons.init(game_version) if game_version else None
 
     @staticmethod
-    def init(game_version: "core.GameVersion") -> "Ototo":
+    def init(game_version: core.GameVersion) -> Ototo:
         return Ototo(core.BaseMaterials.init(), game_version)
 
     @staticmethod
-    def read(stream: "core.Data") -> "Ototo":
+    def read(stream: core.Data) -> Ototo:
         bm = core.BaseMaterials.read(stream)
         return Ototo(bm)
 
-    def write(self, stream: "core.Data"):
+    def write(self, stream: core.Data):
         self.base_materials.write(stream)
 
-    def read_2(self, stream: "core.Data", gv: "core.GameVersion"):
+    def read_2(self, stream: core.Data, gv: core.GameVersion):
         self.remaining_seconds = stream.read_double()
         self.return_flag = stream.read_bool()
         self.improve_id = stream.read_int()
         self.engineers = stream.read_int()
         self.cannons = Cannons.read(stream, gv)
 
-    def write_2(self, stream: "core.Data", gv: "core.GameVersion"):
+    def write_2(self, stream: core.Data, gv: core.GameVersion):
         stream.write_double(self.remaining_seconds)
         stream.write_bool(self.return_flag)
         stream.write_int(self.improve_id)
@@ -348,7 +349,7 @@ class Ototo:
         }
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "Ototo":
+    def deserialize(data: dict[str, Any]) -> Ototo:
         ototo = Ototo(core.BaseMaterials.deserialize(data.get("base_materials", [])))
         ototo.remaining_seconds = data.get("remaining_seconds", 0.0)
         ototo.return_flag = data.get("return_flag", False)
@@ -364,7 +365,7 @@ class Ototo:
         return self.__repr__()
 
     @staticmethod
-    def get_max_engineers(save_file: "core.SaveFile") -> int:
+    def get_max_engineers(save_file: core.SaveFile) -> int:
         file = core.core_data.get_game_data_getter(save_file).download(
             "DataLocal", "CastleCustomLimit.csv"
         )
@@ -373,7 +374,7 @@ class Ototo:
         csv = core.CSV(file)
         return csv.lines[0][0].to_int()
 
-    def edit_engineers(self, save_file: "core.SaveFile"):
+    def edit_engineers(self, save_file: core.SaveFile):
         name = core.core_data.get_gatya_item_names(save_file).get_name(92)
         if name is None:
             name = "engineers"
@@ -387,9 +388,7 @@ class Ototo:
             localized_item=localized_item,
         ).edit()
 
-    def display_current_cannons(
-        self, save_file: "core.SaveFile"
-    ) -> Optional[list[str]]:
+    def display_current_cannons(self, save_file: core.SaveFile) -> list[str] | None:
         descriptions = CannonDescriptions(save_file)
         recipe_unlocks = CastleRecipeUnlock(save_file)
 
@@ -444,7 +443,7 @@ class Ototo:
 
         return names
 
-    def edit_cannon(self, save_file: "core.SaveFile"):
+    def edit_cannon(self, save_file: core.SaveFile):
         if self.cannons is None:
             self.cannons = Cannons.init(save_file.game_version)
 
@@ -492,7 +491,7 @@ class Ototo:
 
         self.display_current_cannons(save_file)
 
-    def select_development(self) -> Optional[int]:
+    def select_development(self) -> int | None:
         return dialog_creator.ChoiceInput.from_reduced(
             ["none", "foundation", "style", "effect"],
             dialog="select_development",
@@ -500,7 +499,7 @@ class Ototo:
         ).single_choice()
 
     def edit_cannon_development(
-        self, save_file: "core.SaveFile", all_at_once: bool, cannon_ids: list[int]
+        self, save_file: core.SaveFile, all_at_once: bool, cannon_ids: list[int]
     ):
         if self.cannons is None:
             self.cannons = Cannons.init(save_file.game_version)
@@ -535,7 +534,7 @@ class Ototo:
                 self.cannons.cannons[cannon_id].development = development - 1
 
     def edit_cannon_level(
-        self, save_file: "core.SaveFile", all_at_once: bool, cannon_ids: list[int]
+        self, save_file: core.SaveFile, all_at_once: bool, cannon_ids: list[int]
     ):
         if self.cannons is None:
             self.cannons = Cannons.init(save_file.game_version)
@@ -621,7 +620,7 @@ class Ototo:
                         level -= 1
                     cannon.levels[part_id] = level
 
-    def get_cannon(self, cannon_id: int) -> Optional[Cannon]:
+    def get_cannon(self, cannon_id: int) -> Cannon | None:
         if self.cannons is None:
             return None
         return self.cannons.cannons.get(cannon_id, None)
@@ -639,5 +638,5 @@ class Ototo:
         return core.core_data.local_manager.get_key("unknown_stage", stage=development)
 
 
-def edit_cannon(save_file: "core.SaveFile"):
+def edit_cannon(save_file: core.SaveFile):
     save_file.ototo.edit_cannon(save_file)

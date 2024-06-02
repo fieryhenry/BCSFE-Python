@@ -1,3 +1,4 @@
+from __future__ import annotations
 import enum
 from typing import Any
 from bcsfe import core
@@ -38,7 +39,7 @@ class Config:
         self.initialize_config()
 
     @staticmethod
-    def get_config_path() -> "core.Path":
+    def get_config_path() -> core.Path:
         return core.Path.get_documents_folder().add("config.yaml")
 
     def __getitem__(self, key: ConfigKey) -> Any:

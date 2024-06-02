@@ -1,4 +1,5 @@
-from typing import Any, Optional
+from __future__ import annotations
+from typing import Any
 from bcsfe import core
 
 
@@ -7,22 +8,22 @@ class Login:
         self.count = count
 
     @staticmethod
-    def init() -> "Login":
+    def init() -> Login:
         return Login(0)
 
     @staticmethod
-    def read(stream: "core.Data") -> "Login":
+    def read(stream: core.Data) -> Login:
         count = stream.read_int()
         return Login(count)
 
-    def write(self, stream: "core.Data"):
+    def write(self, stream: core.Data):
         stream.write_int(self.count)
 
     def serialize(self) -> int:
         return self.count
 
     @staticmethod
-    def deserialize(data: int) -> "Login":
+    def deserialize(data: int) -> Login:
         return Login(data)
 
     def __repr__(self):
@@ -37,18 +38,18 @@ class Logins:
         self.logins = logins
 
     @staticmethod
-    def init() -> "Logins":
+    def init() -> Logins:
         return Logins([])
 
     @staticmethod
-    def read(stream: "core.Data") -> "Logins":
+    def read(stream: core.Data) -> Logins:
         total = stream.read_int()
         logins: list[Login] = []
         for _ in range(total):
             logins.append(Login.read(stream))
         return Logins(logins)
 
-    def write(self, stream: "core.Data"):
+    def write(self, stream: core.Data):
         stream.write_int(len(self.logins))
         for login in self.logins:
             login.write(stream)
@@ -57,7 +58,7 @@ class Logins:
         return [login.serialize() for login in self.logins]
 
     @staticmethod
-    def deserialize(data: list[int]) -> "Logins":
+    def deserialize(data: list[int]) -> Logins:
         return Logins([Login.deserialize(login) for login in data])
 
     def __repr__(self):
@@ -72,18 +73,18 @@ class LoginSets:
         self.logins = logins
 
     @staticmethod
-    def init() -> "LoginSets":
+    def init() -> LoginSets:
         return LoginSets([])
 
     @staticmethod
-    def read(stream: "core.Data") -> "LoginSets":
+    def read(stream: core.Data) -> LoginSets:
         total = stream.read_int()
         logins: list[Logins] = []
         for _ in range(total):
             logins.append(Logins.read(stream))
         return LoginSets(logins)
 
-    def write(self, stream: "core.Data"):
+    def write(self, stream: core.Data):
         stream.write_int(len(self.logins))
         for login in self.logins:
             login.write(stream)
@@ -92,7 +93,7 @@ class LoginSets:
         return [login.serialize() for login in self.logins]
 
     @staticmethod
-    def deserialize(data: list[list[int]]) -> "LoginSets":
+    def deserialize(data: list[list[int]]) -> LoginSets:
         return LoginSets([Logins.deserialize(login) for login in data])
 
     def __repr__(self):
@@ -105,21 +106,21 @@ class LoginSets:
 class LoginBonus:
     def __init__(
         self,
-        old_logins: Optional[LoginSets] = None,
-        logins: Optional[dict[int, Login]] = None,
+        old_logins: LoginSets | None = None,
+        logins: dict[int, Login] | None = None,
     ):
         self.old_logins = old_logins
         self.logins = logins
 
     @staticmethod
-    def init(gv: "core.GameVersion") -> "LoginBonus":
+    def init(gv: core.GameVersion) -> LoginBonus:
         if gv < 80000:
             return LoginBonus(old_logins=LoginSets.init())
         else:
             return LoginBonus(logins={})
 
     @staticmethod
-    def read(stream: "core.Data", gv: "core.GameVersion") -> "LoginBonus":
+    def read(stream: core.Data, gv: core.GameVersion) -> LoginBonus:
         if gv < 80000:
             logins_old = LoginSets.read(stream)
             return LoginBonus(logins_old)
@@ -131,7 +132,7 @@ class LoginBonus:
                 logins[id] = Login.read(stream)
             return LoginBonus(logins=logins)
 
-    def write(self, stream: "core.Data", gv: "core.GameVersion"):
+    def write(self, stream: core.Data, gv: core.GameVersion):
         if gv < 80000 and self.old_logins is not None:
             self.old_logins.write(stream)
         elif gv >= 80000 and self.logins is not None:
@@ -153,7 +154,7 @@ class LoginBonus:
             return {}
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "LoginBonus":
+    def deserialize(data: dict[str, Any]) -> LoginBonus:
         if "old_logins" in data:
             return LoginBonus(old_logins=LoginSets.deserialize(data["old_logins"]))
         elif "logins" in data:
@@ -172,7 +173,7 @@ class LoginBonus:
     def __str__(self):
         return f"LoginBonus({self.old_logins}, {self.logins})"
 
-    def get_login(self, id: int) -> Optional[Login]:
+    def get_login(self, id: int) -> Login | None:
         if self.logins is not None:
             return self.logins.get(id)
         else:

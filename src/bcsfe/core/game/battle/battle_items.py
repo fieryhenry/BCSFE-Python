@@ -1,4 +1,6 @@
-from typing import Any, Optional
+from __future__ import annotations
+
+from typing import Any
 from bcsfe import core
 from bcsfe.cli import dialog_creator
 
@@ -9,20 +11,20 @@ class BattleItem:
         self.locked = False
 
     @staticmethod
-    def init() -> "BattleItem":
+    def init() -> BattleItem:
         return BattleItem(0)
 
     @staticmethod
-    def read_amount(stream: "core.Data") -> "BattleItem":
+    def read_amount(stream: core.Data) -> BattleItem:
         return BattleItem(stream.read_int())
 
-    def write_amount(self, stream: "core.Data"):
+    def write_amount(self, stream: core.Data):
         stream.write_int(self.amount)
 
-    def read_locked(self, stream: "core.Data"):
+    def read_locked(self, stream: core.Data):
         self.locked = stream.read_bool()
 
-    def write_locked(self, stream: "core.Data"):
+    def write_locked(self, stream: core.Data):
         stream.write_bool(self.locked)
 
     def serialize(self) -> dict[str, Any]:
@@ -32,7 +34,7 @@ class BattleItem:
         }
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "BattleItem":
+    def deserialize(data: dict[str, Any]) -> BattleItem:
         battle_item = BattleItem(data.get("amount", 0))
         battle_item.locked = data.get("locked", False)
         return battle_item
@@ -53,25 +55,25 @@ class BattleItems:
         self.lock_item = False
 
     @staticmethod
-    def init() -> "BattleItems":
+    def init() -> BattleItems:
         return BattleItems([BattleItem.init() for _ in range(6)])
 
     @staticmethod
-    def read_items(stream: "core.Data") -> "BattleItems":
+    def read_items(stream: core.Data) -> BattleItems:
         total_items = 6
         items = [BattleItem.read_amount(stream) for _ in range(total_items)]
         return BattleItems(items)
 
-    def write_items(self, stream: "core.Data"):
+    def write_items(self, stream: core.Data):
         for item in self.items:
             item.write_amount(stream)
 
-    def read_locked_items(self, stream: "core.Data"):
+    def read_locked_items(self, stream: core.Data):
         self.lock_item = stream.read_bool()
         for item in self.items:
             item.read_locked(stream)
 
-    def write_locked_items(self, stream: "core.Data"):
+    def write_locked_items(self, stream: core.Data):
         stream.write_bool(self.lock_item)
         for item in self.items:
             item.write_locked(stream)
@@ -83,7 +85,7 @@ class BattleItems:
         }
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "BattleItems":
+    def deserialize(data: dict[str, Any]) -> BattleItems:
         battle_items = BattleItems(
             [BattleItem.deserialize(item) for item in data.get("items", [])]
         )
@@ -96,7 +98,7 @@ class BattleItems:
     def __str__(self):
         return f"BattleItems({self.items})"
 
-    def get_names(self, save_file: "core.SaveFile") -> Optional[list[str]]:
+    def get_names(self, save_file: core.SaveFile) -> list[str] | None:
         names = core.core_data.get_gatya_item_names(save_file).names
         if names is None:
             return None
@@ -107,7 +109,7 @@ class BattleItems:
         names = [names[item.id] for item in items]
         return names
 
-    def edit(self, save_file: "core.SaveFile"):
+    def edit(self, save_file: core.SaveFile):
         group_name = save_file.get_localizable().get("shop_category1")
         if group_name is None:
             group_name = core.core_data.local_manager.get_key("battle_items")

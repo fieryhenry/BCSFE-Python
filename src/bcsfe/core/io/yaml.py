@@ -1,23 +1,27 @@
+from __future__ import annotations
 from typing import Any
 from bcsfe import core
 import yaml
 
 
 class YamlFile:
-    def __init__(self, path: "core.Path"):
+    def __init__(self, path: core.Path):
         self.path = path
+        self.yaml: dict[str, Any] = {}
         if self.path.exists():
             self.data = path.read()
             try:
-                self.yaml = yaml.safe_load(self.data.data)
-                if not isinstance(self.yaml, dict):
+                yml = yaml.safe_load(self.data.data)
+                if not isinstance(yml, dict):
                     self.yaml = {}
                     self.save()
+                else:
+                    self.yaml = yml
             except yaml.YAMLError:
                 self.yaml = {}
                 self.save()
         else:
-            self.yaml: dict[str, Any] = {}
+            self.yaml = {}
             self.save()
 
     def save(self) -> None:

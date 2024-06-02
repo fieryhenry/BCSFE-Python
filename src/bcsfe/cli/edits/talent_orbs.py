@@ -1,4 +1,5 @@
-from typing import Any, Optional
+from __future__ import annotations
+from typing import Any
 from bcsfe import core
 from bcsfe.cli import color, dialog_creator
 
@@ -134,7 +135,7 @@ class OrbInfo:
         return str(self)
 
     @staticmethod
-    def create_unknown(orb_id: int) -> "OrbInfo":
+    def create_unknown(orb_id: int) -> OrbInfo:
         """Create an unknown OrbInfo
 
         Args:
@@ -166,14 +167,14 @@ class OrbInfoList:
         self.orb_info_list = orb_info_list
 
     @staticmethod
-    def create(save_file: "core.SaveFile") -> Optional["OrbInfoList"]:
+    def create(save_file: core.SaveFile) -> OrbInfoList | None:
         """Create an OrbInfoList
 
         Args:
             save_file (core.SaveFile): The save file
 
         Returns:
-            Optional[OrbInfoList]: The OrbInfoList
+            OrbInfoList | None: The OrbInfoList
         """
         gdg = core.core_data.get_game_data_getter(save_file)
         json_data_file = gdg.download_from_path(OrbInfoList.equipment_data_file_name)
@@ -198,7 +199,7 @@ class OrbInfoList:
         return OrbInfoList(orbs)
 
     @staticmethod
-    def parse_json_data(json_data: "core.Data") -> Optional[list[RawOrbInfo]]:
+    def parse_json_data(json_data: core.Data) -> list[RawOrbInfo] | None:
         """Parse the json data of the equipment
 
         Args:
@@ -223,9 +224,9 @@ class OrbInfoList:
     @staticmethod
     def load_names(
         raw_orb_info: list[RawOrbInfo],
-        grade_data: "core.Data",
-        attribute_data: "core.Data",
-        effect_data: "core.Data",
+        grade_data: core.Data,
+        attribute_data: core.Data,
+        effect_data: core.Data,
     ) -> list[OrbInfo]:
         """Load the names of the equipment
 
@@ -249,14 +250,14 @@ class OrbInfoList:
             orb_info_list.append(OrbInfo(orb, grade, attribute, effect))
         return orb_info_list
 
-    def get_orb_info(self, orb_id: int) -> Optional[OrbInfo]:
+    def get_orb_info(self, orb_id: int) -> OrbInfo | None:
         """Get the OrbInfo from the id
 
         Args:
             orb_id (int): The id of the orb
 
         Returns:
-            Optional[OrbInfo]: The OrbInfo
+            OrbInfo | None: The OrbInfo
         """
         try:
             return self.orb_info_list[orb_id]
@@ -268,7 +269,7 @@ class OrbInfoList:
         grade: str,
         attribute: str,
         effect: str,
-    ) -> Optional[OrbInfo]:
+    ) -> OrbInfo | None:
         """Get the OrbInfo from the components
 
         Args:
@@ -277,7 +278,7 @@ class OrbInfoList:
             effect (str): The effect of the orb
 
         Returns:
-            Optional[OrbInfo]: The OrbInfo
+            OrbInfo | None: The OrbInfo
         """
         for orb in self.orb_info_list:
             if (
@@ -372,14 +373,14 @@ class SaveOrbs:
         self.orb_info_list = orb_info_list
 
     @staticmethod
-    def from_save_file(save_file: "core.SaveFile") -> Optional["SaveOrbs"]:
+    def from_save_file(save_file: core.SaveFile) -> SaveOrbs | None:
         """Create a SaveOrbs from the save stats
 
         Args:
             save_file (core.SaveFile): The save file
 
         Returns:
-            Optional[SaveOrbs]: The SaveOrbs
+            SaveOrbs | None: The SaveOrbs
         """
         orb_info_list = OrbInfoList.create(save_file)
         if orb_info_list is None:
@@ -544,7 +545,7 @@ class SaveOrbs:
 
         self.print()
 
-    def save(self, save_file: "core.SaveFile"):
+    def save(self, save_file: core.SaveFile):
         """Save the orbs to the save_stats
 
         Args:
@@ -554,7 +555,7 @@ class SaveOrbs:
             save_file.talent_orbs.orbs[orb_id] = core.TalentOrb(orb_id, orb.count)
 
     @staticmethod
-    def edit_talent_orbs(save_file: "core.SaveFile"):
+    def edit_talent_orbs(save_file: core.SaveFile):
         """Edit the talent orbs
 
         Args:

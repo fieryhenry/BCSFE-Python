@@ -1,10 +1,11 @@
-from typing import Any, Optional, Union
+from __future__ import annotations
+from typing import Any
 from bcsfe import core
 from bcsfe.cli import color
 
 
 class RangeInput:
-    def __init__(self, max: Optional[int] = None, min: int = 0):
+    def __init__(self, max: int | None = None, min: int = 0):
         self.max = max
         self.min = min
 
@@ -16,15 +17,15 @@ class RangeInput:
     def get_input_locale(
         self,
         dialog: str,
-        perameters: dict[str, Union[int, str]],
+        perameters: dict[str, int | str],
         escape: bool = True,
-    ) -> Optional[list[int]]:
+    ) -> list[int] | None:
         user_input = color.ColoredInput(end="").localize(
             dialog, escape=escape, **perameters
         )
         return self.parse(user_input)
 
-    def parse(self, user_input: str) -> Optional[list[int]]:
+    def parse(self, user_input: str) -> list[int] | None:
         if user_input == "":
             return []
         if user_input == core.core_data.local_manager.get_key("quit_key"):
@@ -67,9 +68,9 @@ class RangeInput:
 class IntInput:
     def __init__(
         self,
-        max: Optional[int] = None,
+        max: int | None = None,
         min: int = 0,
-        default: Optional[int] = None,
+        default: int | None = None,
         signed: bool = True,
     ):
         self.signed = signed
@@ -78,7 +79,7 @@ class IntInput:
         self.default = default
 
     @staticmethod
-    def get_max_value(max: Optional[int], signed: bool = True) -> int:
+    def get_max_value(max: int | None, signed: bool = True) -> int:
         disable_maxes = core.core_data.config.get_bool(core.ConfigKey.DISABLE_MAXES)
         if signed:
             max_int = 2**31 - 1
@@ -94,9 +95,9 @@ class IntInput:
     def get_input(
         self,
         localization_key: str,
-        perameters: dict[str, Union[int, str]],
+        perameters: dict[str, int | str],
         escape: bool = True,
-    ) -> tuple[Optional[int], str]:
+    ) -> tuple[int | None, str]:
         user_input = color.ColoredInput(end="").localize(
             localization_key, escape=escape, **perameters
         )
@@ -110,8 +111,8 @@ class IntInput:
         return self.clamp_value(user_input_i), user_input
 
     def get_input_locale_while(
-        self, dialog: str, perameters: dict[str, Union[int, str]]
-    ) -> Optional[int]:
+        self, dialog: str, perameters: dict[str, int | str]
+    ) -> int | None:
         while True:
             int_val, user_input = self.get_input(dialog, perameters)
             if int_val is not None:
@@ -120,8 +121,8 @@ class IntInput:
                 return None
 
     def get_input_locale(
-        self, localization_key: Optional[str], perameters: dict[str, Union[int, str]]
-    ) -> tuple[Optional[int], str]:
+        self, localization_key: str | None, perameters: dict[str, int | str]
+    ) -> tuple[int | None, str]:
         if localization_key is None:
             if self.default is not None:
                 perameters = {"min": self.min, "max": self.max, "default": self.default}
@@ -146,8 +147,8 @@ class ListOutput:
         self,
         strings: list[str],
         ints: list[int],
-        dialog: Optional[str] = None,
-        perameters: Optional[dict[str, Any]] = None,
+        dialog: str | None = None,
+        perameters: dict[str, Any] | None = None,
         start_index: int = 1,
     ):
         self.strings = strings
@@ -158,7 +159,7 @@ class ListOutput:
         self.perameters = perameters
         self.start_index = start_index
 
-    def get_output(self, dialog: Optional[str], strings: list[str]) -> str:
+    def get_output(self, dialog: str | None, strings: list[str]) -> str:
         end_string = ""
         if dialog is not None:
             end_string = core.core_data.local_manager.get_key(dialog, **self.perameters)
@@ -173,7 +174,7 @@ class ListOutput:
         end_string = end_string.strip("\n")
         return end_string
 
-    def display(self, dialog: Optional[str], strings: list[str]) -> None:
+    def display(self, dialog: str | None, strings: list[str]) -> None:
         output = self.get_output(dialog, strings)
         color.ColoredText(output)
 
@@ -199,7 +200,7 @@ class ChoiceInput:
         items: list[str],
         strings: list[str],
         ints: list[int],
-        perameters: dict[str, Union[int, str]],
+        perameters: dict[str, int | str],
         dialog: str,
         single_choice: bool = False,
         remove_alias: bool = False,
@@ -219,14 +220,14 @@ class ChoiceInput:
     @staticmethod
     def from_reduced(
         items: list[str],
-        ints: Optional[list[int]] = None,
-        perameters: Optional[dict[str, Union[int, str]]] = None,
-        dialog: Optional[str] = None,
+        ints: list[int] | None = None,
+        perameters: dict[str, int | str] | None = None,
+        dialog: str | None = None,
         single_choice: bool = False,
         remove_alias: bool = False,
         display_all_at_once: bool = True,
         start_index: int = 1,
-    ) -> "ChoiceInput":
+    ) -> ChoiceInput:
         if perameters is None:
             perameters = {}
         if ints is None:
@@ -245,7 +246,7 @@ class ChoiceInput:
             start_index,
         )
 
-    def get_input(self) -> tuple[Optional[int], str]:
+    def get_input(self) -> tuple[int | None, str]:
         if len(self.strings) == 0:
             return None, ""
         if len(self.strings) == 1:
@@ -257,7 +258,7 @@ class ChoiceInput:
             self.dialog, self.perameters
         )
 
-    def get_input_while(self) -> Optional[int]:
+    def get_input_while(self) -> int | None:
         if len(self.strings) == 0:
             return None
         while True:
@@ -273,9 +274,7 @@ class ChoiceInput:
     def get_min_value(self) -> int:
         return self.start_index
 
-    def get_input_locale(
-        self, localized: bool = True
-    ) -> tuple[Optional[list[int]], bool]:
+    def get_input_locale(self, localized: bool = True) -> tuple[list[int] | None, bool]:
         if len(self.strings) == 0:
             return [], False
         if len(self.strings) == 1:
@@ -330,7 +329,7 @@ class ChoiceInput:
 
         return int_vals, False
 
-    def get_input_locale_while(self) -> Optional[list[int]]:
+    def get_input_locale_while(self) -> list[int] | None:
         if len(self.strings) == 0:
             return []
         if len(self.strings) == 1:
@@ -349,17 +348,17 @@ class ChoiceInput:
 
     def multiple_choice(
         self, localized_options: bool = True
-    ) -> tuple[Optional[list[int]], bool]:
+    ) -> tuple[list[int] | None, bool]:
         color.ColoredText.localize(self.dialog, True, **self.perameters)
         user_input, all_at_once = self.get_input_locale(localized_options)
         if user_input is None:
             return None, all_at_once
         return [i - self.start_index for i in user_input], all_at_once
 
-    def single_choice(self) -> Optional[int]:
+    def single_choice(self) -> int | None:
         return self.get_input_while()
 
-    def get(self) -> tuple[Union[Optional[int], list[int]], bool]:
+    def get(self) -> tuple[int | None | list[int], bool]:
         if self.is_single_choice:
             return self.single_choice(), False
         return self.multiple_choice()
@@ -371,9 +370,9 @@ class MultiEditor:
         group_name: str,
         items: list[str],
         strings: list[str],
-        ints: Optional[list[int]],
-        max_values: Optional[Union[list[int], int]],
-        perameters: Optional[dict[str, Union[int, str]]],
+        ints: list[int] | None,
+        max_values: list[int] | int | None,
+        perameters: dict[str, int | str] | None,
         dialog: str,
         single_choice: bool = False,
         signed: bool = True,
@@ -412,8 +411,8 @@ class MultiEditor:
     def from_reduced(
         group_name: str,
         items: list[str],
-        ints: Optional[list[int]],
-        max_values: Optional[Union[list[int], int]],
+        ints: list[int] | None,
+        max_values: list[int] | int | None,
         group_name_localized: bool = False,
         dialog: str = "input",
         cumulative_max: bool = False,
@@ -520,7 +519,7 @@ class SingleEditor:
         self,
         item: str,
         value: int,
-        max_value: Optional[int] = None,
+        max_value: int | None = None,
         min_value: int = 0,
         signed: bool = True,
         localized_item: bool = False,
@@ -574,7 +573,7 @@ class StringInput:
 
     def get_input_locale_while(
         self, key: str, perameters: dict[str, Any]
-    ) -> Optional[str]:
+    ) -> str | None:
         while True:
             usr_input = self.get_input_locale(key, perameters)
             if usr_input is None:
@@ -588,9 +587,9 @@ class StringInput:
     def get_input_locale(
         self,
         key: str,
-        perameters: Optional[dict[str, Any]] = None,
+        perameters: dict[str, Any] | None = None,
         escape: bool = True,
-    ) -> Optional[str]:
+    ) -> str | None:
         if perameters is None:
             perameters = {}
         usr_input = color.ColoredInput().localize(key, escape, **perameters)
@@ -628,8 +627,8 @@ class YesNoInput:
         self.default = default
 
     def get_input_once(
-        self, key: str, perameters: Optional[dict[str, Any]] = None
-    ) -> Optional[bool]:
+        self, key: str, perameters: dict[str, Any] | None = None
+    ) -> bool | None:
         if perameters is None:
             perameters = {}
         usr_input = color.ColoredInput().localize(key, **perameters)

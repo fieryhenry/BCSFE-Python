@@ -1,6 +1,7 @@
+from __future__ import annotations
 import dataclasses
 import tempfile
-from typing import Any, Optional
+from typing import Any
 from bcsfe import core
 from bcsfe.cli import color
 
@@ -76,7 +77,7 @@ class PropertySet:
         return self.properties.get(key, key).replace("\\n", "\n").replace("\\t", "\t")
 
     @staticmethod
-    def from_config(property: str) -> "PropertySet":
+    def from_config(property: str) -> PropertySet:
         """Gets a PropertySet from the language code in the config.
 
         Args:
@@ -93,7 +94,7 @@ class PropertySet:
 class LocalManager:
     """Manages properties for a locale"""
 
-    def __init__(self, locale: Optional[str] = None):
+    def __init__(self, locale: str | None = None):
         """Initializes a new instance of the LocalManager class.
 
         Args:
@@ -339,7 +340,7 @@ class LocalManager:
         return aliases
 
     @staticmethod
-    def from_config() -> "LocalManager":
+    def from_config() -> LocalManager:
         """Gets a LocalManager from the language code in the config.
 
         Returns:
@@ -375,7 +376,7 @@ class LocalManager:
         return locales
 
     @staticmethod
-    def get_locales_folder() -> "core.Path":
+    def get_locales_folder() -> core.Path:
         """Gets the locales folder.
 
         Returns:
@@ -384,7 +385,7 @@ class LocalManager:
         return core.Path("locales", True)
 
     @staticmethod
-    def get_external_locales_folder() -> "core.Path":
+    def get_external_locales_folder() -> core.Path:
         """Gets the external locales folder.
 
         Returns:
@@ -393,7 +394,7 @@ class LocalManager:
         return core.Path.get_documents_folder().add("external_locales")
 
     @staticmethod
-    def get_locale_folder(locale: str) -> "core.Path":
+    def get_locale_folder(locale: str) -> core.Path:
         """Gets the folder for a locale.
 
         Args:
@@ -434,13 +435,13 @@ class ExternalLocale:
     description: str
     author: str
     version: str
-    git_repo: Optional[str] = None
+    git_repo: str | None = None
 
     def to_json(self) -> dict[str, Any]:
         return dataclasses.asdict(self)
 
     @staticmethod
-    def from_json(json_data: dict[str, Any]) -> Optional["ExternalLocale"]:
+    def from_json(json_data: dict[str, Any]) -> ExternalLocale | None:
         short_name = json_data.get("short_name")
         name = json_data.get("name")
         description = json_data.get("description")
@@ -465,7 +466,7 @@ class ExternalLocale:
         )
 
     @staticmethod
-    def from_git_repo(git_repo: str) -> Optional["ExternalLocale"]:
+    def from_git_repo(git_repo: str) -> ExternalLocale | None:
         repo = core.GitHandler().get_repo(git_repo)
         if repo is None:
             return None
@@ -482,8 +483,8 @@ class ExternalLocale:
         repo = core.GitHandler().get_repo(self.git_repo)
         if repo is None:
             return False
-        with tempfile.TemporaryDirectory() as temp_dir:
-            temp_dir = core.Path(temp_dir)
+        with tempfile.TemporaryDirectory() as tmp:
+            temp_dir = core.Path(tmp)
             success = repo.clone_to_temp(temp_dir)
             if not success:
                 return False
@@ -553,7 +554,7 @@ class ExternalLocaleManager:
         folder.add("locale.json").write(core.JsonFile.from_object(json_data).to_data())
 
     @staticmethod
-    def parse_external_locale(path: "core.Path") -> Optional[ExternalLocale]:
+    def parse_external_locale(path: core.Path) -> ExternalLocale | None:
         """Parses an external locale.
 
         Args:
@@ -616,7 +617,7 @@ class ExternalLocaleManager:
             ExternalLocaleManager.update_external_locale(locale)
 
     @staticmethod
-    def get_external_locale_config() -> Optional[ExternalLocale]:
+    def get_external_locale_config() -> ExternalLocale | None:
         """Gets the external locale from the config.
 
         Returns:
@@ -631,7 +632,7 @@ class ExternalLocaleManager:
         )
 
     @staticmethod
-    def get_external_locale(locale: str) -> Optional[ExternalLocale]:
+    def get_external_locale(locale: str) -> ExternalLocale | None:
         """Gets the external locale from the code.
 
         Returns:

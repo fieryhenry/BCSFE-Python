@@ -1,4 +1,4 @@
-from typing import Optional
+from __future__ import annotations
 from bcsfe import core
 
 
@@ -9,9 +9,9 @@ class Fruit:
         seed: bool,
         group: int,
         sort: int,
-        require: Optional[int] = None,
-        text: Optional[str] = None,
-        grow_up: Optional[list[int]] = None,
+        require: int | None = None,
+        text: str | None = None,
+        grow_up: list[int] | None = None,
     ):
         self.id = id
         self.seed = seed
@@ -23,12 +23,12 @@ class Fruit:
 
 
 class Matatabi:
-    def __init__(self, save_file: "core.SaveFile"):
+    def __init__(self, save_file: core.SaveFile):
         self.save_file = save_file
         self.matatabi = self.__get_matatabi()
         self.gatya_item_names = core.core_data.get_gatya_item_names(self.save_file)
 
-    def __get_matatabi(self) -> Optional[list[Fruit]]:
+    def __get_matatabi(self) -> list[Fruit] | None:
         gdg = core.core_data.get_game_data_getter(self.save_file)
         data = gdg.download("DataLocal", "Matatabi.tsv")
         if data is None:
@@ -56,7 +56,7 @@ class Matatabi:
 
         return matatabi
 
-    def get_names(self) -> Optional[list[Optional[str]]]:
+    def get_names(self) -> list[str | None] | None:
         if self.matatabi is None:
             return None
 

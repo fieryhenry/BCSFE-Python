@@ -1,3 +1,4 @@
+from __future__ import annotations
 from bcsfe import core
 
 
@@ -6,22 +7,22 @@ class Stage:
         self.clear_amount = clear_amount
 
     @staticmethod
-    def init() -> "Stage":
+    def init() -> Stage:
         return Stage(0)
 
     @staticmethod
-    def read(stream: "core.Data") -> "Stage":
+    def read(stream: core.Data) -> Stage:
         clear_amount = stream.read_int()
         return Stage(clear_amount)
 
-    def write(self, stream: "core.Data"):
+    def write(self, stream: core.Data):
         stream.write_int(self.clear_amount)
 
     def serialize(self) -> int:
         return self.clear_amount
 
     @staticmethod
-    def deserialize(data: int) -> "Stage":
+    def deserialize(data: int) -> Stage:
         return Stage(data)
 
     def __repr__(self) -> str:
@@ -36,18 +37,18 @@ class Chapter:
         self.stages = stages
 
     @staticmethod
-    def init() -> "Chapter":
+    def init() -> Chapter:
         return Chapter([Stage.init() for _ in range(12)])
 
     @staticmethod
-    def read(stream: "core.Data") -> "Chapter":
+    def read(stream: core.Data) -> Chapter:
         total = 12
         stages: list[Stage] = []
         for _ in range(total):
             stages.append(Stage.read(stream))
         return Chapter(stages)
 
-    def write(self, stream: "core.Data"):
+    def write(self, stream: core.Data):
         for stage in self.stages:
             stage.write(stream)
 
@@ -55,7 +56,7 @@ class Chapter:
         return [stage.serialize() for stage in self.stages]
 
     @staticmethod
-    def deserialize(data: list[int]) -> "Chapter":
+    def deserialize(data: list[int]) -> Chapter:
         return Chapter([Stage.deserialize(stage) for stage in data])
 
     def __repr__(self) -> str:
@@ -70,11 +71,11 @@ class ExChapters:
         self.chapters = chapters
 
     @staticmethod
-    def init() -> "ExChapters":
+    def init() -> ExChapters:
         return ExChapters([])
 
     @staticmethod
-    def read(stream: "core.Data") -> "ExChapters":
+    def read(stream: core.Data) -> ExChapters:
         total = stream.read_int()
         chapters: list[Chapter] = []
         for _ in range(total):
@@ -82,7 +83,7 @@ class ExChapters:
 
         return ExChapters(chapters)
 
-    def write(self, stream: "core.Data"):
+    def write(self, stream: core.Data):
         stream.write_int(len(self.chapters))
         for chapter in self.chapters:
             chapter.write(stream)
@@ -91,7 +92,7 @@ class ExChapters:
         return [chapter.serialize() for chapter in self.chapters]
 
     @staticmethod
-    def deserialize(data: list[list[int]]) -> "ExChapters":
+    def deserialize(data: list[list[int]]) -> ExChapters:
         return ExChapters([Chapter.deserialize(chapter) for chapter in data])
 
     def __repr__(self) -> str:

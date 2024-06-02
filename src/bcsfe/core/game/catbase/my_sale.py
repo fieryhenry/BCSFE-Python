@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import Any
 from bcsfe import core
 
@@ -8,11 +9,11 @@ class MySale:
         self.dict_2 = dict_2
 
     @staticmethod
-    def init() -> "MySale":
+    def init() -> MySale:
         return MySale({}, {})
 
     @staticmethod
-    def read_bonus_hash(stream: "core.Data"):
+    def read_bonus_hash(stream: core.Data):
         variable_length = stream.read_variable_length_int()
         dict_1 = {}
         for _ in range(variable_length):
@@ -29,7 +30,7 @@ class MySale:
 
         return MySale(dict_1, dict_2)
 
-    def write_bonus_hash(self, stream: "core.Data"):
+    def write_bonus_hash(self, stream: core.Data):
         stream.write_variable_length_int(len(self.dict_1))
         for key, value in self.dict_1.items():
             stream.write_variable_length_int(key)
@@ -47,7 +48,7 @@ class MySale:
         }
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "MySale":
+    def deserialize(data: dict[str, Any]) -> MySale:
         return MySale(data.get("dict_1", {}), data.get("dict_2", {}))
 
     def __repr__(self) -> str:

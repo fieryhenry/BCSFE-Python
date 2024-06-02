@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 """ManagedItem class for bcsfe."""
 
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 import uuid
 import time
 from bcsfe import core
@@ -45,7 +47,7 @@ class ManagedItem:
         self.detail_created_at = detail_created_at
 
     @staticmethod
-    def from_change(change: int, managed_item_type: ManagedItemType) -> "ManagedItem":
+    def from_change(change: int, managed_item_type: ManagedItemType) -> ManagedItem:
         """Create a managed item from a change."""
         if change > 0:
             detail_type = DetailType.GET
@@ -72,7 +74,7 @@ class ManagedItem:
         return f"{self.amount}_{self.detail_created_at}_{self.managed_item_type.value}_{self.detail_type.value}"
 
     @staticmethod
-    def from_short_form(short_form: str) -> "ManagedItem":
+    def from_short_form(short_form: str) -> ManagedItem:
         values = short_form.split("_")
         try:
             amount = int(values[0])
@@ -94,13 +96,12 @@ class ManagedItem:
         except IndexError:
             detail_type = DetailType.GET.value
 
-        detail_type = DetailType(detail_type)
-
-        managed_item_type = ManagedItemType(managed_item_type)
-        managed_item = ManagedItem(
-            amount, detail_type, managed_item_type, detail_created_at=detail_created_at
+        return ManagedItem(
+            amount,
+            DetailType(detail_type),
+            ManagedItemType(managed_item_type),
+            detail_created_at=detail_created_at,
         )
-        return managed_item
 
     def __str__(self) -> str:
         return (
@@ -116,7 +117,7 @@ class ManagedItem:
 class BackupMetaData:
     def __init__(
         self,
-        save_file: "core.SaveFile",
+        save_file: core.SaveFile,
     ):
         self.save_file = save_file
         self.identifier = "managed_items"
@@ -148,7 +149,7 @@ class BackupMetaData:
         self.save_file.remove_strings(self.identifier)
 
     def create(
-        self, save_key: Optional[str] = None, add_managed_items: bool = True
+        self, save_key: str | None = None, add_managed_items: bool = True
     ) -> str:
         """Create the backup metadata."""
 
@@ -159,9 +160,9 @@ class BackupMetaData:
                     continue
                 managed_items.append(managed_item.to_dict())
 
-        managed_items_str = core.JsonFile.from_object(managed_items)
+        managed_items_json = core.JsonFile.from_object(managed_items)
         managed_items_str = (
-            managed_items_str.to_data(indent=None).to_str().replace(" ", "")
+            managed_items_json.to_data(indent=None).to_str().replace(" ", "")
         )
 
         backup_metadata: dict[str, Any] = {

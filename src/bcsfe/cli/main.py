@@ -1,8 +1,10 @@
+from __future__ import annotations
+
 """Main class for the CLI."""
 
 import sys
 import traceback
-from typing import Any, NoReturn, Optional
+from typing import Any, NoReturn
 from bcsfe.cli import (
     file_dialog,
     color,
@@ -136,7 +138,7 @@ class Main:
         self.fh.select_features_run()
 
     @staticmethod
-    def save_save_dialog(save_file: "core.SaveFile") -> Optional["core.Path"]:
+    def save_save_dialog(save_file: core.SaveFile) -> core.Path | None:
         """Save save file dialog.
 
         Args:
@@ -158,7 +160,7 @@ class Main:
         return path
 
     @staticmethod
-    def save_json_dialog(json_data: dict[str, Any]) -> Optional["core.Path"]:
+    def save_json_dialog(json_data: dict[str, Any]) -> core.Path | None:
         """Save json file dialog.
 
         Args:
@@ -180,7 +182,7 @@ class Main:
         return path
 
     @staticmethod
-    def load_save_file() -> Optional["core.Path"]:
+    def load_save_file() -> core.Path | None:
         """Load save file from file dialog.
 
         Returns:
@@ -198,7 +200,7 @@ class Main:
         return path
 
     @staticmethod
-    def load_save_data_json() -> Optional[tuple["core.Path", "core.CountryCode"]]:
+    def load_save_data_json() -> tuple[core.Path, core.CountryCode] | None:
         """Load save data from json file.
 
         Returns:
@@ -236,7 +238,7 @@ class Main:
 
     @staticmethod
     def exit_editor(
-        save_file: Optional["core.SaveFile"] = None, check_temp: bool = True
+        save_file: core.SaveFile | None = None, check_temp: bool = True
     ) -> NoReturn:
         """Exit the editor."""
         save_file_temp = None

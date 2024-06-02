@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import Any
 from bcsfe import core
 
@@ -68,7 +69,7 @@ class GameVersion:
         return f"game_version({self.game_version}) {self.to_string()}"
 
     @staticmethod
-    def read(data: "core.Data") -> "GameVersion":
+    def read(data: core.Data) -> GameVersion:
         """Reads a 4 byte int from a Data object.
 
         Args:
@@ -79,7 +80,7 @@ class GameVersion:
         """
         return GameVersion(data.read_int())
 
-    def write(self, data: "core.Data"):
+    def write(self, data: core.Data):
         """Writes the 4 byte game version to a Data object.
 
         Args:
@@ -96,7 +97,7 @@ class GameVersion:
         return {"game_version": self.game_version}
 
     @staticmethod
-    def deserialize(game_version: dict[str, Any]) -> "GameVersion":
+    def deserialize(game_version: dict[str, Any]) -> GameVersion:
         """Deserializes a game version from a dictionary.
 
         Args:
@@ -108,7 +109,7 @@ class GameVersion:
         return GameVersion(game_version["game_version"])
 
     @staticmethod
-    def from_string(game_version: str) -> "GameVersion":
+    def from_string(game_version: str) -> GameVersion:
         """Converts a string to a GameVersion object.
 
         Args:
@@ -205,7 +206,7 @@ class GameVersion:
         """
         return not self.__lt__(other)
 
-    def __add__(self, other: Any) -> "GameVersion":
+    def __add__(self, other: Any) -> GameVersion:
         """Adds the game version to another object.
 
         Args:
@@ -225,7 +226,7 @@ class GameVersion:
         else:
             return NotImplemented
 
-    def __sub__(self, other: Any) -> "GameVersion":
+    def __sub__(self, other: Any) -> GameVersion:
         """Subtracts the game version from another object.
 
         Args:

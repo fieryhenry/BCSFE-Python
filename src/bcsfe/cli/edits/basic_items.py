@@ -1,18 +1,18 @@
+from __future__ import annotations
 import random
-from typing import Optional
 from bcsfe import core
 from bcsfe.cli import dialog_creator, color, edits
 
 
 class BasicItems:
     @staticmethod
-    def get_name(name: Optional[str], key: str) -> str:
+    def get_name(name: str | None, key: str) -> str:
         if name is None:
             return core.core_data.local_manager.get_key(key)
         return name.strip()
 
     @staticmethod
-    def edit_catfood(save_file: "core.SaveFile"):
+    def edit_catfood(save_file: core.SaveFile):
         should_exit = not dialog_creator.YesNoInput().get_input_once("catfood_warning")
         if should_exit:
             return
@@ -30,7 +30,7 @@ class BasicItems:
         )
 
     @staticmethod
-    def edit_xp(save_file: "core.SaveFile"):
+    def edit_xp(save_file: core.SaveFile):
         name = core.core_data.get_gatya_item_names(save_file).get_name(6)
         save_file.xp = dialog_creator.SingleEditor(
             BasicItems.get_name(name, "xp"),
@@ -39,7 +39,7 @@ class BasicItems:
         ).edit()
 
     @staticmethod
-    def edit_normal_tickets(save_file: "core.SaveFile"):
+    def edit_normal_tickets(save_file: core.SaveFile):
         name = core.core_data.get_gatya_item_names(save_file).get_name(20)
         save_file.normal_tickets = dialog_creator.SingleEditor(
             BasicItems.get_name(name, "normal_tickets"),
@@ -76,7 +76,7 @@ class BasicItems:
         return option
 
     @staticmethod
-    def edit_rare_tickets(save_file: "core.SaveFile"):
+    def edit_rare_tickets(save_file: core.SaveFile):
         color.ColoredText.localize("rare_ticket_warning")
         name = core.core_data.get_gatya_item_names(save_file).get_name(21)
         option = BasicItems.get_bannable_feature_options(
@@ -99,7 +99,7 @@ class BasicItems:
         )
 
     @staticmethod
-    def edit_platinum_tickets(save_file: "core.SaveFile"):
+    def edit_platinum_tickets(save_file: core.SaveFile):
         color.ColoredText.localize("platinum_ticket_warning")
         name = core.core_data.get_gatya_item_names(save_file).get_name(29)
         option = BasicItems.get_bannable_feature_options(
@@ -122,7 +122,7 @@ class BasicItems:
         )
 
     @staticmethod
-    def edit_legend_tickets(save_file: "core.SaveFile"):
+    def edit_legend_tickets(save_file: core.SaveFile):
         should_exit = not dialog_creator.YesNoInput().get_input_once(
             "legend_ticket_warning"
         )
@@ -141,7 +141,7 @@ class BasicItems:
         )
 
     @staticmethod
-    def edit_platinum_shards(save_file: "core.SaveFile"):
+    def edit_platinum_shards(save_file: core.SaveFile):
         name = core.core_data.get_gatya_item_names(save_file).get_name(157)
         platinum_ticket_amount = save_file.platinum_tickets
         max_value = (
@@ -155,7 +155,7 @@ class BasicItems:
         ).edit()
 
     @staticmethod
-    def edit_np(save_file: "core.SaveFile"):
+    def edit_np(save_file: core.SaveFile):
         name = core.core_data.get_gatya_item_names(save_file).get_name(7)
         save_file.np = dialog_creator.SingleEditor(
             BasicItems.get_name(name, "np"),
@@ -164,7 +164,7 @@ class BasicItems:
         ).edit()
 
     @staticmethod
-    def edit_leadership(save_file: "core.SaveFile"):
+    def edit_leadership(save_file: core.SaveFile):
         name = core.core_data.get_gatya_item_names(save_file).get_name(105)
         save_file.leadership = dialog_creator.SingleEditor(
             BasicItems.get_name(name, "leadership"),
@@ -173,11 +173,11 @@ class BasicItems:
         ).edit()
 
     @staticmethod
-    def edit_battle_items(save_file: "core.SaveFile"):
+    def edit_battle_items(save_file: core.SaveFile):
         save_file.battle_items.edit(save_file)
 
     @staticmethod
-    def edit_catamins(save_file: "core.SaveFile"):
+    def edit_catamins(save_file: core.SaveFile):
         names_o = core.core_data.get_gatya_item_names(save_file)
         items = core.core_data.get_gatya_item_buy(save_file).get_by_category(6)
         if items is None:
@@ -200,7 +200,7 @@ class BasicItems:
         save_file.catamins = values
 
     @staticmethod
-    def edit_catseyes(save_file: "core.SaveFile"):
+    def edit_catseyes(save_file: core.SaveFile):
         names_o = core.core_data.get_gatya_item_names(save_file)
         items = core.core_data.get_gatya_item_buy(save_file).get_by_category(5)
         if items is None:
@@ -224,7 +224,7 @@ class BasicItems:
         save_file.catseyes = values
 
     @staticmethod
-    def edit_catfruit(save_file: "core.SaveFile"):
+    def edit_catfruit(save_file: core.SaveFile):
         names = core.Matatabi(save_file).get_names()
         if names is None:
             return
@@ -255,13 +255,13 @@ class BasicItems:
         save_file.catfruit = values
 
     @staticmethod
-    def set_restart_pack(save_file: "core.SaveFile"):
+    def set_restart_pack(save_file: core.SaveFile):
         save_file.restart_pack = 1
         name = core.core_data.get_gatya_item_names(save_file).get_name(123)
         color.ColoredText.localize("value_gave", name=name)
 
     @staticmethod
-    def edit_inquiry_code(save_file: "core.SaveFile"):
+    def edit_inquiry_code(save_file: core.SaveFile):
         should_exit = not dialog_creator.YesNoInput().get_input_once(
             "inquiry_code_warning"
         )
@@ -273,7 +273,7 @@ class BasicItems:
         ).edit()
 
     @staticmethod
-    def edit_password_refresh_token(save_file: "core.SaveFile"):
+    def edit_password_refresh_token(save_file: core.SaveFile):
         should_exit = not dialog_creator.YesNoInput().get_input_once(
             "password_refresh_token_warning"
         )
@@ -286,35 +286,35 @@ class BasicItems:
         ).edit()
 
     @staticmethod
-    def edit_scheme_items(save_file: "core.SaveFile"):
+    def edit_scheme_items(save_file: core.SaveFile):
         save_file.scheme_items.edit(save_file)
 
     @staticmethod
-    def edit_engineers(save_file: "core.SaveFile"):
+    def edit_engineers(save_file: core.SaveFile):
         save_file.ototo.edit_engineers(save_file)
 
     @staticmethod
-    def edit_base_materials(save_file: "core.SaveFile"):
+    def edit_base_materials(save_file: core.SaveFile):
         save_file.ototo.base_materials.edit_base_materials(save_file)
 
     @staticmethod
-    def edit_rare_gatya_seed(save_file: "core.SaveFile"):
+    def edit_rare_gatya_seed(save_file: core.SaveFile):
         save_file.gatya.edit_rare_gatya_seed()
 
     @staticmethod
-    def edit_normal_gatya_seed(save_file: "core.SaveFile"):
+    def edit_normal_gatya_seed(save_file: core.SaveFile):
         save_file.gatya.edit_normal_gatya_seed()
 
     @staticmethod
-    def edit_event_gatya_seed(save_file: "core.SaveFile"):
+    def edit_event_gatya_seed(save_file: core.SaveFile):
         save_file.gatya.edit_event_gatya_seed()
 
     @staticmethod
-    def edit_unlocked_slots(save_file: "core.SaveFile"):
+    def edit_unlocked_slots(save_file: core.SaveFile):
         save_file.lineups.edit_unlocked_slots()
 
     @staticmethod
-    def edit_labyrinth_medals(save_file: "core.SaveFile"):
+    def edit_labyrinth_medals(save_file: core.SaveFile):
         names_o = core.core_data.get_gatya_item_names(save_file)
         items = core.core_data.get_gatya_item_buy(save_file).get_by_category(11)
         if items is None:
@@ -338,16 +338,16 @@ class BasicItems:
         save_file.labyrinth_medals = values
 
     @staticmethod
-    def edit_special_skills(save_file: "core.SaveFile"):
+    def edit_special_skills(save_file: core.SaveFile):
         save_file.special_skills.edit(save_file)
 
     @staticmethod
-    def unlock_equip_menu(save_file: "core.SaveFile"):
+    def unlock_equip_menu(save_file: core.SaveFile):
         save_file.unlock_equip_menu()
         color.ColoredText.localize("equip_menu_unlocked")
 
     @staticmethod
-    def allow_filibuster_stage_reclearing(save_file: "core.SaveFile"):
+    def allow_filibuster_stage_reclearing(save_file: core.SaveFile):
         save_file.filibuster_stage_enabled = True
         save_file.filibuster_stage_id = random.randint(0, 47)
         color.ColoredText.localize("filibuster_stage_reclearing_allowed")

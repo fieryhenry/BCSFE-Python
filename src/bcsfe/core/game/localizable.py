@@ -1,13 +1,13 @@
-from typing import Optional
+from __future__ import annotations
 from bcsfe import core
 
 
 class Localizable:
-    def __init__(self, save_file: "core.SaveFile"):
+    def __init__(self, save_file: core.SaveFile):
         self.save_file = save_file
         self.localizable = self.get_localizable()
 
-    def get_localizable(self) -> Optional[dict[str, str]]:
+    def get_localizable(self) -> dict[str, str] | None:
         gdg = core.core_data.get_game_data_getter(self.save_file)
         data = gdg.download("resLocal", "localizable.tsv")
         if data is None:
@@ -22,10 +22,10 @@ class Localizable:
 
         return keys
 
-    def get(self, key: str) -> Optional[str]:
+    def get(self, key: str) -> str | None:
         if self.localizable is None:
             return None
         return self.localizable.get(key)
 
-    def get_lang(self) -> Optional[str]:
+    def get_lang(self) -> str | None:
         return self.get("lang")

@@ -1,7 +1,7 @@
+from __future__ import annotations
 from bcsfe import core
 from bcsfe.core import io
 from bcsfe.cli import main, color, dialog_creator, server_cli
-from typing import Optional
 
 
 class SaveManagement:
@@ -9,7 +9,7 @@ class SaveManagement:
         pass
 
     @staticmethod
-    def save_save(save_file: "core.SaveFile", check_strict: bool = True):
+    def save_save(save_file: core.SaveFile, check_strict: bool = True):
         """Save the save file without a dialog.
 
         Args:
@@ -28,7 +28,7 @@ class SaveManagement:
         color.ColoredText.localize("save_success", path=save_file.save_path)
 
     @staticmethod
-    def save_save_dialog(save_file: "core.SaveFile"):
+    def save_save_dialog(save_file: core.SaveFile):
         """Save the save file with a dialog.
 
         Args:
@@ -44,7 +44,7 @@ class SaveManagement:
         color.ColoredText.localize("save_success", path=save_file.save_path)
 
     @staticmethod
-    def save_save_documents(save_file: "core.SaveFile"):
+    def save_save_documents(save_file: core.SaveFile):
         """Save the save file to the documents folder.
 
         Args:
@@ -56,7 +56,7 @@ class SaveManagement:
         color.ColoredText.localize("save_success", path=save_file.save_path)
 
     @staticmethod
-    def save_upload(save_file: "core.SaveFile"):
+    def save_upload(save_file: core.SaveFile):
         """Save the save file and upload it to the server.
 
         Args:
@@ -80,7 +80,7 @@ class SaveManagement:
             SaveManagement.save_save(save_file, check_strict=False)
 
     @staticmethod
-    def unban_account(save_file: "core.SaveFile"):
+    def unban_account(save_file: core.SaveFile):
         """Unban the account.
 
         Args:
@@ -94,7 +94,7 @@ class SaveManagement:
             color.ColoredText.localize("unban_fail")
 
     @staticmethod
-    def create_new_account(save_file: "core.SaveFile"):
+    def create_new_account(save_file: core.SaveFile):
         """Create a new account.
 
         Args:
@@ -108,7 +108,7 @@ class SaveManagement:
             color.ColoredText.localize("create_new_account_fail")
 
     @staticmethod
-    def adb_push(save_file: "core.SaveFile") -> Optional["core.AdbHandler"]:
+    def adb_push(save_file: core.SaveFile) -> core.AdbHandler | None:
         """Push the save file to the device.
 
         Args:
@@ -146,7 +146,7 @@ class SaveManagement:
         return adb_handler
 
     @staticmethod
-    def adb_push_rerun(save_file: "core.SaveFile"):
+    def adb_push_rerun(save_file: core.SaveFile):
         """Push the save file to the device and rerun the game.
 
         Args:
@@ -164,7 +164,7 @@ class SaveManagement:
             color.ColoredText.localize("adb_rerun_fail", error=result.result)
 
     @staticmethod
-    def export_save(save_file: "core.SaveFile"):
+    def export_save(save_file: core.SaveFile):
         """Export the save file to a json file.
 
         Args:
@@ -179,7 +179,7 @@ class SaveManagement:
         color.ColoredText.localize("export_success", path=path)
 
     @staticmethod
-    def init_save(save_file: "core.SaveFile"):
+    def init_save(save_file: core.SaveFile):
         """Initialize the save file to a new save file.
 
         Args:
@@ -192,7 +192,7 @@ class SaveManagement:
         color.ColoredText.localize("init_save_success")
 
     @staticmethod
-    def upload_items(save_file: "core.SaveFile", check_strict: bool = True):
+    def upload_items(save_file: core.SaveFile, check_strict: bool = True):
         """Upload the items to the server.
 
         Args:
@@ -213,7 +213,7 @@ class SaveManagement:
             color.ColoredText.localize("upload_items_fail")
 
     @staticmethod
-    def upload_items_checker(save_file: "core.SaveFile", check_strict: bool = True):
+    def upload_items_checker(save_file: core.SaveFile, check_strict: bool = True):
         managed_items = core.BackupMetaData(save_file).get_managed_items()
         if not managed_items:
             return
@@ -225,7 +225,7 @@ class SaveManagement:
         SaveManagement.upload_items(save_file, check_strict)
 
     @staticmethod
-    def select_save(starting_options: bool = False) -> Optional["core.SaveFile"]:
+    def select_save(starting_options: bool = False) -> core.SaveFile | None:
         """Select a new save file.
 
         Args:
@@ -233,7 +233,7 @@ class SaveManagement:
 
 
         Returns:
-            Optional[core.SaveFile]: The save file.
+            core.SaveFile | None: The save file.
         """
         options = [
             "download_save",
@@ -261,7 +261,7 @@ class SaveManagement:
         choice = choice[0] - 1
 
         save_path = None
-        cc: Optional[core.CountryCode] = None
+        cc: core.CountryCode | None = None
         used_storage = False
         package_name = None
 
@@ -380,7 +380,7 @@ class SaveManagement:
         return save_file
 
     @staticmethod
-    def select_package_name(package_names: list[str]) -> Optional[str]:
+    def select_package_name(package_names: list[str]) -> str | None:
         choice = dialog_creator.ChoiceInput.from_reduced(
             package_names, dialog="select_package_name", single_choice=True
         ).single_choice()
@@ -389,7 +389,7 @@ class SaveManagement:
         return package_names[choice - 1]
 
     @staticmethod
-    def load_save(save_file: "core.SaveFile"):
+    def load_save(save_file: core.SaveFile):
         """Load a new save file.
 
         Args:
@@ -403,7 +403,7 @@ class SaveManagement:
         color.ColoredText.localize("load_save_success")
 
     @staticmethod
-    def convert_save_cc(save_file: "core.SaveFile"):
+    def convert_save_cc(save_file: core.SaveFile):
         color.ColoredText.localize("cc_warning", current=save_file.cc)
         ccs_to_select = core.CountryCode.get_all()
         cc = core.CountryCode.select_from_ccs(ccs_to_select)
@@ -414,7 +414,7 @@ class SaveManagement:
         color.ColoredText.localize("country_code_set", cc=cc)
 
     @staticmethod
-    def convert_save_gv(save_file: "core.SaveFile"):
+    def convert_save_gv(save_file: core.SaveFile):
         color.ColoredText.localize(
             "gv_warning", current=save_file.game_version.to_string()
         )

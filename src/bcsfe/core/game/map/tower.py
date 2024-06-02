@@ -1,32 +1,33 @@
+from __future__ import annotations
 from typing import Any
 from bcsfe import core
 
 
 class TowerChapters:
-    def __init__(self, chapters: "core.Chapters"):
+    def __init__(self, chapters: core.Chapters):
         self.chapters = chapters
         self.item_obtain_states: list[list[bool]] = []
 
     @staticmethod
-    def init() -> "TowerChapters":
+    def init() -> TowerChapters:
         return TowerChapters(core.Chapters.init())
 
     @staticmethod
-    def read(data: "core.Data") -> "TowerChapters":
+    def read(data: core.Data) -> TowerChapters:
         ch = core.Chapters.read(data)
         return TowerChapters(ch)
 
-    def write(self, data: "core.Data"):
+    def write(self, data: core.Data):
         self.chapters.write(data)
 
-    def read_item_obtain_states(self, data: "core.Data"):
+    def read_item_obtain_states(self, data: core.Data):
         total_stars = data.read_int()
         total_stages = data.read_int()
         self.item_obtain_states: list[list[bool]] = []
         for _ in range(total_stars):
             self.item_obtain_states.append(data.read_bool_list(total_stages))
 
-    def write_item_obtain_states(self, data: "core.Data"):
+    def write_item_obtain_states(self, data: core.Data):
         data.write_int(len(self.item_obtain_states))
         try:
             data.write_int(len(self.item_obtain_states[0]))
@@ -42,7 +43,7 @@ class TowerChapters:
         }
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "TowerChapters":
+    def deserialize(data: dict[str, Any]) -> TowerChapters:
         tower = TowerChapters(
             core.Chapters.deserialize(data.get("chapters", {})),
         )
@@ -62,6 +63,6 @@ class TowerChapters:
         return len(self.chapters.chapters[chapter_id].chapters[star].stages)
 
     @staticmethod
-    def edit_towers(save_file: "core.SaveFile"):
+    def edit_towers(save_file: core.SaveFile):
         towers = save_file.tower
         towers.chapters.edit_chapters(save_file, "V")

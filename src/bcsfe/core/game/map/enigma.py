@@ -1,3 +1,4 @@
+from __future__ import annotations
 import time
 from typing import Any
 from bcsfe import core
@@ -14,18 +15,18 @@ class Stage:
         self.start_time = start_time
 
     @staticmethod
-    def init() -> "Stage":
+    def init() -> Stage:
         return Stage(0, 0, 0, 0.0)
 
     @staticmethod
-    def read(data: "core.Data") -> "Stage":
+    def read(data: core.Data) -> Stage:
         level = data.read_int()
         stage_id = data.read_int()
         decoding_satus = data.read_byte()
         start_time = data.read_double()
         return Stage(level, stage_id, decoding_satus, start_time)
 
-    def write(self, data: "core.Data"):
+    def write(self, data: core.Data):
         data.write_int(self.level)
         data.write_int(self.stage_id)
         data.write_byte(self.decoding_satus)
@@ -40,7 +41,7 @@ class Stage:
         }
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "Stage":
+    def deserialize(data: dict[str, Any]) -> Stage:
         return Stage(
             data.get("level", 0),
             data.get("stage_id", 0),
@@ -73,11 +74,11 @@ class Enigma:
         self.stages = stages
 
     @staticmethod
-    def init() -> "Enigma":
+    def init() -> Enigma:
         return Enigma(0, 0, 0, 0, False, [])
 
     @staticmethod
-    def read(data: "core.Data") -> "Enigma":
+    def read(data: core.Data) -> Enigma:
         energy_since_1 = data.read_int()
         energy_since_2 = data.read_int()
         enigma_level = data.read_byte()
@@ -93,7 +94,7 @@ class Enigma:
             stages,
         )
 
-    def write(self, data: "core.Data"):
+    def write(self, data: core.Data):
         data.write_int(self.energy_since_1)
         data.write_int(self.energy_since_2)
         data.write_byte(self.enigma_level)
@@ -114,7 +115,7 @@ class Enigma:
         }
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "Enigma":
+    def deserialize(data: dict[str, Any]) -> Enigma:
         return Enigma(
             data.get("energy_since_1", 0),
             data.get("energy_since_2", 0),
@@ -130,7 +131,7 @@ class Enigma:
     def __str__(self):
         return self.__repr__()
 
-    def edit_enigma(self, save_file: "core.SaveFile"):
+    def edit_enigma(self, save_file: core.SaveFile):
         names = core.MapNames(save_file, "H").map_names
         names_list: list[str] = []
         keys = list(names.keys())
@@ -181,5 +182,5 @@ class Enigma:
         color.ColoredText.localize("enigma_success")
 
 
-def edit_enigma(save_file: "core.SaveFile"):
+def edit_enigma(save_file: core.SaveFile):
     save_file.enigma.edit_enigma(save_file)

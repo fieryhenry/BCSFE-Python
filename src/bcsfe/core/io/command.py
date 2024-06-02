@@ -1,3 +1,4 @@
+from __future__ import annotations
 import subprocess
 import threading
 
@@ -18,11 +19,11 @@ class CommandResult:
         return self.exit_code == 0
 
     @staticmethod
-    def create_success(result: str = "") -> "CommandResult":
+    def create_success(result: str = "") -> CommandResult:
         return CommandResult(result, 0)
 
     @staticmethod
-    def create_failure(result: str = "") -> "CommandResult":
+    def create_failure(result: str = "") -> CommandResult:
         return CommandResult(result, 1)
 
 

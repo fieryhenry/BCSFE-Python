@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import Any
 from bcsfe import core
 
@@ -10,30 +11,30 @@ class OfficerPass:
         self.cat_form = 0
 
     @staticmethod
-    def init() -> "OfficerPass":
+    def init() -> OfficerPass:
         return OfficerPass(0)
 
     @staticmethod
-    def read(data: "core.Data") -> "OfficerPass":
+    def read(data: core.Data) -> OfficerPass:
         play_time = data.read_int()
         return OfficerPass(play_time)
 
-    def write(self, data: "core.Data"):
+    def write(self, data: core.Data):
         if self.play_time > 2**31 - 1:
             self.play_time = 2**31 - 1
         data.write_int(self.play_time)
 
-    def read_gold_pass(self, data: "core.Data", gv: "core.GameVersion"):
+    def read_gold_pass(self, data: core.Data, gv: core.GameVersion):
         self.gold_pass = core.NyankoClub.read(data, gv)
 
-    def write_gold_pass(self, data: "core.Data", gv: "core.GameVersion"):
+    def write_gold_pass(self, data: core.Data, gv: core.GameVersion):
         self.gold_pass.write(data, gv)
 
-    def read_cat_data(self, data: "core.Data"):
+    def read_cat_data(self, data: core.Data):
         self.cat_id = data.read_short()
         self.cat_form = data.read_short()
 
-    def write_cat_data(self, data: "core.Data"):
+    def write_cat_data(self, data: core.Data):
         data.write_short(self.cat_id)
         data.write_short(self.cat_form)
 
@@ -46,7 +47,7 @@ class OfficerPass:
         }
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "OfficerPass":
+    def deserialize(data: dict[str, Any]) -> OfficerPass:
         officer_pass = OfficerPass(
             data.get("play_time", 0),
         )

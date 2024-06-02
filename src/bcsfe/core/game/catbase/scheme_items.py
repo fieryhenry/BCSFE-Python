@@ -1,6 +1,6 @@
+from __future__ import annotations
 from bcsfe import core
 from bcsfe.cli import dialog_creator, color
-from typing import Optional
 
 
 class SchemeDataItem:
@@ -11,12 +11,12 @@ class SchemeDataItem:
         type_id: int,
         item_id: int,
         number: int,
-        type_id2: Optional[int] = None,
-        item_id2: Optional[int] = None,
-        number2: Optional[int] = None,
-        type_id3: Optional[int] = None,
-        item_id3: Optional[int] = None,
-        number3: Optional[int] = None,
+        type_id2: int | None = None,
+        item_id2: int | None = None,
+        number2: int | None = None,
+        type_id3: int | None = None,
+        item_id3: int | None = None,
+        number3: int | None = None,
     ):
         self.id = id
         self.type = type
@@ -33,7 +33,7 @@ class SchemeDataItem:
     def is_cat(self) -> bool:
         return self.type_id == 1
 
-    def get_name(self, localizable: "core.Localizable") -> Optional[str]:
+    def get_name(self, localizable: core.Localizable) -> str | None:
         key = f"scheme_popup_{self.id}"
         name = localizable.get(key)
         if name is None:
@@ -47,11 +47,11 @@ class SchemeItems:
         self.received = received
 
     @staticmethod
-    def init() -> "SchemeItems":
+    def init() -> SchemeItems:
         return SchemeItems([], [])
 
     @staticmethod
-    def read(stream: "core.Data") -> "SchemeItems":
+    def read(stream: core.Data) -> SchemeItems:
         total = stream.read_int()
         to_obtain: list[int] = []
         for _ in range(total):
@@ -64,7 +64,7 @@ class SchemeItems:
 
         return SchemeItems(to_obtain, received)
 
-    def write(self, stream: "core.Data"):
+    def write(self, stream: core.Data):
         stream.write_int(len(self.to_obtain))
         for item in self.to_obtain:
             stream.write_int(item)
@@ -77,7 +77,7 @@ class SchemeItems:
         return {"to_obtain": self.to_obtain, "received": self.received}
 
     @staticmethod
-    def deserialize(data: dict[str, list[int]]) -> "SchemeItems":
+    def deserialize(data: dict[str, list[int]]) -> SchemeItems:
         return SchemeItems(data.get("to_obtain", []), data.get("received", []))
 
     def __repr__(self) -> str:
@@ -86,7 +86,7 @@ class SchemeItems:
     def __str__(self) -> str:
         return self.__repr__()
 
-    def edit(self, save_file: "core.SaveFile"):
+    def edit(self, save_file: core.SaveFile):
         item_names = core.core_data.get_gatya_item_names(save_file)
         localizable = save_file.get_localizable()
         scheme_data = core.core_data.get_game_data_getter(save_file).download(

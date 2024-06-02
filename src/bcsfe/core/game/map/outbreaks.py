@@ -1,4 +1,5 @@
-from typing import Any, Optional
+from __future__ import annotations
+from typing import Any
 from bcsfe import core
 from bcsfe.cli import dialog_creator, color
 
@@ -8,22 +9,22 @@ class Outbreak:
         self.cleared = cleared
 
     @staticmethod
-    def init() -> "Outbreak":
+    def init() -> Outbreak:
         return Outbreak(False)
 
     @staticmethod
-    def read(stream: "core.Data") -> "Outbreak":
+    def read(stream: core.Data) -> Outbreak:
         cleared = stream.read_bool()
         return Outbreak(cleared)
 
-    def write(self, stream: "core.Data"):
+    def write(self, stream: core.Data):
         stream.write_bool(self.cleared)
 
     def serialize(self) -> bool:
         return self.cleared
 
     @staticmethod
-    def deserialize(data: bool) -> "Outbreak":
+    def deserialize(data: bool) -> Outbreak:
         return Outbreak(data)
 
     def __repr__(self) -> str:
@@ -44,11 +45,11 @@ class Chapter:
         return self.id - 1
 
     @staticmethod
-    def init(id: int) -> "Chapter":
+    def init(id: int) -> Chapter:
         return Chapter(id, {})
 
     @staticmethod
-    def read(stream: "core.Data", id: int) -> "Chapter":
+    def read(stream: core.Data, id: int) -> Chapter:
         total = stream.read_int()
         outbreaks: dict[int, Outbreak] = {}
         for _ in range(total):
@@ -58,7 +59,7 @@ class Chapter:
 
         return Chapter(id, outbreaks)
 
-    def write(self, stream: "core.Data"):
+    def write(self, stream: core.Data):
         stream.write_int(len(self.outbreaks))
         for outbreak_id, outbreak in self.outbreaks.items():
             stream.write_int(outbreak_id)
@@ -71,7 +72,7 @@ class Chapter:
         }
 
     @staticmethod
-    def deserialize(data: dict[int, Any], id: int) -> "Chapter":
+    def deserialize(data: dict[int, Any], id: int) -> Chapter:
         return Chapter(
             id,
             {
@@ -94,11 +95,11 @@ class Outbreaks:
         self.current_outbreaks: dict[int, Chapter] = {}
 
     @staticmethod
-    def init() -> "Outbreaks":
+    def init() -> Outbreaks:
         return Outbreaks({})
 
     @staticmethod
-    def read_chapters(stream: "core.Data") -> "Outbreaks":
+    def read_chapters(stream: core.Data) -> Outbreaks:
         total = stream.read_int()
         chapters: dict[int, Chapter] = {}
         for _ in range(total):
@@ -108,19 +109,19 @@ class Outbreaks:
 
         return Outbreaks(chapters)
 
-    def write_chapters(self, stream: "core.Data"):
+    def write_chapters(self, stream: core.Data):
         stream.write_int(len(self.chapters))
         for chapter_id, chapter in self.chapters.items():
             stream.write_int(chapter_id)
             chapter.write(stream)
 
-    def read_2(self, stream: "core.Data"):
+    def read_2(self, stream: core.Data):
         self.zombie_event_remaining_time = stream.read_double()
 
-    def write_2(self, stream: "core.Data"):
+    def write_2(self, stream: core.Data):
         stream.write_double(self.zombie_event_remaining_time)
 
-    def read_current_outbreaks(self, stream: "core.Data", gv: "core.GameVersion"):
+    def read_current_outbreaks(self, stream: core.Data, gv: core.GameVersion):
         if gv <= 43:
             total_chapters = stream.read_int()
             for _ in range(total_chapters):
@@ -139,7 +140,7 @@ class Outbreaks:
 
         self.current_outbreaks = current_outbreaks
 
-    def write_current_outbreaks(self, stream: "core.Data", gv: "core.GameVersion"):
+    def write_current_outbreaks(self, stream: core.Data, gv: core.GameVersion):
         if gv <= 43:
             stream.write_int(0)
         stream.write_int(len(self.current_outbreaks))
@@ -161,7 +162,7 @@ class Outbreaks:
         }
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "Outbreaks":
+    def deserialize(data: dict[str, Any]) -> Outbreaks:
         outbreaks = Outbreaks(
             {
                 chapter_id: Chapter.deserialize(chapter_data, chapter_id)
@@ -184,12 +185,12 @@ class Outbreaks:
     def __str__(self) -> str:
         return self.__repr__()
 
-    def get_chapter_from_true_id(self, true_id: int) -> Optional[Chapter]:
+    def get_chapter_from_true_id(self, true_id: int) -> Chapter | None:
         if true_id < 3:
             return self.chapters.get(true_id)
         return self.chapters.get(true_id + 1)
 
-    def get_current_chapter_from_true_id(self, true_id: int) -> Optional[Chapter]:
+    def get_current_chapter_from_true_id(self, true_id: int) -> Chapter | None:
         if true_id < 3:
             return self.current_outbreaks.get(true_id)
         return self.current_outbreaks.get(true_id + 1)
@@ -216,7 +217,7 @@ class Outbreaks:
                     stage.cleared = False
 
     @staticmethod
-    def edit_outbreaks(save_file: "core.SaveFile"):
+    def edit_outbreaks(save_file: core.SaveFile):
         outbreaks = save_file.outbreaks
         chapters = outbreaks.get_valid_chapters()
         if not chapters:

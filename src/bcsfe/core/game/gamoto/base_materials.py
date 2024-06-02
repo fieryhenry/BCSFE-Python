@@ -1,3 +1,4 @@
+from __future__ import annotations
 from bcsfe import core
 from bcsfe.cli import dialog_creator
 
@@ -7,22 +8,22 @@ class Material:
         self.amount = amount
 
     @staticmethod
-    def init() -> "Material":
+    def init() -> Material:
         return Material(0)
 
     @staticmethod
-    def read(stream: "core.Data") -> "Material":
+    def read(stream: core.Data) -> Material:
         amount = stream.read_int()
         return Material(amount)
 
-    def write(self, stream: "core.Data"):
+    def write(self, stream: core.Data):
         stream.write_int(self.amount)
 
     def serialize(self) -> int:
         return self.amount
 
     @staticmethod
-    def deserialize(data: int) -> "Material":
+    def deserialize(data: int) -> Material:
         return Material(data)
 
     def __repr__(self) -> str:
@@ -37,18 +38,18 @@ class BaseMaterials:
         self.materials = materials
 
     @staticmethod
-    def init() -> "BaseMaterials":
+    def init() -> BaseMaterials:
         return BaseMaterials([])
 
     @staticmethod
-    def read(stream: "core.Data") -> "BaseMaterials":
+    def read(stream: core.Data) -> BaseMaterials:
         total = stream.read_int()
         materials: list[Material] = []
         for _ in range(total):
             materials.append(Material.read(stream))
         return BaseMaterials(materials)
 
-    def write(self, stream: "core.Data"):
+    def write(self, stream: core.Data):
         stream.write_int(len(self.materials))
         for material in self.materials:
             material.write(stream)
@@ -57,7 +58,7 @@ class BaseMaterials:
         return [material.serialize() for material in self.materials]
 
     @staticmethod
-    def deserialize(data: list[int]) -> "BaseMaterials":
+    def deserialize(data: list[int]) -> BaseMaterials:
         return BaseMaterials([Material.deserialize(material) for material in data])
 
     def __repr__(self) -> str:
@@ -66,7 +67,7 @@ class BaseMaterials:
     def __str__(self) -> str:
         return self.__repr__()
 
-    def edit_base_materials(self, save_file: "core.SaveFile"):
+    def edit_base_materials(self, save_file: core.SaveFile):
         names = core.core_data.get_gatya_item_names(save_file).names
         items = core.core_data.get_gatya_item_buy(save_file).get_by_category(7)
         if items is None:

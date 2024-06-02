@@ -1,10 +1,10 @@
-from typing import Optional
+from __future__ import annotations
 
 from bcsfe import core
 
 
 class PowerUpHelper:
-    def __init__(self, cat: "core.Cat", save_file: "core.SaveFile"):
+    def __init__(self, cat: core.Cat, save_file: core.SaveFile):
         self.cat = cat
         self.save_file = save_file
         self.unit_limit = self.save_file.cats.read_unitlimit(
@@ -17,7 +17,7 @@ class PowerUpHelper:
         )
         self.max_upgrade_level = self.__get_max_upgrade_level_check()
 
-    def get_current_max_level(self) -> Optional[int]:
+    def get_current_max_level(self) -> int | None:
         if self.unit_buy is None:
             return None
         return min(

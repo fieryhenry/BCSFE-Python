@@ -1,4 +1,5 @@
-from typing import Any, Optional
+from __future__ import annotations
+from typing import Any
 from bcsfe import core
 
 
@@ -15,18 +16,18 @@ class SkillLevel:
         return len(self.levels)
 
     @staticmethod
-    def from_row(row: "core.Row"):
+    def from_row(row: core.Row):
         id = row[0].to_int()
         levels = row[1:].to_int_list()
         return SkillLevel(id, levels)
 
 
 class SkillLevelData:
-    def __init__(self, levels: Optional[list[SkillLevel]]):
+    def __init__(self, levels: list[SkillLevel] | None):
         self.levels = levels
 
     @staticmethod
-    def from_game_data(save_file: "core.SaveFile") -> Optional["SkillLevelData"]:
+    def from_game_data(save_file: core.SaveFile) -> SkillLevelData | None:
         gdg = core.core_data.get_game_data_getter(save_file)
         data = gdg.download("DataLocal", "SkillLevel.csv")
         if data is None:
@@ -37,7 +38,7 @@ class SkillLevelData:
             levels.append(SkillLevel.from_row(line))
         return SkillLevelData(levels)
 
-    def get_skill_level(self, id: int) -> Optional[SkillLevel]:
+    def get_skill_level(self, id: int) -> SkillLevel | None:
         if self.levels is None:
             return None
         for level in self.levels:
@@ -92,7 +93,7 @@ class CatSkill:
         self.skills = skills
 
     @staticmethod
-    def from_row(row: "core.Row"):
+    def from_row(row: core.Row):
         cat_id = row[0].to_int()
         type_id = row[1].to_int()
         skills: list[Skill] = []
@@ -122,7 +123,7 @@ class CatSkills:
         self.skills = skills
 
     @staticmethod
-    def from_game_data(save_file: "core.SaveFile") -> Optional["CatSkills"]:
+    def from_game_data(save_file: core.SaveFile) -> CatSkills | None:
         gdg = core.core_data.get_game_data_getter(save_file)
         data = gdg.download("DataLocal", "SkillAcquisition.csv")
         if data is None:
@@ -134,7 +135,7 @@ class CatSkills:
             skills[skill.cat_id] = skill
         return CatSkills(skills)
 
-    def get_cat_skill(self, cat_id: int) -> Optional[CatSkill]:
+    def get_cat_skill(self, cat_id: int) -> CatSkill | None:
         return self.skills.get(cat_id)
 
 
@@ -143,7 +144,7 @@ class SkillNames:
         self.names = names
 
     @staticmethod
-    def from_game_data(save_file: "core.SaveFile") -> Optional["SkillNames"]:
+    def from_game_data(save_file: core.SaveFile) -> SkillNames | None:
         gdg = core.core_data.get_game_data_getter(save_file)
         data = gdg.download("resLocal", "SkillDescriptions.csv")
         if data is None:
@@ -156,7 +157,7 @@ class SkillNames:
             names[line[0].to_int()] = line[1].to_str()
         return SkillNames(names)
 
-    def get_skill_name(self, skill_id: int) -> Optional[str]:
+    def get_skill_name(self, skill_id: int) -> str | None:
         return self.names.get(skill_id)
 
 
@@ -172,7 +173,7 @@ class TalentData:
         self.cats = cats
 
     @staticmethod
-    def from_game_data(save_file: "core.SaveFile") -> Optional["TalentData"]:
+    def from_game_data(save_file: core.SaveFile) -> TalentData | None:
         skill_names = SkillNames.from_game_data(save_file)
         skill_levels = SkillLevelData.from_game_data(save_file)
         cats = CatSkills.from_game_data(save_file)
@@ -181,16 +182,16 @@ class TalentData:
 
         return TalentData(skill_names, skill_levels, cats)
 
-    def get_skill_name(self, skill_id: int) -> Optional[str]:
+    def get_skill_name(self, skill_id: int) -> str | None:
         return self.skill_names.get_skill_name(skill_id)
 
-    def get_skill_level(self, skill_id: int) -> Optional[SkillLevel]:
+    def get_skill_level(self, skill_id: int) -> SkillLevel | None:
         return self.skill_levels.get_skill_level(skill_id)
 
-    def get_cat_skill(self, cat_id: int) -> Optional[CatSkill]:
+    def get_cat_skill(self, cat_id: int) -> CatSkill | None:
         return self.cats.get_cat_skill(cat_id)
 
-    def get_skill_from_cat(self, cat_id: int, skill_id: int) -> Optional[Skill]:
+    def get_skill_from_cat(self, cat_id: int, skill_id: int) -> Skill | None:
         cat_skill = self.get_cat_skill(cat_id)
         if cat_skill is None:
             return None
@@ -199,13 +200,13 @@ class TalentData:
                 return skill
         return None
 
-    def get_cat_skill_name(self, cat_id: int, skill_id: int) -> Optional[str]:
+    def get_cat_skill_name(self, cat_id: int, skill_id: int) -> str | None:
         skill = self.get_skill_from_cat(cat_id, skill_id)
         if skill is None:
             return None
         return self.get_skill_name(skill.text_id)
 
-    def get_cat_skill_level(self, cat_id: int, skill_id: int) -> Optional[SkillLevel]:
+    def get_cat_skill_level(self, cat_id: int, skill_id: int) -> SkillLevel | None:
         skill = self.get_skill_from_cat(cat_id, skill_id)
         if skill is None:
             return None
@@ -218,17 +219,17 @@ class Talent:
         self.level = level
 
     @staticmethod
-    def init() -> "Talent":
+    def init() -> Talent:
         return Talent(0, 0)
 
     def reset(self):
         self.level = 0
 
     @staticmethod
-    def read(stream: "core.Data"):
+    def read(stream: core.Data):
         return Talent(stream.read_int(), stream.read_int())
 
-    def write(self, stream: "core.Data"):
+    def write(self, stream: core.Data):
         stream.write_int(self.id)
         stream.write_int(self.level)
 
@@ -239,7 +240,7 @@ class Talent:
         }
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "Talent":
+    def deserialize(data: dict[str, Any]) -> Talent:
         return Talent(
             data["id"],
             data["level"],
@@ -277,11 +278,11 @@ class NyankoPictureBookCatData:
 
 
 class NyankoPictureBook:
-    def __init__(self, save_file: "core.SaveFile"):
+    def __init__(self, save_file: core.SaveFile):
         self.save_file = save_file
         self.cats = self.get_cats()
 
-    def get_cats(self) -> Optional[list[NyankoPictureBookCatData]]:
+    def get_cats(self) -> list[NyankoPictureBookCatData] | None:
         gdg = core.core_data.get_game_data_getter(self.save_file)
         data = gdg.download("DataLocal", "nyankoPictureBookData.csv")
         if data is None:
@@ -303,7 +304,7 @@ class NyankoPictureBook:
             cats.append(cat)
         return cats
 
-    def get_cat(self, cat_id: int) -> Optional[NyankoPictureBookCatData]:
+    def get_cat(self, cat_id: int) -> NyankoPictureBookCatData | None:
         if self.cats is None:
             return None
         for cat in self.cats:
@@ -311,7 +312,7 @@ class NyankoPictureBook:
                 return cat
         return None
 
-    def get_obtainable_cats(self) -> Optional[list[NyankoPictureBookCatData]]:
+    def get_obtainable_cats(self) -> list[NyankoPictureBookCatData] | None:
         if self.cats is None:
             return None
         return [cat for cat in self.cats if cat.is_displayed_in_catguide]
@@ -363,7 +364,7 @@ class EvolveItems:
         self.evolve_items = evolve_items
 
     @staticmethod
-    def from_unit_buy_list(raw_data: "core.Row", start_index: int) -> "EvolveItems":
+    def from_unit_buy_list(raw_data: core.Row, start_index: int) -> EvolveItems:
         """Creates a new EvolveItems object from a row from unitbuy.csv.
 
         Args:
@@ -381,11 +382,11 @@ class EvolveItems:
 
 
 class UnitBuyCatData:
-    def __init__(self, id: int, raw_data: "core.Row"):
+    def __init__(self, id: int, raw_data: core.Row):
         self.id = id
         self.assign(raw_data)
 
-    def assign(self, raw_data: "core.Row"):
+    def assign(self, raw_data: core.Row):
         self.stage_unlock = raw_data[0].to_int()
         self.purchase_cost = raw_data[1].to_int()
         self.upgrade_costs = [cost.to_int() for cost in raw_data[2:12]]
@@ -424,11 +425,11 @@ class UnitBuyCatData:
 
 
 class UnitBuy:
-    def __init__(self, save_file: "core.SaveFile"):
+    def __init__(self, save_file: core.SaveFile):
         self.save_file = save_file
         self.unit_buy = self.read_unit_buy()
 
-    def read_unit_buy(self) -> Optional[list[UnitBuyCatData]]:
+    def read_unit_buy(self) -> list[UnitBuyCatData] | None:
         unit_buy: list[UnitBuyCatData] = []
         gdg = core.core_data.get_game_data_getter(self.save_file)
         data = gdg.download("DataLocal", "unitbuy.csv")
@@ -439,7 +440,7 @@ class UnitBuy:
             unit_buy.append(UnitBuyCatData(i, line))
         return unit_buy
 
-    def get_unit_buy(self, id: int) -> Optional[UnitBuyCatData]:
+    def get_unit_buy(self, id: int) -> UnitBuyCatData | None:
         if self.unit_buy is None:
             return None
         try:
@@ -461,11 +462,11 @@ class UnitLimitCatData:
 
 
 class UnitLimit:
-    def __init__(self, save_file: "core.SaveFile"):
+    def __init__(self, save_file: core.SaveFile):
         self.save_file = save_file
         self.unit_limit = self.read_unit_limit()
 
-    def read_unit_limit(self) -> Optional[list[UnitLimitCatData]]:
+    def read_unit_limit(self) -> list[UnitLimitCatData] | None:
         unit_limit: list[UnitLimitCatData] = []
         gdg = core.core_data.get_game_data_getter(self.save_file)
         data = gdg.download("DataLocal", "unitlimit.csv")
@@ -476,7 +477,7 @@ class UnitLimit:
             unit_limit.append(UnitLimitCatData(i, line.to_int_list()))
         return unit_limit
 
-    def get_unit_limit(self, id: int) -> Optional[UnitLimitCatData]:
+    def get_unit_limit(self, id: int) -> UnitLimitCatData | None:
         if self.unit_limit is None:
             return None
 
@@ -490,31 +491,31 @@ class Cat:
     def __init__(self, id: int, unlocked: int):
         self.id = id
         self.unlocked = unlocked
-        self.talents: Optional[list[Talent]] = None
-        self.upgrade: "core.Upgrade" = core.Upgrade.init()
+        self.talents: list[Talent] | None = None
+        self.upgrade: core.Upgrade = core.Upgrade.init()
         self.current_form: int = 0
         self.unlocked_forms: int = 0
         self.gatya_seen: int = 0
-        self.max_upgrade_level: "core.Upgrade" = core.Upgrade.init()
+        self.max_upgrade_level: core.Upgrade = core.Upgrade.init()
         self.catguide_collected: bool = False
         self.fourth_form: int = 0
         self.catseyes_used: int = 0
 
-        self.names: Optional[list[str]] = None
+        self.names: list[str] | None = None
 
-    def get_talent_from_id(self, id: int) -> Optional[Talent]:
+    def get_talent_from_id(self, id: int) -> Talent | None:
         for talent in self.talents or []:
             if talent.id == id:
                 return talent
         return None
 
-    def unlock(self, save_file: "core.SaveFile"):
+    def unlock(self, save_file: core.SaveFile):
         self.unlocked = 1
         self.gatya_seen = 1
         core.core_data.get_chara_drop(save_file).unlock_drops_from_cat_id(self.id)
         save_file.unlock_equip_menu()
 
-    def remove(self, reset: bool = False, save_file: Optional["core.SaveFile"] = None):
+    def remove(self, reset: bool = False, save_file: core.SaveFile | None = None):
         self.unlocked = 0
         if reset:
             self.reset()
@@ -524,11 +525,11 @@ class Cat:
                     self.id
                 )
 
-    def true_form(self, save_file: "core.SaveFile", set_current_form: bool = True):
+    def true_form(self, save_file: core.SaveFile, set_current_form: bool = True):
         self.set_form(2, save_file, set_current_form)
 
     def set_form(
-        self, form: int, save_file: "core.SaveFile", set_current_form: bool = True
+        self, form: int, save_file: core.SaveFile, set_current_form: bool = True
     ):
         if core.core_data.config.get_bool(core.ConfigKey.UNLOCK_CAT_ON_EDIT):
             self.unlock(save_file)
@@ -538,7 +539,7 @@ class Cat:
 
     def set_form_true(
         self,
-        save_file: "core.SaveFile",
+        save_file: core.SaveFile,
         total_forms: int,
         set_current_form: bool = True,
         fourth_form: bool = False,
@@ -560,7 +561,7 @@ class Cat:
         self.fourth_form = 0
 
     def unlock_fourth_form(
-        self, save_file: "core.SaveFile", set_current_form: bool = True
+        self, save_file: core.SaveFile, set_current_form: bool = True
     ):
         if set_current_form:
             self.current_form = 3
@@ -574,8 +575,8 @@ class Cat:
 
     def set_upgrade(
         self,
-        save_file: "core.SaveFile",
-        upgrade: "core.Upgrade",
+        save_file: core.SaveFile,
+        upgrade: core.Upgrade,
         only_plus: bool = False,
     ):
         if core.core_data.config.get_bool(core.ConfigKey.UNLOCK_CAT_ON_EDIT):
@@ -587,7 +588,7 @@ class Cat:
         if plus != -1:
             self.upgrade.plus = upgrade.get_random_plus()
 
-    def upgrade_base(self, save_file: "core.SaveFile"):
+    def upgrade_base(self, save_file: core.SaveFile):
         if core.core_data.config.get_bool(core.ConfigKey.UNLOCK_CAT_ON_EDIT):
             self.unlock(save_file)
         self.upgrade.upgrade()
@@ -605,63 +606,63 @@ class Cat:
             talent.reset()
 
     @staticmethod
-    def init(id: int) -> "Cat":
+    def init(id: int) -> Cat:
         return Cat(id, 0)
 
     @staticmethod
-    def read_unlocked(id: int, stream: "core.Data"):
+    def read_unlocked(id: int, stream: core.Data):
         return Cat(id, stream.read_int())
 
-    def write_unlocked(self, stream: "core.Data"):
+    def write_unlocked(self, stream: core.Data):
         stream.write_int(self.unlocked)
 
-    def read_upgrade(self, stream: "core.Data"):
+    def read_upgrade(self, stream: core.Data):
         self.upgrade = core.Upgrade.read(stream)
 
-    def write_upgrade(self, stream: "core.Data"):
+    def write_upgrade(self, stream: core.Data):
         self.upgrade.write(stream)
 
-    def read_current_form(self, stream: "core.Data"):
+    def read_current_form(self, stream: core.Data):
         self.current_form = stream.read_int()
 
-    def write_current_form(self, stream: "core.Data"):
+    def write_current_form(self, stream: core.Data):
         stream.write_int(self.current_form)
 
-    def read_unlocked_forms(self, stream: "core.Data"):
+    def read_unlocked_forms(self, stream: core.Data):
         self.unlocked_forms = stream.read_int()
 
-    def write_unlocked_forms(self, stream: "core.Data"):
+    def write_unlocked_forms(self, stream: core.Data):
         stream.write_int(self.unlocked_forms)
 
-    def read_gatya_seen(self, stream: "core.Data"):
+    def read_gatya_seen(self, stream: core.Data):
         self.gatya_seen = stream.read_int()
 
-    def write_gatya_seen(self, stream: "core.Data"):
+    def write_gatya_seen(self, stream: core.Data):
         stream.write_int(self.gatya_seen)
 
-    def read_max_upgrade_level(self, stream: "core.Data"):
+    def read_max_upgrade_level(self, stream: core.Data):
         level = core.Upgrade.read(stream)
         self.max_upgrade_level = level
 
-    def write_max_upgrade_level(self, stream: "core.Data"):
+    def write_max_upgrade_level(self, stream: core.Data):
         self.max_upgrade_level.write(stream)
 
-    def read_catguide_collected(self, stream: "core.Data"):
+    def read_catguide_collected(self, stream: core.Data):
         self.catguide_collected = stream.read_bool()
 
-    def write_catguide_collected(self, stream: "core.Data"):
+    def write_catguide_collected(self, stream: core.Data):
         stream.write_bool(self.catguide_collected)
 
-    def read_fourth_form(self, stream: "core.Data"):
+    def read_fourth_form(self, stream: core.Data):
         self.fourth_form = stream.read_int()
 
-    def write_fourth_form(self, stream: "core.Data"):
+    def write_fourth_form(self, stream: core.Data):
         stream.write_int(self.fourth_form)
 
-    def read_catseyes_used(self, stream: "core.Data"):
+    def read_catseyes_used(self, stream: core.Data):
         self.catseyes_used = stream.read_int()
 
-    def write_catseyes_used(self, stream: "core.Data"):
+    def write_catseyes_used(self, stream: core.Data):
         stream.write_int(self.catseyes_used)
 
     def serialize(self) -> dict[str, Any]:
@@ -684,7 +685,7 @@ class Cat:
         }
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "Cat":
+    def deserialize(data: dict[str, Any]) -> Cat:
         cat = Cat(data["id"], data["unlocked"])
         cat.upgrade = core.Upgrade.deserialize(data["upgrade"])
         cat.current_form = data["current_form"]
@@ -707,12 +708,12 @@ class Cat:
     def __str__(self) -> str:
         return self.__repr__()
 
-    def read_talents(self, stream: "core.Data"):
+    def read_talents(self, stream: core.Data):
         self.talents = []
         for _ in range(stream.read_int()):
             self.talents.append(Talent.read(stream))
 
-    def write_talents(self, stream: "core.Data"):
+    def write_talents(self, stream: core.Data):
         if self.talents is None:
             return
         stream.write_int(len(self.talents))
@@ -720,8 +721,8 @@ class Cat:
             talent.write(stream)
 
     def get_names_cls(
-        self, save_file: "core.SaveFile", localizable: "core.Localizable"
-    ) -> Optional[list[str]]:
+        self, save_file: core.SaveFile, localizable: core.Localizable
+    ) -> list[str] | None:
         if self.names is None:
             self.names = Cat.get_names(self.id, save_file, localizable)
         return self.names
@@ -729,9 +730,9 @@ class Cat:
     @staticmethod
     def get_names(
         id: int,
-        save_file: "core.SaveFile",
-        localizable: "core.Localizable",
-    ) -> Optional[list[str]]:
+        save_file: core.SaveFile,
+        localizable: core.Localizable,
+    ) -> list[str] | None:
         file_name = f"Unit_Explanation{id+1}_{core.core_data.get_lang(save_file)}.csv"
         data = core.core_data.get_game_data_getter(save_file).download(
             "resLocal", file_name
@@ -756,20 +757,20 @@ class StorageItem:
         self.item_type = 0
 
     @staticmethod
-    def init() -> "StorageItem":
+    def init() -> StorageItem:
         return StorageItem(0)
 
     @staticmethod
-    def read_item_id(stream: "core.Data"):
+    def read_item_id(stream: core.Data):
         return StorageItem(stream.read_int())
 
-    def write_item_id(self, stream: "core.Data"):
+    def write_item_id(self, stream: core.Data):
         stream.write_int(self.item_id)
 
-    def read_item_type(self, stream: "core.Data"):
+    def read_item_type(self, stream: core.Data):
         self.item_type = stream.read_int()
 
-    def write_item_type(self, stream: "core.Data"):
+    def write_item_type(self, stream: core.Data):
         stream.write_int(self.item_type)
 
     def serialize(self) -> dict[str, Any]:
@@ -779,7 +780,7 @@ class StorageItem:
         }
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "StorageItem":
+    def deserialize(data: dict[str, Any]) -> StorageItem:
         item = StorageItem(data.get("item_id", 0))
         item.item_type = data.get("item_type", 0)
         return item
@@ -797,17 +798,17 @@ class Cats:
         self.storage_items = [StorageItem.init() for _ in range(total_storage_items)]
         self.favourites: dict[int, bool] = {}
         self.chara_new_flags: dict[int, int] = {}
-        self.unit_buy: Optional[UnitBuy] = None
-        self.unit_limit: Optional[UnitLimit] = None
-        self.nyanko_picture_book: Optional[NyankoPictureBook] = None
-        self.talent_data: Optional[TalentData] = None
+        self.unit_buy: UnitBuy | None = None
+        self.unit_limit: UnitLimit | None = None
+        self.nyanko_picture_book: NyankoPictureBook | None = None
+        self.talent_data: TalentData | None = None
         self.bulk_downloaded = False
 
     def get_all_cats(self) -> list[Cat]:
         return self.cats
 
     @staticmethod
-    def init(gv: "core.GameVersion") -> "Cats":
+    def init(gv: core.GameVersion) -> Cats:
         total_cats = Cats.get_gv_cats(gv)
         if total_cats is None:
             total_cats = 0
@@ -822,7 +823,7 @@ class Cats:
         return Cats(cats_l, total_storage_items)
 
     @staticmethod
-    def get_gv_cats(gv: "core.GameVersion") -> Optional[int]:
+    def get_gv_cats(gv: core.GameVersion) -> int | None:
         if gv == 20:
             total_cats = 203
         elif gv == 21:
@@ -845,33 +846,33 @@ class Cats:
     def get_non_unlocked_cats(self) -> list[Cat]:
         return [cat for cat in self.cats if not cat.unlocked]
 
-    def read_unitbuy(self, save_file: "core.SaveFile") -> UnitBuy:
+    def read_unitbuy(self, save_file: core.SaveFile) -> UnitBuy:
         if self.unit_buy is None:
             self.unit_buy = UnitBuy(save_file)
         return self.unit_buy
 
-    def read_unitlimit(self, save_file: "core.SaveFile") -> UnitLimit:
+    def read_unitlimit(self, save_file: core.SaveFile) -> UnitLimit:
         if self.unit_limit is None:
             self.unit_limit = UnitLimit(save_file)
         return self.unit_limit
 
-    def read_nyanko_picture_book(self, save_file: "core.SaveFile") -> NyankoPictureBook:
+    def read_nyanko_picture_book(self, save_file: core.SaveFile) -> NyankoPictureBook:
         if self.nyanko_picture_book is None:
             self.nyanko_picture_book = NyankoPictureBook(save_file)
         return self.nyanko_picture_book
 
-    def read_talent_data(self, save_file: "core.SaveFile") -> Optional[TalentData]:
+    def read_talent_data(self, save_file: core.SaveFile) -> TalentData | None:
         if self.talent_data is None:
             self.talent_data = TalentData.from_game_data(save_file)
         return self.talent_data
 
-    def get_cats_rarity(self, save_file: "core.SaveFile", rarity: int) -> list[Cat]:
+    def get_cats_rarity(self, save_file: core.SaveFile, rarity: int) -> list[Cat]:
         unit_buy = self.read_unitbuy(save_file)
         return [cat for cat in self.cats if unit_buy.get_cat_rarity(cat.id) == rarity]
 
     def get_cats_name(
         self,
-        save_file: "core.SaveFile",
+        save_file: core.SaveFile,
         search_name: str,
     ) -> list[Cat]:
         self.bulk_download_names(save_file)
@@ -887,7 +888,7 @@ class Cats:
                     break
         return cats
 
-    def bulk_download_names(self, save_file: "core.SaveFile"):
+    def bulk_download_names(self, save_file: core.SaveFile):
         if self.bulk_downloaded:
             return
         file_names: list[str] = []
@@ -905,7 +906,7 @@ class Cats:
         )
         self.bulk_downloaded = True
 
-    def get_cats_obtainable(self, save_file: "core.SaveFile") -> Optional[list[Cat]]:
+    def get_cats_obtainable(self, save_file: core.SaveFile) -> list[Cat] | None:
         nyanko_picture_book = self.read_nyanko_picture_book(save_file)
         obtainable_cats = nyanko_picture_book.get_obtainable_cats()
         if obtainable_cats is None:
@@ -917,9 +918,7 @@ class Cats:
                 cats.append(cat)
         return cats
 
-    def get_cats_non_obtainable(
-        self, save_file: "core.SaveFile"
-    ) -> Optional[list[Cat]]:
+    def get_cats_non_obtainable(self, save_file: core.SaveFile) -> list[Cat] | None:
         nyanko_picture_book = self.read_nyanko_picture_book(save_file)
         obtainable_cats = nyanko_picture_book.get_obtainable_cats()
         if obtainable_cats is None:
@@ -932,8 +931,8 @@ class Cats:
         return cats
 
     def get_cats_gatya_banner(
-        self, save_file: "core.SaveFile", gatya_id: int
-    ) -> Optional[list["core.Cat"]]:
+        self, save_file: core.SaveFile, gatya_id: int
+    ) -> list[core.Cat] | None:
         cat_ids = save_file.gatya.read_gatya_data_set(save_file).get_cat_ids(gatya_id)
         if cat_ids is None:
             return None
@@ -941,7 +940,7 @@ class Cats:
 
     def true_form_cats(
         self,
-        save_file: "core.SaveFile",
+        save_file: core.SaveFile,
         cats: list[Cat],
         force: bool = False,
         set_current_forms: bool = True,
@@ -960,7 +959,7 @@ class Cats:
 
     def fourth_form_cats(
         self,
-        save_file: "core.SaveFile",
+        save_file: core.SaveFile,
         cats: list[Cat],
         force: bool = False,
         set_current_forms: bool = True,
@@ -985,14 +984,14 @@ class Cats:
                 cats.append(cat)
         return cats
 
-    def get_cat_by_id(self, id: int) -> Optional[Cat]:
+    def get_cat_by_id(self, id: int) -> Cat | None:
         for cat in self.cats:
             if cat.id == id:
                 return cat
         return None
 
     @staticmethod
-    def get_rarity_names(save_file: "core.SaveFile") -> list[str]:
+    def get_rarity_names(save_file: core.SaveFile) -> list[str]:
         localizable = save_file.get_localizable()
         rarity_names: list[str] = []
         rarity_index = 1
@@ -1005,7 +1004,7 @@ class Cats:
         return rarity_names
 
     @staticmethod
-    def read_unlocked(stream: "core.Data", gv: "core.GameVersion") -> "Cats":
+    def read_unlocked(stream: core.Data, gv: core.GameVersion) -> Cats:
         total_cats = Cats.get_gv_cats(gv)
         if total_cats is None:
             total_cats = stream.read_int()
@@ -1014,84 +1013,84 @@ class Cats:
             cats_l.append(Cat.read_unlocked(i, stream))
         return Cats(cats_l)
 
-    def write_unlocked(self, stream: "core.Data", gv: "core.GameVersion"):
+    def write_unlocked(self, stream: core.Data, gv: core.GameVersion):
         total_cats = Cats.get_gv_cats(gv)
         if total_cats is None:
             stream.write_int(len(self.cats))
         for cat in self.cats:
             cat.write_unlocked(stream)
 
-    def read_upgrade(self, stream: "core.Data", gv: "core.GameVersion"):
+    def read_upgrade(self, stream: core.Data, gv: core.GameVersion):
         total_cats = Cats.get_gv_cats(gv)
         if total_cats is None:
             total_cats = stream.read_int()
         for cat in self.cats:
             cat.read_upgrade(stream)
 
-    def write_upgrade(self, stream: "core.Data", gv: "core.GameVersion"):
+    def write_upgrade(self, stream: core.Data, gv: core.GameVersion):
         total_cats = Cats.get_gv_cats(gv)
         if total_cats is None:
             stream.write_int(len(self.cats))
         for cat in self.cats:
             cat.write_upgrade(stream)
 
-    def read_current_form(self, stream: "core.Data", gv: "core.GameVersion"):
+    def read_current_form(self, stream: core.Data, gv: core.GameVersion):
         total_cats = Cats.get_gv_cats(gv)
         if total_cats is None:
             total_cats = stream.read_int()
         for cat in self.cats:
             cat.read_current_form(stream)
 
-    def write_current_form(self, stream: "core.Data", gv: "core.GameVersion"):
+    def write_current_form(self, stream: core.Data, gv: core.GameVersion):
         total_cats = Cats.get_gv_cats(gv)
         if total_cats is None:
             stream.write_int(len(self.cats))
         for cat in self.cats:
             cat.write_current_form(stream)
 
-    def read_unlocked_forms(self, stream: "core.Data", gv: "core.GameVersion"):
+    def read_unlocked_forms(self, stream: core.Data, gv: core.GameVersion):
         total_cats = Cats.get_gv_cats(gv)
         if total_cats is None:
             total_cats = stream.read_int()
         for cat in self.cats:
             cat.read_unlocked_forms(stream)
 
-    def write_unlocked_forms(self, stream: "core.Data", gv: "core.GameVersion"):
+    def write_unlocked_forms(self, stream: core.Data, gv: core.GameVersion):
         total_cats = Cats.get_gv_cats(gv)
         if total_cats is None:
             stream.write_int(len(self.cats))
         for cat in self.cats:
             cat.write_unlocked_forms(stream)
 
-    def read_gatya_seen(self, stream: "core.Data", gv: "core.GameVersion"):
+    def read_gatya_seen(self, stream: core.Data, gv: core.GameVersion):
         total_cats = Cats.get_gv_cats(gv)
         if total_cats is None:
             total_cats = stream.read_int()
         for cat in self.cats:
             cat.read_gatya_seen(stream)
 
-    def write_gatya_seen(self, stream: "core.Data", gv: "core.GameVersion"):
+    def write_gatya_seen(self, stream: core.Data, gv: core.GameVersion):
         total_cats = Cats.get_gv_cats(gv)
         if total_cats is None:
             stream.write_int(len(self.cats))
         for cat in self.cats:
             cat.write_gatya_seen(stream)
 
-    def read_max_upgrade_levels(self, stream: "core.Data", gv: "core.GameVersion"):
+    def read_max_upgrade_levels(self, stream: core.Data, gv: core.GameVersion):
         total_cats = Cats.get_gv_cats(gv)
         if total_cats is None:
             total_cats = stream.read_int()
         for cat in self.cats:
             cat.read_max_upgrade_level(stream)
 
-    def write_max_upgrade_levels(self, stream: "core.Data", gv: "core.GameVersion"):
+    def write_max_upgrade_levels(self, stream: core.Data, gv: core.GameVersion):
         total_cats = Cats.get_gv_cats(gv)
         if total_cats is None:
             stream.write_int(len(self.cats))
         for cat in self.cats:
             cat.write_max_upgrade_level(stream)
 
-    def read_storage(self, stream: "core.Data", gv: "core.GameVersion"):
+    def read_storage(self, stream: core.Data, gv: core.GameVersion):
         if gv < 110100:
             total_storage = 100
         else:
@@ -1102,7 +1101,7 @@ class Cats:
         for item in self.storage_items:
             item.read_item_type(stream)
 
-    def write_storage(self, stream: "core.Data", gv: "core.GameVersion"):
+    def write_storage(self, stream: core.Data, gv: core.GameVersion):
         if gv >= 110100:
             stream.write_short(len(self.storage_items))
         for item in self.storage_items:
@@ -1110,63 +1109,63 @@ class Cats:
         for item in self.storage_items:
             item.write_item_type(stream)
 
-    def read_catguide_collected(self, stream: "core.Data"):
+    def read_catguide_collected(self, stream: core.Data):
         total_cats = stream.read_int()
         for i in range(total_cats):
             self.cats[i].read_catguide_collected(stream)
 
-    def write_catguide_collected(self, stream: "core.Data"):
+    def write_catguide_collected(self, stream: core.Data):
         stream.write_int(len(self.cats))
         for cat in self.cats:
             cat.write_catguide_collected(stream)
 
-    def read_fourth_forms(self, stream: "core.Data"):
+    def read_fourth_forms(self, stream: core.Data):
         total_cats = stream.read_int()
         for i in range(total_cats):
             self.cats[i].read_fourth_form(stream)
 
-    def read_catseyes_used(self, stream: "core.Data"):
+    def read_catseyes_used(self, stream: core.Data):
         total_cats = stream.read_int()
         for i in range(total_cats):
             self.cats[i].read_catseyes_used(stream)
 
-    def write_catseyes_used(self, stream: "core.Data"):
+    def write_catseyes_used(self, stream: core.Data):
         stream.write_int(len(self.cats))
         for cat in self.cats:
             cat.write_catseyes_used(stream)
 
-    def write_fourth_forms(self, stream: "core.Data"):
+    def write_fourth_forms(self, stream: core.Data):
         stream.write_int(len(self.cats))
         for cat in self.cats:
             cat.write_fourth_form(stream)
 
-    def read_favorites(self, stream: "core.Data"):
+    def read_favorites(self, stream: core.Data):
         self.favourites: dict[int, bool] = {}
         total_cats = stream.read_int()
         for _ in range(total_cats):
             cat_id = stream.read_int()
             self.favourites[cat_id] = stream.read_bool()
 
-    def write_favorites(self, stream: "core.Data"):
+    def write_favorites(self, stream: core.Data):
         stream.write_int(len(self.favourites))
         for cat_id, is_favourite in self.favourites.items():
             stream.write_int(cat_id)
             stream.write_bool(is_favourite)
 
-    def read_chara_new_flags(self, stream: "core.Data"):
+    def read_chara_new_flags(self, stream: core.Data):
         self.chara_new_flags: dict[int, int] = {}
         total_cats = stream.read_int()
         for _ in range(total_cats):
             cat_id = stream.read_int()
             self.chara_new_flags[cat_id] = stream.read_int()
 
-    def write_chara_new_flags(self, stream: "core.Data"):
+    def write_chara_new_flags(self, stream: core.Data):
         stream.write_int(len(self.chara_new_flags))
         for cat_id, new_flag in self.chara_new_flags.items():
             stream.write_int(cat_id)
             stream.write_int(new_flag)
 
-    def read_talents(self, stream: "core.Data"):
+    def read_talents(self, stream: core.Data):
         total_cats = stream.read_int()
         counter = 0
         for _ in range(total_cats):
@@ -1175,7 +1174,7 @@ class Cats:
                 counter += 1
             self.cats[cat_id].read_talents(stream)
 
-    def write_talents(self, stream: "core.Data"):
+    def write_talents(self, stream: core.Data):
         total_talents = 0
         for cat in self.cats:
             total_talents += 1 if cat.talents is not None else 0
@@ -1195,7 +1194,7 @@ class Cats:
         }
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "Cats":
+    def deserialize(data: dict[str, Any]) -> Cats:
         cats_l = [Cat.deserialize(cat) for cat in data.get("cats", [])]
         cats = Cats(cats_l)
         cats.storage_items = [

@@ -1,4 +1,4 @@
-from typing import Optional
+from __future__ import annotations
 from bcsfe.cli import dialog_creator, main, color, file_dialog
 from bcsfe import core
 
@@ -9,7 +9,7 @@ class ServerCLI:
 
     def download_save(
         self,
-    ) -> Optional[tuple["core.Path", "core.CountryCode"]]:
+    ) -> tuple[core.Path, core.CountryCode] | None:
         transfer_code = dialog_creator.StringInput().get_input_locale_while(
             "enter_transfer_code", {}
         )

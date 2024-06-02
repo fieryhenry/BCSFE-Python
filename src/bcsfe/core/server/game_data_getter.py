@@ -1,11 +1,12 @@
-from typing import Any, Callable, Optional
+from __future__ import annotations
+from typing import Any, Callable
 from bcsfe.cli import color
 
 from bcsfe import core
 
 
 class GameDataGetter:
-    def __init__(self, cc: "core.CountryCode"):
+    def __init__(self, cc: core.CountryCode):
         self.url = core.core_data.config.get_str(core.ConfigKey.GAME_DATA_REPO)
         self.lang = core.core_data.config.get_str(core.ConfigKey.LOCALE)
         self.cc = cc.get_cc_lang()
@@ -17,15 +18,15 @@ class GameDataGetter:
         else:
             self.latest_version = self.get_latest_version(self.all_versions, self.cc)
 
-    def does_save_version_match(self, save_file: "core.SaveFile") -> bool:
+    def does_save_version_match(self, save_file: core.SaveFile) -> bool:
         if self.latest_version is None:
             return False
 
         return save_file.game_version == self.latest_version[:-2]
 
     def get_latest_version(
-        self, versions: list[str], cc: "core.CountryCode"
-    ) -> Optional[str]:
+        self, versions: list[str], cc: core.CountryCode
+    ) -> str | None:
         length = len(versions)
         if cc == core.CountryCodeType.EN and length >= 1:
             return versions[0]
@@ -37,14 +38,14 @@ class GameDataGetter:
             return versions[3]
         return None
 
-    def get_versions(self) -> Optional[list[str]]:
+    def get_versions(self) -> list[str] | None:
         response = core.RequestHandler(self.url + "latest.txt").get()
         if response is None:
             return None
         versions = response.text.split("\n")
         return versions
 
-    def get_file(self, pack_name: str, file_name: str) -> Optional["core.Data"]:
+    def get_file(self, pack_name: str, file_name: str) -> core.Data | None:
         pack_name = self.get_packname(pack_name)
         version = self.latest_version
         if version is None:
@@ -68,10 +69,10 @@ class GameDataGetter:
         return packname
 
     @staticmethod
-    def get_game_data_dir() -> "core.Path":
+    def get_game_data_dir() -> core.Path:
         return core.Path("game_data", is_relative=True)
 
-    def get_file_path(self, pack_name: str, file_name: str) -> Optional["core.Path"]:
+    def get_file_path(self, pack_name: str, file_name: str) -> core.Path | None:
         version = self.latest_version
 
         if version is None:
@@ -82,7 +83,7 @@ class GameDataGetter:
         path = path.add(file_name)
         return path
 
-    def save_file(self, pack_name: str, file_name: str) -> Optional["core.Data"]:
+    def save_file(self, pack_name: str, file_name: str) -> core.Data | None:
         pack_name = self.get_packname(pack_name)
         data = self.get_file(pack_name, file_name)
         if data is None:
@@ -103,7 +104,7 @@ class GameDataGetter:
 
     def download_from_path(
         self, path: str, retries: int = 2, display_text: bool = True
-    ) -> Optional["core.Data"]:
+    ) -> core.Data | None:
         pack_name, file_name = path.split("/")
         pack_name = self.get_packname(pack_name)
         return self.download(pack_name, file_name, retries, display_text)
@@ -114,7 +115,7 @@ class GameDataGetter:
         file_name: str,
         retries: int = 2,
         display_text: bool = True,
-    ) -> Optional["core.Data"]:
+    ) -> core.Data | None:
         retries -= 1
         pack_name = self.get_packname(pack_name)
 
@@ -158,7 +159,7 @@ class GameDataGetter:
         pack_name: str,
         file_names: list[str],
         display_text: bool = True,
-    ) -> list[Optional[tuple[str, "core.Data"]]]:
+    ) -> list[tuple[str, core.Data] | None]:
         pack_name = self.get_packname(pack_name)
 
         callables: list[Callable[..., Any]] = []
@@ -167,7 +168,7 @@ class GameDataGetter:
             callables.append(self.download)
             args.append((pack_name, file_name, 2, display_text))
         core.thread_run_many(callables, args)
-        data_list: list[Optional[tuple[str, core.Data]]] = []
+        data_list: list[tuple[str, core.Data] | None] = []
         for file_name in file_names:
             path = self.get_file_path(pack_name, file_name)
             if path is None:

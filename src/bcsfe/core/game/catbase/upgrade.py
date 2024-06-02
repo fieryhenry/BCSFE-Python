@@ -1,5 +1,6 @@
+from __future__ import annotations
 import random
-from typing import Any, Optional
+from typing import Any
 from bcsfe import core
 from bcsfe.cli import color
 
@@ -27,7 +28,7 @@ class Upgrade:
     def increment_plus(self, amount: int):
         self.plus += amount
 
-    def get_random_base(self, max_base: Optional[int] = None) -> int:
+    def get_random_base(self, max_base: int | None = None) -> int:
         if self.base_range is None:
             return self.base
         base = random.randint(self.base_range[0], self.base_range[1])
@@ -35,7 +36,7 @@ class Upgrade:
             base = min(base, max_base)
         return base
 
-    def get_random_plus(self, max_plus: Optional[int] = None) -> int:
+    def get_random_plus(self, max_plus: int | None = None) -> int:
         if self.plus_range is None:
             return self.plus
         plus = random.randint(self.plus_range[0], self.plus_range[1])
@@ -44,13 +45,13 @@ class Upgrade:
         return plus
 
     @staticmethod
-    def read(stream: "core.Data") -> "Upgrade":
+    def read(stream: core.Data) -> Upgrade:
         plus = stream.read_ushort()
         base = stream.read_ushort()
 
         return Upgrade(plus, base)
 
-    def write(self, stream: "core.Data"):
+    def write(self, stream: core.Data):
         stream.write_ushort(self.plus)
         stream.write_ushort(self.base)
 
@@ -61,7 +62,7 @@ class Upgrade:
         }
 
     @staticmethod
-    def init() -> "Upgrade":
+    def init() -> Upgrade:
         return Upgrade(0, 0)
 
     def reset(self):
@@ -69,7 +70,7 @@ class Upgrade:
         self.base = 0
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "Upgrade":
+    def deserialize(data: dict[str, Any]) -> Upgrade:
         return Upgrade(data.get("plus", 0), data.get("base", 0))
 
     def __repr__(self) -> str:
@@ -82,7 +83,7 @@ class Upgrade:
     def get_user_upgrade(
         max_pos_base: int,
         max_pos_plus: int,
-    ) -> tuple[Optional["Upgrade"], bool]:
+    ) -> tuple[Upgrade | None, bool]:
         color.ColoredText.localize(
             "max_upgrade", max_base=max_pos_base + 1, max_plus=max_pos_plus
         )
@@ -175,7 +176,7 @@ class Upgrade:
         upgrade.plus_range = (min_plus or plus_int, max_plus or plus_int)
         return upgrade, False
 
-    def copy(self) -> "Upgrade":
+    def copy(self) -> Upgrade:
         upgrade = Upgrade(self.plus, self.base)
         upgrade.base_range = self.base_range
         upgrade.plus_range = self.plus_range

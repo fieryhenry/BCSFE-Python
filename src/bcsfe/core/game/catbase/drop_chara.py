@@ -1,5 +1,5 @@
+from __future__ import annotations
 from dataclasses import dataclass
-from typing import Optional
 
 from bcsfe import core
 
@@ -12,11 +12,11 @@ class Drop:
 
 
 class CharaDrop:
-    def __init__(self, save_file: "core.SaveFile"):
+    def __init__(self, save_file: core.SaveFile):
         self.save_file = save_file
         self.drops = self.get_drops()
 
-    def get_drops(self) -> Optional[list[Drop]]:
+    def get_drops(self) -> list[Drop] | None:
         gdg = core.core_data.get_game_data_getter(self.save_file)
         data = gdg.download("DataLocal", "drop_chara.csv")
         if data is None:
@@ -34,7 +34,7 @@ class CharaDrop:
 
         return drops
 
-    def get_drop(self, stage_id: int) -> Optional[Drop]:
+    def get_drop(self, stage_id: int) -> Drop | None:
         if self.drops is None:
             return None
         for drop in self.drops:
@@ -43,7 +43,7 @@ class CharaDrop:
 
         return None
 
-    def get_drops_from_chara_id(self, chara_id: int) -> Optional[list[Drop]]:
+    def get_drops_from_chara_id(self, chara_id: int) -> list[Drop] | None:
         if self.drops is None:
             return None
         drops: list[Drop] = []

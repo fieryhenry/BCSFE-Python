@@ -1,4 +1,4 @@
-from typing import Optional
+from __future__ import annotations
 from bcsfe import core
 import tempfile
 
@@ -31,33 +31,33 @@ class RootHandler:
             raise PackageNameNotSet("Package name is not set")
         return self.package_name
 
-    def get_battlecats_path(self) -> "core.Path":
+    def get_battlecats_path(self) -> core.Path:
         return core.Path.get_root().add("data").add("data").add(self.get_package_name())
 
-    def get_battlecats_save_path(self) -> "core.Path":
+    def get_battlecats_save_path(self) -> core.Path:
         return self.get_battlecats_path().add("files").add("SAVE_DATA")
 
-    def save_battlecats_save(self, local_path: "core.Path") -> "core.CommandResult":
+    def save_battlecats_save(self, local_path: core.Path) -> core.CommandResult:
         self.get_battlecats_save_path().copy(local_path)
         return core.CommandResult.create_success()
 
-    def load_battlecats_save(self, local_path: "core.Path") -> "core.CommandResult":
+    def load_battlecats_save(self, local_path: core.Path) -> core.CommandResult:
         local_path.copy(self.get_battlecats_save_path())
         return core.CommandResult.create_success()
 
-    def close_game(self) -> "core.CommandResult":
+    def close_game(self) -> core.CommandResult:
         cmd = core.Command(
             f"sudo pkill -f {self.get_package_name()}",
         )
         return cmd.run()
 
-    def run_game(self) -> "core.CommandResult":
+    def run_game(self) -> core.CommandResult:
         cmd = core.Command(
             f"sudo monkey -p {self.get_package_name()} -c android.intent.category.LAUNCHER 1",
         )
         return cmd.run()
 
-    def rerun_game(self) -> "core.CommandResult":
+    def rerun_game(self) -> core.CommandResult:
         success = self.close_game()
         if not success:
             return core.CommandResult.create_failure()
@@ -68,8 +68,8 @@ class RootHandler:
         return core.CommandResult.create_success()
 
     def save_locally(
-        self, local_path: Optional["core.Path"] = None
-    ) -> tuple[Optional["core.Path"], "core.CommandResult"]:
+        self, local_path: core.Path | None = None
+    ) -> tuple[core.Path | None, core.CommandResult]:
         if local_path is None:
             local_path = core.Path.get_documents_folder().add("saves").add("SAVE_DATA")
         local_path.parent().generate_dirs()
@@ -79,7 +79,7 @@ class RootHandler:
 
         return local_path, result
 
-    def load_locally(self, local_path: "core.Path") -> "core.CommandResult":
+    def load_locally(self, local_path: core.Path) -> core.CommandResult:
         success = self.load_battlecats_save(local_path)
         if not success:
             return core.CommandResult.create_failure()
@@ -91,8 +91,8 @@ class RootHandler:
         return core.CommandResult.create_success()
 
     def load_save(
-        self, save: "core.SaveFile", rerun_game: bool = True
-    ) -> "core.CommandResult":
+        self, save: core.SaveFile, rerun_game: bool = True
+    ) -> core.CommandResult:
         with tempfile.TemporaryDirectory() as temp_dir:
             local_path = core.Path(temp_dir).add("SAVE_DATA")
             save.to_data().to_file(local_path)

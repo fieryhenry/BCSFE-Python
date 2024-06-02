@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import Any
 from bcsfe import core
 from bcsfe.cli import color
@@ -8,22 +9,22 @@ class Stage:
         self.clear_times = clear_times
 
     @staticmethod
-    def init() -> "Stage":
+    def init() -> Stage:
         return Stage(0)
 
     @staticmethod
-    def read(data: "core.Data") -> "Stage":
+    def read(data: core.Data) -> Stage:
         clear_times = data.read_short()
         return Stage(clear_times)
 
-    def write(self, data: "core.Data"):
+    def write(self, data: core.Data):
         data.write_short(self.clear_times)
 
     def serialize(self) -> int:
         return self.clear_times
 
     @staticmethod
-    def deserialize(data: int) -> "Stage":
+    def deserialize(data: int) -> Stage:
         return Stage(
             data,
         )
@@ -44,21 +45,21 @@ class Chapter:
         self.stages: list[Stage] = [Stage.init() for _ in range(total_stages)]
 
     @staticmethod
-    def init(total_stages: int) -> "Chapter":
+    def init(total_stages: int) -> Chapter:
         return Chapter(0, total_stages)
 
     @staticmethod
-    def read_current_stage(data: "core.Data"):
+    def read_current_stage(data: core.Data):
         current_stage = data.read_byte()
         return Chapter(current_stage)
 
-    def write_current_stage(self, data: "core.Data"):
+    def write_current_stage(self, data: core.Data):
         data.write_byte(self.current_stage)
 
-    def read_stages(self, data: "core.Data", total_stages: int):
+    def read_stages(self, data: core.Data, total_stages: int):
         self.stages = [Stage.read(data) for _ in range(total_stages)]
 
-    def write_stages(self, data: "core.Data"):
+    def write_stages(self, data: core.Data):
         for stage in self.stages:
             stage.write(data)
 
@@ -69,7 +70,7 @@ class Chapter:
         }
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "Chapter":
+    def deserialize(data: dict[str, Any]) -> Chapter:
         chapter = Chapter(data.get("current_stage", 0))
         chapter.stages = [Stage.deserialize(stage) for stage in data.get("stages", [])]
         return chapter
@@ -86,23 +87,23 @@ class ChaptersStars:
         self.chapters = chapters
 
     @staticmethod
-    def init(total_stages: int, total_stars: int) -> "ChaptersStars":
+    def init(total_stages: int, total_stars: int) -> ChaptersStars:
         return ChaptersStars([Chapter.init(total_stages) for _ in range(total_stars)])
 
     @staticmethod
-    def read_current_stage(data: "core.Data", total_stars: int):
+    def read_current_stage(data: core.Data, total_stars: int):
         chapters = [Chapter.read_current_stage(data) for _ in range(total_stars)]
         return ChaptersStars(chapters)
 
-    def write_current_stage(self, data: "core.Data"):
+    def write_current_stage(self, data: core.Data):
         for chapter in self.chapters:
             chapter.write_current_stage(data)
 
-    def read_stages(self, data: "core.Data", total_stages: int):
+    def read_stages(self, data: core.Data, total_stages: int):
         for chapter in self.chapters:
             chapter.read_stages(data, total_stages)
 
-    def write_stages(self, data: "core.Data"):
+    def write_stages(self, data: core.Data):
         for chapter in self.chapters:
             chapter.write_stages(data)
 
@@ -110,7 +111,7 @@ class ChaptersStars:
         return [chapter.serialize() for chapter in self.chapters]
 
     @staticmethod
-    def deserialize(data: list[dict[str, Any]]) -> "ChaptersStars":
+    def deserialize(data: list[dict[str, Any]]) -> ChaptersStars:
         chapters = [Chapter.deserialize(chapter) for chapter in data]
         return ChaptersStars(chapters)
 
@@ -126,11 +127,11 @@ class AkuChapters:
         self.chapters = chapters
 
     @staticmethod
-    def init() -> "AkuChapters":
+    def init() -> AkuChapters:
         return AkuChapters([])
 
     @staticmethod
-    def read(data: "core.Data") -> "AkuChapters":
+    def read(data: core.Data) -> AkuChapters:
         total_chapters = data.read_short()
         total_stages = data.read_byte()
         total_stars = data.read_byte()
@@ -145,7 +146,7 @@ class AkuChapters:
 
         return AkuChapters(chapters)
 
-    def write(self, data: "core.Data"):
+    def write(self, data: core.Data):
         data.write_short(len(self.chapters))
         try:
             data.write_byte(len(self.chapters[0].chapters[0].stages))
@@ -166,7 +167,7 @@ class AkuChapters:
         return [chapter.serialize() for chapter in self.chapters]
 
     @staticmethod
-    def deserialize(data: list[list[dict[str, Any]]]) -> "AkuChapters":
+    def deserialize(data: list[list[dict[str, Any]]]) -> AkuChapters:
         chapters = [ChaptersStars.deserialize(chapter) for chapter in data]
         return AkuChapters(chapters)
 
@@ -177,7 +178,7 @@ class AkuChapters:
         return self.__repr__()
 
     @staticmethod
-    def edit_aku_chapters(save_file: "core.SaveFile"):
+    def edit_aku_chapters(save_file: core.SaveFile):
         aku = save_file.aku
         chapter = aku.chapters[0].chapters[0]
 

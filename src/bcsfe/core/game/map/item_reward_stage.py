@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import Any
 from bcsfe import core
 
@@ -7,21 +8,21 @@ class Stage:
         self.claimed = claimed
 
     @staticmethod
-    def init() -> "Stage":
+    def init() -> Stage:
         return Stage(False)
 
     @staticmethod
-    def read(stream: "core.Data") -> "Stage":
+    def read(stream: core.Data) -> Stage:
         return Stage(stream.read_bool())
 
-    def write(self, stream: "core.Data"):
+    def write(self, stream: core.Data):
         stream.write_bool(self.claimed)
 
     def serialize(self) -> bool:
         return self.claimed
 
     @staticmethod
-    def deserialize(data: bool) -> "Stage":
+    def deserialize(data: bool) -> Stage:
         return Stage(data)
 
     def __repr__(self) -> str:
@@ -36,18 +37,18 @@ class SubChapter:
         self.stages = stages
 
     @staticmethod
-    def init(total_stages: int) -> "SubChapter":
+    def init(total_stages: int) -> SubChapter:
         stages = [Stage.init() for _ in range(total_stages)]
         return SubChapter(stages)
 
     @staticmethod
-    def read(stream: "core.Data", total_stages: int) -> "SubChapter":
+    def read(stream: core.Data, total_stages: int) -> SubChapter:
         stages: list[Stage] = []
         for _ in range(total_stages):
             stages.append(Stage.read(stream))
         return SubChapter(stages)
 
-    def write(self, stream: "core.Data"):
+    def write(self, stream: core.Data):
         for stage in self.stages:
             stage.write(stream)
 
@@ -55,7 +56,7 @@ class SubChapter:
         return [stage.serialize() for stage in self.stages]
 
     @staticmethod
-    def deserialize(data: list[bool]) -> "SubChapter":
+    def deserialize(data: list[bool]) -> SubChapter:
         return SubChapter([Stage.deserialize(stage) for stage in data])
 
     def __repr__(self) -> str:
@@ -70,20 +71,18 @@ class SubChapterStars:
         self.sub_chapters = sub_chapters
 
     @staticmethod
-    def init(total_stages: int, total_stars: int) -> "SubChapterStars":
+    def init(total_stages: int, total_stars: int) -> SubChapterStars:
         sub_chapters = [SubChapter.init(total_stages) for _ in range(total_stars)]
         return SubChapterStars(sub_chapters)
 
     @staticmethod
-    def read(
-        stream: "core.Data", total_stages: int, total_stars: int
-    ) -> "SubChapterStars":
+    def read(stream: core.Data, total_stages: int, total_stars: int) -> SubChapterStars:
         sub_chapters: list[SubChapter] = []
         for _ in range(total_stars):
             sub_chapters.append(SubChapter.read(stream, total_stages))
         return SubChapterStars(sub_chapters)
 
-    def write(self, stream: "core.Data"):
+    def write(self, stream: core.Data):
         for sub_chapter in self.sub_chapters:
             sub_chapter.write(stream)
 
@@ -91,7 +90,7 @@ class SubChapterStars:
         return [sub_chapter.serialize() for sub_chapter in self.sub_chapters]
 
     @staticmethod
-    def deserialize(data: list[list[bool]]) -> "SubChapterStars":
+    def deserialize(data: list[list[bool]]) -> SubChapterStars:
         return SubChapterStars(
             [SubChapter.deserialize(sub_chapter) for sub_chapter in data]
         )
@@ -108,21 +107,21 @@ class ItemObtain:
         self.flag = flag
 
     @staticmethod
-    def init() -> "ItemObtain":
+    def init() -> ItemObtain:
         return ItemObtain(False)
 
     @staticmethod
-    def read(stream: "core.Data") -> "ItemObtain":
+    def read(stream: core.Data) -> ItemObtain:
         return ItemObtain(stream.read_bool())
 
-    def write(self, stream: "core.Data"):
+    def write(self, stream: core.Data):
         stream.write_bool(self.flag)
 
     def serialize(self) -> bool:
         return self.flag
 
     @staticmethod
-    def deserialize(data: bool) -> "ItemObtain":
+    def deserialize(data: bool) -> ItemObtain:
         return ItemObtain(data)
 
     def __repr__(self) -> str:
@@ -137,18 +136,18 @@ class ItemObtainSet:
         self.item_obtains = item_obtains
 
     @staticmethod
-    def init() -> "ItemObtainSet":
+    def init() -> ItemObtainSet:
         return ItemObtainSet({})
 
     @staticmethod
-    def read(stream: "core.Data") -> "ItemObtainSet":
+    def read(stream: core.Data) -> ItemObtainSet:
         item_obtains: dict[int, ItemObtain] = {}
         for _ in range(stream.read_int()):
             key = stream.read_int()
             item_obtains[key] = ItemObtain.read(stream)
         return ItemObtainSet(item_obtains)
 
-    def write(self, stream: "core.Data"):
+    def write(self, stream: core.Data):
         stream.write_int(len(self.item_obtains))
         for item_id, item_obtain in self.item_obtains.items():
             stream.write_int(item_id)
@@ -163,7 +162,7 @@ class ItemObtainSet:
         }
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "ItemObtainSet":
+    def deserialize(data: dict[str, Any]) -> ItemObtainSet:
         return ItemObtainSet(
             {
                 int(item_id): ItemObtain.deserialize(item_obtain)
@@ -183,18 +182,18 @@ class ItemObtainSets:
         self.item_obtain_sets = item_obtain_sets
 
     @staticmethod
-    def init() -> "ItemObtainSets":
+    def init() -> ItemObtainSets:
         return ItemObtainSets({})
 
     @staticmethod
-    def read(stream: "core.Data") -> "ItemObtainSets":
+    def read(stream: core.Data) -> ItemObtainSets:
         item_obtain_sets: dict[int, ItemObtainSet] = {}
         for _ in range(stream.read_int()):
             key = stream.read_int()
             item_obtain_sets[key] = ItemObtainSet.read(stream)
         return ItemObtainSets(item_obtain_sets)
 
-    def write(self, stream: "core.Data"):
+    def write(self, stream: core.Data):
         stream.write_int(len(self.item_obtain_sets))
         for item_id, item_obtain_set in self.item_obtain_sets.items():
             stream.write_int(item_id)
@@ -207,7 +206,7 @@ class ItemObtainSets:
         }
 
     @staticmethod
-    def deserialize(data: dict[int, Any]) -> "ItemObtainSets":
+    def deserialize(data: dict[int, Any]) -> ItemObtainSets:
         return ItemObtainSets(
             {
                 int(item_id): ItemObtainSet.deserialize(item_obtain_set)
@@ -227,21 +226,21 @@ class UnobtainedItem:
         self.unobtained = unobtained
 
     @staticmethod
-    def init() -> "UnobtainedItem":
+    def init() -> UnobtainedItem:
         return UnobtainedItem(False)
 
     @staticmethod
-    def read(stream: "core.Data") -> "UnobtainedItem":
+    def read(stream: core.Data) -> UnobtainedItem:
         return UnobtainedItem(stream.read_bool())
 
-    def write(self, stream: "core.Data"):
+    def write(self, stream: core.Data):
         stream.write_bool(self.unobtained)
 
     def serialize(self) -> bool:
         return self.unobtained
 
     @staticmethod
-    def deserialize(data: bool) -> "UnobtainedItem":
+    def deserialize(data: bool) -> UnobtainedItem:
         return UnobtainedItem(data)
 
     def __repr__(self) -> str:
@@ -256,18 +255,18 @@ class UnobtainedItems:
         self.unobtained_items = unobtained_items
 
     @staticmethod
-    def init() -> "UnobtainedItems":
+    def init() -> UnobtainedItems:
         return UnobtainedItems({})
 
     @staticmethod
-    def read(stream: "core.Data") -> "UnobtainedItems":
+    def read(stream: core.Data) -> UnobtainedItems:
         unobtained_items: dict[int, UnobtainedItem] = {}
         for _ in range(stream.read_int()):
             key = stream.read_int()
             unobtained_items[key] = UnobtainedItem.read(stream)
         return UnobtainedItems(unobtained_items)
 
-    def write(self, stream: "core.Data"):
+    def write(self, stream: core.Data):
         stream.write_int(len(self.unobtained_items))
         for item_id, unobtained_item in self.unobtained_items.items():
             stream.write_int(item_id)
@@ -282,7 +281,7 @@ class UnobtainedItems:
         }
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "UnobtainedItems":
+    def deserialize(data: dict[str, Any]) -> UnobtainedItems:
         return UnobtainedItems(
             {
                 int(item_id): UnobtainedItem.deserialize(unobtained_item)
@@ -304,7 +303,7 @@ class ItemRewardChapters:
         self.unobtained_items = UnobtainedItems.init()
 
     @staticmethod
-    def init(gv: "core.GameVersion") -> "ItemRewardChapters":
+    def init(gv: core.GameVersion) -> ItemRewardChapters:
         if gv < 20:
             return ItemRewardChapters([])
         if gv <= 33:
@@ -327,7 +326,7 @@ class ItemRewardChapters:
         )
 
     @staticmethod
-    def read(stream: "core.Data", gv: "core.GameVersion") -> "ItemRewardChapters":
+    def read(stream: core.Data, gv: core.GameVersion) -> ItemRewardChapters:
         if gv < 20:
             return ItemRewardChapters([])
         if gv <= 33:
@@ -347,7 +346,7 @@ class ItemRewardChapters:
             sub_chapters.append(SubChapterStars.read(stream, total_stages, total_stars))
         return ItemRewardChapters(sub_chapters)
 
-    def write(self, stream: "core.Data", gv: "core.GameVersion"):
+    def write(self, stream: core.Data, gv: core.GameVersion):
         if gv < 20:
             return
         if gv <= 33:
@@ -367,11 +366,11 @@ class ItemRewardChapters:
         for sub_chapter in self.sub_chapters:
             sub_chapter.write(stream)
 
-    def read_item_obtains(self, stream: "core.Data"):
+    def read_item_obtains(self, stream: core.Data):
         self.item_obtains = ItemObtainSets.read(stream)
         self.unobtained_items = UnobtainedItems.read(stream)
 
-    def write_item_obtains(self, stream: "core.Data"):
+    def write_item_obtains(self, stream: core.Data):
         self.item_obtains.write(stream)
         self.unobtained_items.write(stream)
 
@@ -385,7 +384,7 @@ class ItemRewardChapters:
         }
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "ItemRewardChapters":
+    def deserialize(data: dict[str, Any]) -> ItemRewardChapters:
         chapters = ItemRewardChapters(
             [
                 SubChapterStars.deserialize(sub_chapter)

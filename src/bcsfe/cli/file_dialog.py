@@ -1,6 +1,6 @@
+from __future__ import annotations
 from bcsfe import core
 from bcsfe.cli import color, dialog_creator
-from typing import Optional
 
 
 class FileDialog:
@@ -28,9 +28,7 @@ class FileDialog:
             self.root.withdraw()
             self.root.wm_attributes("-topmost", 1)  # type: ignore
 
-    def select_files_in_dir(
-        self, path: "core.Path", ignore_json: bool
-    ) -> Optional[str]:
+    def select_files_in_dir(self, path: core.Path, ignore_json: bool) -> str | None:
         """Print current files in directory.
 
         Args:
@@ -84,9 +82,9 @@ class FileDialog:
         title: str,
         initialdir: str,
         initialfile: str,
-        filetypes: Optional[list[tuple[str, str]]] = None,
+        filetypes: list[tuple[str, str]] | None = None,
         ignore_json: bool = False,
-    ) -> Optional[str]:
+    ) -> str | None:
         if filetypes is None:
             filetypes = []
         title = core.core_data.local_manager.get_key(title)
@@ -117,18 +115,18 @@ class FileDialog:
         title: str,
         initialdir: str,
         initialfile: str,
-        filetypes: Optional[list[tuple[str, str]]] = None,
-    ) -> Optional[str]:
+        filetypes: list[tuple[str, str]] | None = None,
+    ) -> str | None:
         """Save file dialog
 
         Args:
             title (str): Title of dialog.
-            filetypes (Optional[list[tuple[str, str]]], optional): File types. Defaults to None.
+            filetypes (list[tuple[str, str]] | None, optional): File types. Defaults to None.
             initialdir (str, optional): Initial directory. Defaults to "".
             initialfile (str, optional): Initial file. Defaults to "".
 
         Returns:
-            Optional[str]: Path to file.
+            str | None: Path to file.
         """
         if filetypes is None:
             filetypes = []

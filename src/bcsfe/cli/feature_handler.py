@@ -1,10 +1,11 @@
-from typing import Any, Callable, Optional
+from __future__ import annotations
+from typing import Any, Callable
 from bcsfe import core
 from bcsfe.cli import dialog_creator, color, edits, save_management, main
 
 
 class FeatureHandler:
-    def __init__(self, save_file: "core.SaveFile"):
+    def __init__(self, save_file: core.SaveFile):
         self.save_file = save_file
 
     def get_features(self):
@@ -137,8 +138,8 @@ class FeatureHandler:
         self,
         name: str,
         parent_path: str = "",
-        features: Optional[dict[str, Any]] = None,
-        found_features: Optional[set[str]] = None,
+        features: dict[str, Any] | None = None,
+        found_features: set[str] | None = None,
     ) -> set[str]:
         name = name.lower().replace(" ", "")
         if features is None:

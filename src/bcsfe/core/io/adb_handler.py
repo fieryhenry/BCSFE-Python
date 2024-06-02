@@ -1,3 +1,4 @@
+from __future__ import annotations
 from bcsfe import core
 from bcsfe.core import io
 from bcsfe.cli import dialog_creator, color
@@ -28,7 +29,7 @@ class AdbHandler(io.root_handler.RootHandler):
             path=core.core_data.config.get_str(core.ConfigKey.ADB_PATH),
         )
 
-    def is_adb_installed(self, path: "core.Path") -> bool:
+    def is_adb_installed(self, path: core.Path) -> bool:
         return path.run("version").success
 
     def adb_root_success(self) -> bool:
@@ -37,13 +38,13 @@ class AdbHandler(io.root_handler.RootHandler):
             != "adbd cannot run as root in production builds"
         )
 
-    def start_server(self) -> "core.CommandResult":
+    def start_server(self) -> core.CommandResult:
         return self.adb_path.run("start-server")
 
-    def kill_server(self) -> "core.CommandResult":
+    def kill_server(self) -> core.CommandResult:
         return self.adb_path.run("kill-server")
 
-    def root(self) -> "core.CommandResult":
+    def root(self) -> core.CommandResult:
         return self.adb_path.run(f"-s {self.get_device()} root")
 
     def get_connected_devices(self) -> list[str]:
@@ -63,15 +64,15 @@ class AdbHandler(io.root_handler.RootHandler):
     def get_device_name(self) -> str:
         return self.run_shell("getprop ro.product.model").result.strip()
 
-    def run_shell(self, command: str) -> "core.CommandResult":
+    def run_shell(self, command: str) -> core.CommandResult:
         return self.adb_path.run(f'-s {self.get_device()} shell "{command}"')
 
-    def run_root_shell(self, command: str) -> "core.CommandResult":
+    def run_root_shell(self, command: str) -> core.CommandResult:
         return self.run_shell(f"su -c '{command}'")
 
     def pull_file(
-        self, device_path: "core.Path", local_path: "core.Path"
-    ) -> "core.CommandResult":
+        self, device_path: core.Path, local_path: core.Path
+    ) -> core.CommandResult:
         if not self.adb_root_success():
             result = self.run_root_shell(
                 f"cp {device_path.to_str_forwards()} /sdcard/ && chmod o+rw /sdcard/{device_path.basename()}"
@@ -92,8 +93,8 @@ class AdbHandler(io.root_handler.RootHandler):
         return result
 
     def push_file(
-        self, local_path: "core.Path", device_path: "core.Path"
-    ) -> "core.CommandResult":
+        self, local_path: core.Path, device_path: core.Path
+    ) -> core.CommandResult:
         orignal_device_path = device_path.copy_object()
         if not self.adb_root_success():
             device_path = core.Path("/sdcard/").add(device_path.basename())
@@ -115,10 +116,10 @@ class AdbHandler(io.root_handler.RootHandler):
 
         return result
 
-    def stat_file(self, device_path: "core.Path") -> "core.CommandResult":
+    def stat_file(self, device_path: core.Path) -> core.CommandResult:
         return self.run_shell(f"stat {device_path.to_str_forwards()}")
 
-    def does_file_exist(self, device_path: "core.Path") -> bool:
+    def does_file_exist(self, device_path: core.Path) -> bool:
         return self.stat_file(device_path).success
 
     def get_battlecats_packages(self) -> list[str]:
@@ -134,17 +135,17 @@ class AdbHandler(io.root_handler.RootHandler):
             packages.append(package.split("/")[3])
         return packages
 
-    def save_battlecats_save(self, local_path: "core.Path") -> "core.CommandResult":
+    def save_battlecats_save(self, local_path: core.Path) -> core.CommandResult:
         result = self.pull_file(self.get_battlecats_save_path(), local_path)
         return result
 
-    def load_battlecats_save(self, local_path: "core.Path") -> "core.CommandResult":
+    def load_battlecats_save(self, local_path: core.Path) -> core.CommandResult:
         return self.push_file(local_path, self.get_battlecats_save_path())
 
-    def close_game(self) -> "core.CommandResult":
+    def close_game(self) -> core.CommandResult:
         return self.run_shell(f"am force-stop {self.get_package_name()}")
 
-    def run_game(self) -> "core.CommandResult":
+    def run_game(self) -> core.CommandResult:
         return self.run_shell(
             f"monkey -p {self.get_package_name()} -c android.intent.category.LAUNCHER 1"
         )

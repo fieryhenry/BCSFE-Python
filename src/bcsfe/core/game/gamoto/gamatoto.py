@@ -1,5 +1,6 @@
+from __future__ import annotations
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any
 from bcsfe import core
 from bcsfe.cli import color, dialog_creator
 
@@ -15,11 +16,11 @@ class MemberName:
 
 
 class GamatotoMembersName:
-    def __init__(self, save_file: "core.SaveFile"):
+    def __init__(self, save_file: core.SaveFile):
         self.save_file = save_file
         self.members = self.read_members()
 
-    def read_members(self) -> Optional[list[MemberName]]:
+    def read_members(self) -> list[MemberName] | None:
         members: list[MemberName] = []
         gdg = core.core_data.get_game_data_getter(self.save_file)
         data = gdg.download(
@@ -48,7 +49,7 @@ class GamatotoMembersName:
             )
         return members
 
-    def get_member(self, member_id: int) -> Optional[MemberName]:
+    def get_member(self, member_id: int) -> MemberName | None:
         if self.members is None:
             return None
         for member in self.members:
@@ -56,23 +57,21 @@ class GamatotoMembersName:
                 return member
         return None
 
-    def get_members_from_ids(self, ids: list[int]) -> list[Optional[MemberName]]:
+    def get_members_from_ids(self, ids: list[int]) -> list[MemberName | None]:
         return [self.get_member(id) for id in ids]
 
-    def get_all_rarity(self, rarity: int) -> Optional[list[MemberName]]:
+    def get_all_rarity(self, rarity: int) -> list[MemberName] | None:
         if self.members is None:
             return None
 
         return [member for member in self.members if member.rarity == rarity]
 
-    def get_members_from_helpers(
-        self, helpers: "Helpers"
-    ) -> list[Optional[MemberName]]:
+    def get_members_from_helpers(self, helpers: Helpers) -> list[MemberName | None]:
         return self.get_members_from_ids(
             [helper.id for helper in helpers.helpers if helper.is_valid()]
         )
 
-    def get_all_rarity_names(self) -> Optional[list[str]]:
+    def get_all_rarity_names(self) -> list[str] | None:
         if self.members is None:
             return None
         names: dict[int, str] = {}
@@ -97,12 +96,12 @@ class GamatotoLimit:
 
 
 class GamatotoLevels:
-    def __init__(self, save_file: "core.SaveFile"):
+    def __init__(self, save_file: core.SaveFile):
         self.save_file = save_file
         self.levels = self.read_levels()
         self.limit = self.read_max_level()
 
-    def read_levels(self) -> Optional[list[GamatotoLevel]]:
+    def read_levels(self) -> list[GamatotoLevel] | None:
         levels: list[GamatotoLevel] = []
         gdg = core.core_data.get_game_data_getter(self.save_file)
         data = gdg.download("DataLocal", "GamatotoExpedition.csv")
@@ -117,7 +116,7 @@ class GamatotoLevels:
             )
         return levels
 
-    def read_max_level(self) -> Optional[GamatotoLimit]:
+    def read_max_level(self) -> GamatotoLimit | None:
         gdg = core.core_data.get_game_data_getter(self.save_file)
         data = gdg.download("DataLocal", "GamatotoExpedition_Limit.csv")
         if data is None:
@@ -126,17 +125,17 @@ class GamatotoLevels:
         line = csv[0]
         return GamatotoLimit(line[0].to_int(), line[1].to_int(), line[2].to_int())
 
-    def get_level(self, level: int) -> Optional[GamatotoLevel]:
+    def get_level(self, level: int) -> GamatotoLevel | None:
         if self.levels is None:
             return None
         if level < 1:
             return None
         return self.levels[level - 1]
 
-    def get_all_levels(self) -> Optional[list[GamatotoLevel]]:
+    def get_all_levels(self) -> list[GamatotoLevel] | None:
         return self.levels
 
-    def get_level_from_xp(self, xp: int) -> Optional[GamatotoLevel]:
+    def get_level_from_xp(self, xp: int) -> GamatotoLevel | None:
         if self.levels is None or self.limit is None:
             return None
         for level in self.levels:
@@ -150,7 +149,7 @@ class GamatotoLevels:
             return self.levels[-1]
         return self.levels[self.limit.max_level - 1]
 
-    def get_xp_from_level(self, level: int) -> Optional[int]:
+    def get_xp_from_level(self, level: int) -> int | None:
         if self.levels is None:
             return None
         level -= 1
@@ -158,17 +157,17 @@ class GamatotoLevels:
             return 0
         return self.levels[level - 1].xp_needed
 
-    def get_max_level(self) -> Optional[int]:
+    def get_max_level(self) -> int | None:
         if self.limit is None:
             return None
         return self.limit.max_level
 
-    def get_total_stages(self) -> Optional[int]:
+    def get_total_stages(self) -> int | None:
         if self.limit is None:
             return None
         return self.limit.total_stages
 
-    def get_total_helpers(self) -> Optional[int]:
+    def get_total_helpers(self) -> int | None:
         if self.limit is None:
             return None
         return self.limit.total_helpers
@@ -179,22 +178,22 @@ class Helper:
         self.id = id
 
     @staticmethod
-    def init() -> "Helper":
+    def init() -> Helper:
         return Helper(-1)
 
     @staticmethod
-    def read(stream: "core.Data") -> "Helper":
+    def read(stream: core.Data) -> Helper:
         id = stream.read_int()
         return Helper(id)
 
-    def write(self, stream: "core.Data"):
+    def write(self, stream: core.Data):
         stream.write_int(self.id)
 
     def serialize(self) -> int:
         return self.id
 
     @staticmethod
-    def deserialize(data: int) -> "Helper":
+    def deserialize(data: int) -> Helper:
         return Helper(data)
 
     def __repr__(self) -> str:
@@ -212,18 +211,18 @@ class Helpers:
         self.helpers = helpers
 
     @staticmethod
-    def init() -> "Helpers":
+    def init() -> Helpers:
         return Helpers([])
 
     @staticmethod
-    def read(stream: "core.Data") -> "Helpers":
+    def read(stream: core.Data) -> Helpers:
         total = stream.read_int()
         helpers: list[Helper] = []
         for _ in range(total):
             helpers.append(Helper.read(stream))
         return Helpers(helpers)
 
-    def write(self, stream: "core.Data"):
+    def write(self, stream: core.Data):
         stream.write_int(len(self.helpers))
         for helper in self.helpers:
             helper.write(stream)
@@ -232,7 +231,7 @@ class Helpers:
         return [helper.serialize() for helper in self.helpers]
 
     @staticmethod
-    def deserialize(data: list[int]) -> "Helpers":
+    def deserialize(data: list[int]) -> Helpers:
         return Helpers([Helper.deserialize(helper) for helper in data])
 
     def __repr__(self) -> str:
@@ -267,7 +266,7 @@ class Gamatoto:
         self.collab_durations: dict[int, float] = {}
 
     @staticmethod
-    def init() -> "Gamatoto":
+    def init() -> Gamatoto:
         return Gamatoto(
             0.0,
             False,
@@ -279,7 +278,7 @@ class Gamatoto:
         )
 
     @staticmethod
-    def read(stream: "core.Data") -> "Gamatoto":
+    def read(stream: core.Data) -> Gamatoto:
         remaining_seconds = stream.read_double()
         return_flag = stream.read_bool()
         xp = stream.read_int()
@@ -297,7 +296,7 @@ class Gamatoto:
             notif_value,
         )
 
-    def write(self, stream: "core.Data"):
+    def write(self, stream: core.Data):
         stream.write_double(self.remaining_seconds)
         stream.write_bool(self.return_flag)
         stream.write_int(self.xp)
@@ -306,25 +305,25 @@ class Gamatoto:
         stream.write_int(self.unknown)
         stream.write_int(self.notif_value)
 
-    def read_2(self, stream: "core.Data"):
+    def read_2(self, stream: core.Data):
         self.helpers = Helpers.read(stream)
         self.is_ad_present = stream.read_bool()
 
-    def write_2(self, stream: "core.Data"):
+    def write_2(self, stream: core.Data):
         self.helpers.write(stream)
         stream.write_bool(self.is_ad_present)
 
-    def read_skin(self, stream: "core.Data"):
+    def read_skin(self, stream: core.Data):
         self.skin = stream.read_int()
 
-    def write_skin(self, stream: "core.Data"):
+    def write_skin(self, stream: core.Data):
         stream.write_int(self.skin)
 
-    def read_collab_data(self, stream: "core.Data"):
+    def read_collab_data(self, stream: core.Data):
         self.collab_flags: dict[int, bool] = stream.read_int_bool_dict()
         self.collab_durations: dict[int, float] = stream.read_int_double_dict()
 
-    def write_collab_data(self, stream: "core.Data"):
+    def write_collab_data(self, stream: core.Data):
         stream.write_int_bool_dict(self.collab_flags)
         stream.write_int_double_dict(self.collab_durations)
 
@@ -345,7 +344,7 @@ class Gamatoto:
         }
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "Gamatoto":
+    def deserialize(data: dict[str, Any]) -> Gamatoto:
         gamatoto = Gamatoto(
             data.get("remaining_seconds", 0.0),
             data.get("return_flag", False),
@@ -376,7 +375,7 @@ class Gamatoto:
     def __str__(self):
         return self.__repr__()
 
-    def edit_xp(self, save_file: "core.SaveFile"):
+    def edit_xp(self, save_file: core.SaveFile):
         gamatoto_levels = core.core_data.get_gamatoto_levels(save_file)
         current_level = gamatoto_levels.get_level_from_xp(self.xp)
         if current_level is None:
@@ -425,7 +424,7 @@ class Gamatoto:
             "gamatoto_level_success", level=current_level.level, xp=xp
         )
 
-    def edit_helpers(self, save_file: "core.SaveFile"):
+    def edit_helpers(self, save_file: core.SaveFile):
         members_name = core.core_data.get_gamatoto_members_name(save_file)
 
         gamatoto_levels = core.core_data.get_gamatoto_levels(save_file)
@@ -481,9 +480,9 @@ class Gamatoto:
             )
 
 
-def edit_xp(save_file: "core.SaveFile"):
+def edit_xp(save_file: core.SaveFile):
     save_file.gamatoto.edit_xp(save_file)
 
 
-def edit_helpers(save_file: "core.SaveFile"):
+def edit_helpers(save_file: core.SaveFile):
     save_file.gamatoto.edit_helpers(save_file)

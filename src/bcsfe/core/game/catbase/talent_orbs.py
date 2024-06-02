@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import Any
 from bcsfe import core
 
@@ -8,14 +9,14 @@ class TalentOrb:
         self.value = value
 
     @staticmethod
-    def init() -> "TalentOrb":
+    def init() -> TalentOrb:
         return TalentOrb(
             0,
             0,
         )
 
     @staticmethod
-    def read(stream: "core.Data", gv: "core.GameVersion") -> "TalentOrb":
+    def read(stream: core.Data, gv: core.GameVersion) -> TalentOrb:
         id = stream.read_short()
         if gv < 110400:
             value = stream.read_byte()
@@ -23,7 +24,7 @@ class TalentOrb:
             value = stream.read_short()
         return TalentOrb(id, value)
 
-    def write(self, stream: "core.Data", gv: "core.GameVersion"):
+    def write(self, stream: core.Data, gv: core.GameVersion):
         stream.write_short(self.id)
         if gv < 110400:
             stream.write_byte(self.value)
@@ -37,7 +38,7 @@ class TalentOrb:
         }
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "TalentOrb":
+    def deserialize(data: dict[str, Any]) -> TalentOrb:
         return TalentOrb(data.get("id", 0), data.get("value", 0))
 
     def __repr__(self):
@@ -52,11 +53,11 @@ class TalentOrbs:
         self.orbs = orbs
 
     @staticmethod
-    def init() -> "TalentOrbs":
+    def init() -> TalentOrbs:
         return TalentOrbs({})
 
     @staticmethod
-    def read(stream: "core.Data", gv: "core.GameVersion") -> "TalentOrbs":
+    def read(stream: core.Data, gv: core.GameVersion) -> TalentOrbs:
         length = stream.read_short()
         orbs = {}
         for _ in range(length):
@@ -64,7 +65,7 @@ class TalentOrbs:
             orbs[orb.id] = orb
         return TalentOrbs(orbs)
 
-    def write(self, stream: "core.Data", gv: "core.GameVersion"):
+    def write(self, stream: core.Data, gv: core.GameVersion):
         stream.write_short(len(self.orbs))
         for orb in self.orbs.values():
             orb.write(stream, gv)
@@ -73,7 +74,7 @@ class TalentOrbs:
         return [orb.serialize() for orb in self.orbs.values()]
 
     @staticmethod
-    def deserialize(data: list[dict[str, Any]]) -> "TalentOrbs":
+    def deserialize(data: list[dict[str, Any]]) -> TalentOrbs:
         return TalentOrbs(
             {orb.get("id", 0): TalentOrb.deserialize(orb) for orb in data}
         )

@@ -1,4 +1,5 @@
-from typing import Any, Optional
+from __future__ import annotations
+from typing import Any
 from bcsfe import core
 from bcsfe.cli import color, dialog_creator
 
@@ -21,11 +22,11 @@ class Medals:
         self.ub = ub
 
     @staticmethod
-    def init() -> "Medals":
+    def init() -> Medals:
         return Medals(0, 0, 0, [], {}, False)
 
     @staticmethod
-    def read(data: "core.Data") -> "Medals":
+    def read(data: core.Data) -> Medals:
         u1 = data.read_int()
         u2 = data.read_int()
         u3 = data.read_int()
@@ -40,7 +41,7 @@ class Medals:
         ub = data.read_bool()
         return Medals(u1, u2, u3, medal_data_1, medal_data_2, ub)
 
-    def write(self, data: "core.Data") -> None:
+    def write(self, data: core.Data) -> None:
         data.write_int(self.u1)
         data.write_int(self.u2)
         data.write_int(self.u3)
@@ -63,7 +64,7 @@ class Medals:
         }
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> "Medals":
+    def deserialize(data: dict[str, Any]) -> Medals:
         return Medals(
             data.get("u1", 0),
             data.get("u2", 0),
@@ -87,7 +88,7 @@ class Medals:
         return medal_id in self.medal_data_1
 
     @staticmethod
-    def edit_medals(save_file: "core.SaveFile"):
+    def edit_medals(save_file: core.SaveFile):
         medals = save_file.medals
         medal_names = core.core_data.get_medal_names(save_file)
         if medal_names.medal_names is None:
@@ -146,11 +147,11 @@ class Medals:
 
 
 class MedalNames:
-    def __init__(self, save_file: "core.SaveFile"):
+    def __init__(self, save_file: core.SaveFile):
         self.save_file = save_file
         self.medal_names = self.get_medal_names()
 
-    def get_medal_names(self) -> Optional[list[list[str]]]:
+    def get_medal_names(self) -> list[list[str]] | None:
         file_name = "medalname.tsv"
         gdg = core.core_data.get_game_data_getter(self.save_file)
         data = gdg.download("resLocal", file_name)
@@ -162,7 +163,7 @@ class MedalNames:
             names.append(row.to_str_list())
         return names
 
-    def get_medal_name(self, medal_id: int) -> Optional[list[str]]:
+    def get_medal_name(self, medal_id: int) -> list[str] | None:
         if self.medal_names is None:
             return None
         if medal_id < 0 or medal_id >= len(self.medal_names):

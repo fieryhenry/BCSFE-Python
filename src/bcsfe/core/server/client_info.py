@@ -1,14 +1,15 @@
+from __future__ import annotations
 from typing import Any
 from bcsfe import core
 
 
 class ClientInfo:
-    def __init__(self, cc: "core.CountryCode", gv: "core.GameVersion"):
+    def __init__(self, cc: core.CountryCode, gv: core.GameVersion):
         self.cc = cc
         self.gv = gv
 
     @staticmethod
-    def from_save_file(save_file: "core.SaveFile"):
+    def from_save_file(save_file: core.SaveFile):
         return ClientInfo(save_file.cc, save_file.game_version)
 
     def get_client_info(self) -> dict[str, Any]:

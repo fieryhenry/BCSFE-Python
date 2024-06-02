@@ -1,6 +1,7 @@
+from __future__ import annotations
 import base64
 import time
-from typing import Any, Optional
+from typing import Any
 
 from bcsfe import core
 import jwt
@@ -12,11 +13,11 @@ class RequestResult:
     def __init__(
         self,
         url: str,
-        response: Optional[core.Response],
+        response: core.Response | None,
         headers: dict[str, str],
         data: str,
-        payload: Optional[dict[str, Any]] = None,
-        timestamp: Optional[str] = None,
+        payload: dict[str, Any] | None = None,
+        timestamp: str | None = None,
     ):
         self.url = url
         self.response = response
@@ -33,7 +34,7 @@ class ServerHandler:
     aws_url = "https://nyanko-service-data-prd.s3.amazonaws.com"
     managed_item_url = "https://nyanko-managed-item.ponosgames.com"
 
-    def __init__(self, save_file: "core.SaveFile", print: bool = True):
+    def __init__(self, save_file: core.SaveFile, print: bool = True):
         self.save_file = save_file
         self.print = print
         self.counter = 0
@@ -53,7 +54,7 @@ class ServerHandler:
     def save_password(self, password: str):
         self.save_file.store_string(ServerHandler.get_password_key(), password)
 
-    def get_stored_password(self) -> Optional[str]:
+    def get_stored_password(self) -> str | None:
         return self.save_file.get_string(ServerHandler.get_password_key())
 
     def remove_stored_password(self):
@@ -62,7 +63,7 @@ class ServerHandler:
     def save_save_key_data(self, save_key: dict[str, Any]):
         self.save_file.store_dict(ServerHandler.get_save_key_key(), save_key)
 
-    def get_stored_save_key_data(self) -> Optional[dict[str, Any]]:
+    def get_stored_save_key_data(self) -> dict[str, Any] | None:
         save_key_data = self.save_file.get_dict(ServerHandler.get_save_key_key())
         if save_key_data is None:
             return None
@@ -98,14 +99,14 @@ class ServerHandler:
     def save_auth_token(self, auth_token: str):
         self.save_file.store_string(ServerHandler.get_auth_token_key(), auth_token)
 
-    def get_stored_auth_token(self) -> Optional[str]:
+    def get_stored_auth_token(self) -> str | None:
         token = self.save_file.get_string(ServerHandler.get_auth_token_key())
         return token
 
     def remove_stored_auth_token(self):
         self.save_file.remove_string(ServerHandler.get_auth_token_key())
 
-    def get_password_new(self) -> Optional[str]:
+    def get_password_new(self) -> str | None:
         self.print_key("getting_password")
 
         url = f"{self.auth_url}/v1/users"
@@ -137,7 +138,7 @@ class ServerHandler:
         )
         core.core_data.logger.log_error(log_text)
 
-    def do_password_request(self, url: str, dict_data: dict[str, Any]) -> Optional[str]:
+    def do_password_request(self, url: str, dict_data: dict[str, Any]) -> str | None:
         result = self.do_request(url, dict_data)
         if result.payload is None:
             ServerHandler.log_error("password_fail", result)
@@ -192,7 +193,7 @@ class ServerHandler:
         payload = json.get("payload", {})
         return RequestResult(url, response, headers, data, payload, timestamp)
 
-    def refresh_password(self) -> Optional[str]:
+    def refresh_password(self) -> str | None:
         self.print_key("refreshing_password")
 
         url = f"{self.auth_url}/v1/user/password"
@@ -203,7 +204,7 @@ class ServerHandler:
         }
         return self.do_password_request(url, data)
 
-    def get_auth_token_new(self, password: str) -> Optional[str]:
+    def get_auth_token_new(self, password: str) -> str | None:
         self.print_key("getting_auth_token")
 
         url = f"{self.auth_url}/v1/tokens"
@@ -227,7 +228,7 @@ class ServerHandler:
         self.save_auth_token(auth_token)
         return auth_token
 
-    def get_password(self, tries: int = 0) -> Optional[str]:
+    def get_password(self, tries: int = 0) -> str | None:
         password = self.get_stored_password()
         if password is not None:
             return password
@@ -257,7 +258,7 @@ class ServerHandler:
 
         return True
 
-    def get_auth_token(self) -> Optional[str]:
+    def get_auth_token(self) -> str | None:
         auth_token = self.get_stored_auth_token()
         if auth_token is not None:
             if self.validate_auth_token(auth_token):
@@ -273,12 +274,14 @@ class ServerHandler:
         if auth_token is not None:
             return auth_token
 
+        return None
+
     def log_no_internet(self, result: RequestResult):
         ServerHandler.log_error("no_internet", result)
         if self.print:
             core.print_no_internet()
 
-    def get_save_key_new(self, auth_token: str) -> Optional[dict[str, Any]]:
+    def get_save_key_new(self, auth_token: str) -> dict[str, Any] | None:
         self.print_key("getting_save_key")
 
         nonce = core.Random.get_hex_string(32)
@@ -306,7 +309,7 @@ class ServerHandler:
         self.save_save_key_data(payload)
         return payload
 
-    def get_save_key(self) -> Optional[dict[str, Any]]:
+    def get_save_key(self) -> dict[str, Any] | None:
         # save_key = self.get_stored_save_key_data()
         # if save_key and save_key.get("key", None):
         #    return save_key
@@ -320,9 +323,11 @@ class ServerHandler:
         if save_key is not None:
             return save_key
 
+        return None
+
     def get_upload_request_body(
         self, save_key: dict[str, Any], boundary: str
-    ) -> Optional["core.Data"]:
+    ) -> core.Data | None:
         save_data = self.save_file.to_data()
         body = core.Data()
         keys = [
@@ -395,7 +400,7 @@ class ServerHandler:
         if self.print:
             color.ColoredText.localize(key, **kwargs)
 
-    def get_codes(self, upload_managed_items: bool = True) -> Optional[tuple[str, str]]:
+    def get_codes(self, upload_managed_items: bool = True) -> tuple[str, str] | None:
         self.save_file.show_ban_message = False
 
         auth_token = self.get_auth_token()
@@ -486,7 +491,7 @@ class ServerHandler:
         bmd.remove_managed_items()
         return True
 
-    def get_new_inquiry_code(self) -> Optional[str]:
+    def get_new_inquiry_code(self) -> str | None:
         url = f"{self.backups_url}/?action=createAccount&referenceId="
 
         response = core.RequestHandler(url).get()
@@ -524,10 +529,10 @@ class ServerHandler:
     def from_codes(
         transfer_code: str,
         confirmation_code: str,
-        cc: "core.CountryCode",
-        gv: "core.GameVersion",
+        cc: core.CountryCode,
+        gv: core.GameVersion,
         print_no_internet: bool = True,
-    ) -> tuple[Optional["ServerHandler"], Optional[RequestResult]]:
+    ) -> tuple[ServerHandler | None, RequestResult | None]:
         url = f"{ServerHandler.save_url}/v2/transfers/{transfer_code}/reception"
         data = core.ClientInfo(cc, gv).get_client_info()
         data["pin"] = confirmation_code

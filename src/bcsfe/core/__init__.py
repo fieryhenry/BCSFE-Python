@@ -45,6 +45,7 @@ from bcsfe.core.game.catbase.powerup import PowerUpHelper
 from bcsfe.core.game.catbase.scheme_items import SchemeItems
 from bcsfe.core.game.catbase.special_skill import (
     SpecialSkills,
+    SpecialSkill,
     AbilityData,
     AbilityDataItem,
 )
@@ -290,4 +291,5 @@ __all__ = [
     "SaveOrb",
     "SaveOrbs",
     "ConfigKey",
+    "SpecialSkill",
 ]

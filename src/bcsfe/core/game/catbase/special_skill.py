@@ -6,20 +6,20 @@ from typing import Any
 from bcsfe.cli import dialog_creator, color
 
 
-class Skill:
+class SpecialSkill:
     def __init__(self, upg: core.Upgrade):
         self.upgrade = upg
         self.seen = 0
         self.max_upgrade_level = core.Upgrade(0, 0)
 
     @staticmethod
-    def init() -> Skill:
-        return Skill(core.Upgrade(0, 0))
+    def init() -> SpecialSkill:
+        return SpecialSkill(core.Upgrade(0, 0))
 
     @staticmethod
-    def read_upgrade(stream: core.Data) -> Skill:
+    def read_upgrade(stream: core.Data) -> SpecialSkill:
         up = core.Upgrade.read(stream)
-        return Skill(up)
+        return SpecialSkill(up)
 
     def write_upgrade(self, stream: core.Data):
         self.upgrade.write(stream)
@@ -45,8 +45,8 @@ class Skill:
         }
 
     @staticmethod
-    def deserialize(data: dict[str, Any]) -> Skill:
-        skill = Skill(core.Upgrade.deserialize(data.get("upgrade", {})))
+    def deserialize(data: dict[str, Any]) -> SpecialSkill:
+        skill = SpecialSkill(core.Upgrade.deserialize(data.get("upgrade", {})))
         skill.seen = data.get("seen", 0)
         skill.max_upgrade_level = core.Upgrade.deserialize(
             data.get("max_upgrade_level", {})
@@ -81,16 +81,16 @@ class Skill:
 
 
 class SpecialSkills:
-    def __init__(self, skills: list[Skill]):
+    def __init__(self, skills: list[SpecialSkill]):
         self.skills = skills
 
     @staticmethod
     def init() -> SpecialSkills:
-        skills = [Skill.init() for _ in range(11)]
+        skills = [SpecialSkill.init() for _ in range(11)]
         return SpecialSkills(skills)
 
-    def get_valid_skills(self) -> list[Skill]:
-        new_skills: list[Skill] = []
+    def get_valid_skills(self) -> list[SpecialSkill]:
+        new_skills: list[SpecialSkill] = []
         for i, skill in enumerate(self.skills):
             if i == 1:
                 continue
@@ -102,9 +102,9 @@ class SpecialSkills:
     def read_upgrades(stream: core.Data) -> SpecialSkills:
         total_skills = 11
 
-        skills: list[Skill] = []
+        skills: list[SpecialSkill] = []
         for _ in range(total_skills):
-            skills.append(Skill.read_upgrade(stream))
+            skills.append(SpecialSkill.read_upgrade(stream))
 
         return SpecialSkills(skills)
 
@@ -135,7 +135,7 @@ class SpecialSkills:
     def deserialize(data: list[dict[str, Any]]) -> SpecialSkills:
         skills = SpecialSkills([])
         for skill in data:
-            skills.skills.append(Skill.deserialize(skill))
+            skills.skills.append(SpecialSkill.deserialize(skill))
 
         return skills
 
@@ -236,6 +236,15 @@ class SpecialSkills:
 
         if success:
             color.ColoredText.localize("skills_edited")
+
+    def get_from_id(self, id: int, only_valid: bool = True) -> SpecialSkill | None:
+        if only_valid:
+            skills = self.get_valid_skills()
+        else:
+            skills = self.skills
+        if id >= len(skills) or id < 0:
+            return None
+        return skills[id]
 
 
 class AbilityDataItem:

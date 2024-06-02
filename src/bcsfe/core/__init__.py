@@ -49,7 +49,15 @@ from bcsfe.core.game.catbase.special_skill import (
     AbilityDataItem,
 )
 from bcsfe.core.game.catbase.stamp import StampData
-from bcsfe.core.game.catbase.talent_orbs import TalentOrb, TalentOrbs
+from bcsfe.core.game.catbase.talent_orbs import (
+    TalentOrb,
+    TalentOrbs,
+    OrbInfo,
+    OrbInfoList,
+    RawOrbInfo,
+    SaveOrb,
+    SaveOrbs,
+)
 from bcsfe.core.game.catbase.unlock_popups import UnlockPopups
 from bcsfe.core.game.catbase.upgrade import Upgrade
 from bcsfe.core.game.catbase.user_rank_rewards import (
@@ -274,4 +282,12 @@ __all__ = [
     "Cat",
     "Upgrade",
     "PowerUpHelper",
+    "TalentOrb",
+    "TalentOrbs",
+    "OrbInfo",
+    "OrbInfoList",
+    "RawOrbInfo",
+    "SaveOrb",
+    "SaveOrbs",
+    "ConfigKey",
 ]

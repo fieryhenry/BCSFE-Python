@@ -54,7 +54,7 @@ class FeatureHandler:
                 "battle_items": edits.basic_items.BasicItems.edit_battle_items,
                 "catseyes": edits.basic_items.BasicItems.edit_catseyes,
                 "catfruit": edits.basic_items.BasicItems.edit_catfruit,
-                "talent_orbs": edits.talent_orbs.SaveOrbs.edit_talent_orbs,
+                "talent_orbs": core.game.catbase.talent_orbs.SaveOrbs.edit_talent_orbs,
                 "catamins": edits.basic_items.BasicItems.edit_catamins,
                 "scheme_items": edits.basic_items.BasicItems.edit_scheme_items,
                 "labyrinth_medals": edits.basic_items.BasicItems.edit_labyrinth_medals,

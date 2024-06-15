@@ -111,10 +111,10 @@ class IntInput:
         return self.clamp_value(user_input_i), user_input
 
     def get_input_locale_while(
-        self, dialog: str, perameters: dict[str, int | str]
+        self, dialog: str, perameters: dict[str, int | str], escape: bool = True
     ) -> int | None:
         while True:
-            int_val, user_input = self.get_input(dialog, perameters)
+            int_val, user_input = self.get_input(dialog, perameters, escape=escape)
             if int_val is not None:
                 return int_val
             if user_input == core.core_data.local_manager.get_key("quit_key"):
@@ -535,7 +535,7 @@ class SingleEditor:
         self.min_value = min_value
         self.signed = signed
 
-    def edit(self) -> int:
+    def edit(self, escape_text: bool = True) -> int:
         max_value = self.max_value
         if max_value is None:
             max_value = IntInput.get_max_value(max_value, self.signed)
@@ -555,6 +555,7 @@ class SingleEditor:
                 "max": max_value,
                 "min": self.min_value,
             },
+            escape=escape_text,
         )
         if usr_input is None:
             return self.value

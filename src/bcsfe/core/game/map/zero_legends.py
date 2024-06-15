@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import Any
 from bcsfe import core
-from bcsfe.cli import edits
+from bcsfe.cli import edits, color
 
 
 class Stage:
@@ -272,6 +272,7 @@ class ZeroLegendsChapters:
         zero_legends_chapters.edit_chapters(save_file, "ND")
 
     def edit_chapters(self, save_file: core.SaveFile, letter_code: str):
+        color.ColoredText.localize("zero_legends_warning")
         edits.map.edit_chapters(save_file, self, letter_code)
 
     def unclear_rest(self, stages: list[int], stars: int, id: int):
@@ -281,5 +282,6 @@ class ZeroLegendsChapters:
                 self.chapters[id].chapters[star].clear_progress = 0
 
     def set_total_stages(self, map: int, total_stages: int):
+        self.create(map)
         for chapter in self.chapters[map].chapters:
             chapter.total_stages = total_stages

@@ -1,7 +1,7 @@
 from __future__ import annotations
 import base64
 from typing import Any
-from bcsfe import core
+from bcsfe import core, __version__, cli
 import datetime
 
 
@@ -1905,6 +1905,7 @@ class SaveFile:
 
     def to_dict(self) -> dict[str, Any]:
         data: dict[str, Any] = {
+            "editor_version": __version__,
             "cc": self.cc.get_code(),
             "dsts": self.dsts,
             "game_version": self.game_version.game_version,
@@ -2262,7 +2263,14 @@ class SaveFile:
         return data
 
     @staticmethod
-    def from_dict(data: dict[str, Any]):
+    def from_dict(data: dict[str, Any], warn: bool = True) -> SaveFile:
+        editor_version = data.get("editor_version", "0.0.0")
+        if editor_version != __version__ and warn:
+            cli.color.ColoredText.localize(
+                "editor_version_mismatch",
+                json_version=editor_version,
+                editor_version=__version__,
+            )
         cc = core.CountryCode(data.get("cc", None))
         save_file = SaveFile(cc=cc)
         save_file.dsts = data.get("dsts", [])

@@ -43,6 +43,9 @@ class Data:
     def __bytes__(self) -> bytes:
         return self.data
 
+    def __buffer__(self, flags: int, /) -> memoryview:
+        return memoryview(self.data)
+
     @staticmethod
     def from_hex(hex: str) -> Data:
         return Data(bytes.fromhex(hex))

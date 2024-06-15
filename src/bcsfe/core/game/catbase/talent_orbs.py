@@ -595,9 +595,19 @@ class SaveOrbs:
 
         max_orbs = core.core_data.max_value_manager.get("talent_orbs")
 
-        individual = (
-            color.ColoredInput().localize("edit_orbs_individually").lower() == "i"
-        )
+        if len(orb_selection) == 0:
+            return
+        if len(orb_selection) == 1:
+            individual = True
+        else:
+            individual = dialog_creator.ChoiceInput.from_reduced(
+                ["individual", "edit_all_at_once"],
+                dialog="edit_orbs_individually",
+                single_choice=True,
+            ).single_choice()
+            if individual is None:
+                return
+            individual = True if individual == 1 else False
         if individual:
             for orb in orb_selection:
                 orb_id = orb.raw_orb_info.orb_id
@@ -607,7 +617,11 @@ class SaveOrbs:
                     orb_count = 0
 
                 orb_count = color.ColoredInput().localize(
-                    "input", name=orb.to_colortext(), value=orb_count, max=max_orbs
+                    "input",
+                    name=orb.to_colortext(),
+                    value=orb_count,
+                    max=max_orbs,
+                    escape=False,
                 )
                 if orb_count == core.core_data.local_manager.get_key("quit_key"):
                     break
@@ -621,7 +635,9 @@ class SaveOrbs:
 
         else:
             int_input = dialog_creator.IntInput(max_orbs)
-            orb_count = int_input.get_input_locale_while("edit_orbs_all", {})
+            orb_count = int_input.get_input_locale_while(
+                "edit_orbs_all", {"max": max_orbs}
+            )
             if orb_count is None:
                 return
             orb_count = int_input.clamp_value(orb_count)

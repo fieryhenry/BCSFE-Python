@@ -7,6 +7,7 @@ from bcsfe.cli import color, dialog_creator
 
 class ConfigKey(enum.Enum):
     UPDATE_TO_BETA = "update_to_beta"
+    SHOW_UPDATE_MESSAGE = "show_update_message"
     LOCALE = "locale"
     DISABLE_MAXES = "disable_maxes"
     MAX_BACKUPS = "max_backups"
@@ -55,6 +56,7 @@ class Config:
     def get_defaults() -> dict[ConfigKey, Any]:
         initial_values = {
             ConfigKey.UPDATE_TO_BETA: False,
+            ConfigKey.SHOW_UPDATE_MESSAGE: True,
             ConfigKey.LOCALE: "en",
             ConfigKey.DISABLE_MAXES: False,
             ConfigKey.MAX_BACKUPS: 50,

@@ -10,6 +10,7 @@ from bcsfe.cli import (
     color,
     feature_handler,
     save_management,
+    dialog_creator,
 )
 from bcsfe import core
 
@@ -38,6 +39,8 @@ class Main:
             self.load_save_options()
 
     def check_update(self):
+        """Check for updates."""
+
         updater = core.Updater()
         has_pre_release = updater.has_enabled_pre_release()
         local_version = updater.get_local_version()
@@ -61,19 +64,33 @@ class Main:
         else:
             update_needed = False
 
+        show_message = core.core_data.config.get(core.ConfigKey.SHOW_UPDATE_MESSAGE)
+        if not show_message:
+            update_needed = False
+
         if update_needed:
-            update = (
-                color.ColoredInput().localize(
-                    "update_available", latest_version=latest_version
-                )
-                == "y"
+            update = dialog_creator.YesNoInput(True).get_input_once(
+                "update_available", {"latest_version": latest_version}
             )
+            if update is None:
+                return
+
             if update:
                 if updater.update(latest_version):
                     color.ColoredText.localize("update_success")
                 else:
                     color.ColoredText.localize("update_fail")
                 sys.exit()
+            else:
+                disable_message = dialog_creator.YesNoInput(False).get_input_once(
+                    "disable_update_message"
+                )
+                if disable_message is None:
+                    return
+
+                core.core_data.config.set(
+                    core.ConfigKey.SHOW_UPDATE_MESSAGE, not disable_message
+                )
 
     def print_start_text(self):
         external_theme = core.ExternalThemeManager.get_external_theme_config()

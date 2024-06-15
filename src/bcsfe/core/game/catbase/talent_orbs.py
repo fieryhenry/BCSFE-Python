@@ -616,20 +616,9 @@ class SaveOrbs:
                 except KeyError:
                     orb_count = 0
 
-                orb_count = color.ColoredInput().localize(
-                    "input",
-                    name=orb.to_colortext(),
-                    value=orb_count,
-                    max=max_orbs,
-                    escape=False,
-                )
-                if orb_count == core.core_data.local_manager.get_key("quit_key"):
-                    break
-                try:
-                    orb_count = int(orb_count)
-                except ValueError:
-                    continue
-                orb_count = min(orb_count, max_orbs)
+                orb_count = dialog_creator.SingleEditor(
+                    orb.to_colortext(), orb_count, max_orbs
+                ).edit(escape_text=False)
 
                 self.orbs[orb_id] = SaveOrb(orb, orb_count)
 

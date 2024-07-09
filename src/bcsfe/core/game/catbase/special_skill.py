@@ -84,6 +84,24 @@ class SpecialSkills:
     def __init__(self, skills: list[SpecialSkill]):
         self.skills = skills
 
+    def set_upgrade(
+        self,
+        valid_skill_id: int,
+        upgrade: core.Upgrade,
+        max_base: int | None = None,
+        max_plus: int | None = None,
+    ):
+        u = upgrade.copy()
+        valid_skills = self.get_valid_skills()
+        valid_skills[valid_skill_id].set_upgrade(
+            u, max_base=max_base, max_plus=max_plus
+        )
+
+        if (
+            valid_skill_id == 0
+        ):  # if it is a cat cannon power upgrade, mirror the upgrade to the hidden cat cannon power special skill
+            self.skills[1].set_upgrade(u, max_base=max_base, max_plus=max_plus)
+
     @staticmethod
     def init() -> SpecialSkills:
         skills = [SpecialSkill.init() for _ in range(11)]
@@ -197,7 +215,7 @@ class SpecialSkills:
                 if should_exit:
                     return
                 if upgrade is not None:
-                    skills[id].set_upgrade(upgrade)
+                    self.set_upgrade(id, upgrade)
                     color.ColoredText.localize(
                         "selected_skill_upgraded",
                         name=names[id],
@@ -222,8 +240,11 @@ class SpecialSkills:
                 max_base_level = ability_data.ability_data[id].max_base_level
                 max_plus_level = ability_data.ability_data[id].max_plus_level
 
-                skills[id].set_upgrade(
-                    upgrade.copy(), max_base=max_base_level - 1, max_plus=max_plus_level
+                self.set_upgrade(
+                    id,
+                    upgrade.copy(),
+                    max_base=max_base_level - 1,
+                    max_plus=max_plus_level,
                 )
 
                 color.ColoredText.localize(

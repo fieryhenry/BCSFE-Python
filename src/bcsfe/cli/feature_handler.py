@@ -106,6 +106,7 @@ class FeatureHandler:
                 "fix_gamatoto_crash": edits.fixes.Fixes.fix_gamatoto_crash,
                 "fix_time_errors": edits.fixes.Fixes.fix_time_errors,
                 "unlock_equip_menu": edits.basic_items.BasicItems.unlock_equip_menu,
+                "fix_officer_pass_crash": core.OfficerPass.fix_crash,
             },
             "other": {
                 "unlocked_slots": edits.basic_items.BasicItems.edit_unlocked_slots,

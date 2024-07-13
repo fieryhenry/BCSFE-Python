@@ -1,6 +1,7 @@
 from __future__ import annotations
 from typing import Any
 from bcsfe import core
+from bcsfe.cli import color
 
 
 class OfficerPass:
@@ -61,3 +62,16 @@ class OfficerPass:
 
     def __str__(self):
         return self.__repr__()
+
+    def reset(self, save_file: core.SaveFile):
+        self.cat_id = 0
+        self.cat_form = 0
+        self.play_time = 0
+        self.gold_pass.remove_gold_pass(save_file)
+
+    @staticmethod
+    def fix_crash(save_file: core.SaveFile):
+        officer_pass = save_file.officer_pass
+        officer_pass.reset(save_file)
+
+        color.ColoredText.localize("officer_pass_fixed")

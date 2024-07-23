@@ -3,6 +3,16 @@ import traceback
 
 from bcsfe import cli
 
+import sys
+
+import bcsfe
+
+args = sys.argv[1:]
+for arg in args:
+    if arg.lower() in ["--version", "-v"]:
+        print(bcsfe.__version__)
+        exit()
+
 try:
     cli.main.Main().main()
 except KeyboardInterrupt:

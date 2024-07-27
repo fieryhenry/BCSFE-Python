@@ -22,6 +22,7 @@ class YamlFile:
                 self.save()
         else:
             self.yaml = {}
+            self.path.parent().generate_dirs()
             self.save()
 
     def save(self) -> None:

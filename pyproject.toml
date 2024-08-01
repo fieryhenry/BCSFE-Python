@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "bcsfe"
 authors = [{ name = "fieryhenry" }]
 description = "A save file editor for The Battle Cats"
-license = { text = "MIT License" }
+license = { text = "GPL-3.0-or-later License" }
 readme = "README.md"
 requires-python = ">=3.9"
 classifiers = [
@@ -15,7 +15,7 @@ classifiers = [
     "Topic :: Utilities",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.9",
-    "License :: OSI Approved :: MIT License",
+    "License :: OSI Approved :: GPL-3.0-or-later License",
     "Operating System :: OS Independent",
 ]
 dependencies = [

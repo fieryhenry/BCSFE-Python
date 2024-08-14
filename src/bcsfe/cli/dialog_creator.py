@@ -502,14 +502,13 @@ class MultiEditor:
             ).get_input_locale_while(
                 self.dialog,
                 {"name": item, "value": ints[choice], "max": max_value},
+                escape=False,
             )
             if usr_input is None:
                 continue
             ints[choice] = usr_input
             color.ColoredText.localize(
-                "value_changed",
-                name=item,
-                value=ints[choice],
+                "value_changed", name=item, value=ints[choice], escape=False
             )
         return ints
 

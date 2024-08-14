@@ -229,11 +229,22 @@ class BasicItems:
         if names is None:
             return
         new_names: list[str] = []
-        for name in names:
+        for i, name in enumerate(names):
             if name is None:
-                name = core.core_data.local_manager.get_key("unknown_catfruit_name")
+                name = core.core_data.local_manager.get_key(
+                    "unknown_catfruit_name", id=i
+                )
             new_names.append(name)
         names = new_names
+
+        extra = len(save_file.catfruit) - len(names)
+        if extra > 0:
+            for i in range(extra):
+                names.append(
+                    core.core_data.local_manager.get_key(
+                        "unknown_catfruit_name", id=i + len(names)
+                    )
+                )
 
         if save_file.game_version < 110400:
             max_value = core.core_data.max_value_manager.get_old("catfruit")

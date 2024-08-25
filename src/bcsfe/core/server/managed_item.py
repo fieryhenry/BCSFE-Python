@@ -153,9 +153,27 @@ class BackupMetaData:
     ) -> str:
         """Create the backup metadata."""
 
+        return BackupMetaData.create_static(
+            self.save_file.inquiry_code,
+            self.save_file.officer_pass.play_time,
+            self.save_file.calculate_user_rank(),
+            self.get_managed_items(),
+            save_key,
+            add_managed_items,
+        )
+
+    @staticmethod
+    def create_static(
+        iq: str,
+        playtime: int,
+        userrank: int,
+        items: list[ManagedItem],
+        save_key: str | None = None,
+        add_managed_items: bool = True,
+    ):
         managed_items: list[dict[str, Any]] = []
         if add_managed_items:
-            for managed_item in self.get_managed_items():
+            for managed_item in items:
                 if managed_item.amount == 0:
                     continue
                 managed_items.append(managed_item.to_dict())
@@ -168,11 +186,11 @@ class BackupMetaData:
         backup_metadata: dict[str, Any] = {
             "managedItemDetails": managed_items,
             "nonce": core.Random.get_hex_string(32),
-            "playTime": self.save_file.officer_pass.play_time,
-            "rank": self.save_file.calculate_user_rank(),
+            "playTime": playtime,
+            "rank": userrank,
             "receiptLogIds": [],
             "signature_v1": core.NyankoSignature(
-                self.save_file.inquiry_code, managed_items_str
+                iq, managed_items_str
             ).generate_signature_v1(),
         }
         if save_key is not None:

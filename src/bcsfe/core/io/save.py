@@ -1012,13 +1012,55 @@ class SaveFile:
 
         if self.game_version >= 130100:
             length = self.data.read_int()
-            self.uiltl1: list[tuple[int, int]] = []
+            self.utl3: list[tuple[int, int]] = []
             for _ in range(length):
                 i1 = self.data.read_int()
                 i2 = self.data.read_long()
-                self.uiltl1.append((i1, i2))
+                self.utl3.append((i1, i2))
 
             self.gv_130100 = self.data.read_int()
+
+        if self.game_version >= 130301:
+            length = self.data.read_int()
+            self.ustid1: dict[str, tuple[int, float]] = {}
+            for _ in range(length):
+                key = self.data.read_string()
+                value_1 = self.data.read_int()
+                value_2 = self.data.read_double()
+                self.ustid1[key] = (value_1, value_2)
+
+            self.gv_130301 = self.data.read_int()
+
+        if self.game_version >= 130400:
+            self.ud13 = self.data.read_double()
+            self.ud14 = self.data.read_double()
+
+            self.gv_130400 = self.data.read_int()
+
+        if self.game_version >= 130500:
+            self.utl4: list[tuple[int, list[tuple[int, int, int, list[int]]]]] = []
+            length1 = self.data.read_short()
+            for _ in range(length1):
+                id = self.data.read_byte()
+                length2 = self.data.read_byte()
+                ls2: list[tuple[int, int, int, list[int]]] = []
+                for _ in range(length2):
+                    v1 = self.data.read_byte()
+                    v2 = self.data.read_byte()
+                    v3 = self.data.read_byte()
+
+                    length3 = self.data.read_short()
+                    ls1: list[int] = []
+
+                    for _ in range(length3):
+                        val = self.data.read_short()
+                        ls1.append(val)
+
+                    ls2.append((v1, v2, v3, ls1))
+
+                self.utl4.append((id, ls2))
+
+            self.gv_130500 = self.data.read_int()
 
         self.remaining_data = self.data.read_to_end(32)
 
@@ -1864,12 +1906,44 @@ class SaveFile:
                 self.data.write_int(self.gv_130000)
 
         if self.game_version >= 130100:
-            self.data.write_int(len(self.uiltl1))
-            for i, l in self.uiltl1:
+            self.data.write_int(len(self.utl3))
+            for i, l in self.utl3:
                 self.data.write_int(i)
                 self.data.write_long(l)
 
             self.data.write_int(self.gv_130100)
+
+        if self.game_version >= 130301:
+            self.data.write_int(len(self.ustid1))
+            for key, (v1, v2) in self.ustid1.items():
+                self.data.write_string(key)
+                self.data.write_int(v1)
+                self.data.write_double(v2)
+
+            self.data.write_int(self.gv_130301)
+
+        if self.game_version >= 130400:
+            self.data.write_double(self.ud13)
+            self.data.write_double(self.ud14)
+
+            self.data.write_int(self.gv_130400)
+
+        if self.game_version >= 130500:
+            self.data.write_short(len(self.utl4))
+            for id, ls2 in self.utl4:
+                self.data.write_byte(id)
+                self.data.write_byte(len(ls2))
+                for v1, v2, v3, ls1 in ls2:
+                    self.data.write_byte(v1)
+                    self.data.write_byte(v2)
+                    self.data.write_byte(v3)
+
+                    self.data.write_short(len(ls1))
+
+                    for val in ls1:
+                        self.data.write_short(val)
+
+            self.data.write_int(self.gv_130500)
 
         self.data.write_bytes(self.remaining_data)
 
@@ -2256,8 +2330,15 @@ class SaveFile:
             "ustl1": self.ustl1,
             "gv_120700": self.gv_120700,
             "gv_130000": self.gv_130000,
-            "uiltl1": self.uiltl1,
+            "utl3": self.utl3,
             "gv_130100": self.gv_130100,
+            "ustid1": self.ustid1,
+            "gv_130301": self.gv_130301,
+            "ud13": self.ud13,
+            "ud14": self.ud14,
+            "gv_130400": self.gv_130400,
+            "utl4": self.utl4,
+            "gv_130500": self.gv_130500,
             "remaining_data": base64.b64encode(self.remaining_data).decode("utf-8"),
         }
         return data
@@ -2669,8 +2750,15 @@ class SaveFile:
         save_file.ustl1 = data.get("ustl1", [])
         save_file.gv_120700 = data.get("gv_120700", 120700)
         save_file.gv_130000 = data.get("gv_130000", 130000)
-        save_file.uiltl1 = data.get("uiltl1", [])
+        save_file.utl3 = data.get("utl3", [])
         save_file.gv_130100 = data.get("gv_130100", 130100)
+        save_file.ustid1 = data.get("ustid1", {})
+        save_file.gv_130301 = data.get("gv_130301", 130301)
+        save_file.ud13 = data.get("ud13", 0.0)
+        save_file.ud14 = data.get("ud14", 0.0)
+        save_file.gv_130400 = data.get("gv_130400", 130400)
+        save_file.utl4 = data.get("utl4", [])
+        save_file.gv_130500 = data.get("gv_130500", 130500)
 
         save_file.remaining_data = base64.b64decode(data.get("remaining_data", ""))
 
@@ -2825,6 +2913,9 @@ class SaveFile:
         self.gv_120700 = 120700
         self.gv_130000 = 130000
         self.gv_130100 = 130100
+        self.gv_130301 = 130301
+        self.gv_130400 = 130400
+        self.gv_130500 = 130500
 
         self.catfood = 0
         self.current_energy = 0
@@ -2876,6 +2967,8 @@ class SaveFile:
         self.ud10 = 0.0
         self.ud11 = 0.0
         self.ud12 = 0.0
+        self.ud13 = 0.0
+        self.ud14 = 0.0
 
         self.timestamp = 0.0
         self.g_timestamp = 0.0
@@ -2920,8 +3013,6 @@ class SaveFile:
 
         self.ustl1 = []
 
-        self.uiltl1 = []
-
         if 20 <= gv and gv <= 25:
             self.ubl1 = [False] * 12
         else:
@@ -2938,6 +3029,8 @@ class SaveFile:
 
         self.utl1 = []
         self.utl2 = [(False, False, 0, 0.0, 0.0)] * 6
+        self.utl3 = []
+        self.utl4 = []
 
         self.unlock_popups_11 = [0] * 3
         if 20 <= gv and gv <= 25:
@@ -3091,6 +3184,7 @@ class SaveFile:
         self.uidtii = {}
         self.uidtff = {}
         self.ushshd = {}
+        self.ustid1 = {}
 
         self.first_locks = {}
 
@@ -3191,6 +3285,9 @@ class SaveFile:
             assert self.gv_120700 == 120700
             assert self.gv_130000 == 130000
             assert self.gv_130100 == 130100
+            assert self.gv_130301 == 130301
+            assert self.gv_130400 == 130400
+            assert self.gv_130500 == 130500
         except AssertionError:
             return False
         return True

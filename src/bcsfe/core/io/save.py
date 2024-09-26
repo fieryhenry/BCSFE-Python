@@ -691,6 +691,21 @@ class SaveFile:
                 self.ud4 = self.data.read_double()
                 self.ud5 = self.data.read_double()
 
+            if self.game_version >= 130700:
+                length = self.data.read_short()
+                self.uiid3: dict[int, int] = {}
+                for _ in range(length):
+                    key = self.data.read_int()
+                    value = self.data.read_byte()
+                    self.uiid3[key] = value
+
+                length = self.data.read_short()
+                self.uidd2: dict[int, float] = {}
+                for _ in range(length):
+                    key = self.data.read_int()
+                    value = self.data.read_double()
+                    self.uidd2[key] = value
+
             self.gv_90500 = self.data.read_int()
 
         if self.game_version >= 90700:
@@ -1622,6 +1637,17 @@ class SaveFile:
                 self.data.write_double(self.ud4)
                 self.data.write_double(self.ud5)
 
+            if self.game_version >= 130700:
+                self.data.write_short(len(self.uiid3))
+                for key, value in self.uiid3.items():
+                    self.data.write_int(key)
+                    self.data.write_byte(value)
+
+                self.data.write_short(len(self.uidd2))
+                for key, value in self.uidd2.items():
+                    self.data.write_int(key)
+                    self.data.write_double(value)
+
             self.data.write_int(self.gv_90500)
 
         if self.game_version >= 90700:
@@ -2215,6 +2241,8 @@ class SaveFile:
             "ub9": self.ub9,
             "ud4": self.ud4,
             "ud5": self.ud5,
+            "uiid3": self.uiid3,
+            "uidd2": self.uidd2,
             "gv_90500": self.gv_90500,
             "talent_orbs": self.talent_orbs.serialize(),
             "uidiid2": self.uidiid2,
@@ -2631,6 +2659,8 @@ class SaveFile:
         save_file.ub9 = data.get("ub9", False)
         save_file.ud4 = data.get("ud4", 0.0)
         save_file.ud5 = data.get("ud5", 0.0)
+        save_file.uiid3 = data.get("uiid3", {})
+        save_file.uidd2 = data.get("uidd2", {})
         save_file.gv_90500 = data.get("gv_90500", 90500)
         save_file.talent_orbs = core.TalentOrbs.deserialize(data.get("talent_orbs", {}))
         save_file.uidiid2 = data.get("uidiid2", {})
@@ -3185,6 +3215,8 @@ class SaveFile:
         self.uidtff = {}
         self.ushshd = {}
         self.ustid1 = {}
+        self.uiid3 = {}
+        self.uidd2 = {}
 
         self.first_locks = {}
 
@@ -3216,7 +3248,7 @@ class SaveFile:
                 self.data.write_bool(False)
             self.dst_index += 1
 
-    def verify_load(self):
+    def verify_load(self, raise_error: bool = False):
         try:
             assert self.gv_44 == 44
             assert self.gv_45 == 45
@@ -3288,7 +3320,9 @@ class SaveFile:
             assert self.gv_130301 == 130301
             assert self.gv_130400 == 130400
             assert self.gv_130500 == 130500
-        except AssertionError:
+        except AssertionError as e:
+            if raise_error:
+                raise AssertionError(e) from e
             return False
         return True
 

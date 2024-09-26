@@ -6,6 +6,7 @@ from typing import Any
 from bcsfe import core
 import jwt
 
+from bcsfe import cli
 from bcsfe.cli import color
 
 
@@ -531,7 +532,7 @@ class ServerHandler:
         confirmation_code: str,
         cc: core.CountryCode,
         gv: core.GameVersion,
-        print_no_internet: bool = True,
+        print: bool = True,
     ) -> tuple[ServerHandler | None, RequestResult | None]:
         url = f"{ServerHandler.save_url}/v2/transfers/{transfer_code}/reception"
         data = core.ClientInfo(cc, gv).get_client_info()
@@ -551,7 +552,7 @@ class ServerHandler:
         }
         response = core.RequestHandler(url, headers, core.Data(data_str)).post()
         if response is None:
-            if print_no_internet:
+            if print:
                 core.print_no_internet()
             return None, None
         resp_headers = response.headers
@@ -560,6 +561,13 @@ class ServerHandler:
             return None, RequestResult(url, response, headers, data_str)
 
         save_data = response.content
+
+        temp_path = core.Path.get_documents_folder().add("saves", "transfer_backup")
+        temp_path.write(core.Data(save_data))
+
+        if print:
+            color.ColoredText.localize("transfer_backup", path=str(temp_path))
+
         save_file = core.SaveFile(core.Data(save_data))
 
         password_refresh_token = resp_headers.get("Nyanko-Password-Refresh-Token")

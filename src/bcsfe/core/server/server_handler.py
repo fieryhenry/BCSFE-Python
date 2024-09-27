@@ -6,7 +6,6 @@ from typing import Any
 from bcsfe import core
 import jwt
 
-from bcsfe import cli
 from bcsfe.cli import color
 
 
@@ -562,7 +561,12 @@ class ServerHandler:
 
         save_data = response.content
 
-        temp_path = core.Path.get_documents_folder().add("saves", "transfer_backup")
+        temp_path = (
+            core.Path.get_documents_folder()
+            .add("saves")
+            .generate_dirs()
+            .add("transfer_backup")
+        )
         temp_path.write(core.Data(save_data))
 
         if print:

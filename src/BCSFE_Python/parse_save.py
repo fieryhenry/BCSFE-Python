@@ -7,6 +7,7 @@ import json
 import struct
 import traceback
 from typing import Any, Optional, Union
+import base64
 
 
 from . import helper
@@ -1406,13 +1407,31 @@ def get_talent_orbs(game_version: dict[str, Any]) -> dict[int, int]:
     return talent_orb_data
 
 
-def data_after_after_gauntlets() -> list[dict[str, int]]:
+def data_after_after_gauntlets(game_version: dict[str, Any]) -> list[dict[str, int]]:
     data: list[dict[str, int]] = []
     data.append(next_int_len(1))
     data.append(next_int_len(8 * 2))
     data.append(next_int_len(4))
     data.append(next_int_len(1 * 2))
     data.append(next_int_len(8 * 2))
+
+    if game_version["Value"] >= 130700:
+        length = next_int_len(2)
+        data.append(length)
+        for _ in range(length["Value"]):
+            key = next_int_len(4)
+            data.append(key)
+            value = next_int_len(1)
+            data.append(value)
+
+        length = next_int_len(2)
+        data.append(length)
+        for _ in range(length["Value"]):
+            key = next_int_len(4)
+            data.append(key)
+            value = next_int_len(8)
+            data.append(value)
+
     data.append(next_int_len(4))  # 90500
     return data
 
@@ -2354,7 +2373,7 @@ def parse_save(
     save_stats["collab_gauntlets"] = get_gauntlet_progress(lengths)
     save_stats["unknown_84"] = get_length_data(4, 1, lengths["total"])
 
-    save_stats["unknown_85"] = data_after_after_gauntlets()
+    save_stats["unknown_85"] = data_after_after_gauntlets(save_stats["game_version"])
 
     save_stats["talent_orbs"] = get_talent_orbs(save_stats["game_version"])
 
@@ -2503,7 +2522,10 @@ def parse_save(
         return save_stats
 
     length = len(save_data) - address - 32
-    save_stats["extra_data"] = next_int_len(length)
+    save_stats["extra_data"] = base64.b64encode(
+        save_data_g[address : address + length]
+    ).decode()
+    set_address(address + length)
 
     save_stats = exit_parser(save_stats)
 

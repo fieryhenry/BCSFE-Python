@@ -1,5 +1,6 @@
 """Handler for serialising save data from dict"""
 
+import base64
 import struct
 from typing import Any, Union
 
@@ -1564,7 +1565,9 @@ def serialize_save(save_stats: dict[str, Any]) -> bytes:
 
     save_data = write(save_data, save_stats["gv_120200"])
 
-    save_data = write(save_data, save_stats["extra_data"])
+    extra_data = base64.b64decode(save_stats["extra_data"])
+
+    save_data += extra_data
 
     save_data = exit_serialiser(save_data, save_stats)
 

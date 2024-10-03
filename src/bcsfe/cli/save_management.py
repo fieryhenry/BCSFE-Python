@@ -382,7 +382,10 @@ class SaveManagement:
     @staticmethod
     def select_package_name(package_names: list[str]) -> str | None:
         choice = dialog_creator.ChoiceInput.from_reduced(
-            package_names, dialog="select_package_name", single_choice=True
+            package_names,
+            dialog="select_package_name",
+            single_choice=True,
+            localize_options=False,
         ).single_choice()
         if choice is None:
             return None

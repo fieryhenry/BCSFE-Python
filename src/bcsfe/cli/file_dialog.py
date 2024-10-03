@@ -50,7 +50,10 @@ class FileDialog:
         options = files_str_ls + ["other_dir", "another_path"]
 
         choice = dialog_creator.ChoiceInput.from_reduced(
-            options, dialog="select_files_dir", single_choice=True
+            options,
+            dialog="select_files_dir",
+            single_choice=True,
+            localize_options=False,
         ).single_choice()
         if choice is None:
             return

@@ -792,7 +792,9 @@ class EventChapters:
             names_list.append(map_name)
 
         while True:
-            dialog_creator.ListOutput(names_list, [], "select_map").display_locale()
+            dialog_creator.ListOutput(
+                names_list, [], "select_map", localize_elements=False
+            ).display_locale()
             if names_list:
                 example_name = names_list[0]
             else:

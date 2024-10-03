@@ -150,6 +150,7 @@ class ListOutput:
         dialog: str | None = None,
         perameters: dict[str, Any] | None = None,
         start_index: int = 1,
+        localize_elements: bool = True,
     ):
         self.strings = strings
         self.ints = ints
@@ -158,6 +159,7 @@ class ListOutput:
             perameters = {}
         self.perameters = perameters
         self.start_index = start_index
+        self.localize_elements = localize_elements
 
     def get_output(self, dialog: str | None, strings: list[str]) -> str:
         end_string = ""
@@ -169,7 +171,8 @@ class ListOutput:
                 int_string = str(self.ints[i])
             except IndexError:
                 int_string = ""
-            string = string.format(int=int_string)
+
+            string = string.replace("{int}", int_string)
             end_string += f" <@s>{i+self.start_index}.</> <@t>{string}</>\n"
         end_string = end_string.strip("\n")
         return end_string
@@ -184,10 +187,14 @@ class ListOutput:
             dialog = core.core_data.local_manager.get_key(self.dialog)
         new_strings: list[str] = []
         for string in self.strings:
-            string_ = core.core_data.local_manager.get_key(string)
+            if self.localize_elements:
+                string_ = core.core_data.local_manager.get_key(string)
+            else:
+                string_ = string
             if remove_alias:
                 string_ = core.core_data.local_manager.get_all_aliases(string_)[0]
             new_strings.append(string_)
+
         self.display(dialog, new_strings)
 
     def display_non_locale(self) -> None:
@@ -206,6 +213,7 @@ class ChoiceInput:
         remove_alias: bool = False,
         display_all_at_once: bool = True,
         start_index: int = 1,
+        localize_options: bool = True,
     ):
         self.items = items
         self.strings = strings
@@ -216,6 +224,7 @@ class ChoiceInput:
         self.remove_alias = remove_alias
         self.display_all_at_once = display_all_at_once
         self.start_index = start_index
+        self.localize_options = localize_options
 
     @staticmethod
     def from_reduced(
@@ -227,6 +236,7 @@ class ChoiceInput:
         remove_alias: bool = False,
         display_all_at_once: bool = True,
         start_index: int = 1,
+        localize_options: bool = True,
     ) -> ChoiceInput:
         if perameters is None:
             perameters = {}
@@ -244,6 +254,7 @@ class ChoiceInput:
             remove_alias,
             display_all_at_once,
             start_index,
+            localize_options,
         )
 
     def get_input(self) -> tuple[int | None, str]:
@@ -252,7 +263,10 @@ class ChoiceInput:
         if len(self.strings) == 1:
             return self.get_min_value(), ""
         ListOutput(
-            self.strings, self.ints, start_index=self.start_index
+            self.strings,
+            self.ints,
+            start_index=self.start_index,
+            localize_elements=self.localize_options,
         ).display_locale(self.remove_alias)
         return IntInput(self.get_max_value(), self.get_min_value()).get_input_locale(
             self.dialog, self.perameters
@@ -286,11 +300,17 @@ class ChoiceInput:
                 self.strings.append(core.core_data.local_manager.get_key("all_at_once"))
         if localized:
             ListOutput(
-                self.strings, self.ints, start_index=self.start_index
+                self.strings,
+                self.ints,
+                start_index=self.start_index,
+                localize_elements=self.localize_options,
             ).display_locale()
         else:
             ListOutput(
-                self.strings, self.ints, start_index=self.start_index
+                self.strings,
+                self.ints,
+                start_index=self.start_index,
+                localize_elements=self.localize_options,
             ).display_non_locale()
         key = "input_many"
         if self.is_single_choice:

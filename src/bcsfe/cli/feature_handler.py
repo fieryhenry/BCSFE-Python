@@ -99,7 +99,7 @@ class FeatureHandler:
             },
             "gatya": {
                 "rare_gatya_seed": edits.basic_items.BasicItems.edit_rare_gatya_seed,
-                "normal_gatya_seed": edits.basic_items.BasicItems.edit_rare_gatya_seed,
+                "normal_gatya_seed": edits.basic_items.BasicItems.edit_normal_gatya_seed,
                 "event_gatya_seed": edits.basic_items.BasicItems.edit_event_gatya_seed,
             },
             "fixes": {

@@ -40,3 +40,6 @@ version = { attr = "bcsfe.__version__" }
 
 [tool.setuptools]
 package-dir = { "" = "src" }
+
+[project.scripts]
+bcsfe = "bcsfe:run"

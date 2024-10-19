@@ -331,6 +331,8 @@ class GauntletChapters:
         edits.map.edit_chapters(save_file, self, letter_code)
 
     def unclear_rest(self, stages: list[int], stars: int, id: int):
+        if not stages:
+            return
         for star in range(stars, self.get_total_stars(id)):
             for stage in range(max(stages), self.get_total_stages(id, star)):
                 self.chapters[id].chapters[star].stages[stage].clear_times = 0

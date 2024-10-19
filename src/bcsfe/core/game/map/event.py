@@ -736,10 +736,13 @@ class EventChapters:
                 continue
             new_stage_names.append(stage)
         stage_names = new_stage_names
-        choices, _ = dialog_creator.ChoiceInput.from_reduced(
-            stage_names, dialog="select_stage"
-        ).multiple_choice()
-        return choices
+
+        dialog_creator.ListOutput(stage_names, ints=[], dialog="select_stage", localize_elements=False).display_locale()
+
+        choices = dialog_creator.RangeInput(len(stage_names), 1).get_input_locale("stages_select", {})
+        if choices is None:
+            return None
+        return [c -1 for c in choices]
 
     @staticmethod
     def ask_stages_stage_names(stage_names: list[str]) -> list[int] | None:
@@ -877,6 +880,8 @@ class EventChapters:
         id: int,
         type: int,
     ):
+        if not stages:
+            return
         for star in range(stars, self.get_total_stars(type, id)):
             for stage in range(max(stages), self.get_total_stages(type, id, star)):
                 self.chapters[type].chapters[id].chapters[star].stages[

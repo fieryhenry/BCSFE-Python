@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.7.2.4] - 2024-10-22
+
+#### Added
+
+- Zero Legends (added by @cintagram)
+
+#### Fixed
+
+- Save parsing for 13.7.0
+- Editor crash when exporting save to json
+
 ## [2.7.2.3] - 2023-06-19
 
 #### Fixed

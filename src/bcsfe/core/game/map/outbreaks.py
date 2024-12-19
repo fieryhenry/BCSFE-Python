@@ -221,6 +221,7 @@ class Outbreaks:
         outbreaks = save_file.outbreaks
         chapters = outbreaks.get_valid_chapters()
         if not chapters:
+            color.ColoredText.localize("no_valid_outbreaks")
             return
 
         options = ["clear", "unclear"]

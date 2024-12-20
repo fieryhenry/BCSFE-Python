@@ -1432,6 +1432,15 @@ def data_after_after_gauntlets(game_version: dict[str, Any]) -> list[dict[str, i
             value = next_int_len(8)
             data.append(value)
 
+    if game_version["Value"] >= 140100:
+        length = next_int_len(2)
+        data.append(length)
+        for _ in range(length["Value"]):
+            key = next_int_len(4)
+            data.append(key)
+            value = next_int_len(8)
+            data.append(value)
+
     data.append(next_int_len(4))  # 90500
     return data
 

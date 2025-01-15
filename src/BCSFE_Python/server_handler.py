@@ -427,7 +427,9 @@ def upload_save_data_v2(
     )
     body, boundary = upload_save_data_body_v2(save_data, save_key_data)
 
-    url = "https://nyanko-service-data-prd.s3.amazonaws.com/"
+    url = save_key_data.get("url")
+    if url is None:
+        url = "https://nyanko-service-data-prd.s3.amazonaws.com/"
     headers = {
         "accept-encoding": "gzip",
         "connection": "keep-alive",
@@ -467,7 +469,9 @@ def upload_metadata_v2(
     )
     body, boundary = upload_save_data_body_v2(save_data, save_key_data)
 
-    url = "https://nyanko-service-data-prd.s3.amazonaws.com/"
+    url = save_key_data.get("url")
+    if url is None:
+        url = "https://nyanko-service-data-prd.s3.amazonaws.com/"
     headers = {
         "accept-encoding": "gzip",
         "connection": "keep-alive",

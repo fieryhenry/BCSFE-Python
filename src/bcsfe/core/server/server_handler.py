@@ -370,7 +370,9 @@ class ServerHandler:
         if body is None:
             self.remove_stored_save_key_data()
             return False
-        url = f"{self.aws_url}/"
+        url = save_key.get("url")
+        if url is None:
+            url = f"{self.aws_url}/"
         headers = {
             "accept-encoding": "gzip",
             "connection": "keep-alive",

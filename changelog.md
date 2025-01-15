@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.7.2.6] - 2025-01-15
+
+#### Fixed
+
+- Save uploading
+
 ## [2.7.2.5] - 2024-12-20
 
 #### Fixed

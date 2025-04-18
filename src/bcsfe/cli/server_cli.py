@@ -38,7 +38,7 @@ class ServerCLI:
             cc,
             gv,
         )
-        if result is not None:
+        if server_handler is None and result is not None:
             color.ColoredText.localize("invalid_codes_error")
             if dialog_creator.YesNoInput().get_input_once(
                 "display_response_debug_info_q"

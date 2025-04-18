@@ -1,23 +1,25 @@
 {
-    "catfood": 45000,
-    "xp": 99999999,
-    "normal_tickets": 2999,
-    "rare_tickets": 299,
-    "platinum_tickets": 9,
-    "legend_tickets": 4,
-    "np": 9999,
-    "leadership": 9999,
-    "battle_items": 9999,
-    "catamins": 9999,
-    "catseyes": 9999,
-    "catfruit": {
-        "old": 128,
-        "new": 998
-    },
-    "base_materials": 9999,
-    "labyrinth_medals": 9999,
-    "talent_orbs": 998,
-    "treasure_level": 9999,
-    "stage_clear_count": 9999,
-    "itf_timed_score": 9999
+  "catfood": 45000,
+  "xp": 99999999,
+  "normal_tickets": 2999,
+  "100_million_tickets": 9999,
+  "rare_tickets": 299,
+  "platinum_tickets": 9,
+  "legend_tickets": 4,
+  "np": 9999,
+  "leadership": 9999,
+  "battle_items": 9999,
+  "catamins": 9999,
+  "catseyes": 9999,
+  "catfruit": {
+    "old": 128,
+    "new": 998
+  },
+  "base_materials": 9999,
+  "labyrinth_medals": 9999,
+  "talent_orbs": 998,
+  "treasure_level": 9999,
+  "stage_clear_count": 9999,
+  "itf_timed_score": 9999
 }
+

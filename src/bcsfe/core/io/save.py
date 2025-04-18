@@ -1085,6 +1085,212 @@ class SaveFile:
 
             self.gv_130500 = self.data.read_int()
 
+        if self.game_version >= 130600:
+            self.uby14 = self.data.read_byte()
+
+            if self.not_jp():
+                self.ush12 = self.data.read_short()
+
+            self.gv_130600 = self.data.read_int()
+
+        if self.game_version >= 130700:
+            if self.is_jp():
+                self.ush12 = self.data.read_short()
+            self.ud15 = self.data.read_double()
+            self.uby15 = self.data.read_byte()
+            self.uby16 = self.data.read_byte()
+
+            self.ush11 = self.data.read_short()
+            self.uby17 = self.data.read_byte()
+            self.uby18 = self.data.read_byte()
+            self.uby19 = self.data.read_byte()
+
+            self.ud16 = self.data.read_double()
+
+            length1 = self.data.read_short()
+
+            self.ushd1: dict[int, tuple[int, int, dict[int, int]]] = {}
+
+            for _ in range(length1):
+                key = self.data.read_short()
+                value = self.data.read_short()
+                value_2 = self.data.read_int()
+
+                length2 = self.data.read_short()
+
+                data2: dict[int, int] = {}
+
+                for _ in range(length2):
+                    key2 = self.data.read_short()
+                    value3 = self.data.read_short()
+
+                    data2[key2] = value3
+
+                self.ushd1[key] = (value, value_2, data2)
+
+            self.gv_130700 = self.data.read_int()
+
+        if self.game_version >= 140000:
+            self.ui22 = self.data.read_int()
+            self.ud17 = self.data.read_double()
+            self.uby20 = self.data.read_byte()
+
+            length = self.data.read_byte()
+
+            self.uild1: dict[int, list[int]] = {}
+
+            for _ in range(length):
+                key = self.data.read_int()
+                length2 = self.data.read_byte()
+                data3: list[int] = []
+                for _ in range(length2):
+                    value = self.data.read_byte()
+                    data3.append(value)
+
+                self.uild1[key] = data3
+
+            # probably cat claw championship stuff
+            length = self.data.read_short()
+
+            self.uill: list[tuple[int, list[tuple[int, int, int, list[int]]]]] = []
+
+            for _ in range(length):
+                value = self.data.read_byte()
+                l1: list[tuple[int, int, int, list[int]]] = []
+                length2 = self.data.read_byte()
+                for _ in range(length2):
+                    value2 = self.data.read_byte()
+                    value3 = self.data.read_byte()
+                    value4 = self.data.read_byte()
+                    length3 = self.data.read_short()
+
+                    l2: list[int] = []
+
+                    for _ in range(length3):
+                        value5 = self.data.read_short()
+                        l2.append(value5)
+                    l1.append((value2, value3, value4, l2))
+
+                self.uill.append((value, l1))
+
+            length = self.data.read_short()
+
+            self.uil9: list[int] = []
+            for _ in range(length):
+                self.uil9.append(self.data.read_int())
+
+            self.ub35 = self.data.read_bool()
+            self.ud18 = self.data.read_double()
+
+            length = self.data.read_short()
+
+            self.ushd2: dict[int, int] = {}
+
+            for _ in range(length):
+                key = self.data.read_short()
+                value = self.data.read_byte()
+                self.ushd2[key] = value
+
+            self.gv_140000 = self.data.read_int()
+
+        if self.game_version >= 140100:
+            self.uby21 = self.data.read_byte()
+            self.gv_140100 = self.data.read_int()
+
+        if self.game_version >= 140200:
+            length = self.data.read_byte()
+
+            self.uil10: list[
+                tuple[
+                    int,
+                    int,
+                    bool,
+                    bool,
+                    bool,
+                    int,
+                    int,
+                    int,
+                    bool,
+                    bool,
+                    bool,
+                    bool,
+                ]
+            ] = []
+
+            for _ in range(length):
+                val_1 = self.data.read_int()
+                val_2 = self.data.read_int()
+                val_3 = self.data.read_bool()
+                val_4 = self.data.read_bool()
+                val_5 = self.data.read_bool()
+                val_6 = self.data.read_int()
+                val_7 = self.data.read_int()
+                val_8 = self.data.read_int()
+                val_9 = self.data.read_bool()
+                val_10 = self.data.read_bool()
+                val_11 = self.data.read_bool()
+
+                val_12 = self.data.read_bool()
+
+                self.uil10.append(
+                    (
+                        val_1,
+                        val_2,
+                        val_3,
+                        val_4,
+                        val_5,
+                        val_6,
+                        val_7,
+                        val_8,
+                        val_9,
+                        val_10,
+                        val_11,
+                        val_12,
+                    )
+                )
+
+            length = self.data.read_byte()
+
+            self.uid1: dict[int, float] = {}
+
+            for _ in range(length):
+                key = self.data.read_int()
+                value = self.data.read_double()
+
+                self.uid1[key] = value
+
+            self.hundred_million_ticket = self.data.read_int()
+            self.gv_140200 = self.data.read_int()
+
+        if self.game_version >= 140300:
+            length = self.data.read_byte()
+            self.uil11: list[int] = []
+            for _ in range(length):
+                val = self.data.read_byte()
+                self.uil11.append(val)
+
+            self.ub36 = self.data.read_bool()
+
+            length = self.data.read_byte()
+
+            self.uil12: list[int] = []
+
+            for _ in range(length):
+                value = self.data.read_int()
+                self.uil12.append(value)
+
+            self.ui23 = self.data.read_int()
+            length = self.data.read_short()
+
+            self.uil13: list[int] = []
+
+            for _ in range(length):
+                self.uil13.append(self.data.read_int())
+
+            self.ub37 = self.data.read_bool()
+
+            self.gv_140300 = self.data.read_int()
+
         self.remaining_data = self.data.read_to_end(32)
 
     def save(self, data: core.Data):
@@ -1947,9 +2153,9 @@ class SaveFile:
 
         if self.game_version >= 130100:
             self.data.write_int(len(self.utl3))
-            for i, l in self.utl3:
+            for i, long in self.utl3:
                 self.data.write_int(i)
-                self.data.write_long(l)
+                self.data.write_long(long)
 
             self.data.write_int(self.gv_130100)
 
@@ -1984,6 +2190,137 @@ class SaveFile:
                         self.data.write_short(val)
 
             self.data.write_int(self.gv_130500)
+
+        if self.game_version >= 130600:
+            self.data.write_byte(self.uby14)
+
+            if self.not_jp():
+                self.data.write_short(self.ush12)
+
+            self.data.write_int(self.gv_130600)
+
+        if self.game_version >= 130700:
+            if self.is_jp():
+                self.data.write_short(self.ush12)
+
+            self.data.write_double(self.ud15)
+            self.data.write_byte(self.uby15)
+            self.data.write_byte(self.uby16)
+
+            self.data.write_short(self.ush11)
+            self.data.write_byte(self.uby17)
+            self.data.write_byte(self.uby18)
+            self.data.write_byte(self.uby19)
+
+            self.data.write_double(self.ud16)
+
+            self.data.write_short(len(self.ushd1))
+
+            for key, (value, value_2, data_2) in self.ushd1.items():
+                self.data.write_short(key)
+                self.data.write_short(value)
+                self.data.write_int(value_2)
+
+                self.data.write_short(len(data_2))
+
+                for key2, value3 in data_2.items():
+                    self.data.write_short(key2)
+                    self.data.write_short(value3)
+
+            self.data.write_int(self.gv_130700)
+        if self.game_version >= 140000:
+            self.data.write_int(self.ui22)
+            self.data.write_double(self.ud17)
+            self.data.write_byte(self.uby20)
+
+            self.data.write_byte(len(self.uild1))
+
+            for key, value in self.uild1.items():
+                self.data.write_int(key)
+                self.data.write_byte(len(value))
+                for val in value:
+                    self.data.write_byte(val)
+
+            self.data.write_short(len(self.uill))
+
+            for value1, value2 in self.uill:
+                self.data.write_byte(value1)
+                self.data.write_byte(len(value2))
+
+                for val3, val4, val5, val6 in value2:
+                    self.data.write_byte(val3)
+                    self.data.write_byte(val4)
+                    self.data.write_byte(val5)
+                    self.data.write_short(len(val6))
+
+                    for val7 in val6:
+                        self.data.write_short(val7)
+
+            self.data.write_short(len(self.uil9))
+            for val in self.uil9:
+                self.data.write_int(val)
+
+            self.data.write_bool(self.ub35)
+            self.data.write_double(self.ud18)
+
+            self.data.write_short(len(self.ushd2))
+
+            for key, value in self.ushd2.items():
+                self.data.write_short(key)
+                self.data.write_byte(value)
+
+            self.data.write_int(self.gv_140000)
+
+        if self.game_version >= 140100:
+            self.data.write_byte(self.uby21)
+            self.data.write_int(self.gv_140100)
+
+        if self.game_version >= 140200:
+            self.data.write_byte(len(self.uil10))
+
+            for v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12 in self.uil10:
+                self.data.write_int(v1)
+                self.data.write_int(v2)
+                self.data.write_bool(v3)
+                self.data.write_bool(v4)
+                self.data.write_bool(v5)
+                self.data.write_int(v6)
+                self.data.write_int(v7)
+                self.data.write_int(v8)
+                self.data.write_bool(v9)
+                self.data.write_bool(v10)
+                self.data.write_bool(v11)
+                self.data.write_bool(v12)
+
+            self.data.write_byte(len(self.uid1))
+
+            for key, value in self.uid1.items():
+                self.data.write_int(key)
+                self.data.write_double(value)
+
+            self.data.write_int(self.hundred_million_ticket)
+            self.data.write_int(self.gv_140200)
+
+        if self.game_version >= 140300:
+            self.data.write_byte(len(self.uil11))
+            for val in self.uil11:
+                self.data.write_byte(val)
+
+            self.data.write_bool(self.ub36)
+
+            self.data.write_byte(len(self.uil12))
+
+            for val in self.uil12:
+                self.data.write_int(val)
+
+            self.data.write_int(self.ui23)
+            self.data.write_short(len(self.uil13))
+
+            for val in self.uil13:
+                self.data.write_int(val)
+
+            self.data.write_bool(self.ub37)
+            self.data.write_int(self.gv_140300)
 
         self.data.write_bytes(self.remaining_data)
 
@@ -2382,6 +2719,42 @@ class SaveFile:
             "gv_130400": self.gv_130400,
             "utl4": self.utl4,
             "gv_130500": self.gv_130500,
+            "uby14": self.uby14,
+            "ush12": self.ush12,
+            "gv_130600": self.gv_130600,
+            "ud15": self.ud15,
+            "uby15": self.uby15,
+            "uby16": self.uby16,
+            "ush11": self.ush11,
+            "uby17": self.uby17,
+            "uby18": self.uby18,
+            "uby19": self.uby19,
+            "ud16": self.ud16,
+            "ushd1": self.ushd1,
+            "gv_130700": self.gv_130700,
+            "ui22": self.ui22,
+            "ud17": self.ud17,
+            "uby20": self.uby20,
+            "uild1": self.uild1,
+            "uill": self.uill,
+            "uil9": self.uil9,
+            "ub35": self.ub35,
+            "ud18": self.ud18,
+            "ushd2": self.ushd2,
+            "gv_140000": self.gv_140000,
+            "uby21": self.uby21,
+            "gv_140100": self.gv_140100,
+            "uil10": self.uil10,
+            "uid1": self.uid1,
+            "hundred_million_ticket": self.hundred_million_ticket,
+            "gv_140200": self.gv_140200,
+            "uil11": self.uil11,
+            "ub36": self.ub36,
+            "uil12": self.uil12,
+            "ui23": self.ui23,
+            "uil13": self.uil13,
+            "ub37": self.ub37,
+            "gv_140300": self.gv_140300,
             "remaining_data": base64.b64encode(self.remaining_data).decode("utf-8"),
         }
         return data
@@ -2395,7 +2768,11 @@ class SaveFile:
                 json_version=editor_version,
                 editor_version=__version__,
             )
-        cc = core.CountryCode(data.get("cc", None))
+        cc = data.get("cc")
+        if cc is not None:
+            cc = core.CountryCode(cc)
+        else:
+            cc = None
         save_file = SaveFile(cc=cc)
         save_file.dsts = data.get("dsts", [])
         save_file.game_version = core.GameVersion(data.get("game_version", 0))
@@ -2805,6 +3182,40 @@ class SaveFile:
         save_file.gv_130400 = data.get("gv_130400", 130400)
         save_file.utl4 = data.get("utl4", [])
         save_file.gv_130500 = data.get("gv_130500", 130500)
+        save_file.uby14 = data.get("uby14", 0)
+        save_file.ush12 = data.get("ush12", 0)
+        save_file.gv_130600 = data.get("gv_130600", 130600)
+        save_file.ud15 = data.get("ud15", 0.0)
+        save_file.uby15 = data.get("uby15", 0)
+        save_file.uby16 = data.get("uby16", 0)
+        save_file.ush11 = data.get("ush11", 0)
+        save_file.uby17 = data.get("uby17", 0)
+        save_file.uby18 = data.get("uby18", 0)
+        save_file.uby19 = data.get("uby19", 0)
+        save_file.ud16 = data.get("ud16", 0.0)
+        save_file.ushd1 = data.get("ushd1", {})
+        save_file.gv_130700 = data.get("gv_130700", 130700)
+        save_file.ui22 = data.get("ui22", 0)
+        save_file.ud17 = data.get("ud17", 0.0)
+        save_file.uby20 = data.get("uby20", 0)
+        save_file.uild1 = data.get("uild1", {})
+        save_file.uill = data.get("uill", [])
+        save_file.uil9 = data.get("uil9", [])
+        save_file.ub35 = data.get("ub35", False)
+        save_file.ud18 = data.get("ud18", 0.0)
+        save_file.ushd2 = data.get("ushd2", {})
+        save_file.gv_140100 = data.get("140100", 140100)
+        save_file.uil10 = data.get("uil10", [])
+        save_file.uid1 = data.get("uid1", {})
+        save_file.hundred_million_ticket = data.get("hundred_million_ticket", 0)
+        save_file.gv_140200 = data.get("140200", 140200)
+        save_file.uil11 = data.get("uil11", [])
+        save_file.ub36 = data.get("ub36", False)
+        save_file.uil12 = data.get("uil12", [])
+        save_file.ui23 = data.get("ui23", 0)
+        save_file.uil13 = data.get("uil13", [])
+        save_file.ub37 = data.get("ub37", False)
+        save_file.gv_140300 = data.get("140300", 140300)
 
         save_file.remaining_data = base64.b64decode(data.get("remaining_data", ""))
 
@@ -2853,6 +3264,9 @@ class SaveFile:
         self.ub32 = False
         self.ub33 = False
         self.ub34 = False
+        self.ub35 = False
+        self.ub36 = False
+        self.ub37 = False
 
         self.mute_bgm = False
         self.mute_se = False
@@ -2890,6 +3304,8 @@ class SaveFile:
         self.ui19 = 0
         self.ui20 = 0
         self.ui21 = 0
+        self.ui22 = 0
+        self.ui23 = 0
 
         self.gv_44 = 44
         self.gv_45 = 45
@@ -2962,6 +3378,12 @@ class SaveFile:
         self.gv_130301 = 130301
         self.gv_130400 = 130400
         self.gv_130500 = 130500
+        self.gv_130600 = 130600
+        self.gv_130700 = 130700
+        self.gv_140000 = 140000
+        self.gv_140100 = 140100
+        self.gv_140200 = 140200
+        self.gv_140300 = 140300
 
         self.catfood = 0
         self.current_energy = 0
@@ -3000,6 +3422,7 @@ class SaveFile:
         self.platinum_shards = 0
         self.sound_effects_volume = 0
         self.background_music_volume = 0
+        self.hundred_million_ticket = 0
 
         self.ud1 = 0.0
         self.ud2 = 0.0
@@ -3015,6 +3438,10 @@ class SaveFile:
         self.ud12 = 0.0
         self.ud13 = 0.0
         self.ud14 = 0.0
+        self.ud15 = 0.0
+        self.ud16 = 0.0
+        self.ud17 = 0.0
+        self.ud18 = 0.0
 
         self.timestamp = 0.0
         self.g_timestamp = 0.0
@@ -3051,8 +3478,14 @@ class SaveFile:
         self.uil6 = []
         self.uil7 = []
         self.uil8 = []
+        self.uil9 = []
+        self.uil10 = []
+        self.uil11 = []
+        self.uil12 = []
+        self.uil13 = []
 
         self.uiil1 = []
+        self.uill = []
 
         self.usl1 = []
         self.usl2 = []
@@ -3156,6 +3589,14 @@ class SaveFile:
         self.uby11 = 0
         self.uby12 = 0
         self.uby13 = 0
+        self.uby14 = 0
+        self.uby15 = 0
+        self.uby16 = 0
+        self.uby17 = 0
+        self.uby18 = 0
+        self.uby19 = 0
+        self.uby20 = 0
+        self.uby21 = 0
 
         self.has_account = 0
         self.filibuster_stage_id = 0
@@ -3170,6 +3611,9 @@ class SaveFile:
         self.ush7 = 0
         self.ush8 = 0
         self.ush9 = 0
+        self.ush10 = 0
+        self.ush11 = 0
+        self.ush12 = 0
 
         self.leadership = 0
 
@@ -3234,6 +3678,10 @@ class SaveFile:
         self.uiid3 = {}
         self.uidd2 = {}
         self.uidd3 = {}
+        self.ushd1 = {}
+        self.uild1 = {}
+        self.ushd2 = {}
+        self.uid1 = {}
 
         self.first_locks = {}
 
@@ -3337,6 +3785,12 @@ class SaveFile:
             assert self.gv_130301 == 130301
             assert self.gv_130400 == 130400
             assert self.gv_130500 == 130500
+            assert self.gv_130600 == 130600
+            assert self.gv_130700 == 130700
+            assert self.gv_140000 == 140000
+            assert self.gv_140100 == 140100
+            assert self.gv_140200 == 140200
+            assert self.gv_140300 == 140300
         except AssertionError as e:
             if raise_error:
                 raise AssertionError(e) from e
@@ -3401,7 +3855,10 @@ class SaveFile:
         self.order_ids = new_order_ids
 
     def store_dict(
-        self, identifier: str, dictionary: dict[str, str], overwrite: bool = True
+        self,
+        identifier: str,
+        dictionary: dict[str, str],
+        overwrite: bool = True,
     ):
         if overwrite:
             for i, order in enumerate(self.order_ids):

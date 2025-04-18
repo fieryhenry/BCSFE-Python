@@ -35,6 +35,9 @@ class CatEditor:
     def get_cats_obtainable(self) -> list[core.Cat] | None:
         return self.save_file.cats.get_cats_obtainable(self.save_file)
 
+    def get_cats_unobtainable(self) -> list[core.Cat] | None:
+        return self.save_file.cats.get_cats_non_obtainable(self.save_file)
+
     def get_cats_gatya_banner(self, gatya_id: int) -> list[core.Cat] | None:
         return self.save_file.cats.get_cats_gatya_banner(self.save_file, gatya_id)
 
@@ -86,6 +89,7 @@ class CatEditor:
             "select_cats_rarity": self.select_rarity,
             "select_cats_gatya_banner": self.select_gatya_banner,
             "select_cats_not_unlocked": self.get_non_unlocked_cats,
+            "select_cats_not_obtainable": self.get_cats_unobtainable,
         }
         option_id = dialog_creator.ChoiceInput(
             list(options), list(options), [], {}, "select_cats", True
@@ -225,7 +229,10 @@ class CatEditor:
             )
             formatted_names.append(formatted_name)
         gatya_option_ids, _ = dialog_creator.ChoiceInput.from_reduced(
-            formatted_names, ints=ids, dialog="select_gatya_banner", start_index=0
+            formatted_names,
+            ints=ids,
+            dialog="select_gatya_banner",
+            start_index=0,
         ).multiple_choice(False)
         if gatya_option_ids is None:
             return None
@@ -666,7 +673,13 @@ class CatEditor:
             "finish_edit_cats",
         ]
         option_id = dialog_creator.ChoiceInput(
-            options, options, [], {}, "select_edit_cats_option", True, remove_alias=True
+            options,
+            options,
+            [],
+            {},
+            "select_edit_cats_option",
+            True,
+            remove_alias=True,
         ).single_choice()
         if option_id is None:
             return False, cats

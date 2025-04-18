@@ -94,46 +94,29 @@ class RawOrbInfo:
     def __init__(
         self,
         orb_id: int,
-        grade_id: int,
+        rank_id: int,
         effect_id: int,
         value: list[int],
-        attribute_id: int | None,
+        target_id: int | None,
     ):
-        """Initialize the RawOrbInfo class
-
-        Args:
-            orb_id (int): The id of the orb
-            grade_id (int): The id of the grade
-            effect_id (int): The id of the effect
-            value (list[int]): The value of the effect? idk
-            attribute_id (int | None): The id of the attribute
-        """
         self.orb_id = orb_id
-        self.grade_id = grade_id
+        self.rank_id = rank_id
         self.effect_id = effect_id
         self.value = value
-        self.attribute_id = attribute_id
+        self.target_id = target_id
 
 
 class OrbInfo:
     def __init__(
         self,
         raw_orb_info: RawOrbInfo,
-        grade: str,
-        attribute: str | None,
+        rank: str,
+        target: str | None,
         effect: str,
     ):
-        """Initialize the OrbInfo class
-
-        Args:
-            raw_orb_info (RawOrbInfo): The raw orb info
-            grade (str): The grade of the orb (e.g. "S")
-            attribute (str | None): The attribute of the orb (e.g. "Red"). None if it applies to all traits
-            effect (str): The effect of the orb (e.g. "Attack Up %@: %@")
-        """
         self.raw_orb_info = raw_orb_info
-        self.grade = grade
-        self.attribute = attribute
+        self.rank = rank
+        self.target = target
         self.effect = effect
 
     def __str__(self) -> str:
@@ -142,17 +125,15 @@ class OrbInfo:
         Returns:
             str: The string representation of the OrbInfo
         """
-        attribute_color = color_from_enemy_type(self.attribute)
-        grade_color = color_from_grade(self.grade)
-        effect_color = color_from_effect(self.effect.split("%@")[0])
+        target_color = color_from_enemy_type(self.raw_orb_info.target_id)
+        rank_color = color_from_grade(self.raw_orb_info.rank_id)
+        effect_color = color_from_effect(self.raw_orb_info.effect_id)
         effect_text = self.effect.replace("%@", "{}")
         effect_text = f"<{effect_color}>{effect_text}</>"
-        if self.attribute is None:
-            attribute = core.core_data.local_manager.get_key("all")
-        else:
-            attribute = self.attribute
+        target = self.target
         effect = effect_text.format(
-            f"<{grade_color}>{self.grade}</>", f"<{attribute_color}>{attribute}</>"
+            f"<{rank_color}>{self.rank}</>",
+            f"<{target_color}>{target}</>" if target else "",
         )
         return f"{effect}"
 
@@ -274,11 +255,11 @@ class OrbInfoList:
         effect_csv = core.CSV(effect_data, "\t")
         orb_info_list: list[OrbInfo] = []
         for orb in raw_orb_info:
-            grade = grade_csv[orb.grade_id][3].to_str()
+            grade = grade_csv[orb.rank_id][3].to_str()
             effect = effect_csv[orb.effect_id][0].to_str()
 
-            if orb.attribute_id is not None:
-                attribute = attribute_tsv[orb.attribute_id][0].to_str()
+            if orb.target_id is not None:
+                attribute = attribute_tsv[orb.target_id][0].to_str()
             else:
                 attribute = None
 
@@ -316,11 +297,7 @@ class OrbInfoList:
             OrbInfo | None: The OrbInfo
         """
         for orb in self.orb_info_list:
-            if (
-                orb.grade == grade
-                and orb.attribute == attribute
-                and orb.effect == effect
-            ):
+            if orb.rank == grade and orb.target == attribute and orb.effect == effect:
                 return orb
         return None
 
@@ -354,12 +331,9 @@ class OrbInfoList:
         orbs: list[OrbInfo] = []
         for orb in self.orb_info_list:
             if (
-                (orb.grade.lower() == grade.lower() or grade == "*")
-                and (self.does_match_orb_str(orb.attribute, attribute))
-                and (
-                    orb.effect.lower().split(" ")[0] == effect.lower().split(" ")[0]
-                    or effect == "*"
-                )
+                (orb.rank.lower() == grade.lower() or grade == "*")
+                and (self.does_match_orb_str(orb.target, attribute))
+                and (orb.effect == effect or effect == "*")
             ):
                 orbs.append(orb)
         return orbs
@@ -370,7 +344,14 @@ class OrbInfoList:
         Returns:
             list[str]: The list of grades
         """
-        return list(set([orb.grade for orb in self.orb_info_list]))
+
+        data = list(
+            set([(orb.rank, orb.raw_orb_info.rank_id) for orb in self.orb_info_list])
+        )
+
+        data.sort(key=lambda id: id[1])
+
+        return [orb[0] for orb in data]
 
     def get_all_attributes(self) -> list[str | None]:
         """Get all the attributes
@@ -378,7 +359,20 @@ class OrbInfoList:
         Returns:
             list[str]: The list of attributes
         """
-        return list(set([orb.attribute for orb in self.orb_info_list]))
+
+        data = list(
+            set(
+                [
+                    (orb.target, orb.raw_orb_info.target_id)
+                    for orb in self.orb_info_list
+                    if orb.target is not None and orb.raw_orb_info.target_id is not None
+                ]
+            )
+        )
+
+        data.sort(key=lambda id: id[1])
+
+        return [orb[0] for orb in data]
 
     def get_all_effects(self) -> list[str]:
         """Get all the effects
@@ -386,7 +380,16 @@ class OrbInfoList:
         Returns:
             list[str]: The list of effects
         """
-        return list(set([orb.effect for orb in self.orb_info_list]))
+
+        data = list(
+            set(
+                [(orb.effect, orb.raw_orb_info.effect_id) for orb in self.orb_info_list]
+            )
+        )
+
+        data.sort(key=lambda id: id[1])
+
+        return [orb[0] for orb in data]
 
 
 class SaveOrb:
@@ -403,64 +406,73 @@ class SaveOrb:
         self.orb = orb
 
 
-def color_from_enemy_type(enemy_type: str | None) -> str:
-    if enemy_type is None:
+def color_from_enemy_type(target_id: int | None) -> str:
+    if target_id is None:
         return color.ColorHex.WHITE
-    enemy_type = enemy_type.lower().strip()
-    if enemy_type == "red":
+    if target_id == 0:
         return color.ColorHex.RED
-    elif enemy_type == "floating":
+    elif target_id == 1:
         return color.ColorHex.GREEN
-    elif enemy_type == "black":
+    elif target_id == 2:
         return color.ColorHex.DARK_GREY
-    elif enemy_type == "metal":
+    elif target_id == 3:
         return color.ColorHex.LIGHT_GREY
-    elif enemy_type == "angel":
+    elif target_id == 4:
         return color.ColorHex.YELLOW
-    elif enemy_type == "alien":
+    elif target_id == 5:
         return color.ColorHex.BLUE
-    elif enemy_type == "zombie":
+    elif target_id == 6:
         return color.ColorHex.MAGENTA
-    elif enemy_type == "relic":
+    elif target_id == 7:
         return color.ColorHex.DARK_GREEN
-    elif enemy_type == "traitless":
+    elif target_id == 8:
         return color.ColorHex.WHITE
-    elif enemy_type == "witch":
+    elif target_id == 9:
         return color.ColorHex.DARK_MAGENTA
-    elif enemy_type == "eva angel":
+    elif target_id == 10:
         return color.ColorHex.ORANGE
-    elif enemy_type == "aku":
+    elif target_id == 11:
         return color.ColorHex.CYAN
     return color.ColorHex.BLACK
 
 
-def color_from_grade(grade: str) -> str:
-    grade = grade.lower().strip()
-    if grade == "d":
+def color_from_grade(grade_id: int) -> str:
+    if grade_id == 0:
         return color.ColorHex.RED
-    elif grade == "c":
+    elif grade_id == 1:
         return color.ColorHex.ORANGE
-    elif grade == "b":
+    elif grade_id == 2:
         return color.ColorHex.YELLOW
-    elif grade == "a":
+    elif grade_id == 3:
         return color.ColorHex.GREEN
-    elif grade == "s":
+    elif grade_id == 4:
         return color.ColorHex.BLUE
     return color.ColorHex.BLACK
 
 
-def color_from_effect(effect_name: str):
-    effect_name = effect_name.lower().strip().split(" ")[0]
-    if effect_name == "attack":
+def color_from_effect(effect_id: int):
+    if effect_id == 0:
         return color.ColorHex.RED
-    elif effect_name == "defense":
-        return color.ColorHex.BLUE
-    elif effect_name == "strong":
+    elif effect_id == 1:
         return color.ColorHex.GREEN
-    elif effect_name == "massive":
+    elif effect_id == 2:
+        return color.ColorHex.DARK_GREY
+    elif effect_id == 3:
+        return color.ColorHex.LIGHT_GREY
+    elif effect_id == 4:
         return color.ColorHex.YELLOW
-    elif effect_name == "tough":
+    elif effect_id == 5:
         return color.ColorHex.BLUE
+    elif effect_id == 6:
+        return color.ColorHex.MAGENTA
+    elif effect_id == 7:
+        return color.ColorHex.DARK_GREEN
+    elif effect_id == 8:
+        return color.ColorHex.WHITE
+    elif effect_id == 9:
+        return color.ColorHex.DARK_MAGENTA
+    elif effect_id == 10:
+        return color.ColorHex.ORANGE
 
     return color.ColorHex.BLACK
 
@@ -519,42 +531,49 @@ class SaveOrbs:
         """Sort the orbs by attribute, effect, grade and id in that order with attribute being the most important"""
         orbs = list(self.orbs.values())
         orbs.sort(key=lambda orb: orb.orb.raw_orb_info.orb_id)
-        orbs.sort(key=lambda orb: orb.orb.raw_orb_info.grade_id)
+        orbs.sort(key=lambda orb: orb.orb.raw_orb_info.rank_id)
         orbs.sort(key=lambda orb: orb.orb.raw_orb_info.effect_id)
-        orbs.sort(key=lambda orb: orb.orb.raw_orb_info.attribute_id or -1)
+        orbs.sort(key=lambda orb: orb.orb.raw_orb_info.target_id or -1)
 
-    def localize_attribute(self, attribute: str | None) -> str:
+    def localize_attribute(self, attribute: str | None) -> str | None:
         if attribute is not None:
             return attribute
 
-        return core.core_data.local_manager.get_key("all")
-
     def edit(self):
         """Edit the orbs"""
+        # this code sucks quit a lot, but it works and i can't be bothered making it better atm
         self.print()
         all_grades = self.orb_info_list.get_all_grades()
-        all_grades = [grade.lower() for grade in all_grades]
+        all_grades = [grade for grade in all_grades]
         all_grades.sort()
         all_attributes = self.orb_info_list.get_all_attributes()
         all_attributes = [
-            self.localize_attribute(attribute) for attribute in all_attributes
+            self.localize_attribute(attribute) or ""
+            for attribute in all_attributes
+            if attribute
         ]
         all_attributes.sort()
         all_effects = self.orb_info_list.get_all_effects()
-        all_effects = [effect.lower().split(" ")[0] for effect in all_effects]
         all_effects.sort()
+        all_effects_str = [
+            effect.lower().replace("%@", "").replace(":", "").strip() + f" ({i})"
+            for (i, effect) in enumerate(all_effects)
+        ]
+        all_effect_ids = [i for i in range(len(all_effects))]
 
         all_grades_str = "".join(
-            f"<{color_from_grade(grade)}>{grade}</>," for grade in all_grades
+            f"<{color_from_grade(self.orb_info_list.get_all_grades().index(grade))}>{grade}</>,"
+            for grade in all_grades
         )
 
         all_attributes_str = "".join(
-            f"<{color_from_enemy_type(attribute)}>{attribute}</>,"
+            f"<{color_from_enemy_type(self.orb_info_list.get_all_attributes().index(attribute))}>{attribute}</>,"
             for attribute in all_attributes
         )
 
         all_effects_str = "".join(
-            f"<{color_from_effect(effect)}>{effect}</>," for effect in all_effects
+            f"<{color_from_effect(self.orb_info_list.get_all_effects().index(effect))}>{effect_str}</>,"
+            for effect_str, effect in zip(all_effects_str, all_effects)
         )
 
         color.ColoredText.localize(
@@ -577,31 +596,29 @@ class SaveOrbs:
 
         orb_selection: list[OrbInfo] = []
 
-        all_str = core.core_data.local_manager.get_key("all")
-
         for orb_input in orb_input_selection:
             grade = None
             attribute = None
             effect = None
             orb_input = orb_input.strip()
             parts = orb_input.split(" ")
-            parts = [part for part in parts if part != ""]
+            parts = [part.lower() for part in parts if part != ""]
             if len(parts) == 0:
                 continue
             if parts[0] == "*":
                 orb_selection = self.orb_info_list.orb_info_list
                 break
             for available_grade in all_grades:
-                if available_grade in parts:
+                if available_grade.lower() in parts:
                     grade = available_grade
                     break
             for available_attribute in all_attributes:
-                if available_attribute in parts:
+                if available_attribute.lower() in parts:
                     attribute = available_attribute
                     break
-            for available_effect in all_effects:
-                if available_effect in parts:
-                    effect = available_effect
+            for available_effect in all_effect_ids:
+                if str(available_effect) in parts:
+                    effect = all_effects[available_effect]
                     break
             if grade is None:
                 grade = "*"
@@ -609,8 +626,6 @@ class SaveOrbs:
                 attribute = "*"
             if effect is None:
                 effect = "*"
-            if attribute.lower() == all_str.lower():
-                attribute = None
             orbs = self.orb_info_list.get_orbs_from_component_fuzzy(
                 grade, attribute, effect
             )
@@ -618,9 +633,9 @@ class SaveOrbs:
 
         orb_selection = list(set(orb_selection))
         orb_selection.sort(key=lambda orb: orb.raw_orb_info.orb_id)
-        orb_selection.sort(key=lambda orb: orb.raw_orb_info.grade_id)
+        orb_selection.sort(key=lambda orb: orb.raw_orb_info.rank_id)
         orb_selection.sort(key=lambda orb: orb.raw_orb_info.effect_id)
-        orb_selection.sort(key=lambda orb: orb.raw_orb_info.attribute_id or -1)
+        orb_selection.sort(key=lambda orb: orb.raw_orb_info.target_id or -1)
 
         color.ColoredText.localize("selected_orbs")
 
@@ -659,7 +674,7 @@ class SaveOrbs:
         else:
             int_input = dialog_creator.IntInput(max_orbs)
             orb_count = int_input.get_input_locale_while(
-                "edit_orbs_all", {"max": max_orbs}
+                "edit_orbs_all", {"max": max_orbs}, escape=False
             )
             if orb_count is None:
                 return

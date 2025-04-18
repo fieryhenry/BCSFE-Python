@@ -34,7 +34,9 @@ class CatShrine:
         shrine_gone = stream.read_bool()
         flags = stream.read_byte_list(length=stream.read_byte())
         xp_offering = stream.read_long()
-        return CatShrine(unknown, stamp_1, stamp_2, shrine_gone, flags, xp_offering)
+        return CatShrine(
+            unknown, stamp_1, stamp_2, shrine_gone, flags, xp_offering
+        )
 
     def write(self, stream: core.Data):
         stream.write_bool(self.unknown)
@@ -107,7 +109,9 @@ class CatShrine:
         xp = shrine.xp_offering
         level = data.get_level_from_xp(xp)
 
-        color.ColoredText.localize("current_shrine_xp_level", level=level, xp=xp)
+        color.ColoredText.localize(
+            "current_shrine_xp_level", level=level, xp=xp
+        )
 
         if choice == 0:
             max_level = data.get_max_level()
@@ -115,7 +119,9 @@ class CatShrine:
                 return
             level = dialog_creator.IntInput(
                 min=1, max=max_level
-            ).get_input_locale_while("shrine_level_dialog", {"max_level": max_level})
+            ).get_input_locale_while(
+                "shrine_level_dialog", {"max_level": max_level}
+            )
             if level is None:
                 return
             shrine.xp_offering = data.get_xp_from_level(level)
@@ -123,9 +129,9 @@ class CatShrine:
             max_xp = data.get_max_xp()
             if max_xp is None:
                 return
-            xp = dialog_creator.IntInput(min=0, max=max_xp).get_input_locale_while(
-                "shrine_xp_dialog", {"max_xp": max_xp}
-            )
+            xp = dialog_creator.IntInput(
+                min=0, max=max_xp
+            ).get_input_locale_while("shrine_xp_dialog", {"max_xp": max_xp})
             if xp is None:
                 return
             shrine.xp_offering = xp
@@ -142,7 +148,9 @@ class CatShrine:
         shrine.stamp_1 = 0.0
         shrine.stamp_2 = 0.0
 
-        color.ColoredText.localize("current_shrine_xp_level", level=level, xp=xp)
+        color.ColoredText.localize(
+            "current_shrine_xp_level", level=level, xp=xp
+        )
 
         color.ColoredText.localize("cat_shrine_edited")
 
@@ -159,7 +167,8 @@ class CatShrineLevels:
         if data is None:
             return None
         csv = core.CSV(
-            data, delimiter=core.Delimeter.from_country_code_res(self.save_file.cc)
+            data,
+            delimiter=core.Delimeter.from_country_code_res(self.save_file.cc),
         )
         boundaries: list[int] = []
         counter = 0

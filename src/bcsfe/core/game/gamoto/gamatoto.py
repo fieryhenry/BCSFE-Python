@@ -66,7 +66,9 @@ class GamatotoMembersName:
 
         return [member for member in self.members if member.rarity == rarity]
 
-    def get_members_from_helpers(self, helpers: Helpers) -> list[MemberName | None]:
+    def get_members_from_helpers(
+        self, helpers: Helpers
+    ) -> list[MemberName | None]:
         return self.get_members_from_ids(
             [helper.id for helper in helpers.helpers if helper.is_valid()]
         )
@@ -123,7 +125,9 @@ class GamatotoLevels:
             return None
         csv = core.CSV(data)
         line = csv[0]
-        return GamatotoLimit(line[0].to_int(), line[1].to_int(), line[2].to_int())
+        return GamatotoLimit(
+            line[0].to_int(), line[1].to_int(), line[2].to_int()
+        )
 
     def get_level(self, level: int) -> GamatotoLevel | None:
         if self.levels is None:
@@ -436,7 +440,9 @@ class Gamatoto:
             if member is None:
                 continue
             color.ColoredText.localize(
-                "gamatoto_helper", name=member.name, rarity_name=member.rarity_name
+                "gamatoto_helper",
+                name=member.name,
+                rarity_name=member.rarity_name,
             )
         rarity_names = members_name.get_all_rarity_names()
         if rarity_names is None:
@@ -476,7 +482,9 @@ class Gamatoto:
             if member is None:
                 continue
             color.ColoredText.localize(
-                "gamatoto_helper", name=member.name, rarity_name=member.rarity_name
+                "gamatoto_helper",
+                name=member.name,
+                rarity_name=member.rarity_name,
             )
 
 

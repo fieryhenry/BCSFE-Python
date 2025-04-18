@@ -113,9 +113,13 @@ class ColoredText:
                 print(colored.stylize(text, fg), end="")  # type: ignore
 
     @staticmethod
-    def localize(string: str, escape: bool = True, **kwargs: Any) -> ColoredText:
+    def localize(
+        string: str, escape: bool = True, **kwargs: Any
+    ) -> ColoredText:
         return ColoredText(
-            core.core_data.local_manager.get_key(string, escape=escape, **kwargs)
+            core.core_data.local_manager.get_key(
+                string, escape=escape, **kwargs
+            )
         )
 
     def parse(self, txt: str) -> list[tuple[str, str]]:
@@ -130,7 +134,11 @@ class ColoredText:
         special_chars = core.LocalManager.get_special_chars()
         while i < len(txt):
             char = txt[i]
-            if char == "\\" and i + 1 < len(txt) and txt[i + 1] in special_chars:
+            if (
+                char == "\\"
+                and i + 1 < len(txt)
+                and txt[i + 1] in special_chars
+            ):
                 i += 1
                 char = txt[i]
                 text += char
@@ -175,5 +183,7 @@ class ColoredInput:
         return input()
 
     def localize(self, string: str, escape: bool = True, **kwargs: Any) -> str:
-        text = core.core_data.local_manager.get_key(string, escape=escape, **kwargs)
+        text = core.core_data.local_manager.get_key(
+            string, escape=escape, **kwargs
+        )
         return self.get(text)

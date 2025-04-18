@@ -72,7 +72,9 @@ class Chapter:
     @staticmethod
     def deserialize(data: dict[str, Any]) -> Chapter:
         chapter = Chapter(data.get("current_stage", 0))
-        chapter.stages = [Stage.deserialize(stage) for stage in data.get("stages", [])]
+        chapter.stages = [
+            Stage.deserialize(stage) for stage in data.get("stages", [])
+        ]
         return chapter
 
     def __repr__(self):
@@ -88,11 +90,15 @@ class ChaptersStars:
 
     @staticmethod
     def init(total_stages: int, total_stars: int) -> ChaptersStars:
-        return ChaptersStars([Chapter.init(total_stages) for _ in range(total_stars)])
+        return ChaptersStars(
+            [Chapter.init(total_stages) for _ in range(total_stars)]
+        )
 
     @staticmethod
     def read_current_stage(data: core.Data, total_stars: int):
-        chapters = [Chapter.read_current_stage(data) for _ in range(total_stars)]
+        chapters = [
+            Chapter.read_current_stage(data) for _ in range(total_stars)
+        ]
         return ChaptersStars(chapters)
 
     def write_current_stage(self, data: core.Data):
@@ -189,7 +195,9 @@ class AkuChapters:
             return
 
         if clear_progress > 1:
-            individual_clear_count = core.StoryChapters.ask_if_individual_clear_counts()
+            individual_clear_count = (
+                core.StoryChapters.ask_if_individual_clear_counts()
+            )
             if individual_clear_count is None:
                 return
         else:
@@ -201,7 +209,9 @@ class AkuChapters:
                 return
             for i, stage in enumerate(chapter.stages[:clear_progress]):
                 stage_name = stage_names[i]
-                color.ColoredText.localize("aku_current_stage", name=stage_name, id=i)
+                color.ColoredText.localize(
+                    "aku_current_stage", name=stage_name, id=i
+                )
                 clear_count = core.StoryChapters.ask_clear_count()
                 if clear_count is None:
                     return

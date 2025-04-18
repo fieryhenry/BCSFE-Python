@@ -47,7 +47,9 @@ class ManagedItem:
         self.detail_created_at = detail_created_at
 
     @staticmethod
-    def from_change(change: int, managed_item_type: ManagedItemType) -> ManagedItem:
+    def from_change(
+        change: int, managed_item_type: ManagedItemType
+    ) -> ManagedItem:
         """Create a managed item from a change."""
         if change > 0:
             detail_type = DetailType.GET
@@ -104,14 +106,10 @@ class ManagedItem:
         )
 
     def __str__(self) -> str:
-        return (
-            f"{self.amount} {self.managed_item_type.value} ({self.detail_type.value})"
-        )
+        return f"{self.amount} {self.managed_item_type.value} ({self.detail_type.value})"
 
     def __repr__(self) -> str:
-        return (
-            f"{self.amount} {self.managed_item_type.value} ({self.detail_type.value})"
-        )
+        return f"{self.amount} {self.managed_item_type.value} ({self.detail_type.value})"
 
 
 class BackupMetaData:
@@ -126,7 +124,9 @@ class BackupMetaData:
         self.save_file.remove_strings(self.identifier)
         for managed_item in managed_items:
             string = managed_item.to_short_form()
-            self.save_file.store_string(self.identifier, string, overwrite=False)
+            self.save_file.store_string(
+                self.identifier, string, overwrite=False
+            )
 
     def get_managed_items(self) -> list[ManagedItem]:
         managed_items: list[ManagedItem] = []

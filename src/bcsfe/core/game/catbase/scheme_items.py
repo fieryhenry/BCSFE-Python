@@ -118,7 +118,9 @@ class SchemeItems:
                 return
             string = "\n\t"
             if item.is_cat():
-                cat_names = core.Cat.get_names(item.item_id, save_file, localizable)
+                cat_names = core.Cat.get_names(
+                    item.item_id, save_file, localizable
+                )
                 if cat_names:
                     cat_name = cat_names[0]
                     string += scheme_name.replace("%@", cat_name)

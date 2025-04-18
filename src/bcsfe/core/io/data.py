@@ -16,7 +16,9 @@ class PaddingType(enum.Enum):
 
 
 class Data:
-    def __init__(self, data: bytes | str | None | int | bool | Data | Any = None):
+    def __init__(
+        self, data: bytes | str | None | int | bool | Data | Any = None
+    ):
         if isinstance(data, str):
             self.data = data.encode("utf-8")
         elif isinstance(data, bytes):
@@ -401,7 +403,9 @@ class Data:
     def read_int_tuple(self) -> tuple[int, int]:
         return self.read_int(), self.read_int()
 
-    def read_int_tuple_list(self, length: int | None = None) -> list[tuple[int, int]]:
+    def read_int_tuple_list(
+        self, length: int | None = None
+    ) -> list[tuple[int, int]]:
         if length is None:
             length = self.read_int()
         result: list[tuple[int, int]] = []
@@ -431,7 +435,9 @@ class Data:
             result[key] = value
         return result
 
-    def write_int_bool_dict(self, value: dict[int, bool], write_length: bool = True):
+    def write_int_bool_dict(
+        self, value: dict[int, bool], write_length: bool = True
+    ):
         if write_length:
             self.write_int(len(value))
         for key, item in value.items():
@@ -448,14 +454,18 @@ class Data:
             result[key] = value
         return result
 
-    def write_int_int_dict(self, value: dict[int, int], write_length: bool = True):
+    def write_int_int_dict(
+        self, value: dict[int, int], write_length: bool = True
+    ):
         if write_length:
             self.write_int(len(value))
         for key, item in value.items():
             self.write_int(key)
             self.write_int(item)
 
-    def read_int_double_dict(self, length: int | None = None) -> dict[int, float]:
+    def read_int_double_dict(
+        self, length: int | None = None
+    ) -> dict[int, float]:
         if length is None:
             length = self.read_int()
         result: dict[int, float] = {}
@@ -465,14 +475,18 @@ class Data:
             result[key] = value
         return result
 
-    def write_int_double_dict(self, value: dict[int, float], write_length: bool = True):
+    def write_int_double_dict(
+        self, value: dict[int, float], write_length: bool = True
+    ):
         if write_length:
             self.write_int(len(value))
         for key, item in value.items():
             self.write_int(key)
             self.write_double(item)
 
-    def read_short_bool_dict(self, length: int | None = None) -> dict[int, bool]:
+    def read_short_bool_dict(
+        self, length: int | None = None
+    ) -> dict[int, bool]:
         if length is None:
             length = self.read_int()
         result: dict[int, bool] = {}
@@ -482,7 +496,9 @@ class Data:
             result[key] = value
         return result
 
-    def write_short_bool_dict(self, value: dict[int, bool], write_length: bool = True):
+    def write_short_bool_dict(
+        self, value: dict[int, bool], write_length: bool = True
+    ):
         if write_length:
             self.write_int(len(value))
         for key, item in value.items():
@@ -566,7 +582,9 @@ class Data:
             return Data(joiner.data.join(data_lst))
 
     @staticmethod
-    def from_int_list(int_list: list[int], endianess: Literal["little", "big"]) -> Data:
+    def from_int_list(
+        int_list: list[int], endianess: Literal["little", "big"]
+    ) -> Data:
         bytes_data = b""
         for integer in int_list:
             bytes_data += integer.to_bytes(4, endianess)
@@ -603,7 +621,9 @@ class Data:
     def search(self, search_data: Data, start: int = 0) -> int:
         return self.data.find(search_data.data, start)
 
-    def add_line(self, line: Data | str | None | bytes | int | bool = None) -> Data:
+    def add_line(
+        self, line: Data | str | None | bytes | int | bool = None
+    ) -> Data:
         line = Data(line)
         self.data += line.data + b"\r\n"
         return self

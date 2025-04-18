@@ -216,7 +216,9 @@ class Missions:
                     continue
                 name = name.replace("%d", str(condition.progress_count))
                 if "%@" in name and len(condition.conditions_value) > 2:
-                    name = name.replace("%@", str(condition.conditions_value[2]))
+                    name = name.replace(
+                        "%@", str(condition.conditions_value[2])
+                    )
                 options.append(name)
                 mssion_ids.append(mission_id)
 

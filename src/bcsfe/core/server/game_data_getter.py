@@ -16,7 +16,9 @@ class GameDataGetter:
         if self.all_versions is None:
             self.latest_version = None
         else:
-            self.latest_version = self.get_latest_version(self.all_versions, self.cc)
+            self.latest_version = self.get_latest_version(
+                self.all_versions, self.cc
+            )
 
     def does_save_version_match(self, save_file: core.SaveFile) -> bool:
         if self.latest_version is None:

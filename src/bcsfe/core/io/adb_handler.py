@@ -14,7 +14,9 @@ class AdbNotInstalled(Exception):
 
 class AdbHandler(io.root_handler.RootHandler):
     def __init__(self):
-        adb_path = core.Path(core.core_data.config.get_str(core.ConfigKey.ADB_PATH))
+        adb_path = core.Path(
+            core.core_data.config.get_str(core.ConfigKey.ADB_PATH)
+        )
         if not self.is_adb_installed(adb_path):
             raise AdbNotInstalled("Adb is not in PATH environment variable.")
         self.adb_path = adb_path

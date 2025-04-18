@@ -126,7 +126,9 @@ class Upgrade:
                         min_base = int(range_parts[0]) - 1
                         max_base = min_base
                     except ValueError:
-                        color.ColoredText.localize("invalid_upgrade_base", base=base)
+                        color.ColoredText.localize(
+                            "invalid_upgrade_base", base=base
+                        )
                         return None, False
             else:
                 try:
@@ -155,7 +157,9 @@ class Upgrade:
                         min_plus = int(range_parts[0])
                         max_plus = min_plus
                     except ValueError:
-                        color.ColoredText.localize("invalid_upgrade_plus", plus=plus)
+                        color.ColoredText.localize(
+                            "invalid_upgrade_plus", plus=plus
+                        )
                         return None, False
             else:
                 try:

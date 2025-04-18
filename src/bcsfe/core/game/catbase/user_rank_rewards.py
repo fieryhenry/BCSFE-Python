@@ -4,12 +4,16 @@ from bcsfe.cli import dialog_creator, color
 
 
 class RankGift:
-    def __init__(self, index: int, threshold: int, rewards: list[tuple[int, int]]):
+    def __init__(
+        self, index: int, threshold: int, rewards: list[tuple[int, int]]
+    ):
         self.index = index
         self.threshold = threshold
         self.rewards = rewards
 
-    def get_name(self, rank_gift_descriptions: RankGiftDescriptions) -> str | None:
+    def get_name(
+        self, rank_gift_descriptions: RankGiftDescriptions
+    ) -> str | None:
         return rank_gift_descriptions.get_name(self.threshold)
 
 

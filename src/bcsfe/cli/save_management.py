@@ -185,7 +185,9 @@ class SaveManagement:
         Args:
             save_file (core.SaveFile): The save file to initialize.
         """
-        confirm = dialog_creator.YesNoInput().get_input_once("init_save_confirm")
+        confirm = dialog_creator.YesNoInput().get_input_once(
+            "init_save_confirm"
+        )
         if not confirm:
             return
         save_file.init_save(save_file.game_version)
@@ -213,7 +215,9 @@ class SaveManagement:
             color.ColoredText.localize("upload_items_fail")
 
     @staticmethod
-    def upload_items_checker(save_file: core.SaveFile, check_strict: bool = True):
+    def upload_items_checker(
+        save_file: core.SaveFile, check_strict: bool = True
+    ):
         managed_items = core.BackupMetaData(save_file).get_managed_items()
         if not managed_items:
             return
@@ -311,7 +315,9 @@ class SaveManagement:
                     )
                 else:
                     color.ColoredText.localize(
-                        "adb_pull_fail", package_name=package_name, error=result.result
+                        "adb_pull_fail",
+                        package_name=package_name,
+                        error=result.result,
                     )
             else:
                 used_storage = True
@@ -355,7 +361,9 @@ class SaveManagement:
         color.ColoredText.localize("save_file_found", path=save_path)
 
         try:
-            save_file = core.SaveFile(save_path.read(), cc, package_name=package_name)
+            save_file = core.SaveFile(
+                save_path.read(), cc, package_name=package_name
+            )
         except core.CantDetectSaveCCError:
             color.ColoredText.localize("cant_detect_cc")
             cc = core.CountryCode.select()

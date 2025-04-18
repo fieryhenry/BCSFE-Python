@@ -26,7 +26,9 @@ class Matatabi:
     def __init__(self, save_file: core.SaveFile):
         self.save_file = save_file
         self.matatabi = self.__get_matatabi()
-        self.gatya_item_names = core.core_data.get_gatya_item_names(self.save_file)
+        self.gatya_item_names = core.core_data.get_gatya_item_names(
+            self.save_file
+        )
 
     def __get_matatabi(self) -> list[Fruit] | None:
         gdg = core.core_data.get_game_data_getter(self.save_file)
@@ -52,7 +54,9 @@ class Matatabi:
                 grow_up = [item.to_int() for item in line[6:]]
             else:
                 grow_up = None
-            matatabi.append(Fruit(id, seed, group, sort, require, text, grow_up))
+            matatabi.append(
+                Fruit(id, seed, group, sort, require, text, grow_up)
+            )
 
         return matatabi
 

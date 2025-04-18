@@ -30,7 +30,9 @@ class Logger:
         Args:
             message (str): The message to log
         """
-        self.log_data.append(core.Data(f"[DEBUG]::{self.get_time()} - {message}"))
+        self.log_data.append(
+            core.Data(f"[DEBUG]::{self.get_time()} - {message}")
+        )
         self.write()
 
     def log_info(self, message: str):
@@ -40,7 +42,9 @@ class Logger:
         Args:
             message (str): The message to log
         """
-        self.log_data.append(core.Data(f"[INFO]::{self.get_time()} - {message}"))
+        self.log_data.append(
+            core.Data(f"[INFO]::{self.get_time()} - {message}")
+        )
         self.write()
 
     def log_warning(self, message: str):
@@ -50,7 +54,9 @@ class Logger:
         Args:
             message (str): The message to log
         """
-        self.log_data.append(core.Data(f"[WARNING]::{self.get_time()} - {message}"))
+        self.log_data.append(
+            core.Data(f"[WARNING]::{self.get_time()} - {message}")
+        )
         self.write()
 
     def log_error(self, message: str):
@@ -60,7 +66,9 @@ class Logger:
         Args:
             message (str): The message to log
         """
-        self.log_data.append(core.Data(f"[ERROR]::{self.get_time()} - {message}"))
+        self.log_data.append(
+            core.Data(f"[ERROR]::{self.get_time()} - {message}")
+        )
         self.write()
 
     def log_exception(self, exception: Exception, extra_msg: str = ""):
@@ -79,7 +87,9 @@ class Logger:
         """
         Writes the log data to the log file
         """
-        self.log_file.write(core.Data.from_many(self.log_data, core.Data("\n")).strip())
+        self.log_file.write(
+            core.Data.from_many(self.log_data, core.Data("\n")).strip()
+        )
 
     def log_no_file_found(self, file_name: str):
         """

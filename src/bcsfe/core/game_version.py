@@ -21,7 +21,9 @@ class GameVersion:
             str: Game version as a string. e.g 12.1.2
         """
         split_gv = str(self.game_version).zfill(6)
-        split_gv = [str(int(split_gv[i : i + 2])) for i in range(0, len(split_gv), 2)]
+        split_gv = [
+            str(int(split_gv[i : i + 2])) for i in range(0, len(split_gv), 2)
+        ]
         return ".".join(split_gv)
 
     def get_parts_zfill(self) -> list[str]:
@@ -140,7 +142,9 @@ class GameVersion:
         elif isinstance(other, int):
             return self.game_version == other
         elif isinstance(other, str):
-            return self.game_version == GameVersion.from_string(other).game_version
+            return (
+                self.game_version == GameVersion.from_string(other).game_version
+            )
         else:
             return False
 
@@ -169,7 +173,9 @@ class GameVersion:
         elif isinstance(other, int):
             return self.game_version < other
         elif isinstance(other, str):
-            return self.game_version < GameVersion.from_string(other).game_version
+            return (
+                self.game_version < GameVersion.from_string(other).game_version
+            )
         else:
             return False
 

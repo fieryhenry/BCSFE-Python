@@ -78,7 +78,10 @@ class Chapter:
         self.treasure_festival_type = 0
 
     def clear_stage(
-        self, index: int, clear_amount: int = 1, overwrite_clear_progress: bool = False
+        self,
+        index: int,
+        clear_amount: int = 1,
+        overwrite_clear_progress: bool = False,
     ):
         if overwrite_clear_progress:
             self.progress = index + 1
@@ -111,7 +114,9 @@ class Chapter:
 
     def read_clear_times(self, stream: core.Data):
         total_stages = 51
-        self.stages = [Stage.read_clear_times(stream) for _ in range(total_stages)]
+        self.stages = [
+            Stage.read_clear_times(stream) for _ in range(total_stages)
+        ]
 
     def read_treasure(self, stream: core.Data):
         for stage in self.get_treasure_stages():
@@ -185,11 +190,19 @@ class Chapter:
     def deserialize(data: dict[str, Any]) -> Chapter:
         chapter = Chapter(data.get("selected_stage", 0))
         chapter.progress = data.get("progress", 0)
-        chapter.stages = [Stage.deserialize(stage) for stage in data.get("stages", [])]
-        chapter.time_until_treasure_chance = data.get("time_until_treasure_chance", 0)
-        chapter.treasure_chance_duration = data.get("treasure_chance_duration", 0)
+        chapter.stages = [
+            Stage.deserialize(stage) for stage in data.get("stages", [])
+        ]
+        chapter.time_until_treasure_chance = data.get(
+            "time_until_treasure_chance", 0
+        )
+        chapter.treasure_chance_duration = data.get(
+            "treasure_chance_duration", 0
+        )
         chapter.treasure_chance_value = data.get("treasure_chance_value", 0)
-        chapter.treasure_chance_stage_id = data.get("treasure_chance_stage_id", 0)
+        chapter.treasure_chance_stage_id = data.get(
+            "treasure_chance_stage_id", 0
+        )
         chapter.treasure_festival_type = data.get("treasure_festival_type", 0)
         return chapter
 
@@ -199,7 +212,9 @@ class Chapter:
     def __str__(self):
         return f"Chapter({self.selected_stage}, {self.progress}, {self.stages}, {self.time_until_treasure_chance}, {self.treasure_chance_duration}, {self.treasure_chance_value}, {self.treasure_chance_stage_id}, {self.treasure_festival_type})"
 
-    def apply_progress(self, progress: int, clear_times: list[int] | None = None):
+    def apply_progress(
+        self, progress: int, clear_times: list[int] | None = None
+    ):
         if clear_times is None:
             clear_times = [1] * progress
 
@@ -325,7 +340,9 @@ class StoryChapters:
 
     @staticmethod
     def deserialize(data: list[dict[str, Any]]) -> StoryChapters:
-        chapters = StoryChapters([Chapter.deserialize(chapter) for chapter in data])
+        chapters = StoryChapters(
+            [Chapter.deserialize(chapter) for chapter in data]
+        )
         return chapters
 
     def __repr__(self):
@@ -367,11 +384,17 @@ class StoryChapters:
 
         for chapter_id in chapter_ids:
             if chapter_id < 3:
-                chapter_names.append(eoc_name.replace("%d", str(chapter_id + 1)))
+                chapter_names.append(
+                    eoc_name.replace("%d", str(chapter_id + 1))
+                )
             elif chapter_id < 6:
-                chapter_names.append(itf_name.replace("%d", str(chapter_id - 2)))
+                chapter_names.append(
+                    itf_name.replace("%d", str(chapter_id - 2))
+                )
             else:
-                chapter_names.append(cotc_name.replace("%d", str(chapter_id - 5)))
+                chapter_names.append(
+                    cotc_name.replace("%d", str(chapter_id - 5))
+                )
 
         return chapter_names
 
@@ -394,7 +417,9 @@ class StoryChapters:
     def get_selected_chapter_progress(max_stages: int = 48) -> int | None:
         progress = dialog_creator.IntInput(
             min=0, max=max_stages
-        ).get_input_locale_while("edit_chapter_progress_all", {"max": max_stages})
+        ).get_input_locale_while(
+            "edit_chapter_progress_all", {"max": max_stages}
+        )
         if progress is None:
             return None
 
@@ -413,7 +438,8 @@ class StoryChapters:
         progress = dialog_creator.IntInput(
             min=0, max=max_stages
         ).get_input_locale_while(
-            "edit_chapter_progress", {"max": max_stages, "chapter_name": chapter_name}
+            "edit_chapter_progress",
+            {"max": max_stages, "chapter_name": chapter_name},
         )
         if progress is None:
             return False
@@ -608,7 +634,9 @@ class StoryChapters:
                 new_stage_names.append(stage_names[index_stage_id])
             stage_names = new_stage_names
             map_name = names[id]
-            color.ColoredText.localize("current_sol_chapter", name=map_name, id=id)
+            color.ColoredText.localize(
+                "current_sol_chapter", name=map_name, id=id
+            )
             if clear_type_choice:
                 stages = core.EventChapters.ask_stages_stage_names(stage_names)
                 if stages is None:
@@ -648,7 +676,9 @@ class StoryChapters:
 
     @staticmethod
     def ask_treasure_level(save_file: core.SaveFile) -> int | None:
-        treasure_text = core.core_data.get_treasure_text(save_file).treasure_text
+        treasure_text = core.core_data.get_treasure_text(
+            save_file
+        ).treasure_text
         if treasure_text is None:
             return None
         if len(treasure_text) < 3:
@@ -667,7 +697,9 @@ class StoryChapters:
             return None
         choice -= 1
 
-        max_treasure_level = core.core_data.max_value_manager.get("treasure_level")
+        max_treasure_level = core.core_data.max_value_manager.get(
+            "treasure_level"
+        )
 
         if choice == 4:
             treasure_level = dialog_creator.IntInput(
@@ -694,7 +726,9 @@ class StoryChapters:
         return choice
 
     @staticmethod
-    def edit_treasures_whole_chapters(save_file: core.SaveFile, chapters: list[int]):
+    def edit_treasures_whole_chapters(
+        save_file: core.SaveFile, chapters: list[int]
+    ):
         choice = StoryChapters.get_per_chapter(chapters)
         if choice is None:
             return
@@ -726,7 +760,9 @@ class StoryChapters:
         return 2
 
     @staticmethod
-    def select_stages(save_file: core.SaveFile, chapter_id: int) -> list[int] | None:
+    def select_stages(
+        save_file: core.SaveFile, chapter_id: int
+    ) -> list[int] | None:
         options = ["select_stage_by_id", "select_stage_by_name"]
         choice = dialog_creator.ChoiceInput.from_reduced(
             options, dialog="select_stage_dialog", single_choice=True
@@ -762,7 +798,9 @@ class StoryChapters:
         return selected_stages
 
     @staticmethod
-    def edit_treasures_individual_stages(save_file: core.SaveFile, chapters: list[int]):
+    def edit_treasures_individual_stages(
+        save_file: core.SaveFile, chapters: list[int]
+    ):
         choice = StoryChapters.get_per_chapter(chapters)
         if choice is None:
             return
@@ -810,9 +848,11 @@ class StoryChapters:
             for i in range(len(treasure_group_data)):
                 treasure_group_names_new.append(treasure_group_names[i])
 
-            selected_treasure_groups, _ = dialog_creator.ChoiceInput.from_reduced(
-                treasure_group_names_new, dialog="select_treasure_groups"
-            ).multiple_choice(localized_options=False)
+            selected_treasure_groups, _ = (
+                dialog_creator.ChoiceInput.from_reduced(
+                    treasure_group_names_new, dialog="select_treasure_groups"
+                ).multiple_choice(localized_options=False)
+            )
 
             if not selected_treasure_groups:
                 return
@@ -861,9 +901,13 @@ class StoryChapters:
         choice -= 1
 
         if choice == 0:
-            StoryChapters.edit_treasures_whole_chapters(save_file, selected_chapters)
+            StoryChapters.edit_treasures_whole_chapters(
+                save_file, selected_chapters
+            )
         elif choice == 1:
-            StoryChapters.edit_treasures_individual_stages(save_file, selected_chapters)
+            StoryChapters.edit_treasures_individual_stages(
+                save_file, selected_chapters
+            )
         elif choice == 2:
             StoryChapters.edit_treasures_groups(save_file, selected_chapters)
 
@@ -911,7 +955,8 @@ class StoryChapters:
                 StoryChapters.print_current_chapter(save_file, chapter_id)
                 chapter = save_file.story.get_real_chapters()[chapter_id]
                 score = dialog_creator.IntInput(
-                    min=0, max=core.core_data.max_value_manager.get("itf_timed_score")
+                    min=0,
+                    max=core.core_data.max_value_manager.get("itf_timed_score"),
                 ).get_input_locale_while("itf_timed_score_dialog", {})
                 if score is None:
                     return
@@ -919,7 +964,8 @@ class StoryChapters:
                     stage.itf_timed_score = score
         else:
             score = dialog_creator.IntInput(
-                min=0, max=core.core_data.max_value_manager.get("itf_timed_score")
+                min=0,
+                max=core.core_data.max_value_manager.get("itf_timed_score"),
             ).get_input_locale_while("itf_timed_score_dialog", {})
             if score is None:
                 return
@@ -929,7 +975,9 @@ class StoryChapters:
                     stage.itf_timed_score = score
 
     @staticmethod
-    def print_current_stage(save_file: core.SaveFile, chapter_id: int, stage_id: int):
+    def print_current_stage(
+        save_file: core.SaveFile, chapter_id: int, stage_id: int
+    ):
         chapter_names = StoryChapters.get_chapter_names(save_file)
         if chapter_names is None:
             return
@@ -953,7 +1001,9 @@ class StoryChapters:
             return
         options = ["individual_stages", "all_selected_stages"]
         choice2 = dialog_creator.ChoiceInput.from_reduced(
-            options, dialog="itf_timed_scores_individual_dialog", single_choice=True
+            options,
+            dialog="itf_timed_scores_individual_dialog",
+            single_choice=True,
         ).single_choice()
         if choice2 is None:
             return
@@ -974,7 +1024,9 @@ class StoryChapters:
 
                         score = dialog_creator.IntInput(
                             min=0,
-                            max=core.core_data.max_value_manager.get("itf_timed_score"),
+                            max=core.core_data.max_value_manager.get(
+                                "itf_timed_score"
+                            ),
                         ).get_input_locale_while("itf_timed_score_dialog", {})
                         if score is None:
                             return
@@ -982,7 +1034,9 @@ class StoryChapters:
                 elif choice2 == 1:
                     score = dialog_creator.IntInput(
                         min=0,
-                        max=core.core_data.max_value_manager.get("itf_timed_score"),
+                        max=core.core_data.max_value_manager.get(
+                            "itf_timed_score"
+                        ),
                     ).get_input_locale_while("itf_timed_score_dialog", {})
                     if score is None:
                         return
@@ -997,16 +1051,21 @@ class StoryChapters:
                     StoryChapters.print_current_stage(save_file, 3, stage_id)
                     score = dialog_creator.IntInput(
                         min=0,
-                        max=core.core_data.max_value_manager.get("itf_timed_score"),
+                        max=core.core_data.max_value_manager.get(
+                            "itf_timed_score"
+                        ),
                     ).get_input_locale_while("itf_timed_score_dialog", {})
                     if score is None:
                         return
                     for chapter_id in chapters:
-                        chapter = save_file.story.get_real_chapters()[chapter_id]
+                        chapter = save_file.story.get_real_chapters()[
+                            chapter_id
+                        ]
                         chapter.stages[stage_id].itf_timed_score = score
             elif choice2 == 1:
                 score = dialog_creator.IntInput(
-                    min=0, max=core.core_data.max_value_manager.get("itf_timed_score")
+                    min=0,
+                    max=core.core_data.max_value_manager.get("itf_timed_score"),
                 ).get_input_locale_while("itf_timed_score_dialog", {})
                 if score is None:
                     return
@@ -1017,7 +1076,9 @@ class StoryChapters:
 
 
 class StageNames:
-    def __init__(self, save_file: core.SaveFile, chapter: str, max_stages: int = 48):
+    def __init__(
+        self, save_file: core.SaveFile, chapter: str, max_stages: int = 48
+    ):
         self.save_file = save_file
         self.chapter = chapter
         self.max_stages = max_stages
@@ -1025,9 +1086,7 @@ class StageNames:
 
     def get_file_name(self) -> str:
         if self.chapter.isdigit():
-            return (
-                f"StageName{self.chapter}_{core.core_data.get_lang(self.save_file)}.csv"
-            )
+            return f"StageName{self.chapter}_{core.core_data.get_lang(self.save_file)}.csv"
         return f"StageName_{self.chapter}_{core.core_data.get_lang(self.save_file)}.csv"
 
     def get_stage_names(self) -> list[str] | None:
@@ -1037,7 +1096,8 @@ class StageNames:
         if file is None:
             return None
         csv = core.CSV(
-            file, delimiter=core.Delimeter.from_country_code_res(self.save_file.cc)
+            file,
+            delimiter=core.Delimeter.from_country_code_res(self.save_file.cc),
         )
         stage_names: list[str] = []
         if self.chapter.isdigit():
@@ -1070,7 +1130,8 @@ class TreasureText:
         if file is None:
             return None
         csv = core.CSV(
-            file, delimiter=core.Delimeter.from_country_code_res(self.save_file.cc)
+            file,
+            delimiter=core.Delimeter.from_country_code_res(self.save_file.cc),
         )
         treasure_text: list[str] = []
         for row in csv:
@@ -1130,7 +1191,8 @@ class TreasureGroupNames:
         if file is None:
             return None
         csv = core.CSV(
-            file, delimiter=core.Delimeter.from_country_code_res(self.save_file.cc)
+            file,
+            delimiter=core.Delimeter.from_country_code_res(self.save_file.cc),
         )
         treasure_group_names: list[str] = []
         for row in csv:

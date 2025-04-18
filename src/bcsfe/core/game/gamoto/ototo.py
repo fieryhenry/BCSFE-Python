@@ -156,7 +156,9 @@ class CannonDescriptions:
 
         return cannon_descriptions
 
-    def get_cannon_description(self, cannon_id: int) -> CannonDescription | None:
+    def get_cannon_description(
+        self, cannon_id: int
+    ) -> CannonDescription | None:
         if self.cannon_descriptions is None:
             return None
         for cannon_description in self.cannon_descriptions:
@@ -216,7 +218,9 @@ class Cannon:
 
 
 class Cannons:
-    def __init__(self, cannons: dict[int, Cannon], selected_parts: list[list[int]]):
+    def __init__(
+        self, cannons: dict[int, Cannon], selected_parts: list[list[int]]
+    ):
         self.cannons = cannons
         self.selected_parts = selected_parts
 
@@ -262,7 +266,9 @@ class Cannons:
             stream.write_int(cannon_id)
             cannon.write(stream)
         if gv < 80200:
-            stream.write_int_list(self.selected_parts[0], write_length=False, length=3)
+            stream.write_int_list(
+                self.selected_parts[0], write_length=False, length=3
+            )
         else:
             if gv > 90699:
                 stream.write_byte(len(self.selected_parts))
@@ -350,7 +356,9 @@ class Ototo:
 
     @staticmethod
     def deserialize(data: dict[str, Any]) -> Ototo:
-        ototo = Ototo(core.BaseMaterials.deserialize(data.get("base_materials", [])))
+        ototo = Ototo(
+            core.BaseMaterials.deserialize(data.get("base_materials", []))
+        )
         ototo.remaining_seconds = data.get("remaining_seconds", 0.0)
         ototo.return_flag = data.get("return_flag", False)
         ototo.improve_id = data.get("improve_id", 0)
@@ -388,7 +396,9 @@ class Ototo:
             localized_item=localized_item,
         ).edit()
 
-    def display_current_cannons(self, save_file: core.SaveFile) -> list[str] | None:
+    def display_current_cannons(
+        self, save_file: core.SaveFile
+    ) -> list[str] | None:
         descriptions = CannonDescriptions(save_file)
         recipe_unlocks = CastleRecipeUnlock(save_file)
 
@@ -430,7 +440,9 @@ class Ototo:
                 text += "\n"
                 text += "        "
                 buffer = " " * (
-                    longest_part_name - len(description.get_part_name(part_id)) + 2
+                    longest_part_name
+                    - len(description.get_part_name(part_id))
+                    + 2
                 )
                 name = description.get_part_name(part_id)
                 text += core.core_data.local_manager.get_key(
@@ -520,7 +532,9 @@ class Ototo:
                 ).get_cannon_description(cannon_id)
                 if cannon_description is None:
                     continue
-                current_development = self.cannons.cannons[cannon_id].development
+                current_development = self.cannons.cannons[
+                    cannon_id
+                ].development
 
                 color.ColoredText.localize(
                     "selected_cannon_stage",
@@ -586,7 +600,9 @@ class Ototo:
                     continue
                 cannon.development = max(cannon.development, 3)
 
-                cannon_desc = cannon_descriptions.get_cannon_description(cannon_id)
+                cannon_desc = cannon_descriptions.get_cannon_description(
+                    cannon_id
+                )
                 if cannon_desc is None:
                     continue
                 levels = cannon.levels
@@ -635,7 +651,9 @@ class Ototo:
             return core.core_data.local_manager.get_key("style")
         if development == 3:
             return core.core_data.local_manager.get_key("effect")
-        return core.core_data.local_manager.get_key("unknown_stage", stage=development)
+        return core.core_data.local_manager.get_key(
+            "unknown_stage", stage=development
+        )
 
 
 def edit_cannon(save_file: core.SaveFile):

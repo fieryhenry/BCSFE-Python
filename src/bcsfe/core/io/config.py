@@ -288,7 +288,9 @@ class Config:
                     "git_not_installed",
                 )
                 return
-            git_repo = color.ColoredInput().localize("enter_locale_git_repo").strip()
+            git_repo = (
+                color.ColoredInput().localize("enter_locale_git_repo").strip()
+            )
             external_locale = core.ExternalLocale.from_git_repo(git_repo)
             if external_locale is None:
                 color.ColoredText.localize(
@@ -377,7 +379,9 @@ class Config:
                     "git_not_installed",
                 )
                 return
-            git_repo = color.ColoredInput().localize("enter_theme_git_repo").strip()
+            git_repo = (
+                color.ColoredInput().localize("enter_theme_git_repo").strip()
+            )
             external_theme = core.ExternalTheme.from_git_repo(git_repo)
             if external_theme is None:
                 color.ColoredText.localize(

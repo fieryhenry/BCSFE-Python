@@ -25,7 +25,9 @@ class EnemyEditor:
         if not enemies:
             return
         if len(enemies) > 50:
-            color.ColoredText.localize("total_selected_enemies", total=len(enemies))
+            color.ColoredText.localize(
+                "total_selected_enemies", total=len(enemies)
+            )
         else:
             for enemy in enemies:
                 color.ColoredText.localize(
@@ -57,7 +59,9 @@ class EnemyEditor:
             return None
 
         if current_enemies:
-            mode_id = dialog_creator.IntInput().get_basic_input_locale("and_mode_q", {})
+            mode_id = dialog_creator.IntInput().get_basic_input_locale(
+                "and_mode_q", {}
+            )
             if mode_id is None:
                 mode = SelectMode.OR
             elif mode_id == 1:
@@ -102,7 +106,9 @@ class EnemyEditor:
         return enemies
 
     def select_name(self) -> list[core.Enemy] | None:
-        usr_name = dialog_creator.StringInput().get_input_locale("enter_enemy_name", {})
+        usr_name = dialog_creator.StringInput().get_input_locale(
+            "enter_enemy_name", {}
+        )
         if usr_name is None:
             return None
         enemies = self.get_enemies_by_name(usr_name)
@@ -155,7 +161,9 @@ class EnemyEditor:
         enemy_editor: EnemyEditor | None = None,
     ):
         if enemy_editor is None or current_enemies is None:
-            enemy_editor, current_enemies = EnemyEditor.from_save_file(save_file)
+            enemy_editor, current_enemies = EnemyEditor.from_save_file(
+                save_file
+            )
         if enemy_editor is None or not current_enemies:
             return
 

@@ -52,7 +52,10 @@ class Chapter:
         self.total_stages = 0
 
     def clear_stage(
-        self, index: int, clear_amount: int = 1, overwrite_clear_progress: bool = False
+        self,
+        index: int,
+        clear_amount: int = 1,
+        overwrite_clear_progress: bool = False,
     ) -> bool:
         if overwrite_clear_progress:
             self.clear_progress = index + 1
@@ -112,7 +115,9 @@ class Chapter:
     def deserialize(data: dict[str, Any]) -> Chapter:
         chapter = Chapter(data.get("selected_stage", 0))
         chapter.clear_progress = data.get("clear_progress", 0)
-        chapter.stages = [Stage.deserialize(stage) for stage in data.get("stages", [])]
+        chapter.stages = [
+            Stage.deserialize(stage) for stage in data.get("stages", [])
+        ]
         chapter.chapter_unlock_state = data.get("chapter_unlock_state", 0)
         return chapter
 
@@ -156,7 +161,9 @@ class ChaptersStars:
 
     @staticmethod
     def read_selected_stage(data: core.Data, total_stars: int) -> ChaptersStars:
-        chapters = [Chapter.read_selected_stage(data) for _ in range(total_stars)]
+        chapters = [
+            Chapter.read_selected_stage(data) for _ in range(total_stars)
+        ]
         return ChaptersStars(chapters)
 
     def write_selected_stage(self, data: core.Data):

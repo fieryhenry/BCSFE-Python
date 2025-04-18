@@ -226,10 +226,16 @@ class SpecialSkills:
 
         elif option_id == 1:
             max_base_level = max(
-                [ability.max_base_level for ability in ability_data.ability_data]
+                [
+                    ability.max_base_level
+                    for ability in ability_data.ability_data
+                ]
             )
             max_plus_level = max(
-                [ability.max_plus_level for ability in ability_data.ability_data]
+                [
+                    ability.max_plus_level
+                    for ability in ability_data.ability_data
+                ]
             )
             upgrade, should_exit = core.Upgrade.get_user_upgrade(
                 max_base_level - 1, max_plus_level
@@ -258,7 +264,9 @@ class SpecialSkills:
         if success:
             color.ColoredText.localize("skills_edited")
 
-    def get_from_id(self, id: int, only_valid: bool = True) -> SpecialSkill | None:
+    def get_from_id(
+        self, id: int, only_valid: bool = True
+    ) -> SpecialSkill | None:
         if only_valid:
             skills = self.get_valid_skills()
         else:

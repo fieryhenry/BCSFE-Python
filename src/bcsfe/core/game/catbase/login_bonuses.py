@@ -148,7 +148,9 @@ class LoginBonus:
             return {"old_logins": self.old_logins.serialize()}
         elif self.logins is not None:
             return {
-                "logins": {id: login.serialize() for id, login in self.logins.items()}
+                "logins": {
+                    id: login.serialize() for id, login in self.logins.items()
+                }
             }
         else:
             return {}
@@ -156,7 +158,9 @@ class LoginBonus:
     @staticmethod
     def deserialize(data: dict[str, Any]) -> LoginBonus:
         if "old_logins" in data:
-            return LoginBonus(old_logins=LoginSets.deserialize(data["old_logins"]))
+            return LoginBonus(
+                old_logins=LoginSets.deserialize(data["old_logins"])
+            )
         elif "logins" in data:
             return LoginBonus(
                 logins={

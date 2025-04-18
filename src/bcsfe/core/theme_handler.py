@@ -9,7 +9,9 @@ from bcsfe.cli import color
 class ThemeHandler:
     def __init__(self, theme_code: str | None = None):
         if theme_code is None:
-            self.theme_code = core.core_data.config.get_str(core.ConfigKey.THEME)
+            self.theme_code = core.core_data.config.get_str(
+                core.ConfigKey.THEME
+            )
         else:
             self.theme_code = theme_code
 
@@ -21,12 +23,18 @@ class ThemeHandler:
 
     @staticmethod
     def get_external_themes_folder() -> core.Path:
-        return core.Path.get_documents_folder().add("external_themes").generate_dirs()
+        return (
+            core.Path.get_documents_folder()
+            .add("external_themes")
+            .generate_dirs()
+        )
 
     @staticmethod
     def get_theme_path(theme_code: str) -> core.Path:
         if theme_code.startswith("ext-"):
-            return ThemeHandler.get_external_themes_folder().add(theme_code + ".json")
+            return ThemeHandler.get_external_themes_folder().add(
+                theme_code + ".json"
+            )
         return ThemeHandler.get_themes_folder().add(theme_code + ".json")
 
     def get_theme_data(self) -> dict[str, Any]:

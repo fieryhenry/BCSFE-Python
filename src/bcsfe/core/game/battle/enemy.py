@@ -47,5 +47,7 @@ class EnemyNames:
                     "enemy_not_in_name_list", id=id
                 )
         except IndexError:
-            return core.core_data.local_manager.get_key("enemy_unknown_name", id=id)
+            return core.core_data.local_manager.get_key(
+                "enemy_unknown_name", id=id
+            )
         return name

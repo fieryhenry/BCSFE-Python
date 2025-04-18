@@ -43,7 +43,9 @@ def clear_stage(
             type, map, star, stage, clear_amount, overwrite_clear_progress
         )
     else:
-        chapters.clear_stage(map, star, stage, clear_amount, overwrite_clear_progress)
+        chapters.clear_stage(
+            map, star, stage, clear_amount, overwrite_clear_progress
+        )
 
 
 def unclear_rest(
@@ -95,7 +97,9 @@ def edit_chapters(
     names = map_names.map_names
 
     choice = dialog_creator.ChoiceInput.from_reduced(
-        ["clear_stages", "unclear_stages"], dialog="clear_unclear_q", single_choice=True
+        ["clear_stages", "unclear_stages"],
+        dialog="clear_unclear_q",
+        single_choice=True,
     ).single_choice()
     if choice is None:
         return

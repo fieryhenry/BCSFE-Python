@@ -50,7 +50,9 @@ class PlayTime:
         return PlayTime(seconds * PlayTime.get_fps())
 
     @staticmethod
-    def from_hours_mins_secs(hours: int, minutes: int, seconds: int) -> PlayTime:
+    def from_hours_mins_secs(
+        hours: int, minutes: int, seconds: int
+    ) -> PlayTime:
         return (
             PlayTime.from_hours(hours)
             + PlayTime.from_minutes(minutes)
@@ -73,10 +75,14 @@ def edit(save_file: core.SaveFile):
     hours, _ = dialog_creator.IntInput().get_input("playtime_hours_prompt", {})
     if hours is None:
         return
-    minutes, _ = dialog_creator.IntInput().get_input("playtime_minutes_prompt", {})
+    minutes, _ = dialog_creator.IntInput().get_input(
+        "playtime_minutes_prompt", {}
+    )
     if minutes is None:
         return
-    seconds, _ = dialog_creator.IntInput().get_input("playtime_seconds_prompt", {})
+    seconds, _ = dialog_creator.IntInput().get_input(
+        "playtime_seconds_prompt", {}
+    )
     if seconds is None:
         return
 

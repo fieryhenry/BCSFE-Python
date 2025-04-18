@@ -38,7 +38,11 @@ from bcsfe.core.game.catbase.login_bonuses import LoginBonus
 from bcsfe.core.game.catbase.matatabi import Matatabi
 from bcsfe.core.game.catbase.drop_chara import CharaDrop
 from bcsfe.core.game.catbase.medals import Medals, MedalNames
-from bcsfe.core.game.catbase.mission import Missions, MissionNames, MissionConditions
+from bcsfe.core.game.catbase.mission import (
+    Missions,
+    MissionNames,
+    MissionConditions,
+)
 from bcsfe.core.game.catbase.my_sale import MySale
 from bcsfe.core.game.catbase.nyanko_club import NyankoClub
 from bcsfe.core.game.catbase.officer_pass import OfficerPass
@@ -117,11 +121,19 @@ from bcsfe.core.log import Logger
 from bcsfe.core.server.client_info import ClientInfo
 from bcsfe.core.server.game_data_getter import GameDataGetter
 from bcsfe.core.server.headers import AccountHeaders
-from bcsfe.core.server.managed_item import BackupMetaData, ManagedItem, ManagedItemType
+from bcsfe.core.server.managed_item import (
+    BackupMetaData,
+    ManagedItem,
+    ManagedItemType,
+)
 from bcsfe.core.server.request import RequestHandler
 from bcsfe.core.server.server_handler import ServerHandler
 from bcsfe.core.server.updater import Updater
-from bcsfe.core.theme_handler import ThemeHandler, ExternalTheme, ExternalThemeManager
+from bcsfe.core.theme_handler import (
+    ThemeHandler,
+    ExternalTheme,
+    ExternalThemeManager,
+)
 from bcsfe.core.max_value_helper import MaxValueHelper
 
 
@@ -200,7 +212,9 @@ class CoreData:
             self.enemy_names = EnemyNames(save)
         return self.enemy_names
 
-    def get_rank_gift_descriptions(self, save: SaveFile) -> RankGiftDescriptions:
+    def get_rank_gift_descriptions(
+        self, save: SaveFile
+    ) -> RankGiftDescriptions:
         if self.rank_gift_descriptions is None:
             self.rank_gift_descriptions = RankGiftDescriptions(save)
         return self.rank_gift_descriptions

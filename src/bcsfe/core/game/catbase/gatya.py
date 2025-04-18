@@ -119,7 +119,9 @@ class Gatya:
         gatya = Gatya(data.get("rare_seed", 0), data.get("normal_seed", 0))
         gatya.stepup_stage_3_cooldown = data.get("stepup_stage_3_cooldown", 0)
         gatya.previous_normal_roll = data.get("previous_normal_roll", 0)
-        gatya.previous_normal_roll_type = data.get("previous_normal_roll_type", 0)
+        gatya.previous_normal_roll_type = data.get(
+            "previous_normal_roll_type", 0
+        )
         gatya.previous_rare_roll = data.get("previous_rare_roll", 0)
         gatya.previous_rare_roll_type = data.get("previous_rare_roll_type", 0)
         gatya.unknown1 = data.get("unknown1", False)
@@ -176,7 +178,9 @@ class GatyaDataSet:
         self.save_file = save_file
         self.gatya_data_set = self.load_gatya_data_set("R", 1)
 
-    def load_gatya_data_set(self, rarity: str, id: int) -> list[list[int]] | None:
+    def load_gatya_data_set(
+        self, rarity: str, id: int
+    ) -> list[list[int]] | None:
         file_name = f"GatyaDataSet{rarity.upper()[0]}{id}.csv"
         gdg = core.core_data.get_game_data_getter(self.save_file)
         data = gdg.download("DataLocal", file_name)
@@ -203,7 +207,9 @@ class GatyaDataSet:
 
 
 class GatyaInfo:
-    def __init__(self, gatya_id: int, cc: core.CountryCode, type_str: str = "R"):
+    def __init__(
+        self, gatya_id: int, cc: core.CountryCode, type_str: str = "R"
+    ):
         self.gatya_id = gatya_id
         self.cc = cc
         self.gatya_data_set: GatyaDataSet | None = None
@@ -221,7 +227,9 @@ class GatyaInfo:
     def get_url(self) -> str:
         return f"https://ponosgames.com/information/appli/battlecats/gacha/rare/{self.get_cc_str()}{self.type}{self.get_id_str()}.html"
 
-    def download_data(self, name_only_optimization: bool = False) -> core.Data | None:
+    def download_data(
+        self, name_only_optimization: bool = False
+    ) -> core.Data | None:
         url = self.get_url()
 
         if name_only_optimization:
@@ -268,7 +276,9 @@ class GatyaInfo:
             data = None
         return data
 
-    def get_data(self, name_only_optimization: bool = False) -> core.Data | None:
+    def get_data(
+        self, name_only_optimization: bool = False
+    ) -> core.Data | None:
         if self.data is not None:
             return self.data
         data = self.load_data_from_file(name_only_optimization)
@@ -300,7 +310,9 @@ class GatyaInfo:
 
 
 class GatyaInfos:
-    def __init__(self, save_file: core.SaveFile, type_str: str = "R", set_id: int = 1):
+    def __init__(
+        self, save_file: core.SaveFile, type_str: str = "R", set_id: int = 1
+    ):
         self.save_file = save_file
         self.type = type_str
         self.set_id = set_id
@@ -311,7 +323,10 @@ class GatyaInfos:
         self.got_all = False
 
     def get_all(
-        self, threaded: bool = True, print_progress: bool = True, max_threads: int = 16
+        self,
+        threaded: bool = True,
+        print_progress: bool = True,
+        max_threads: int = 16,
     ):
         if self.gatya_data_set is None:
             return
@@ -347,16 +362,17 @@ class GatyaInfos:
             return self.infos[gatya_id]
         return None
 
-    def get_all_names(self, name_only_optimization: bool = False) -> dict[int, str]:
+    def get_all_names(
+        self, name_only_optimization: bool = False
+    ) -> dict[int, str]:
         if not self.got_all:
             max_threads = 64 if name_only_optimization else 16
             self.get_all(name_only_optimization, max_threads=max_threads)
         names: dict[int, str] = {}
         for info in self.infos:
-            names[
-                info.gatya_id
-            ] = info.get_name() or core.core_data.local_manager.get_key(
-                "unknown_banner"
+            names[info.gatya_id] = (
+                info.get_name()
+                or core.core_data.local_manager.get_key("unknown_banner")
             )
 
         return names

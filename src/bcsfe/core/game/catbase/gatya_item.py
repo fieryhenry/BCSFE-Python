@@ -12,7 +12,9 @@ class GatyaItemNames:
         data = gdg.download("resLocal", "GatyaitemName.csv")
         if data is None:
             return None
-        csv = core.CSV(data, core.Delimeter.from_country_code_res(self.save_file.cc))
+        csv = core.CSV(
+            data, core.Delimeter.from_country_code_res(self.save_file.cc)
+        )
         names: list[str] = []
         for line in csv:
             names.append(line[0].to_str())

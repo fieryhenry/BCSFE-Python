@@ -120,7 +120,9 @@ class EventSubChapter:
             data.write_byte(self.clear_progress)
 
     def read_stages(self, data: core.Data, total_stages: int, is_int: bool):
-        self.stages = [EventStage.read(data, is_int) for _ in range(total_stages)]
+        self.stages = [
+            EventStage.read(data, is_int) for _ in range(total_stages)
+        ]
 
     def write_stages(self, data: core.Data, is_int: bool):
         for stage in self.stages:
@@ -267,7 +269,8 @@ class EventSubChapterStars:
     @staticmethod
     def deserialize(data: dict[str, Any]) -> EventSubChapterStars:
         chapters = [
-            EventSubChapter.deserialize(chapter) for chapter in data.get("chapters", [])
+            EventSubChapter.deserialize(chapter)
+            for chapter in data.get("chapters", [])
         ]
         chapter = EventSubChapterStars(chapters)
         chapter.legend_restriction = data.get("legend_restriction", 0)
@@ -321,7 +324,10 @@ class EventChapterGroup:
     @staticmethod
     def init(total_subchapters: int, total_stars: int) -> EventChapterGroup:
         return EventChapterGroup(
-            [EventSubChapterStars.init(total_stars) for _ in range(total_subchapters)]
+            [
+                EventSubChapterStars.init(total_stars)
+                for _ in range(total_subchapters)
+            ]
         )
 
     @staticmethod
@@ -375,7 +381,9 @@ class EventChapterGroup:
 
     @staticmethod
     def deserialize(data: list[dict[str, Any]]) -> EventChapterGroup:
-        chapters = [EventSubChapterStars.deserialize(chapter) for chapter in data]
+        chapters = [
+            EventSubChapterStars.deserialize(chapter) for chapter in data
+        ]
         return EventChapterGroup(chapters)
 
     def __repr__(self) -> str:
@@ -559,7 +567,9 @@ class EventChapters:
             stars_per_subchapter = 0
 
         try:
-            stages_per_subchapter = len(self.chapters[0].chapters[0].chapters[0].stages)
+            stages_per_subchapter = len(
+                self.chapters[0].chapters[0].chapters[0].stages
+            )
         except IndexError:
             stages_per_subchapter = 0
         return (
@@ -697,7 +707,9 @@ class EventChapters:
         ch.completed_one_level_in_chapter = data.get(
             "completed_one_level_in_chapter", {}
         )
-        ch.displayed_cleared_limit_text = data.get("displayed_cleared_limit_text", {})
+        ch.displayed_cleared_limit_text = data.get(
+            "displayed_cleared_limit_text", {}
+        )
         ch.event_start_dates = data.get("event_start_dates", {})
         ch.stages_reward_claimed = data.get("stages_reward_claimed", [])
         return ch
@@ -718,15 +730,17 @@ class EventChapters:
     def ask_stars(
         max_stars: int, prompt: str = "custom_star_count_per_chapter"
     ) -> int | None:
-        stars = dialog_creator.IntInput(min=0, max=max_stars).get_basic_input_locale(
-            prompt, {"max": max_stars}
-        )
+        stars = dialog_creator.IntInput(
+            min=0, max=max_stars
+        ).get_basic_input_locale(prompt, {"max": max_stars})
         if stars is None:
             return None
         return stars
 
     @staticmethod
-    def ask_stages(map_names: core.MapNames, chapter_id: int) -> list[int] | None:
+    def ask_stages(
+        map_names: core.MapNames, chapter_id: int
+    ) -> list[int] | None:
         stage_names = map_names.stage_names.get(chapter_id)
         if stage_names is None:
             return None
@@ -737,12 +751,16 @@ class EventChapters:
             new_stage_names.append(stage)
         stage_names = new_stage_names
 
-        dialog_creator.ListOutput(stage_names, ints=[], dialog="select_stage", localize_elements=False).display_locale()
+        dialog_creator.ListOutput(
+            stage_names, ints=[], dialog="select_stage", localize_elements=False
+        ).display_locale()
 
-        choices = dialog_creator.RangeInput(len(stage_names), 1).get_input_locale("stages_select", {})
+        choices = dialog_creator.RangeInput(
+            len(stage_names), 1
+        ).get_input_locale("stages_select", {})
         if choices is None:
             return None
-        return [c -1 for c in choices]
+        return [c - 1 for c in choices]
 
     @staticmethod
     def ask_stages_stage_names(stage_names: list[str]) -> list[int] | None:
@@ -804,21 +822,23 @@ class EventChapters:
                 example_name = ""
             usr_input = (
                 color.ColoredInput()
-                .localize("select_map_dialog", example=example_name, escape=False)
+                .localize(
+                    "select_map_dialog", example=example_name, escape=False
+                )
                 .lower()
                 .strip()
             )
             if usr_input == "q":
                 return None
-            usr_ids = dialog_creator.RangeInput(max=len(names_list), min=1).parse(
-                usr_input
-            )
+            usr_ids = dialog_creator.RangeInput(
+                max=len(names_list), min=1
+            ).parse(usr_input)
             if not usr_ids:
                 found_names: list[tuple[int, str]] = []
                 for i, name in enumerate(names_list):
-                    if usr_input.replace(" ", "_") in name.lower().strip().replace(
+                    if usr_input.replace(
                         " ", "_"
-                    ):
+                    ) in name.lower().strip().replace(" ", "_"):
                         true_id = ids[i]
                         found_names.append((i, name))
 
@@ -866,12 +886,16 @@ class EventChapters:
     @staticmethod
     def print_current_chapter(name: str | None, id: int):
         if name is None:
-            name = core.core_data.local_manager.get_key("unknown_map_name", id=id)
+            name = core.core_data.local_manager.get_key(
+                "unknown_map_name", id=id
+            )
         color.ColoredText.localize("current_sol_chapter", name=name, id=id)
 
     @staticmethod
     def edit_chapters(save_file: core.SaveFile, type: int, letter_code: str):
-        edits.map.edit_chapters(save_file, save_file.event_stages, letter_code, type)
+        edits.map.edit_chapters(
+            save_file, save_file.event_stages, letter_code, type
+        )
 
     def unclear_rest(
         self,
@@ -883,11 +907,15 @@ class EventChapters:
         if not stages:
             return
         for star in range(stars, self.get_total_stars(type, id)):
-            for stage in range(max(stages), self.get_total_stages(type, id, star)):
+            for stage in range(
+                max(stages), self.get_total_stages(type, id, star)
+            ):
                 self.chapters[type].chapters[id].chapters[star].stages[
                     stage
                 ].clear_amount = 0
-                self.chapters[type].chapters[id].chapters[star].clear_progress = 0
+                self.chapters[type].chapters[id].chapters[
+                    star
+                ].clear_progress = 0
 
     def set_total_stages(self, map: int, type: int, total_stages: int):
         for chapter in self.chapters[type].chapters[map].chapters:

@@ -7,7 +7,9 @@ from bcsfe.cli import color
 
 
 class MapNames:
-    def __init__(self, save_file: core.SaveFile, code: str, output: bool = True):
+    def __init__(
+        self, save_file: core.SaveFile, code: str, output: bool = True
+    ):
         self.save_file = save_file
         self.out = output
         self.code = code
@@ -39,9 +41,7 @@ class MapNames:
         if self.gdg.cc != core.CountryCodeType.JP:
             url = f"https://ponosgames.com/information/appli/battlecats/stage/{self.gdg.cc.get_code()}/{file_name}"
         else:
-            url = (
-                f"https://ponosgames.com/information/appli/battlecats/stage/{file_name}"
-            )
+            url = f"https://ponosgames.com/information/appli/battlecats/stage/{file_name}"
         data = core.RequestHandler(url).get()
         if data is None:
             return None
@@ -94,5 +94,7 @@ class MapNames:
 
     def save_map_names(self):
         file_path = self.get_file_path()
-        self.map_names = dict(sorted(self.map_names.items(), key=lambda item: item[0]))
+        self.map_names = dict(
+            sorted(self.map_names.items(), key=lambda item: item[0])
+        )
         core.JsonFile.from_object(self.map_names).to_file(file_path)

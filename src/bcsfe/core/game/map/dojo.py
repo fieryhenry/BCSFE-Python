@@ -65,12 +65,18 @@ class Chapter:
             stage.write(stream)
 
     def serialize(self) -> dict[int, Any]:
-        return {stage_id: stage.serialize() for stage_id, stage in self.stages.items()}
+        return {
+            stage_id: stage.serialize()
+            for stage_id, stage in self.stages.items()
+        }
 
     @staticmethod
     def deserialize(data: dict[int, Any]) -> Chapter:
         return Chapter(
-            {stage_id: Stage.deserialize(stage) for stage_id, stage in data.items()}
+            {
+                stage_id: Stage.deserialize(stage)
+                for stage_id, stage in data.items()
+            }
         )
 
     def __repr__(self) -> str:

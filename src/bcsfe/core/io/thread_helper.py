@@ -64,7 +64,9 @@ def thread_run_many(
 
         threads.append(
             Thread.run(
-                "run_many_helper", thread_run_many_helper, (callable_chunks[i], *args_)
+                "run_many_helper",
+                thread_run_many_helper,
+                (callable_chunks[i], *args_),
             )
         )
 

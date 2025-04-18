@@ -61,7 +61,9 @@ class Path:
         else:
             raise OSError("Unknown OS")
 
-    def run(self, arg: str = "", display_output: bool = False) -> core.CommandResult:
+    def run(
+        self, arg: str = "", display_output: bool = False
+    ) -> core.CommandResult:
         cmd_text = self.path + " " + arg
         cmd = core.Command(cmd_text, display_output=display_output)
         return cmd.run()

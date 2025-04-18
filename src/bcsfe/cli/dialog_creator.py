@@ -125,7 +125,11 @@ class IntInput:
     ) -> tuple[int | None, str]:
         if localization_key is None:
             if self.default is not None:
-                perameters = {"min": self.min, "max": self.max, "default": self.default}
+                perameters = {
+                    "min": self.min,
+                    "max": self.max,
+                    "default": self.default,
+                }
                 localization_key = "input_int_default"
             else:
                 perameters = {"min": self.min, "max": self.max}
@@ -173,7 +177,7 @@ class ListOutput:
                 int_string = ""
 
             string = string.replace("{int}", int_string)
-            end_string += f" <@s>{i+self.start_index}.</> <@t>{string}</>\n"
+            end_string += f" <@s>{i + self.start_index}.</> <@t>{string}</>\n"
         end_string = end_string.strip("\n")
         return end_string
 
@@ -461,7 +465,11 @@ class MultiEditor:
 
     def edit(self) -> list[int]:
         choices, all_at_once = ChoiceInput(
-            self.items, self.strings, self.ints or [], self.perameters, "select_edit"
+            self.items,
+            self.strings,
+            self.ints or [],
+            self.perameters,
+            "select_edit",
         ).get()
         if choices is None:
             return self.ints or []
@@ -580,9 +588,7 @@ class SingleEditor:
             return self.value
         print()
         color.ColoredText.localize(
-            "value_changed",
-            name=self.item,
-            value=usr_input,
+            "value_changed", name=self.item, value=usr_input, escape=escape_text
         )
         return usr_input
 

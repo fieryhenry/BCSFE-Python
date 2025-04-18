@@ -52,7 +52,9 @@ class Repo:
         except FileNotFoundError:
             return None
 
-    def get_temp_file(self, temp_folder: core.Path, file_path: core.Path) -> core.Data:
+    def get_temp_file(
+        self, temp_folder: core.Path, file_path: core.Path
+    ) -> core.Data:
         path = temp_folder.add(file_path)
         return path.read()
 

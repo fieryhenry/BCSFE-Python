@@ -58,11 +58,15 @@ class PowerUpHelper:
                 if present[0] >= 1000 and present[0] <= 1599:
                     for limit in self.unit_limit.values:
                         if limit == present[0]:
-                            self.cat.max_upgrade_level.increment_base(present[1])
+                            self.cat.max_upgrade_level.increment_base(
+                                present[1]
+                            )
                 elif present[0] >= 4000 and present[0] <= 4599:
                     for limit in self.unit_limit.values:
                         if limit == present[0]:
-                            self.cat.max_upgrade_level.increment_plus(present[1])
+                            self.cat.max_upgrade_level.increment_plus(
+                                present[1]
+                            )
 
         return self.cat.max_upgrade_level.base
 
@@ -119,7 +123,10 @@ class PowerUpHelper:
             self.can_use_catseye()
             and self.unit_buy.max_upgrade_level_no_catseye <= current_max_level
         ):
-            if self.cat.upgrade.get_base() < self.unit_buy.max_upgrade_level_catseye:
+            if (
+                self.cat.upgrade.get_base()
+                < self.unit_buy.max_upgrade_level_catseye
+            ):
                 self.cat.upgrade_base(self.save_file)
                 self.cat.catseyes_used += 1
                 self.cat.max_upgrade_level.upgrade()

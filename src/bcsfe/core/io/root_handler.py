@@ -32,7 +32,12 @@ class RootHandler:
         return self.package_name
 
     def get_battlecats_path(self) -> core.Path:
-        return core.Path.get_root().add("data").add("data").add(self.get_package_name())
+        return (
+            core.Path.get_root()
+            .add("data")
+            .add("data")
+            .add(self.get_package_name())
+        )
 
     def get_battlecats_save_path(self) -> core.Path:
         return self.get_battlecats_path().add("files").add("SAVE_DATA")
@@ -71,7 +76,9 @@ class RootHandler:
         self, local_path: core.Path | None = None
     ) -> tuple[core.Path | None, core.CommandResult]:
         if local_path is None:
-            local_path = core.Path.get_documents_folder().add("saves").add("SAVE_DATA")
+            local_path = (
+                core.Path.get_documents_folder().add("saves").add("SAVE_DATA")
+            )
         local_path.parent().generate_dirs()
         result = self.save_battlecats_save(local_path)
         if not result.success:

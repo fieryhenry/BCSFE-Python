@@ -150,7 +150,9 @@ class TimedScoreChapters:
             total_stars = stream.read_int()
         sub_chapters: list[SubChapterStars] = []
         for _ in range(total_subchapters):
-            sub_chapters.append(SubChapterStars.read(stream, total_stages, total_stars))
+            sub_chapters.append(
+                SubChapterStars.read(stream, total_stages, total_stars)
+            )
         return TimedScoreChapters(sub_chapters)
 
     def write(self, stream: core.Data, gv: core.GameVersion):
@@ -163,7 +165,9 @@ class TimedScoreChapters:
         else:
             stream.write_int(len(self.sub_chapters))
             try:
-                stream.write_int(len(self.sub_chapters[0].sub_chapters[0].stages))
+                stream.write_int(
+                    len(self.sub_chapters[0].sub_chapters[0].stages)
+                )
             except IndexError:
                 stream.write_int(0)
             try:

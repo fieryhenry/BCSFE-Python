@@ -28,7 +28,9 @@ class FileDialog:
             self.root.withdraw()
             self.root.wm_attributes("-topmost", 1)  # type: ignore
 
-    def select_files_in_dir(self, path: core.Path, ignore_json: bool) -> str | None:
+    def select_files_in_dir(
+        self, path: core.Path, ignore_json: bool
+    ) -> str | None:
         """Print current files in directory.
 
         Args:
@@ -137,7 +139,9 @@ class FileDialog:
         color.ColoredText.localize(title)
         if not self.use_tk():
             def_path = core.Path(initialdir).add(initialfile).to_str()
-            path = color.ColoredInput().localize("enter_path_default", default=def_path)
+            path = color.ColoredInput().localize(
+                "enter_path_default", default=def_path
+            )
             return path.strip().strip("'").strip('"') if path else def_path
         return (
             self.filedialog.asksaveasfilename(  # type: ignore

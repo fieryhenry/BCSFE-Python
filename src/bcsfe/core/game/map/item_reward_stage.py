@@ -72,11 +72,15 @@ class SubChapterStars:
 
     @staticmethod
     def init(total_stages: int, total_stars: int) -> SubChapterStars:
-        sub_chapters = [SubChapter.init(total_stages) for _ in range(total_stars)]
+        sub_chapters = [
+            SubChapter.init(total_stages) for _ in range(total_stars)
+        ]
         return SubChapterStars(sub_chapters)
 
     @staticmethod
-    def read(stream: core.Data, total_stages: int, total_stars: int) -> SubChapterStars:
+    def read(
+        stream: core.Data, total_stages: int, total_stars: int
+    ) -> SubChapterStars:
         sub_chapters: list[SubChapter] = []
         for _ in range(total_stars):
             sub_chapters.append(SubChapter.read(stream, total_stages))
@@ -285,7 +289,9 @@ class UnobtainedItems:
         return UnobtainedItems(
             {
                 int(item_id): UnobtainedItem.deserialize(unobtained_item)
-                for item_id, unobtained_item in data.get("unobtained_items", {}).items()
+                for item_id, unobtained_item in data.get(
+                    "unobtained_items", {}
+                ).items()
             }
         )
 
@@ -343,7 +349,9 @@ class ItemRewardChapters:
             total_stars = stream.read_int()
         sub_chapters: list[SubChapterStars] = []
         for _ in range(total_subchapters):
-            sub_chapters.append(SubChapterStars.read(stream, total_stages, total_stars))
+            sub_chapters.append(
+                SubChapterStars.read(stream, total_stages, total_stars)
+            )
         return ItemRewardChapters(sub_chapters)
 
     def write(self, stream: core.Data, gv: core.GameVersion):
@@ -356,7 +364,9 @@ class ItemRewardChapters:
         else:
             stream.write_int(len(self.sub_chapters))
             try:
-                stream.write_int(len(self.sub_chapters[0].sub_chapters[0].stages))
+                stream.write_int(
+                    len(self.sub_chapters[0].sub_chapters[0].stages)
+                )
             except IndexError:
                 stream.write_int(0)
             try:
@@ -391,7 +401,9 @@ class ItemRewardChapters:
                 for sub_chapter in data.get("sub_chapters", [])
             ]
         )
-        chapters.item_obtains = ItemObtainSets.deserialize(data.get("item_obtains", {}))
+        chapters.item_obtains = ItemObtainSets.deserialize(
+            data.get("item_obtains", {})
+        )
         chapters.unobtained_items = UnobtainedItems.deserialize(
             data.get("unobtained_items", {})
         )

@@ -17,7 +17,9 @@ class PropertySet:
             property (str): Name of the property file.
         """
         self.locale = locale
-        self.path = LocalManager.get_locale_folder(locale).add(property + ".properties")
+        self.path = LocalManager.get_locale_folder(locale).add(
+            property + ".properties"
+        )
         self.properties: dict[str, str] = {}
         self.parse()
 
@@ -74,7 +76,11 @@ class PropertySet:
         Returns:
             str: Value of the key.
         """
-        return self.properties.get(key, key).replace("\\n", "\n").replace("\\t", "\t")
+        return (
+            self.properties.get(key, key)
+            .replace("\\n", "\n")
+            .replace("\\t", "\t")
+        )
 
     @staticmethod
     def from_config(property: str) -> PropertySet:
@@ -124,7 +130,9 @@ class LocalManager:
             self.properties[file_name[:-11]] = property_set
 
         if self.locale != "en":
-            for file in self.en_properties_path.glob("**/*.properties", recursive=True):
+            for file in self.en_properties_path.glob(
+                "**/*.properties", recursive=True
+            ):
                 file_name = file.strip_path_from(self.en_properties_path).path
                 property_set = PropertySet("en", file_name[:-11])
                 self.en_properties.update(property_set.properties)
@@ -307,7 +315,8 @@ class LocalManager:
 
                 if key_name != key:
                     value = value.replace(
-                        "{{" + key_name + "}}", self.get_key(key_name, escape, **kwargs)
+                        "{{" + key_name + "}}",
+                        self.get_key(key_name, escape, **kwargs),
                     )
             char_index += 1
 
@@ -346,7 +355,9 @@ class LocalManager:
         Returns:
             LocalManager: LocalManager for the locale.
         """
-        return LocalManager(core.core_data.config.get_str(core.ConfigKey.LOCALE))
+        return LocalManager(
+            core.core_data.config.get_str(core.ConfigKey.LOCALE)
+        )
 
     def check_duplicates(self):
         """Checks for duplicate keys in all property files.
@@ -488,7 +499,9 @@ class ExternalLocale:
             success = repo.clone_to_temp(temp_dir)
             if not success:
                 return False
-            external_locale = ExternalLocaleManager.parse_external_locale(temp_dir)
+            external_locale = ExternalLocaleManager.parse_external_locale(
+                temp_dir
+            )
             if external_locale is None:
                 return False
             version = external_locale.version
@@ -551,7 +564,9 @@ class ExternalLocaleManager:
         files_dir.copy_tree(folder)
 
         json_data = external_locale.to_json()
-        folder.add("locale.json").write(core.JsonFile.from_object(json_data).to_data())
+        folder.add("locale.json").write(
+            core.JsonFile.from_object(json_data).to_data()
+        )
 
     @staticmethod
     def parse_external_locale(path: core.Path) -> ExternalLocale | None:
@@ -565,7 +580,9 @@ class ExternalLocaleManager:
         """
         if not path.exists():
             return None
-        json_data = core.JsonFile.from_data(path.add("locale.json").read()).to_object()
+        json_data = core.JsonFile.from_data(
+            path.add("locale.json").read()
+        ).to_object()
         return ExternalLocale.from_json(json_data)
 
     @staticmethod

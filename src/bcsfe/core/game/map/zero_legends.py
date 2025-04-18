@@ -58,7 +58,10 @@ class Chapter:
         self.total_stages = 0
 
     def clear_stage(
-        self, index: int, clear_amount: int = 1, overwrite_clear_progress: bool = False
+        self,
+        index: int,
+        clear_amount: int = 1,
+        overwrite_clear_progress: bool = False,
     ) -> bool:
         if overwrite_clear_progress:
             self.clear_progress = index + 1
@@ -182,7 +185,10 @@ class ChaptersStars:
     def deserialize(data: dict[str, Any]) -> ChaptersStars:
         return ChaptersStars(
             data.get("unknown", 0),
-            [Chapter.deserialize(chapter) for chapter in data.get("chapters", [])],
+            [
+                Chapter.deserialize(chapter)
+                for chapter in data.get("chapters", [])
+            ],
         )
 
     def __repr__(self):

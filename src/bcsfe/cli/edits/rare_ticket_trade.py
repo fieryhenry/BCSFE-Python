@@ -9,13 +9,16 @@ class RareTicketTrade:
     def rare_ticket_trade(save_file: core.SaveFile):
         current_amount = save_file.rare_tickets
         max_amount = max(
-            core.core_data.max_value_manager.get("rare_tickets") - current_amount, 0
+            core.core_data.max_value_manager.get("rare_tickets")
+            - current_amount,
+            0,
         )
         if max_amount == 0:
             color.ColoredText.localize("rare_ticket_trade_maxed")
             return
         to_add = dialog_creator.IntInput(max_amount, 0).get_input_locale_while(
-            "rare_ticket_trade_enter", {"max": max_amount, "current": current_amount}
+            "rare_ticket_trade_enter",
+            {"max": max_amount, "current": current_amount},
         )
         if to_add is None:
             return

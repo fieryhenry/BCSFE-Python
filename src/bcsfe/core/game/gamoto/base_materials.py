@@ -59,7 +59,9 @@ class BaseMaterials:
 
     @staticmethod
     def deserialize(data: list[int]) -> BaseMaterials:
-        return BaseMaterials([Material.deserialize(material) for material in data])
+        return BaseMaterials(
+            [Material.deserialize(material) for material in data]
+        )
 
     def __repr__(self) -> str:
         return f"Materials(materials={self.materials!r})"
@@ -75,7 +77,9 @@ class BaseMaterials:
         if names is None:
             return
         names = [names[item.id] for item in items]
-        base_materials = [base_material.amount for base_material in self.materials]
+        base_materials = [
+            base_material.amount for base_material in self.materials
+        ]
         values = dialog_creator.MultiEditor.from_reduced(
             "base_materials",
             names,

@@ -64,7 +64,9 @@ class ServerHandler:
         self.save_file.store_dict(ServerHandler.get_save_key_key(), save_key)
 
     def get_stored_save_key_data(self) -> dict[str, Any] | None:
-        save_key_data = self.save_file.get_dict(ServerHandler.get_save_key_key())
+        save_key_data = self.save_file.get_dict(
+            ServerHandler.get_save_key_key()
+        )
         if save_key_data is None:
             return None
         if not self.validate_save_key_data(save_key_data):
@@ -97,7 +99,9 @@ class ServerHandler:
         self.save_file.remove_dict(ServerHandler.get_save_key_key())
 
     def save_auth_token(self, auth_token: str):
-        self.save_file.store_string(ServerHandler.get_auth_token_key(), auth_token)
+        self.save_file.store_string(
+            ServerHandler.get_auth_token_key(), auth_token
+        )
 
     def get_stored_auth_token(self) -> str | None:
         token = self.save_file.get_string(ServerHandler.get_auth_token_key())
@@ -138,7 +142,9 @@ class ServerHandler:
         )
         core.core_data.logger.log_error(log_text)
 
-    def do_password_request(self, url: str, dict_data: dict[str, Any]) -> str | None:
+    def do_password_request(
+        self, url: str, dict_data: dict[str, Any]
+    ) -> str | None:
         result = self.do_request(url, dict_data)
         if result.payload is None:
             ServerHandler.log_error("password_fail", result)
@@ -362,9 +368,7 @@ class ServerHandler:
 
     def upload_save_data(self, save_key: dict[str, Any]) -> bool:
         self.print_key("uploading_save_file")
-        boundary = (
-            f"__-----------------------{core.Random.get_digits_string(9)}-2147483648"
-        )
+        boundary = f"__-----------------------{core.Random.get_digits_string(9)}-2147483648"
 
         body = self.get_upload_request_body(save_key, boundary)
         if body is None:
@@ -390,7 +394,9 @@ class ServerHandler:
                     url,
                     response,
                     headers,
-                    body.split(b"Content-Type: application/octet-stream")[0].to_str(),
+                    body.split(b"Content-Type: application/octet-stream")[
+                        0
+                    ].to_str(),
                 ),
             )
 
@@ -402,7 +408,9 @@ class ServerHandler:
         if self.print:
             color.ColoredText.localize(key, **kwargs)
 
-    def get_codes(self, upload_managed_items: bool = True) -> tuple[str, str] | None:
+    def get_codes(
+        self, upload_managed_items: bool = True
+    ) -> tuple[str, str] | None:
         self.save_file.show_ban_message = False
 
         auth_token = self.get_auth_token()
@@ -427,7 +435,9 @@ class ServerHandler:
         headers = core.AccountHeaders(self.save_file, meta_data).get_headers()
         headers["authorization"] = "Bearer " + auth_token
 
-        response = core.RequestHandler(url, headers, core.Data(meta_data)).post()
+        response = core.RequestHandler(
+            url, headers, core.Data(meta_data)
+        ).post()
         if response is None:
             self.log_no_internet(RequestResult(url, None, headers, meta_data))
             return None
@@ -445,7 +455,8 @@ class ServerHandler:
         confirmation_code = payload.get("pin", None)
         if transfer_code is None or confirmation_code is None:
             ServerHandler.log_error(
-                "upload_fail_transfers", RequestResult(url, response, headers, "")
+                "upload_fail_transfers",
+                RequestResult(url, response, headers, ""),
             )
             self.remove_stored_auth_token()
             return None
@@ -481,7 +492,9 @@ class ServerHandler:
         headers = core.AccountHeaders(self.save_file, meta_data).get_headers()
         headers["authorization"] = "Bearer " + auth_token
 
-        response = core.RequestHandler(url, headers, core.Data(meta_data)).post()
+        response = core.RequestHandler(
+            url, headers, core.Data(meta_data)
+        ).post()
         if response is None:
             self.log_no_internet(RequestResult(url, None, headers, meta_data))
             return False
@@ -534,6 +547,7 @@ class ServerHandler:
         cc: core.CountryCode,
         gv: core.GameVersion,
         print: bool = True,
+        save_backup: bool = True,
     ) -> tuple[ServerHandler | None, RequestResult | None]:
         url = f"{ServerHandler.save_url}/v2/transfers/{transfer_code}/reception"
         data = core.ClientInfo(cc, gv).get_client_info()
@@ -563,20 +577,25 @@ class ServerHandler:
 
         save_data = response.content
 
-        temp_path = (
-            core.Path.get_documents_folder()
-            .add("saves")
-            .generate_dirs()
-            .add("transfer_backup")
-        )
-        temp_path.write(core.Data(save_data))
+        if save_backup:
+            temp_path = (
+                core.Path.get_documents_folder()
+                .add("saves")
+                .generate_dirs()
+                .add("transfer_backup")
+            )
+            temp_path.write(core.Data(save_data))
 
-        if print:
-            color.ColoredText.localize("transfer_backup", path=str(temp_path))
+            if print:
+                color.ColoredText.localize(
+                    "transfer_backup", path=str(temp_path)
+                )
 
         save_file = core.SaveFile(core.Data(save_data))
 
-        password_refresh_token = resp_headers.get("Nyanko-Password-Refresh-Token")
+        password_refresh_token = resp_headers.get(
+            "Nyanko-Password-Refresh-Token"
+        )
         if password_refresh_token is not None:
             save_file.password_refresh_token = password_refresh_token
 
@@ -585,7 +604,7 @@ class ServerHandler:
         if password is not None:
             server_handler.save_password(password)
 
-        return server_handler, None
+        return server_handler, RequestResult(url, response, headers, data_str)
 
     def update_managed_items(self) -> bool:
         auth_token = self.get_auth_token()

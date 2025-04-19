@@ -13,9 +13,7 @@ class BasicItems:
 
     @staticmethod
     def edit_catfood(save_file: core.SaveFile):
-        should_exit = not dialog_creator.YesNoInput().get_input_once(
-            "catfood_warning"
-        )
+        should_exit = not dialog_creator.YesNoInput().get_input_once("catfood_warning")
         if should_exit:
             return
 
@@ -52,20 +50,16 @@ class BasicItems:
     @staticmethod
     def edit_100_million_ticket(save_file: core.SaveFile):
         name = core.core_data.get_gatya_item_names(save_file).get_name(212)
-        save_file.normal_tickets = dialog_creator.SingleEditor(
+        save_file.hundred_million_ticket = dialog_creator.SingleEditor(
             BasicItems.get_name(name, "100_million_tickets"),
             save_file.hundred_million_ticket,
             core.core_data.max_value_manager.get("100_million_tickets"),
         ).edit()
 
     @staticmethod
-    def get_bannable_feature_options(
-        feature_name: str, safe_feature_name: str
-    ) -> int:
+    def get_bannable_feature_options(feature_name: str, safe_feature_name: str) -> int:
         feature_name = core.core_data.local_manager.get_key(feature_name)
-        safe_feature_name = core.core_data.local_manager.get_key(
-            safe_feature_name
-        )
+        safe_feature_name = core.core_data.local_manager.get_key(safe_feature_name)
 
         options = [
             core.core_data.local_manager.get_key(
@@ -100,9 +94,7 @@ class BasicItems:
         if option == 2:
             return
         if option == 1:
-            return edits.rare_ticket_trade.RareTicketTrade.rare_ticket_trade(
-                save_file
-            )
+            return edits.rare_ticket_trade.RareTicketTrade.rare_ticket_trade(save_file)
 
         original_amount = save_file.rare_tickets
         save_file.rare_tickets = dialog_creator.SingleEditor(
@@ -112,9 +104,7 @@ class BasicItems:
         ).edit()
         change = save_file.rare_tickets - original_amount
         core.BackupMetaData(save_file).add_managed_item(
-            core.ManagedItem.from_change(
-                change, core.ManagedItemType.RARE_TICKET
-            )
+            core.ManagedItem.from_change(change, core.ManagedItemType.RARE_TICKET)
         )
 
     @staticmethod
@@ -137,9 +127,7 @@ class BasicItems:
         ).edit()
         change = save_file.platinum_tickets - original_amount
         core.BackupMetaData(save_file).add_managed_item(
-            core.ManagedItem.from_change(
-                change, core.ManagedItemType.PLATINUM_TICKET
-            )
+            core.ManagedItem.from_change(change, core.ManagedItemType.PLATINUM_TICKET)
         )
 
     @staticmethod
@@ -158,9 +146,7 @@ class BasicItems:
         ).edit()
         change = save_file.legend_tickets - original_amount
         core.BackupMetaData(save_file).add_managed_item(
-            core.ManagedItem.from_change(
-                change, core.ManagedItemType.LEGEND_TICKET
-            )
+            core.ManagedItem.from_change(change, core.ManagedItemType.LEGEND_TICKET)
         )
 
     @staticmethod

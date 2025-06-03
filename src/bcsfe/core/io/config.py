@@ -25,6 +25,7 @@ class ConfigKey(enum.Enum):
     UNLOCK_CAT_ON_EDIT = "unlock_cat_on_edit"
     USE_FILE_DIALOG = "use_file_dialog"
     ADB_PATH = "adb_path"
+    IGNORE_PARSE_ERROR = "ignore_parse_error"
 
 
 class Config:
@@ -74,6 +75,7 @@ class Config:
             ConfigKey.UNLOCK_CAT_ON_EDIT: True,
             ConfigKey.USE_FILE_DIALOG: True,
             ConfigKey.ADB_PATH: "adb",
+            ConfigKey.IGNORE_PARSE_ERROR: False,
         }
         return initial_values
 
@@ -288,9 +290,7 @@ class Config:
                     "git_not_installed",
                 )
                 return
-            git_repo = (
-                color.ColoredInput().localize("enter_locale_git_repo").strip()
-            )
+            git_repo = color.ColoredInput().localize("enter_locale_git_repo").strip()
             external_locale = core.ExternalLocale.from_git_repo(git_repo)
             if external_locale is None:
                 color.ColoredText.localize(
@@ -379,9 +379,7 @@ class Config:
                     "git_not_installed",
                 )
                 return
-            git_repo = (
-                color.ColoredInput().localize("enter_theme_git_repo").strip()
-            )
+            git_repo = color.ColoredInput().localize("enter_theme_git_repo").strip()
             external_theme = core.ExternalTheme.from_git_repo(git_repo)
             if external_theme is None:
                 color.ColoredText.localize(

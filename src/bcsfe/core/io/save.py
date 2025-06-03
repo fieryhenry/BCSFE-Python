@@ -4,6 +4,9 @@ from typing import Any
 from bcsfe import core, __version__, cli
 import datetime
 
+from bcsfe.cli.color import ColoredText
+from bcsfe.core.io.config import ConfigKey
+
 
 class SaveError(Exception):
     pass
@@ -135,13 +138,15 @@ class SaveFile:
         try:
             self.load()
         except Exception as e:
-            raise FailedToLoadError(
-                core.core_data.local_manager.get_key("failed_to_load_save")
-            ) from e
-        if not self.verify_load():
-            raise SaveFileInvalid(
-                core.core_data.local_manager.get_key("failed_to_load_save_gv")
-            )
+            ignore_error = core.core_data.config.get_bool(ConfigKey.IGNORE_PARSE_ERROR)
+            if not ignore_error:
+                raise FailedToLoadError(
+                    core.core_data.local_manager.get_key("failed_to_load_save")
+                ) from e
+            else:
+                from traceback import format_exc
+
+                ColoredText.localize("parse_ignored_error", error=format_exc())
 
     def set_gv(self, gv: core.GameVersion):
         self.game_version = gv
@@ -380,7 +385,7 @@ class SaveFile:
             if self.not_jp():
                 self.ub2 = self.data.read_bool()
 
-            self.gv_44 = self.data.read_int()
+            assert self.data.read_int() == 44
 
             self.itf1_complete = self.data.read_int()
 
@@ -393,21 +398,24 @@ class SaveFile:
 
             self.combo_unlocked_10k_ur = self.data.read_bool()
 
-            self.gv_45 = self.data.read_int()
+            assert self.data.read_int() == 45
 
         if 21 <= self.game_version:
-            self.gv_46 = self.data.read_int()
+            assert self.data.read_int() == 46
+
             self.gatya.read_event_seed(self.data, self.game_version)
             if self.game_version < 34:
-                self.event_capsules_1 = self.data.read_int_list(length=100)
-                self.event_capsules_2 = self.data.read_int_list(length=100)
+                self.event_capsules = self.data.read_int_list(length=100)
+                self.event_capsules_counter = self.data.read_int_list(length=100)
             else:
-                self.event_capsules_1 = self.data.read_int_list()
-                self.event_capsules_2 = self.data.read_int_list()
-            self.gv_47 = self.data.read_int()
+                self.event_capsules = self.data.read_int_list()
+                self.event_capsules_counter = self.data.read_int_list()
+
+            assert self.data.read_int() == 47
 
         if 22 <= self.game_version:
-            self.gv_48 = self.data.read_int()
+            assert self.data.read_int() == 48
+
         if 23 <= self.game_version:
             if not self.not_jp():
                 self.energy_notification = self.data.read_bool()
@@ -422,15 +430,20 @@ class SaveFile:
             self.next_week_timestamp = self.data.read_double()
             self.catfood_beginner_expired = self.data.read_bool_list(length=3)
             self.rank_up_sale_value = self.data.read_int()
-            self.gv_49 = self.data.read_int()
+
+            assert self.data.read_int() == 49
 
         if 24 <= self.game_version:
-            self.gv_50 = self.data.read_int()
+            assert self.data.read_int() == 50
+
         if 25 <= self.game_version:
-            self.gv_51 = self.data.read_int()
+            assert self.data.read_int() == 51
+
         if 26 <= self.game_version:
             self.cats.read_catguide_collected(self.data)
-            self.gv_52 = self.data.read_int()
+
+            assert self.data.read_int() == 52
+
         if 27 <= self.game_version:
             self.time_since_time_check_cumulative = self.data.read_double()
             self.server_timestamp = self.data.read_double()
@@ -448,12 +461,14 @@ class SaveFile:
             self.unlock_popups_6 = self.data.read_bool_list()
             self.ex_stages = core.ExChapters.read(self.data)
 
-            self.gv_53 = self.data.read_int()
+            assert self.data.read_int() == 53
+
         if 29 <= self.game_version:
             self.gamatoto.read_2(self.data)
-            self.gv_54 = self.data.read_int()
+            assert self.data.read_int() == 54
             self.item_pack = core.ItemPack.read(self.data)
-            self.gv_54 = self.data.read_int()
+            assert self.data.read_int() == 54
+
         if self.game_version >= 30:
             self.gamatoto.read_skin(self.data)
             self.platinum_tickets = self.data.read_int()
@@ -468,7 +483,8 @@ class SaveFile:
             self.ui12 = self.data.read_int()
             self.ui13 = self.data.read_int()
             self.ui14 = self.data.read_int()
-            self.gv_55 = self.data.read_int()
+
+            assert self.data.read_int() == 55
 
         if self.game_version >= 31:
             self.ub3 = self.data.read_bool()
@@ -476,17 +492,20 @@ class SaveFile:
             self.gatya.read_stepup(self.data)
 
             self.backup_frame = self.data.read_int()
-            self.gv_56 = self.data.read_int()
+
+            assert self.data.read_int() == 56
 
         if self.game_version >= 32:
             self.ub4 = self.data.read_bool()
             self.cats.read_favorites(self.data)
-            self.gv_57 = self.data.read_int()
+
+            assert self.data.read_int() == 57
 
         if self.game_version >= 33:
             self.dojo = core.Dojo.read_chapters(self.data)
             self.dojo.read_item_locks(self.data)
-            self.gv_58 = self.data.read_int()
+
+            assert self.data.read_int() == 58
 
         if self.game_version >= 34:
             self.last_checked_zombie_time = self.data.read_double()
@@ -498,33 +517,38 @@ class SaveFile:
             self.outbreaks.read_current_outbreaks(self.data, self.game_version)
             self.first_locks = self.data.read_int_bool_dict()
             self.energy_penalty_timestamp = self.data.read_double()
-            self.gv_60 = self.data.read_int()
+
+            assert self.data.read_int() == 60
 
         if self.game_version >= 36:
             self.cats.read_chara_new_flags(self.data)
             self.shown_maxcollab_mg = self.data.read_bool()
             self.item_pack.read_displayed_packs(self.data)
-            self.gv_61 = self.data.read_int()
+
+            assert self.data.read_int() == 61
 
         if self.game_version >= 38:
             self.unlock_popups = core.UnlockPopups.read(self.data)
-            self.gv_63 = self.data.read_int()
+            assert self.data.read_int() == 63
 
         if self.game_version >= 39:
             self.ototo = core.Ototo.read(self.data)
             self.ototo.read_2(self.data, self.game_version)
             self.last_checked_castle_time = self.data.read_double()
-            self.gv_64 = self.data.read_int()
+
+            assert self.data.read_int() == 64
 
         if self.game_version >= 40:
             self.beacon_base = core.BeaconEventListScene.read(self.data)
-            self.gv_65 = self.data.read_int()
+
+            assert self.data.read_int() == 65
 
         if self.game_version >= 41:
             self.tower = core.TowerChapters.read(self.data)
             self.missions = core.Missions.read(self.data, self.game_version)
             self.tower.read_item_obtain_states(self.data)
-            self.gv_66 = self.data.read_int()
+
+            assert self.data.read_int() == 66
 
         if self.game_version >= 42:
             self.dojo.read_ranking(self.data)
@@ -532,60 +556,70 @@ class SaveFile:
             self.challenge = core.ChallengeChapters.read(self.data)
             self.challenge.read_scores(self.data)
             self.challenge.read_popup(self.data)
-            self.gv_67 = self.data.read_int()
+
+            assert self.data.read_int() == 67
 
         if self.game_version >= 43:
             self.missions.read_weekly_missions(self.data)
             self.dojo.ranking.read_did_win_rewards(self.data)
             self.event_update_flags = self.data.read_bool()
-            self.gv_68 = self.data.read_int()
+
+            assert self.data.read_int() == 68
 
         if self.game_version >= 44:
             self.event_stages.read_dicts(self.data)
             self.cotc_1_complete = self.data.read_int()
-            self.gv_69 = self.data.read_int()
+
+            assert self.data.read_int() == 69
 
         if self.game_version >= 46:
             self.gamatoto.read_collab_data(self.data)
-            self.gv_71 = self.data.read_int()
+
+            assert self.data.read_int() == 71
 
         if self.game_version < 90300:
             self.map_resets = core.MapResets.read(self.data)
-            self.gv_72 = self.data.read_int()
+
+            assert self.data.read_int() == 72
 
         if self.game_version >= 51:
             self.uncanny = core.UncannyChapters.read(self.data)
-            self.gv_76 = self.data.read_int()
+            assert self.data.read_int() == 76
 
         if self.game_version >= 77:
             self.uncanny_2 = core.UncannyChapters.read(self.data)
 
-            self.event_capsules_3 = self.data.read_int_list()
+            self.lucky_tickets = self.data.read_int_list()
 
             self.ub5 = self.data.read_bool()
-            self.gv_77 = self.data.read_int()
+
+            assert self.data.read_int() == 77
 
         if self.game_version >= 80000:
             self.officer_pass.read_gold_pass(self.data, self.game_version)
             self.cats.read_talents(self.data)
             self.np = self.data.read_int()
             self.ub6 = self.data.read_bool()
-            self.gv_80000 = self.data.read_int()
+
+            assert self.data.read_int() == 80000
 
         if self.game_version >= 80200:
             self.ub7 = self.data.read_bool()
             self.leadership = self.data.read_short()
             self.officer_pass.read_cat_data(self.data)
-            self.gv_80200 = self.data.read_int()
+
+            assert self.data.read_int() == 80200
 
         if self.game_version >= 80300:
             self.filibuster_stage_id = self.data.read_byte()
             self.filibuster_stage_enabled = self.data.read_bool()
-            self.gv_80300 = self.data.read_int()
+
+            assert self.data.read_int() == 80300
 
         if self.game_version >= 80500:
             self.uil5 = self.data.read_int_list()
-            self.gv_80500 = self.data.read_int()
+
+            assert self.data.read_int() == 80500
 
         if self.game_version >= 80600:
             length = self.data.read_short()
@@ -593,7 +627,8 @@ class SaveFile:
             self.legend_quest = core.LegendQuestChapters.read(self.data)
             self.ush1 = self.data.read_short()
             self.uby1 = self.data.read_byte()
-            self.gv_80600 = self.data.read_int()
+
+            assert self.data.read_int() == 80600
 
         if self.game_version >= 80700:
             length = self.data.read_int()
@@ -603,16 +638,16 @@ class SaveFile:
                 value = self.data.read_int_list()
                 self.uiid1[key] = value
 
-            self.gv_80700 = self.data.read_int()
+            assert self.data.read_int() == 80700
 
         if self.game_version >= 100600:
             if self.is_en():
                 self.uby2 = self.data.read_byte()
-                self.gv_100600 = self.data.read_int()
+                assert self.data.read_int() == 100600
 
         if self.game_version >= 81000:
             self.restart_pack = self.data.read_byte()
-            self.gv_81000 = self.data.read_int()
+            assert self.data.read_int() == 81000
 
         if self.game_version >= 90000:
             self.medals = core.Medals.read(self.data)
@@ -642,7 +677,7 @@ class SaveFile:
                     value = self.data.read_int()
                 self.uiid2[key] = value
 
-            self.gv_90000 = self.data.read_int()
+            assert self.data.read_int() == 90000
 
         if self.game_version >= 90100:
             self.ush2 = self.data.read_short()
@@ -650,7 +685,7 @@ class SaveFile:
             self.ui15 = self.data.read_int()
             self.ud1 = self.data.read_double()
 
-            self.gv_90100 = self.data.read_int()
+            assert self.data.read_int() == 90100
 
         if self.game_version >= 90300:
             length = self.data.read_short()
@@ -670,14 +705,14 @@ class SaveFile:
 
             self.gauntlets = core.GauntletChapters.read(self.data)
 
-            self.gv_90300 = self.data.read_int()
+            assert self.data.read_int() == 90300
 
         if self.game_version >= 90400:
             self.gauntlets_2 = core.GauntletChapters.read(self.data)
             self.enigma = core.Enigma.read(self.data)
             self.cleared_slots = core.ClearedSlots.read(self.data)
 
-            self.gv_90400 = self.data.read_int()
+            assert self.data.read_int() == 90400
 
         if self.game_version >= 90500:
             self.collab_gauntlets = core.GauntletChapters.read(self.data)
@@ -714,7 +749,7 @@ class SaveFile:
                     value = self.data.read_double()
                     self.uidd3[key] = value
 
-            self.gv_90500 = self.data.read_int()
+            assert self.data.read_int() == 90500
 
         if self.game_version >= 90700:
             self.talent_orbs = core.TalentOrbs.read(self.data, self.game_version)
@@ -734,26 +769,26 @@ class SaveFile:
 
             self.ub10 = self.data.read_bool()
 
-            self.gv_90700 = self.data.read_int()
+            assert self.data.read_int() == 90700
 
         if self.game_version >= 90800:
             length = self.data.read_short()
             self.uil7 = self.data.read_int_list(length)
             self.ubl2 = self.data.read_bool_list(10)
 
-            self.gv_90800 = self.data.read_int()
+            assert self.data.read_int() == 90800
 
         if self.game_version >= 90900:
             self.cat_shrine = core.CatShrine.read(self.data)
             self.ud6 = self.data.read_double()
             self.ud7 = self.data.read_double()
 
-            self.gv_90900 = self.data.read_int()
+            assert self.data.read_int() == 90900
 
         if self.game_version >= 91000:
             self.lineups.read_slot_names(self.data, self.game_version)
 
-            self.gv_91000 = self.data.read_int()
+            assert self.data.read_int() == 91000
 
         if self.game_version >= 100000:
             self.legend_tickets = self.data.read_int()
@@ -775,12 +810,12 @@ class SaveFile:
             self.ud8 = self.data.read_double()
             self.ud9 = self.data.read_double()
 
-            self.gv_100000 = self.data.read_int()
+            assert self.data.read_int() == 100000
 
         if self.game_version >= 100100:
             self.date_int = self.data.read_int()
 
-            self.gv_100100 = self.data.read_int()
+            assert self.data.read_int() == 100100
 
         if self.game_version >= 100300:
             self.utl2: list[tuple[bool, bool, int, float, float]] = []
@@ -793,21 +828,21 @@ class SaveFile:
                 f2 = self.data.read_double()
                 self.utl2.append((b1, b2, i1, f1, f2))
 
-            self.gv_100300 = self.data.read_int()
+            assert self.data.read_int() == 100300
 
         if self.game_version >= 100400:
             length = self.data.read_byte()
             self.uil8 = self.data.read_int_list(length)
             self.two_battle_lines = self.data.read_bool()
 
-            self.gv_100400 = self.data.read_int()
+            assert self.data.read_int() == 100400
 
         if self.game_version >= 100600:
             self.ud10 = self.data.read_double()
             self.platinum_shards = self.data.read_int()
             self.ub15 = self.data.read_bool()
 
-            self.gv_100600 = self.data.read_int()
+            assert self.data.read_int() == 100600
 
         if self.game_version >= 100700:
             length = self.data.read_short()
@@ -837,7 +872,7 @@ class SaveFile:
                     value = self.data.read_int()
                 self.ushid[key] = value
 
-            self.gv_100700 = self.data.read_int()
+            assert self.data.read_int() == 100700
 
         if self.game_version >= 100900:
             self.aku = core.AkuChapters.read(self.data)
@@ -873,12 +908,12 @@ class SaveFile:
 
             self.ub18 = self.data.read_bool()
 
-            self.gv_100900 = self.data.read_int()
+            assert self.data.read_int() == 100900
 
         if self.game_version >= 101000:
             self.uby6 = self.data.read_byte()
 
-            self.gv_101000 = self.data.read_int()
+            assert self.data.read_int() == 101000
 
         if self.game_version >= 110000:
             length = self.data.read_short()
@@ -891,18 +926,18 @@ class SaveFile:
                 )
                 self.uidtii[key] = value
 
-            self.gv_110000 = self.data.read_int()
+            assert self.data.read_int() == 110000
 
         if self.game_version >= 110500:
             self.behemoth_culling = core.GauntletChapters.read(self.data)
             self.ub19 = self.data.read_bool()
 
-            self.gv_110500 = self.data.read_int()
+            assert self.data.read_int() == 110500
 
         if self.game_version >= 110600:
             self.ub20 = self.data.read_bool()
 
-            self.gv_110600 = self.data.read_int()
+            assert self.data.read_int() == 110600
 
         if self.game_version >= 110700:
             length = self.data.read_int()
@@ -918,7 +953,7 @@ class SaveFile:
             if self.not_jp():
                 self.ub20 = self.data.read_bool()
 
-            self.gv_110700 = self.data.read_int()
+            assert self.data.read_int() == 110700
 
         if self.game_version >= 110800:
             self.cat_shrine.read_dialogs(self.data)
@@ -927,7 +962,7 @@ class SaveFile:
             self.ub22 = self.data.read_bool()
             self.ub23 = self.data.read_bool()
 
-            self.gv_110800 = self.data.read_int()
+            assert self.data.read_int() == 110800
 
         if self.game_version >= 111000:
             self.ui17 = self.data.read_int()
@@ -970,19 +1005,19 @@ class SaveFile:
             length = self.data.read_byte()
             self.labyrinth_medals = self.data.read_short_list(length)
 
-            self.gv_111000 = self.data.read_int()
+            assert self.data.read_int() == 111000
 
         if self.game_version >= 120000:
             self.zero_legends = core.ZeroLegendsChapters.read(self.data)
             self.uby12 = self.data.read_byte()
 
-            self.gv_120000 = self.data.read_int()
+            assert self.data.read_int() == 120000
 
         if self.game_version >= 120100:
             length = self.data.read_short()
             self.ushl6 = self.data.read_short_list(length)
 
-            self.gv_120100 = self.data.read_int()
+            assert self.data.read_int() == 120100
 
         if self.game_version >= 120200:
             self.ub31 = self.data.read_bool()
@@ -994,13 +1029,13 @@ class SaveFile:
                 value = self.data.read_short()
                 self.ushshd[key] = value
 
-            self.gv_120200 = self.data.read_int()
+            assert self.data.read_int() == 120200
 
         if self.game_version >= 120400:
             self.ud11 = self.data.read_double()
             self.ud12 = self.data.read_double()
 
-            self.gv_120400 = self.data.read_int()
+            assert self.data.read_int() == 120400
 
         if self.game_version >= 120500:
             self.ub32 = self.data.read_bool()
@@ -1010,13 +1045,13 @@ class SaveFile:
             self.ui21 = self.data.read_int()
             self.uby13 = self.data.read_byte()
 
-            self.gv_120500 = self.data.read_int()
+            assert self.data.read_int() == 120500
 
         if self.game_version >= 120600:
             self.sound_effects_volume = self.data.read_byte()
             self.background_music_volume = self.data.read_byte()
 
-            self.gv_120600 = self.data.read_int()
+            assert self.data.read_int() == 120600
 
         if (self.not_jp() and self.game_version >= 120700) or (
             self.is_jp() and self.game_version >= 130000
@@ -1029,9 +1064,9 @@ class SaveFile:
                 self.ustl1.append((s1, s2))
 
             if self.not_jp():
-                self.gv_120700 = self.data.read_int()
+                assert self.data.read_int() == 120700
             else:
-                self.gv_130000 = self.data.read_int()
+                assert self.data.read_int() == 130000
 
         if self.game_version >= 130100:
             length = self.data.read_int()
@@ -1041,7 +1076,7 @@ class SaveFile:
                 i2 = self.data.read_long()
                 self.utl3.append((i1, i2))
 
-            self.gv_130100 = self.data.read_int()
+            assert self.data.read_int() == 130100
 
         if self.game_version >= 130301:
             length = self.data.read_int()
@@ -1052,13 +1087,13 @@ class SaveFile:
                 value_2 = self.data.read_double()
                 self.ustid1[key] = (value_1, value_2)
 
-            self.gv_130301 = self.data.read_int()
+            assert self.data.read_int() == 130301
 
         if self.game_version >= 130400:
             self.ud13 = self.data.read_double()
             self.ud14 = self.data.read_double()
 
-            self.gv_130400 = self.data.read_int()
+            assert self.data.read_int() == 130400
 
         if self.game_version >= 130500:
             self.utl4: list[tuple[int, list[tuple[int, int, int, list[int]]]]] = []
@@ -1083,7 +1118,7 @@ class SaveFile:
 
                 self.utl4.append((id, ls2))
 
-            self.gv_130500 = self.data.read_int()
+            assert self.data.read_int() == 130500
 
         if self.game_version >= 130600:
             self.uby14 = self.data.read_byte()
@@ -1091,7 +1126,7 @@ class SaveFile:
             if self.not_jp():
                 self.ush12 = self.data.read_short()
 
-            self.gv_130600 = self.data.read_int()
+            assert self.data.read_int() == 130600
 
         if self.game_version >= 130700:
             if self.is_jp():
@@ -1128,7 +1163,7 @@ class SaveFile:
 
                 self.ushd1[key] = (value, value_2, data2)
 
-            self.gv_130700 = self.data.read_int()
+            assert self.data.read_int() == 130700
 
         if self.game_version >= 140000:
             self.ui22 = self.data.read_int()
@@ -1191,11 +1226,11 @@ class SaveFile:
                 value = self.data.read_byte()
                 self.ushd2[key] = value
 
-            self.gv_140000 = self.data.read_int()
+            assert self.data.read_int() == 140000
 
         if self.game_version >= 140100:
             self.uby21 = self.data.read_byte()
-            self.gv_140100 = self.data.read_int()
+            assert self.data.read_int() == 140100
 
         if self.game_version >= 140200:
             length = self.data.read_byte()
@@ -1260,7 +1295,8 @@ class SaveFile:
                 self.uid1[key] = value
 
             self.hundred_million_ticket = self.data.read_int()
-            self.gv_140200 = self.data.read_int()
+
+            assert self.data.read_int() == 140200
 
         if self.game_version >= 140300:
             length = self.data.read_byte()
@@ -1289,7 +1325,7 @@ class SaveFile:
 
             self.ub37 = self.data.read_bool()
 
-            self.gv_140300 = self.data.read_int()
+            assert self.data.read_int() == 140300
 
         self.remaining_data = self.data.read_to_end(32)
 
@@ -1520,7 +1556,7 @@ class SaveFile:
             if self.not_jp():
                 self.data.write_bool(self.ub2)
 
-            self.data.write_int(self.gv_44)
+            self.data.write_int(44)
             self.data.write_int(self.itf1_complete)
             self.story.write_itf_timed_scores(self.data)
             self.data.write_int(self.title_chapter_bg)
@@ -1530,26 +1566,26 @@ class SaveFile:
 
             self.data.write_bool(self.combo_unlocked_10k_ur)
 
-            self.data.write_int(self.gv_45)
+            self.data.write_int(45)
 
         if 21 <= self.game_version:
-            self.data.write_int(self.gv_46)
+            self.data.write_int(46)
             self.gatya.write_event_seed(self.data)
             if self.game_version < 34:
                 self.data.write_int_list(
-                    self.event_capsules_1, write_length=False, length=100
+                    self.event_capsules, write_length=False, length=100
                 )
                 self.data.write_int_list(
-                    self.event_capsules_2, write_length=False, length=100
+                    self.event_capsules_counter, write_length=False, length=100
                 )
             else:
-                self.data.write_int_list(self.event_capsules_1)
-                self.data.write_int_list(self.event_capsules_2)
+                self.data.write_int_list(self.event_capsules)
+                self.data.write_int_list(self.event_capsules_counter)
 
-            self.data.write_int(self.gv_47)
+            self.data.write_int(47)
 
         if 22 <= self.game_version:
-            self.data.write_int(self.gv_48)
+            self.data.write_int(48)
 
         if 23 <= self.game_version:
             if self.is_jp():
@@ -1575,17 +1611,17 @@ class SaveFile:
                 self.catfood_beginner_expired, write_length=False, length=3
             )
             self.data.write_int(self.rank_up_sale_value)
-            self.data.write_int(self.gv_49)
+            self.data.write_int(49)
 
         if 24 <= self.game_version:
-            self.data.write_int(self.gv_50)
+            self.data.write_int(50)
 
         if 25 <= self.game_version:
-            self.data.write_int(self.gv_51)
+            self.data.write_int(51)
 
         if 26 <= self.game_version:
             self.cats.write_catguide_collected(self.data)
-            self.data.write_int(self.gv_52)
+            self.data.write_int(52)
 
         if 27 <= self.game_version:
             self.data.write_double(self.time_since_time_check_cumulative)
@@ -1604,13 +1640,13 @@ class SaveFile:
             self.data.write_bool_list(self.unlock_popups_6)
             self.ex_stages.write(self.data)
 
-            self.data.write_int(self.gv_53)
+            self.data.write_int(53)
 
         if 29 <= self.game_version:
             self.gamatoto.write_2(self.data)
-            self.data.write_int(self.gv_54)
+            self.data.write_int(54)
             self.item_pack.write(self.data)
-            self.data.write_int(self.gv_54)
+            self.data.write_int(54)
 
         if self.game_version >= 30:
             self.gamatoto.write_skin(self.data)
@@ -1630,7 +1666,7 @@ class SaveFile:
             self.data.write_int(self.ui12)
             self.data.write_int(self.ui13)
             self.data.write_int(self.ui13)
-            self.data.write_int(self.gv_55)
+            self.data.write_int(55)
 
         if self.game_version >= 31:
             self.data.write_bool(self.ub3)
@@ -1638,17 +1674,17 @@ class SaveFile:
             self.gatya.write_stepup(self.data)
 
             self.data.write_int(self.backup_frame)
-            self.data.write_int(self.gv_56)
+            self.data.write_int(56)
 
         if self.game_version >= 32:
             self.data.write_bool(self.ub4)
             self.cats.write_favorites(self.data)
-            self.data.write_int(self.gv_57)
+            self.data.write_int(57)
 
         if self.game_version >= 33:
             self.dojo.write_chapters(self.data)
             self.dojo.write_item_locks(self.data)
-            self.data.write_int(self.gv_58)
+            self.data.write_int(58)
 
         if self.game_version >= 34:
             self.data.write_double(self.last_checked_zombie_time)
@@ -1660,33 +1696,33 @@ class SaveFile:
             self.outbreaks.write_current_outbreaks(self.data, self.game_version)
             self.data.write_int_bool_dict(self.first_locks)
             self.data.write_double(self.energy_penalty_timestamp)
-            self.data.write_int(self.gv_60)
+            self.data.write_int(60)
 
         if self.game_version >= 36:
             self.cats.write_chara_new_flags(self.data)
             self.data.write_bool(self.shown_maxcollab_mg)
             self.item_pack.write_displayed_packs(self.data)
-            self.data.write_int(self.gv_61)
+            self.data.write_int(61)
 
         if self.game_version >= 38:
             self.unlock_popups.write(self.data)
-            self.data.write_int(self.gv_63)
+            self.data.write_int(63)
 
         if self.game_version >= 39:
             self.ototo.write(self.data)
             self.ototo.write_2(self.data, self.game_version)
             self.data.write_double(self.last_checked_castle_time)
-            self.data.write_int(self.gv_64)
+            self.data.write_int(64)
 
         if self.game_version >= 40:
             self.beacon_base.write(self.data)
-            self.data.write_int(self.gv_65)
+            self.data.write_int(65)
 
         if self.game_version >= 41:
             self.tower.write(self.data)
             self.missions.write(self.data, self.game_version)
             self.tower.write_item_obtain_states(self.data)
-            self.data.write_int(self.gv_66)
+            self.data.write_int(66)
 
         if self.game_version >= 42:
             self.dojo.write_ranking(self.data)
@@ -1694,58 +1730,58 @@ class SaveFile:
             self.challenge.write(self.data)
             self.challenge.write_scores(self.data)
             self.challenge.write_popup(self.data)
-            self.data.write_int(self.gv_67)
+            self.data.write_int(67)
 
         if self.game_version >= 43:
             self.missions.write_weekly_missions(self.data)
             self.dojo.ranking.write_did_win_rewards(self.data)
             self.data.write_bool(self.event_update_flags)
-            self.data.write_int(self.gv_68)
+            self.data.write_int(68)
 
         if self.game_version >= 44:
             self.event_stages.write_dicts(self.data)
             self.data.write_int(self.cotc_1_complete)
-            self.data.write_int(self.gv_69)
+            self.data.write_int(69)
 
         if self.game_version >= 46:
             self.gamatoto.write_collab_data(self.data)
-            self.data.write_int(self.gv_71)
+            self.data.write_int(71)
 
         if self.game_version < 90300:
             self.map_resets.write(self.data)
-            self.data.write_int(self.gv_72)
+            self.data.write_int(72)
 
         if self.game_version >= 51:
             self.uncanny.write(self.data)
-            self.data.write_int(self.gv_76)
+            self.data.write_int(76)
 
         if self.game_version >= 77:
             self.uncanny_2.write(self.data)
-            self.data.write_int_list(self.event_capsules_3)
+            self.data.write_int_list(self.lucky_tickets)
             self.data.write_bool(self.ub5)
-            self.data.write_int(self.gv_77)
+            self.data.write_int(77)
 
         if self.game_version >= 80000:
             self.officer_pass.write_gold_pass(self.data, self.game_version)
             self.cats.write_talents(self.data)
             self.data.write_int(self.np)
             self.data.write_bool(self.ub6)
-            self.data.write_int(self.gv_80000)
+            self.data.write_int(80000)
 
         if self.game_version >= 80200:
             self.data.write_bool(self.ub7)
             self.data.write_short(self.leadership)
             self.officer_pass.write_cat_data(self.data)
-            self.data.write_int(self.gv_80200)
+            self.data.write_int(80200)
 
         if self.game_version >= 80300:
             self.data.write_byte(self.filibuster_stage_id)
             self.data.write_bool(self.filibuster_stage_enabled)
-            self.data.write_int(self.gv_80300)
+            self.data.write_int(80300)
 
         if self.game_version >= 80500:
             self.data.write_int_list(self.uil5)
-            self.data.write_int(self.gv_80500)
+            self.data.write_int(80500)
 
         if self.game_version >= 80600:
             self.data.write_short(len(self.uil6))
@@ -1753,23 +1789,23 @@ class SaveFile:
             self.legend_quest.write(self.data)
             self.data.write_short(self.ush1)
             self.data.write_byte(self.uby1)
-            self.data.write_int(self.gv_80600)
+            self.data.write_int(80600)
 
         if self.game_version >= 80700:
             self.data.write_int(len(self.uiid1))
             for key, value in self.uiid1.items():
                 self.data.write_int(key)
                 self.data.write_int_list(value)
-            self.data.write_int(self.gv_80700)
+            self.data.write_int(80700)
 
         if self.game_version >= 100600:
             if self.is_en():
                 self.data.write_byte(self.uby2)
-                self.data.write_int(self.gv_100600)
+                self.data.write_int(100600)
 
         if self.game_version >= 81000:
             self.data.write_byte(self.restart_pack)
-            self.data.write_int(self.gv_81000)
+            self.data.write_int(81000)
 
         if self.game_version >= 90000:
             self.medals.write(self.data)
@@ -1791,14 +1827,14 @@ class SaveFile:
                 else:
                     self.data.write_int(int(value))
 
-            self.data.write_int(self.gv_90000)
+            self.data.write_int(90000)
 
         if self.game_version >= 90100:
             self.data.write_short(self.ush2)
             self.data.write_short(self.ush3)
             self.data.write_int(self.ui15)
             self.data.write_double(self.ud1)
-            self.data.write_int(self.gv_90100)
+            self.data.write_int(90100)
 
         if self.game_version >= 90300:
             self.data.write_short(len(self.utl1))
@@ -1831,13 +1867,13 @@ class SaveFile:
             self.data.write_short(len(self.uidd1))
             self.data.write_int_double_dict(self.uidd1, write_length=False)
             self.gauntlets.write(self.data)
-            self.data.write_int(self.gv_90300)
+            self.data.write_int(90300)
 
         if self.game_version >= 90400:
             self.gauntlets_2.write(self.data)
             self.enigma.write(self.data)
             self.cleared_slots.write(self.data)
-            self.data.write_int(self.gv_90400)
+            self.data.write_int(90400)
 
         if self.game_version >= 90500:
             self.collab_gauntlets.write(self.data)
@@ -1868,7 +1904,7 @@ class SaveFile:
                     self.data.write_int(key)
                     self.data.write_double(value)
 
-            self.data.write_int(self.gv_90500)
+            self.data.write_int(90500)
 
         if self.game_version >= 90700:
             self.talent_orbs.write(self.data, self.game_version)
@@ -1881,23 +1917,23 @@ class SaveFile:
                     self.data.write_short(value2)
 
             self.data.write_bool(self.ub10)
-            self.data.write_int(self.gv_90700)
+            self.data.write_int(90700)
 
         if self.game_version >= 90800:
             self.data.write_short(len(self.uil7))
             self.data.write_int_list(self.uil7, write_length=False)
             self.data.write_bool_list(self.ubl2, write_length=False, length=10)
-            self.data.write_int(self.gv_90800)
+            self.data.write_int(90800)
 
         if self.game_version >= 90900:
             self.cat_shrine.write(self.data)
             self.data.write_double(self.ud6)
             self.data.write_double(self.ud7)
-            self.data.write_int(self.gv_90900)
+            self.data.write_int(90900)
 
         if self.game_version >= 91000:
             self.lineups.write_slot_names(self.data, self.game_version)
-            self.data.write_int(self.gv_91000)
+            self.data.write_int(91000)
 
         if self.game_version >= 100000:
             self.data.write_int(self.legend_tickets)
@@ -1917,11 +1953,11 @@ class SaveFile:
             self.data.write_double(self.ud8)
             self.data.write_double(self.ud9)
 
-            self.data.write_int(self.gv_100000)
+            self.data.write_int(100000)
 
         if self.game_version >= 100100:
             self.data.write_int(self.date_int)
-            self.data.write_int(self.gv_100100)
+            self.data.write_int(100100)
 
         if self.game_version >= 100300:
             for i in range(6):
@@ -1949,19 +1985,19 @@ class SaveFile:
                 self.data.write_double(f1)
                 self.data.write_double(f2)
 
-            self.data.write_int(self.gv_100300)
+            self.data.write_int(100300)
 
         if self.game_version >= 100400:
             self.data.write_byte(len(self.uil8))
             self.data.write_int_list(self.uil8, write_length=False)
             self.data.write_bool(self.two_battle_lines)
-            self.data.write_int(self.gv_100400)
+            self.data.write_int(100400)
 
         if self.game_version >= 100600:
             self.data.write_double(self.ud10)
             self.data.write_int(self.platinum_shards)
             self.data.write_bool(self.ub15)
-            self.data.write_int(self.gv_100600)
+            self.data.write_int(100600)
 
         if self.game_version >= 100700:
             self.data.write_short(len(self.ushbd2))
@@ -1983,7 +2019,7 @@ class SaveFile:
                 else:
                     self.data.write_int(int(value))
 
-            self.data.write_int(self.gv_100700)
+            self.data.write_int(100700)
 
         if self.game_version >= 100900:
             self.aku.write(self.data)
@@ -2008,11 +2044,11 @@ class SaveFile:
                 self.data.write_double(value)
 
             self.data.write_bool(self.ub18)
-            self.data.write_int(self.gv_100900)
+            self.data.write_int(100900)
 
         if self.game_version >= 101000:
             self.data.write_byte(self.uby6)
-            self.data.write_int(self.gv_101000)
+            self.data.write_int(101000)
 
         if self.game_version >= 110000:
             self.data.write_short(len(self.uidtii))
@@ -2021,16 +2057,16 @@ class SaveFile:
                 self.data.write_byte(value[0])
                 self.data.write_byte(value[1])
 
-            self.data.write_int(self.gv_110000)
+            self.data.write_int(110000)
 
         if self.game_version >= 110500:
             self.behemoth_culling.write(self.data)
             self.data.write_bool(self.ub19)
-            self.data.write_int(self.gv_110500)
+            self.data.write_int(110500)
 
         if self.game_version >= 110600:
             self.data.write_bool(self.ub20)
-            self.data.write_int(self.gv_110600)
+            self.data.write_int(110600)
 
         if self.game_version >= 110700:
             self.data.write_int(len(self.uidtff))
@@ -2041,7 +2077,7 @@ class SaveFile:
 
             if self.not_jp():
                 self.data.write_bool(self.ub20)
-            self.data.write_int(self.gv_110700)
+            self.data.write_int(110700)
 
         if self.game_version >= 110800:
             self.cat_shrine.write_dialogs(self.data)
@@ -2050,7 +2086,7 @@ class SaveFile:
             self.data.write_bool(self.ub22)
             self.data.write_bool(self.ub23)
 
-            self.data.write_int(self.gv_110800)
+            self.data.write_int(110800)
 
         if self.game_version >= 111000:
             self.data.write_int(self.ui17)
@@ -2093,19 +2129,19 @@ class SaveFile:
             self.data.write_byte(len(self.labyrinth_medals))
             self.data.write_short_list(self.labyrinth_medals, write_length=False)
 
-            self.data.write_int(self.gv_111000)
+            self.data.write_int(111000)
 
         if self.game_version >= 120000:
             self.zero_legends.write(self.data)
             self.data.write_byte(self.uby12)
 
-            self.data.write_int(self.gv_120000)
+            self.data.write_int(120000)
 
         if self.game_version >= 120100:
             self.data.write_short(len(self.ushl6))
             self.data.write_short_list(self.ushl6, write_length=False)
 
-            self.data.write_int(self.gv_120100)
+            self.data.write_int(120100)
 
         if self.game_version >= 120200:
             self.data.write_bool(self.ub31)
@@ -2115,13 +2151,13 @@ class SaveFile:
                 self.data.write_short(key)
                 self.data.write_short(value)
 
-            self.data.write_int(self.gv_120200)
+            self.data.write_int(120200)
 
         if self.game_version >= 120400:
             self.data.write_double(self.ud11)
             self.data.write_double(self.ud12)
 
-            self.data.write_int(self.gv_120400)
+            self.data.write_int(120400)
 
         if self.game_version >= 120500:
             self.data.write_bool(self.ub32)
@@ -2130,13 +2166,13 @@ class SaveFile:
             self.data.write_int(self.ui21)
             self.data.write_byte(self.uby13)
 
-            self.data.write_int(self.gv_120500)
+            self.data.write_int(120500)
 
         if self.game_version >= 120600:
             self.data.write_byte(self.sound_effects_volume)
             self.data.write_byte(self.background_music_volume)
 
-            self.data.write_int(self.gv_120600)
+            self.data.write_int(120600)
 
         if (self.not_jp() and self.game_version >= 120700) or (
             self.is_jp() and self.game_version >= 130000
@@ -2147,9 +2183,9 @@ class SaveFile:
                 self.data.write_string(str2)
 
             if self.not_jp():
-                self.data.write_int(self.gv_120700)
+                self.data.write_int(120700)
             else:
-                self.data.write_int(self.gv_130000)
+                self.data.write_int(130000)
 
         if self.game_version >= 130100:
             self.data.write_int(len(self.utl3))
@@ -2157,7 +2193,7 @@ class SaveFile:
                 self.data.write_int(i)
                 self.data.write_long(long)
 
-            self.data.write_int(self.gv_130100)
+            self.data.write_int(130100)
 
         if self.game_version >= 130301:
             self.data.write_int(len(self.ustid1))
@@ -2166,13 +2202,13 @@ class SaveFile:
                 self.data.write_int(v1)
                 self.data.write_double(v2)
 
-            self.data.write_int(self.gv_130301)
+            self.data.write_int(130301)
 
         if self.game_version >= 130400:
             self.data.write_double(self.ud13)
             self.data.write_double(self.ud14)
 
-            self.data.write_int(self.gv_130400)
+            self.data.write_int(130400)
 
         if self.game_version >= 130500:
             self.data.write_short(len(self.utl4))
@@ -2189,7 +2225,7 @@ class SaveFile:
                     for val in ls1:
                         self.data.write_short(val)
 
-            self.data.write_int(self.gv_130500)
+            self.data.write_int(130500)
 
         if self.game_version >= 130600:
             self.data.write_byte(self.uby14)
@@ -2197,7 +2233,7 @@ class SaveFile:
             if self.not_jp():
                 self.data.write_short(self.ush12)
 
-            self.data.write_int(self.gv_130600)
+            self.data.write_int(130600)
 
         if self.game_version >= 130700:
             if self.is_jp():
@@ -2227,7 +2263,7 @@ class SaveFile:
                     self.data.write_short(key2)
                     self.data.write_short(value3)
 
-            self.data.write_int(self.gv_130700)
+            self.data.write_int(130700)
         if self.game_version >= 140000:
             self.data.write_int(self.ui22)
             self.data.write_double(self.ud17)
@@ -2269,11 +2305,11 @@ class SaveFile:
                 self.data.write_short(key)
                 self.data.write_byte(value)
 
-            self.data.write_int(self.gv_140000)
+            self.data.write_int(140000)
 
         if self.game_version >= 140100:
             self.data.write_byte(self.uby21)
-            self.data.write_int(self.gv_140100)
+            self.data.write_int(140100)
 
         if self.game_version >= 140200:
             self.data.write_byte(len(self.uil10))
@@ -2299,7 +2335,7 @@ class SaveFile:
                 self.data.write_double(value)
 
             self.data.write_int(self.hundred_million_ticket)
-            self.data.write_int(self.gv_140200)
+            self.data.write_int(140200)
 
         if self.game_version >= 140300:
             self.data.write_byte(len(self.uil11))
@@ -2320,7 +2356,7 @@ class SaveFile:
                 self.data.write_int(val)
 
             self.data.write_bool(self.ub37)
-            self.data.write_int(self.gv_140300)
+            self.data.write_int(140300)
 
         self.data.write_bytes(self.remaining_data)
 
@@ -2457,17 +2493,12 @@ class SaveFile:
             "has_account": self.has_account,
             "backup_state": self.backup_state,
             "ub2": self.ub2,
-            "gv_44": self.gv_44,
             "itf1_complete": self.itf1_complete,
             "title_chapter_bg": self.title_chapter_bg,
             "combo_unlocks": self.combo_unlocks,
             "combo_unlocked_10k_ur": self.combo_unlocked_10k_ur,
-            "gv_45": self.gv_45,
-            "gv_46": self.gv_46,
-            "event_capsules_1": self.event_capsules_1,
-            "event_capsules_2": self.event_capsules_2,
-            "gv_47": self.gv_47,
-            "gv_48": self.gv_48,
+            "event_capsules": self.event_capsules,
+            "event_capsules_counter": self.event_capsules_counter,
             "m_dGetTimeSave3": self.m_dGetTimeSave3,
             "gatya_seen_lucky_drops": self.gatya_seen_lucky_drops,
             "banned": self.show_ban_message,
@@ -2475,10 +2506,6 @@ class SaveFile:
             "next_week_timestamp": self.next_week_timestamp,
             "catfood_beginner_expired": self.catfood_beginner_expired,
             "rank_up_sale_value": self.rank_up_sale_value,
-            "gv_49": self.gv_49,
-            "gv_50": self.gv_50,
-            "gv_51": self.gv_51,
-            "gv_52": self.gv_52,
             "time_since_time_check_cumulative": self.time_since_time_check_cumulative,
             "server_timestamp": self.server_timestamp,
             "last_checked_energy_recovery_time": self.last_checked_energy_recovery_time,
@@ -2490,8 +2517,6 @@ class SaveFile:
             "gamatoto": self.gamatoto.serialize(),
             "unlock_popups_6": self.unlock_popups_6,
             "ex_stages": self.ex_stages.serialize(),
-            "gv_53": self.gv_53,
-            "gv_54": self.gv_54,
             "item_pack": self.item_pack.serialize(),
             "platinum_tickets": self.platinum_tickets,
             "logins": self.logins.serialize(),
@@ -2503,86 +2528,58 @@ class SaveFile:
             "ui12": self.ui12,
             "ui13": self.ui13,
             "ui14": self.ui14,
-            "gv_55": self.gv_55,
             "ub3": self.ub3,
             "backup_frame": self.backup_frame,
-            "gv_56": self.gv_56,
             "ub4": self.ub4,
-            "gv_57": self.gv_57,
             "dojo": self.dojo.serialize(),
-            "gv_58": self.gv_58,
             "last_checked_zombie_time": self.last_checked_zombie_time,
             "outbreaks": self.outbreaks.serialize(),
             "scheme_items": self.scheme_items.serialize(),
             "first_locks": self.first_locks,
             "energy_penalty_timestamp": self.energy_penalty_timestamp,
-            "gv_60": self.gv_60,
             "shown_maxcollab_mg": self.shown_maxcollab_mg,
-            "gv_61": self.gv_61,
             "unlock_popups": self.unlock_popups.serialize(),
-            "gv_63": self.gv_63,
             "ototo": self.ototo.serialize(),
             "last_checked_castle_time": self.last_checked_castle_time,
-            "gv_64": self.gv_64,
             "beacon_base": self.beacon_base.serialize(),
-            "gv_65": self.gv_65,
             "tower": self.tower.serialize(),
             "missions": self.missions.serialize(),
-            "gv_66": self.gv_66,
             "challenge": self.challenge.serialize(),
-            "gv_67": self.gv_67,
             "event_update_flags": self.event_update_flags,
-            "gv_68": self.gv_68,
             "cotc_1_complete": self.cotc_1_complete,
-            "gv_69": self.gv_69,
-            "gv_71": self.gv_71,
             "map_resets": self.map_resets.serialize(),
-            "gv_72": self.gv_72,
             "uncanny": self.uncanny.serialize(),
-            "gv_76": self.gv_76,
             "uncanny_2": self.uncanny_2.serialize(),
-            "event_capsules_3": self.event_capsules_3,
+            "lucky_tickets": self.lucky_tickets,
             "ub5": self.ub5,
-            "gv_77": self.gv_77,
             "np": self.np,
             "ub6": self.ub6,
-            "gv_80000": self.gv_80000,
             "ub7": self.ub7,
             "leadership": self.leadership,
-            "gv_80200": self.gv_80200,
             "filibuster_stage_id": self.filibuster_stage_id,
             "filibuster_stage_enabled": self.filibuster_stage_enabled,
-            "gv_80300": self.gv_80300,
             "uil5": self.uil5,
-            "gv_80500": self.gv_80500,
             "uil6": self.uil6,
             "legend_quest": self.legend_quest.serialize(),
             "ush1": self.ush1,
             "uby1": self.uby1,
-            "gv_80600": self.gv_80600,
             "uiid1": self.uiid1,
-            "gv_80700": self.gv_80700,
             "uby2": self.uby2,
             "restart_pack": self.restart_pack,
-            "gv_81000": self.gv_81000,
             "medals": self.medals.serialize(),
             "ushbd1": self.ushbd1,
             "uidiid1": self.uidiid1,
             "uiid2": self.uiid2,
-            "gv_90000": self.gv_90000,
             "ush2": self.ush2,
             "ush3": self.ush3,
             "ui15": self.ui15,
             "ud1": self.ud1,
-            "gv_90100": self.gv_90100,
             "utl1": self.utl1,
             "uidd1": self.uidd1,
             "gauntlets": self.gauntlets.serialize(),
-            "gv_90300": self.gv_90300,
             "gauntlets_2": self.gauntlets_2.serialize(),
             "enigma": self.enigma.serialize(),
             "cleared_slots": self.cleared_slots.serialize(),
-            "gv_90400": self.gv_90400,
             "collab_gauntlets": self.collab_gauntlets.serialize(),
             "ub8": self.ub8,
             "ud2": self.ud2,
@@ -2595,19 +2592,14 @@ class SaveFile:
             "uiid3": self.uiid3,
             "uidd2": self.uidd2,
             "uidd3": self.uidd3,
-            "gv_90500": self.gv_90500,
             "talent_orbs": self.talent_orbs.serialize(),
             "uidiid2": self.uidiid2,
             "ub10": self.ub10,
-            "gv_90700": self.gv_90700,
             "uil7": self.uil7,
             "ubl2": self.ubl2,
-            "gv_90800": self.gv_90800,
             "cat_shrine": self.cat_shrine.serialize(),
             "ud6": self.ud6,
             "ud7": self.ud7,
-            "gv_90900": self.gv_90900,
-            "gv_91000": self.gv_91000,
             "legend_tickets": self.legend_tickets,
             "uiil1": self.uiil1,
             "ub11": self.ub11,
@@ -2618,22 +2610,16 @@ class SaveFile:
             "uby5": self.uby5,
             "ud8": self.ud8,
             "ud9": self.ud9,
-            "gv_100000": self.gv_100000,
             "date_int": self.date_int,
-            "gv_100100": self.gv_100100,
             "utl2": self.utl2,
-            "gv_100300": self.gv_100300,
             "uil8": self.uil8,
             "two_battle_lines": self.two_battle_lines,
-            "gv_100400": self.gv_100400,
             "ud10": self.ud10,
             "platinum_shards": self.platinum_shards,
             "ub15": self.ub15,
-            "gv_100600": self.gv_100600,
             "ushbd2": self.ushbd2,
             "ushdshd": self.ushdshd,
             "ushid": self.ushid,
-            "gv_100700": self.gv_100700,
             "aku": self.aku.serialize(),
             "ub16": self.ub16,
             "ub17": self.ub17,
@@ -2641,23 +2627,16 @@ class SaveFile:
             "ushdd": self.ushdd,
             "ushdd2": self.ushdd2,
             "ub18": self.ub18,
-            "gv_100900": self.gv_100900,
             "uby6": self.uby6,
-            "gv_101000": self.gv_101000,
             "uidtii": self.uidtii,
-            "gv_110000": self.gv_110000,
             "behemoth_culling": self.behemoth_culling.serialize(),
             "ub19": self.ub19,
-            "gv_110500": self.gv_110500,
             "ub20": self.ub20,
-            "gv_110600": self.gv_110600,
             "uidtff": self.uidtff,
-            "gv_110700": self.gv_110700,
             "ub21": self.ub21,
             "dojo_3x_speed": self.dojo_3x_speed,
             "ub22": self.ub22,
             "ub23": self.ub23,
-            "gv_110800": self.gv_110800,
             "ui17": self.ui17,
             "ush4": self.ush4,
             "uby7": self.uby7,
@@ -2685,43 +2664,29 @@ class SaveFile:
             "ushl4": self.ushl4,
             "ubl3": self.ubl3,
             "labyrinth_medals": self.labyrinth_medals,
-            "gv_111000": self.gv_111000,
             "zero_legends": self.zero_legends.serialize(),
             "uby12": self.uby12,
-            "gv_120000": self.gv_120000,
             "ushl6": self.ushl6,
-            "gv_120100": self.gv_120100,
             "ub31": self.ub31,
             "ush9": self.ush9,
             "ushshd": self.ushshd,
-            "gv_120200": self.gv_120200,
             "ud11": self.ud11,
             "ud12": self.ud12,
-            "gv_120400": self.gv_120400,
             "ub32": self.ub32,
             "ub33": self.ub33,
             "ub34": self.ub34,
             "ui21": self.ui21,
             "uby13": self.uby13,
-            "gv_120500": self.gv_120500,
             "sound_effects_volume": self.sound_effects_volume,
             "background_music_volume": self.background_music_volume,
-            "gv_120600": self.gv_120600,
             "ustl1": self.ustl1,
-            "gv_120700": self.gv_120700,
-            "gv_130000": self.gv_130000,
             "utl3": self.utl3,
-            "gv_130100": self.gv_130100,
             "ustid1": self.ustid1,
-            "gv_130301": self.gv_130301,
             "ud13": self.ud13,
             "ud14": self.ud14,
-            "gv_130400": self.gv_130400,
             "utl4": self.utl4,
-            "gv_130500": self.gv_130500,
             "uby14": self.uby14,
             "ush12": self.ush12,
-            "gv_130600": self.gv_130600,
             "ud15": self.ud15,
             "uby15": self.uby15,
             "uby16": self.uby16,
@@ -2731,7 +2696,6 @@ class SaveFile:
             "uby19": self.uby19,
             "ud16": self.ud16,
             "ushd1": self.ushd1,
-            "gv_130700": self.gv_130700,
             "ui22": self.ui22,
             "ud17": self.ud17,
             "uby20": self.uby20,
@@ -2741,20 +2705,16 @@ class SaveFile:
             "ub35": self.ub35,
             "ud18": self.ud18,
             "ushd2": self.ushd2,
-            "gv_140000": self.gv_140000,
             "uby21": self.uby21,
-            "gv_140100": self.gv_140100,
             "uil10": self.uil10,
             "uid1": self.uid1,
             "hundred_million_ticket": self.hundred_million_ticket,
-            "gv_140200": self.gv_140200,
             "uil11": self.uil11,
             "ub36": self.ub36,
             "uil12": self.uil12,
             "ui23": self.ui23,
             "uil13": self.uil13,
             "ub37": self.ub37,
-            "gv_140300": self.gv_140300,
             "remaining_data": base64.b64encode(self.remaining_data).decode("utf-8"),
         }
         return data
@@ -2887,17 +2847,12 @@ class SaveFile:
         save_file.has_account = data.get("has_account", False)
         save_file.backup_state = data.get("backup_state", 0)
         save_file.ub2 = data.get("ub2", False)
-        save_file.gv_44 = data.get("gv_44", 44)
         save_file.itf1_complete = data.get("itf1_complete", 0)
         save_file.title_chapter_bg = data.get("title_chapter_bg", 0)
         save_file.combo_unlocks = data.get("combo_unlocks", [])
         save_file.combo_unlocked_10k_ur = data.get("combo_unlocked_10k_ur", False)
-        save_file.gv_45 = data.get("gv_45", 45)
-        save_file.gv_46 = data.get("gv_46", 46)
-        save_file.event_capsules_1 = data.get("event_capsules_1", [])
-        save_file.event_capsules_2 = data.get("event_capsules_2", [])
-        save_file.gv_47 = data.get("gv_47", 47)
-        save_file.gv_48 = data.get("gv_48", 48)
+        save_file.event_capsules = data.get("event_capsules", [])
+        save_file.event_capsules_counter = data.get("event_capsules_counter", [])
         save_file.m_dGetTimeSave3 = data.get("m_dGetTimeSave3", 0.0)
         save_file.gatya_seen_lucky_drops = data.get("gatya_seen_lucky_drops", [])
         save_file.show_ban_message = data.get("banned", False)
@@ -2907,10 +2862,6 @@ class SaveFile:
         save_file.next_week_timestamp = data.get("next_week_timestamp", 0.0)
         save_file.catfood_beginner_expired = data.get("catfood_beginner_expired", [])
         save_file.rank_up_sale_value = data.get("rank_up_sale_value", 0)
-        save_file.gv_49 = data.get("gv_49", 49)
-        save_file.gv_50 = data.get("gv_50", 50)
-        save_file.gv_51 = data.get("gv_51", 51)
-        save_file.gv_52 = data.get("gv_52", 52)
         save_file.time_since_time_check_cumulative = data.get(
             "time_since_time_check_cumulative", 0.0
         )
@@ -2928,8 +2879,6 @@ class SaveFile:
         save_file.gamatoto = core.Gamatoto.deserialize(data.get("gamatoto", {}))
         save_file.unlock_popups_6 = data.get("unlock_popups_6", [])
         save_file.ex_stages = core.ExChapters.deserialize(data.get("ex_stages", []))
-        save_file.gv_53 = data.get("gv_53", 53)
-        save_file.gv_54 = data.get("gv_54", 54)
         save_file.item_pack = core.ItemPack.deserialize(data.get("item_pack", {}))
         save_file.platinum_tickets = data.get("platinum_tickets", 0)
         save_file.logins = core.LoginBonus.deserialize(data.get("logins", {}))
@@ -2941,14 +2890,10 @@ class SaveFile:
         save_file.ui12 = data.get("ui12", 0)
         save_file.ui13 = data.get("ui13", 0)
         save_file.ui14 = data.get("ui14", 0)
-        save_file.gv_55 = data.get("gv_55", 55)
         save_file.ub3 = data.get("ub3", False)
         save_file.backup_frame = data.get("backup_frame", 0)
-        save_file.gv_56 = data.get("gv_56", 56)
         save_file.ub4 = data.get("ub4", False)
-        save_file.gv_57 = data.get("gv_57", 57)
         save_file.dojo = core.Dojo.deserialize(data.get("dojo", {}))
-        save_file.gv_58 = data.get("gv_58", 58)
         save_file.last_checked_zombie_time = data.get("last_checked_zombie_time", 0.0)
         save_file.outbreaks = core.Outbreaks.deserialize(data.get("outbreaks", {}))
         save_file.scheme_items = core.SchemeItems.deserialize(
@@ -2956,82 +2901,58 @@ class SaveFile:
         )
         save_file.first_locks = data.get("first_locks", {})
         save_file.energy_penalty_timestamp = data.get("energy_penalty_timestamp", 0.0)
-        save_file.gv_60 = data.get("gv_60", 60)
         save_file.shown_maxcollab_mg = data.get("shown_maxcollab_mg", False)
-        save_file.gv_61 = data.get("gv_61", 61)
         save_file.unlock_popups = core.UnlockPopups.deserialize(
             data.get("unlock_popups", {})
         )
-        save_file.gv_63 = data.get("gv_63", 63)
         save_file.ototo = core.Ototo.deserialize(data.get("ototo", {}))
         save_file.last_checked_castle_time = data.get("last_checked_castle_time", 0.0)
-        save_file.gv_64 = data.get("gv_64", 64)
         save_file.beacon_base = core.BeaconEventListScene.deserialize(
             data.get("beacon_base", {})
         )
-        save_file.gv_65 = data.get("gv_65", 65)
         save_file.tower = core.TowerChapters.deserialize(data.get("tower", {}))
         save_file.missions = core.Missions.deserialize(data.get("missions", {}))
-        save_file.gv_66 = data.get("gv_66", 66)
         save_file.challenge = core.ChallengeChapters.deserialize(
             data.get("challenge", {})
         )
-        save_file.gv_67 = data.get("gv_67", 67)
         save_file.event_update_flags = data.get("event_update_flags", [])
-        save_file.gv_68 = data.get("gv_68", 68)
         save_file.cotc_1_complete = data.get("cotc_1_complete", False)
-        save_file.gv_69 = data.get("gv_69", 69)
-        save_file.gv_71 = data.get("gv_71", 71)
         save_file.map_resets = core.MapResets.deserialize(data.get("map_resets", {}))
-        save_file.gv_72 = data.get("gv_72", 72)
         save_file.uncanny = core.UncannyChapters.deserialize(data.get("uncanny", {}))
-        save_file.gv_76 = data.get("gv_76", 76)
         save_file.uncanny_2 = core.UncannyChapters.deserialize(
             data.get("uncanny_2", {})
         )
-        save_file.event_capsules_3 = data.get("event_capsules_3", [])
+        save_file.lucky_tickets = data.get("lucky_tickets", [])
         save_file.ub5 = data.get("ub5", False)
-        save_file.gv_77 = data.get("gv_77", 77)
         save_file.np = data.get("np", 0)
         save_file.ub6 = data.get("ub6", False)
-        save_file.gv_80000 = data.get("gv_80000", 80000)
         save_file.ub7 = data.get("ub7", False)
         save_file.leadership = data.get("leadership", 0)
-        save_file.gv_80200 = data.get("gv_80200", 80200)
         save_file.filibuster_stage_id = data.get("filibuster_stage_id", 0)
         save_file.filibuster_stage_enabled = data.get("filibuster_stage_enabled", False)
-        save_file.gv_80300 = data.get("gv_80300", 80300)
         save_file.uil5 = data.get("uil5", [])
-        save_file.gv_80500 = data.get("gv_80500", 80500)
         save_file.uil6 = data.get("uil6", [])
         save_file.legend_quest = core.LegendQuestChapters.deserialize(
             data.get("legend_quest", {})
         )
         save_file.ush1 = data.get("ush1", 0)
         save_file.uby1 = data.get("uby1", 0)
-        save_file.gv_80600 = data.get("gv_80600", 80600)
         save_file.uiid1 = data.get("uiid1", {})
-        save_file.gv_80700 = data.get("gv_80700", 80700)
         save_file.uby2 = data.get("uby2", 0)
-        save_file.gv_100600 = data.get("gv_100600", 100600)
         save_file.restart_pack = data.get("restart_pack", 0)
-        save_file.gv_81000 = data.get("gv_81000", 81000)
         save_file.medals = core.Medals.deserialize(data.get("medals", {}))
         save_file.ushbd1 = data.get("ushbd1", {})
         save_file.uidiid1 = data.get("uidiid1", {})
         save_file.uiid2 = data.get("uiid2", {})
-        save_file.gv_90000 = data.get("gv_90000", 90000)
         save_file.ush2 = data.get("ush2", 0)
         save_file.ush3 = data.get("ush3", 0)
         save_file.ui15 = data.get("ui15", 0)
         save_file.ud1 = data.get("ud1", 0.0)
-        save_file.gv_90100 = data.get("gv_90100", 90100)
         save_file.utl1 = data.get("utl1", [])
         save_file.uidd1 = data.get("uidd1", {})
         save_file.gauntlets = core.GauntletChapters.deserialize(
             data.get("gauntlets", {})
         )
-        save_file.gv_90300 = data.get("gv_90300", 90300)
         save_file.gauntlets_2 = core.GauntletChapters.deserialize(
             data.get("gauntlets_2", {})
         )
@@ -3039,7 +2960,6 @@ class SaveFile:
         save_file.cleared_slots = core.ClearedSlots.deserialize(
             data.get("cleared_slots", {})
         )
-        save_file.gv_90400 = data.get("gv_90400", 90400)
         save_file.collab_gauntlets = core.GauntletChapters.deserialize(
             data.get("collab_gauntlets", {})
         )
@@ -3054,19 +2974,14 @@ class SaveFile:
         save_file.uiid3 = data.get("uiid3", {})
         save_file.uidd2 = data.get("uidd2", {})
         save_file.uidd3 = data.get("uidd3", {})
-        save_file.gv_90500 = data.get("gv_90500", 90500)
         save_file.talent_orbs = core.TalentOrbs.deserialize(data.get("talent_orbs", {}))
         save_file.uidiid2 = data.get("uidiid2", {})
         save_file.ub10 = data.get("ub10", False)
-        save_file.gv_90700 = data.get("gv_90700", 90700)
         save_file.uil7 = data.get("uil7", [])
         save_file.ubl2 = data.get("ubl2", [])
-        save_file.gv_90800 = data.get("gv_90800", 90800)
         save_file.cat_shrine = core.CatShrine.deserialize(data.get("cat_shrine", {}))
         save_file.ud6 = data.get("ud6", 0.0)
         save_file.ud7 = data.get("ud7", 0)
-        save_file.gv_90900 = data.get("gv_90900", 90900)
-        save_file.gv_91000 = data.get("gv_91000", 91000)
         save_file.legend_tickets = data.get("legend_tickets", 0)
         save_file.uiil1 = data.get("uiil1", [])
         save_file.ub11 = data.get("ub11", False)
@@ -3077,22 +2992,16 @@ class SaveFile:
         save_file.uby5 = data.get("uby5", 0)
         save_file.ud8 = data.get("ud8", 0.0)
         save_file.ud9 = data.get("ud9", 0.0)
-        save_file.gv_100000 = data.get("gv_100000", 100000)
         save_file.date_int = data.get("date_int", 0)
-        save_file.gv_100100 = data.get("gv_100100", 100100)
         save_file.utl2 = data.get("utl2", [(False, False, 0, 0.0, 0.0)] * 6)
-        save_file.gv_100300 = data.get("gv_100300", 100300)
         save_file.uil8 = data.get("uil8", [])
         save_file.two_battle_lines = data.get("two_battle_lines", False)
-        save_file.gv_100400 = data.get("gv_100400", 100400)
         save_file.ud10 = data.get("ud10", 0.0)
         save_file.platinum_shards = data.get("platinum_shards", 0)
         save_file.ub15 = data.get("ub15", False)
-        save_file.gv_100600 = data.get("gv_100600", 100600)
         save_file.ushbd2 = data.get("ushbd2", {})
         save_file.ushdshd = data.get("ushdshd", {})
         save_file.ushid = data.get("ushid", {})
-        save_file.gv_100700 = data.get("gv_100700", 100700)
         save_file.aku = core.AkuChapters.deserialize(data.get("aku", {}))
         save_file.ub16 = data.get("ub16", False)
         save_file.ub17 = data.get("ub17", False)
@@ -3100,25 +3009,18 @@ class SaveFile:
         save_file.ushdd = data.get("ushdd", {})
         save_file.ushdd2 = data.get("ushdd2", {})
         save_file.ub18 = data.get("ub18", False)
-        save_file.gv_100900 = data.get("gv_100900", 100900)
         save_file.uby6 = data.get("uby6", 0)
-        save_file.gv_101000 = data.get("gv_101000", 101000)
         save_file.uidtii = data.get("uidtii", {})
-        save_file.gv_110000 = data.get("gv_110000", 110000)
         save_file.behemoth_culling = core.GauntletChapters.deserialize(
             data.get("behemoth_culling", {})
         )
         save_file.ub19 = data.get("ub19", False)
-        save_file.gv_110500 = data.get("gv_110500", 110500)
         save_file.ub20 = data.get("ub20", False)
-        save_file.gv_110600 = data.get("gv_110600", 110600)
         save_file.uidtff = data.get("uidtff", {})
-        save_file.gv_110700 = data.get("gv_110700", 110700)
         save_file.ub21 = data.get("ub21", False)
         save_file.dojo_3x_speed = data.get("dojo_3x_speed", False)
         save_file.ub22 = data.get("ub22", False)
         save_file.ub23 = data.get("ub23", False)
-        save_file.gv_110800 = data.get("gv_110800", 110800)
         save_file.ui17 = data.get("ui17", 0)
         save_file.ush4 = data.get("ush4", 0)
         save_file.uby7 = data.get("uby7", 0)
@@ -3146,45 +3048,31 @@ class SaveFile:
         save_file.ushl4 = data.get("ushl4", [])
         save_file.ubl3 = data.get("ubl3", [])
         save_file.labyrinth_medals = data.get("labyrinth_medals", [])
-        save_file.gv_111000 = data.get("gv_111000", 111000)
         save_file.zero_legends = core.ZeroLegendsChapters.deserialize(
             data.get("zero_legends", [])
         )
         save_file.uby12 = data.get("uby12", 0)
-        save_file.gv_120000 = data.get("gv_120000", 120000)
         save_file.ushl6 = data.get("ushl6", [])
-        save_file.gv_120100 = data.get("gv_120100", 120100)
         save_file.ub31 = data.get("ub31", False)
         save_file.ush9 = data.get("ush9", 0)
         save_file.ushshd = data.get("ushshd", {})
-        save_file.gv_120200 = data.get("gv_120200", 120200)
         save_file.ud11 = data.get("ud11", 0.0)
         save_file.ud12 = data.get("ud12", 0.0)
-        save_file.gv_120400 = data.get("gv_120400", 120400)
         save_file.ub32 = data.get("ub32", False)
         save_file.ub33 = data.get("ub33", False)
         save_file.ub34 = data.get("ub34", False)
         save_file.ui21 = data.get("ui21", 0)
         save_file.uby13 = data.get("uby13", 0)
-        save_file.gv_120500 = data.get("gv_120500", 120500)
         save_file.sound_effects_volume = data.get("sound_effects_volume", 0)
         save_file.background_music_volume = data.get("background_music_volume", 0)
-        save_file.gv_120600 = data.get("gv_120600", 120600)
         save_file.ustl1 = data.get("ustl1", [])
-        save_file.gv_120700 = data.get("gv_120700", 120700)
-        save_file.gv_130000 = data.get("gv_130000", 130000)
         save_file.utl3 = data.get("utl3", [])
-        save_file.gv_130100 = data.get("gv_130100", 130100)
         save_file.ustid1 = data.get("ustid1", {})
-        save_file.gv_130301 = data.get("gv_130301", 130301)
         save_file.ud13 = data.get("ud13", 0.0)
         save_file.ud14 = data.get("ud14", 0.0)
-        save_file.gv_130400 = data.get("gv_130400", 130400)
         save_file.utl4 = data.get("utl4", [])
-        save_file.gv_130500 = data.get("gv_130500", 130500)
         save_file.uby14 = data.get("uby14", 0)
         save_file.ush12 = data.get("ush12", 0)
-        save_file.gv_130600 = data.get("gv_130600", 130600)
         save_file.ud15 = data.get("ud15", 0.0)
         save_file.uby15 = data.get("uby15", 0)
         save_file.uby16 = data.get("uby16", 0)
@@ -3194,7 +3082,6 @@ class SaveFile:
         save_file.uby19 = data.get("uby19", 0)
         save_file.ud16 = data.get("ud16", 0.0)
         save_file.ushd1 = data.get("ushd1", {})
-        save_file.gv_130700 = data.get("gv_130700", 130700)
         save_file.ui22 = data.get("ui22", 0)
         save_file.ud17 = data.get("ud17", 0.0)
         save_file.uby20 = data.get("uby20", 0)
@@ -3204,18 +3091,15 @@ class SaveFile:
         save_file.ub35 = data.get("ub35", False)
         save_file.ud18 = data.get("ud18", 0.0)
         save_file.ushd2 = data.get("ushd2", {})
-        save_file.gv_140100 = data.get("140100", 140100)
         save_file.uil10 = data.get("uil10", [])
         save_file.uid1 = data.get("uid1", {})
         save_file.hundred_million_ticket = data.get("hundred_million_ticket", 0)
-        save_file.gv_140200 = data.get("140200", 140200)
         save_file.uil11 = data.get("uil11", [])
         save_file.ub36 = data.get("ub36", False)
         save_file.uil12 = data.get("uil12", [])
         save_file.ui23 = data.get("ui23", 0)
         save_file.uil13 = data.get("uil13", [])
         save_file.ub37 = data.get("ub37", False)
-        save_file.gv_140300 = data.get("140300", 140300)
 
         save_file.remaining_data = base64.b64decode(data.get("remaining_data", ""))
 
@@ -3306,84 +3190,6 @@ class SaveFile:
         self.ui21 = 0
         self.ui22 = 0
         self.ui23 = 0
-
-        self.gv_44 = 44
-        self.gv_45 = 45
-        self.gv_46 = 46
-        self.gv_47 = 47
-        self.gv_48 = 48
-        self.gv_49 = 49
-        self.gv_50 = 50
-        self.gv_51 = 51
-        self.gv_52 = 52
-        self.gv_53 = 53
-        self.gv_54 = 54
-        self.gv_55 = 55
-        self.gv_56 = 56
-        self.gv_57 = 57
-        self.gv_58 = 58
-        self.gv_60 = 60
-        self.gv_61 = 61
-        self.gv_63 = 63
-        self.gv_64 = 64
-        self.gv_65 = 65
-        self.gv_66 = 66
-        self.gv_67 = 67
-        self.gv_68 = 68
-        self.gv_69 = 69
-        self.gv_71 = 71
-        self.gv_72 = 72
-        self.gv_76 = 76
-        self.gv_77 = 77
-        self.gv_80000 = 80000
-        self.gv_80200 = 80200
-        self.gv_80300 = 80300
-        self.gv_80500 = 80500
-        self.gv_80600 = 80600
-        self.gv_80700 = 80700
-        self.gv_81000 = 81000
-        self.gv_90000 = 90000
-        self.gv_90100 = 90100
-        self.gv_90200 = 90200
-        self.gv_90300 = 90300
-        self.gv_90400 = 90400
-        self.gv_90500 = 90500
-        self.gv_90700 = 90700
-        self.gv_90800 = 90800
-        self.gv_90900 = 90900
-        self.gv_91000 = 91000
-        self.gv_100000 = 100000
-        self.gv_100100 = 100100
-        self.gv_100300 = 100300
-        self.gv_100400 = 100400
-        self.gv_100600 = 100600
-        self.gv_100700 = 100700
-        self.gv_100900 = 100900
-        self.gv_101000 = 101000
-        self.gv_110000 = 110000
-        self.gv_110500 = 110500
-        self.gv_110600 = 110600
-        self.gv_110700 = 110700
-        self.gv_110800 = 110800
-        self.gv_111000 = 111000
-        self.gv_120000 = 120000
-        self.gv_120100 = 120100
-        self.gv_120200 = 120200
-        self.gv_120400 = 120400
-        self.gv_120500 = 120500
-        self.gv_120600 = 120600
-        self.gv_120700 = 120700
-        self.gv_130000 = 130000
-        self.gv_130100 = 130100
-        self.gv_130301 = 130301
-        self.gv_130400 = 130400
-        self.gv_130500 = 130500
-        self.gv_130600 = 130600
-        self.gv_130700 = 130700
-        self.gv_140000 = 140000
-        self.gv_140100 = 140100
-        self.gv_140200 = 140200
-        self.gv_140300 = 140300
 
         self.catfood = 0
         self.current_energy = 0
@@ -3548,11 +3354,11 @@ class SaveFile:
         self.order_ids = []
         self.combo_unlocks = []
         if gv < 34:
-            self.event_capsules_1 = [0] * 100
-            self.event_capsules_2 = [0] * 100
+            self.event_capsules = [0] * 100
+            self.event_capsules_counter = [0] * 100
         else:
-            self.event_capsules_1 = []
-            self.event_capsules_2 = []
+            self.event_capsules = []
+            self.event_capsules_counter = []
 
         if gv < 26:
             self.gatya_seen_lucky_drops = [0] * 44
@@ -3566,7 +3372,7 @@ class SaveFile:
         self.unlock_popups_6 = []
         self.reset_item_reward_flags = []
         self.announcements: list[tuple[int, int]] = [(0, 0)] * 16
-        self.event_capsules_3 = []
+        self.lucky_tickets = []
         self.labyrinth_medals = []
 
         self.save_data_4_hash = ""
@@ -3712,90 +3518,6 @@ class SaveFile:
             except IndexError:
                 self.data.write_bool(False)
             self.dst_index += 1
-
-    def verify_load(self, raise_error: bool = False):
-        try:
-            assert self.gv_44 == 44
-            assert self.gv_45 == 45
-            assert self.gv_46 == 46
-            assert self.gv_47 == 47
-            assert self.gv_48 == 48
-            assert self.gv_49 == 49
-            assert self.gv_50 == 50
-            assert self.gv_51 == 51
-            assert self.gv_52 == 52
-            assert self.gv_53 == 53
-            assert self.gv_54 == 54
-            assert self.gv_55 == 55
-            assert self.gv_56 == 56
-            assert self.gv_57 == 57
-            assert self.gv_58 == 58
-            assert self.gv_60 == 60
-            assert self.gv_61 == 61
-            assert self.gv_63 == 63
-            assert self.gv_64 == 64
-            assert self.gv_65 == 65
-            assert self.gv_66 == 66
-            assert self.gv_67 == 67
-            assert self.gv_68 == 68
-            assert self.gv_69 == 69
-            assert self.gv_71 == 71
-            assert self.gv_72 == 72
-            assert self.gv_76 == 76
-            assert self.gv_77 == 77
-            assert self.gv_80000 == 80000
-            assert self.gv_80200 == 80200
-            assert self.gv_80300 == 80300
-            assert self.gv_80500 == 80500
-            assert self.gv_80600 == 80600
-            assert self.gv_80700 == 80700
-            assert self.gv_81000 == 81000
-            assert self.gv_90000 == 90000
-            assert self.gv_90100 == 90100
-            assert self.gv_90300 == 90300
-            assert self.gv_90400 == 90400
-            assert self.gv_90500 == 90500
-            assert self.gv_90700 == 90700
-            assert self.gv_90800 == 90800
-            assert self.gv_90900 == 90900
-            assert self.gv_91000 == 91000
-            assert self.gv_100000 == 100000
-            assert self.gv_100100 == 100100
-            assert self.gv_100300 == 100300
-            assert self.gv_100400 == 100400
-            assert self.gv_100600 == 100600
-            assert self.gv_100700 == 100700
-            assert self.gv_100900 == 100900
-            assert self.gv_101000 == 101000
-            assert self.gv_110000 == 110000
-            assert self.gv_110500 == 110500
-            assert self.gv_110600 == 110600
-            assert self.gv_110700 == 110700
-            assert self.gv_110800 == 110800
-            assert self.gv_111000 == 111000
-            assert self.gv_120000 == 120000
-            assert self.gv_120100 == 120100
-            assert self.gv_120200 == 120200
-            assert self.gv_120400 == 120400
-            assert self.gv_120500 == 120500
-            assert self.gv_120600 == 120600
-            assert self.gv_120700 == 120700
-            assert self.gv_130000 == 130000
-            assert self.gv_130100 == 130100
-            assert self.gv_130301 == 130301
-            assert self.gv_130400 == 130400
-            assert self.gv_130500 == 130500
-            assert self.gv_130600 == 130600
-            assert self.gv_130700 == 130700
-            assert self.gv_140000 == 140000
-            assert self.gv_140100 == 140100
-            assert self.gv_140200 == 140200
-            assert self.gv_140300 == 140300
-        except AssertionError as e:
-            if raise_error:
-                raise AssertionError(e) from e
-            return False
-        return True
 
     def calculate_user_rank(self):
         user_rank = 0

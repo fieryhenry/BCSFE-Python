@@ -2,6 +2,7 @@ from __future__ import annotations
 from bcsfe import core
 from bcsfe.core import io
 from bcsfe.cli import main, color, dialog_creator, server_cli
+from bcsfe.core.io.config import ConfigKey
 
 
 class SaveManagement:
@@ -108,6 +109,55 @@ class SaveManagement:
             color.ColoredText.localize("create_new_account_fail")
 
     @staticmethod
+    def waydroid_push(save_file: core.SaveFile) -> core.WayDroidHandler | None:
+        SaveManagement.save_save(save_file)
+        try:
+            waydroid_handler = core.WayDroidHandler()
+        except core.AdbNotInstalled:
+            core.AdbHandler.display_no_adb_error()
+            return None
+        except core.io.waydroid.WayDroidNotInstalledError as e:
+            core.WayDroidHandler.display_waydroid_not_installed(e)
+            return None
+
+        if not waydroid_handler.adb_handler.select_device():
+            return None
+
+        if save_file.used_storage and save_file.package_name is not None:
+            waydroid_handler.set_package_name(save_file.package_name)
+        else:
+            packages = waydroid_handler.get_battlecats_packages()
+            package_name = SaveManagement.select_package_name(packages)
+            if package_name is None:
+                color.ColoredText.localize("no_package_name_error")
+                return waydroid_handler
+            waydroid_handler.set_package_name(package_name)
+
+        if save_file.save_path is None:
+            return waydroid_handler
+
+        result = waydroid_handler.load_battlecats_save(save_file.save_path)
+        if result.success:
+            color.ColoredText.localize("waydroid_push_success")
+        else:
+            color.ColoredText.localize("waydroid_push_fail", error=result.result)
+
+        return waydroid_handler
+
+    @staticmethod
+    def waydroid_push_rerun(save_file: core.SaveFile) -> core.AdbHandler | None:
+        waydroid_handler = SaveManagement.waydroid_push(save_file)
+        if not waydroid_handler:
+            return
+        if waydroid_handler.package_name is None:
+            return
+        result = waydroid_handler.rerun_game()
+        if result.success:
+            color.ColoredText.localize("waydroid_rerun_success")
+        else:
+            color.ColoredText.localize("waydroid_rerun_fail", error=result.result)
+
+    @staticmethod
     def adb_push(save_file: core.SaveFile) -> core.AdbHandler | None:
         """Push the save file to the device.
 
@@ -185,9 +235,7 @@ class SaveManagement:
         Args:
             save_file (core.SaveFile): The save file to initialize.
         """
-        confirm = dialog_creator.YesNoInput().get_input_once(
-            "init_save_confirm"
-        )
+        confirm = dialog_creator.YesNoInput().get_input_once("init_save_confirm")
         if not confirm:
             return
         save_file.init_save(save_file.game_version)
@@ -215,9 +263,7 @@ class SaveManagement:
             color.ColoredText.localize("upload_items_fail")
 
     @staticmethod
-    def upload_items_checker(
-        save_file: core.SaveFile, check_strict: bool = True
-    ):
+    def upload_items_checker(save_file: core.SaveFile, check_strict: bool = True):
         managed_items = core.BackupMetaData(save_file).get_managed_items()
         if not managed_items:
             return
@@ -252,10 +298,14 @@ class SaveManagement:
             options.append("update_external")
             options.append("exit")
 
+        use_waydroid = core.core_data.config.get_bool(ConfigKey.USE_WAYDROID)
+        if use_waydroid:
+            options[3] = "waydroid_pull_save"
+
         root_handler = io.root_handler.RootHandler()
 
         if root_handler.is_android():
-            options[2] = "root_storage_pull_save"
+            options[3] = "root_storage_pull_save"
 
         choice = dialog_creator.ChoiceInput(
             options, options, [], {}, "save_load_option", True
@@ -285,13 +335,25 @@ class SaveManagement:
         elif choice == 3:
             handler = root_handler
             if not root_handler.is_android():
-                try:
-                    handler = core.AdbHandler()
-                except core.AdbNotInstalled:
-                    core.AdbHandler.display_no_adb_error()
-                    return None
-                if not handler.select_device():
-                    return None
+                if use_waydroid:
+                    try:
+                        handler = core.WayDroidHandler()
+                    except core.AdbNotInstalled:
+                        core.AdbHandler.display_no_adb_error()
+                        return None
+                    except core.io.waydroid.WayDroidNotInstalledError as e:
+                        core.WayDroidHandler.display_waydroid_not_installed(e)
+                        return None
+                    if not handler.adb_handler.select_device():
+                        return None
+                else:
+                    try:
+                        handler = core.AdbHandler()
+                    except core.AdbNotInstalled:
+                        core.AdbHandler.display_no_adb_error()
+                        return None
+                    if not handler.select_device():
+                        return None
 
             package_names = handler.get_battlecats_packages()
 
@@ -303,22 +365,25 @@ class SaveManagement:
             if root_handler.is_android():
                 key = "storage_pulling"
             else:
-                key = "adb_pulling"
+                if use_waydroid:
+                    key = "waydroid_pulling"
+                else:
+                    key = "adb_pulling"
             color.ColoredText.localize(key, package_name=package_name)
             save_path, result = handler.save_locally()
             if save_path is None:
                 if root_handler.is_android():
-                    color.ColoredText.localize(
-                        "storage_pull_fail",
-                        package_name=package_name,
-                        error=result.result,
-                    )
+                    key = "storage_pull_fail"
                 else:
-                    color.ColoredText.localize(
-                        "adb_pull_fail",
-                        package_name=package_name,
-                        error=result.result,
-                    )
+                    if use_waydroid:
+                        key = "waydroid_pull_fail"
+                    else:
+                        key = "adb_pull_fail"
+                color.ColoredText.localize(
+                    key,
+                    package_name=package_name,
+                    error=result.result,
+                )
             else:
                 used_storage = True
         elif choice == 4:
@@ -361,9 +426,7 @@ class SaveManagement:
         color.ColoredText.localize("save_file_found", path=save_path)
 
         try:
-            save_file = core.SaveFile(
-                save_path.read(), cc, package_name=package_name
-            )
+            save_file = core.SaveFile(save_path.read(), cc, package_name=package_name)
         except core.CantDetectSaveCCError:
             color.ColoredText.localize("cant_detect_cc")
             cc = core.CountryCode.select()

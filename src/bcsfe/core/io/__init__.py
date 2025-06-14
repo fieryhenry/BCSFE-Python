@@ -11,6 +11,7 @@ from bcsfe.core.io import (
     root_handler,
     adb_handler,
     git_handler,
+    waydroid,
 )
 
 __all__ = [
@@ -26,4 +27,5 @@ __all__ = [
     "root_handler",
     "adb_handler",
     "git_handler",
+    "waydroid",
 ]

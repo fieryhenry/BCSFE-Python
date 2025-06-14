@@ -26,6 +26,7 @@ class ConfigKey(enum.Enum):
     USE_FILE_DIALOG = "use_file_dialog"
     ADB_PATH = "adb_path"
     IGNORE_PARSE_ERROR = "ignore_parse_error"
+    USE_WAYDROID = "use_waydroid"
 
 
 class Config:
@@ -76,6 +77,7 @@ class Config:
             ConfigKey.USE_FILE_DIALOG: True,
             ConfigKey.ADB_PATH: "adb",
             ConfigKey.IGNORE_PARSE_ERROR: False,
+            ConfigKey.USE_WAYDROID: False,
         }
         return initial_values
 

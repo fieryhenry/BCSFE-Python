@@ -101,6 +101,7 @@ from bcsfe.core.game.map.zero_legends import ZeroLegendsChapters
 from bcsfe.core.game.map.map_names import MapNames
 from bcsfe.core.game_version import GameVersion
 from bcsfe.core.io.adb_handler import AdbHandler, AdbNotInstalled
+from bcsfe.core.io.waydroid import WayDroidHandler
 from bcsfe.core.io.bc_csv import CSV, Delimeter, Row
 from bcsfe.core.io.command import Command, CommandResult
 from bcsfe.core.io.config import Config, ConfigKey
@@ -212,9 +213,7 @@ class CoreData:
             self.enemy_names = EnemyNames(save)
         return self.enemy_names
 
-    def get_rank_gift_descriptions(
-        self, save: SaveFile
-    ) -> RankGiftDescriptions:
+    def get_rank_gift_descriptions(self, save: SaveFile) -> RankGiftDescriptions:
         if self.rank_gift_descriptions is None:
             self.rank_gift_descriptions = RankGiftDescriptions(save)
         return self.rank_gift_descriptions
@@ -307,4 +306,5 @@ __all__ = [
     "SaveOrbs",
     "ConfigKey",
     "SpecialSkill",
+    "WayDroidHandler",
 ]

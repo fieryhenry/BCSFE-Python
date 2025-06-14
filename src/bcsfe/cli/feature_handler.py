@@ -10,9 +10,7 @@ class FeatureHandler:
 
     def get_features(self):
         cat_features = {"cats": edits.cat_editor.CatEditor.edit_cats}
-        if core.core_data.config.get_bool(
-            core.ConfigKey.SEPARATE_CAT_EDIT_OPTIONS
-        ):
+        if core.core_data.config.get_bool(core.ConfigKey.SEPARATE_CAT_EDIT_OPTIONS):
             cat_features = {
                 "unlock_remove_cats": edits.cat_editor.CatEditor.unlock_remove_cats_run,
                 "upgrade_cats": edits.cat_editor.CatEditor.upgrade_cats_run,
@@ -34,6 +32,8 @@ class FeatureHandler:
                 "save_upload": save_management.SaveManagement.save_upload,
                 "save_save_file": save_management.SaveManagement.save_save_dialog,
                 "save_save_documents": save_management.SaveManagement.save_save_documents,
+                "waydroid_push": save_management.SaveManagement.waydroid_push,
+                "waydroid_push_rerun": save_management.SaveManagement.waydroid_push_rerun,
                 "adb_push": save_management.SaveManagement.adb_push,
                 "adb_push_rerun": save_management.SaveManagement.adb_push_rerun,
                 "export_save": save_management.SaveManagement.export_save,
@@ -152,13 +152,9 @@ class FeatureHandler:
             found_features = set()
 
         for feature_name_key, feature in features.items():
-            feature_name = core.core_data.local_manager.get_key(
-                feature_name_key
-            )
+            feature_name = core.core_data.local_manager.get_key(feature_name_key)
             path = (
-                f"{parent_path}.{feature_name_key}"
-                if parent_path
-                else feature_name_key
+                f"{parent_path}.{feature_name_key}" if parent_path else feature_name_key
             )
             if isinstance(feature, dict):
                 found_features.update(
@@ -181,13 +177,11 @@ class FeatureHandler:
         for feature_name in features:
             feature_names.append(feature_name.split(".")[-1])
         print()
-        dialog_creator.ListOutput(
-            feature_names, [], "features", {}
-        ).display_locale(remove_alias=True)
+        dialog_creator.ListOutput(feature_names, [], "features", {}).display_locale(
+            remove_alias=True
+        )
 
-    def select_features(
-        self, features: list[str], parent_path: str = ""
-    ) -> list[str]:
+    def select_features(self, features: list[str], parent_path: str = "") -> list[str]:
         if features != list(self.get_features().keys()):
             features.insert(0, "go_back")
         self.display_features(features)
@@ -270,11 +264,7 @@ class FeatureHandler:
                 core.core_data.game_data_getter = None  # reset game data getter so that if an old version is removed, it will download the new version
 
     def do_save_actions(self):
-        if core.core_data.config.get_bool(
-            core.ConfigKey.CLEAR_TUTORIAL_ON_LOAD
-        ):
+        if core.core_data.config.get_bool(core.ConfigKey.CLEAR_TUTORIAL_ON_LOAD):
             edits.clear_tutorial.clear_tutorial(self.save_file, False)
-        if core.core_data.config.get_bool(
-            core.ConfigKey.REMOVE_BAN_MESSAGE_ON_LOAD
-        ):
+        if core.core_data.config.get_bool(core.ConfigKey.REMOVE_BAN_MESSAGE_ON_LOAD):
             self.save_file.show_ban_message = False

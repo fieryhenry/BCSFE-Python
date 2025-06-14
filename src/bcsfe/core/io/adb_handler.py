@@ -13,16 +13,16 @@ class AdbNotInstalled(Exception):
 
 
 class AdbHandler(io.root_handler.RootHandler):
-    def __init__(self):
-        adb_path = core.Path(
-            core.core_data.config.get_str(core.ConfigKey.ADB_PATH)
-        )
+    def __init__(self, root: bool = True):
+        self.root_avail = root
+        adb_path = core.Path(core.core_data.config.get_str(core.ConfigKey.ADB_PATH))
         if not self.is_adb_installed(adb_path):
             raise AdbNotInstalled("Adb is not in PATH environment variable.")
         self.adb_path = adb_path
         self.start_server()
         self.device_id = None
         self.package_name = None
+        self.root_result = None
 
     @staticmethod
     def display_no_adb_error():
@@ -35,9 +35,12 @@ class AdbHandler(io.root_handler.RootHandler):
         return path.run("version").success
 
     def adb_root_success(self) -> bool:
+        if self.root_result is None:
+            return False
+        result = self.root_result.result.strip()
         return (
-            self.root_result.result.strip()
-            != "adbd cannot run as root in production builds"
+            result != "adbd cannot run as root in production builds"
+            and result != "not available in Waydroid"
         )
 
     def start_server(self) -> core.CommandResult:
@@ -56,7 +59,8 @@ class AdbHandler(io.root_handler.RootHandler):
 
     def set_device(self, device_id: str):
         self.device_id = device_id
-        self.root_result = self.root()
+        if self.root_avail:
+            self.root_result = self.root()
 
     def get_device(self) -> str:
         if self.device_id is None:
@@ -72,6 +76,13 @@ class AdbHandler(io.root_handler.RootHandler):
     def run_root_shell(self, command: str) -> core.CommandResult:
         return self.run_shell(f"su -c '{command}'")
 
+    def adb_pull_file(
+        self, device_path: core.Path, local_path: core.Path
+    ) -> core.CommandResult:
+        return self.adb_path.run(
+            f'-s {self.get_device()} pull "{device_path.to_str_forwards()}" "{local_path}"',
+        )
+
     def pull_file(
         self, device_path: core.Path, local_path: core.Path
     ) -> core.CommandResult:
@@ -83,9 +94,8 @@ class AdbHandler(io.root_handler.RootHandler):
                 return result
             device_path = core.Path("/sdcard/").add(device_path.basename())
 
-        result = self.adb_path.run(
-            f'-s {self.get_device()} pull "{device_path.to_str_forwards()}" "{local_path}"',
-        )
+        result = self.adb_pull_file(device_path, local_path)
+
         if not result.success:
             return result
         if not self.adb_root_success():
@@ -94,6 +104,13 @@ class AdbHandler(io.root_handler.RootHandler):
                 return result2
         return result
 
+    def adb_push_file(
+        self, local_path: core.Path, device_path: core.Path
+    ) -> core.CommandResult:
+        return self.adb_path.run(
+            f'-s {self.get_device()} push "{local_path}" "{device_path.to_str_forwards()}"'
+        )
+
     def push_file(
         self, local_path: core.Path, device_path: core.Path
     ) -> core.CommandResult:
@@ -101,9 +118,7 @@ class AdbHandler(io.root_handler.RootHandler):
         if not self.adb_root_success():
             device_path = core.Path("/sdcard/").add(device_path.basename())
 
-        result = self.adb_path.run(
-            f'-s {self.get_device()} push "{local_path}" "{device_path.to_str_forwards()}"'
-        )
+        result = self.adb_push_file(local_path, device_path)
         if not result.success:
             return result
         if not self.adb_root_success():
@@ -125,7 +140,7 @@ class AdbHandler(io.root_handler.RootHandler):
         return self.stat_file(device_path).success
 
     def get_battlecats_packages(self) -> list[str]:
-        cmd = "find /data/data/*/files/SAVE_DATA"
+        cmd = "find /data/data/ -name SAVE_DATA -mindepth 3 -maxdepth 3"
         result = self.run_root_shell(cmd)
         if not result.success:
             return []

@@ -61,9 +61,7 @@ class Path:
         else:
             raise OSError("Unknown OS")
 
-    def run(
-        self, arg: str = "", display_output: bool = False
-    ) -> core.CommandResult:
+    def run(self, arg: str = "", display_output: bool = False) -> core.CommandResult:
         cmd_text = self.path + " " + arg
         cmd = core.Command(cmd_text, display_output=display_output)
         return cmd.run()
@@ -156,6 +154,7 @@ class Path:
                 self.copy_tree(target)
             else:
                 try:
+                    target.parent().generate_dirs()
                     shutil.copy(self.path, target.path)
                 except shutil.SameFileError:
                     pass
@@ -169,6 +168,7 @@ class Path:
         if target.exists():
             target.remove_tree()
         if self.exists():
+            target.parent().generate_dirs()
             shutil.copytree(self.path, target.path)
 
     def read(self, create: bool = False) -> core.Data:

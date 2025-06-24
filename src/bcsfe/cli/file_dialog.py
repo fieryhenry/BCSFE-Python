@@ -49,7 +49,7 @@ class FileDialog:
             files = [file for file in files if file.get_extension() != "json"]
 
         files_str_ls = [file.basename() for file in files]
-        options = files_str_ls + ["other_dir", "another_path"]
+        options = files_str_ls + [core.localize("other_dir"), core.localize("another_path")]
 
         choice = dialog_creator.ChoiceInput.from_reduced(
             options,

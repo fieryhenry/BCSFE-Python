@@ -269,6 +269,10 @@ def print_no_internet():
 core_data = CoreData()
 core_data.init_data()
 
+def localize(key: str, escape: bool = True, **kwargs: Any) -> str:
+    return core_data.local_manager.get_key(
+        key, escape=escape, **kwargs
+    )
 
 __all__ = [
     "server",

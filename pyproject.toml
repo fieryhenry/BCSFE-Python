@@ -10,20 +10,21 @@ license = "GPL-3.0-or-later"
 readme = "README.md"
 requires-python = ">=3.9"
 classifiers = [
-    "Development Status :: 4 - Beta",
-    "Intended Audience :: End Users/Desktop",
-    "Topic :: Utilities",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
-    "Operating System :: OS Independent",
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: End Users/Desktop",
+  "Topic :: Utilities",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.9",
+  "Operating System :: OS Independent",
 ]
 dependencies = [
-    "aenum",
-    "colored==1.4.4",
-    "pyjwt",
-    "requests",
-    "pyyaml",
-    "beautifulsoup4",
+  "aenum",
+  "colored==1.4.4",
+  "pyjwt",
+  "requests",
+  "pyyaml",
+  "beautifulsoup4",
+  "argparse",
 ]
 dynamic = ["version"]
 keywords = ["battle cats", "save editor", "hacking"]

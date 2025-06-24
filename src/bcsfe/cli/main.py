@@ -28,7 +28,7 @@ class Main:
         """Wipe the temp save."""
         core.SaveFile.get_temp_path().remove()
 
-    def main(self):
+    def main(self, input_path: str | None = None):
         """Main function for the CLI."""
         self.wipe_temp_save()
         core.GameDataGetter.delete_old_versions()
@@ -36,7 +36,7 @@ class Main:
         print()
         self.print_start_text()
         while not self.exit:
-            self.load_save_options()
+            self.load_save_options(input_path)
 
     def check_update(self):
         """Check for updates."""
@@ -142,9 +142,9 @@ class Main:
         )
         print()
 
-    def load_save_options(self):
+    def load_save_options(self, input_path: str | None = None):
         """Load save options."""
-        save_file = save_management.SaveManagement.select_save(True)
+        save_file = save_management.SaveManagement.select_save(True, input_path)
         if save_file is None:
             return
         self.save_file = save_file

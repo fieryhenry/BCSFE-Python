@@ -2,6 +2,7 @@ from __future__ import annotations
 from bcsfe import core
 from bcsfe.core import io
 from bcsfe.cli import main, color, dialog_creator, server_cli
+from bcsfe.core.country_code import CountryCode
 from bcsfe.core.io.config import ConfigKey
 
 
@@ -275,7 +276,7 @@ class SaveManagement:
         SaveManagement.upload_items(save_file, check_strict)
 
     @staticmethod
-    def select_save(starting_options: bool = False) -> core.SaveFile | None:
+    def select_save(starting_options: bool = False, input_file: str | None = None) -> core.SaveFile | None:
         """Select a new save file.
 
         Args:
@@ -285,6 +286,9 @@ class SaveManagement:
         Returns:
             core.SaveFile | None: The save file.
         """
+        if input_file is not None:
+            return SaveManagement.load_save_file_path(core.Path(input_file), None, False, None)
+            
         options = [
             "download_save",
             "select_save_file",
@@ -423,6 +427,10 @@ class SaveManagement:
         if save_path is None or not save_path.exists():
             return None
 
+        return SaveManagement.load_save_file_path(save_path, cc, used_storage, package_name)
+
+    @staticmethod
+    def load_save_file_path(save_path: core.Path, cc: CountryCode | None, used_storage: bool, package_name: str | None = None) -> core.SaveFile | None:
         color.ColoredText.localize("save_file_found", path=save_path)
 
         try:

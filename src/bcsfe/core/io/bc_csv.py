@@ -98,6 +98,44 @@ class Row:
             self.index += 1
             return self.cells[self.index - 1]
 
+    def next(self):
+        return next(self)
+
+    def next_opt(self) -> Cell | None:
+        if self.done():
+            return None
+        return self.next()
+
+    def done(self):
+        return self.index >= len(self.cells)
+
+    def next_int(self) -> int:
+        return self.next().to_int()
+
+    def next_str(self) -> str:
+        return self.next().to_str()
+
+    def next_bool(self) -> bool:
+        return self.next().to_bool()
+
+    def next_int_opt(self) -> int | None:
+        val = self.next_opt()
+        if val is None:
+            return None
+        return val.to_int()
+
+    def next_str_opt(self) -> str | None:
+        val = self.next_opt()
+        if val is None:
+            return None
+        return val.to_str()
+
+    def next_bool_opt(self) -> bool | None:
+        val = self.next_opt()
+        if val is None:
+            return None
+        return val.to_bool()
+
     def to_str_list(self) -> list[str]:
         return [cell.to_str() for cell in self.cells]
 

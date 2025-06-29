@@ -33,6 +33,7 @@ class ServerHandler:
     backups_url = "https://nyanko-backups.ponosgames.com"
     aws_url = "https://nyanko-service-data-prd.s3.amazonaws.com"
     managed_item_url = "https://nyanko-managed-item.ponosgames.com"
+    events_url = "https://nyanko-events.ponosgames.com"
 
     def __init__(self, save_file: core.SaveFile, print: bool = True):
         self.save_file = save_file
@@ -643,3 +644,37 @@ class ServerHandler:
 
         core.BackupMetaData(self.save_file).remove_managed_items()
         return True
+    def download_event_data(self, filename: str) -> core.Data | None:
+        url = (
+            self.events_url
+            + f"/battlecats{self.save_file.cc.get_patching_code()}_production/{filename}"
+        )
+
+        auth_token = self.get_auth_token()
+
+        if auth_token is None:
+            return None
+
+        url += f"?jwt={auth_token}"
+
+        headers = {
+            "accept-encoding": "gzip",
+            "connection": "keep-alive",
+            "user-agent": "Dalvik/2.1.0 (Linux; U; Android 9; Pixel 2 Build/PQ3A.190801.002)",
+        }
+
+        resp = core.RequestHandler(url, headers).get()
+
+        if resp is None:
+            return None
+
+        return core.Data(resp.content)
+
+    def download_gatya_data(self) -> core.Data | None:
+        return self.download_event_data("gatya.tsv")
+
+    def download_item_data(self) -> core.Data | None:
+        return self.download_event_data("item.tsv")
+
+    def download_sale_data(self) -> core.Data | None:
+        return self.download_event_data("sale.tsv")

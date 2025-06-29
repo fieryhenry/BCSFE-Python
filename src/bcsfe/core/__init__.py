@@ -23,7 +23,12 @@ from bcsfe.core.crypto import Hash, HashAlgorithm, Hmac, NyankoSignature, Random
 from bcsfe.core.game.battle.battle_items import BattleItems
 from bcsfe.core.game.battle.cleared_slots import ClearedSlots
 from bcsfe.core.game.battle.slots import LineUps
-from bcsfe.core.game.battle.enemy import Enemy, EnemyNames
+from bcsfe.core.game.battle.enemy import (
+    Enemy,
+    EnemyNames,
+    EnemyDescriptions,
+    EnemyDictionary,
+)
 from bcsfe.core.game.catbase.beacon_base import BeaconEventListScene
 from bcsfe.core.game.catbase.cat import Cat, Cats, UnitBuy, TalentData
 from bcsfe.core.game.catbase.gatya import Gatya, GatyaInfos, GatyaDataSet
@@ -311,4 +316,6 @@ __all__ = [
     "ConfigKey",
     "SpecialSkill",
     "WayDroidHandler",
+    "EnemyDescriptions",
+    "EnemyDictionary",
 ]

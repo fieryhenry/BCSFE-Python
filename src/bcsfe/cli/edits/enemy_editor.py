@@ -3,6 +3,7 @@ from typing import Any
 from bcsfe import core
 from bcsfe.cli import color, dialog_creator
 from bcsfe.cli.edits.cat_editor import SelectMode
+from bcsfe.core.game.battle.enemy import EnemyNames
 
 
 class EnemyEditor:
@@ -25,9 +26,7 @@ class EnemyEditor:
         if not enemies:
             return
         if len(enemies) > 50:
-            color.ColoredText.localize(
-                "total_selected_enemies", total=len(enemies)
-            )
+            color.ColoredText.localize("total_selected_enemies", total=len(enemies))
         else:
             for enemy in enemies:
                 color.ColoredText.localize(
@@ -42,9 +41,11 @@ class EnemyEditor:
         self.print_selected_enemies(current_enemies)
 
         options: dict[str, Any] = {
+            "select_enemies_valid": self.get_all_valid_enemies,
             "select_enemies_all": self.get_all_enemies,
             "select_enemies_id": self.select_id,
             "select_enemies_name": self.select_name,
+            "select_enemies_invalid": self.get_all_invalid_enemies,
         }
         option_id = dialog_creator.ChoiceInput.from_reduced(
             list(options), dialog="select_enemies", single_choice=True
@@ -59,9 +60,7 @@ class EnemyEditor:
             return None
 
         if current_enemies:
-            mode_id = dialog_creator.IntInput().get_basic_input_locale(
-                "and_mode_q", {}
-            )
+            mode_id = dialog_creator.IntInput().get_basic_input_locale("and_mode_q", {})
             if mode_id is None:
                 mode = SelectMode.OR
             elif mode_id == 1:
@@ -89,6 +88,22 @@ class EnemyEditor:
             enemies.append(core.Enemy(i))
         return enemies
 
+    def get_all_valid_enemies(self) -> list[core.Enemy] | None:
+        valid_ids = core.EnemyDictionary(self.save_file).get_valid_enemies()
+        if valid_ids is None:
+            return None
+
+        return [core.Enemy(id) for id in valid_ids]
+
+    def get_all_invalid_enemies(self) -> list[core.Enemy] | None:
+        invalid_ids = core.EnemyDictionary(self.save_file).get_invalid_enemies(
+            len(self.save_file.enemy_guide)
+        )
+        if invalid_ids is None:
+            return None
+
+        return [core.Enemy(id) for id in invalid_ids]
+
     def select_id(self) -> list[core.Enemy] | None:
         enemy_ids = dialog_creator.RangeInput(
             len(self.save_file.enemy_guide) - 1
@@ -106,9 +121,7 @@ class EnemyEditor:
         return enemies
 
     def select_name(self) -> list[core.Enemy] | None:
-        usr_name = dialog_creator.StringInput().get_input_locale(
-            "enter_enemy_name", {}
-        )
+        usr_name = dialog_creator.StringInput().get_input_locale("enter_enemy_name", {})
         if usr_name is None:
             return None
         enemies = self.get_enemies_by_name(usr_name)
@@ -161,9 +174,7 @@ class EnemyEditor:
         enemy_editor: EnemyEditor | None = None,
     ):
         if enemy_editor is None or current_enemies is None:
-            enemy_editor, current_enemies = EnemyEditor.from_save_file(
-                save_file
-            )
+            enemy_editor, current_enemies = EnemyEditor.from_save_file(save_file)
         if enemy_editor is None or not current_enemies:
             return
 

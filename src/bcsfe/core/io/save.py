@@ -832,7 +832,7 @@ class SaveFile:
 
         if self.game_version >= 100400:
             length = self.data.read_byte()
-            self.uil8 = self.data.read_int_list(length)
+            self.event_capsules_2 = self.data.read_int_list(length)
             self.two_battle_lines = self.data.read_bool()
 
             assert self.data.read_int() == 100400
@@ -1988,8 +1988,8 @@ class SaveFile:
             self.data.write_int(100300)
 
         if self.game_version >= 100400:
-            self.data.write_byte(len(self.uil8))
-            self.data.write_int_list(self.uil8, write_length=False)
+            self.data.write_byte(len(self.event_capsules_2))
+            self.data.write_int_list(self.event_capsules_2, write_length=False)
             self.data.write_bool(self.two_battle_lines)
             self.data.write_int(100400)
 
@@ -2612,7 +2612,7 @@ class SaveFile:
             "ud9": self.ud9,
             "date_int": self.date_int,
             "utl2": self.utl2,
-            "uil8": self.uil8,
+            "event_capsules_2": self.event_capsules_2,
             "two_battle_lines": self.two_battle_lines,
             "ud10": self.ud10,
             "platinum_shards": self.platinum_shards,
@@ -2994,7 +2994,7 @@ class SaveFile:
         save_file.ud9 = data.get("ud9", 0.0)
         save_file.date_int = data.get("date_int", 0)
         save_file.utl2 = data.get("utl2", [(False, False, 0, 0.0, 0.0)] * 6)
-        save_file.uil8 = data.get("uil8", [])
+        save_file.event_capsules_2 = data.get("event_capsules_2", [])
         save_file.two_battle_lines = data.get("two_battle_lines", False)
         save_file.ud10 = data.get("ud10", 0.0)
         save_file.platinum_shards = data.get("platinum_shards", 0)
@@ -3283,7 +3283,7 @@ class SaveFile:
         self.uil5 = []
         self.uil6 = []
         self.uil7 = []
-        self.uil8 = []
+        self.event_capsules_2 = []
         self.uil9 = []
         self.uil10 = []
         self.uil11 = []

@@ -1309,11 +1309,11 @@ class SaveFile:
 
             length = self.data.read_byte()
 
-            self.uil12: list[int] = []
+            self.treasure_chests: list[int] = []
 
             for _ in range(length):
                 value = self.data.read_int()
-                self.uil12.append(value)
+                self.treasure_chests.append(value)
 
             self.ui23 = self.data.read_int()
             length = self.data.read_short()
@@ -2344,9 +2344,9 @@ class SaveFile:
 
             self.data.write_bool(self.ub36)
 
-            self.data.write_byte(len(self.uil12))
+            self.data.write_byte(len(self.treasure_chests))
 
-            for val in self.uil12:
+            for val in self.treasure_chests:
                 self.data.write_int(val)
 
             self.data.write_int(self.ui23)
@@ -2711,7 +2711,7 @@ class SaveFile:
             "hundred_million_ticket": self.hundred_million_ticket,
             "uil11": self.uil11,
             "ub36": self.ub36,
-            "uil12": self.uil12,
+            "treasure_chests": self.treasure_chests,
             "ui23": self.ui23,
             "uil13": self.uil13,
             "ub37": self.ub37,
@@ -3096,7 +3096,7 @@ class SaveFile:
         save_file.hundred_million_ticket = data.get("hundred_million_ticket", 0)
         save_file.uil11 = data.get("uil11", [])
         save_file.ub36 = data.get("ub36", False)
-        save_file.uil12 = data.get("uil12", [])
+        save_file.treasure_chests = data.get("treasure_chests", [])
         save_file.ui23 = data.get("ui23", 0)
         save_file.uil13 = data.get("uil13", [])
         save_file.ub37 = data.get("ub37", False)
@@ -3287,7 +3287,7 @@ class SaveFile:
         self.uil9 = []
         self.uil10 = []
         self.uil11 = []
-        self.uil12 = []
+        self.treasure_chests = []
         self.uil13 = []
 
         self.uiil1 = []

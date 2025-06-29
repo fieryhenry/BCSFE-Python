@@ -1,4 +1,5 @@
 from __future__ import annotations
+import enum
 from bcsfe import core
 
 
@@ -63,6 +64,20 @@ class GatyaItemBuyItem:
         self.gatya_ticket_id = gatya_ticket_id
         self.comment = comment
 
+class GatyaItemCategory(enum.Enum):
+    MISC = 0
+    EVENT_TICKETS = 1
+    SPECIAL_SKILLS = 2
+    BATTLE_ITEMS = 3
+    EVOLVE_ITEMS = 4
+    CATSEYES = 5
+    CATAMINS = 6
+    BASE_MATERIALS = 7
+    LUCKY_TICKETS_1 = 8
+    ENDLESS_ITEMS = 9
+    LUCKY_TICKETS_2 = 10
+    LABYRINTH_MEDALS = 11
+    TREASURE_CHESTS = 12
 
 class GatyaItemBuy:
     def __init__(self, save_file: core.SaveFile):
@@ -104,9 +119,11 @@ class GatyaItemBuy:
         items.sort(key=lambda x: x.index)
         return items
 
-    def get_by_category(self, category: int) -> list[GatyaItemBuyItem] | None:
+    def get_by_category(self, category: int | GatyaItemCategory) -> list[GatyaItemBuyItem] | None:
         if self.buy is None:
             return None
+        if isinstance(category, GatyaItemCategory):
+            category = category.value
         return self.sort_by_index(
             [item for item in self.buy if item.category == category]
         )

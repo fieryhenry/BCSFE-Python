@@ -2,6 +2,7 @@ from __future__ import annotations
 import random
 from bcsfe import core
 from bcsfe.cli import dialog_creator, color, edits
+from bcsfe.core.game.catbase.gatya_item import GatyaItemCategory
 
 
 class BasicItems:
@@ -231,6 +232,32 @@ class BasicItems:
             group_name_localized=True,
         ).edit()
         save_file.catseyes = values
+
+    @staticmethod
+    def edit_treasure_chests(save_file: core.SaveFile):
+        names_o = core.core_data.get_gatya_item_names(save_file)
+        items = core.core_data.get_gatya_item_buy(save_file).get_by_category(
+            GatyaItemCategory.TREASURE_CHESTS
+        )
+        if items is None:
+            return
+        names: list[str] = []
+        for item in items:
+            name = names_o.get_name(item.id)
+            if name is None:
+                name = core.core_data.local_manager.get_key(
+                    "unknown_treasure_chest_name", id=item.id
+                )
+            names.append(name)
+
+        values = dialog_creator.MultiEditor.from_reduced(
+            "treasure_chests",
+            names,
+            save_file.treasure_chests,
+            core.core_data.max_value_manager.get("treasure_chests"),
+            group_name_localized=True,
+        ).edit()
+        save_file.treasure_chests = values
 
     @staticmethod
     def edit_catfruit(save_file: core.SaveFile):

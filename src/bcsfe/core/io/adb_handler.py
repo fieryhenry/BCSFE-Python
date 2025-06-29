@@ -9,15 +9,15 @@ class DeviceIDNotSet(Exception):
 
 
 class AdbNotInstalled(Exception):
-    pass
+    def __init__(self, result: core.CommandResult):
+        self.result = result
 
 
 class AdbHandler(io.root_handler.RootHandler):
     def __init__(self, root: bool = True):
         self.root_avail = root
         adb_path = core.Path(core.core_data.config.get_str(core.ConfigKey.ADB_PATH))
-        if not self.is_adb_installed(adb_path):
-            raise AdbNotInstalled("Adb is not in PATH environment variable.")
+        self.check_adb_installed(adb_path)
         self.adb_path = adb_path
         self.start_server()
         self.device_id = None
@@ -25,14 +25,17 @@ class AdbHandler(io.root_handler.RootHandler):
         self.root_result = None
 
     @staticmethod
-    def display_no_adb_error():
+    def display_no_adb_error(e: AdbNotInstalled):
         color.ColoredText.localize(
             "adb_not_installed",
             path=core.core_data.config.get_str(core.ConfigKey.ADB_PATH),
+            error=e,
         )
 
-    def is_adb_installed(self, path: core.Path) -> bool:
-        return path.run("version").success
+    def check_adb_installed(self, path: core.Path):
+        result = path.run("version")
+        if not result.success:
+            raise AdbNotInstalled(result)
 
     def adb_root_success(self) -> bool:
         if self.root_result is None:
@@ -88,7 +91,7 @@ class AdbHandler(io.root_handler.RootHandler):
     ) -> core.CommandResult:
         if not self.adb_root_success():
             result = self.run_root_shell(
-                f"cp {device_path.to_str_forwards()} /sdcard/ && chmod o+rw /sdcard/{device_path.basename()}"
+                f"cp {device_path.to_str_forwards()} /sdcard/{device_path.basename()} && chmod o+rw /sdcard/{device_path.basename()}"
             )
             if result.exit_code != 0:
                 return result
@@ -163,9 +166,7 @@ class AdbHandler(io.root_handler.RootHandler):
         return self.run_shell(f"am force-stop {self.get_package_name()}")
 
     def run_game(self) -> core.CommandResult:
-        return self.run_shell(
-            f"monkey -p {self.get_package_name()} -c android.intent.category.LAUNCHER 1"
-        )
+        return self.run_shell(f"monkey --pct-syskeys 0 -p {self.get_package_name()} 1")
 
     def select_device(self) -> bool:
         devices = self.get_connected_devices()

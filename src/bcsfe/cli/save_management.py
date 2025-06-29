@@ -114,8 +114,8 @@ class SaveManagement:
         SaveManagement.save_save(save_file)
         try:
             waydroid_handler = core.WayDroidHandler()
-        except core.AdbNotInstalled:
-            core.AdbHandler.display_no_adb_error()
+        except core.AdbNotInstalled as e:
+            core.AdbHandler.display_no_adb_error(e)
             return None
         except core.io.waydroid.WayDroidNotInstalledError as e:
             core.WayDroidHandler.display_waydroid_not_installed(e)
@@ -171,8 +171,8 @@ class SaveManagement:
         SaveManagement.save_save(save_file)
         try:
             adb_handler = core.AdbHandler()
-        except core.AdbNotInstalled:
-            core.AdbHandler.display_no_adb_error()
+        except core.AdbNotInstalled as e:
+            core.AdbHandler.display_no_adb_error(e)
             return None
         success = adb_handler.select_device()
         if not success:
@@ -342,8 +342,8 @@ class SaveManagement:
                 if use_waydroid:
                     try:
                         handler = core.WayDroidHandler()
-                    except core.AdbNotInstalled:
-                        core.AdbHandler.display_no_adb_error()
+                    except core.AdbNotInstalled as e:
+                        core.AdbHandler.display_no_adb_error(e)
                         return None
                     except core.io.waydroid.WayDroidNotInstalledError as e:
                         core.WayDroidHandler.display_waydroid_not_installed(e)
@@ -353,8 +353,8 @@ class SaveManagement:
                 else:
                     try:
                         handler = core.AdbHandler()
-                    except core.AdbNotInstalled:
-                        core.AdbHandler.display_no_adb_error()
+                    except core.AdbNotInstalled as e:
+                        core.AdbHandler.display_no_adb_error(e)
                         return None
                     if not handler.select_device():
                         return None

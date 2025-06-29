@@ -43,7 +43,7 @@ class WayDroidHandler(io.root_handler.RootHandler):
         # copy file to sdcard
 
         result = self.run_shell_cmd(
-            f"cp {device_path.to_str_forwards()} /sdcard/ && chmod o+rw /sdcard/{device_path.basename()}"
+            f"cp {device_path.to_str_forwards()} /sdcard/{device_path.basename()} && chmod o+rw /sdcard/{device_path.basename()}"
         )
 
         if not result.success:
@@ -51,7 +51,7 @@ class WayDroidHandler(io.root_handler.RootHandler):
 
         device_path = core.Path("/sdcard/").add(device_path.basename())
 
-        # abd pull
+        # adb pull
 
         result = self.adb_handler.adb_pull_file(device_path, local_path)
         if not result.success:
@@ -114,7 +114,7 @@ class WayDroidHandler(io.root_handler.RootHandler):
         return self.push_file(local_path, self.get_battlecats_save_path())
 
     def run_game(self) -> core.CommandResult:
-        return core.Command(f"waydroid app launch {self.get_package_name()}").run()
+        return self.adb_handler.run_game()
 
     def close_game(self) -> core.CommandResult:
-        return self.run_shell_cmd(f"am force-stop {self.get_package_name()}")
+        return self.adb_handler.close_game()

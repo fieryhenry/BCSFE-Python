@@ -16,6 +16,9 @@ class Upgrade:
     def get_base(self) -> int:
         return self.base + 1
 
+    def get_total(self) -> int:
+        return self.get_base() + self.get_plus()
+
     def get_plus(self) -> int:
         return self.plus
 

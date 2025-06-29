@@ -84,6 +84,12 @@ class SpecialSkills:
     def __init__(self, skills: list[SpecialSkill]):
         self.skills = skills
 
+    def get_upgrade(self, valid_skill_id: int) -> SpecialSkill:
+        if valid_skill_id >= 1:
+            valid_skill_id += 1
+
+        return self.skills[valid_skill_id]
+
     def set_upgrade(
         self,
         valid_skill_id: int,

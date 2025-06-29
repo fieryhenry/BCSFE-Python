@@ -264,7 +264,7 @@ class ServerHandler:
 
         return True
 
-    def get_auth_token(self) -> str | None:
+    def get_auth_token(self, tries: int = 1) -> str | None:
         auth_token = self.get_stored_auth_token()
         if auth_token is not None:
             if self.validate_auth_token(auth_token):
@@ -279,6 +279,10 @@ class ServerHandler:
         auth_token = self.get_auth_token_new(password)
         if auth_token is not None:
             return auth_token
+
+        if tries > 0:
+            self.print_key("retry_auth_token")
+            return self.get_auth_token(tries - 1)
 
         return None
 

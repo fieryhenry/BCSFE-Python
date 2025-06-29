@@ -105,6 +105,9 @@ pipx install bcsfe
 bcsfe
 ```
 
+6. You may also need to install `tk` with your system package manager to open the
+file selection dialog. This package may be called `tk` or `python-tk` or `python3-tk`.
+
 If anyone wants to put the editor on the AUR or another package repo, feel free, I'll be happy to
 help if needed.
 

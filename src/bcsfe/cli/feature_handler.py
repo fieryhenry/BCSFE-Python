@@ -61,6 +61,7 @@ class FeatureHandler:
                 "scheme_items": edits.basic_items.BasicItems.edit_scheme_items,
                 "labyrinth_medals": edits.basic_items.BasicItems.edit_labyrinth_medals,
                 "100_million_tickets": edits.basic_items.BasicItems.edit_100_million_ticket,
+                "event_tickets": edits.event_tickets.EventTickets.edit,
                 "treasure_chests": edits.basic_items.BasicItems.edit_treasure_chests,
             },
             "cats_special_skills": cat_features,

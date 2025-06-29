@@ -7,6 +7,7 @@ from bcsfe.cli.edits import (
     enemy_editor,
     aku_realm,
     map,
+    event_tickets,
 )
 
 __all__ = [
@@ -18,4 +19,5 @@ __all__ = [
     "enemy_editor",
     "aku_realm",
     "map",
+    "event_tickets"
 ]

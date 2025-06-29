@@ -127,3 +127,29 @@ class GatyaItemBuy:
         return self.sort_by_index(
             [item for item in self.buy if item.category == category]
         )
+
+    def get_names_by_category(self, category: int | GatyaItemCategory) -> list[tuple[GatyaItemBuyItem, str | None]] | None:
+        items = self.get_by_category(category)
+        if items is None:
+            return None
+
+        names = GatyaItemNames(self.save_file)
+
+        return [(item, names.get_name(item.id)) for item in items]
+
+    def get(self, item_id: int) -> GatyaItemBuyItem | None:
+        if self.buy is None:
+            return None
+        if item_id < 0 or item_id >= len(self.buy):
+            return None
+
+        return self.buy[item_id]
+
+    def get_by_server_id(self, server_id: int) -> GatyaItemBuyItem | None:
+        if self.buy is None:
+            return None
+        for item in self.buy:
+            if item.server_id == server_id:
+                return item
+
+        return None

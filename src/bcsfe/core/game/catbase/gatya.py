@@ -1,4 +1,5 @@
 from __future__ import annotations
+import enum
 from typing import Any, Callable
 from bcsfe import core
 from bcsfe.cli import dialog_creator, color
@@ -119,9 +120,7 @@ class Gatya:
         gatya = Gatya(data.get("rare_seed", 0), data.get("normal_seed", 0))
         gatya.stepup_stage_3_cooldown = data.get("stepup_stage_3_cooldown", 0)
         gatya.previous_normal_roll = data.get("previous_normal_roll", 0)
-        gatya.previous_normal_roll_type = data.get(
-            "previous_normal_roll_type", 0
-        )
+        gatya.previous_normal_roll_type = data.get("previous_normal_roll_type", 0)
         gatya.previous_rare_roll = data.get("previous_rare_roll", 0)
         gatya.previous_rare_roll_type = data.get("previous_rare_roll_type", 0)
         gatya.unknown1 = data.get("unknown1", False)
@@ -178,9 +177,7 @@ class GatyaDataSet:
         self.save_file = save_file
         self.gatya_data_set = self.load_gatya_data_set("R", 1)
 
-    def load_gatya_data_set(
-        self, rarity: str, id: int
-    ) -> list[list[int]] | None:
+    def load_gatya_data_set(self, rarity: str, id: int) -> list[list[int]] | None:
         file_name = f"GatyaDataSet{rarity.upper()[0]}{id}.csv"
         gdg = core.core_data.get_game_data_getter(self.save_file)
         data = gdg.download("DataLocal", file_name)
@@ -207,9 +204,7 @@ class GatyaDataSet:
 
 
 class GatyaInfo:
-    def __init__(
-        self, gatya_id: int, cc: core.CountryCode, type_str: str = "R"
-    ):
+    def __init__(self, gatya_id: int, cc: core.CountryCode, type_str: str = "R"):
         self.gatya_id = gatya_id
         self.cc = cc
         self.gatya_data_set: GatyaDataSet | None = None
@@ -227,9 +222,7 @@ class GatyaInfo:
     def get_url(self) -> str:
         return f"https://ponosgames.com/information/appli/battlecats/gacha/rare/{self.get_cc_str()}{self.type}{self.get_id_str()}.html"
 
-    def download_data(
-        self, name_only_optimization: bool = False
-    ) -> core.Data | None:
+    def download_data(self, name_only_optimization: bool = False) -> core.Data | None:
         url = self.get_url()
 
         if name_only_optimization:
@@ -276,9 +269,7 @@ class GatyaInfo:
             data = None
         return data
 
-    def get_data(
-        self, name_only_optimization: bool = False
-    ) -> core.Data | None:
+    def get_data(self, name_only_optimization: bool = False) -> core.Data | None:
         if self.data is not None:
             return self.data
         data = self.load_data_from_file(name_only_optimization)
@@ -310,9 +301,7 @@ class GatyaInfo:
 
 
 class GatyaInfos:
-    def __init__(
-        self, save_file: core.SaveFile, type_str: str = "R", set_id: int = 1
-    ):
+    def __init__(self, save_file: core.SaveFile, type_str: str = "R", set_id: int = 1):
         self.save_file = save_file
         self.type = type_str
         self.set_id = set_id
@@ -362,17 +351,101 @@ class GatyaInfos:
             return self.infos[gatya_id]
         return None
 
-    def get_all_names(
-        self, name_only_optimization: bool = False
-    ) -> dict[int, str]:
+    def get_all_names(self, name_only_optimization: bool = False) -> dict[int, str]:
         if not self.got_all:
             max_threads = 64 if name_only_optimization else 16
             self.get_all(name_only_optimization, max_threads=max_threads)
         names: dict[int, str] = {}
         for info in self.infos:
-            names[info.gatya_id] = (
-                info.get_name()
-                or core.core_data.local_manager.get_key("unknown_banner")
+            names[
+                info.gatya_id
+            ] = info.get_name() or core.core_data.local_manager.get_key(
+                "unknown_banner"
             )
 
         return names
+
+
+class GatyaDataOptionSet:
+    def __init__(
+        self,
+        id: int,
+        banner_on: bool,
+        ticket_item_id: int,
+        anim_id: int,
+        button_cut_id: int,
+        series_id: int,
+        menu_cut_id: int,
+        char_id: int | None,
+        wait_maanim: bool | None,
+    ):
+        self.id = id
+        self.banner_on = banner_on
+        self.ticket_item_id = ticket_item_id
+        self.anim_id = anim_id
+        self.button_cut_id = button_cut_id
+        self.series_id = series_id
+        self.menu_cut_id = menu_cut_id
+        self.char_id = char_id
+        self.wait_maanim = wait_maanim
+
+    @staticmethod
+    def from_csv_row(row: core.Row) -> GatyaDataOptionSet:
+        return GatyaDataOptionSet(
+            row.next_int(),
+            row.next_bool(),
+            row.next_int(),
+            row.next_int(),
+            row.next_int(),
+            row.next_int(),
+            row.next_int(),
+            row.next_int_opt(),
+            row.next_bool_opt(),
+        )
+
+
+class GatyaEventType(enum.Enum):
+    NORMAL = "N"
+    RARE = "R"
+    EVENT = "E"
+
+
+class GatyaDataOption:
+    def __init__(self, sets: list[GatyaDataOptionSet]):
+        self.sets = sets
+
+    def get(self, set_id: int) -> GatyaDataOptionSet | None:
+        for gset in self.sets:
+            if gset.id == set_id:
+                return gset
+
+        return None
+
+    @staticmethod
+    def from_csv(csv: core.CSV) -> GatyaDataOption:
+        sets: list[GatyaDataOptionSet] = []
+        csv.read_line()  # skip headers
+        for row in csv:
+            sets.append(GatyaDataOptionSet.from_csv_row(row))
+
+        return GatyaDataOption(sets)
+
+    @staticmethod
+    def from_data(data: core.Data) -> GatyaDataOption:
+        return GatyaDataOption.from_csv(core.CSV(data, "\t"))
+
+    @staticmethod
+    def get_filename(event_type: GatyaEventType) -> str:
+        return f"GatyaData_Option_Set{event_type.value}.tsv"
+
+    @staticmethod
+    def read(
+        save_file: core.SaveFile, e_type: GatyaEventType
+    ) -> GatyaDataOption | None:
+        gdg = core.core_data.get_game_data_getter(save_file)
+
+        data = gdg.download("DataLocal", GatyaDataOption.get_filename(e_type))
+        if data is None:
+            return None
+
+        return GatyaDataOption.from_data(data)

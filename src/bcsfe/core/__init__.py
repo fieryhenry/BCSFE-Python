@@ -31,8 +31,19 @@ from bcsfe.core.game.battle.enemy import (
 )
 from bcsfe.core.game.catbase.beacon_base import BeaconEventListScene
 from bcsfe.core.game.catbase.cat import Cat, Cats, UnitBuy, TalentData
-from bcsfe.core.game.catbase.gatya import Gatya, GatyaInfos, GatyaDataSet
-from bcsfe.core.game.catbase.gatya_item import GatyaItemBuy, GatyaItemNames
+from bcsfe.core.game.catbase.gatya import (
+    Gatya,
+    GatyaInfos,
+    GatyaDataSet,
+    GatyaDataOptionSet,
+    GatyaDataOption,
+)
+from bcsfe.core.game.catbase.gatya_item import (
+    GatyaItemBuy,
+    GatyaItemNames,
+    GatyaItemCategory,
+    GatyaItemBuyItem,
+)
 from bcsfe.core.game.catbase.item_pack import (
     ItemPack,
     Purchases,
@@ -59,6 +70,7 @@ from bcsfe.core.game.catbase.special_skill import (
     AbilityData,
     AbilityDataItem,
 )
+
 from bcsfe.core.game.catbase.stamp import StampData
 from bcsfe.core.game.catbase.talent_orbs import (
     TalentOrb,
@@ -124,6 +136,13 @@ from bcsfe.core.locale_handler import (
     ExternalLocale,
 )
 from bcsfe.core.log import Logger
+from bcsfe.core.server.event_data import (
+    ServerItemData,
+    ServerItemDataItem,
+    ServerGatyaData,
+    ServerGatyaDataSet,
+    ServerGatyaDataItem,
+)
 from bcsfe.core.server.client_info import ClientInfo
 from bcsfe.core.server.game_data_getter import GameDataGetter
 from bcsfe.core.server.headers import AccountHeaders
@@ -274,10 +293,10 @@ def print_no_internet():
 core_data = CoreData()
 core_data.init_data()
 
+
 def localize(key: str, escape: bool = True, **kwargs: Any) -> str:
-    return core_data.local_manager.get_key(
-        key, escape=escape, **kwargs
-    )
+    return core_data.local_manager.get_key(key, escape=escape, **kwargs)
+
 
 __all__ = [
     "server",
@@ -318,4 +337,13 @@ __all__ = [
     "WayDroidHandler",
     "EnemyDescriptions",
     "EnemyDictionary",
+    "GatyaItemCategory",
+    "ServerItemData",
+    "GatyaItemBuyItem",
+    "ServerItemDataItem",
+    "ServerGatyaData",
+    "ServerGatyaDataSet",
+    "ServerGatyaDataItem",
+    "GatyaDataOptionSet",
+    "GatyaDataOption",
 ]

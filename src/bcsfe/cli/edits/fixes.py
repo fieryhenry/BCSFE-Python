@@ -12,6 +12,13 @@ class Fixes:
         color.ColoredText.localize("fix_gamatoto_crash_success")
 
     @staticmethod
+    def fix_ototo_crash(save_file: core.SaveFile):
+        save_file.ototo.cannons = core.game.gamoto.ototo.Cannons.init(
+            save_file.game_version
+        )
+        color.ColoredText.localize("fix_ototo_crash_success")
+
+    @staticmethod
     def fix_time_errors(save_file: core.SaveFile):
         save_file.date_3 = datetime.datetime.now()
         save_file.timestamp = datetime.datetime.now().timestamp()

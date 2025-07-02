@@ -482,7 +482,10 @@ class MultiEditor:
     def edit_all(self, choices: list[int]) -> list[int]:
         max_max_value = 0
         for choice in choices:
-            max_value = self.max_values[choice]
+            if choice >= len(self.max_values):
+                max_value = None
+            else:
+                max_value = self.max_values[choice]
             if max_value is None:
                 max_value = IntInput.get_max_value(max_value, self.signed)
             max_max_value = max(max_max_value, max_value)
@@ -500,7 +503,11 @@ class MultiEditor:
         ints = self.ints or [0] * len(self.strings)
 
         for choice in choices:
-            max_value = IntInput.get_max_value(self.max_values[choice], self.signed)
+            if choice >= len(self.max_values):
+                max_value = None
+            else:
+                max_value = self.max_values[choice]
+            max_value = IntInput.get_max_value(max_value, self.signed)
             value = min(usr_input, max_value)
             ints[choice] = value
             if self.ints is not None:
@@ -516,7 +523,10 @@ class MultiEditor:
         ints = self.ints or [0] * len(self.strings)
 
         for choice in choices:
-            max_value = self.max_values[choice]
+            if choice >= len(self.max_values):
+                max_value = None
+            else:
+                max_value = self.max_values[choice]
             if max_value is None:
                 max_value = IntInput.get_max_value(max_value, self.signed)
 

@@ -578,25 +578,23 @@ class StoryChapters:
         clear_amount = 1
         clear_amount_type = -1
         if modify_clear_amounts:
-            options = ["clear_amount_chapter", "clear_amount_all"]
-            if clear_type_choice == 1:
-                options.append("clear_amount_stages")
-            clear_amount_type = dialog_creator.ChoiceInput.from_reduced(
-                options, dialog="select_clear_amount_type", single_choice=True
-            ).single_choice()
-            if clear_amount_type is None:
-                return
-            clear_amount_type -= 1
+            if len(map_choices) == 1:
+                clear_amount_type = 0
+            else:
+                options = ["clear_amount_chapter", "clear_amount_all"]
+                if clear_type_choice == 1:
+                    options.append("clear_amount_stages")
+                clear_amount_type = dialog_creator.ChoiceInput.from_reduced(
+                    options, dialog="select_clear_amount_type", single_choice=True
+                ).single_choice()
+                if clear_amount_type is None:
+                    return
+                clear_amount_type -= 1
+
             if clear_amount_type == 1:
                 clear_amount = core.EventChapters.ask_clear_amount()
                 if clear_amount is None:
                     return
-
-        unclear_other_stages = dialog_creator.YesNoInput().get_input_once(
-            "unclear_other_stages"
-        )
-        if unclear_other_stages is None:
-            return
 
         for id in map_choices:
             stage_names = StageNames(
@@ -625,10 +623,28 @@ class StoryChapters:
                 if clear_amount is None:
                     return
 
+            could_unclear_stages = False
+
+            if chapters[id].progress > max(stages) + 1:
+                could_unclear_stages = True
+
+            for stage in range(max(stages) + 1, 48):
+                if chapters[id].stages[stage].clear_times:
+                    could_unclear_stages = True
+
+            if could_unclear_stages:
+                unclear_other_stages = dialog_creator.YesNoInput().get_input_once(
+                    "unclear_other_stages"
+                )
+                if unclear_other_stages is None:
+                    return
+            else:
+                unclear_other_stages = False
+
             if unclear_other_stages:
+                chapters[id].progress = 0
                 for stage in range(max(stages), 48):
                     chapters[id].stages[stage].clear_times = 0
-                    chapters[id].progress = 0
 
             for stage in stages:
                 if clear_amount_type == 2:

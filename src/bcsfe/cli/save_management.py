@@ -278,7 +278,7 @@ class SaveManagement:
     @staticmethod
     def select_save(
         starting_options: bool = False, input_file: str | None = None
-    ) -> core.SaveFile | None:
+    ) -> tuple[core.SaveFile | None, bool]:
         """Select a new save file.
 
         Args:
@@ -289,9 +289,12 @@ class SaveManagement:
             core.SaveFile | None: The save file.
         """
         if input_file is not None:
-            return SaveManagement.load_save_file_path(
+            file = SaveManagement.load_save_file_path(
                 core.Path(input_file), None, False, None
             )
+            if file is None:
+                return (None, True)
+            return (file, False)
 
         options = [
             "download_save",
@@ -319,7 +322,7 @@ class SaveManagement:
             options, options, [], {}, "save_load_option", True
         ).get_input_locale_while()
         if choice is None:
-            return None
+            return None, False
         choice = choice[0] - 1
 
         save_path = None
@@ -339,7 +342,7 @@ class SaveManagement:
             save_path = core.SaveFile.get_saves_path().add("SAVE_DATA")
             if not save_path.exists():
                 color.ColoredText.localize("save_file_not_found")
-                return None
+                return None, False
         elif choice == 3:
             handler = root_handler
             if not root_handler.is_android():
@@ -348,27 +351,27 @@ class SaveManagement:
                         handler = core.WayDroidHandler()
                     except core.AdbNotInstalled as e:
                         core.AdbHandler.display_no_adb_error(e)
-                        return None
+                        return None, False
                     except core.io.waydroid.WayDroidNotInstalledError as e:
                         core.WayDroidHandler.display_waydroid_not_installed(e)
-                        return None
+                        return None, False
                     if not handler.adb_handler.select_device():
-                        return None
+                        return None, False
                 else:
                     try:
                         handler = core.AdbHandler()
                     except core.AdbNotInstalled as e:
                         core.AdbHandler.display_no_adb_error(e)
-                        return None
+                        return None, False
                     if not handler.select_device():
-                        return None
+                        return None, False
 
             package_names = handler.get_battlecats_packages()
 
             package_name = SaveManagement.select_package_name(package_names)
             if package_name is None:
                 color.ColoredText.localize("no_package_name_error")
-                return None
+                return None, False
             handler.set_package_name(package_name)
             if root_handler.is_android():
                 key = "storage_pulling"
@@ -404,7 +407,7 @@ class SaveManagement:
             color.ColoredText.localize("create_new_save_warning")
             cc = core.CountryCode.select()
             if cc is None:
-                return None
+                return None, False
             try:
                 gv = core.GameVersion.from_string(
                     color.ColoredInput().localize(
@@ -413,11 +416,11 @@ class SaveManagement:
                 )
             except ValueError:
                 color.ColoredText.localize("invalid_game_version")
-                return
+                return None, False
             save = core.SaveFile(cc=cc, gv=gv, load=False)
             save_path = main.Main.save_save_dialog(save)
             if save_path is None:
-                return None
+                return None, False
             save.to_file(save_path)
             color.ColoredText.localize("create_new_save_success")
 
@@ -429,10 +432,13 @@ class SaveManagement:
             main.Main.exit_editor(check_temp=False)
 
         if save_path is None or not save_path.exists():
-            return None
+            return None, False
 
-        return SaveManagement.load_save_file_path(
-            save_path, cc, used_storage, package_name
+        return (
+            SaveManagement.load_save_file_path(
+                save_path, cc, used_storage, package_name
+            ),
+            False,
         )
 
     @staticmethod
@@ -489,11 +495,12 @@ class SaveManagement:
             save_file (core.SaveFile): The current save file.
         """
         SaveManagement.upload_items_checker(save_file)
-        new_save_file = SaveManagement.select_save()
+        new_save_file, stop = SaveManagement.select_save()
         if new_save_file is None:
-            return
+            return stop
         save_file.load_save_file(new_save_file)
         color.ColoredText.localize("load_save_success")
+        return False
 
     @staticmethod
     def convert_save_cc(save_file: core.SaveFile):

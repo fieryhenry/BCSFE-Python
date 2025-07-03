@@ -36,7 +36,9 @@ class Main:
         print()
         self.print_start_text()
         while not self.exit:
-            self.load_save_options(input_path)
+            stop = self.load_save_options(input_path)
+            if stop:
+                break
 
     def check_update(self):
         """Check for updates."""
@@ -144,12 +146,13 @@ class Main:
 
     def load_save_options(self, input_path: str | None = None):
         """Load save options."""
-        save_file = save_management.SaveManagement.select_save(True, input_path)
+        save_file, stop = save_management.SaveManagement.select_save(True, input_path)
         if save_file is None:
-            return
+            return stop
         self.save_file = save_file
 
         self.feature_handler()
+        return False
 
     def feature_handler(self):
         """Run the feature handler."""

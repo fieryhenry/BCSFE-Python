@@ -65,18 +65,12 @@ class Chapter:
             stage.write(stream)
 
     def serialize(self) -> dict[int, Any]:
-        return {
-            stage_id: stage.serialize()
-            for stage_id, stage in self.stages.items()
-        }
+        return {stage_id: stage.serialize() for stage_id, stage in self.stages.items()}
 
     @staticmethod
     def deserialize(data: dict[int, Any]) -> Chapter:
         return Chapter(
-            {
-                stage_id: Stage.deserialize(stage)
-                for stage_id, stage in data.items()
-            }
+            {stage_id: Stage.deserialize(stage) for stage_id, stage in data.items()}
         )
 
     def __repr__(self) -> str:
@@ -152,6 +146,7 @@ class Ranking:
         should_show_rank_description: bool,
         should_show_start_message: bool,
         submit_error_flag: bool,
+        other: int | None,
     ):
         self.score = score
         self.ranking = ranking
@@ -165,6 +160,7 @@ class Ranking:
         self.should_show_start_message = should_show_start_message
         self.submit_error_flag = submit_error_flag
         self.did_win_rewards = False
+        self.other = other
 
     @staticmethod
     def init() -> Ranking:
@@ -180,10 +176,11 @@ class Ranking:
             False,
             False,
             False,
+            None,
         )
 
     @staticmethod
-    def read(stream: core.Data) -> Ranking:
+    def read(stream: core.Data, game_version: core.GameVersion) -> Ranking:
         score = stream.read_int()
         ranking = stream.read_int()
         has_submitted = stream.read_bool()
@@ -195,6 +192,11 @@ class Ranking:
         should_show_rank_description = stream.read_bool()
         should_show_start_message = stream.read_bool()
         submit_error_flag = stream.read_bool()
+
+        if game_version >= 140500:
+            other = stream.read_int()
+        else:
+            other = None
         return Ranking(
             score,
             ranking,
@@ -207,9 +209,10 @@ class Ranking:
             should_show_rank_description,
             should_show_start_message,
             submit_error_flag,
+            other,
         )
 
-    def write(self, stream: core.Data):
+    def write(self, stream: core.Data, game_version: core.GameVersion):
         stream.write_int(self.score)
         stream.write_int(self.ranking)
         stream.write_bool(self.has_submitted)
@@ -221,6 +224,8 @@ class Ranking:
         stream.write_bool(self.should_show_rank_description)
         stream.write_bool(self.should_show_start_message)
         stream.write_bool(self.submit_error_flag)
+        if game_version >= 140500:
+            stream.write_int(self.other or 0)
 
     def read_did_win_rewards(self, stream: core.Data):
         self.did_win_rewards = stream.read_bool()
@@ -242,6 +247,7 @@ class Ranking:
             "should_show_start_message": self.should_show_start_message,
             "submit_error_flag": self.submit_error_flag,
             "did_win_rewards": self.did_win_rewards,
+            "other": self.other,
         }
 
     @staticmethod
@@ -258,6 +264,7 @@ class Ranking:
             data.get("should_show_rank_description", False),
             data.get("should_show_start_message", False),
             data.get("submit_error_flag", False),
+            data.get("other", None),
         )
         ranking.did_win_rewards = data.get("did_win_rewards", False)
         return ranking
@@ -271,7 +278,8 @@ class Ranking:
             f"should_show_rank_description={self.should_show_rank_description!r}, "
             f"should_show_start_message={self.should_show_start_message!r}, "
             f"submit_error_flag={self.submit_error_flag!r},"
-            f"did_win_rewards={self.did_win_rewards!r})"
+            f"did_win_rewards={self.did_win_rewards!r}),"
+            f"other={self.other!r})"
         )
 
     def __str__(self) -> str:
@@ -305,11 +313,11 @@ class Dojo:
         stream.write_bool(self.item_lock_flags)
         stream.write_bool_list(self.item_locks, write_length=False, length=6)
 
-    def read_ranking(self, stream: core.Data):
-        self.ranking = Ranking.read(stream)
+    def read_ranking(self, stream: core.Data, game_version: core.GameVersion):
+        self.ranking = Ranking.read(stream, game_version)
 
-    def write_ranking(self, stream: core.Data):
-        self.ranking.write(stream)
+    def write_ranking(self, stream: core.Data, game_version: core.GameVersion):
+        self.ranking.write(stream, game_version)
 
     def serialize(self) -> dict[str, Any]:
         return {

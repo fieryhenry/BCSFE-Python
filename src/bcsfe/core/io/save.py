@@ -551,7 +551,7 @@ class SaveFile:
             assert self.data.read_int() == 66
 
         if self.game_version >= 42:
-            self.dojo.read_ranking(self.data)
+            self.dojo.read_ranking(self.data, self.game_version)
             self.item_pack.read_three_days(self.data)
             self.challenge = core.ChallengeChapters.read(self.data)
             self.challenge.read_scores(self.data)
@@ -709,7 +709,7 @@ class SaveFile:
 
         if self.game_version >= 90400:
             self.gauntlets_2 = core.GauntletChapters.read(self.data)
-            self.enigma = core.Enigma.read(self.data)
+            self.enigma = core.Enigma.read(self.data, self.game_version)
             self.cleared_slots = core.ClearedSlots.read(self.data)
 
             assert self.data.read_int() == 90400
@@ -1228,7 +1228,7 @@ class SaveFile:
 
             assert self.data.read_int() == 140000
 
-        if self.game_version >= 140100:
+        if self.game_version >= 140100 and self.game_version < 140500:
             self.uby21 = self.data.read_byte()
             assert self.data.read_int() == 140100
 
@@ -1248,6 +1248,7 @@ class SaveFile:
                     bool,
                     bool,
                     bool,
+                    int | None,
                     bool,
                 ]
             ] = []
@@ -1265,7 +1266,12 @@ class SaveFile:
                 val_10 = self.data.read_bool()
                 val_11 = self.data.read_bool()
 
-                val_12 = self.data.read_bool()
+                val_12 = None
+                if self.game_version >= 140500:
+                    # game seems to read more than just this, may break in the future
+                    val_12 = self.data.read_int()
+
+                val_13 = self.data.read_bool()
 
                 self.uil10.append(
                     (
@@ -1281,6 +1287,7 @@ class SaveFile:
                         val_10,
                         val_11,
                         val_12,
+                        val_13,
                     )
                 )
 
@@ -1725,7 +1732,7 @@ class SaveFile:
             self.data.write_int(66)
 
         if self.game_version >= 42:
-            self.dojo.write_ranking(self.data)
+            self.dojo.write_ranking(self.data, self.game_version)
             self.item_pack.write_three_days(self.data)
             self.challenge.write(self.data)
             self.challenge.write_scores(self.data)
@@ -1871,7 +1878,7 @@ class SaveFile:
 
         if self.game_version >= 90400:
             self.gauntlets_2.write(self.data)
-            self.enigma.write(self.data)
+            self.enigma.write(self.data, self.game_version)
             self.cleared_slots.write(self.data)
             self.data.write_int(90400)
 
@@ -2307,14 +2314,14 @@ class SaveFile:
 
             self.data.write_int(140000)
 
-        if self.game_version >= 140100:
+        if self.game_version >= 140100 and self.game_version < 140500:
             self.data.write_byte(self.uby21)
             self.data.write_int(140100)
 
         if self.game_version >= 140200:
             self.data.write_byte(len(self.uil10))
 
-            for v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12 in self.uil10:
+            for v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13 in self.uil10:
                 self.data.write_int(v1)
                 self.data.write_int(v2)
                 self.data.write_bool(v3)
@@ -2326,7 +2333,11 @@ class SaveFile:
                 self.data.write_bool(v9)
                 self.data.write_bool(v10)
                 self.data.write_bool(v11)
-                self.data.write_bool(v12)
+                if self.game_version >= 140500:
+                    # game seems to write more than this, may not work with all saves
+                    self.data.write_int(v12 or 0)
+
+                self.data.write_bool(v13)
 
             self.data.write_byte(len(self.uid1))
 

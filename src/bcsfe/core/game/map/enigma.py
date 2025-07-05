@@ -7,7 +7,11 @@ from bcsfe.cli import dialog_creator, color
 
 class Stage:
     def __init__(
-        self, level: int, stage_id: int, decoding_satus: int, start_time: float
+        self,
+        level: int,
+        stage_id: int,
+        decoding_satus: int,
+        start_time: float,
     ):
         self.level = level
         self.stage_id = stage_id
@@ -24,6 +28,7 @@ class Stage:
         stage_id = data.read_int()
         decoding_satus = data.read_byte()
         start_time = data.read_double()
+
         return Stage(level, stage_id, decoding_satus, start_time)
 
     def write(self, data: core.Data):
@@ -65,6 +70,7 @@ class Enigma:
         unknown_1: int,
         unknown_2: bool,
         stages: list[Stage],
+        extra: tuple[int, int, int, float] | None,
     ):
         self.energy_since_1 = energy_since_1
         self.energy_since_2 = energy_since_2
@@ -72,19 +78,35 @@ class Enigma:
         self.unknown_1 = unknown_1
         self.unknown_2 = unknown_2
         self.stages = stages
+        self.extra = extra
 
     @staticmethod
     def init() -> Enigma:
-        return Enigma(0, 0, 0, 0, False, [])
+        return Enigma(0, 0, 0, 0, False, [], None)
 
     @staticmethod
-    def read(data: core.Data) -> Enigma:
+    def read(data: core.Data, game_version: core.GameVersion) -> Enigma:
         energy_since_1 = data.read_int()
         energy_since_2 = data.read_int()
         enigma_level = data.read_byte()
         unknown_1 = data.read_byte()
         unknown_2 = data.read_bool()
-        stages = [Stage.read(data) for _ in range(data.read_byte())]
+
+        total_stages = data.read_byte()
+
+        stages = [Stage.read(data) for _ in range(total_stages)]
+
+        extra_data = None
+
+        if game_version >= 140500:
+            has_extra = data.read_bool()
+            if has_extra:
+                extra_data = (
+                    data.read_int(),
+                    data.read_int(),
+                    data.read_byte(),
+                    data.read_double(),
+                )
         return Enigma(
             energy_since_1,
             energy_since_2,
@@ -92,9 +114,10 @@ class Enigma:
             unknown_1,
             unknown_2,
             stages,
+            extra_data,
         )
 
-    def write(self, data: core.Data):
+    def write(self, data: core.Data, game_version: core.GameVersion):
         data.write_int(self.energy_since_1)
         data.write_int(self.energy_since_2)
         data.write_byte(self.enigma_level)
@@ -104,6 +127,14 @@ class Enigma:
         for stage in self.stages:
             stage.write(data)
 
+        if game_version >= 140500:
+            data.write_bool(self.extra is not None)
+            if self.extra is not None:
+                data.write_int(self.extra[0])
+                data.write_int(self.extra[1])
+                data.write_byte(self.extra[2])
+                data.write_double(self.extra[3])
+
     def serialize(self) -> dict[str, Any]:
         return {
             "energy_since_1": self.energy_since_1,
@@ -112,6 +143,7 @@ class Enigma:
             "unknown_1": self.unknown_1,
             "unknown_2": self.unknown_2,
             "stages": [stage.serialize() for stage in self.stages],
+            "extra": self.extra,
         }
 
     @staticmethod
@@ -123,10 +155,11 @@ class Enigma:
             data.get("unknown_1", 0),
             data.get("unknown_2", False),
             [Stage.deserialize(stage) for stage in data.get("stages", [])],
+            data.get("extra", None),
         )
 
     def __repr__(self):
-        return f"Enigma({self.energy_since_1}, {self.energy_since_2}, {self.enigma_level}, {self.unknown_1}, {self.unknown_2}, {self.stages})"
+        return f"Enigma({self.energy_since_1}, {self.energy_since_2}, {self.enigma_level}, {self.unknown_1}, {self.unknown_2}, {self.stages}, {self.extra})"
 
     def __str__(self):
         return self.__repr__()

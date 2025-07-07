@@ -729,7 +729,9 @@ def serialise_cleared_slots(
     return save_data
 
 
-def serialise_enigma_data(save_data: list[int], enigma_data: dict[str, Any]):
+def serialise_enigma_data(
+    save_data: list[int], enigma_data: dict[str, Any], game_version: int
+):
     """
     Serialises the enigma data
 
@@ -749,6 +751,18 @@ def serialise_enigma_data(save_data: list[int], enigma_data: dict[str, Any]):
         save_data = write(save_data, stage["stage_id"], 4)
         save_data = write(save_data, stage["decoding_status"], 1)
         save_data = write_double(save_data, stage["start_time"])
+
+    if game_version >= 140500:
+        extra_data = enigma_data.get("extra_data")
+        if extra_data is not None:
+            save_data = write(save_data, 1, 1)
+
+            save_data = write(save_data, extra_data[0], 4)
+            save_data = write(save_data, extra_data[1], 4)
+            save_data = write(save_data, extra_data[2], 1)
+            save_data = write_double(save_data, extra_data[3])
+        else:
+            save_data = write(save_data, 0, 1)
 
     return save_data
 
@@ -1380,7 +1394,9 @@ def serialize_save(save_stats: dict[str, Any]) -> bytes:
     save_data = write_length_data(
         save_data, save_stats["unknown_80"], bytes_per_val=1, write_length=False
     )
-    save_data = serialise_enigma_data(save_data, save_stats["enigma_data"])
+    save_data = serialise_enigma_data(
+        save_data, save_stats["enigma_data"], save_stats["game_version"]["Value"]
+    )
     save_data = serialise_cleared_slots(save_data, save_stats["cleared_slot_data"])
 
     save_data = serialise_dumped_data(save_data, save_stats["unknown_121"])

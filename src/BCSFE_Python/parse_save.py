@@ -707,7 +707,7 @@ def get_data_after_challenge() -> list[dict[str, int]]:
     return data
 
 
-def get_data_after_tower() -> list[dict[str, int]]:
+def get_data_after_tower(game_version: int) -> list[dict[str, int]]:
     data: list[dict[str, int]] = []
 
     gv_66 = next_int_len(4)  # 0x42
@@ -717,6 +717,10 @@ def get_data_after_tower() -> list[dict[str, int]]:
     data.append(next_int_len(1 * 3))
     data.append(next_int_len(4 * 3))
     data.append(next_int_len(1 * 3))
+
+    if game_version >= 140500:
+        data.append(next_int_len(4))
+
     data.append(next_int_len(1))
     data.append(next_int_len(8))
 
@@ -1232,7 +1236,7 @@ class ClearedSlots:
         )
 
 
-def get_enigma_stages() -> dict[str, Any]:
+def get_enigma_stages(game_version: int) -> dict[str, Any]:
     """
     Gets the enigma stages
 
@@ -1258,6 +1262,15 @@ def get_enigma_stages() -> dict[str, Any]:
         data["start_time"] = get_double()
         stages.append(data)
     enigma_data["stages"] = stages
+
+    extra_data = None
+    if game_version >= 140500:
+        has_extra = next_int(1)
+        if has_extra:
+            extra_data = (next_int(4), next_int(4), next_int(1), get_double())
+
+    enigma_data["extra_data"] = extra_data
+
     return enigma_data
 
 
@@ -2251,7 +2264,7 @@ def parse_save(
     save_stats["tower"] = get_ht_it_data()
     save_stats["missions"] = get_mission_data()
     save_stats["tower_item_obtained"] = get_tower_item_obtained()
-    save_stats["unknown_61"] = get_data_after_tower()
+    save_stats["unknown_61"] = get_data_after_tower(save_stats["game_version"]["Value"])
 
     save_stats["challenge"] = {"Score": next_int_len(4), "Cleared": next_int_len(1)}
 
@@ -2371,7 +2384,7 @@ def parse_save(
 
     save_stats["unknown_80"] = get_length_data(4, 1, lengths["total"])
 
-    save_stats["enigma_data"] = get_enigma_stages()
+    save_stats["enigma_data"] = get_enigma_stages(save_stats["game_version"]["Value"])
     data = get_cleared_slots()
     save_stats["cleared_slot_data"] = data[0]
 

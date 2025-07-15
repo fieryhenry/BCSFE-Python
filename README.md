@@ -348,7 +348,7 @@ add more documentation in the future.
 
 ## Contributing
 
-If you want to contribute to the BCSFE, I recommend joining the [Discord Server] and starting a
+If you want to contribute to the BCSFE, I recommend joining the [Discord Server](https://discord.gg/DvmMgvn5ZB) and starting a
 discussion in #dev-chat, or create an issue in this repo, or a draft pull request.
 
 If you need help with reverse engineering the save file, I have a basic starting guide here:

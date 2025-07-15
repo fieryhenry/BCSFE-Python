@@ -338,8 +338,6 @@ py -m bcsfe
 
 If you want to use the editor again all you need to do is run the `py -m bcsfe` command
 
-
-
 ## Documentation
 
 - [Custom Editor Locales](https://github.com/fieryhenry/ExampleEditorLocale)
@@ -347,6 +345,14 @@ If you want to use the editor again all you need to do is run the `py -m bcsfe` 
 
 I only have documentation for the locales and themes atm, but I will probably
 add more documentation in the future.
+
+## Contributing
+
+If you want to contribute to the BCSFE, I recommend joining the [Discord Server] and starting a
+discussion in #dev-chat, or create an issue in this repo, or a draft pull request.
+
+If you need help with reverse engineering the save file, I have a basic starting guide here:
+<https://codeberg.org/fieryhenry/bc_ree>.
 
 ## License
 

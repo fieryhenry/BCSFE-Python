@@ -200,9 +200,7 @@ class TalentData:
                 return skill
         return None
 
-    def get_talent_from_cat_skill(
-        self, cat: core.Cat, skill_id: int
-    ) -> Talent | None:
+    def get_talent_from_cat_skill(self, cat: core.Cat, skill_id: int) -> Talent | None:
         talents = cat.talents
         if talents is None:
             return None
@@ -217,9 +215,7 @@ class TalentData:
             return None
         return self.get_skill_name(skill.text_id)
 
-    def get_cat_skill_level(
-        self, cat_id: int, skill_id: int
-    ) -> SkillLevel | None:
+    def get_cat_skill_level(self, cat_id: int, skill_id: int) -> SkillLevel | None:
         skill = self.get_skill_from_cat(cat_id, skill_id)
         if skill is None:
             return None
@@ -553,26 +549,20 @@ class Cat:
     def unlock(self, save_file: core.SaveFile):
         self.unlocked = 1
         self.gatya_seen = 1
-        core.core_data.get_chara_drop(save_file).unlock_drops_from_cat_id(
-            self.id
-        )
+        core.core_data.get_chara_drop(save_file).unlock_drops_from_cat_id(self.id)
         save_file.unlock_equip_menu()
 
-    def remove(
-        self, reset: bool = False, save_file: core.SaveFile | None = None
-    ):
+    def remove(self, reset: bool = False, save_file: core.SaveFile | None = None):
         self.unlocked = 0
         if reset:
             self.reset()
             if save_file is not None:
                 save_file.cats.chara_new_flags[self.id] = 0
-                core.core_data.get_chara_drop(
-                    save_file
-                ).remove_drops_from_cat_id(self.id)
+                core.core_data.get_chara_drop(save_file).remove_drops_from_cat_id(
+                    self.id
+                )
 
-    def true_form(
-        self, save_file: core.SaveFile, set_current_form: bool = True
-    ):
+    def true_form(self, save_file: core.SaveFile, set_current_form: bool = True):
         self.set_form(2, save_file, set_current_form)
 
     def set_form(
@@ -738,9 +728,7 @@ class Cat:
         cat.current_form = data["current_form"]
         cat.unlocked_forms = data["unlocked_forms"]
         cat.gatya_seen = data["gatya_seen"]
-        cat.max_upgrade_level = core.Upgrade.deserialize(
-            data["max_upgrade_level"]
-        )
+        cat.max_upgrade_level = core.Upgrade.deserialize(data["max_upgrade_level"])
         cat.catguide_collected = data["catguide_collected"]
         cat.fourth_form = data["fourth_form"]
         cat.catseyes_used = data["catseyes_used"]
@@ -782,9 +770,7 @@ class Cat:
         save_file: core.SaveFile,
         localizable: core.Localizable,
     ) -> list[str] | None:
-        file_name = (
-            f"Unit_Explanation{id + 1}_{core.core_data.get_lang(save_file)}.csv"
-        )
+        file_name = f"Unit_Explanation{id + 1}_{core.core_data.get_lang(save_file)}.csv"
         data = core.core_data.get_game_data_getter(save_file).download(
             "resLocal", file_name
         )
@@ -837,22 +823,16 @@ class StorageItem:
         return item
 
     def __repr__(self) -> str:
-        return (
-            f"StorageItem(item_id={self.item_id}, item_type={self.item_type})"
-        )
+        return f"StorageItem(item_id={self.item_id}, item_type={self.item_type})"
 
     def __str__(self) -> str:
-        return (
-            f"StorageItem(item_id={self.item_id}, item_type={self.item_type})"
-        )
+        return f"StorageItem(item_id={self.item_id}, item_type={self.item_type})"
 
 
 class Cats:
     def __init__(self, cats: list[Cat], total_storage_items: int = 0):
         self.cats = cats
-        self.storage_items = [
-            StorageItem.init() for _ in range(total_storage_items)
-        ]
+        self.storage_items = [StorageItem.init() for _ in range(total_storage_items)]
         self.favourites: dict[int, bool] = {}
         self.chara_new_flags: dict[int, int] = {}
         self.unit_buy: UnitBuy | None = None
@@ -913,9 +893,7 @@ class Cats:
             self.unit_limit = UnitLimit(save_file)
         return self.unit_limit
 
-    def read_nyanko_picture_book(
-        self, save_file: core.SaveFile
-    ) -> NyankoPictureBook:
+    def read_nyanko_picture_book(self, save_file: core.SaveFile) -> NyankoPictureBook:
         if self.nyanko_picture_book is None:
             self.nyanko_picture_book = NyankoPictureBook(save_file)
         return self.nyanko_picture_book
@@ -925,15 +903,9 @@ class Cats:
             self.talent_data = TalentData.from_game_data(save_file)
         return self.talent_data
 
-    def get_cats_rarity(
-        self, save_file: core.SaveFile, rarity: int
-    ) -> list[Cat]:
+    def get_cats_rarity(self, save_file: core.SaveFile, rarity: int) -> list[Cat]:
         unit_buy = self.read_unitbuy(save_file)
-        return [
-            cat
-            for cat in self.cats
-            if unit_buy.get_cat_rarity(cat.id) == rarity
-        ]
+        return [cat for cat in self.cats if unit_buy.get_cat_rarity(cat.id) == rarity]
 
     def get_cats_name(
         self,
@@ -983,9 +955,7 @@ class Cats:
                 cats.append(cat)
         return cats
 
-    def get_cats_non_obtainable(
-        self, save_file: core.SaveFile
-    ) -> list[Cat] | None:
+    def get_cats_non_obtainable(self, save_file: core.SaveFile) -> list[Cat] | None:
         nyanko_picture_book = self.read_nyanko_picture_book(save_file)
         obtainable_cats = nyanko_picture_book.get_obtainable_cats()
         if obtainable_cats is None:
@@ -1000,9 +970,7 @@ class Cats:
     def get_cats_gatya_banner(
         self, save_file: core.SaveFile, gatya_id: int
     ) -> list[core.Cat] | None:
-        cat_ids = save_file.gatya.read_gatya_data_set(save_file).get_cat_ids(
-            gatya_id
-        )
+        cat_ids = save_file.gatya.read_gatya_data_set(save_file).get_cat_ids(gatya_id)
         if cat_ids is None:
             return None
         return self.get_cats_by_ids(cat_ids)
@@ -1037,9 +1005,7 @@ class Cats:
         for cat in cats:
             pic_book_cat = pic_book.get_cat(cat.id)
             if force:
-                cat.unlock_fourth_form(
-                    save_file, set_current_form=set_current_forms
-                )
+                cat.unlock_fourth_form(save_file, set_current_form=set_current_forms)
             elif pic_book_cat is not None:
                 cat.set_form_true(
                     save_file,
@@ -1269,8 +1235,7 @@ class Cats:
         cats_l = [Cat.deserialize(cat) for cat in data.get("cats", [])]
         cats = Cats(cats_l)
         cats.storage_items = [
-            StorageItem.deserialize(item)
-            for item in data.get("storage_items", [])
+            StorageItem.deserialize(item) for item in data.get("storage_items", [])
         ]
         cats.favourites = data.get("favorites", {})
         cats.chara_new_flags = data.get("chara_new_flags", {})

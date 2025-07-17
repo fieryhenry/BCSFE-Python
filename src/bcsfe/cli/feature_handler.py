@@ -146,13 +146,15 @@ class FeatureHandler:
         name: str,
         parent_path: str = "",
         features: dict[str, Any] | None = None,
-        found_features: set[str] | None = None,
-    ) -> set[str]:
-        name = name.lower().replace(" ", "")
+        found_features: dict[str, int] | None = None,
+    ) -> dict[str, int]:
+        name = name.lower()
         if features is None:
             features = self.get_features()
         if found_features is None:
-            found_features = set()
+            found_features = {}
+
+        is_fuzzy = core.core_data.config.get_bool(core.ConfigKey.FUZZY_FEATURE_SELECT)
 
         for feature_name_key, feature in features.items():
             feature_name = core.core_data.local_manager.get_key(feature_name_key)
@@ -169,8 +171,24 @@ class FeatureHandler:
                     )
                 )
             for alias in core.LocalManager.get_all_aliases(feature_name):
-                if name in alias.lower().replace(" ", "") or name == "":
-                    found_features.add(path)
+                if not name:
+                    found_features[path] = 100
+                    break
+                alias = alias.lower()
+
+                if is_fuzzy:
+                    from fuzzywuzzy import fuzz
+
+                    ratio = fuzz.partial_ratio(name, alias)
+                else:
+                    name = name.replace(" ", "")
+                    alias = alias.replace(" ", "")
+                    if alias in name or name in alias:
+                        ratio = 100
+                    else:
+                        ratio = 0
+                if ratio > 75:
+                    found_features[path] = ratio
                     break
 
         return found_features
@@ -220,7 +238,10 @@ class FeatureHandler:
                     selected_features.append(feature_path)
 
         else:
-            selected_features = list(self.search_features(usr_input))
+            feats = self.search_features(usr_input)
+            kv_map = list(feats.items())
+            kv_map.sort(key=lambda v: v[1], reverse=True)
+            selected_features = [v[0] for v in kv_map]
 
         return selected_features
 

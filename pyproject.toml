@@ -25,6 +25,8 @@ dependencies = [
   "pyyaml",
   "beautifulsoup4",
   "argparse",
+  "levenshtein",
+  "fuzzywuzzy",
 ]
 dynamic = ["version"]
 keywords = ["battle cats", "save editor", "hacking"]

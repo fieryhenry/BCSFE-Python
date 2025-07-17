@@ -27,6 +27,7 @@ class ConfigKey(enum.Enum):
     ADB_PATH = "adb_path"
     IGNORE_PARSE_ERROR = "ignore_parse_error"
     USE_WAYDROID = "use_waydroid"
+    FUZZY_FEATURE_SELECT = "fuzzy_feature_select"
 
 
 class Config:
@@ -78,6 +79,7 @@ class Config:
             ConfigKey.ADB_PATH: "adb",
             ConfigKey.IGNORE_PARSE_ERROR: False,
             ConfigKey.USE_WAYDROID: False,
+            ConfigKey.FUZZY_FEATURE_SELECT: False,
         }
         return initial_values
 

@@ -1248,7 +1248,7 @@ class SaveFile:
                     bool,
                     bool,
                     bool,
-                    int | None,
+                    str | None,
                     bool,
                 ]
             ] = []
@@ -1267,9 +1267,10 @@ class SaveFile:
                 val_11 = self.data.read_bool()
 
                 val_12 = None
+
                 if self.game_version >= 140500:
                     # game seems to read more than just this, may break in the future
-                    val_12 = self.data.read_int()
+                    val_12 = self.data.read_string()
 
                 val_13 = self.data.read_bool()
 
@@ -2335,7 +2336,7 @@ class SaveFile:
                 self.data.write_bool(v11)
                 if self.game_version >= 140500:
                     # game seems to write more than this, may not work with all saves
-                    self.data.write_int(v12 or 0)
+                    self.data.write_string(v12 or "")
 
                 self.data.write_bool(v13)
 

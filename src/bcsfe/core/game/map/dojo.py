@@ -146,7 +146,7 @@ class Ranking:
         should_show_rank_description: bool,
         should_show_start_message: bool,
         submit_error_flag: bool,
-        other: int | None,
+        other: str | None,
     ):
         self.score = score
         self.ranking = ranking
@@ -194,7 +194,8 @@ class Ranking:
         submit_error_flag = stream.read_bool()
 
         if game_version >= 140500:
-            other = stream.read_int()
+            # game seems to do more that just this, may break in the future
+            other = stream.read_string()
         else:
             other = None
         return Ranking(
@@ -225,7 +226,8 @@ class Ranking:
         stream.write_bool(self.should_show_start_message)
         stream.write_bool(self.submit_error_flag)
         if game_version >= 140500:
-            stream.write_int(self.other or 0)
+            # game seems to do more that just this, may break in the future
+            stream.write_string(self.other or "")
 
     def read_did_win_rewards(self, stream: core.Data):
         self.did_win_rewards = stream.read_bool()

@@ -740,7 +740,7 @@ class Cat:
         return cat
 
     def __repr__(self) -> str:
-        return f"Cat(id={id}, unlocked={self.unlocked}, upgrade={self.upgrade}, current_form={self.current_form}, unlocked_forms={self.unlocked_forms}, gatya_seen={self.gatya_seen}, max_upgrade_level={self.max_upgrade_level}, catguide_collected={self.catguide_collected}, fourth_form={self.fourth_form}, catseyes_used={self.catseyes_used}, talents={self.talents})"
+        return f"Cat(id={self.id}, unlocked={self.unlocked}, upgrade={self.upgrade}, current_form={self.current_form}, unlocked_forms={self.unlocked_forms}, gatya_seen={self.gatya_seen}, max_upgrade_level={self.max_upgrade_level}, catguide_collected={self.catguide_collected}, fourth_form={self.fourth_form}, catseyes_used={self.catseyes_used}, talents={self.talents})"
 
     def __str__(self) -> str:
         return self.__repr__()

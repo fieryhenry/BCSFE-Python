@@ -50,6 +50,7 @@ class BasicItems:
 
     @staticmethod
     def edit_100_million_ticket(save_file: core.SaveFile):
+        color.ColoredText.localize("100_million_warn")
         name = core.core_data.get_gatya_item_names(save_file).get_name(212)
         save_file.hundred_million_ticket = dialog_creator.SingleEditor(
             BasicItems.get_name(name, "100_million_tickets"),

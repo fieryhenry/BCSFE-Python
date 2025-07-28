@@ -25,6 +25,13 @@ def main():
         default=None,
         help="path to the config file. If unspecified defaults to Documents/bcsfe/config.yaml",
     )
+    parser.add_argument(
+        "--log-path",
+        "-l",
+        type=str,
+        default=None,
+        help="path to the log file. If unspecified defaults to Documents/bcsfe/bcsfe.log",
+    )
 
     args = parser.parse_args()
     if args.version:
@@ -33,6 +40,9 @@ def main():
 
     if args.config_path is not None:
         core.set_config_path(core.Path(args.config_path))
+
+    if args.log_path is not None:
+        core.set_log_path(core.Path(args.log_path))
 
     core.core_data.init_data()
 

@@ -577,10 +577,13 @@ class ServerHandler:
                 .generate_dirs()
                 .add("transfer_backup")
             )
-            temp_path.write(core.Data(save_data))
-
-            if print:
-                color.ColoredText.localize("transfer_backup", path=str(temp_path))
+            try:
+                temp_path.write(core.Data(save_data))
+            except Exception as e:
+                color.ColoredText.localize("transfer_backup_fail", path=str(temp_path), error=e)
+            else:
+                if print:
+                    color.ColoredText.localize("transfer_backup", path=str(temp_path))
 
         save_file = core.SaveFile(core.Data(save_data))
 

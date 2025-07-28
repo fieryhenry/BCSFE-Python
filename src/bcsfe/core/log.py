@@ -7,12 +7,21 @@ import time
 
 
 class Logger:
-    def __init__(self):
+    def __init__(self, path: core.Path | None):
         """
         Initializes a Logger object
         """
-        self.log_file = core.Path.get_documents_folder().add("bcsfe.log")
-        self.log_data = self.log_file.read(True).split(b"\n")
+        if path is None:
+            path = core.Path.get_documents_folder().add("bcsfe.log")
+        self.log_file = path
+        try:
+            self.log_data = self.log_file.read(True).split(b"\n")
+        except Exception as e:
+            self.log_data = None
+
+    def is_log_enabled(self) -> bool:
+        return self.log_data is not None
+        
 
     def get_time(self) -> str:
         """
@@ -30,6 +39,8 @@ class Logger:
         Args:
             message (str): The message to log
         """
+        if self.log_data is None:
+            return
         self.log_data.append(
             core.Data(f"[DEBUG]::{self.get_time()} - {message}")
         )
@@ -42,6 +53,8 @@ class Logger:
         Args:
             message (str): The message to log
         """
+        if self.log_data is None:
+            return
         self.log_data.append(
             core.Data(f"[INFO]::{self.get_time()} - {message}")
         )
@@ -54,6 +67,8 @@ class Logger:
         Args:
             message (str): The message to log
         """
+        if self.log_data is None:
+            return
         self.log_data.append(
             core.Data(f"[WARNING]::{self.get_time()} - {message}")
         )
@@ -66,6 +81,8 @@ class Logger:
         Args:
             message (str): The message to log
         """
+        if self.log_data is None:
+            return
         self.log_data.append(
             core.Data(f"[ERROR]::{self.get_time()} - {message}")
         )
@@ -87,6 +104,8 @@ class Logger:
         """
         Writes the log data to the log file
         """
+        if self.log_data is None:
+            return
         self.log_file.write(
             core.Data.from_many(self.log_data, core.Data("\n")).strip()
         )

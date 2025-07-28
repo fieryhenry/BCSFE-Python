@@ -165,7 +165,7 @@ from bcsfe.core.max_value_helper import MaxValueHelper
 class CoreData:
     def init_data(self):
         self.config = Config(config_path)
-        self.logger = Logger()
+        self.logger = Logger(log_path)
         self.local_manager = LocalManager()
         self.theme_manager = ThemeHandler()
         self.max_value_manager = MaxValueHelper()
@@ -277,11 +277,16 @@ class CoreData:
 
 
 config_path = None
+log_path = None
 
 
 def set_config_path(path: Path):
     global config_path
     config_path = path
+
+def set_log_path(path: Path):
+    global log_path
+    log_path = path
 
 
 def update_external_content(_: Any = None):

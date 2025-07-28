@@ -256,7 +256,10 @@ class GatyaInfo:
         )
 
     def save_data(self, data: core.Data):
-        data.to_file(self.get_file_path())
+        try:
+            data.to_file(self.get_file_path())
+        except Exception as e:
+            color.ColoredText.localize("save_gatya_error", error=e)
         self.data = data
 
     def load_data_from_file(

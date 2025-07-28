@@ -629,10 +629,11 @@ class StringInput:
         if perameters is None:
             perameters = {}
         usr_input = color.ColoredInput().localize(key, escape, **perameters)
-        if usr_input == "" or usr_input == core.core_data.local_manager.get_key(
-            "quit_key"
-        ):
+        quit_key = core.core_data.local_manager.get_key("quit_key")
+        if usr_input == "" or usr_input == quit_key:
             return None
+        if usr_input == f"\\{quit_key}":
+            return quit_key
         return usr_input
 
 

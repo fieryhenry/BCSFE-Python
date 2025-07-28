@@ -22,10 +22,10 @@ class YamlFile:
                 self.save()
         else:
             self.yaml = {}
-            self.path.parent().generate_dirs()
             self.save()
 
     def save(self) -> None:
+        self.path.parent().generate_dirs()
         with open(self.path.path, "w", encoding="utf-8") as f:
             yaml.dump(self.yaml, f)
 

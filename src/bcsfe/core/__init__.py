@@ -164,7 +164,7 @@ from bcsfe.core.max_value_helper import MaxValueHelper
 
 class CoreData:
     def init_data(self):
-        self.config = Config()
+        self.config = Config(config_path)
         self.logger = Logger()
         self.local_manager = LocalManager()
         self.theme_manager = ThemeHandler()
@@ -276,6 +276,14 @@ class CoreData:
         return self.get_localizable(save).get_lang() or "en"
 
 
+config_path = None
+
+
+def set_config_path(path: Path):
+    global config_path
+    config_path = path
+
+
 def update_external_content(_: Any = None):
     """Updates external content."""
 
@@ -291,7 +299,6 @@ def print_no_internet():
 
 
 core_data = CoreData()
-core_data.init_data()
 
 
 def localize(key: str, escape: bool = True, **kwargs: Any) -> str:

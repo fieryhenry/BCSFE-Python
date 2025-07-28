@@ -31,8 +31,10 @@ class ConfigKey(enum.Enum):
 
 
 class Config:
-    def __init__(self):
-        config = core.YamlFile(Config.get_config_path())
+    def __init__(self, path: core.Path | None):
+        if path is None:
+            path = Config.get_config_path()
+        config = core.YamlFile(path)
         self.config: dict[ConfigKey, Any] = {}
         for key, value in config.yaml.items():
             try:

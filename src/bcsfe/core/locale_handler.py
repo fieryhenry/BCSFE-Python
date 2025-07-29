@@ -17,8 +17,9 @@ class PropertySet:
             property (str): Name of the property file.
         """
         self.locale = locale
+        self.property = property
         self.path = LocalManager.get_locale_folder(locale).add(property + ".properties")
-        self.properties: dict[str, str] = {}
+        self.properties: dict[str, tuple[str, str]] = {}
         self.parse()
 
     def parse(self):
@@ -49,7 +50,7 @@ class PropertySet:
                     multi_line_text += line[1:]
                 else:
                     multi_line_text = multi_line_text[:-1]  # remove extra newline
-                self.properties[multi_line_key] = multi_line_text
+                self.properties[multi_line_key] = (multi_line_text, self.property)
                 multi_line_text = ""
                 multi_line_key = ""
             if line.startswith("#") or not line:
@@ -68,7 +69,7 @@ class PropertySet:
                 value = "=".join(parts[1:])
                 if key in self.properties:
                     raise KeyError(f"Key {key} already exists in property file")
-                self.properties[key] = value
+                self.properties[key] = (value, self.property)
 
             i += 1
 
@@ -81,7 +82,9 @@ class PropertySet:
         Returns:
             str: Value of the key.
         """
-        return self.properties.get(key, key).replace("\\n", "\n").replace("\\t", "\t")
+        return (
+            self.properties.get(key, key)[0].replace("\\n", "\n").replace("\\t", "\t")
+        )
 
     @staticmethod
     def from_config(property: str) -> PropertySet:
@@ -115,8 +118,8 @@ class LocalManager:
         self.locale = lc
         self.path = LocalManager.get_locale_folder(lc)
         self.properties: dict[str, PropertySet] = {}
-        self.all_properties: dict[str, str] = {}
-        self.en_properties: dict[str, str] = {}
+        self.all_properties: dict[str, tuple[str, str]] = {}
+        self.en_properties: dict[str, tuple[str, str]] = {}
         self.en_properties_path = LocalManager.get_locale_folder("en")
         self.authors: list[str] = ["fieryhenry"]
         self.name: str = "English"
@@ -147,15 +150,15 @@ class LocalManager:
 
             print()
 
-    def get_missing_keys(self) -> list[str]:
+    def get_missing_keys(self) -> list[tuple[str, str]]:
         missing = set(self.en_properties.keys()) - set(self.all_properties.keys())
 
-        return list(missing)
+        return [(key, self.en_properties[key][1] + ".properties") for key in missing]
 
-    def get_extra_keys(self) -> list[str]:
+    def get_extra_keys(self) -> list[tuple[str, str]]:
         extra = set(self.all_properties.keys()) - set(self.en_properties.keys())
 
-        return list(extra)
+        return [(key, self.all_properties[key][1] + ".properties") for key in extra]
 
     def parse(self):
         """Parses all property files in the locale folder recursively."""
@@ -340,8 +343,8 @@ class LocalManager:
     ) -> str:
         value = self.all_properties.get(key)
         if value is None:
-            value = self.en_properties.get(key, key)
-        value = value.replace("\\n", "\n").replace("\\t", "\t")
+            value = self.en_properties.get(key, (key, key))
+        value = value[0].replace("\\n", "\n").replace("\\t", "\t")
         # replace {{key}} with the value of the key
         if "{{" not in value:
             return value

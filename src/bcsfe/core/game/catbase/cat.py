@@ -757,18 +757,15 @@ class Cat:
         for talent in self.talents:
             talent.write(stream)
 
-    def get_names_cls(
-        self, save_file: core.SaveFile, localizable: core.Localizable
-    ) -> list[str] | None:
+    def get_names_cls(self, save_file: core.SaveFile) -> list[str] | None:
         if self.names is None:
-            self.names = Cat.get_names(self.id, save_file, localizable)
+            self.names = Cat.get_names(self.id, save_file)
         return self.names
 
     @staticmethod
     def get_names(
         id: int,
         save_file: core.SaveFile,
-        localizable: core.Localizable,
     ) -> list[str] | None:
         file_name = f"Unit_Explanation{id + 1}_{core.core_data.get_lang(save_file)}.csv"
         data = core.core_data.get_game_data_getter(save_file).download(
@@ -913,10 +910,9 @@ class Cats:
         search_name: str,
     ) -> list[Cat]:
         self.bulk_download_names(save_file)
-        localizable = save_file.get_localizable()
         cats: list[Cat] = []
         for cat in self.cats:
-            names = cat.get_names_cls(save_file, localizable)
+            names = cat.get_names_cls(save_file)
             if names is None:
                 continue
             for name in names:

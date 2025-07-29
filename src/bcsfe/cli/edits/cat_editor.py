@@ -48,9 +48,8 @@ class CatEditor:
             color.ColoredText.localize("total_selected_cats", total=len(current_cats))
         else:
             self.save_file.cats.bulk_download_names(self.save_file)
-            localizable = self.save_file.get_localizable()
             for cat in current_cats:
-                names = cat.get_names_cls(self.save_file, localizable)
+                names = cat.get_names_cls(self.save_file)
                 if not names:
                     names = [str(cat.id)]
                 color.ColoredText.localize("selected_cat", id=cat.id, name=names[0])
@@ -159,11 +158,10 @@ class CatEditor:
         if not cats:
             color.ColoredText.localize("no_cats_found_name", name=usr_name)
             return None
-        localizable = self.save_file.get_localizable()
         cat_names: list[str] = []
         cat_list: list[core.Cat] = []
         for cat in cats:
-            names = cat.get_names_cls(self.save_file, localizable)
+            names = cat.get_names_cls(self.save_file)
             if not names:
                 names = [str(cat.id)]
             for name in names:
@@ -326,9 +324,8 @@ class CatEditor:
             option_id -= 1
         success = False
         if option_id == 0:
-            localizable = self.save_file.get_localizable()
             for cat in cats:
-                names = cat.get_names_cls(self.save_file, localizable)
+                names = cat.get_names_cls(self.save_file)
                 if not names:
                     names = [str(cat.id)]
                 color.ColoredText.localize(
@@ -432,11 +429,10 @@ class CatEditor:
         if talent_data is None:
             return
         if option_id == 0:
-            localizable = self.save_file.get_localizable()
             for cat in cats:
                 if cat.talents is None:
                     continue
-                names = cat.get_names_cls(self.save_file, localizable)
+                names = cat.get_names_cls(self.save_file)
                 if not names:
                     names = [str(cat.id)]
                 color.ColoredText.localize(

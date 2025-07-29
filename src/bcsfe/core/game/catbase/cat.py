@@ -936,7 +936,6 @@ class Cats:
                 if gdg.is_downloaded("resLocal", file_name):
                     continue
                 file_names.append(file_name)
-                cat.names = []
 
         core.core_data.get_game_data_getter(save_file).download_all(
             "resLocal", file_names

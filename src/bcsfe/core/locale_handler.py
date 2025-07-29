@@ -150,15 +150,29 @@ class LocalManager:
 
             print()
 
-    def get_missing_keys(self) -> list[tuple[str, str]]:
+    def get_missing_keys(self) -> list[tuple[str, str, str]]:
         missing = set(self.en_properties.keys()) - set(self.all_properties.keys())
 
-        return [(key, self.en_properties[key][1] + ".properties") for key in missing]
+        return [
+            (
+                key,
+                self.en_properties[key][0],
+                self.en_properties[key][1] + ".properties",
+            )
+            for key in missing
+        ]
 
     def get_extra_keys(self) -> list[tuple[str, str]]:
         extra = set(self.all_properties.keys()) - set(self.en_properties.keys())
 
-        return [(key, self.all_properties[key][1] + ".properties") for key in extra]
+        return [
+            (
+                key,
+                self.all_properties[key][0],
+                self.all_properties[key][1] + ".properties",
+            )
+            for key in extra
+        ]
 
     def parse(self):
         """Parses all property files in the locale folder recursively."""

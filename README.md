@@ -23,6 +23,10 @@ Anyone who has supported my on [Ko-Fi](https://ko-fi.com/fieryhenry) or [LiberaP
 Everyone who's given me saves, which helped to test save loading/saving and to
 test/develop new features
 
+### Localization
+
+- HungJoesifer for Vietnamese localization
+
 ## Installation
 
 Note the following tutorials are for the device you wish to run the editor on, not the device

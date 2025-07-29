@@ -324,7 +324,6 @@ If you want the latest features then you can install the editor from the github.
 ```sh
 git clone https://github.com/fieryhenry/BCSFE-Python.git
 cd BCSFE-Python
-git checkout 3.0.0
 py -m pip install -e .
 py -m bcsfe
 ```
@@ -332,13 +331,13 @@ py -m bcsfe
 Then if you want the latest changes you only need to run `git pull` in the downloaded
 `BCSFE-Python` folder. (use `cd` to change the folder)
 
-<!-- Alternatively you can use pip directly, although it won't auto-update with the latest -->
-<!-- git commits. -->
+Alternatively you can use pip directly, although it won't auto-update with the latest
+git commits.
 
-<!-- ```sh -->
-<!-- py -m pip install git+https://github.com/fieryhenry/BCSFE-Python.git -->
-<!-- py -m bcsfe -->
-<!-- ``` -->
+```sh
+py -m pip install git+https://github.com/fieryhenry/BCSFE-Python.git
+py -m bcsfe
+```
 
 If you want to use the editor again all you need to do is run the `py -m bcsfe` command
 

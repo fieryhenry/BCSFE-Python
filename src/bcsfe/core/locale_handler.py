@@ -34,31 +34,38 @@ class PropertySet:
         in_multi_line = False
         multi_line_text = ""
         multi_line_key = ""
+
         while i < len(lines):
             line = lines[i]
+            finish_multiline = False
+            if (in_multi_line and not line.startswith(">")) or (
+                in_multi_line and i == len(lines) - 1
+            ):
+                in_multi_line = False
+                finish_multiline = True
+                if multi_line_key in self.properties:
+                    raise KeyError(
+                        f"Key {multi_line_key} already exists in property file"
+                    )
+                if line.startswith(">"):
+                    multi_line_text += line[1:]
+                else:
+                    multi_line_text = multi_line_text[:-1]  # remove extra newline
+                self.properties[multi_line_key] = multi_line_text
+                multi_line_text = ""
+                multi_line_key = ""
             if line.startswith("#") or not line:
                 i += 1
                 continue
             if line.startswith(">") and in_multi_line:
                 multi_line_text += line[1:] + "\n"
-            if (in_multi_line and not line.startswith(">")) or (
-                in_multi_line and i == len(lines) - 1
-            ):
-                in_multi_line = False
-                if multi_line_key in self.properties:
-                    raise KeyError(
-                        f"Key {multi_line_key} already exists in property file"
-                    )
-                self.properties[multi_line_key] = multi_line_text[:-1]
-                multi_line_text = ""
-                multi_line_key = ""
 
             parts = line.split("=")
             if line.strip().endswith("="):
                 in_multi_line = True
                 multi_line_key = parts[0]
 
-            if not in_multi_line:
+            if not in_multi_line and not finish_multiline:
                 key = parts[0]
                 value = "=".join(parts[1:])
                 if key in self.properties:
@@ -76,11 +83,7 @@ class PropertySet:
         Returns:
             str: Value of the key.
         """
-        return (
-            self.properties.get(key, key)
-            .replace("\\n", "\n")
-            .replace("\\t", "\t")
-        )
+        return self.properties.get(key, key).replace("\\n", "\n").replace("\\t", "\t")
 
     @staticmethod
     def from_config(property: str) -> PropertySet:

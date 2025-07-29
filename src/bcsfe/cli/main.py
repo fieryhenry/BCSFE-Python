@@ -66,9 +66,7 @@ class Main:
         else:
             update_needed = False
 
-        show_message = core.core_data.config.get(
-            core.ConfigKey.SHOW_UPDATE_MESSAGE
-        )
+        show_message = core.core_data.config.get(core.ConfigKey.SHOW_UPDATE_MESSAGE)
         if not show_message:
             update_needed = False
 
@@ -86,9 +84,9 @@ class Main:
                     color.ColoredText.localize("update_fail")
                 sys.exit()
             else:
-                disable_message = dialog_creator.YesNoInput(
-                    False
-                ).get_input_once("disable_update_message")
+                disable_message = dialog_creator.YesNoInput(False).get_input_once(
+                    "disable_update_message"
+                )
                 if disable_message is None:
                     return
 
@@ -98,9 +96,7 @@ class Main:
 
     def print_start_text(self):
         external_theme = core.ExternalThemeManager.get_external_theme_config()
-        external_locale = (
-            core.ExternalLocaleManager.get_external_locale_config()
-        )
+        external_locale = core.ExternalLocaleManager.get_external_locale_config()
         if external_theme is None:
             theme_text = core.core_data.local_manager.get_key(
                 "default_theme_text",
@@ -119,9 +115,12 @@ class Main:
                 escape=False,
             )
         if external_locale is None:
+            authors = core.core_data.local_manager.authors
             locale_text = core.core_data.local_manager.get_key(
-                "default_locale_text",
-                path=core.LocalManager.get_locale_folder("en"),
+                "default_locale_text_authors",
+                path=core.core_data.local_manager.path,
+                authors=", ".join(authors),
+                name=core.core_data.local_manager.name,
                 escape=False,
             )
         else:

@@ -1,4 +1,5 @@
 """Module that runs when the module is run directly"""
+
 import os
 import sys
 import traceback
@@ -99,6 +100,10 @@ def check_update() -> None:
         if input().lower() == "y":
             updater.try_update(update_data[1])
             helper.exit_editor()
+
+    helper.colored_text(
+        f"{locale_manager.search_key('bcsfe_3.0.0')}", base=helper.RED, new=helper.WHITE
+    )
 
 
 def main():
@@ -274,4 +279,13 @@ if __name__ == "__main__":
             new=helper.WHITE,
         )
         traceback.print_exc()
+
+        print()
+
+        helper.colored_text(
+            locale_handler.LocalManager.from_config().search_key("bcsfe_3.0.0"),
+            base=helper.RED,
+            new=helper.WHITE,
+        )
+
         helper.exit_check_changes()

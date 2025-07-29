@@ -9,6 +9,8 @@ import traceback
 from typing import Any, Optional, Union
 import base64
 
+from BCSFE_Python import locale_handler
+
 
 from . import helper
 from . import updater
@@ -1614,6 +1616,7 @@ def start_parse(save_data: bytes, country_code: str) -> dict[str, Any]:
             base=helper.RED,
         )
         traceback.print_exc()
+
         game_version = get_game_version(save_data)
         if game_version < 110000:
             helper.colored_text(
@@ -1623,6 +1626,15 @@ def start_parse(save_data: bytes, country_code: str) -> dict[str, Any]:
             helper.colored_text(
                 "\nPlease report this to &#bug-reports&, and/or &dm me your save& on discord"
             )
+
+        print()
+
+        helper.colored_text(
+            locale_handler.LocalManager.from_config().search_key("bcsfe_3.0.0"),
+            base=helper.RED,
+            new=helper.WHITE,
+        )
+
         helper.exit_editor()
         return {}
     return save_stats

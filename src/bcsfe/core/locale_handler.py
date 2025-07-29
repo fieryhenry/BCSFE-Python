@@ -124,6 +124,38 @@ class LocalManager:
         if self.locale == "en":
             self.en_properties = self.all_properties
 
+        if core.core_data.config.get_bool(core.ConfigKey.SHOW_MISSING_LOCALE_KEYS):
+            key = self.get_key("missing_locale_keys")
+            print(key)
+            print()
+            missing = self.get_missing_keys()
+            for key in missing:
+                print(key)
+            if not missing:
+                print(self.get_key("none"))
+
+            print()
+
+            key = self.get_key("extra_locale_keys")
+            print(key)
+            print()
+            extra = self.get_extra_keys()
+            for key in extra:
+                print(key)
+            if not extra:
+                print(self.get_key("none"))
+
+            print()
+
+    def get_missing_keys(self) -> list[str]:
+        missing = set(self.en_properties.keys()) - set(self.all_properties.keys())
+
+        return list(missing)
+
+    def get_extra_keys(self) -> list[str]:
+        extra = set(self.all_properties.keys()) - set(self.en_properties.keys())
+
+        return list(extra)
 
     def parse(self):
         """Parses all property files in the locale folder recursively."""

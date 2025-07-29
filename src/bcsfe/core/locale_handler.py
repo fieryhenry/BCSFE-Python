@@ -162,7 +162,7 @@ class LocalManager:
             for key in missing
         ]
 
-    def get_extra_keys(self) -> list[tuple[str, str]]:
+    def get_extra_keys(self) -> list[tuple[str, str, str]]:
         extra = set(self.all_properties.keys()) - set(self.en_properties.keys())
 
         return [

@@ -1,0 +1,16 @@
+{
+  "short_name": "Discord Theme",
+  "name": "Discord Theme",
+  "description": "Discord-inspired dark mode theme",
+  "author": "HungJoesifer",
+  "version": "1.0.0",
+  "colors": {
+    "primary": "#F0F8FF",
+    "secondary": "#A6B3F8",
+    "tertiary": "#5865F2",
+    "quaternary": "#FFFFFF",
+    "error": "#ED4245",
+    "warning": "#F1C40F",
+    "success": "#57F287"
+  }
+}

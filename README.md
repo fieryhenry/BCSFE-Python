@@ -27,6 +27,10 @@ test/develop new features
 
 - HungJoesifer for Vietnamese localization
 
+### Themes
+
+- HungJoesifer for the `discord` inspired theme
+
 ## Installation
 
 Note the following tutorials are for the device you wish to run the editor on, not the device

@@ -1,4 +1,5 @@
 from __future__ import annotations
+import sys
 from typing import Any
 from bcsfe import core
 import bcsfe
@@ -63,7 +64,8 @@ class Updater:
         return releases.get(self.get_latest_version(prereleases))
 
     def update(self, target_version: str) -> bool:
-        python_aliases = ["py", "python", "python3"]
+        binary = sys.orig_argv[0]
+        python_aliases = [binary, "py", "python", "python3"]
         for python_alias in python_aliases:
             cmd = f"{python_alias} -m pip install --upgrade {self.package_name}=={target_version}"
             result = core.Path().run(cmd)

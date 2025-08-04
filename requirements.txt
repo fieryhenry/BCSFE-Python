@@ -5,5 +5,3 @@ PyYAML==6.0
 Requests==2.32.2
 beautifulsoup4=4.12.2
 argparse==1.4.0
-fuzzywuzzy==0.18.0
-levenshtein==0.27.1

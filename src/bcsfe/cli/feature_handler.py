@@ -154,8 +154,6 @@ class FeatureHandler:
         if found_features is None:
             found_features = {}
 
-        is_fuzzy = core.core_data.config.get_bool(core.ConfigKey.FUZZY_FEATURE_SELECT)
-
         for feature_name_key, feature in features.items():
             feature_name = core.core_data.local_manager.get_key(feature_name_key)
             path = (
@@ -176,20 +174,11 @@ class FeatureHandler:
                     break
                 alias = alias.lower()
 
-                if is_fuzzy:
-                    from fuzzywuzzy import fuzz
-
-                    ratio = fuzz.partial_ratio(name, alias)
-                else:
-                    name = name.replace(" ", "")
-                    alias = alias.replace(" ", "")
-                    if alias in name or name in alias:
-                        ratio = 100
-                    else:
-                        ratio = 0
-                if ratio > 75:
-                    found_features[path] = ratio
-                    break
+                name = name.replace(" ", "")
+                alias = alias.replace(" ", "")
+                if alias in name or name in alias:
+                    found_features[path] = 100
+                break
 
         return found_features
 

@@ -112,8 +112,13 @@ class Main:
         external_locale = core.ExternalLocaleManager.get_external_locale_config()
         if external_theme is None:
             theme_text = core.core_data.local_manager.get_key(
-                "default_theme_text",
-                theme_path=core.ThemeHandler.get_theme_path("default"),
+                "theme_text",
+                theme_path=core.ThemeHandler.get_theme_path(
+                    core.core_data.theme_manager.theme_code
+                ),
+                theme_version=core.core_data.theme_manager.get_version(),
+                theme_author=core.core_data.theme_manager.get_author(),
+                theme_name=core.core_data.theme_manager.get_name(),
                 escape=False,
             )
         else:

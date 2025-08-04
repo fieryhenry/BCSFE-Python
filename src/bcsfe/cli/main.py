@@ -47,6 +47,7 @@ class Main:
         has_pre_release = updater.has_enabled_pre_release()
         local_version = updater.get_local_version()
         latest_version = updater.get_latest_version(has_pre_release)
+
         if latest_version is None:
             color.ColoredText.localize("update_check_fail")
             return
@@ -57,14 +58,26 @@ class Main:
             latest_version=latest_version,
         )
 
-        if local_version.split("b")[0] == latest_version:
+        is_local_beta = "b" in local_version
+        is_latest_beta = "b" in latest_version
+
+        local_no_beta = local_version.split("b")[0]
+        latest_no_beta = latest_version.split("b")[0]
+
+        if latest_no_beta > local_no_beta:
             update_needed = True
-            if local_version == latest_version:
-                update_needed = False
-        elif local_version < latest_version:
-            update_needed = True
-        else:
+        elif latest_no_beta < local_no_beta:
             update_needed = False
+        else:
+            if latest_version == local_version:
+                update_needed = False
+            else:
+                if is_local_beta and is_latest_beta:
+                    update_needed = latest_version > local_version
+                elif is_local_beta:
+                    update_needed = True
+                else:
+                    update_needed = False
 
         show_message = core.core_data.config.get(core.ConfigKey.SHOW_UPDATE_MESSAGE)
         if not show_message:

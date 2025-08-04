@@ -1,108 +1,45 @@
 # Changelog
 
-## [3.0.0] - ???
+## [3.0.0] - 2025-08-04
+
+This is a full re-write of the editor, so many things were added, changed and fixed, and I didn't
+really document the changes that well, so here's a summary:
 
 ### Added
 
-- A way to select a specific device if multiple devices are connected through
-  adb at the same time
+- Game Data for es, it, de, th, fr locales and a way to change what repo to use for game data
 
-- Custom color themes
+- Better color and localization support
 
-- Way to create / load custom color schemes and locales
+- Better adb usage
 
-- Theoretical support for all game versions (not tested on all versions yet). If
-you have any issues with a specific version please report it to the discord
-server
+- Waydroid support
 
-- Save backup system. When you load a save file, a backup of the save file is
-created in your Documents folder with the following path format
-`Documents/bcsfe/saves/backups/{country_code}/{inquiry_code}/{YYYY-MM-DD_HH-MM-SS}`
- folder
+- More config options
 
-- Option to create a blank save file
+- Lucky tickets
 
-- Feature to change version of the game (e.g 12.7.0 -> 12.6.0)
+- Treasure Chests
 
-- A way to randomize the upgrades of a cat e.g randomize plus level to be
-between 40 and 50. (it was requested, i guess to make it less obvious that you
-save edited)
+- Support for new talent orbs
 
-- Config option `separate_cat_edit_options` to control the following:
-  - When disabled (default), when editing cats, you first select what you want
-  to edit and then you select your cats
+- Ultra Form Support
 
-  - When enabled, you first select your cats, then you edit
-  them.
+- Better save backups
 
-- Config option `strict_ban_prevention` which, when enabled, generates a new
-inquiry code and token whenever you upload your save data / managed items to
-the servers. This should reduce the chance of bans if you don't mind having a
-new inquiry code every time you upload your save data
+_ More support for older game versions
 
-- Config option `game_data_repo` to specify where to download game data from.
-Useful if you have your own custom apk and want to use the editor with it, or
-if you think I take too long to update the game data
+- Labyrinth medals
 
-- Game data for it, fr, es, th, de, tw, kr
-
-- Outbreaks for CotC 2
-
-- Feature to add labyrinth medals
-
-- Feature to clear zero legends
-
-- Way to specifiy how many times you want to clear a stage
-
-- Ultra forms
-
-### Fixed
-
-- Not pushing to the correct game version if the save file is from a custom
-apk with a custom package name using adb
-
-- ADB pulling and pushing not working on production android builds
-
-- Uploading save data not always working
-
-- Uploading managed items not always working (ban risk should be reduced)
-
-- Ototo cat cannon crashing the game
-
-- Uploading save data failing too often
+- Many more things
 
 ### Changed
 
-- All printed strings are taken from .properties files so they can be translated
+- Improved the wording on a few features
 
-- Text colors are now specified within the text of the localized strings and
-aren't hardcoded
+- Cats will be auto-unlocked by default when upgrading / true forming, etc
 
-- Improved / Changed the way many features work, e.g when clearing stages, you
-  can now clear based on map names and stage names
-
-- The save file is now saved to your Documents folder by default instead of the
-current working directory
-
-- Improved success rate of changing save country code.
-
-- When doing any cat operations (e.g upgrading or true forming), the cat will be
-unlocked if it isn't already
-
-- When you are upgrading cats and the level goes above the normal non-catseye
-max, the editor will now automatically increase the level cap of the cat to
-match, this prevents issues with having to use 10 catseyes to upgrade a cat
-from level 39 to 40
-
-- Cat selection now defaults to using your currently unlocked cats (e.g when
-selecting all rare cats to upgrade, it will only select the rare cats you have
-unlocked). This does not apply to the `all` option and when unlocking cats
-
-- Important save information such as password and auth token is now saved within
-the save file instead of in a separate file which should make it less likely that
-uploading save data will fail
-
-- Lots more item names are taken from the game data instead of being hardcoded
+- Many more things
 
 ## [2.7.2.3] - 2023-06-19
 

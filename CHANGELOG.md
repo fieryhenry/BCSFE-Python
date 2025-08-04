@@ -1,5 +1,11 @@
 # Changelog
 
+## [3.0.1] - 2025-08-04
+
+### Fixed
+
+- Installing the editor on certain platforms due to a dependency issue
+
 ## [3.0.0] - 2025-08-04
 
 This is a full re-write of the editor, so many things were added, changed and fixed, and I didn't

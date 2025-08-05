@@ -1,11 +1,12 @@
 from __future__ import annotations
 from typing import Any
 from bcsfe import core
+from bcsfe import cli
 import yaml
 
 
 class YamlFile:
-    def __init__(self, path: core.Path):
+    def __init__(self, path: core.Path, print_err: bool = True):
         self.path = path
         self.yaml: dict[str, Any] = {}
         if self.path.exists():
@@ -14,20 +15,25 @@ class YamlFile:
                 yml = yaml.safe_load(self.data.data)
                 if not isinstance(yml, dict):
                     self.yaml = {}
-                    self.save()
+                    self.save(print_err)
                 else:
                     self.yaml = yml
             except yaml.YAMLError:
                 self.yaml = {}
-                self.save()
+                self.save(print_err)
         else:
             self.yaml = {}
-            self.save()
+            self.save(print_err)
 
-    def save(self) -> None:
+    def save(self, print_err: bool = True) -> None:
         self.path.parent().generate_dirs()
-        with open(self.path.path, "w", encoding="utf-8") as f:
-            yaml.dump(self.yaml, f)
+
+        try:
+            with open(self.path.path, "w", encoding="utf-8") as f:
+                yaml.dump(self.yaml, f)
+        except FileNotFoundError:
+            if print_err:
+                cli.color.ColoredText.localize("yaml_create_error", path=self.path.path)
 
     def __getitem__(self, key: str) -> Any:
         return self.yaml[key]

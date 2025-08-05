@@ -330,49 +330,27 @@ class ServerHandler:
 
         return None
 
-    def get_upload_request_body(
-        self, save_key: dict[str, Any], boundary: str
-    ) -> core.Data | None:
+    def get_upload_request_form(
+        self,
+        save_key: dict[str, str],
+    ) -> core.MultipartForm:
         save_data = self.save_file.to_data()
-        body = core.Data()
-        keys = [
-            "key",
-            "policy",
-            "x-amz-signature",
-            "x-amz-credential",
-            "x-amz-algorithm",
-            "x-amz-date",
-            "x-amz-security-token",
-        ]
-        for key in keys:
-            body.add_line(f"--{boundary}")
-            body.add_line(f'Content-Disposition: form-data; name="{key}"')
-            body.add_line("Content-Type: text/plain")
-            body.add_line()
-            try:
-                body.add_line(save_key[key])
-            except KeyError:
-                self.remove_stored_save_key_data()
-                return None
+        form_data = core.MultipartForm()
+        for key, value in save_key.items():
+            if key == "url":
+                continue
+            form_data.add_key(key, value.encode(), "text/plain")
 
-        body.add_line(f"--{boundary}")
-        body.add_line(
-            'Content-Disposition: form-data; name="file"; filename="file.sav"'
+        form_data.add_key(
+            "file", save_data.to_bytes(), "application/octet-stream", "file.sav"
         )
-        body.add_line("Content-Type: application/octet-stream")
-        body.add_line()
-        body.add_line(save_data)
-        body.add_line(f"--{boundary}--")
-        return body
+        return form_data
 
     def upload_save_data(self, save_key: dict[str, Any]) -> bool:
         self.print_key("uploading_save_file")
-        boundary = (
-            f"__-----------------------{core.Random.get_digits_string(9)}-2147483648"
-        )
 
-        body = self.get_upload_request_body(save_key, boundary)
-        if body is None:
+        form = self.get_upload_request_form(save_key)
+        if form is None:
             self.remove_stored_save_key_data()
             return False
         url = save_key.get("url")
@@ -381,10 +359,9 @@ class ServerHandler:
         headers = {
             "accept-encoding": "gzip",
             "connection": "keep-alive",
-            "content-type": f"multipart/form-data; boundary={boundary}",
             "user-agent": "Dalvik/2.1.0 (Linux; U; Android 9; SM-G955F Build/N2G48B)",
         }
-        response = core.RequestHandler(url, headers, body).post()
+        response = core.RequestHandler(url, headers, form=form).post(no_timeout=True)
         if response is None:
             self.log_no_internet(RequestResult(url, None, headers, ""))
             return False
@@ -395,7 +372,7 @@ class ServerHandler:
                     url,
                     response,
                     headers,
-                    body.split(b"Content-Type: application/octet-stream")[0].to_str(),
+                    form.get_all_type("text-plain"),
                 ),
             )
 
@@ -580,7 +557,9 @@ class ServerHandler:
             try:
                 temp_path.write(core.Data(save_data))
             except Exception as e:
-                color.ColoredText.localize("transfer_backup_fail", path=str(temp_path), error=e)
+                color.ColoredText.localize(
+                    "transfer_backup_fail", path=str(temp_path), error=e
+                )
             else:
                 if print:
                     color.ColoredText.localize("transfer_backup", path=str(temp_path))

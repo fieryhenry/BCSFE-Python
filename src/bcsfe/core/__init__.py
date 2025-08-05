@@ -151,7 +151,7 @@ from bcsfe.core.server.managed_item import (
     ManagedItem,
     ManagedItemType,
 )
-from bcsfe.core.server.request import RequestHandler
+from bcsfe.core.server.request import RequestHandler, MultiPartFile, MultipartForm
 from bcsfe.core.server.server_handler import ServerHandler
 from bcsfe.core.server.updater import Updater
 from bcsfe.core.theme_handler import (

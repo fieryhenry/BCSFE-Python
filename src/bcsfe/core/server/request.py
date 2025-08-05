@@ -27,7 +27,9 @@ class RequestHandler:
         self.headers = headers
         self.data = data
 
-    def get(self, stream: bool = False) -> requests.Response | None:
+    def get(
+        self, stream: bool = False, no_timeout: bool = False
+    ) -> requests.Response | None:
         """Sends a GET request.
 
         Returns:
@@ -37,15 +39,19 @@ class RequestHandler:
             return requests.get(
                 self.url,
                 headers=self.headers,
-                timeout=core.core_data.config.get_int(
-                    core.ConfigKey.MAX_REQUEST_TIMEOUT
+                timeout=(
+                    None
+                    if no_timeout
+                    else core.core_data.config.get_int(
+                        core.ConfigKey.MAX_REQUEST_TIMEOUT
+                    )
                 ),
                 stream=stream,
             )
         except requests.exceptions.ConnectionError:
             return None
 
-    def post(self) -> requests.Response | None:
+    def post(self, no_timeout: bool = False) -> requests.Response | None:
         """Sends a POST request.
 
         Returns:
@@ -56,8 +62,12 @@ class RequestHandler:
                 self.url,
                 headers=self.headers,
                 data=self.data.data,
-                timeout=core.core_data.config.get_int(
-                    core.ConfigKey.MAX_REQUEST_TIMEOUT
+                timeout=(
+                    None
+                    if no_timeout
+                    else core.core_data.config.get_int(
+                        core.ConfigKey.MAX_REQUEST_TIMEOUT
+                    )
                 ),
             )
         except requests.exceptions.ConnectionError:

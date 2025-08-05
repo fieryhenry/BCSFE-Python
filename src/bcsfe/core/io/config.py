@@ -72,7 +72,7 @@ class Config:
             ConfigKey.STRICT_UPGRADE: False,
             ConfigKey.SEPARATE_CAT_EDIT_OPTIONS: True,
             ConfigKey.STRICT_BAN_PREVENTION: False,
-            ConfigKey.MAX_REQUEST_TIMEOUT: 20,
+            ConfigKey.MAX_REQUEST_TIMEOUT: 30,
             ConfigKey.GAME_DATA_REPO: "https://raw.githubusercontent.com/fieryhenry/BCData/master/",
             ConfigKey.FORCE_LANG_GAME_DATA: False,
             ConfigKey.CLEAR_TUTORIAL_ON_LOAD: True,

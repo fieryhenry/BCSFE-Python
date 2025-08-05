@@ -366,6 +366,10 @@ class SaveManagement:
                     if not handler.select_device():
                         return None, False
 
+            elif not root_handler.is_rooted():
+                color.ColoredText.localize("not_rooted_error")
+                return None, False
+
             package_names = handler.get_battlecats_packages()
 
             package_name = SaveManagement.select_package_name(package_names)

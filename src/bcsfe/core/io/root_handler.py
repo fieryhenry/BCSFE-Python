@@ -17,6 +17,13 @@ class RootHandler:
     def set_package_name(self, package_name: str):
         self.package_name = package_name
 
+    def is_rooted(self) -> bool:
+        try:
+            core.Path.get_root().add("data").add("data").get_dirs()
+        except PermissionError:
+            return False
+        return True
+
     def get_battlecats_packages(self) -> list[str]:
         packages = core.Path.get_root().add("data").add("data").get_dirs()
         packages = [

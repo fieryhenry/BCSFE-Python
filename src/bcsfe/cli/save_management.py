@@ -337,7 +337,11 @@ class SaveManagement:
             else:
                 save_path = None
         elif choice == 1:
-            save_path = main.Main.load_save_file()
+            uuid = dialog_creator.StringInput().get_input_locale_while("enter_uuid", {})
+            if uuid is None:
+                save_path = None
+            else:
+                save_path = main.Main.load_save_file(uuid)
         elif choice == 2:
             save_path = core.SaveFile.get_saves_path().add("SAVE_DATA")
             if not save_path.exists():

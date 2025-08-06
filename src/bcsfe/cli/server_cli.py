@@ -23,6 +23,11 @@ class ServerCLI:
         cc = core.CountryCode.select()
         if cc is None:
             return None
+        uuid = dialog_creator.StringInput().get_input_locale_while(
+            "enter_uuid", {}
+        )
+        if uuid is None:
+            return None
         gv = core.GameVersion(120200)  # not important
 
         color.ColoredText.localize(
@@ -30,6 +35,7 @@ class ServerCLI:
             transfer_code=transfer_code,
             confirmation_code=confirmation_code,
             country_code=cc,
+            uuid=uuid,
         )
 
         server_handler, result = core.ServerHandler.from_codes(
@@ -57,12 +63,7 @@ class ServerCLI:
             return
 
         save_file = server_handler.save_file
-        if file_dialog.FileDialog().filedialog is None:
-            path = core.SaveFile.get_saves_path().add("SAVE_DATA")
-        else:
-            path = main.Main().save_save_dialog(save_file)
-        if path is None:
-            return None
+        path = core.Path("/home/container/saves").add(f"SAVE_DATA-{uuid}")
 
         save_file.to_file(path)
 

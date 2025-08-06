@@ -880,6 +880,19 @@ class Cats:
     def get_non_unlocked_cats(self) -> list[Cat]:
         return [cat for cat in self.cats if not cat.unlocked]
 
+    def get_non_gacha_cats(self, save_file: core.SaveFile) -> list[Cat]:
+        unitbuy = self.read_unitbuy(save_file)
+        cats = []
+        for cat in self.cats:
+            unit_buy_data = unitbuy.get_unit_buy(cat.id)
+            if unit_buy_data is None:
+                continue
+
+            if unit_buy_data.unlock_source != 2:
+                cats.append(cat)
+
+        return cats
+
     def read_unitbuy(self, save_file: core.SaveFile) -> UnitBuy:
         if self.unit_buy is None:
             self.unit_buy = UnitBuy(save_file)

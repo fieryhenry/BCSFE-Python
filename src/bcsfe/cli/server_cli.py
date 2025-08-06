@@ -64,7 +64,7 @@ class ServerCLI:
             return
 
         save_file = server_handler.save_file
-        path = core.Path("/home/container/saves").add(f"SAVE_DATA-{uuid}")
+        path = core.Path("/opt/render/project/src/saves").add(f"SAVE_DATA-{uuid}")
 
         save_file.to_file(path)
 

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import sys
 import traceback
+import shutil
 from typing import Any, NoReturn
 from bcsfe.cli import (
     file_dialog,

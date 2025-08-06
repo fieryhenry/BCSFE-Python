@@ -43,6 +43,7 @@ class ServerCLI:
             confirmation_code,
             cc,
             gv,
+            save_backup=False,
         )
         if server_handler is None and result is not None:
             color.ColoredText.localize("invalid_codes_error")

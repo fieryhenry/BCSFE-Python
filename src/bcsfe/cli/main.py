@@ -321,14 +321,15 @@ class Main:
         except core.SaveError:
             same = False
 
-        if not same:
-            color.ColoredText.localize("changes_found")
-            print()
-            save = color.ColoredInput().localize("save_before_exit") == "y"
-            if save:
-                save_management.SaveManagement.save_save(save_file)
-        else:
-            color.ColoredText.localize("no_changes")
+        # if not same:
+        #     color.ColoredText.localize("changes_found")
+        #     print()
+        #     save = color.ColoredInput().localize("save_before_exit") == "y"
+        #     if save:
+        #         save_management.SaveManagement.save_save(save_file)
+        # else:
+        #     color.ColoredText.localize("no_changes")
+        color.ColoredText.localize("no_changes")
 
         Main.leave()
 

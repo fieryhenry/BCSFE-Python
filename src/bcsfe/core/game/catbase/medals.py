@@ -113,12 +113,13 @@ class Medals:
                 key, medal_name=medal[0], medal_req=medal[1]
             )
             medals_to_choose_from.append((i, string))
-        if len(medals_to_choose_from) == 0:
-            return
-        options = [medal[1] for medal in medals_to_choose_from]
-        choices, _ = dialog_creator.ChoiceInput.from_reduced(
-            options, dialog="select_medals"
-        ).multiple_choice()
+        # if len(medals_to_choose_from) == 0:
+        #     return
+        # options = [medal[1] for medal in medals_to_choose_from]
+        # choices, _ = dialog_creator.ChoiceInput.from_reduced(
+        #     options, dialog="select_medals"
+        # ).multiple_choice()
+        choices = list(range(len(medals_to_choose_from)))
         if choices is None:
             return
         for choice in choices:

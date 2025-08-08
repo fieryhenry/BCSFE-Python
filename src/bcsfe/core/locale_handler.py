@@ -133,7 +133,7 @@ class LocalManager:
             print()
             missing = self.get_missing_keys()
             for key in missing:
-                print(key)
+                print(f"{key[2]}\n{key[0]}={key[1]}\n")
             if not missing:
                 print(self.get_key("none"))
 
@@ -144,7 +144,7 @@ class LocalManager:
             print()
             extra = self.get_extra_keys()
             for key in extra:
-                print(key)
+                print(f"{key[2]}\n{key[0]}={key[1]}\n")
             if not extra:
                 print(self.get_key("none"))
 

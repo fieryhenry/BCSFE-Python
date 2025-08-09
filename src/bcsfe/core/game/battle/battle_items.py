@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 from bcsfe import core
-from bcsfe.cli import dialog_creator
+from bcsfe.cli import dialog_creator, color
 
 
 class BattleItem:
@@ -125,3 +125,20 @@ class BattleItems:
         ).edit()
         for i, value in enumerate(values):
             self.items[i].amount = value
+
+    def editα(self, save_file: core.SaveFile):
+        group_name = save_file.get_localizable().get("shop_category1")
+        if group_name is None:
+            group_name = core.core_data.local_manager.get_key("battle_items")
+        item_names = self.get_names(save_file)
+        if item_names is None:
+            return
+        for item in self.items:
+        item.amount = 9999
+        print()
+        color.ColoredText.localize(
+            "value_changed",
+            name=group_name,
+            value=9999,
+            escape=True
+        )

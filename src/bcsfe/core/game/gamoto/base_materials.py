@@ -101,7 +101,7 @@ class BaseMaterials:
         print()
         color.ColoredText.localize(
             "value_changed",
-            name="base_materials",
+            name="城素材",
             value=9999,
             escape=True
         )

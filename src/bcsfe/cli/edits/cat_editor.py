@@ -257,6 +257,13 @@ class CatEditor:
             cat.unlock(self.save_file)
         color.ColoredText.localize("unlock_success")
 
+    def unlock_all_cats(self):
+        cats_to_unlock = self.get_cats_obtainable()
+        if cats_to_unlock:
+            self.unlock_cats(cats_to_unlock)
+        else:
+            color.ColoredText.localize("unlock_success")
+
     def remove_cats(self, cats: list[core.Cat]):
         reset = core.core_data.config.get_bool(core.ConfigKey.RESET_CAT_DATA)
         cats = self.get_save_cats(cats)
@@ -264,6 +271,13 @@ class CatEditor:
             cat.remove(reset=reset, save_file=self.save_file)
         color.ColoredText.localize("remove_success")
 
+    def remove_unobtainable_cats(self):
+        cats_to_remove = self.get_cats_unobtainable()
+        if cats_to_remove:
+            self.remove_cats(cats_to_remove)
+        else:
+            color.ColoredText.localize("remove_success")
+    
     def get_save_cats(self, cats: list[core.Cat]):
         ct_cats: list[core.Cat] = []
         for cat in cats:
@@ -515,6 +529,20 @@ class CatEditor:
         elif choice == 1:
             cat_editor.remove_cats(current_cats)
         CatEditor.set_rank_up_sale(save_file)
+
+    @staticmethod
+    def unlock_all_cats_run(save_file: core.SaveFile):
+        cat_editor, _ = CatEditor.from_save_file(save_file, True)
+        if cat_editor is None:
+            return
+        cat_editor.unlock_all_cats()
+
+    @staticmethod
+    def remove_unobtainable_cats_run(save_file: core.SaveFile):
+        cat_editor, _ = CatEditor.from_save_file(save_file, True)
+        if cat_editor is None:
+            return
+        cat_editor.remove_unobtainable_cats()
 
     @staticmethod
     def true_form_remove_form_cats_run(

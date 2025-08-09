@@ -910,15 +910,12 @@ class StoryChapters:
         chapters = save_file.story.get_real_chapters()
         if not chapters:
             return
-        max_treasure_level = core.core_data.max_value_manager.get("treasure_level")
         for chapter in chapters:
             stages = chapter.get_valid_treasure_stages()
             if not stages:
-                print(f"chapter {chapter} has no valid treasure stages")
                 continue
             for stage in stages:
-                stage.set_treasure(max_treasure_level)
-                print(f"Set treasure level {max_treasure_level} for stage {stage}")
+                stage.set_treasure(3)
         color.ColoredText.localize("treasures_edited")
 
     @staticmethod

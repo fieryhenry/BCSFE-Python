@@ -3,6 +3,13 @@ from typing import Any
 from bcsfe import core
 from bcsfe.cli import color, dialog_creator, edits
 
+def get_total_stars(chapters: ChaptersType, map_id: int, stage_type: int | None = None) -> int:
+    if isinstance(chapters, core.EventChapters):
+        if stage_type is None:
+            raise ValueError("stage_type must be specified for EventChapters!")
+        return chapters.get_total_stars(stage_type, map_id)
+    else:
+        return chapters.get_total_stars(map_id)
 
 class EventStage:
     def __init__(self, clear_amount: int):

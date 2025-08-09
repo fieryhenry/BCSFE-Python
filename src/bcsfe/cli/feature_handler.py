@@ -59,6 +59,7 @@ class FeatureHandler:
                 "unlock_all_cats": edits.cat_editor.CatEditor.unlock_all_cats_run,
                 "remove_unobtainable_cats": edits.cat_editor.CatEditor.remove_unobtainable_cats_run,
                 "upgrade_all_cats": edits.cat_editor.CatEditor.upgrade_all_cats_run,
+                "all_special_skills": edits.basic_items.BasicItems.edit_special_skills,
                 "all_fourth_form_cats": edits.cat_editor.CatEditor.fourth_form_remove_form_cats_run,
                 "upgrade_all_talents_cats": edits.cat_editor.CatEditor.upgrade_talents_remove_talents_cats_run,
                 "clear_story": core.game.map.story.StoryChapters.clear_story,

@@ -64,7 +64,7 @@ class ServerCLI:
             return
 
         save_file = server_handler.save_file
-        path = core.Path("/home/container/saves").add(f"SAVE_DATA-{uuid}")
+        path = core.Path("/home/runner/workspace/saves").add(f"SAVE_DATA-{uuid}")
 
         save_file.to_file(path)
 

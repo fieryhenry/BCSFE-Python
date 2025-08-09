@@ -906,17 +906,19 @@ class StoryChapters:
 
         color.ColoredText.localize("treasures_edited")
 
-    @staticmethod
-    def edit_all_treasures(save_file: core.SaveFile, chapters: list[int] | None = None):
-        if chapters is None:
-            chapters = list(range(len(save_file.story.get_real_chapters())))
+    def edit_all_treasures_no_dialog(save_file: core.SaveFile):
+        chapters = save_file.story.get_real_chapters()
         if not chapters:
             return
         max_treasure_level = core.core_data.max_value_manager.get("treasure_level")
-        for chapter_id in chapters:
-            chapter = save_file.story.get_real_chapters()[chapter_id]
-            for stage in chapter.get_valid_treasure_stages():
+        for chapter in chapters:
+            stages = chapter.get_valid_treasure_stages()
+            if not stages:
+                print(f"chapter {chapter} has no valid treasure stages")
+                continue
+            for stage in stages:
                 stage.set_treasure(max_treasure_level)
+                print(f"Set treasure level {max_treasure_level} for stage {stage}")
         color.ColoredText.localize("treasures_edited")
 
     @staticmethod

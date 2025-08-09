@@ -906,7 +906,7 @@ class StoryChapters:
 
         color.ColoredText.localize("treasures_edited")
 
-    def edit_all_treasures_no_dialog(save_file: core.SaveFile):
+    def edit_all_treasures(save_file: core.SaveFile):
         chapters = save_file.story.get_real_chapters()
         if not chapters:
             return

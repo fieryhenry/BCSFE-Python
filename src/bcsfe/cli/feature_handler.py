@@ -48,6 +48,7 @@ class FeatureHandler:
                 "catfoodα": edits.basic_items.BasicItems.edit_catfood,
                 "battle_itemsα": edits.basic_items.BasicItems.edit_battle_items,
                 "cataminsα": edits.basic_items.BasicItems.edit_catamins,
+                "base_materialsα": edits.basic_items.BasicItems.edit_base_materials,
                 "catseyesα": edits.basic_items.BasicItems.edit_catseyes,
                 "catfruitα": edits.basic_items.BasicItems.edit_catfruit,
                 "talent_orbsα": core.game.catbase.talent_orbs.SaveOrbs.edit_talent_orbs,

@@ -229,7 +229,7 @@ class BasicItems:
         print()
         color.ColoredText.localize(
             "value_changed", 
-            name=name 
+            name=name,
             value=9, 
             escape=True
         )

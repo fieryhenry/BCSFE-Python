@@ -339,7 +339,7 @@ class BasicItems:
         print()
         color.ColoredText.localize(
             "value_changed",
-            name="catamins",
+            name="ネコビタン",
             value=9999,
             escape=True
         )
@@ -386,7 +386,7 @@ class BasicItems:
         print()
         color.ColoredText.localize(
             "value_changed",
-            name="catseyes",
+            name="キャッツアイ",
             value=999,
             escape=True
         )
@@ -485,7 +485,7 @@ class BasicItems:
         print()
         color.ColoredText.localize(
             "value_changed",
-            name="catfruit",
+            name="マタタビ",
             value=99,
             escape=True
         )

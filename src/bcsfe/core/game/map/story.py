@@ -908,6 +908,17 @@ class StoryChapters:
         color.ColoredText.localize("treasures_edited")
 
     @staticmethod
+    def edit_all_treasures(save_file: core.SaveFile):
+        chapters = save_file.story.get_real_chapters()
+        if not chapters:
+            return
+        max_treasure_level = core.core_data.max_value_manager.get("treasure_level")
+        for chapter in chapters:
+            for stage in chapter.get_valid_treasure_stages():
+                stage.set_treasure(max_treasure_level)
+        color.ColoredText.localize("treasures_edited")
+
+    @staticmethod
     def edit_itf_timed_scores(save_file: core.SaveFile):
         selected_chapters = StoryChapters.select_story_chapters(
             save_file, chapters=[3, 4, 5]

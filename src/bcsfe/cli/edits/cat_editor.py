@@ -307,6 +307,13 @@ class CatEditor:
         )
         color.ColoredText.localize("fourth_form_success")
 
+    def all_fourth_form_cats(self, force: bool = False):
+        cats_to_upgrade = self.get_cats_obtainable()
+        if cats_to_upgrade:
+            self.fourth_form_cats(cats_to_upgrade, force=force)
+        else:
+            color.ColoredText.localize("fourth_form_success")
+
     def remove_true_form_cats(self, cats: list[core.Cat]):
         cats = self.get_save_cats(cats)
         for cat in cats:
@@ -616,6 +623,11 @@ class CatEditor:
         if cat_editor is None:
             return
         cat_editor.fourth_form_cats(current_cats, force=True)
+
+    @staticmethod
+    def all_fourth_form_cats_run(save_file: core.SaveFile):
+        cat_editor = CatEditor(save_file)
+        cat_editor.all_fourth_form_cats(force=True)
 
     @staticmethod
     def upgrade_cats_run(save_file: core.SaveFile):

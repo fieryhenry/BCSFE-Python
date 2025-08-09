@@ -31,6 +31,23 @@ class BasicItems:
         )
 
     @staticmethod
+    def edit_catfoodα(save_file: core.SaveFile):
+        name = core.core_data.get_gatya_item_names(save_file).get_name(22)
+        original_amount = save_file.catfood
+        save_file.catfood = 50000
+        change = save_file.catfood - original_amount
+        core.BackupMetaData(save_file).add_managed_item(
+            core.ManagedItem.from_change(change, core.ManagedItemType.CATFOOD)
+        )
+        print()
+        color.ColoredText.localize(
+            "value_changed", 
+            name=name, 
+            value=50000, 
+            escape=True
+        )
+
+    @staticmethod
     def edit_xp(save_file: core.SaveFile):
         name = core.core_data.get_gatya_item_names(save_file).get_name(6)
         save_file.xp = dialog_creator.SingleEditor(
@@ -38,6 +55,18 @@ class BasicItems:
             save_file.xp,
             core.core_data.max_value_manager.get("xp"),
         ).edit()
+
+    @staticmethod
+    def edit_xpα(save_file: core.SaveFile):
+        name = core.core_data.get_gatya_item_names(save_file).get_name(6)
+        save_file.xp = 99999999
+        print()
+        color.ColoredText.localize(
+            "value_changed", 
+            name=name, 
+            value=99999999, 
+            escape=True
+        )
 
     @staticmethod
     def edit_normal_tickets(save_file: core.SaveFile):
@@ -110,6 +139,25 @@ class BasicItems:
         )
 
     @staticmethod
+    def edit_general_ticketsα(save_file: core.SaveFile):
+        name1 = core.core_data.get_gatya_item_names(save_file).get_name(20)
+        name2 = core.core_data.get_gatya_item_names(save_file).get_name(21)
+        original_amount = save_file.rare_tickets
+        save_file.normal_tickets = 999
+        save_file.rare_tickets = 999
+        change = save_file.rare_tickets - original_amount
+        core.BackupMetaData(save_file).add_managed_item(
+            core.ManagedItem.from_change(change, core.ManagedItemType.RARE_TICKET)
+        )
+        print()
+        color.ColoredText.localize(
+            "value_changed", 
+            name=f"{name1} and {name2}", 
+            value=999, 
+            escape=True
+        )
+
+    @staticmethod
     def edit_platinum_tickets(save_file: core.SaveFile):
         color.ColoredText.localize("platinum_ticket_warning")
         name = core.core_data.get_gatya_item_names(save_file).get_name(29)
@@ -133,6 +181,24 @@ class BasicItems:
         )
 
     @staticmethod
+    def edit_platinum_ticketsα(save_file: core.SaveFile):
+        name = core.core_data.get_gatya_item_names(save_file).get_name(29)
+        original_amount = save_file.platinum_tickets
+        save_file.platinum_tickets = 29
+        change = save_file.platinum_tickets - original_amount
+        core.BackupMetaData(save_file).add_managed_item(
+            core.ManagedItem.from_change(change, core.ManagedItemType.PLATINUM_TICKET)
+        )
+        print()
+        color.ColoredText.localize(
+            "value_changed", 
+            name=name, 
+            value=29, 
+            escape=True
+        )
+
+
+    @staticmethod
     def edit_legend_tickets(save_file: core.SaveFile):
         should_exit = not dialog_creator.YesNoInput().get_input_once(
             "legend_ticket_warning"
@@ -149,6 +215,23 @@ class BasicItems:
         change = save_file.legend_tickets - original_amount
         core.BackupMetaData(save_file).add_managed_item(
             core.ManagedItem.from_change(change, core.ManagedItemType.LEGEND_TICKET)
+        )
+
+    @staticmethod
+    def edit_legend_ticketsα(save_file: core.SaveFile):
+        name = core.core_data.get_gatya_item_names(save_file).get_name(145)
+        original_amount = save_file.legend_tickets
+        save_file.legend_tickets = 9
+        change = save_file.legend_tickets - original_amount
+        core.BackupMetaData(save_file).add_managed_item(
+            core.ManagedItem.from_change(change, core.ManagedItemType.LEGEND_TICKET)
+        )
+        print()
+        color.ColoredText.localize(
+            "value_changed", 
+            name=name 
+            value=9, 
+            escape=True
         )
 
     @staticmethod
@@ -175,6 +258,18 @@ class BasicItems:
         ).edit()
 
     @staticmethod
+    def edit_npα(save_file: core.SaveFile):
+        name = core.core_data.get_gatya_item_names(save_file).get_name(7)
+        save_file.np = 9999
+        print()
+        color.ColoredText.localize(
+            "value_changed", 
+            name=name 
+            value=9999, 
+            escape=True
+        )
+
+    @staticmethod
     def edit_leadership(save_file: core.SaveFile):
         name = core.core_data.get_gatya_item_names(save_file).get_name(105)
         save_file.leadership = dialog_creator.SingleEditor(
@@ -184,8 +279,24 @@ class BasicItems:
         ).edit()
 
     @staticmethod
+    def edit_leadershipα(save_file: core.SaveFile):
+        name = core.core_data.get_gatya_item_names(save_file).get_name(105)
+        save_file.leadership = 9999
+        print()
+        color.ColoredText.localize(
+            "value_changed", 
+            name=name 
+            value=9999, 
+            escape=True
+        )
+
+    @staticmethod
     def edit_battle_items(save_file: core.SaveFile):
         save_file.battle_items.edit(save_file)
+
+    @staticmethod
+    def edit_battle_itemsα(save_file: core.SaveFile):
+        save_file.battle_items.editα(save_file)
 
     @staticmethod
     def edit_catamins(save_file: core.SaveFile):
@@ -211,6 +322,29 @@ class BasicItems:
         save_file.catamins = values
 
     @staticmethod
+    def edit_cataminsα(save_file: core.SaveFile):
+        names_o = core.core_data.get_gatya_item_names(save_file)
+        items = core.core_data.get_gatya_item_buy(save_file).get_by_category(6)
+        if items is None:
+            return
+        names: list[str] = []
+        for item in items:
+            name = names_o.get_name(item.id)
+            if name is None:
+                name = core.core_data.local_manager.get_key(
+                    "unknown_catamin_name", id=item.id
+                )
+            names.append(name)
+        save_file.catamins = [9999]*len(items)
+        print()
+        color.ColoredText.localize(
+            "value_changed",
+            name="catamins",
+            value=9999,
+            escape=True
+        )
+
+    @staticmethod
     def edit_catseyes(save_file: core.SaveFile):
         names_o = core.core_data.get_gatya_item_names(save_file)
         items = core.core_data.get_gatya_item_buy(save_file).get_by_category(5)
@@ -233,6 +367,29 @@ class BasicItems:
             group_name_localized=True,
         ).edit()
         save_file.catseyes = values
+
+    @staticmethod
+    def edit_catseyesα(save_file: core.SaveFile):
+        names_o = core.core_data.get_gatya_item_names(save_file)
+        items = core.core_data.get_gatya_item_buy(save_file).get_by_category(5)
+        if items is None:
+            return
+        names: list[str] = []
+        for item in items:
+            name = names_o.get_name(item.id)
+            if name is None:
+                name = core.core_data.local_manager.get_key(
+                    "unknown_catseye_name", id=item.id
+                )
+            names.append(name)
+        save_file.catseyes = [999]*len(items)
+        print()
+        color.ColoredText.localize(
+            "value_changed",
+            name="catseyes",
+            value=999,
+            escape=True
+        )
 
     @staticmethod
     def edit_treasure_chests(save_file: core.SaveFile):
@@ -303,6 +460,37 @@ class BasicItems:
         save_file.catfruit = values
 
     @staticmethod
+    def edit_catfruitα(save_file: core.SaveFile):
+        names = core.Matatabi(save_file).get_names()
+        if names is None:
+            return
+        new_names: list[str] = []
+        for i, name in enumerate(names):
+            if name is None:
+                name = core.core_data.local_manager.get_key(
+                    "unknown_catfruit_name", id=i
+                )
+            new_names.append(name)
+        names = new_names
+
+        extra = len(save_file.catfruit) - len(names)
+        if extra > 0:
+            for i in range(extra):
+                names.append(
+                    core.core_data.local_manager.get_key(
+                        "unknown_catfruit_name", id=i + len(names)
+                    )
+                )
+        save_file.catfruit = [99]*len(save_file.catfruit)
+        print()
+        color.ColoredText.localize(
+            "value_changed",
+            name="catfruit",
+            value=99,
+            escape=True
+        )
+
+    @staticmethod
     def set_restart_pack(save_file: core.SaveFile):
         save_file.restart_pack = 1
         name = core.core_data.get_gatya_item_names(save_file).get_name(123)
@@ -345,6 +533,10 @@ class BasicItems:
     @staticmethod
     def edit_base_materials(save_file: core.SaveFile):
         save_file.ototo.base_materials.edit_base_materials(save_file)
+
+    @staticmethod
+    def edit_base_materialsα(save_file: core.SaveFile):
+        save_file.ototo.base_materials.edit_base_materialsα(save_file)
 
     @staticmethod
     def edit_rare_gatya_seed(save_file: core.SaveFile):

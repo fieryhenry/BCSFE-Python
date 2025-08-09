@@ -776,31 +776,32 @@ class EventChapters:
     @staticmethod
     def edit_all_sol_chapters(save_file: core.SaveFile):
         chapters = save_file.event_stages
-        type = 0
+        stage_type = 0
         map_names = core.MapNames(save_file, "N")
         names = map_names.map_names
         map_choices = list(names.keys())
+        edited_count = 0
         for map_id in map_choices:
-            map_name = names[map_id]
-            stage_names = map_names.stage_names.get(map_id)
-            stage_names = [
-                s for s in stage_names or [] if s and s != "＠"
-            ]
+            map_name = names.get(map_id)
+            stage_names = map_names.stage_names.get(map_id) or []
+            stage_names = [s for s in stage_names if s and s != "＠"]
             total_stages = len(stage_names)
-            chapters.set_total_stages(map_id, type, total_stages)
-            stars = get_total_stars(chapters, map_id, type)
-            stages = list(range(total_stages))
+            if total_stages == 0:
+                continue
+            chapters.set_total_stages(map_id, stage_type, total_stages)
+            stars = get_total_stars(chapters, map_id, stage_type)
             for star in range(stars):
-                for stage in stages:
+                for stage in range(total_stages):
                     clear_stage(
                         chapters,
-                        map_id,
-                        star,
-                        stage,
+                        map_id=map_id,
+                        star=star,
+                        stage=stage,
                         overwrite_clear_progress=True,
                         clear_amount=1,
-                        type=type,
+                        type=stage_type,
                     )
+            edited_count += 1
         color.ColoredText.localize("map_chapters_edited")
 
     @staticmethod

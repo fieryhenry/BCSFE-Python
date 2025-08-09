@@ -385,6 +385,21 @@ class CatEditor:
         if success:
             color.ColoredText.localize("upgrade_success")
 
+    def upgrade_all_cats_max(self):
+        cats = self.get_cats_obtainable()
+        if not cats:
+            color.ColoredText.localize("upgrade_success")
+            return
+        for cat in cats:
+            power_up = core.PowerUpHelper(cat, self.save_file)
+            max_base = power_up.get_max_max_base_upgrade_level() - 1
+            max_plus = power_up.get_max_max_plus_upgrade_level()
+            power_up.reset_upgrade()
+            power_up.upgrade_by(max_base)
+            upgrade = core.Upgrade(max_plus, max_base)
+            cat.set_upgrade(self.save_file, upgrade, True)
+        color.ColoredText.localize("upgrade_success")
+
     def remove_talents_cats(self, cats: list[core.Cat]):
         for cat in cats:
             if cat.talents is None:
@@ -608,6 +623,12 @@ class CatEditor:
         if cat_editor is None:
             return
         cat_editor.upgrade_cats(current_cats)
+        CatEditor.set_rank_up_sale(save_file)
+
+    @staticmethod
+    def upgrade_all_cats_run(save_file: core.SaveFile):
+        cat_editor = CatEditor(save_file)
+        cat_editor.upgrade_all_cats_max()
         CatEditor.set_rank_up_sale(save_file)
 
     @staticmethod

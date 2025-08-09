@@ -650,7 +650,7 @@ class CatEditor:
     @staticmethod
     def all_fourth_form_cats_run(save_file: core.SaveFile):
         cat_editor = CatEditor(save_file)
-        cat_editor.all_fourth_form_cats(force=True)
+        cat_editor.all_fourth_form_cats(force=False)
 
     @staticmethod
     def upgrade_cats_run(save_file: core.SaveFile):

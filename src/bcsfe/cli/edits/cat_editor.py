@@ -513,6 +513,29 @@ class CatEditor:
                     talent.level = max_levels[i]
         color.ColoredText.localize("talents_success")
 
+    def upgrade_all_talents_cats(self):
+        cats = self.get_cats_obtainable()
+        if not cats:
+            color.ColoredText.localize("talents_success")
+            return
+        talent_data = self.save_file.cats.read_talent_data(self.save_file)
+        if talent_data is None:
+            color.ColoredText.localize("talents_success")
+            return
+        for cat in cats:
+            if cat.talents is None:
+                continue
+            data = talent_data.get_cat_talents(cat)
+            if data is None:
+                continue
+            talent_names, max_levels, current_levels, ids = data
+            for i, id in enumerate(ids):
+                talent = cat.get_talent_from_id(id)
+                if talent is None:
+                    continue
+                talent.level = max_levels[i]
+        color.ColoredText.localize("talents_success")
+
     @staticmethod
     def edit_cats(save_file: core.SaveFile):
         cat_editor = CatEditor(save_file)

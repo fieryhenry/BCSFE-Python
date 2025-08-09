@@ -565,7 +565,6 @@ class StoryChapters:
                     stage_id,
                     clear_amount=1,
                     overwrite_clear_progress=True,
-                    chapters=chapters,
                 )
         color.ColoredText.localize("map_chapters_edited")
 

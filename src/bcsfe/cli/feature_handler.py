@@ -61,7 +61,7 @@ class FeatureHandler:
                 "upgrade_all_cats": edits.cat_editor.CatEditor.upgrade_all_cats_run,
                 "special_skillsα": edits.basic_items.BasicItems.edit_special_skillsα,
                 "all_fourth_form_cats": edits.cat_editor.CatEditor.all_fourth_form_cats_run,
-                "upgrade_all_talents_cats": edits.cat_editor.CatEditor.upgrade_talents_remove_talents_cats_run,
+                "upgrade_all_talents_cats": edits.cat_editor.CatEditor.upgrade_all_talents_cats_run,
                 "clear_story": core.game.map.story.StoryChapters.clear_story,
                 "outbreaks": core.game.map.outbreaks.Outbreaks.edit_outbreaks,
                 "sol": core.game.map.event.EventChapters.edit_sol_chapters,

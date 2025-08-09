@@ -693,6 +693,11 @@ class CatEditor:
             cat_editor.remove_talents_cats(current_cats)
 
     @staticmethod
+    def upgrade_all_talents_cats_run(save_file: core.SaveFile):
+        cat_editor = CatEditor(save_file)
+        cat_editor.upgrade_all_talents_cats()
+
+    @staticmethod
     def unlock_cat_guide_remove_guide_run(
         save_file: core.SaveFile,
         current_cats: list[core.Cat] | None = None,

@@ -264,7 +264,7 @@ class BasicItems:
         print()
         color.ColoredText.localize(
             "value_changed", 
-            name=name 
+            name=name,
             value=9999, 
             escape=True
         )
@@ -285,7 +285,7 @@ class BasicItems:
         print()
         color.ColoredText.localize(
             "value_changed", 
-            name=name 
+            name=name,
             value=9999, 
             escape=True
         )

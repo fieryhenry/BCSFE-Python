@@ -134,7 +134,7 @@ class BattleItems:
         if item_names is None:
             return
         for item in self.items:
-        item.amount = 9999
+            item.amount = 9999
         print()
         color.ColoredText.localize(
             "value_changed",

@@ -774,6 +774,36 @@ class EventChapters:
         EventChapters.edit_chapters(save_file, 0, "N")
 
     @staticmethod
+    def clear_all_sol(save_file: core.SaveFile):
+        chapters = save_file.event_stages
+        type = 0
+        map_names = core.MapNames(save_file, "N")
+        names = map_names.map_names
+        map_choices = list(names.keys())
+        for map_id in map_choices:
+            map_name = names[map_id]
+            stage_names = map_names.stage_names.get(map_id)
+            stage_names = [
+                s for s in stage_names or [] if s and s != "＠"
+            ]
+            total_stages = len(stage_names)
+            chapters.set_total_stages(map_id, type, total_stages)
+            stars = get_total_stars(chapters, map_id, type)
+            stages = list(range(total_stages))
+            for star in range(stars):
+                for stage in stages:
+                    clear_stage(
+                        chapters,
+                        map_id,
+                        star,
+                        stage,
+                        overwrite_clear_progress=True,
+                        clear_amount=1,
+                        type=type,
+                    )
+        color.ColoredText.localize("map_chapters_edited")
+
+    @staticmethod
     def edit_event_chapters(save_file: core.SaveFile):
         EventChapters.edit_chapters(save_file, 1, "S")
 

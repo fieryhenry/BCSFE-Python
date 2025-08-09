@@ -774,7 +774,7 @@ class EventChapters:
         EventChapters.edit_chapters(save_file, 0, "N")
 
     @staticmethod
-    def clear_all_sol(save_file: core.SaveFile):
+    def edit_all_sol_chapters(save_file: core.SaveFile):
         chapters = save_file.event_stages
         type = 0
         map_names = core.MapNames(save_file, "N")

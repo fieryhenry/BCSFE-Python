@@ -584,7 +584,9 @@ class BasicItems:
 
     @staticmethod
     def edit_special_skillsα(save_file: core.SaveFile):
-        save_file.special_skills.editα(save_file)
+        skill_ids = list(range(len(save_file.special_skills.get_valid_skills())))
+        save_file.special_skills.editα(skill_ids, save_file)
+
 
     @staticmethod
     def unlock_equip_menu(save_file: core.SaveFile):

@@ -217,7 +217,7 @@ class Outbreaks:
                     stage.cleared = False
 
     @staticmethod
-    def clear_all_outbreaks(save_file: core.SaveFile):
+    def edit_all_outbreaks(save_file: core.SaveFile):
         outbreaks = save_file.outbreaks
         chapters = outbreaks.get_valid_chapters()
         if not chapters:

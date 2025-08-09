@@ -551,6 +551,24 @@ class StoryChapters:
             save_file,
         )
 
+    @staticmethod
+    def clear_all_story(save_file: core.SaveFile):
+        story = save_file.story
+        chapters = story.get_real_chapters()
+        if not chapters:
+            color.ColoredText.localize("map_chapters_edited")
+            return
+        for chapter_id, chapter in enumerate(chapters):
+            num_stages = len(chapter.stages)
+            for stage_id in range(num_stages):
+                chapter.clear_stage(
+                    stage_id,
+                    clear_amount=1,
+                    overwrite_clear_progress=True,
+                    chapters=chapters,
+                )
+        color.ColoredText.localize("map_chapters_edited")
+
     def edit_chapters(self, save_file: core.SaveFile):
         chapters = self.get_real_chapters()
         names = StoryChapters.get_chapter_names(save_file)

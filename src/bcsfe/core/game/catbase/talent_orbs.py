@@ -724,3 +724,10 @@ class SaveOrbs:
         for orb_id, orb in save_orbs.orbs.items():
             save_orbs.orbs[orb_id] = SaveOrb(orb.orb, 99)
         save_orbs.save(save_file)
+        print()
+        color.ColoredText.localize(
+            "value_changed",
+            name="本能玉",
+            value=99,
+            escape=True
+        )

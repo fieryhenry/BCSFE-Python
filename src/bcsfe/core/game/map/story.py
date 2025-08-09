@@ -731,7 +731,7 @@ class StoryChapters:
         return choice
 
     @staticmethod
-    def edit_treasures_whole_chapters(save_file: core.SaveFile, chapters: list[int]):
+    def edit_all_treasures(save_file: core.SaveFile, chapters: list[int]):
         choice = StoryChapters.get_per_chapter(chapters)
         if choice is None:
             return

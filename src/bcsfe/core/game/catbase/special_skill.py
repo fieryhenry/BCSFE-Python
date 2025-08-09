@@ -270,6 +270,24 @@ class SpecialSkills:
         if success:
             color.ColoredText.localize("skills_edited")
 
+    def editα(self, skill_ids: list[int], save_file: core.SaveFile):
+        ability_data = core.core_data.get_ability_data(save_file)
+        if ability_data.ability_data is None:
+            color.ColoredText.localize("skills_edited")
+            return
+        if not skill_ids:
+            color.ColoredText.localize("skills_edited")
+            return
+        for skill_id in skill_ids:
+            ability = ability_data.get_ability_data_item(skill_id)
+            if ability is None:
+                continue
+            max_base = ability.max_base_level - 1
+            max_plus = ability.max_plus_level
+            upgrade = core.Upgrade(max_plus, max_base)
+            self.set_upgrade(skill_id, upgrade, max_base=max_base, max_plus=max_plus)
+        color.ColoredText.localize("skills_edited")
+
     def get_from_id(
         self, id: int, only_valid: bool = True
     ) -> SpecialSkill | None:

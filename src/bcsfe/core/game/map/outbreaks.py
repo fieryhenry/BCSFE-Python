@@ -226,11 +226,8 @@ class Outbreaks:
         clear = True
         for chapter in chapters:
             chapter_id = chapter.get_true_id()
-            stages = core.StoryChapters.select_stages(save_file, chapter_id)
-            if not stages:
-                continue
-            for stage in stages:
-                outbreaks.clear_outbreak(chapter_id, stage, clear)
+            for stage_id in range(48):
+                outbreaks.clear_outbreak(chapter_id, stage_id, clear)
         color.ColoredText.localize("clear_outbreaks_success")
 
     @staticmethod

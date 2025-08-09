@@ -65,7 +65,7 @@ class FeatureHandler:
                 "clear_all_story": core.game.map.story.StoryChapters.clear_all_story,
                 "all_story_treasures": core.game.map.story.StoryChapters.edit_all_treasures,
                 "all_outbreaks": core.game.map.outbreaks.Outbreaks.edit_all_outbreaks,
-                "all_sol": core.game.map.event.EventChapters.edit_sol_chapters,
+                "all_sol": core.game.map.event.EventChapters.edit_all_sol_chapters,
                 "all_uncanny": core.game.map.uncanny.UncannyChapters.edit_uncanny,
                 "all_zero_legends": core.game.map.zero_legends.ZeroLegendsChapters.edit_zero_legends,
                 "all_aku_chapters": core.game.map.aku.AkuChapters.edit_aku_chapters,

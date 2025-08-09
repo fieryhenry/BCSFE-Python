@@ -708,3 +708,19 @@ class SaveOrbs:
             return None
         save_orbs.edit()
         save_orbs.save(save_file)
+
+    @staticmethod
+    def edit_talent_orbsα(save_file: core.SaveFile):
+        """Edit the talent orbs
+
+        Args:
+            save_file (core.SaveFile): The save_stats to edit the orbs of
+
+        """
+        save_orbs = SaveOrbs.from_save_file(save_file)
+        if save_orbs is None:
+            color.ColoredText.localize("failed_to_load_orbs")
+            return None
+        for orb_id, orb in save_orbs.orbs.items():
+            save_orbs.orbs[orb_id] = SaveOrb(orb.orb, 99)
+        save_orbs.save(save_file)

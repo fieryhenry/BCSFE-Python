@@ -583,6 +583,10 @@ class BasicItems:
         save_file.special_skills.edit(save_file)
 
     @staticmethod
+    def edit_special_skillsα(save_file: core.SaveFile):
+        save_file.special_skills.editα(save_file)
+
+    @staticmethod
     def unlock_equip_menu(save_file: core.SaveFile):
         save_file.unlock_equip_menu()
         color.ColoredText.localize("equip_menu_unlocked")

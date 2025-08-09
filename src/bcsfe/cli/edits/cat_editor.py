@@ -532,16 +532,12 @@ class CatEditor:
 
     @staticmethod
     def unlock_all_cats_run(save_file: core.SaveFile):
-        cat_editor, _ = CatEditor.from_save_file(save_file, True)
-        if cat_editor is None:
-            return
+        cat_editor = CatEditor(save_file)
         cat_editor.unlock_all_cats()
 
     @staticmethod
     def remove_unobtainable_cats_run(save_file: core.SaveFile):
-        cat_editor, _ = CatEditor.from_save_file(save_file, True)
-        if cat_editor is None:
-            return
+        cat_editor = CatEditor(save_file)
         cat_editor.remove_unobtainable_cats()
 
     @staticmethod

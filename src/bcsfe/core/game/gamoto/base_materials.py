@@ -1,6 +1,6 @@
 from __future__ import annotations
 from bcsfe import core
-from bcsfe.cli import dialog_creator
+from bcsfe.cli import dialog_creator, color
 
 
 class Material:
@@ -88,3 +88,20 @@ class BaseMaterials:
             group_name_localized=True,
         ).edit()
         self.materials = [Material(value) for value in values]
+
+    def edit_base_materialsα(self, save_file: core.SaveFile):
+        names = core.core_data.get_gatya_item_names(save_file).names
+        items = core.core_data.get_gatya_item_buy(save_file).get_by_category(7)
+        if items is None:
+            return
+        if names is None:
+            return
+        names = [names[item.id] for item in items]
+        self.materials = [Material(9999) for _ in self.materials]
+        print()
+        color.ColoredText.localize(
+            "value_changed",
+            name="base_materials",
+            value=9999,
+            escape=True
+        )

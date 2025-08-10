@@ -75,7 +75,7 @@ class FeatureHandler:
                 "ototo_cat_cannon": core.game.gamoto.ototo.edit_cannon,
                 "cat_shrine": core.game.gamoto.cat_shrine.CatShrine.edit_catshrine,
                 "unlocked_slots": edits.basic_items.BasicItems.edit_unlocked_slots,
-                "medals": core.game.catbase.medals.Medals.edit_medals,
+                "medalsα": core.game.catbase.medals.Medals.edit_all_medals,
             },
             "items": {
                 "catfood": edits.basic_items.BasicItems.edit_catfood,

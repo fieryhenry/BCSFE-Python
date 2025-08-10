@@ -265,21 +265,17 @@ def edit_chapters_auto(
     modify_clear_amounts = False
     clear_amount = 1
 
-    # ここでchaptersがアクセスできる範囲まで拡張（createメソッドがある場合はそちらを使う）
-    max_id = max(map_choices) if map_choices else -1
-    if max_id >= 0:
-        # createがあれば使う例（引数は必要に応じて調整）
-        if hasattr(chapters, "create"):
-            chapters.create(max_id)
-        else:
-            # createメソッドがなければ直接拡張
-            while len(chapters.chapters) <= max_id:
-                # 初期化は仮例なので必要に応じて調整してください
-                chapters.chapters.append(
-                    ChaptersStars.init(default_total_stages=0, total_stars=0)
-                )
-
     for id in map_choices:
+        # id が範囲内にあるかチェック（chaptersが.chaptersを持つ場合）
+        if hasattr(chapters, "chapters"):
+            if id >= len(chapters.chapters):
+                # 範囲外ならスキップ
+                continue
+        else:
+            # chaptersがリストの場合など
+            if id >= len(chapters):
+                continue
+
         map_name = names[id]
         stage_names = map_names.stage_names.get(id) or []
         stages = [
@@ -295,6 +291,7 @@ def edit_chapters_auto(
             chapters.set_total_stages(id, total_stages)
 
         color.ColoredText.localize("current_sol_chapter", name=map_name, id=id)
+
         stars = get_total_stars(chapters, id, type)
         if stars is None:
             stars = 0
@@ -315,4 +312,6 @@ def edit_chapters_auto(
                     clear_amount=clear_amount,
                     type=type,
                 )
+
     color.ColoredText.localize("map_chapters_edited")
+

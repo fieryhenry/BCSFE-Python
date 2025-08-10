@@ -229,7 +229,7 @@ class AkuChapters:
         color.ColoredText.localize("aku_clear_success")
 
     @staticmethod
-    def edit_aku_chapters_auto(save_file: core.SaveFile):
+    def edit_all_aku_chapters(save_file: core.SaveFile):
         aku = save_file.aku
         for chapters_stars in aku.chapters:
             for chapter in chapters_stars.chapters:

@@ -71,8 +71,6 @@ class FeatureHandler:
                 "all_aku_chapters": core.game.map.aku.AkuChapters.edit_all_aku_chapters,
                 "all_event": core.game.map.event.EventChapters.edit_all_event_chapters,
                 "all_collab": core.game.map.event.EventChapters.edit_all_collab_chapters,
-                "all_gauntlets": core.game.map.gauntlets.GauntletChapters.edit_all_gauntlets,
-                "all_collab_gauntlets": core.game.map.gauntlets.GauntletChapters.edit_all_collab_gauntlets,
                 "all_towers": core.game.map.tower.TowerChapters.edit_all_towers,
                 "gamatoto_xp_levelα": core.game.gamoto.gamatoto.edit_xpα,
                 "gamatoto_helpersα": core.game.gamoto.gamatoto.edit_helpersα,

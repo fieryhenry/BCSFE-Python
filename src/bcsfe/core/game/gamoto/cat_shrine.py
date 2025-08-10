@@ -154,6 +154,27 @@ class CatShrine:
 
         color.ColoredText.localize("cat_shrine_edited")
 
+    @staticmethod
+    def edit_catshrineα(save_file: core.SaveFile):
+        shrine = save_file.cat_shrine
+        data = core.core_data.get_cat_shrine_levels(save_file)
+        max_level = data.get_max_level()
+        if max_level is None:
+            color.ColoredText.localize("cat_shrine_edited")
+            return
+        xp = data.get_xp_from_level(max_level)
+        if xp is None:
+            color.ColoredText.localize("cat_shrine_edited")
+            return
+        shrine.xp_offering = xp
+        shrine.dialogs = max_level - 1
+        shrine.shrine_gone = False
+        shrine.stamp_1 = 0.0
+        shrine.stamp_2 = 0.0
+        color.ColoredText.localize(
+            "current_shrine_xp_level", level=max_level, xp=xp
+        )
+        color.ColoredText.localize("cat_shrine_edited")
 
 class CatShrineLevels:
     def __init__(self, save_file: core.SaveFile):

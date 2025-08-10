@@ -555,6 +555,10 @@ class BasicItems:
         save_file.lineups.edit_unlocked_slots()
 
     @staticmethod
+    def edit_unlocked_slotsα(save_file: core.SaveFile):
+        save_file.lineups.edit_unlocked_slotsα()
+
+    @staticmethod
     def edit_labyrinth_medals(save_file: core.SaveFile):
         names_o = core.core_data.get_gatya_item_names(save_file)
         items = core.core_data.get_gatya_item_buy(save_file).get_by_category(11)

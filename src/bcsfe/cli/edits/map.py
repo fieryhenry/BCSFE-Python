@@ -247,3 +247,53 @@ def edit_chapters(
                     unclear_stage(chapters, id, star, stage, type)
 
     color.ColoredText.localize("map_chapters_edited")
+
+def edit_chapters_auto(
+    save_file: core.SaveFile,
+    chapters: ChaptersType,
+    letter_code: str,
+    type: int | None = None,
+):
+    map_names = core.MapNames(save_file, letter_code)
+    names = map_names.map_names
+    clear = True
+    clear_txt = "clear"
+    star_prompt = "custom_star_count_per_chapter"
+    map_choices = list(range(len(names)))
+    clear_type_choice = 0
+    stars_type_choice = False
+    modify_clear_amounts = False
+    clear_amount = 1
+    for id in map_choices:
+        map_name = names[id]
+        stage_names = map_names.stage_names.get(id) or []
+        stages = [
+            i for i, stage_name in enumerate(stage_names) if stage_name and stage_name != "＠"
+        ]
+        total_stages = len(stages)
+        if isinstance(chapters, core.EventChapters):
+            if type is None:
+                raise ValueError("Type must be specified for EventChapters!")
+            chapters.set_total_stages(id, type, total_stages)
+        else:
+            chapters.set_total_stages(id, total_stages)
+        color.ColoredText.localize("current_sol_chapter", name=map_name, id=id)
+        stars = get_total_stars(chapters, id, type)
+        if stars is None:
+            stars = 0
+        if clear_type_choice == 0:
+            stages_to_clear = list(range(total_stages))
+        else:
+            stages_to_clear = stages
+        for star in range(stars):
+            for stage in stages_to_clear:
+                clear_stage(
+                    chapters,
+                    id,
+                    star,
+                    stage,
+                    overwrite_clear_progress=True,
+                    clear_amount=clear_amount,
+                    type=type,
+                )
+    color.ColoredText.localize("map_chapters_edited")

@@ -257,16 +257,18 @@ def edit_chapters_auto(
     map_names = core.MapNames(save_file, letter_code)
     names = map_names.map_names
 
-    # 有効なmap idを小さい順に取得
-    map_choices = sorted(id for id in names.keys() if id < len(chapters.chapters))
+    # 有効なマップIDのみ取得（抜けがあってもOK）
+    map_choices = [map_id for map_id in names.keys() if map_id < len(chapters.chapters)]
 
     for id in map_choices:
         map_name = names[id]
         stage_names = map_names.stage_names.get(id) or []
-        # 有効ステージ（＠除外）を全部選択
-        stages = [i for i, sname in enumerate(stage_names) if sname and sname != "＠"]
-        total_stages = len(stages)
 
+        # 有効なステージのみ抽出（"＠" は無効扱い）
+        valid_stages = [i for i, sname in enumerate(stage_names) if sname and sname != "＠"]
+        total_stages = len(valid_stages)
+
+        # ステージ数を設定（EventChaptersならtype必須）
         if isinstance(chapters, core.EventChapters):
             if type is None:
                 raise ValueError("Type must be specified for EventChapters!")
@@ -276,13 +278,15 @@ def edit_chapters_auto(
 
         color.ColoredText.localize("current_sol_chapter", name=map_name, id=id)
 
-        # max星数を直接取得（chapters構造に応じて調整）
-        stars = len(chapters.chapters[id].chapters)
-        if stars == 0:
-            continue  # 星がなければスキップ
+        # そのマップの星数最大値を取得
+        stars = get_total_stars(chapters, id, type)
+        if stars is None or stars == 0:
+            # 星数が不明なら適当に最大5とかにしても良いですがここではスキップ
+            continue
 
+        # 全星×全有効ステージをクリア状態に設定
         for star in range(stars):
-            for stage in stages:
+            for stage in valid_stages:
                 clear_stage(
                     chapters,
                     id,

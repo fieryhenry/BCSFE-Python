@@ -503,6 +503,29 @@ class Ototo:
 
         self.display_current_cannons(save_file)
 
+    @staticmethod
+    def edit_all_cannons(save_file: core.SaveFile):
+        if save_file.cannons is None:
+            save_file.cannons = Cannons.init(save_file.game_version)
+        all_cannon_ids = list(range(len(save_file.cannons.cannons)))
+        for cannon_id in all_cannon_ids:
+            cannon = save_file.cannons.get_cannon(cannon_id)
+            if cannon is None:
+                continue
+            cannon.development = cannon.max_development
+            cannon.level = cannon.max_level
+        color.ColoredText.localize("cannon_success")
+        for cannon_id in all_cannon_ids:
+            cannon = save_file.cannons.get_cannon(cannon_id)
+            if cannon is None:
+                continue
+            color.ColoredText.localize(
+                "cannon_info",
+                name=cannon.name,
+                development=cannon.development,
+                level=cannon.level
+            )
+
     def select_development(self) -> int | None:
         return dialog_creator.ChoiceInput.from_reduced(
             ["none", "foundation", "style", "effect"],
@@ -658,3 +681,6 @@ class Ototo:
 
 def edit_cannon(save_file: core.SaveFile):
     save_file.ototo.edit_cannon(save_file)
+
+def edit_cannonα(save_file: core.SaveFile):
+    save_file.ototo.edit_all_cannons(save_file)

@@ -782,34 +782,7 @@ class EventChapters:
 
     @staticmethod
     def edit_all_sol_chapters(save_file: core.SaveFile):
-        chapters = save_file.event_stages
-        stage_type = 0
-        map_names = core.MapNames(save_file, "N")
-        names = map_names.map_names
-        map_choices = list(names.keys())
-        edited_count = 0
-        for map_id in map_choices:
-            map_name = names.get(map_id)
-            stage_names = map_names.stage_names.get(map_id) or []
-            stage_names = [s for s in stage_names if s and s != "＠"]
-            total_stages = len(stage_names)
-            if total_stages == 0:
-                continue
-            chapters.set_total_stages(map_id, stage_type, total_stages)
-            stars = get_total_stars(chapters, map_id, stage_type)
-            for star in range(stars):
-                for stage in range(total_stages):
-                    clear_stage(
-                        chapters,
-                        map_id=map_id,
-                        star=star,
-                        stage=stage,
-                        overwrite_clear_progress=True,
-                        clear_amount=1,
-                        type=stage_type,
-                    )
-            edited_count += 1
-        color.ColoredText.localize("map_chapters_edited")
+        EventChapters.edit_chapters_auto(save_file, 0, "N")
 
     @staticmethod
     def edit_event_chapters(save_file: core.SaveFile):
@@ -914,6 +887,10 @@ class EventChapters:
     @staticmethod
     def edit_chapters(save_file: core.SaveFile, type: int, letter_code: str):
         edits.map.edit_chapters(save_file, save_file.event_stages, letter_code, type)
+
+    @staticmethod
+    def edit_chapters_auto(save_file: core.SaveFile, type: int, letter_code: str):
+        edits.map.edit_chapters_auto(save_file, save_file.event_stages, letter_code, type)
 
     def unclear_rest(
         self,

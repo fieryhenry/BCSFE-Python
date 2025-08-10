@@ -726,7 +726,7 @@ class CatEditor:
     @staticmethod
     def from_save_file(
         save_file: core.SaveFile,
-        is_getting_cats: bool = False,
+        is_getting_cats: bool = True,
     ) -> tuple[CatEditor | None, list[core.Cat]]:
         cat_editor = CatEditor(save_file)
         current_cats = cat_editor.select(is_getting_cats=is_getting_cats)

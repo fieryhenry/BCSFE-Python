@@ -256,15 +256,22 @@ def edit_chapters_auto(
     map_names = core.MapNames(save_file, letter_code)
     names = map_names.map_names
 
-    # chapters.chapters のインデックスでループする想定
-    map_choices = list(range(len(chapters.chapters)))
+    # 全チャプターを選択（対話なし）
+    map_choices = list(names.keys())
 
+    clear = True  # 全クリアに固定
+    clear_txt = "clear"
+    star_prompt = "custom_star_count_per_chapter"
+    clear_type_choice = 0  # 全チャプター対象に固定
+    stars_type_choice = False  # 星数指定なし＝最大に固定
+    modify_clear_amounts = False  # クリア回数変更なし
     clear_amount = 1
+    clear_amount_type = -1
 
     for id in map_choices:
-        map_name = names.get(id, core.core_data.local_manager.get_key("unknown_map_name", id=id))
+        map_name = names[id]
         stage_names = map_names.stage_names.get(id) or []
-        stage_names = [s for s in stage_names if s and s != "＠"]
+        stage_names = [sn for sn in stage_names if sn and sn != "＠"]
         total_stages = len(stage_names)
 
         if isinstance(chapters, core.EventChapters):
@@ -274,26 +281,23 @@ def edit_chapters_auto(
         else:
             chapters.set_total_stages(id, total_stages)
 
-        # 本家ログ呼び出し（チャプター名・ID）
         color.ColoredText.localize("current_sol_chapter", name=map_name, id=id)
 
+        # 星は既存最大星数を取得して使う（0なら最大3に）
         stars = get_total_stars(chapters, id, type)
         if stars == 0:
-            stars = 3  # 適切な最大星数
+            stars = 3
 
+        # 全ステージを対象に
         stages = list(range(total_stages))
 
-        for star in range(stars):
-            # 本家ログ呼び出し（星数）
-            color.ColoredText.localize("current_sol_star", star=star + 1)
+        # unclear_rest は「未クリア状態のリセット」なのでクリア時はスキップ
 
+        start = 0
+        end = stars
+
+        for star in range(start, end):
             for stage in stages:
-                stage_name = (
-                    stage_names[stage] if stage < len(stage_names) else core.core_data.local_manager.get_key("unknown_stage", id=stage)
-                )
-                # 本家ログ呼び出し（ステージ名・ID）
-                color.ColoredText.localize("current_sol_stage", name=stage_name, id=stage)
-
                 clear_stage(
                     chapters,
                     id,
@@ -304,5 +308,4 @@ def edit_chapters_auto(
                     type=type,
                 )
 
-    # 最後に本家ログ（編集完了）
     color.ColoredText.localize("map_chapters_edited")

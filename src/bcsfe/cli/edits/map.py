@@ -256,15 +256,13 @@ def edit_chapters_auto(
     map_names = core.MapNames(save_file, letter_code)
     names = map_names.map_names
 
-    if hasattr(chapters, "chapters") and isinstance(chapters.chapters, list):
-        map_choices = list(range(len(chapters.chapters)))
-    else:
-        map_choices = list(names.keys())
+    # chapters.chapters のインデックスでループする想定
+    map_choices = list(range(len(chapters.chapters)))
 
     clear_amount = 1
 
     for id in map_choices:
-        map_name = names.get(id, f"Unknown Map {id}")
+        map_name = names.get(id, core.core_data.local_manager.get_key("unknown_map_name", id=id))
         stage_names = map_names.stage_names.get(id) or []
         stage_names = [s for s in stage_names if s and s != "＠"]
         total_stages = len(stage_names)
@@ -276,18 +274,24 @@ def edit_chapters_auto(
         else:
             chapters.set_total_stages(id, total_stages)
 
+        # 本家ログ呼び出し（チャプター名・ID）
         color.ColoredText.localize("current_sol_chapter", name=map_name, id=id)
 
         stars = get_total_stars(chapters, id, type)
         if stars == 0:
-            stars = 3
+            stars = 3  # 適切な最大星数
 
         stages = list(range(total_stages))
 
         for star in range(stars):
+            # 本家ログ呼び出し（星数）
             color.ColoredText.localize("current_sol_star", star=star + 1)
+
             for stage in stages:
-                stage_name = stage_names[stage] if stage < len(stage_names) else f"Stage {stage}"
+                stage_name = (
+                    stage_names[stage] if stage < len(stage_names) else core.core_data.local_manager.get_key("unknown_stage", id=stage)
+                )
+                # 本家ログ呼び出し（ステージ名・ID）
                 color.ColoredText.localize("current_sol_stage", name=stage_name, id=stage)
 
                 clear_stage(
@@ -300,5 +304,5 @@ def edit_chapters_auto(
                     type=type,
                 )
 
+    # 最後に本家ログ（編集完了）
     color.ColoredText.localize("map_chapters_edited")
-

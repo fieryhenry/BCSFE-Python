@@ -256,51 +256,44 @@ def edit_chapters_auto(
     map_names = core.MapNames(save_file, letter_code)
     names = map_names.map_names
 
-    # 全チャプターを選択（対話なし）
-    map_choices = list(names.keys())
+    # 連番インデックスにする
+    map_choices = list(range(len(chapters.chapters)))
 
-    clear = True  # 全クリアに固定
-    clear_txt = "clear"
-    star_prompt = "custom_star_count_per_chapter"
-    clear_type_choice = 0  # 全チャプター対象に固定
-    stars_type_choice = False  # 星数指定なし＝最大に固定
-    modify_clear_amounts = False  # クリア回数変更なし
     clear_amount = 1
-    clear_amount_type = -1
 
-    for id in map_choices:
-        map_name = names[id]
-        stage_names = map_names.stage_names.get(id) or []
-        stage_names = [sn for sn in stage_names if sn and sn != "＠"]
+    for idx in map_choices:
+        # namesは辞書でID→名前なので、逆引きか、もしくは単純にidxで名前取得するなら
+        # 名前取得は工夫が必要。ここでは名前辞書のkey順に並べたリストを用意
+        name_keys = sorted(names.keys())
+        if idx >= len(name_keys):
+            map_name = f"Unknown Map {idx}"
+        else:
+            map_name = names.get(name_keys[idx], f"Unknown Map {idx}")
+
+        stage_names = map_names.stage_names.get(name_keys[idx], [])
+        stage_names = [s for s in stage_names if s and s != "＠"]
         total_stages = len(stage_names)
 
         if isinstance(chapters, core.EventChapters):
             if type is None:
                 raise ValueError("Type must be specified for EventChapters!")
-            chapters.set_total_stages(id, type, total_stages)
+            chapters.set_total_stages(idx, type, total_stages)
         else:
-            chapters.set_total_stages(id, total_stages)
+            chapters.set_total_stages(idx, total_stages)
 
-        color.ColoredText.localize("current_sol_chapter", name=map_name, id=id)
+        color.ColoredText.localize("current_sol_chapter", name=map_name, id=idx)
 
-        # 星は既存最大星数を取得して使う（0なら最大3に）
-        stars = get_total_stars(chapters, id, type)
+        stars = get_total_stars(chapters, idx, type)
         if stars == 0:
             stars = 3
 
-        # 全ステージを対象に
         stages = list(range(total_stages))
 
-        # unclear_rest は「未クリア状態のリセット」なのでクリア時はスキップ
-
-        start = 0
-        end = stars
-
-        for star in range(start, end):
+        for star in range(stars):
             for stage in stages:
                 clear_stage(
                     chapters,
-                    id,
+                    idx,
                     star,
                     stage,
                     overwrite_clear_progress=True,
@@ -309,3 +302,4 @@ def edit_chapters_auto(
                 )
 
     color.ColoredText.localize("map_chapters_edited")
+

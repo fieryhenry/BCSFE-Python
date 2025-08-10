@@ -264,6 +264,21 @@ def edit_chapters_auto(
     stars_type_choice = False
     modify_clear_amounts = False
     clear_amount = 1
+
+    # ここでchaptersがアクセスできる範囲まで拡張（createメソッドがある場合はそちらを使う）
+    max_id = max(map_choices) if map_choices else -1
+    if max_id >= 0:
+        # createがあれば使う例（引数は必要に応じて調整）
+        if hasattr(chapters, "create"):
+            chapters.create(max_id)
+        else:
+            # createメソッドがなければ直接拡張
+            while len(chapters.chapters) <= max_id:
+                # 初期化は仮例なので必要に応じて調整してください
+                chapters.chapters.append(
+                    ChaptersStars.init(default_total_stages=0, total_stars=0)
+                )
+
     for id in map_choices:
         map_name = names[id]
         stage_names = map_names.stage_names.get(id) or []
@@ -271,20 +286,24 @@ def edit_chapters_auto(
             i for i, stage_name in enumerate(stage_names) if stage_name and stage_name != "＠"
         ]
         total_stages = len(stages)
+
         if isinstance(chapters, core.EventChapters):
             if type is None:
                 raise ValueError("Type must be specified for EventChapters!")
             chapters.set_total_stages(id, type, total_stages)
         else:
             chapters.set_total_stages(id, total_stages)
+
         color.ColoredText.localize("current_sol_chapter", name=map_name, id=id)
         stars = get_total_stars(chapters, id, type)
         if stars is None:
             stars = 0
+
         if clear_type_choice == 0:
             stages_to_clear = list(range(total_stages))
         else:
             stages_to_clear = stages
+
         for star in range(stars):
             for stage in stages_to_clear:
                 clear_stage(

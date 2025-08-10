@@ -428,6 +428,19 @@ class Gamatoto:
             "gamatoto_level_success", level=current_level.level, xp=xp
         )
 
+    @staticmethod
+    def edit_lv130(save_file: core.SaveFile):
+        gamatoto_levels = core.core_data.get_gamatoto_levels(save_file)
+        max_level = gamatoto_levels.get_max_level()
+        xp = gamatoto_levels.get_xp_from_level(130)
+        current_level = gamatoto_levels.get_level(130)
+        if xp is None or current_level is None:
+            return
+        save_file.gamatoto.xp = xp
+        color.ColoredText.localize(
+            "gamatoto_level_success", level=current_level.level, xp=xp
+        )
+
     def edit_helpers(self, save_file: core.SaveFile):
         members_name = core.core_data.get_gamatoto_members_name(save_file)
 
@@ -487,10 +500,50 @@ class Gamatoto:
                 rarity_name=member.rarity_name,
             )
 
+    @staticmethod
+    def edit_helpersα(save_file: core.SaveFile):
+        members_name = core.core_data.get_gamatoto_members_name(save_file)
+        gamatoto_levels = core.core_data.get_gamatoto_levels(save_file)
+        max_helpers = gamatoto_levels.get_total_helpers()
+        rarity_names = members_name.get_all_rarity_names()
+        if rarity_names is None:
+            color.ColoredText.localize(
+                "gamatoto_helper",
+                name=member.name,
+                rarity_name=member.rarity_name,
+            )
+            return
+        legend_index = len(rarity_names) - 1
+        total_rarity_amounts: list[int] = [0] * len(rarity_names)
+        total_rarity_amounts[legend_index] = min(10, max_helpers)
+        helpers: list[Helper] = []
+        for i, rarity_amount in enumerate(total_rarity_amounts):
+            rarity_members = members_name.get_all_rarity(i)
+            if rarity_members is None:
+                continue
+            for _ in range(rarity_amount):
+                member = rarity_members.pop(0)
+                helpers.append(Helper(member.member_id))
+        save_file.gamatoto.helpers = Helpers(helpers)
+        members = members_name.get_members_from_helpers(save_file.gamatoto.helpers)
+        color.ColoredText.localize("new_gamatoto_helpers")
+        for member in members:
+            if member is None:
+                continue
+            color.ColoredText.localize(
+                "gamatoto_helper",
+                name=member.name,
+                rarity_name=member.rarity_name,
+            )
 
 def edit_xp(save_file: core.SaveFile):
     save_file.gamatoto.edit_xp(save_file)
 
+def edit_xpα(save_file: core.SaveFile):
+    save_file.gamatoto.edit_lv130(save_file)
 
 def edit_helpers(save_file: core.SaveFile):
     save_file.gamatoto.edit_helpers(save_file)
+
+def edit_helpersα(save_file: core.SaveFile):
+    save_file.gamatoto.edit_helpersα(save_file)

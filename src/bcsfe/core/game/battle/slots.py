@@ -198,3 +198,6 @@ class LineUps:
             localized_item=True,
             remove_alias=True,
         ).edit()
+
+    def edit_unlocked_slotsα(self):
+        self.unlocked_slots = self.slot_names_length

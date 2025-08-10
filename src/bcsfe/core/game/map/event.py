@@ -789,8 +789,16 @@ class EventChapters:
         EventChapters.edit_chapters(save_file, 1, "S")
 
     @staticmethod
+    def edit_all_event_chapters(save_file: core.SaveFile):
+        EventChapters.edit_chapters_auto(save_file, 1, "S")
+
+    @staticmethod
     def edit_collab_chapters(save_file: core.SaveFile):
         EventChapters.edit_chapters(save_file, 2, "C")
+
+    @staticmethod
+    def edit_all_collab_chapters(save_file: core.SaveFile):
+        EventChapters.edit_chapters_auto(save_file, 2, "C")
 
     @staticmethod
     def select_map_names(names_dict: dict[int, str | None]) -> list[int] | None:

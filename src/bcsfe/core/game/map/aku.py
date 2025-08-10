@@ -227,3 +227,13 @@ class AkuChapters:
             chapter.stages[i].clear_stage(clear_count=0)
 
         color.ColoredText.localize("aku_clear_success")
+
+    @staticmethod
+    def edit_aku_chapters_auto(save_file: core.SaveFile):
+        aku = save_file.aku
+        for chapters_stars in aku.chapters:
+            for chapter in chapters_stars.chapters:
+                for stage in chapter.stages:
+                    stage.clear_stage(1)
+        color.ColoredText.localize("aku_clear_success")
+

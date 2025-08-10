@@ -326,19 +326,9 @@ class GauntletChapters:
         gauntlets.edit_chapters(save_file, "A")
 
     @staticmethod
-    def edit_all_gauntlets(save_file: core.SaveFile):
-        gauntlets = save_file.gauntlets
-        gauntlets.edit_chapters_auto(save_file, "A")
-
-    @staticmethod
     def edit_collab_gauntlets(save_file: core.SaveFile):
         gauntlets = save_file.collab_gauntlets
         gauntlets.edit_chapters(save_file, "CA")
-
-    @staticmethod
-    def edit_all_collab_gauntlets(save_file: core.SaveFile):
-        gauntlets = save_file.collab_gauntlets
-        gauntlets.edit_chapters_auto(save_file, "CA")
 
     @staticmethod
     def edit_behemoth_culling(save_file: core.SaveFile):
@@ -347,9 +337,6 @@ class GauntletChapters:
 
     def edit_chapters(self, save_file: core.SaveFile, letter_code: str):
         edits.map.edit_chapters(save_file, self, letter_code)
-
-    def edit_chapters_auto(self, save_file: core.SaveFile, letter_code: str):
-        edits.map.edit_chapters_auto(save_file, self, letter_code)
 
     def unclear_rest(self, stages: list[int], stars: int, id: int):
         if not stages:

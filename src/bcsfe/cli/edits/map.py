@@ -249,48 +249,48 @@ def edit_chapters(
 
 def edit_chapters_auto(
     save_file: core.SaveFile,
-    chapters: ChaptersType,
+    chapters: GauntletChapters,
     letter_code: str,
     type: int | None = None,
 ):
     map_names = core.MapNames(save_file, letter_code)
     names = map_names.map_names
-    map_choices = list(names.keys())
-    clear = True
-    clear_txt = "clear"
-    star_prompt = "custom_star_count_per_chapter"
-    clear_type_choice = 0
-    stars_type_choice = False
-    modify_clear_amounts = False
+
+    # map_choicesはchapters.chaptersのインデックスに合わせる
+    map_choices = list(range(len(chapters.chapters)))
+
     clear_amount = 1
-    clear_amount_type = -1
-    for id in map_choices:
-        map_name = names[id]
-        stage_names = map_names.stage_names.get(id) or []
-        stage_names = [sn for sn in stage_names if sn and sn != "＠"]
-        total_stages = len(stage_names)
-        if isinstance(chapters, core.EventChapters):
+
+    for map_id in map_choices:
+        map_name = names.get(map_id, f"Unknown Map {map_id}")
+
+        total_stars = chapters.get_total_stars(map_id)
+        if total_stars == 0:
+            continue  # スター数0ならスキップ
+
+        # 総ステージ数はstar=0のチャプターから取る
+        total_stages = chapters.get_total_stages(map_id, 0)
+        if total_stages == 0:
+            continue  # ステージ数0ならスキップ
+
+        if isinstance(chapters, GauntletChapters):
             if type is None:
-                raise ValueError("Type must be specified for EventChapters!")
-            chapters.set_total_stages(id, type, total_stages)
+                raise ValueError("type must be specified for GauntletChapters")
+            chapters.set_total_stages(map_id, total_stages)
         else:
-            chapters.set_total_stages(id, total_stages)
-        color.ColoredText.localize("current_sol_chapter", name=map_name, id=id)
-        stars = get_total_stars(chapters, id, type)
-        if stars == 0:
-            stars = 3
-        stages = list(range(total_stages))
-        start = 0
-        end = stars
-        for star in range(start, end):
-            for stage in stages:
-                clear_stage(
-                    chapters,
-                    id,
-                    star,
-                    stage,
-                    overwrite_clear_progress=True,
+            # もし他型であれば別途処理
+            pass
+
+        color.ColoredText.localize("current_sol_chapter", name=map_name, id=map_id)
+
+        for star in range(total_stars):
+            for stage in range(total_stages):
+                chapters.clear_stage(
+                    map=map_id,
+                    star=star,
+                    stage=stage,
                     clear_amount=clear_amount,
-                    type=type,
+                    overwrite_clear_progress=True,
                 )
+
     color.ColoredText.localize("map_chapters_edited")

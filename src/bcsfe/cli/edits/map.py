@@ -247,3 +247,58 @@ def edit_chapters(
 
     color.ColoredText.localize("map_chapters_edited")
 
+def edit_chapters_auto(
+    save_file: core.SaveFile,
+    chapters: ChaptersType,
+    letter_code: str,
+    type: int | None = None,
+):
+    map_names = core.MapNames(save_file, letter_code)
+    names = map_names.map_names
+
+    if hasattr(chapters, "chapters") and isinstance(chapters.chapters, list):
+        map_choices = list(range(len(chapters.chapters)))
+    else:
+        map_choices = list(names.keys())
+
+    clear_amount = 1
+
+    for id in map_choices:
+        map_name = names.get(id, f"Unknown Map {id}")
+        stage_names = map_names.stage_names.get(id) or []
+        stage_names = [s for s in stage_names if s and s != "＠"]
+        total_stages = len(stage_names)
+
+        if isinstance(chapters, core.EventChapters):
+            if type is None:
+                raise ValueError("Type must be specified for EventChapters!")
+            chapters.set_total_stages(id, type, total_stages)
+        else:
+            chapters.set_total_stages(id, total_stages)
+
+        color.ColoredText.localize("current_sol_chapter", name=map_name, id=id)
+
+        stars = get_total_stars(chapters, id, type)
+        if stars == 0:
+            stars = 3
+
+        stages = list(range(total_stages))
+
+        for star in range(stars):
+            color.ColoredText.localize("current_sol_star", star=star + 1)
+            for stage in stages:
+                stage_name = stage_names[stage] if stage < len(stage_names) else f"Stage {stage}"
+                color.ColoredText.localize("current_sol_stage", name=stage_name, id=stage)
+
+                clear_stage(
+                    chapters,
+                    id,
+                    star,
+                    stage,
+                    overwrite_clear_progress=True,
+                    clear_amount=clear_amount,
+                    type=type,
+                )
+
+    color.ColoredText.localize("map_chapters_edited")
+

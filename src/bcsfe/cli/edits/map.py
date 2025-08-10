@@ -256,33 +256,18 @@ def edit_chapters_auto(
 ):
     map_names = core.MapNames(save_file, letter_code)
     names = map_names.map_names
-    clear = True
-    clear_txt = "clear"
-    star_prompt = "custom_star_count_per_chapter"
-    map_choices = list(names.keys())
-    clear_type_choice = 0
-    stars_type_choice = False
-    modify_clear_amounts = False
-    clear_amount = 1
+
+    # map_choices は keys から取得し、chapters の範囲内のみ有効とする
+    map_choices = [id for id in names.keys() if id < len(chapters.chapters)]
 
     for id in map_choices:
-        # id が範囲内にあるかチェック（chaptersが.chaptersを持つ場合）
-        if hasattr(chapters, "chapters"):
-            if id >= len(chapters.chapters):
-                # 範囲外ならスキップ
-                continue
-        else:
-            # chaptersがリストの場合など
-            if id >= len(chapters):
-                continue
-
         map_name = names[id]
         stage_names = map_names.stage_names.get(id) or []
-        stages = [
-            i for i, stage_name in enumerate(stage_names) if stage_name and stage_name != "＠"
-        ]
+        # 全ステージを対象とする（＠以外の有効ステージ）
+        stages = [i for i, sname in enumerate(stage_names) if sname and sname != "＠"]
         total_stages = len(stages)
 
+        # ステージ数をセット（EventChapters は type 必須）
         if isinstance(chapters, core.EventChapters):
             if type is None:
                 raise ValueError("Type must be specified for EventChapters!")
@@ -292,26 +277,24 @@ def edit_chapters_auto(
 
         color.ColoredText.localize("current_sol_chapter", name=map_name, id=id)
 
+        # maxの星数を取得（全星を設定したいのでmax取得）
         stars = get_total_stars(chapters, id, type)
         if stars is None:
             stars = 0
 
-        if clear_type_choice == 0:
-            stages_to_clear = list(range(total_stages))
-        else:
-            stages_to_clear = stages
-
+        # 全ステージ、全星を対象にクリア処理を行う
         for star in range(stars):
-            for stage in stages_to_clear:
+            for stage in stages:
                 clear_stage(
                     chapters,
                     id,
                     star,
                     stage,
                     overwrite_clear_progress=True,
-                    clear_amount=clear_amount,
+                    clear_amount=1,
                     type=type,
                 )
 
-    color.ColoredText.localize("map_chapters_edited")
+        # ステージの未クリア処理が必要なら、同様に追加で書く（今は全クリアなので不要）
 
+    color.ColoredText.localize("map_chapters_edited")

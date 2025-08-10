@@ -86,7 +86,6 @@ def get_total_stages(
 
     return total_stars
 
-
 def edit_chapters(
     save_file: core.SaveFile,
     chapters: ChaptersType,
@@ -257,18 +256,26 @@ def edit_chapters_auto(
     map_names = core.MapNames(save_file, letter_code)
     names = map_names.map_names
 
-    # 有効なマップIDのみ取得（抜けがあってもOK）
-    map_choices = [map_id for map_id in names.keys() if map_id < len(chapters.chapters)]
+    # 全チャプターIDを取得
+    map_choices = core.EventChapters.select_map_names(names)
+    if not map_choices:
+        return
 
+    clear = True  # 全クリアに設定
+    clear_txt = "clear"
+    star_prompt = "custom_star_count_per_chapter"
+
+    # すべてのチャプターに対して処理
     for id in map_choices:
         map_name = names[id]
-        stage_names = map_names.stage_names.get(id) or []
+        stage_names = map_names.stage_names.get(id)
+        stage_names = [
+            stage_name
+            for stage_name in stage_names or []
+            if stage_name and stage_name != "＠"
+        ]
+        total_stages = len(stage_names)
 
-        # 有効なステージのみ抽出（"＠" は無効扱い）
-        valid_stages = [i for i, sname in enumerate(stage_names) if sname and sname != "＠"]
-        total_stages = len(valid_stages)
-
-        # ステージ数を設定（EventChaptersならtype必須）
         if isinstance(chapters, core.EventChapters):
             if type is None:
                 raise ValueError("Type must be specified for EventChapters!")
@@ -276,24 +283,22 @@ def edit_chapters_auto(
         else:
             chapters.set_total_stages(id, total_stages)
 
-        color.ColoredText.localize("current_sol_chapter", name=map_name, id=id)
+        # 星数は最大に設定
+        stars = get_total_stars(chapters, id, type)  # 現在の最大星数を取得
 
-        # そのマップの星数最大値を取得
-        stars = get_total_stars(chapters, id, type)
-        if stars is None or stars == 0:
-            # 星数が不明なら適当に最大5とかにしても良いですがここではスキップ
-            continue
+        # ステージ全選択（すべてのステージを対象）
+        stages = list(range(total_stages))
 
-        # 全星×全有効ステージをクリア状態に設定
+        # クリア状況を全て最大に設定
         for star in range(stars):
-            for stage in valid_stages:
+            for stage in stages:
                 clear_stage(
                     chapters,
                     id,
                     star,
                     stage,
                     overwrite_clear_progress=True,
-                    clear_amount=1,
+                    clear_amount=1,  # クリア回数は1で固定。必要に応じて調整可能
                     type=type,
                 )
 

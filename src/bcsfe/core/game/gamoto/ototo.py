@@ -503,28 +503,21 @@ class Ototo:
 
         self.display_current_cannons(save_file)
 
-    @staticmethod
-    def edit_all_cannons(save_file: core.SaveFile):
-        if save_file.cannons is None:
-            save_file.cannons = Cannons.init(save_file.game_version)
-        all_cannon_ids = list(range(len(save_file.cannons.cannons)))
-        for cannon_id in all_cannon_ids:
-            cannon = save_file.cannons.get_cannon(cannon_id)
-            if cannon is None:
+    def edit_all_cannons(self, save_file: core.SaveFile):
+        if self.cannons is None:
+            self.cannons = Cannons.init(save_file.game_version)
+        cannon_recipe = CastleRecipeUnlock(save_file)
+        for cannon_id, cannon in self.cannons.cannons.items():
+            if cannon_id == 0:
                 continue
-            cannon.development = cannon.max_development
-            cannon.level = cannon.max_level
+            cannon.development = max(cannon.development, 3)
+            for part_id in range(len(cannon.levels)):
+                max_level = cannon_recipe.get_max_level(cannon_id, part_id)
+                if max_level is None:
+                    continue
+                cannon.levels[part_id] = max_level
         color.ColoredText.localize("cannon_success")
-        for cannon_id in all_cannon_ids:
-            cannon = save_file.cannons.get_cannon(cannon_id)
-            if cannon is None:
-                continue
-            color.ColoredText.localize(
-                "cannon_info",
-                name=cannon.name,
-                development=cannon.development,
-                level=cannon.level
-            )
+        self.display_current_cannons(save_file)
 
     def select_development(self) -> int | None:
         return dialog_creator.ChoiceInput.from_reduced(

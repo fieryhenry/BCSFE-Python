@@ -277,9 +277,17 @@ class ZeroLegendsChapters:
         zero_legends_chapters = save_file.zero_legends
         zero_legends_chapters.edit_chapters(save_file, "ND")
 
+    @staticmethod
+    def edit_all_zero_legends(save_file: core.SaveFile):
+        zero_legends_chapters = save_file.zero_legends
+        zero_legends_chapters.edit_chapters_auto(save_file, "ND")
+
     def edit_chapters(self, save_file: core.SaveFile, letter_code: str):
         color.ColoredText.localize("zero_legends_warning")
         edits.map.edit_chapters(save_file, self, letter_code)
+
+    def edit_chapters_auto(self, save_file: core.SaveFile, letter_code: str):
+        edits.map.edit_chapters_auto(save_file, self, letter_code)
 
     def unclear_rest(self, stages: list[int], stars: int, id: int):
         if not stages:

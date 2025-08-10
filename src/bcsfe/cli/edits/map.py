@@ -255,7 +255,7 @@ def edit_chapters_auto(
 ):
     map_names = core.MapNames(save_file, letter_code)
     names = map_names.map_names
-    map_choices = list(range(len(chapters.chapters)))
+    map_choices = list(names.keys())
     clear = True
     clear_txt = "clear"
     star_prompt = "custom_star_count_per_chapter"
@@ -294,3 +294,4 @@ def edit_chapters_auto(
                     type=type,
                 )
     color.ColoredText.localize("map_chapters_edited")
+

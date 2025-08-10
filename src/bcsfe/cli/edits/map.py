@@ -256,26 +256,16 @@ def edit_chapters_auto(
     map_names = core.MapNames(save_file, letter_code)
     names = map_names.map_names
 
-    # 全チャプターIDを取得
-    map_choices = core.EventChapters.select_map_names(names)
-    if not map_choices:
-        return
+    # 全チャプターIDを辞書のキーから取得（対話なし）
+    map_choices = list(names.keys())
 
-    clear = True  # 全クリアに設定
-    clear_txt = "clear"
-    star_prompt = "custom_star_count_per_chapter"
-
-    # すべてのチャプターに対して処理
     for id in map_choices:
-        map_name = names[id]
-        stage_names = map_names.stage_names.get(id)
-        stage_names = [
-            stage_name
-            for stage_name in stage_names or []
-            if stage_name and stage_name != "＠"
-        ]
+        stage_names = map_names.stage_names.get(id) or []
+        # 無効なステージ名を除外
+        stage_names = [s for s in stage_names if s and s != "＠"]
         total_stages = len(stage_names)
 
+        # 総ステージ数をセット
         if isinstance(chapters, core.EventChapters):
             if type is None:
                 raise ValueError("Type must be specified for EventChapters!")
@@ -283,13 +273,15 @@ def edit_chapters_auto(
         else:
             chapters.set_total_stages(id, total_stages)
 
-        # 星数は最大に設定
-        stars = get_total_stars(chapters, id, type)  # 現在の最大星数を取得
+        # 既存の星数最大を取得（もしくは最大星数を固定してもよい）
+        stars = get_total_stars(chapters, id, type)
+        if stars == 0:
+            # もし0なら、適切な最大星数を仮設定（例: 3）
+            stars = 3
 
-        # ステージ全選択（すべてのステージを対象）
         stages = list(range(total_stages))
 
-        # クリア状況を全て最大に設定
+        # 全チャプターの全ステージを全星クリアに設定
         for star in range(stars):
             for stage in stages:
                 clear_stage(
@@ -298,7 +290,7 @@ def edit_chapters_auto(
                     star,
                     stage,
                     overwrite_clear_progress=True,
-                    clear_amount=1,  # クリア回数は1で固定。必要に応じて調整可能
+                    clear_amount=1,
                     type=type,
                 )
 

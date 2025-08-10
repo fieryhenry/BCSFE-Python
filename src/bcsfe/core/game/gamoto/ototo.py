@@ -508,17 +508,18 @@ class Ototo:
             self.cannons = Cannons.init(save_file.game_version)
         cannon_recipe = CastleRecipeUnlock(save_file)
         for cannon_id, cannon in self.cannons.cannons.items():
-            if cannon_id == 0:
-                continue
             cannon.development = max(cannon.development, 3)
             for part_id in range(len(cannon.levels)):
                 max_level = cannon_recipe.get_max_level(cannon_id, part_id)
                 if max_level is None:
                     continue
-                if part_id == 0:
+                if cannon_id == 0:
                     cannon.levels[part_id] = max_level - 1
                 else:
-                    cannon.levels[part_id] = max_level
+                    if part_id == 0:
+                        cannon.levels[part_id] = max_level - 1
+                    else:
+                        cannon.levels[part_id] = max_level
         color.ColoredText.localize("cannon_success")
         self.display_current_cannons(save_file)
 

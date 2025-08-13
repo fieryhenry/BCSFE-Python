@@ -83,6 +83,7 @@ class FeatureHandler:
                 "gauntlets": core.game.map.gauntlets.GauntletChapters.edit_gauntlets,
                 "collab_gauntlets": core.game.map.gauntlets.GauntletChapters.edit_collab_gauntlets,
                 "uncanny": core.game.map.uncanny.UncannyChapters.edit_uncanny,
+                "catamin_stages": core.game.map.uncanny.UncannyChapters.edit_catamin_stages,
                 "behemoth_culling": core.game.map.gauntlets.GauntletChapters.edit_behemoth_culling,
                 "legend_quest": core.game.map.legend_quest.LegendQuestChapters.edit_legend_quest,
                 "towers": core.game.map.tower.TowerChapters.edit_towers,

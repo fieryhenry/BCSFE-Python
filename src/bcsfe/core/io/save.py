@@ -166,7 +166,7 @@ class SaveFile:
 
         self.dsts: list[bool] = []
 
-        self.game_version = core.GameVersion(self.data.read_int())
+        self.game_version: core.GameVersion = core.GameVersion(self.data.read_int())
 
         if self.game_version >= 10 or self.not_jp():
             self.ub1 = self.data.read_bool()
@@ -587,7 +587,7 @@ class SaveFile:
             assert self.data.read_int() == 76
 
         if self.game_version >= 77:
-            self.uncanny_2 = core.UncannyChapters.read(self.data)
+            self.catamin_stages = core.UncannyChapters.read(self.data)
 
             self.lucky_tickets = self.data.read_int_list()
 
@@ -1764,7 +1764,7 @@ class SaveFile:
             self.data.write_int(76)
 
         if self.game_version >= 77:
-            self.uncanny_2.write(self.data)
+            self.catamin_stages.write(self.data)
             self.data.write_int_list(self.lucky_tickets)
             self.data.write_bool(self.ub5)
             self.data.write_int(77)
@@ -2561,7 +2561,7 @@ class SaveFile:
             "cotc_1_complete": self.cotc_1_complete,
             "map_resets": self.map_resets.serialize(),
             "uncanny": self.uncanny.serialize(),
-            "uncanny_2": self.uncanny_2.serialize(),
+            "catamin_stages": self.catamin_stages.serialize(),
             "lucky_tickets": self.lucky_tickets,
             "ub5": self.ub5,
             "np": self.np,
@@ -2931,8 +2931,8 @@ class SaveFile:
         save_file.cotc_1_complete = data.get("cotc_1_complete", False)
         save_file.map_resets = core.MapResets.deserialize(data.get("map_resets", {}))
         save_file.uncanny = core.UncannyChapters.deserialize(data.get("uncanny", {}))
-        save_file.uncanny_2 = core.UncannyChapters.deserialize(
-            data.get("uncanny_2", {})
+        save_file.catamin_stages = core.UncannyChapters.deserialize(
+            data.get("catamin_stages", {})
         )
         save_file.lucky_tickets = data.get("lucky_tickets", [])
         save_file.ub5 = data.get("ub5", False)
@@ -3383,16 +3383,16 @@ class SaveFile:
         self.catamins = []
         self.unlock_popups_6 = []
         self.reset_item_reward_flags = []
-        self.announcements: list[tuple[int, int]] = [(0, 0)] * 16
+        self.announcements = [(0, 0)] * 16
         self.lucky_tickets = []
         self.labyrinth_medals = []
 
         self.save_data_4_hash = ""
         self.player_id = ""
-        self.transfer_code = ""
-        self.confirmation_code = ""
-        self.inquiry_code = ""
-        self.password_refresh_token = ""
+        self.transfer_code: str = ""
+        self.confirmation_code: str = ""
+        self.inquiry_code: str = ""
+        self.password_refresh_token: str = ""
 
         self.uby1 = 0
         self.uby2 = 0
@@ -3463,7 +3463,7 @@ class SaveFile:
         self.challenge = core.ChallengeChapters.init()
         self.map_resets = core.MapResets.init()
         self.uncanny = core.UncannyChapters.init()
-        self.uncanny_2 = core.UncannyChapters.init()
+        self.catamin_stages = core.UncannyChapters.init()
         self.legend_quest = core.LegendQuestChapters.init()
         self.medals = core.Medals.init()
         self.gauntlets = core.GauntletChapters.init()
@@ -3656,9 +3656,9 @@ class SaveFile:
                     all_saves.append((save, date))
 
         all_saves.sort(key=lambda x: x[1], reverse=True)
-        for i, save in enumerate(all_saves):
+        for i, save_info in enumerate(all_saves):
             if i >= max_backups:
-                save[0].remove()
+                save_info[0].remove()
 
         for cc in saves_path.get_dirs():
             dirs = cc.get_dirs()

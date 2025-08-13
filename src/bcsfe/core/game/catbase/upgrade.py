@@ -87,6 +87,10 @@ class Upgrade:
         max_pos_base: int,
         max_pos_plus: int,
     ) -> tuple[Upgrade | None, bool]:
+        disable_maxes = core.core_data.config.get_bool(core.ConfigKey.DISABLE_MAXES)
+        if disable_maxes:
+            max_pos_base = 50_000
+            max_pos_plus = 50_000
         color.ColoredText.localize(
             "max_upgrade", max_base=max_pos_base + 1, max_plus=max_pos_plus
         )
@@ -129,9 +133,7 @@ class Upgrade:
                         min_base = int(range_parts[0]) - 1
                         max_base = min_base
                     except ValueError:
-                        color.ColoredText.localize(
-                            "invalid_upgrade_base", base=base
-                        )
+                        color.ColoredText.localize("invalid_upgrade_base", base=base)
                         return None, False
             else:
                 try:
@@ -160,9 +162,7 @@ class Upgrade:
                         min_plus = int(range_parts[0])
                         max_plus = min_plus
                     except ValueError:
-                        color.ColoredText.localize(
-                            "invalid_upgrade_plus", plus=plus
-                        )
+                        color.ColoredText.localize("invalid_upgrade_plus", plus=plus)
                         return None, False
             else:
                 try:

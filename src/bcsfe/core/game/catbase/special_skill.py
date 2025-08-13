@@ -1,4 +1,4 @@
-from __future__ import annotations
+from __future__ import annotations, division
 from bcsfe import core
 
 from typing import Any
@@ -232,30 +232,28 @@ class SpecialSkills:
 
         elif option_id == 1:
             max_base_level = max(
-                [
-                    ability.max_base_level
-                    for ability in ability_data.ability_data
-                ]
+                [ability.max_base_level for ability in ability_data.ability_data]
             )
             max_plus_level = max(
-                [
-                    ability.max_plus_level
-                    for ability in ability_data.ability_data
-                ]
+                [ability.max_plus_level for ability in ability_data.ability_data]
             )
             upgrade, should_exit = core.Upgrade.get_user_upgrade(
                 max_base_level - 1, max_plus_level
             )
             if should_exit or upgrade is None:
                 return
+            disable_maxes = core.core_data.config.get_bool(core.ConfigKey.DISABLE_MAXES)
             for id in ids:
-                max_base_level = ability_data.ability_data[id].max_base_level
+                max_base_level = ability_data.ability_data[id].max_base_level - 1
                 max_plus_level = ability_data.ability_data[id].max_plus_level
+                if disable_maxes:
+                    max_base_level = None
+                    max_plus_level = None
 
                 self.set_upgrade(
                     id,
                     upgrade.copy(),
-                    max_base=max_base_level - 1,
+                    max_base=max_base_level,
                     max_plus=max_plus_level,
                 )
 
@@ -270,9 +268,7 @@ class SpecialSkills:
         if success:
             color.ColoredText.localize("skills_edited")
 
-    def get_from_id(
-        self, id: int, only_valid: bool = True
-    ) -> SpecialSkill | None:
+    def get_from_id(self, id: int, only_valid: bool = True) -> SpecialSkill | None:
         if only_valid:
             skills = self.get_valid_skills()
         else:

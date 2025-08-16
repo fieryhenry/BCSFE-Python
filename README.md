@@ -347,8 +347,8 @@ If you want to use the editor again all you need to do is run the `py -m bcsfe` 
 
 ## Documentation
 
-- [Custom Editor Locales](https://github.com/fieryhenry/ExampleEditorLocale)
-- [Custom Editor Themes](https://github.com/fieryhenry/ExampleEditorTheme)
+- [Custom Editor Locales](https://codeberg.org/fieryhenry/ExampleEditorLocale)
+- [Custom Editor Themes](https://codeberg.org/fieryhenry/ExampleEditorTheme)
 
 I only have documentation for the locales and themes atm, but I will probably
 add more documentation in the future.

@@ -1,56 +1,73 @@
 from __future__ import annotations
 from typing import Any, Callable
+
+from requests import JSONDecodeError
 from bcsfe.cli import color
 
 from bcsfe import core
 
 
 class GameDataGetter:
-    def __init__(self, cc: core.CountryCode):
-        self.url = core.core_data.config.get_str(core.ConfigKey.GAME_DATA_REPO)
+    def __init__(self, cc: core.CountryCode, gv: core.GameVersion):
+        self.repo_url = core.core_data.config.get_game_data_repo()
         self.lang = core.core_data.config.get_str(core.ConfigKey.LOCALE)
         self.cc = cc.get_cc_lang()
         self.real_cc = cc
+        self.gv = gv
         self.cc = self.cc if not self.cc.is_lang() else self.real_cc
-        self.all_versions = self.get_versions()
-        if self.all_versions is None:
-            self.latest_version = None
+        self.metadata = self.get_metadata()
+        if self.metadata is not None:
+            self.all_versions = self.get_versions(self.metadata)
+            self.url = self.metadata.get("base_url")
         else:
-            self.latest_version = self.get_latest_version(self.all_versions, self.cc)
+            self.all_versions = None
+            self.url = None
+
+        if self.all_versions is None:
+            self.version = None
+        else:
+            self.version = self.get_version(self.all_versions, self.cc)
 
     def does_save_version_match(self, save_file: core.SaveFile) -> bool:
-        if self.latest_version is None:
+        if self.version is None:
             return False
 
-        return save_file.game_version == self.latest_version[:-2]
+        return save_file.game_version == self.version
 
-    def get_latest_version(
-        self, versions: list[str], cc: core.CountryCode
+    def get_version(
+        self, versions: dict[str, list[str]], cc: core.CountryCode
     ) -> str | None:
-        length = len(versions)
-        if cc == core.CountryCodeType.EN and length >= 1:
-            return versions[0]
-        if cc == core.CountryCodeType.JP and length >= 2:
-            return versions[1]
-        if cc == core.CountryCodeType.KR and length >= 3:
-            return versions[2]
-        if cc == core.CountryCodeType.TW and length >= 4:
-            return versions[3]
-        return None
+        cc_versions = versions.get(cc.get_code())
+        if cc_versions is None:
+            return None
+        if not cc_versions:
+            return None
+        gv_string = self.gv.to_string()
+        if gv_string not in cc_versions:
+            cc_versions.sort(reverse=True)
+            # TODO: do closest version rather than always latest version
+            return cc_versions[0]
+        return gv_string
 
-    def get_versions(self) -> list[str] | None:
-        response = core.RequestHandler(self.url + "latest.txt").get()
+    def get_metadata(self) -> dict[str, Any] | None:
+        response = core.RequestHandler(self.repo_url).get()
         if response is None:
             return None
-        versions = response.text.split("\n")
-        return versions
+        try:
+            data = response.json()
+        except JSONDecodeError:
+            return None
+        return data
+
+    def get_versions(self, metdata: dict[str, Any]) -> dict[str, list[str]] | None:
+        return metdata.get("versions")
 
     def get_file(self, pack_name: str, file_name: str) -> core.Data | None:
         pack_name = self.get_packname(pack_name)
-        version = self.latest_version
-        if version is None:
+        version = self.version
+        if version is None or self.url is None:
             return None
-        url = self.url + f"{version}/{pack_name}/{file_name}"
+        url = self.url + f"{self.cc.get_code()}/{version}/{pack_name}/{file_name}"
         response = core.RequestHandler(url).get()
         if response is None:
             return None
@@ -70,15 +87,20 @@ class GameDataGetter:
 
     @staticmethod
     def get_game_data_dir() -> core.Path:
-        return core.Path("game_data", is_relative=True)
+        return core.Path.get_documents_folder().add("game_data")
 
     def get_file_path(self, pack_name: str, file_name: str) -> core.Path | None:
-        version = self.latest_version
+        version = self.version
 
         if version is None:
             return None
         pack_name = self.get_packname(pack_name)
-        path = GameDataGetter.get_game_data_dir().add(version).add(pack_name)
+        path = (
+            GameDataGetter.get_game_data_dir()
+            .add(self.cc.get_code())
+            .add(version)
+            .add(pack_name)
+        )
         path.generate_dirs()
         path = path.add(file_name)
         return path
@@ -131,7 +153,7 @@ class GameDataGetter:
         if retries == 0:
             return None
 
-        version = self.latest_version
+        version = self.version
 
         if version is None:
             if display_text:
@@ -143,6 +165,7 @@ class GameDataGetter:
                 "downloading",
                 file_name=file_name,
                 pack_name=pack_name,
+                country_code=self.cc.get_code(),
                 version=version,
             )
         data = self.save_file(pack_name, file_name)
@@ -180,38 +203,40 @@ class GameDataGetter:
         return data_list
 
     @staticmethod
-    def get_all_downloaded_versions() -> list[str]:
-        versions: list[str] = []
-        for version in GameDataGetter.get_game_data_dir().get_dirs():
-            if version.exists():
-                versions.append(version.basename())
+    def get_all_downloaded_versions() -> dict[str, list[str]]:
+        versions: dict[str, list[str]] = {}
+        for cc in core.CountryCode.get_all_str():
+            dir = GameDataGetter.get_game_data_dir().add(cc)
+            if not dir.exists():
+                continue
+            for version in GameDataGetter.get_game_data_dir().add(cc).get_dirs():
+                if not version.exists():
+                    continue
+                if cc in versions:
+                    versions[cc].append(version.basename())
+                else:
+                    versions[cc] = [version.basename()]
+
         return versions
 
     @staticmethod
-    def delete_old_versions() -> None:
+    def delete_old_versions(to_keep: int) -> None:
         versions = GameDataGetter.get_all_downloaded_versions()
-        ccs: list[str] = []
-        for version in versions:
-            cc = version[-2:]
-            if cc not in ccs:
-                ccs.append(cc)
-
-        for cc in ccs:
-            versions_cc = list(filter(lambda x: x[-2:] == cc, versions))
-            if len(versions_cc) <= 1:
-                continue
-            versions_cc.sort(reverse=True)
-            for version in versions_cc[1:]:
-                path = GameDataGetter.get_game_data_dir().add(version)
+        for cc, cc_versions in versions.items():
+            cc_versions.sort(reverse=True)
+            to_keep = min(to_keep, len(cc_versions))
+            for version in cc_versions[to_keep:]:
+                path = GameDataGetter.get_game_data_dir().add(cc).add(version)
                 path.remove()
 
     def print_no_file(self, packname: str, file_name: str) -> None:
-        if self.latest_version is None:
-            color.ColoredText.localize("failed_to_get_latest_version")
+        if self.version is None:
+            color.ColoredText.localize("failed_to_get_game_versions")
         else:
             color.ColoredText.localize(
                 "failed_to_download_game_data",
                 file_name=file_name,
                 pack_name=packname,
-                version=self.latest_version,
+                country_code=self.cc.get_code(),
+                version=self.version,
             )

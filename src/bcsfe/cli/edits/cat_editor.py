@@ -378,14 +378,14 @@ class CatEditor:
         gdg = core.core_data.get_game_data_getter(self.save_file)
         is_good_version = gdg.does_save_version_match(self.save_file)
         if not is_good_version:
-            data_version = gdg.latest_version
+            data_version = gdg.version
             if data_version is None:
                 color.ColoredText.localize("no_data_version")
                 return
             color.ColoredText.localize(
                 "talents_version_warning",
                 save_version=self.save_file.game_version.to_string(),
-                data_version=data_version[:-2],
+                data_version=data_version,
             )
             should_stay = dialog_creator.YesNoInput().get_input_once("continue_q")
             if not should_stay:

@@ -326,7 +326,7 @@ If you want the latest features then you can install the editor from the github.
 2. Run the following commands: (You may have to replace `py` with `python` or `python3`)
 
 ```sh
-git clone https://github.com/fieryhenry/BCSFE-Python.git
+git clone https://codeberg.org/fieryhenry/BCSFE-Python.git
 cd BCSFE-Python
 py -m pip install -e .
 py -m bcsfe
@@ -339,7 +339,7 @@ Alternatively you can use pip directly, although it won't auto-update with the l
 git commits.
 
 ```sh
-py -m pip install git+https://github.com/fieryhenry/BCSFE-Python.git
+py -m pip install git+https://codeberg.org/fieryhenry/BCSFE-Python.git
 py -m bcsfe
 ```
 

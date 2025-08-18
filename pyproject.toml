@@ -30,10 +30,10 @@ dynamic = ["version"]
 keywords = ["battle cats", "save editor", "hacking"]
 
 [project.urls]
-Homepage = "https://github.com/fieryhenry/BCSFE-Python"
-Repository = "https://github.com/fieryhenry/BCSFE-Python"
-Issues = "https://github.com/fieryhenry/BCSFE-Python/issues"
-Changelog = "https://github.com/fieryhenry/BCSFE-Python/blob/master/CHANGELOG.md"
+Homepage = "https://codeberg.org/fieryhenry/BCSFE-Python"
+Repository = "https://codeberg.org/fieryhenry/BCSFE-Python"
+Issues = "https://codeberg.org/fieryhenry/BCSFE-Python/issues"
+Changelog = "https://codeberg.org/fieryhenry/BCSFE-Python/raw/branch/main/CHANGELOG.md"
 
 [tool.setuptools.dynamic]
 version = { attr = "bcsfe.__version__" }

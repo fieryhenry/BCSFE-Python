@@ -85,7 +85,7 @@ py -m bcsfe
 
 Again change `py` for `python` or `python3` if needed.
 
-If you are using Windows and you are still struggling, try watching this video [here](https://youtu.be/ypmT39jqZrg).
+If you are using Windows and you are still struggling, try watching this video [here](https://codeberg.org/fieryhenry/videos/media/branch/main/bcsfe_windows_help.webm).
 
 ### Linux
 

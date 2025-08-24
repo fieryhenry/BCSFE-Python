@@ -182,12 +182,15 @@ class CatEditor:
         unknown_name = core.core_data.local_manager.get_key("unknown_banner")
 
         if filter_down:
+            ids.reverse()
             for id in ids:
                 name = all_names[id]
                 if name in new_names or name == unknown_name:
                     continue
                 new_names.append(name)
                 new_ids.append(id)
+            new_ids.reverse()
+            new_names.reverse()
         else:
             new_names = names
             new_ids = ids

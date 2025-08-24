@@ -48,7 +48,7 @@ class CatEditor:
         if len(current_cats) > 50:
             color.ColoredText.localize("total_selected_cats", total=len(current_cats))
         else:
-            self.save_file.cats.bulk_download_names(self.save_file)
+            self.save_file.cats.bulk_download_names(self.save_file, current_cats)
             for cat in current_cats:
                 names = cat.get_names_cls(self.save_file)
                 if not names:
@@ -164,18 +164,13 @@ class CatEditor:
     def select_obtainable(self) -> list[core.Cat] | None:
         return self.get_cats_obtainable()
 
-    def select_gatya_banner(self) -> list[core.Cat] | None:
-        gset = self.save_file.gatya.read_gatya_data_set(self.save_file).gatya_data_set
-        if gset is None:
-            return None
+    def select_gatya_banner_name(self) -> list[int] | None:
 
         filter_down = dialog_creator.YesNoInput().get_input_once("filter_down_q_gatya")
         if filter_down is None:
             return None
 
-        all_names = core.GatyaInfos(self.save_file).get_all_names(
-            name_only_optimization=True
-        )
+        all_names = core.GatyaInfos(self.save_file).get_all_names()
         ids = list(all_names.keys())
         ids.sort()
         names: list[str] = []
@@ -218,11 +213,27 @@ class CatEditor:
         for gatya_option_id in gatya_option_ids:
             gatya_ids.append(ids[gatya_option_id])
 
-        # gatya_ids = dialog_creator.RangeInput(len(gset) - 1).get_input_locale(
-        #    "select_gatya_banner", {}
-        # )
-        # if gatya_ids is None:
-        #    return None
+        return gatya_ids
+
+    def select_gatya_banner(self) -> list[core.Cat] | None:
+        gset = self.save_file.gatya.read_gatya_data_set(self.save_file).gatya_data_set
+        if gset is None:
+            return None
+
+        by_id = dialog_creator.ChoiceInput.from_reduced(
+            ["by_id", "by_name"], dialog="gatya_by_id_q"
+        ).single_choice()
+        if by_id is None:
+            return None
+
+        if by_id == 1:
+            gatya_ids = dialog_creator.RangeInput(len(gset) - 1).get_input_locale(
+                "select_gatya_banner", {}
+            )
+        else:
+            gatya_ids = self.select_gatya_banner_name()
+        if gatya_ids is None:
+            return None
         cats: list[core.Cat] = []
         for gatya_id in gatya_ids:
             gatya_cats = self.get_cats_gatya_banner(gatya_id)

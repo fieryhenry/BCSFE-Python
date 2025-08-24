@@ -222,25 +222,13 @@ class GatyaInfo:
     def get_url(self) -> str:
         return f"https://ponosgames.com/information/appli/battlecats/gacha/rare/{self.get_cc_str()}{self.type}{self.get_id_str()}.html"
 
-    def download_data(self, name_only_optimization: bool = False) -> core.Data | None:
+    def download_data(self) -> core.Data | None:
         url = self.get_url()
 
-        if name_only_optimization:
-            stream = core.RequestHandler(url).get(stream=True)
-            if stream is None:
-                return
-            # read bytes
-            data = core.Data()
-            for chunk in stream.iter_lines():
-                chunk_str = chunk.decode("utf-8")
-                if "h2" in chunk_str:
-                    data.write_bytes(chunk)
-                    break
-        else:
-            response = core.RequestHandler(url).get()
-            if response is None:
-                return
-            data = core.Data(response.content)
+        response = core.RequestHandler(url).get()
+        if response is None:
+            return
+        data = core.Data(response.content)
 
         self.save_data(data)
         return data
@@ -262,26 +250,21 @@ class GatyaInfo:
             color.ColoredText.localize("save_gatya_error", error=e)
         self.data = data
 
-    def load_data_from_file(
-        self, name_only_optimization: bool = False
-    ) -> core.Data | None:
+    def load_data_from_file(self) -> core.Data | None:
         if not self.get_file_path().exists():
             return None
-        data = core.Data.from_file(self.get_file_path())
-        if len(data) < 400 and not name_only_optimization:
-            data = None
-        return data
+        return core.Data.from_file(self.get_file_path())
 
-    def get_data(self, name_only_optimization: bool = False) -> core.Data | None:
+    def get_data(self) -> core.Data | None:
         if self.data is not None:
             return self.data
-        data = self.load_data_from_file(name_only_optimization)
+        data = self.load_data_from_file()
         if data is None:
-            data = self.download_data(name_only_optimization)
+            data = self.download_data()
         return data
 
-    def get_name(self, name_only_optimization: bool = False) -> str | None:
-        data = self.get_data(name_only_optimization)
+    def get_name(self) -> str | None:
+        data = self.get_data()
         if data is None:
             return None
         # find <h2>...</h2>
@@ -354,10 +337,9 @@ class GatyaInfos:
             return self.infos[gatya_id]
         return None
 
-    def get_all_names(self, name_only_optimization: bool = False) -> dict[int, str]:
+    def get_all_names(self) -> dict[int, str]:
         if not self.got_all:
-            max_threads = 64 if name_only_optimization else 16
-            self.get_all(name_only_optimization, max_threads=max_threads)
+            self.get_all(True, max_threads=64)
         names: dict[int, str] = {}
         for info in self.infos:
             names[

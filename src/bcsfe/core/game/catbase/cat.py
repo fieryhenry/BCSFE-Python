@@ -1218,11 +1218,10 @@ class Cats:
 
     def read_talents(self, stream: core.Data):
         total_cats = stream.read_int()
-        counter = 0
         for _ in range(total_cats):
             cat_id = stream.read_int()
-            if self.cats[cat_id].talents is None:
-                counter += 1
+            if cat_id < 0 or cat_id >= len(self.cats):
+                continue
             self.cats[cat_id].read_talents(stream)
 
     def write_talents(self, stream: core.Data):

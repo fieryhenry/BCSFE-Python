@@ -934,12 +934,18 @@ class Cats:
                     break
         return cats
 
-    def bulk_download_names(self, save_file: core.SaveFile):
-        if self.bulk_downloaded:
+    def bulk_download_names(
+        self, save_file: core.SaveFile, current_cats: list[core.Cat] | None = None
+    ):
+        if self.bulk_downloaded and current_cats is None:
             return
         file_names: list[str] = []
         gdg = core.core_data.get_game_data_getter(save_file)
-        for cat in self.cats:
+        if current_cats is None:
+            cats = self.cats
+        else:
+            cats = current_cats
+        for cat in cats:
             if cat.names is None:
                 file_name = f"Unit_Explanation{cat.id + 1}_{core.core_data.get_lang(save_file)}.csv"
                 if gdg.is_downloaded("resLocal", file_name):
@@ -949,7 +955,7 @@ class Cats:
         core.core_data.get_game_data_getter(save_file).download_all(
             "resLocal", file_names
         )
-        self.bulk_downloaded = True
+        self.bulk_downloaded = current_cats is None
 
     def get_cats_obtainable(self, save_file: core.SaveFile) -> list[Cat] | None:
         nyanko_picture_book = self.read_nyanko_picture_book(save_file)

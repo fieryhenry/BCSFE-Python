@@ -1,6 +1,8 @@
 from __future__ import annotations
 from typing import Any, Callable
 
+import zipfile
+
 from requests import JSONDecodeError
 from bcsfe.cli import color
 
@@ -55,9 +57,73 @@ class GameDataGetter:
             return None
         try:
             data = response.json()
-        except JSONDecodeError:
+        except JSONDecodeError as e:
+            print(e)
             return None
         return data
+
+    def get_cat_names_fast(
+        self, display_text: bool = True
+    ) -> dict[str, core.Data] | None:
+        version = self.version
+        if version is None or self.metadata is None:
+            return None
+
+        versions = (
+            self.metadata.get("cat_names", {}).get(self.cc.get_code(), {}).get(version)
+        )
+
+        if versions is None:
+            return None
+
+        if not isinstance(versions, str):
+            if self.cc != core.CountryCodeType.EN:
+                key = self.cc.get_code()
+            elif self.lang in core.CountryCode.get_langs():
+                key = self.lang
+            else:
+                key = self.cc.get_code()
+
+            if key is None:
+                return
+
+            url = versions.get(key)
+
+            if url is None:
+                return None
+        else:
+            url = versions
+
+        if display_text:
+            color.ColoredText.localize("downloading_cat_names", url=url)
+
+        response = core.RequestHandler(url).get()
+        if response is None:
+            return None
+
+        if response.status_code != 200:
+            return None
+
+        try:
+            zip = zipfile.ZipFile(core.Data(response.content).to_bytes_io())
+        except zipfile.BadZipFile:
+            return None
+
+        files: dict[str, core.Data] = {}
+
+        for file in zip.filelist:
+            data = zip.read(file.filename)
+            files[file.filename] = core.Data(data)
+
+        return files
+
+    def save_all_cat_names_fast(self, display_text: bool = True):
+        files = self.get_cat_names_fast(display_text)
+        if files is None:
+            return
+
+        for filename, data in files.items():
+            self.save_file_data("resLocal", filename, data)
 
     def get_versions(self, metdata: dict[str, Any]) -> dict[str, list[str]] | None:
         return metdata.get("versions")
@@ -110,6 +176,17 @@ class GameDataGetter:
         data = self.get_file(pack_name, file_name)
         if data is None:
             return None
+
+        path = self.get_file_path(pack_name, file_name)
+        if path is None:
+            return None
+        data.to_file(path)
+        return data
+
+    def save_file_data(
+        self, pack_name: str, file_name: str, data: core.Data
+    ) -> core.Data | None:
+        pack_name = self.get_packname(pack_name)
 
         path = self.get_file_path(pack_name, file_name)
         if path is None:

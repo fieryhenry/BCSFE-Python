@@ -952,6 +952,9 @@ class Cats:
                     continue
                 file_names.append(file_name)
 
+        if len(file_names) > 50:
+            gdg.save_all_cat_names_fast()
+
         core.core_data.get_game_data_getter(save_file).download_all(
             "resLocal", file_names
         )

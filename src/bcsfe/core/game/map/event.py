@@ -711,10 +711,16 @@ class EventChapters:
         return self.__repr__()
 
     def get_total_stars(self, type: int, map: int) -> int:
-        return len(self.chapters[type].chapters[map].chapters)
+        try:
+            return len(self.chapters[type].chapters[map].chapters)
+        except IndexError:
+            return len(self.chapters[0].chapters[0].chapters)
 
     def get_total_stages(self, type: int, map: int, star: int) -> int:
-        return len(self.chapters[type].chapters[map].chapters[star].stages)
+        try:
+            return len(self.chapters[type].chapters[map].chapters[star].stages)
+        except IndexError:
+            return len(self.chapters[0].chapters[0].chapters[0].stages)
 
     @staticmethod
     def ask_stars(

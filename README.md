@@ -361,6 +361,8 @@ discussion in #dev-chat, or create an issue in this repo, or a draft pull reques
 If you need help with reverse engineering the save file, I have a basic starting guide here:
 <https://codeberg.org/fieryhenry/bc_ree>.
 
+If you want to localize the editor see [here](./LOCALIZATION.md).
+
 ## License
 
 BCSFE is licensed under the GNU GPLv3 which can be read [here](https://www.gnu.org/licenses/gpl-3.0.en.html).

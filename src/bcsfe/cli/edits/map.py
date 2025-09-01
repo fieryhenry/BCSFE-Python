@@ -152,15 +152,18 @@ def edit_chapters(
     clear_amount = 1
     clear_amount_type = -1
     if modify_clear_amounts:
-        options = ["clear_amount_chapter", "clear_amount_all"]
-        if clear_type_choice == 1:
-            options.append("clear_amount_stages")
-        clear_amount_type = dialog_creator.ChoiceInput.from_reduced(
-            options, dialog="select_clear_amount_type", single_choice=True
-        ).single_choice()
-        if clear_amount_type is None:
-            return None
-        clear_amount_type -= 1
+        if len(map_choices) > 1:
+            options = ["clear_amount_chapter", "clear_amount_all"]
+            if clear_type_choice == 1:
+                options.append("clear_amount_stages")
+            clear_amount_type = dialog_creator.ChoiceInput.from_reduced(
+                options, dialog="select_clear_amount_type", single_choice=True
+            ).single_choice()
+            if clear_amount_type is None:
+                return None
+            clear_amount_type -= 1
+        else:
+            clear_amount_type = 0
         if clear_amount_type == 1:
             clear_amount = core.EventChapters.ask_clear_amount()
             if clear_amount is None:

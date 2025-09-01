@@ -564,7 +564,7 @@ class ServerHandler:
                 if print:
                     color.ColoredText.localize("transfer_backup", path=str(temp_path))
 
-        save_file = core.SaveFile(core.Data(save_data))
+        save_file = core.SaveFile(core.Data(save_data), cc=cc)
 
         password_refresh_token = resp_headers.get("Nyanko-Password-Refresh-Token")
         if password_refresh_token is not None:

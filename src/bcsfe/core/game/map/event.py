@@ -291,18 +291,22 @@ class EventChapterGroup:
         stage: int,
         clear_amount: int = 1,
         overwrite_clear_progress: bool = False,
-    ):
+    ) -> bool:
         finished = self.chapters[map].clear_stage(
             star, stage, clear_amount, overwrite_clear_progress
         )
         if finished and map + 1 < len(self.chapters):
             self.chapters[map + 1].chapters[0].chapter_unlock_state = 1
 
-    def unclear_stage(self, map: int, star: int, stage: int):
+        return finished
+
+    def unclear_stage(self, map: int, star: int, stage: int) -> bool:
         finished = self.chapters[map].unclear_stage(star, stage)
         if finished and map + 1 < len(self.chapters) and star == 0:
             for chapter in self.chapters[map + 1].chapters:
                 chapter.chapter_unlock_state = 0
+
+        return finished
 
     def clear_map(self, map: int, star: int, increment: bool = True):
         finished = self.chapters[map].clear_map(star, increment)
@@ -401,8 +405,8 @@ class EventChapters:
         stage: int,
         clear_amount: int = 1,
         overwrite_clear_progress: bool = False,
-    ):
-        self.chapters[type].clear_stage(
+    ) -> bool:
+        return self.chapters[type].clear_stage(
             map,
             star,
             stage,
@@ -410,8 +414,8 @@ class EventChapters:
             overwrite_clear_progress,
         )
 
-    def unclear_stage(self, type: int, map: int, star: int, stage: int):
-        self.chapters[type].unclear_stage(map, star, stage)
+    def unclear_stage(self, type: int, map: int, star: int, stage: int) -> bool:
+        return self.chapters[type].unclear_stage(map, star, stage)
 
     def clear_map(self, type: int, map: int, star: int, increment: bool = True):
         self.chapters[type].clear_map(map, star, increment)

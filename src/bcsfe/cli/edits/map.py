@@ -18,13 +18,13 @@ def unclear_stage(
     star: int,
     stage: int,
     type: int | None = None,
-):
+) -> bool:
     if isinstance(chapters, core.EventChapters):
         if type is None:
             raise ValueError("Type must be specified for EventChapters!")
-        chapters.unclear_stage(type, map, star, stage)
+        return chapters.unclear_stage(type, map, star, stage)
     else:
-        chapters.unclear_stage(map, star, stage)
+        return chapters.unclear_stage(map, star, stage)
 
 
 def clear_stage(
@@ -35,15 +35,15 @@ def clear_stage(
     clear_amount: int = 1,
     overwrite_clear_progress: bool = False,
     type: int | None = None,
-):
+) -> bool:
     if isinstance(chapters, core.EventChapters):
         if type is None:
             raise ValueError("Type must be specified for EventChapters!")
-        chapters.clear_stage(
+        return chapters.clear_stage(
             type, map, star, stage, clear_amount, overwrite_clear_progress
         )
     else:
-        chapters.clear_stage(
+        return chapters.clear_stage(
             map, star, stage, clear_amount, overwrite_clear_progress
         )
 
@@ -92,7 +92,7 @@ def edit_chapters(
     chapters: ChaptersType,
     letter_code: str,
     type: int | None = None,
-):
+) -> dict[int, bool] | None:
     map_names = core.MapNames(save_file, letter_code)
     names = map_names.map_names
 
@@ -102,7 +102,7 @@ def edit_chapters(
         single_choice=True,
     ).single_choice()
     if choice is None:
-        return
+        return None
 
     choice -= 1
 
@@ -119,14 +119,14 @@ def edit_chapters(
 
     map_choices = core.EventChapters.select_map_names(names)
     if not map_choices:
-        return
+        return None
     clear_type_choice = dialog_creator.ChoiceInput.from_reduced(
         [f"{clear_txt}_whole_chapters", f"{clear_txt}_specific_stages"],
         dialog=f"select_{clear_txt}_type",
         single_choice=True,
     ).single_choice()
     if clear_type_choice is None:
-        return
+        return None
     clear_type_choice -= 1
 
     if len(map_choices) > 1:
@@ -137,7 +137,7 @@ def edit_chapters(
         stars_type_choice = False
 
     if stars_type_choice is None:
-        return
+        return None
 
     if clear:
         modify_clear_amounts = dialog_creator.YesNoInput().get_input_once(
@@ -147,7 +147,7 @@ def edit_chapters(
         modify_clear_amounts = False
 
     if modify_clear_amounts is None:
-        return
+        return None
 
     clear_amount = 1
     clear_amount_type = -1
@@ -159,12 +159,12 @@ def edit_chapters(
             options, dialog="select_clear_amount_type", single_choice=True
         ).single_choice()
         if clear_amount_type is None:
-            return
+            return None
         clear_amount_type -= 1
         if clear_amount_type == 1:
             clear_amount = core.EventChapters.ask_clear_amount()
             if clear_amount is None:
-                return
+                return None
 
     if not stars_type_choice:
         stars = core.EventChapters.ask_stars(
@@ -172,9 +172,11 @@ def edit_chapters(
             prompt=star_prompt,
         )
         if stars is None:
-            return
+            return None
     else:
         stars = 0
+
+    completed_chapters: dict[int, bool] = {}
 
     for id in map_choices:
         map_name = names[id]
@@ -198,18 +200,18 @@ def edit_chapters(
                 get_total_stars(chapters, id, type), prompt=star_prompt
             )
             if stars is None:
-                return
+                return None
         if clear_type_choice:
             stages = core.EventChapters.ask_stages(map_names, id)
             if stages is None:
-                return
+                return None
         else:
             stages = list(range(get_total_stages(chapters, id, 0, type)))
 
         if clear_amount_type == 0:
             clear_amount = core.EventChapters.ask_clear_amount()
             if clear_amount is None:
-                return
+                return None
 
         if not clear:
             start = stars - 1
@@ -232,9 +234,9 @@ def edit_chapters(
                 if clear_amount_type == 2:
                     clear_amount = core.EventChapters.ask_clear_amount()
                 if clear_amount is None:
-                    return
+                    return None
                 if clear:
-                    clear_stage(
+                    finished = clear_stage(
                         chapters,
                         id,
                         star,
@@ -243,7 +245,14 @@ def edit_chapters(
                         clear_amount=clear_amount,
                         type=type,
                     )
+                    if finished:
+                        completed_chapters[id] = True
+
                 else:
-                    unclear_stage(chapters, id, star, stage, type)
+                    finished = unclear_stage(chapters, id, star, stage, type)
+                    if finished:
+                        completed_chapters[id] = False
 
     color.ColoredText.localize("map_chapters_edited")
+
+    return completed_chapters

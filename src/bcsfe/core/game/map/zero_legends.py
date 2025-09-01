@@ -185,10 +185,7 @@ class ChaptersStars:
     def deserialize(data: dict[str, Any]) -> ChaptersStars:
         return ChaptersStars(
             data.get("unknown", 0),
-            [
-                Chapter.deserialize(chapter)
-                for chapter in data.get("chapters", [])
-            ],
+            [Chapter.deserialize(chapter) for chapter in data.get("chapters", [])],
         )
 
     def __repr__(self):
@@ -209,7 +206,7 @@ class ZeroLegendsChapters:
         stage: int,
         clear_amount: int = 1,
         overwrite_clear_progress: bool = False,
-    ):
+    ) -> bool:
         self.create(map)
         finished = self.chapters[map].clear_stage(
             star, stage, clear_amount, overwrite_clear_progress
@@ -217,12 +214,16 @@ class ZeroLegendsChapters:
         if finished and map + 1 < len(self.chapters):
             self.chapters[map + 1].chapters[0].chapter_unlock_state = 1
 
-    def unclear_stage(self, map: int, star: int, stage: int):
+        return finished
+
+    def unclear_stage(self, map: int, star: int, stage: int) -> bool:
         self.create(map)
         finished = self.chapters[map].unclear_stage(star, stage)
         if finished and map + 1 < len(self.chapters) and star == 0:
             for chapter in self.chapters[map + 1].chapters:
                 chapter.chapter_unlock_state = 0
+
+        return finished
 
     @staticmethod
     def init() -> ZeroLegendsChapters:

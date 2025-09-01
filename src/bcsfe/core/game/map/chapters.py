@@ -115,9 +115,7 @@ class Chapter:
     def deserialize(data: dict[str, Any]) -> Chapter:
         chapter = Chapter(data.get("selected_stage", 0))
         chapter.clear_progress = data.get("clear_progress", 0)
-        chapter.stages = [
-            Stage.deserialize(stage) for stage in data.get("stages", [])
-        ]
+        chapter.stages = [Stage.deserialize(stage) for stage in data.get("stages", [])]
         chapter.chapter_unlock_state = data.get("chapter_unlock_state", 0)
         return chapter
 
@@ -161,9 +159,7 @@ class ChaptersStars:
 
     @staticmethod
     def read_selected_stage(data: core.Data, total_stars: int) -> ChaptersStars:
-        chapters = [
-            Chapter.read_selected_stage(data) for _ in range(total_stars)
-        ]
+        chapters = [Chapter.read_selected_stage(data) for _ in range(total_stars)]
         return ChaptersStars(chapters)
 
     def write_selected_stage(self, data: core.Data):
@@ -228,18 +224,22 @@ class Chapters:
         stage: int,
         clear_amount: int = 1,
         overwrite_clear_progress: bool = False,
-    ):
+    ) -> bool:
         finished = self.chapters[map].clear_stage(
             star, stage, clear_amount, overwrite_clear_progress
         )
         if finished and map + 1 < len(self.chapters):
             self.chapters[map + 1].chapters[0].chapter_unlock_state = 1
 
-    def unclear_stage(self, map: int, star: int, stage: int):
+        return finished
+
+    def unclear_stage(self, map: int, star: int, stage: int) -> bool:
         finished = self.chapters[map].unclear_stage(star, stage)
         if finished and map + 1 < len(self.chapters) and star == 0:
             for chapter in self.chapters[map + 1].chapters:
                 chapter.chapter_unlock_state = 0
+
+        return finished
 
     @staticmethod
     def init() -> Chapters:
@@ -354,8 +354,10 @@ class Chapters:
                 self.chapters[id].chapters[star].stages[stage].clear_times = 0
                 self.chapters[id].chapters[star].clear_progress = 0
 
-    def edit_chapters(self, save_file: core.SaveFile, letter_code: str):
-        edits.map.edit_chapters(save_file, self, letter_code)
+    def edit_chapters(
+        self, save_file: core.SaveFile, letter_code: str
+    ) -> dict[int, bool] | None:
+        return edits.map.edit_chapters(save_file, self, letter_code)
 
     def set_total_stages(self, map: int, total_stages: int):
         for chapter in self.chapters[map].chapters:

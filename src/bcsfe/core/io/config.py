@@ -28,6 +28,7 @@ class ConfigKey(enum.Enum):
     ADB_PATH = "adb_path"
     IGNORE_PARSE_ERROR = "ignore_parse_error"
     USE_WAYDROID = "use_waydroid"
+    USE_PKEXEC_WAYDROID = "use_pkexec_waydroid"
 
 
 class Config:
@@ -82,6 +83,7 @@ class Config:
             ConfigKey.ADB_PATH: "adb",
             ConfigKey.IGNORE_PARSE_ERROR: False,
             ConfigKey.USE_WAYDROID: False,
+            ConfigKey.USE_PKEXEC_WAYDROID: True,
         }
         return initial_values
 

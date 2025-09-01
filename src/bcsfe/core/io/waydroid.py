@@ -35,7 +35,11 @@ class WayDroidHandler(io.root_handler.RootHandler):
             raise WayDroidNotInstalledError(result)
 
     def run_shell_cmd(self, command: str) -> core.CommandResult:
-        return io.command.Command("waydroid shell").run(f"{command}")
+        cmd = "waydroid shell"
+        use_pkexec = core.core_data.config.get_bool(core.ConfigKey.USE_PKEXEC_WAYDROID)
+        if use_pkexec:
+            cmd = "pkexec " + cmd
+        return io.command.Command(cmd).run(f"{command}")
 
     def pull_file(
         self, device_path: core.Path, local_path: core.Path
@@ -58,8 +62,8 @@ class WayDroidHandler(io.root_handler.RootHandler):
             return result
 
         # delete /sdcard file again
-
-        return self.run_shell_cmd(f"rm /sdcard/{device_path.basename()}")
+        #
+        return self.adb_handler.run_shell(f"rm /sdcard/{device_path.basename()}")
 
     def push_file(
         self, local_path: core.Path, device_path: core.Path
@@ -86,8 +90,8 @@ class WayDroidHandler(io.root_handler.RootHandler):
             return result
 
         # remove temp file
-
-        return self.run_shell_cmd(f"rm '/sdcard/{device_path.basename()}'")
+        #
+        return self.adb_handler.run_shell(f"rm '/sdcard/{device_path.basename()}'")
 
     def get_battlecats_packages(self) -> list[str]:
         cmd = "find /data/data/ -name SAVE_DATA -mindepth 3 -maxdepth 3"

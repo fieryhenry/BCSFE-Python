@@ -159,7 +159,7 @@ from bcsfe.core.theme_handler import (
     ExternalTheme,
     ExternalThemeManager,
 )
-from bcsfe.core.max_value_helper import MaxValueHelper
+from bcsfe.core.max_value_helper import MaxValueHelper, MaxValueType
 
 
 class CoreData:
@@ -367,4 +367,5 @@ __all__ = [
     "ServerGatyaDataItem",
     "GatyaDataOptionSet",
     "GatyaDataOption",
+    "MaxValueType",
 ]

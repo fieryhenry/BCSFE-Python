@@ -1,5 +1,51 @@
 # Changelog
 
+## [3.1.0] - 2025-09-03
+
+### Added
+
+- Added a way to choose a gacha banner by id rather than by name
+
+- Feature to clear catamin stages and set the clear times to whatever you want
+
+- When selecting cats you can now filter down your selection, e.g Select current rare cats from
+  this specific gacha banner
+
+- Better error message if your device is not rooted when trying to pull from root storage
+
+- Better error message when failing to create a config file
+
+
+### Changed
+
+- Changed default game data repo from <https://github.com/fieryhenry/BCData> to <https://git.fyhenry.uk/BCData>
+
+- Changed a few other urls to point to the Codeberg repo rather than the GitHub repo
+
+- Increased speed of downloading all cat names
+
+- Made a few more option selections work if you enter the text of the option rather than the
+  number associated with it
+
+
+### Fixed
+
+- Fixed talent parsing issue for some save files
+
+- Fixed gacha banner selection using old banners rather than newer ones for banners which have the
+  same name
+
+- Disable maxes config option now works for upgrading cats
+
+- Fixed regression where editing scheme items raised an exception
+
+- Increased default timeout for requests and made some requests have no timeout to fix issues with
+  slow internet connection
+
+- Issue where an exception would be raised if the editor couldn't auto-detect your country code
+  when downloading save data
+
+
 ## [3.0.1] - 2025-08-04
 
 ### Fixed

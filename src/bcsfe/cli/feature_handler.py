@@ -38,9 +38,9 @@ class FeatureHandler:
                 "adb_push_rerun": save_management.SaveManagement.adb_push_rerun,
                 "export_save": save_management.SaveManagement.export_save,
                 "load_save": save_management.SaveManagement.load_save,
-                "init_save": save_management.SaveManagement.init_save,
-                "convert_region": save_management.SaveManagement.convert_save_cc,
-                "convert_version": save_management.SaveManagement.convert_save_gv,
+                # "init_save": save_management.SaveManagement.init_save,
+                # "convert_region": save_management.SaveManagement.convert_save_cc,
+                # "convert_version": save_management.SaveManagement.convert_save_gv,
             },
             "items": {
                 "catfood": edits.basic_items.BasicItems.edit_catfood,

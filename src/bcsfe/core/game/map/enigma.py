@@ -195,6 +195,9 @@ class Enigma:
             if wipe is None:
                 return
             if wipe:
+                for stage in self.stages:
+                    id = stage.stage_id
+                    save_file.event_stages.chapter_completion_count[id] = 0
                 self.stages = []
 
         ids, _ = dialog_creator.ChoiceInput(
@@ -209,6 +212,8 @@ class Enigma:
 
         for enigma_id in ids:
             abs_id = enigma_id + base_level
+            save_file.event_stages.chapter_completion_count[abs_id] = 0
+            # TODO: level? they can go much higher than 3... not sure it really matters though
             stage = Stage(3, abs_id, 2, int(time.time()))
             self.stages.append(stage)
 

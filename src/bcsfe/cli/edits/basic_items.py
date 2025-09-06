@@ -13,6 +13,12 @@ class BasicItems:
         return name.strip()
 
     @staticmethod
+    def reset_golden_cat_cpus(save_file: core.SaveFile):
+        save_file.golden_cpu_count = 0
+
+        color.ColoredText.localize("reset_golden_cat_cpus_success")
+
+    @staticmethod
     def edit_catfood(save_file: core.SaveFile):
         should_exit = not dialog_creator.YesNoInput().get_input_once("catfood_warning")
         if should_exit:

@@ -63,6 +63,7 @@ class FeatureHandler:
                 "100_million_tickets": edits.basic_items.BasicItems.edit_100_million_ticket,
                 "event_tickets": edits.event_tickets.EventTickets.edit,
                 "treasure_chests": edits.basic_items.BasicItems.edit_treasure_chests,
+                "reset_golden_cat_cpus": edits.basic_items.BasicItems.reset_golden_cat_cpus,
             },
             "cats_special_skills": cat_features,
             "levels": {

@@ -1043,7 +1043,7 @@ class SaveFile:
             self.ub34 = self.data.read_bool()
 
             self.ui21 = self.data.read_int()
-            self.uby13 = self.data.read_byte()
+            self.golden_cpu_count = self.data.read_byte()
 
             assert self.data.read_int() == 120500
 
@@ -2172,7 +2172,7 @@ class SaveFile:
             self.data.write_bool(self.ub33)
             self.data.write_bool(self.ub34)
             self.data.write_int(self.ui21)
-            self.data.write_byte(self.uby13)
+            self.data.write_byte(self.golden_cpu_count)
 
             self.data.write_int(120500)
 
@@ -2688,7 +2688,7 @@ class SaveFile:
             "ub33": self.ub33,
             "ub34": self.ub34,
             "ui21": self.ui21,
-            "uby13": self.uby13,
+            "golden_cpu_count": self.golden_cpu_count,
             "sound_effects_volume": self.sound_effects_volume,
             "background_music_volume": self.background_music_volume,
             "ustl1": self.ustl1,
@@ -3074,7 +3074,7 @@ class SaveFile:
         save_file.ub33 = data.get("ub33", False)
         save_file.ub34 = data.get("ub34", False)
         save_file.ui21 = data.get("ui21", 0)
-        save_file.uby13 = data.get("uby13", 0)
+        save_file.golden_cpu_count = data.get("golden_cpu_count", 0)
         save_file.sound_effects_volume = data.get("sound_effects_volume", 0)
         save_file.background_music_volume = data.get("background_music_volume", 0)
         save_file.ustl1 = data.get("ustl1", [])
@@ -3406,7 +3406,7 @@ class SaveFile:
         self.uby10 = 0
         self.uby11 = 0
         self.uby12 = 0
-        self.uby13 = 0
+        self.golden_cpu_count = 0
         self.uby14 = 0
         self.uby15 = 0
         self.uby16 = 0

@@ -708,7 +708,7 @@ class SaveFile:
             assert self.data.read_int() == 90300
 
         if self.game_version >= 90400:
-            self.gauntlets_2 = core.GauntletChapters.read(self.data)
+            self.enigma_clears = core.GauntletChapters.read(self.data)
             self.enigma = core.Enigma.read(self.data, self.game_version)
             self.cleared_slots = core.ClearedSlots.read(self.data)
 
@@ -1878,7 +1878,7 @@ class SaveFile:
             self.data.write_int(90300)
 
         if self.game_version >= 90400:
-            self.gauntlets_2.write(self.data)
+            self.enigma_clears.write(self.data)
             self.enigma.write(self.data, self.game_version)
             self.cleared_slots.write(self.data)
             self.data.write_int(90400)
@@ -2589,7 +2589,7 @@ class SaveFile:
             "utl1": self.utl1,
             "uidd1": self.uidd1,
             "gauntlets": self.gauntlets.serialize(),
-            "gauntlets_2": self.gauntlets_2.serialize(),
+            "enigma_clears": self.enigma_clears.serialize(),
             "enigma": self.enigma.serialize(),
             "cleared_slots": self.cleared_slots.serialize(),
             "collab_gauntlets": self.collab_gauntlets.serialize(),
@@ -2965,8 +2965,8 @@ class SaveFile:
         save_file.gauntlets = core.GauntletChapters.deserialize(
             data.get("gauntlets", {})
         )
-        save_file.gauntlets_2 = core.GauntletChapters.deserialize(
-            data.get("gauntlets_2", {})
+        save_file.enigma_clears = core.GauntletChapters.deserialize(
+            data.get("enigma_clears", {})
         )
         save_file.enigma = core.Enigma.deserialize(data.get("enigma", {}))
         save_file.cleared_slots = core.ClearedSlots.deserialize(
@@ -3467,7 +3467,7 @@ class SaveFile:
         self.legend_quest = core.LegendQuestChapters.init()
         self.medals = core.Medals.init()
         self.gauntlets = core.GauntletChapters.init()
-        self.gauntlets_2 = core.GauntletChapters.init()
+        self.enigma_clears = core.GauntletChapters.init()
         self.enigma = core.Enigma.init()
         self.cleared_slots = core.ClearedSlots.init()
         self.collab_gauntlets = core.GauntletChapters.init()

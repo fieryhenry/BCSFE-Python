@@ -334,6 +334,10 @@ class GauntletChapters:
         gauntlets = save_file.behemoth_culling
         gauntlets.edit_chapters(save_file, "Q")
 
+    @staticmethod
+    def edit_enigma_stages(save_file: core.SaveFile):
+        save_file.enigma_clears.edit_chapters(save_file, "H")
+
     def edit_chapters(self, save_file: core.SaveFile, letter_code: str):
         edits.map.edit_chapters(save_file, self, letter_code)
 

@@ -339,9 +339,11 @@ Alternatively you can use pip directly, although it won't auto-update with the l
 git commits.
 
 ```sh
-py -m pip install git+https://codeberg.org/fieryhenry/BCSFE-Python.git
+py -m pip install -U git+https://codeberg.org/fieryhenry/BCSFE-Python.git
 py -m bcsfe
 ```
+
+Again, you might need change `py` for `python` or `python3`
 
 If you want to use the editor again all you need to do is run the `py -m bcsfe` command
 

@@ -230,6 +230,8 @@ class FeatureHandler:
 
         else:
             feats = self.search_features(usr_input)
+            if not feats:
+                color.ColoredText.localize("no_feature_with_name", name=usr_input)
             kv_map = list(feats.items())
             kv_map.sort(key=lambda v: v[1], reverse=True)
             selected_features = [v[0] for v in kv_map]

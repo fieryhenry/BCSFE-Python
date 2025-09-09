@@ -275,12 +275,25 @@ class ZeroLegendsChapters:
 
     @staticmethod
     def edit_zero_legends(save_file: core.SaveFile):
-        zero_legends_chapters = save_file.zero_legends
-        zero_legends_chapters.edit_chapters(save_file, "ND")
-
-    def edit_chapters(self, save_file: core.SaveFile, letter_code: str):
         color.ColoredText.localize("zero_legends_warning")
-        edits.map.edit_chapters(save_file, self, letter_code)
+        zero_legends_chapters = save_file.zero_legends
+        zero_legends_chapters.edit_chapters(save_file, "RND")
+
+    @staticmethod
+    def edit_catclaw_championships(save_file: core.SaveFile):
+        zero_legends_chapters = save_file.dojo_chapters
+        zero_legends_chapters.edit_chapters(save_file, "G", True, base_index=37000)
+
+    def edit_chapters(
+        self,
+        save_file: core.SaveFile,
+        letter_code: str,
+        no_r_prefix: bool = False,
+        base_index: int | None = None,
+    ):
+        edits.map.edit_chapters(
+            save_file, self, letter_code, no_r_prefix=no_r_prefix, base_index=base_index
+        )
 
     def unclear_rest(self, stages: list[int], stars: int, id: int):
         if not stages:

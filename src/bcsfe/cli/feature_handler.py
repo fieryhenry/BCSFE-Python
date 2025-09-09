@@ -90,6 +90,7 @@ class FeatureHandler:
                 "legend_quest": core.game.map.legend_quest.LegendQuestChapters.edit_legend_quest,
                 "towers": core.game.map.tower.TowerChapters.edit_towers,
                 "zero_legends": core.game.map.zero_legends.ZeroLegendsChapters.edit_zero_legends,
+                "dojo_catclaw_championships": core.game.map.zero_legends.ZeroLegendsChapters.edit_catclaw_championships,
             },
             "gamototo": {
                 "engineers": edits.basic_items.BasicItems.edit_engineers,

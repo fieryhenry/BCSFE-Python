@@ -1184,29 +1184,7 @@ class SaveFile:
 
                 self.uild1[key] = data3
 
-            # probably cat claw championship stuff
-            length = self.data.read_short()
-
-            self.uill: list[tuple[int, list[tuple[int, int, int, list[int]]]]] = []
-
-            for _ in range(length):
-                value = self.data.read_byte()
-                l1: list[tuple[int, int, int, list[int]]] = []
-                length2 = self.data.read_byte()
-                for _ in range(length2):
-                    value2 = self.data.read_byte()
-                    value3 = self.data.read_byte()
-                    value4 = self.data.read_byte()
-                    length3 = self.data.read_short()
-
-                    l2: list[int] = []
-
-                    for _ in range(length3):
-                        value5 = self.data.read_short()
-                        l2.append(value5)
-                    l1.append((value2, value3, value4, l2))
-
-                self.uill.append((value, l1))
+            self.dojo_chapters = core.ZeroLegendsChapters.read(self.data)
 
             length = self.data.read_short()
 
@@ -2285,20 +2263,7 @@ class SaveFile:
                 for val in value:
                     self.data.write_byte(val)
 
-            self.data.write_short(len(self.uill))
-
-            for value1, value2 in self.uill:
-                self.data.write_byte(value1)
-                self.data.write_byte(len(value2))
-
-                for val3, val4, val5, val6 in value2:
-                    self.data.write_byte(val3)
-                    self.data.write_byte(val4)
-                    self.data.write_byte(val5)
-                    self.data.write_short(len(val6))
-
-                    for val7 in val6:
-                        self.data.write_short(val7)
+            self.dojo_chapters.write(self.data)
 
             self.data.write_short(len(self.uil9))
             for val in self.uil9:
@@ -2712,7 +2677,7 @@ class SaveFile:
             "ud17": self.ud17,
             "uby20": self.uby20,
             "uild1": self.uild1,
-            "uill": self.uill,
+            "dojo_chapters": self.dojo_chapters.serialize(),
             "uil9": self.uil9,
             "ub35": self.ub35,
             "ud18": self.ud18,
@@ -3098,7 +3063,9 @@ class SaveFile:
         save_file.ud17 = data.get("ud17", 0.0)
         save_file.uby20 = data.get("uby20", 0)
         save_file.uild1 = data.get("uild1", {})
-        save_file.uill = data.get("uill", [])
+        save_file.dojo_chapters = core.ZeroLegendsChapters.deserialize(
+            data.get("dojo_chapters", [])
+        )
         save_file.uil9 = data.get("uil9", [])
         save_file.ub35 = data.get("ub35", False)
         save_file.ud18 = data.get("ud18", 0.0)
@@ -3303,7 +3270,6 @@ class SaveFile:
         self.uil13 = []
 
         self.uiil1 = []
-        self.uill = []
 
         self.usl1 = []
         self.usl2 = []
@@ -3476,6 +3442,7 @@ class SaveFile:
         self.aku = core.AkuChapters.init()
         self.behemoth_culling = core.GauntletChapters.init()
         self.zero_legends = core.ZeroLegendsChapters.init()
+        self.dojo_chapters = core.ZeroLegendsChapters.init()
 
         self.uiid1 = {}
         self.ushbd1 = {}

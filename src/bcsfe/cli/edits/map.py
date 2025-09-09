@@ -92,8 +92,12 @@ def edit_chapters(
     chapters: ChaptersType,
     letter_code: str,
     type: int | None = None,
+    no_r_prefix: bool = False,
+    base_index: int | None = None,
 ) -> dict[int, bool] | None:
-    map_names = core.MapNames(save_file, letter_code)
+    map_names = core.MapNames(
+        save_file, letter_code, no_r_prefix=no_r_prefix, base_index=base_index
+    )
     names = map_names.map_names
 
     choice = dialog_creator.ChoiceInput.from_reduced(

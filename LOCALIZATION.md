@@ -55,4 +55,4 @@ in the `metadata.json` file in the opening text
 
 9. Once done, push your changes to your fork if you have one and feel free to submit a pull request
 to the codeberg repo. Alternatively you can just zip your locale folder and send it to me or in
-the #localization channel on discord. (or [matrix](https://matrix.to/#/@fieryhenry:matrix.fyhenry.uk>))
+the #localization channel on discord. (or [matrix](https://matrix.to/#/@fieryhenry:matrix.battlecatsmodding.org))

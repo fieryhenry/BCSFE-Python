@@ -327,7 +327,7 @@ class ChoiceInput:
         dialog = core.core_data.local_manager.get_key(key).format(
             min=self.get_min_value(), max=self.get_max_value()
         )
-        usr_input = color.ColoredInput().get(dialog).split(" ")
+        usr_input = color.ColoredInput().get(dialog).strip().split(" ")
         int_vals: list[int] = []
         for inp in usr_input:
             try:

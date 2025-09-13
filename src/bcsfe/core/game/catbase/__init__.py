@@ -21,6 +21,7 @@ from bcsfe.core.game.catbase import (
     powerup,
     drop_chara,
     playtime,
+    gambling,
 )
 
 __all__ = [
@@ -46,4 +47,5 @@ __all__ = [
     "powerup",
     "drop_chara",
     "playtime",
+    "gambling",
 ]

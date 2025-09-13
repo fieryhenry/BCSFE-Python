@@ -31,6 +31,7 @@ from bcsfe.core.game.battle.enemy import (
 )
 from bcsfe.core.game.catbase.beacon_base import BeaconEventListScene
 from bcsfe.core.game.catbase.cat import Cat, Cats, UnitBuy, TalentData
+from bcsfe.core.game.catbase.gambling import GamblingEvent
 from bcsfe.core.game.catbase.gatya import (
     Gatya,
     GatyaInfos,
@@ -368,4 +369,5 @@ __all__ = [
     "GatyaDataOptionSet",
     "GatyaDataOption",
     "MaxValueType",
+    "GamblingEvent",
 ]

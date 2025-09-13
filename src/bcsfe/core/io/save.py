@@ -651,31 +651,7 @@ class SaveFile:
 
         if self.game_version >= 90000:
             self.medals = core.Medals.read(self.data)
-            total = self.data.read_short()
-            self.ushbd1 = self.data.read_short_bool_dict(total)
-            length = self.data.read_short()
-            self.uidiid1: dict[int, dict[int, int]] = {}
-            for _ in range(length):
-                key = self.data.read_short()
-                length = self.data.read_short()
-                for _ in range(length):
-                    key2 = self.data.read_short()
-                    value = self.data.read_short()
-                    if key not in self.uidiid1:
-                        self.uidiid1[key] = {}
-                    self.uidiid1[key][key2] = value
-                if length == 0:
-                    self.uidiid1[key] = {}
-
-            length = self.data.read_short()
-            self.uiid2: dict[int, int | float] = {}
-            for _ in range(length):
-                key = self.data.read_short()
-                if self.game_version < 90100:
-                    value = self.data.read_double()
-                else:
-                    value = self.data.read_int()
-                self.uiid2[key] = value
+            self.wildcat_slots = core.GamblingEvent.read(self.data, self.game_version)
 
             assert self.data.read_int() == 90000
 
@@ -845,32 +821,7 @@ class SaveFile:
             assert self.data.read_int() == 100600
 
         if self.game_version >= 100700:
-            length = self.data.read_short()
-            self.ushbd2 = self.data.read_short_bool_dict(length)
-
-            length = self.data.read_short()
-            self.ushdshd: dict[int, dict[int, int]] = {}
-            for _ in range(length):
-                key = self.data.read_short()
-                length = self.data.read_short()
-                for _ in range(length):
-                    key2 = self.data.read_short()
-                    value = self.data.read_short()
-                    if key not in self.ushdshd:
-                        self.ushdshd[key] = {}
-                    self.ushdshd[key][key2] = value
-                if length == 0:
-                    self.ushdshd[key] = {}
-
-            length = self.data.read_short()
-            self.ushid: dict[int, int | float] = {}
-            for _ in range(length):
-                key = self.data.read_short()
-                if self.game_version < 90100:
-                    value = self.data.read_double()
-                else:
-                    value = self.data.read_int()
-                self.ushid[key] = value
+            self.cat_scratcher = core.GamblingEvent.read(self.data, self.game_version)
 
             assert self.data.read_int() == 100700
 
@@ -1795,23 +1746,7 @@ class SaveFile:
 
         if self.game_version >= 90000:
             self.medals.write(self.data)
-            self.data.write_short(len(self.ushbd1))
-            self.data.write_short_bool_dict(self.ushbd1, write_length=False)
-            self.data.write_short(len(self.uidiid1))
-            for key, value in self.uidiid1.items():
-                self.data.write_short(key)
-                self.data.write_short(len(value))
-                for key2, value2 in value.items():
-                    self.data.write_short(key2)
-                    self.data.write_short(value2)
-
-            self.data.write_short(len(self.uiid2))
-            for key, value in self.uiid2.items():
-                self.data.write_short(key)
-                if self.game_version < 90100:
-                    self.data.write_double(value)
-                else:
-                    self.data.write_int(int(value))
+            self.wildcat_slots.write(self.data, self.game_version)
 
             self.data.write_int(90000)
 
@@ -1986,24 +1921,7 @@ class SaveFile:
             self.data.write_int(100600)
 
         if self.game_version >= 100700:
-            self.data.write_short(len(self.ushbd2))
-            self.data.write_short_bool_dict(self.ushbd2, write_length=False)
-
-            self.data.write_short(len(self.ushdshd))
-            for key, value in self.ushdshd.items():
-                self.data.write_short(key)
-                self.data.write_short(len(value))
-                for key2, value2 in value.items():
-                    self.data.write_short(key2)
-                    self.data.write_short(value2)
-
-            self.data.write_short(len(self.ushid))
-            for key, value in self.ushid.items():
-                self.data.write_short(key)
-                if self.game_version < 90100:
-                    self.data.write_double(value)
-                else:
-                    self.data.write_int(int(value))
+            self.cat_scratcher.write(self.data, self.game_version)
 
             self.data.write_int(100700)
 
@@ -2544,9 +2462,7 @@ class SaveFile:
             "uby2": self.uby2,
             "restart_pack": self.restart_pack,
             "medals": self.medals.serialize(),
-            "ushbd1": self.ushbd1,
-            "uidiid1": self.uidiid1,
-            "uiid2": self.uiid2,
+            "wildcat_slots": self.wildcat_slots.serialize(),
             "ush2": self.ush2,
             "ush3": self.ush3,
             "ui15": self.ui15,
@@ -2594,9 +2510,7 @@ class SaveFile:
             "ud10": self.ud10,
             "platinum_shards": self.platinum_shards,
             "ub15": self.ub15,
-            "ushbd2": self.ushbd2,
-            "ushdshd": self.ushdshd,
-            "ushid": self.ushid,
+            "cat_scratcher": self.cat_scratcher.serialize(),
             "aku": self.aku.serialize(),
             "ub16": self.ub16,
             "ub17": self.ub17,
@@ -2918,9 +2832,9 @@ class SaveFile:
         save_file.uby2 = data.get("uby2", 0)
         save_file.restart_pack = data.get("restart_pack", 0)
         save_file.medals = core.Medals.deserialize(data.get("medals", {}))
-        save_file.ushbd1 = data.get("ushbd1", {})
-        save_file.uidiid1 = data.get("uidiid1", {})
-        save_file.uiid2 = data.get("uiid2", {})
+        save_file.wildcat_slots = core.GamblingEvent.deserialize(
+            data.get("wildcat_slots", {})
+        )
         save_file.ush2 = data.get("ush2", 0)
         save_file.ush3 = data.get("ush3", 0)
         save_file.ui15 = data.get("ui15", 0)
@@ -2976,9 +2890,9 @@ class SaveFile:
         save_file.ud10 = data.get("ud10", 0.0)
         save_file.platinum_shards = data.get("platinum_shards", 0)
         save_file.ub15 = data.get("ub15", False)
-        save_file.ushbd2 = data.get("ushbd2", {})
-        save_file.ushdshd = data.get("ushdshd", {})
-        save_file.ushid = data.get("ushid", {})
+        save_file.cat_scratcher = core.GamblingEvent.deserialize(
+            data.get("cat_scratcher", {})
+        )
         save_file.aku = core.AkuChapters.deserialize(data.get("aku", {}))
         save_file.ub16 = data.get("ub16", False)
         save_file.ub17 = data.get("ub17", False)
@@ -3443,16 +3357,12 @@ class SaveFile:
         self.behemoth_culling = core.GauntletChapters.init()
         self.zero_legends = core.ZeroLegendsChapters.init()
         self.dojo_chapters = core.ZeroLegendsChapters.init()
+        self.wildcat_slots = core.GamblingEvent.init()
+        self.cat_scratcher = core.GamblingEvent.init()
 
         self.uiid1 = {}
-        self.ushbd1 = {}
-        self.uidiid1 = {}
-        self.uiid2 = {}
         self.uidd1 = {}
         self.uidiid2 = {}
-        self.ushbd2 = {}
-        self.ushdshd = {}
-        self.ushid = {}
         self.ushdshd2 = {}
         self.ushdd = {}
         self.ushdd2 = {}

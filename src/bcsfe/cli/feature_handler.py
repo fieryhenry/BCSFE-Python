@@ -120,6 +120,7 @@ class FeatureHandler:
             },
             "other": {
                 "unlocked_slots": edits.basic_items.BasicItems.edit_unlocked_slots,
+                "reset_gambling_events": core.GamblingEvent.reset_events,
                 "restart_pack": edits.basic_items.BasicItems.set_restart_pack,
                 "special_skills": edits.basic_items.BasicItems.edit_special_skills,
                 "playtime": core.game.catbase.playtime.edit,

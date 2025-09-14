@@ -689,9 +689,11 @@ class YesNoInput:
 
         if usr_input == core.core_data.local_manager.get_key("quit_key"):
             return None
-        return usr_input == core.core_data.local_manager.get_key(
-            "yes_key"
-        ) or usr_input == core.core_data.local_manager.get_key("yes")
+        return (
+            usr_input == core.core_data.local_manager.get_key("yes_key")
+            or usr_input.lower().strip()
+            == core.core_data.local_manager.get_key("yes").lower().strip()
+        )
 
 
 class DialogBuilder:

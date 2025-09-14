@@ -26,7 +26,7 @@ class Updater:
             return None
         try:
             return response.json()
-        except requests.exceptions.JSONDecodeError:
+        except core.JSONDecodeError:
             return None
 
     def get_releases(self) -> list[str] | None:

@@ -3,7 +3,6 @@ from typing import Any, Callable
 
 import zipfile
 
-from requests import JSONDecodeError
 from bcsfe.cli import color
 
 from bcsfe import core
@@ -57,7 +56,7 @@ class GameDataGetter:
             return None
         try:
             data = response.json()
-        except JSONDecodeError as e:
+        except core.JSONDecodeError as e:
             print(e)
             return None
         return data

@@ -503,6 +503,7 @@ class SaveManagement:
         if new_save_file is None:
             return stop
         save_file.load_save_file(new_save_file)
+        core.core_data.init_data()
         color.ColoredText.localize("load_save_success")
         return False
 
@@ -515,6 +516,7 @@ class SaveManagement:
             return
         save_file.set_cc(cc)
         core.ServerHandler(save_file).create_new_account()
+        core.core_data.init_data()
         color.ColoredText.localize("country_code_set", cc=cc)
 
     @staticmethod
@@ -530,4 +532,5 @@ class SaveManagement:
             color.ColoredText.localize("invalid_game_version")
             return
         save_file.set_gv(gv)
+        core.core_data.init_data()
         color.ColoredText.localize("game_version_set", version=gv.to_string())

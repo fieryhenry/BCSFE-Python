@@ -10,6 +10,8 @@ import re
 
 class Path:
     def __init__(self, path: str = "", is_relative: bool = False):
+        if isinstance(path, Path):
+            path = path.path
         if is_relative:
             self.path = self.get_relative_path(path)
         else:
@@ -113,12 +115,6 @@ class Path:
     def join(*paths: str | Path) -> Path:
         _paths: list[str] = [str(path) for path in paths]
         return Path(os.path.join(*_paths))
-
-    @typing.overload
-    def add(self, *paths: Path) -> Path: ...
-
-    @typing.overload
-    def add(self, *paths: str) -> Path: ...
 
     def add(self, *paths: str | Path) -> Path:
         _paths: list[str] = [str(path) for path in paths]

@@ -148,7 +148,7 @@ class CSV:
         self,
         file_data: core.Data,
         delimiter: Delimeter | str = Delimeter(DelimeterType.COMMA),
-        remove_padding: bool = True,
+        remove_padding: bool = False,
         remove_comments: bool = True,
         remove_empty: bool = True,
     ):

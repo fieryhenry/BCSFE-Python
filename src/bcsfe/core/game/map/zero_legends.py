@@ -277,7 +277,7 @@ class ZeroLegendsChapters:
     def edit_zero_legends(save_file: core.SaveFile):
         color.ColoredText.localize("zero_legends_warning")
         zero_legends_chapters = save_file.zero_legends
-        zero_legends_chapters.edit_chapters(save_file, "RND")
+        zero_legends_chapters.edit_chapters(save_file, "ND")
 
     @staticmethod
     def edit_catclaw_championships(save_file: core.SaveFile):

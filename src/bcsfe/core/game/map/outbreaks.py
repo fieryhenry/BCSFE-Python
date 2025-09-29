@@ -195,14 +195,6 @@ class Outbreaks:
             return self.current_outbreaks.get(true_id)
         return self.current_outbreaks.get(true_id + 1)
 
-    def get_valid_chapters(self) -> list[Chapter]:
-        new_chapters: list[Chapter] = []
-        for chapter_id, chapter in self.chapters.items():
-            if chapter_id < 9 and len(chapter.outbreaks) > 3:
-                new_chapters.append(chapter)
-
-        return new_chapters
-
     def clear_outbreak(self, chapter_id: int, stage_id: int, clear: bool):
         chapter = self.get_chapter_from_true_id(chapter_id)
         if chapter is not None:
@@ -219,7 +211,7 @@ class Outbreaks:
     @staticmethod
     def edit_outbreaks(save_file: core.SaveFile):
         outbreaks = save_file.outbreaks
-        chapters = outbreaks.get_valid_chapters()
+        chapters = outbreaks.chapters
         if not chapters:
             color.ColoredText.localize("no_valid_outbreaks")
             return
@@ -235,7 +227,7 @@ class Outbreaks:
         clear = choice == 0
 
         selected_ids = core.StoryChapters.select_story_chapters(
-            save_file, [chapter.get_true_id() for chapter in chapters]
+            save_file, [chapter.get_true_id() for chapter in chapters.values()]
         )
         if not selected_ids:
             return

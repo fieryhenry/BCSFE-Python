@@ -706,7 +706,7 @@ class StoryChapters:
 
         options = ["per_chapter", "all_selected_chapters"]
         choice = dialog_creator.ChoiceInput.from_reduced(
-            options, dialog="treasure_dialog_per_chapter", single_choice=True
+            options, dialog="edit_per_chapter", single_choice=True
         ).single_choice()
         if choice is None:
             return None

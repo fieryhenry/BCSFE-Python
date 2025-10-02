@@ -36,6 +36,8 @@ class FeatureHandler:
                 "waydroid_push_rerun": save_management.SaveManagement.waydroid_push_rerun,
                 "adb_push": save_management.SaveManagement.adb_push,
                 "adb_push_rerun": save_management.SaveManagement.adb_push_rerun,
+                "root_push": save_management.SaveManagement.root_push,
+                "root_push_rerun": save_management.SaveManagement.root_push_rerun,
                 "export_save": save_management.SaveManagement.export_save,
                 "load_save": save_management.SaveManagement.load_save,
                 # "init_save": save_management.SaveManagement.init_save,

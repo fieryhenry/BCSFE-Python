@@ -197,6 +197,43 @@ class SaveManagement:
         return adb_handler
 
     @staticmethod
+    def root_push(save_file: core.SaveFile) -> core.RootHandler | None:
+        """Push the save file to the device.
+
+        Args:
+            save_file (core.SaveFile): The save file to push.
+
+        Returns:
+            core.AdbHandler: The AdbHandler instance.
+        """
+        SaveManagement.save_save(save_file)
+        root_handler = core.RootHandler()
+        if not root_handler.is_android():
+            color.ColoredText.localize("root_push_not_android_error")
+            return None
+        if not root_handler.is_rooted():
+            color.ColoredText.localize("not_rooted_error")
+            return None
+        if save_file.used_storage and save_file.package_name is not None:
+            root_handler.set_package_name(save_file.package_name)
+        else:
+            packages = root_handler.get_battlecats_packages()
+            package_name = SaveManagement.select_package_name(packages)
+            if package_name is None:
+                color.ColoredText.localize("no_package_name_error")
+                return root_handler
+            root_handler.set_package_name(package_name)
+        if save_file.save_path is None:
+            return root_handler
+        result = root_handler.load_battlecats_save(save_file.save_path)
+        if result.success:
+            color.ColoredText.localize("root_push_success")
+        else:
+            color.ColoredText.localize("root_push_fail", error=result.result)
+
+        return root_handler
+
+    @staticmethod
     def adb_push_rerun(save_file: core.SaveFile):
         """Push the save file to the device and rerun the game.
 
@@ -213,6 +250,24 @@ class SaveManagement:
             color.ColoredText.localize("adb_rerun_success")
         else:
             color.ColoredText.localize("adb_rerun_fail", error=result.result)
+
+    @staticmethod
+    def root_push_rerun(save_file: core.SaveFile):
+        """Push the save file to the device and rerun the game.
+
+        Args:
+            save_file (core.SaveFile): The save file to push.
+        """
+        root_handler = SaveManagement.root_push(save_file)
+        if not root_handler:
+            return
+        if root_handler.package_name is None:
+            return
+        result = root_handler.rerun_game()
+        if result.success:
+            color.ColoredText.localize("root_rerun_success")
+        else:
+            color.ColoredText.localize("root_rerun_fail", error=result.result)
 
     @staticmethod
     def export_save(save_file: core.SaveFile):

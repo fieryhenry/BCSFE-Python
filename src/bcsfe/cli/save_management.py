@@ -1,5 +1,6 @@
 from __future__ import annotations
 from bcsfe import core
+import bcsfe
 from bcsfe.core import io
 from bcsfe.cli import main, color, dialog_creator, server_cli
 from bcsfe.core.country_code import CountryCode
@@ -520,12 +521,16 @@ class SaveManagement:
                 save_file = core.SaveFile(save_path.read(), cc)
             except Exception:
                 tb = core.core_data.logger.get_traceback()
-                color.ColoredText.localize("parse_save_error", error=tb)
+                color.ColoredText.localize(
+                    "parse_save_error", error=tb, version=bcsfe.__version__
+                )
                 return None
 
         except Exception:
             tb = core.core_data.logger.get_traceback()
-            color.ColoredText.localize("parse_save_error", error=tb)
+            color.ColoredText.localize(
+                "parse_save_error", error=tb, version=bcsfe.__version__
+            )
             return None
 
         save_file.save_path = save_path

@@ -20,7 +20,8 @@ class EventTickets:
         )
 
         cli.color.ColoredText.localize("downloading_gatya_data")
-        gatya_event_data = core.ServerHandler(self.save_file).download_gatya_data()
+        temp_save_file = core.SaveFile(cc=save_file.cc, gv=save_file.game_version)
+        gatya_event_data = core.ServerHandler(temp_save_file).download_gatya_data()
 
         if gatya_event_data is None:
             cli.color.ColoredText.localize("download_gatya_data_fail")

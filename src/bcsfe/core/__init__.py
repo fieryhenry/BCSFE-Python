@@ -4,7 +4,7 @@ from typing import Any
 from requests.exceptions import ConnectionError
 from requests import Response
 from json.decoder import JSONDecodeError
-from bcsfe.cli import color
+from bcsfe.cli import color, dialog_creator
 
 from bcsfe.core import (
     country_code,
@@ -307,6 +307,14 @@ def update_external_content(_: Any = None):
     ExternalThemeManager.update_all_external_themes()
     ExternalLocaleManager.update_all_external_locales()
     core_data.init_data()
+
+    clear_game_data = dialog_creator.YesNoInput().get_input_once("clear_game_data_q")
+    if clear_game_data is None:
+        return
+
+    if clear_game_data:
+        GameDataGetter.delete_old_versions(0)
+        color.ColoredText.localize("cleared_game_data")
 
 
 def print_no_internet():

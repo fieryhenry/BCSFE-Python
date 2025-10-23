@@ -227,7 +227,7 @@ class TalentData:
         talent_data_cat = self.get_cat_skill(cat.id)
         if talent_data_cat is None or cat.talents is None:
             return None
-        save_talent_data = cat.talents
+        # save_talent_data = cat.talents
         talent_names: list[str] = []
         max_levels: list[int] = []
         current_levels: list[int] = []
@@ -882,7 +882,7 @@ class Cats:
 
     def get_non_gacha_cats(self, save_file: core.SaveFile) -> list[Cat]:
         unitbuy = self.read_unitbuy(save_file)
-        cats = []
+        cats: list[Cat] = []
         for cat in self.cats:
             unit_buy_data = unitbuy.get_unit_buy(cat.id)
             if unit_buy_data is None:

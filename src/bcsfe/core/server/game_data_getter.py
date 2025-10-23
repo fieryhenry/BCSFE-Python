@@ -1,16 +1,20 @@
 from __future__ import annotations
+from io import BytesIO
 from typing import Any, Callable
 
-import zipfile
-
 from bcsfe.cli import color
+
+import tarfile
 
 from bcsfe import core
 
 
 class GameDataGetter:
-    def __init__(self, cc: core.CountryCode, gv: core.GameVersion):
+    def __init__(
+        self, cc: core.CountryCode, gv: core.GameVersion, do_print: bool = True
+    ):
         self.repo_url = core.core_data.config.get_game_data_repo()
+        self.print = do_print
         self.lang = core.core_data.config.get_str(core.ConfigKey.LOCALE)
         self.cc = cc.get_cc_lang()
         self.real_cc = cc
@@ -26,8 +30,9 @@ class GameDataGetter:
 
         if self.all_versions is None:
             self.version = None
+            self.filepath = None
         else:
-            self.version = self.get_version(self.all_versions, self.cc)
+            self.version, self.filepath = self.get_version(self.all_versions, self.cc)
 
     def does_save_version_match(self, save_file: core.SaveFile) -> bool:
         if self.version is None:
@@ -36,19 +41,20 @@ class GameDataGetter:
         return save_file.game_version == self.version
 
     def get_version(
-        self, versions: dict[str, list[str]], cc: core.CountryCode
-    ) -> str | None:
+        self, versions: dict[str, dict[str, str]], cc: core.CountryCode
+    ) -> tuple[str | None, str | None]:
         cc_versions = versions.get(cc.get_code())
         if cc_versions is None:
-            return None
+            return None, None
         if not cc_versions:
-            return None
+            return None, None
         gv_string = self.gv.to_string()
         if gv_string not in cc_versions:
-            cc_versions.sort(reverse=True)
+            cc_version_keys = list(cc_versions.keys())
+            cc_version_keys.sort(reverse=True)
             # TODO: do closest version rather than always latest version
-            return cc_versions[0]
-        return gv_string
+            return cc_version_keys[0], cc_versions[cc_version_keys[0]]
+        return gv_string, cc_versions[gv_string]
 
     def get_metadata(self) -> dict[str, Any] | None:
         response = core.RequestHandler(self.repo_url).get()
@@ -61,84 +67,8 @@ class GameDataGetter:
             return None
         return data
 
-    def get_cat_names_fast(
-        self, display_text: bool = True
-    ) -> dict[str, core.Data] | None:
-        version = self.version
-        if version is None or self.metadata is None:
-            return None
-
-        versions = (
-            self.metadata.get("cat_names", {}).get(self.cc.get_code(), {}).get(version)
-        )
-
-        if versions is None:
-            return None
-
-        if not isinstance(versions, str):
-            if self.cc != core.CountryCodeType.EN:
-                key = self.cc.get_code()
-            elif self.lang in core.CountryCode.get_langs():
-                key = self.lang
-            else:
-                key = self.cc.get_code()
-
-            if key is None:
-                return
-
-            url = versions.get(key)
-
-            if url is None:
-                return None
-        else:
-            url = versions
-
-        if display_text:
-            color.ColoredText.localize("downloading_cat_names", url=url)
-
-        response = core.RequestHandler(url).get()
-        if response is None:
-            return None
-
-        if response.status_code != 200:
-            return None
-
-        try:
-            zip = zipfile.ZipFile(core.Data(response.content).to_bytes_io())
-        except zipfile.BadZipFile:
-            return None
-
-        files: dict[str, core.Data] = {}
-
-        for file in zip.filelist:
-            data = zip.read(file.filename)
-            files[file.filename] = core.Data(data)
-
-        return files
-
-    def save_all_cat_names_fast(self, display_text: bool = True):
-        files = self.get_cat_names_fast(display_text)
-        if files is None:
-            return
-
-        for filename, data in files.items():
-            self.save_file_data("resLocal", filename, data)
-
-    def get_versions(self, metdata: dict[str, Any]) -> dict[str, list[str]] | None:
+    def get_versions(self, metdata: dict[str, Any]) -> dict[str, dict[str, str]] | None:
         return metdata.get("versions")
-
-    def get_file(self, pack_name: str, file_name: str) -> core.Data | None:
-        pack_name = self.get_packname(pack_name)
-        version = self.version
-        if version is None or self.url is None:
-            return None
-        url = self.url + f"{self.cc.get_code()}/{version}/{pack_name}/{file_name}"
-        response = core.RequestHandler(url).get()
-        if response is None:
-            return None
-        if response.status_code != 200:
-            return None
-        return core.Data(response.content)
 
     def get_packname(self, packname: str) -> str:
         if packname != "resLocal":
@@ -155,30 +85,87 @@ class GameDataGetter:
         return core.Path.get_documents_folder().add("game_data")
 
     def get_file_path(self, pack_name: str, file_name: str) -> core.Path | None:
-        version = self.version
-
-        if version is None:
-            return None
         pack_name = self.get_packname(pack_name)
-        path = (
-            GameDataGetter.get_game_data_dir()
-            .add(self.cc.get_code())
-            .add(version)
-            .add(pack_name)
-        )
-        path.generate_dirs()
-        path = path.add(file_name)
-        return path
+        path = self.get_version_path()
+        if path is None:
+            return None
+        return path.add(pack_name).generate_dirs().add(file_name)
 
-    def save_file(self, pack_name: str, file_name: str) -> core.Data | None:
+    def download_version_data(self):
+        if self.url is None or self.filepath is None or self.version is None:
+            return None
+        url = self.url + self.filepath
+
+        if self.print:
+            color.ColoredText.localize("downloading_compressed_data", url=url)
+
+        downloaded_data = core.RequestHandler(url).get()
+        if downloaded_data is None:
+            if self.print:
+                color.ColoredText.localize("no_internet")
+            return None
+
+        archive = tarfile.open(
+            name=self.filepath, fileobj=BytesIO(downloaded_data.content)
+        )
+
+        outdir = (
+            GameDataGetter.get_game_data_dir().add(self.cc.get_code()).add(self.version)
+        ).generate_dirs()
+
+        archive.extractall(outdir.path)
+
+        return True
+
+    def get_version_path(self) -> core.Path | None:
+        if self.version is None:
+            return None
+        return (
+            GameDataGetter.get_game_data_dir().add(self.cc.get_code()).add(self.version)
+        ).generate_dirs()
+
+    def is_missing(self) -> bool:
+        path = self.get_version_path()
+        if path is None:
+            return False
+        return len(path.get_dirs()) != 0
+
+    def get_file(self, pack_name: str, file_name: str) -> core.Data | bool:
+        path = self.get_file_path(pack_name, file_name)
+        if path is None:
+            return False
+
+        if path.exists():
+            return path.read()
+        else:
+            if self.is_missing():
+                return True
+            if self.download_version_data() is None:
+                return False
+
+            path = self.get_file_path(pack_name, file_name)
+            if path is None:
+                return False
+
+            if path.exists():
+                return path.read()
+            return self.is_missing()
+        path = self.get_file_path(pack_name, file_name)
+        if path is None:
+            return False
+
+        if path.exists():
+            return path.read()
+
+    def save_file(self, pack_name: str, file_name: str) -> core.Data | bool:
         pack_name = self.get_packname(pack_name)
         data = self.get_file(pack_name, file_name)
-        if data is None:
-            return None
+        if isinstance(data, bool):
+            return data
 
         path = self.get_file_path(pack_name, file_name)
         if path is None:
-            return None
+            return False
         data.to_file(path)
         return data
 
@@ -245,8 +232,12 @@ class GameDataGetter:
                 version=version,
             )
         data = self.save_file(pack_name, file_name)
-        if data is None:
-            data = self.download(pack_name, file_name, retries, display_text)
+        if isinstance(data, bool):
+            if not data and display_text:
+                self.print_no_file(pack_name, file_name)
+            return None
+
+        data = self.download(pack_name, file_name, retries, display_text)
         if data is None:
             if display_text:
                 self.print_no_file(pack_name, file_name)

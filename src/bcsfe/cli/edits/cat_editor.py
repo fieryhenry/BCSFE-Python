@@ -48,7 +48,6 @@ class CatEditor:
         if len(current_cats) > 50:
             color.ColoredText.localize("total_selected_cats", total=len(current_cats))
         else:
-            self.save_file.cats.bulk_download_names(self.save_file, current_cats)
             for cat in current_cats:
                 names = cat.get_names_cls(self.save_file)
                 if not names:

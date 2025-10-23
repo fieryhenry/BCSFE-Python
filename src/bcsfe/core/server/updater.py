@@ -3,7 +3,6 @@ import sys
 from typing import Any
 from bcsfe import core
 import bcsfe
-import requests
 
 
 class Updater:

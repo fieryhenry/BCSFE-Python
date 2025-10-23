@@ -1,5 +1,39 @@
 # Changelog
 
+## [3.2.0] - ???
+
+### Added
+
+- Feature to reset the golden cat cpu uses
+
+- Feature to clear enigma stages
+
+- Feature to clear catclaw championships
+
+- Feature to reset cat scratcher and wildcat slots
+
+- Cats of the Cosmos Chapter 3 outbreaks
+
+- Features to push to root storage and rerun game
+
+### Fixed
+
+- Fixed issue of not being able to add engima stages if they have already been cleared
+
+- Fixed issue on some platforms where it couldn't find JSONDecodeError
+
+- Fixed a few text and input issues
+
+- Fixed issue where editing event tickets could cause your inquiry code to change
+
+### Changed
+
+- Game data repo is now at <https://git.battlecatsmodding.org/fieryhenry/BCData>
+
+- Game data is now downloaded and saved all at once, rather than file by file which should speed up some features
+
+- When running the Update External Content feature, it asks you if you want to clear the current game data
+
 ## [3.1.0] - 2025-09-03
 
 ### Added

@@ -128,7 +128,7 @@ class GameDataGetter:
         path = self.get_version_path()
         if path is None:
             return False
-        return len(path.get_dirs()) != 0
+        return len(path.add("DataLocal").get_files()) != 0
 
     def get_file(self, pack_name: str, file_name: str) -> core.Data | bool:
         path = self.get_file_path(pack_name, file_name)
@@ -150,12 +150,6 @@ class GameDataGetter:
             if path.exists():
                 return path.read()
             return self.is_missing()
-        path = self.get_file_path(pack_name, file_name)
-        if path is None:
-            return False
-
-        if path.exists():
-            return path.read()
 
     def save_file(self, pack_name: str, file_name: str) -> core.Data | bool:
         pack_name = self.get_packname(pack_name)

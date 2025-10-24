@@ -18,7 +18,7 @@
 
 ### Fixed
 
-- Fixed issue of not being able to add engima stages if they have already been cleared
+- Fixed issue of not being able to add enigma stages if they have already been cleared
 
 - Fixed issue on some platforms where it couldn't find JSONDecodeError
 

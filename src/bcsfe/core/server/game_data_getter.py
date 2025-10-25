@@ -217,7 +217,7 @@ class GameDataGetter:
                 self.print_no_file(pack_name, file_name)
             return None
 
-        if display_text:
+        if display_text and not self.is_missing():
             color.ColoredText.localize(
                 "downloading",
                 file_name=file_name,

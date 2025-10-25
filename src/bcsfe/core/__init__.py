@@ -30,7 +30,13 @@ from bcsfe.core.game.battle.enemy import (
     EnemyDictionary,
 )
 from bcsfe.core.game.catbase.beacon_base import BeaconEventListScene
-from bcsfe.core.game.catbase.cat import Cat, Cats, UnitBuy, TalentData
+from bcsfe.core.game.catbase.cat import (
+    Cat,
+    Cats,
+    UnitBuy,
+    TalentData,
+    NyankoPictureBook,
+)
 from bcsfe.core.game.catbase.gambling import GamblingEvent
 from bcsfe.core.game.catbase.gatya import (
     Gatya,
@@ -378,4 +384,6 @@ __all__ = [
     "GatyaDataOption",
     "MaxValueType",
     "GamblingEvent",
+    "UnitBuy",
+    "NyankoPictureBook",
 ]

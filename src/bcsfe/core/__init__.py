@@ -36,6 +36,7 @@ from bcsfe.core.game.catbase.cat import (
     UnitBuy,
     TalentData,
     NyankoPictureBook,
+    StorageItem,
 )
 from bcsfe.core.game.catbase.gambling import GamblingEvent
 from bcsfe.core.game.catbase.gatya import (
@@ -386,4 +387,7 @@ __all__ = [
     "GamblingEvent",
     "UnitBuy",
     "NyankoPictureBook",
+    "StorageItem",
+    "OfficerPass",
+    "LocalManager",
 ]

@@ -9,6 +9,7 @@ from bcsfe.cli.edits import (
     map,
     event_tickets,
     max_all,
+    storage,
 )
 
 __all__ = [
@@ -22,4 +23,5 @@ __all__ = [
     "map",
     "event_tickets",
     "max_all",
+    "storage",
 ]

@@ -791,6 +791,18 @@ class StorageItem:
         self.item_type = 0
 
     @staticmethod
+    def from_cat(cat_id: int) -> StorageItem:
+        item = StorageItem(cat_id)
+        item.item_type = 1
+        return item
+
+    @staticmethod
+    def from_special_skill(special_skill_id: int) -> StorageItem:
+        item = StorageItem(special_skill_id)
+        item.item_type = 2
+        return item
+
+    @staticmethod
     def init() -> StorageItem:
         return StorageItem(0)
 

@@ -26,6 +26,8 @@ class FeatureHandler:
             edits.basic_items.BasicItems.edit_special_skills
         )
 
+        cat_features["cat_storage"] = edits.storage.edit_storage
+
         features: dict[str, Any] = {
             "save_management": {
                 "save_save": save_management.SaveManagement.save_save,
@@ -217,7 +219,7 @@ class FeatureHandler:
                     return list(self.get_features().keys())
                 feature = self.get_feature(feature_name_top)
                 if isinstance(feature, dict):
-                    for feature_name in feature.keys():
+                    for feature_name in feature.keys():  # type: ignore
                         feature_path = (
                             f"{parent_path}.{feature_name_top}.{feature_name}"
                             if parent_path

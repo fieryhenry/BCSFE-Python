@@ -55,9 +55,8 @@ class CatEditor:
                 color.ColoredText.localize("selected_cat", id=cat.id, name=names[0])
 
     def select(
-        self,
-        current_cats: list[core.Cat] | None = None,
-    ) -> list[core.Cat] | None:
+        self, current_cats: list[core.Cat] | None = None, finish_option: bool = True
+    ) -> tuple[list[core.Cat], bool]:
         if current_cats is None:
             current_cats = []
         options: dict[str, Callable[[], Any]] = {
@@ -72,18 +71,23 @@ class CatEditor:
             "select_cats_not_obtainable": self.get_cats_unobtainable,
             "select_cats_non_gatya": self.get_non_gacha_cats,
         }
+        if finish_option:
+            options["finish"] = lambda: None
         option_id = dialog_creator.ChoiceInput(
             list(options), list(options), [], {}, "select_cats", True
         ).single_choice()
         if option_id is None:
-            return current_cats
+            return current_cats, False
         option_id -= 1
+
+        if option_id == len(options) - 1 and finish_option:
+            return current_cats, True
 
         func = options[list(options)[option_id]]
         new_cats = func()
 
         if new_cats is None:
-            return None
+            return current_cats, False
 
         if current_cats:
             mode_id = dialog_creator.IntInput().get_basic_input_locale("and_mode_q", {})
@@ -101,12 +105,12 @@ class CatEditor:
             mode = SelectMode.OR
 
         if mode == SelectMode.AND:
-            return list(set(current_cats) & set(new_cats))
+            return list(set(current_cats) & set(new_cats)), False
         if mode == SelectMode.OR:
-            return list(set(current_cats) | set(new_cats))
+            return list(set(current_cats) | set(new_cats)), False
         if mode == SelectMode.REPLACE:
-            return new_cats
-        return new_cats
+            return new_cats, False
+        return new_cats, False
 
     def select_id(self) -> list[core.Cat] | None:
         cat_ids = dialog_creator.RangeInput(
@@ -638,11 +642,12 @@ class CatEditor:
         stop = False
         cats = []
         while not stop:
-            current_cats = cat_editor.select(cats)
-            if current_cats is None:
-                return None, []
+            current_cats, finished = cat_editor.select(cats)
             cats = current_cats
             cat_editor.print_selected_cats(cats)
+            if finished:
+                stop = True
+                continue
             finished = dialog_creator.YesNoInput().get_input_once(
                 "finished_cats_selection"
             )
@@ -681,9 +686,7 @@ class CatEditor:
             return False, cats
         option_id -= 1
         if option_id == 0:
-            cats_ = self.select(cats)
-            if cats_ is None:
-                return False, cats
+            cats_, _ = self.select(cats, False)
             cats = cats_
         elif option_id == 1:
             self.unlock_remove_cats_run(self.save_file, cats, self)

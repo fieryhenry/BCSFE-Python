@@ -70,6 +70,7 @@ class CatEditor:
             "select_cats_not_unlocked": self.get_non_unlocked_cats,
             "select_cats_not_obtainable": self.get_cats_unobtainable,
             "select_cats_non_gatya": self.get_non_gacha_cats,
+            "select_cats_game_version": self.select_cats_game_version,
         }
         if finish_option:
             options["finish"] = lambda: None
@@ -119,6 +120,78 @@ class CatEditor:
         if cat_ids is None:
             return None
         return self.save_file.cats.get_cats_by_ids(cat_ids)
+
+    def select_cats_game_version(self) -> list[core.Cat] | None:
+        unitbuy = core.UnitBuy(self.save_file)
+        if unitbuy.unit_buy is None:
+            return None
+
+        versions_set: set[int] = set()
+        for cat in unitbuy.unit_buy:
+            if cat.game_version == -1:
+                continue
+            versions_set.add(cat.game_version)
+
+        if not versions_set:
+            return None
+
+        versions = list(versions_set)
+        versions.sort()
+
+        color.ColoredText.localize("possible_gvs")
+
+        cur_major_v = -1
+        for version in versions:
+            gv = core.GameVersion(version)
+            major_v = gv.get_parts()[0]
+            if major_v != cur_major_v:
+                if cur_major_v != -1:
+                    print()
+                cur_major_v = major_v
+            else:
+                color.ColoredText(", ", end="")
+            color.ColoredText(f"<@t>{gv.format()}</>", end="")
+
+        print()
+
+        usr_input = dialog_creator.StringInput().get_input_locale("select_gv")
+        if usr_input is None:
+            return None
+        chunks = usr_input.split(" ")
+
+        versions_selected: list[int] = []
+        for chunk in chunks:
+            parts = chunk.split("-")
+            if len(parts) == 2:
+                min = parts[0]
+                max = parts[1]
+
+                v1 = core.GameVersion.from_string(min)
+                v2 = core.GameVersion.from_string(max)
+
+                for v in range(v1.game_version, v2.game_version + 1):
+                    versions_selected.append(v)
+            else:
+                v = core.GameVersion.from_string(chunk)
+                versions_selected.append(v.game_version)
+
+        valid_versions: set[int] = set()
+        for version in versions_selected:
+            if version in versions_set:
+                valid_versions.add(version)
+
+        if not valid_versions:
+            color.ColoredText.localize("no_valid_gvs_entered")
+
+        cats: list[core.Cat] = []
+        for cat in self.save_file.cats.cats:
+            row = unitbuy.get_unit_buy(cat.id)
+            if row is None:
+                continue
+            if row.game_version in valid_versions:
+                cats.append(cat)
+
+        return cats
 
     def select_rarity(self) -> list[core.Cat] | None:
         rarity_names = self.save_file.cats.get_rarity_names(self.save_file)

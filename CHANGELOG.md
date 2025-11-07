@@ -4,6 +4,8 @@
 
 ### Added
 
+- Feature to edit the cat storage
+
 - Feature to reset the golden cat cpu uses
 
 - Feature to clear enigma stages
@@ -15,6 +17,8 @@
 - Cats of the Cosmos Chapter 3 outbreaks
 
 - Features to push to root storage and rerun game
+
+- Option to select cats by the game version they were released in
 
 ### Fixed
 

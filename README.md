@@ -403,7 +403,6 @@ You'll need to collect the catfood in-game after each clear though
 If you want the latest features then you can install the editor from the github.
 
 1. Download git:
-
   1. Windows: [Git](https://git-scm.com/downloads)
   2. Linux: (use package manager, e.g `sudo apt-get install git` or `sudo pacman -S git`)
   3. Android: Termux: `pkg install git`

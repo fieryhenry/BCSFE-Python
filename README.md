@@ -69,7 +69,8 @@ python3 -m pip install bcsfe
 py -m ensurepip --upgrade
 ```
 
-Again change `py` for `python` or `python3` if needed
+Again change `py` for `python` or `python3` if needed. I won't mention this again, so just remember
+the one which works at keep using that.
 
 5. To run the editor, as long as Python is in your PATH, you should be able to run:
 
@@ -83,9 +84,19 @@ bcsfe
 py -m bcsfe
 ```
 
-Again change `py` for `python` or `python3` if needed.
-
 If you are using Windows and you are still struggling, try watching this video [here](https://codeberg.org/fieryhenry/videos/media/branch/main/bcsfe_windows_help.webm).
+
+7. To update the editor run:
+
+```powershell
+py -m pip install -U bcsfe
+```
+
+8. To uninstall the editor run:
+
+```powershell
+py -m pip uninstall bcsfe
+```
 
 ### Linux
 
@@ -115,6 +126,18 @@ bcsfe
 
 6. You may also need to install `tk` with your system package manager to open the
 file selection dialog. This package may be called `tk` or `python-tk` or `python3-tk`.
+
+7. To update the editor if you are using pipx run:
+
+```sh
+pipx upgrade bcsfe
+```
+
+8. To uninstall the editor if you are using pipx run:
+
+```sh
+pipx uninstall bcsfe
+```
 
 If anyone wants to put the editor on the AUR or another package repo, feel free, I'll be happy to
 help if needed.
@@ -178,14 +201,72 @@ selection dialog, you just have to type the file path manually.
 For example to save your save file to your downloads directory, the path might look something like
 `/storage/emulated/0/Download/SAVE_DATA` or `/sdcard/Download/SAVE_DATA`
 
+5. To update the editor run:
+
+```sh
+pip install -U bcsfe
+```
+
+Or
+
+```sh
+python -m pip install -U bcsfe
+```
+
+
+5. To uninstall the editor run:
+
+```sh
+pip uninstall bcsfe
+```
+
+Or
+
+```sh
+python -m pip uninstall bcsfe
+```
 
 ### iOS
 
-I do not have an iOS device, so there is no text tutorial, but Viarules has made a video
-tutorial [here](https://www.youtube.com/watch?v=xw-uOqQRYJ8). The video uses iSH which is
-apparently quite slow, and other people recommend using a-Shell instead.
+I do not have an iOS device, so there is no tutorial. The video that was recommended is now outdated.
+But for a general overview of what you need to do:
 
+1. Download a-Shell from the App Store
+2. Install the editor with:
 
+```sh
+pip install bcsfe
+```
+
+3. Run the editor with:
+
+```sh
+bcsfe
+```
+
+Or if that doesn't work try:
+
+```sh
+python -m bcsfe
+```
+
+Or 
+
+```sh
+python3 -m bcsfe
+```
+
+4. To update the editor run:
+
+```sh
+pip install -U bcsfe
+```
+
+5. To uninstall the editor run:
+
+```sh
+pip uninstall bcsfe
+```
 ## Terms of Use
 
 By using the editor you agree to the following:
@@ -321,7 +402,12 @@ You'll need to collect the catfood in-game after each clear though
 
 If you want the latest features then you can install the editor from the github.
 
-1. Download [Git](https://git-scm.com/downloads)
+1. Download git:
+
+  1. Windows: [Git](https://git-scm.com/downloads)
+  2. Linux: (use package manager, e.g `sudo apt-get install git` or `sudo pacman -S git`)
+  3. Android: Termux: `pkg install git`
+  4. iOS: a-Shell should already include it
 
 2. Run the following commands: (You may have to replace `py` with `python` or `python3`)
 

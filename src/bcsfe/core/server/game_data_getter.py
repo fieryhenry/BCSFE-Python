@@ -20,19 +20,40 @@ class GameDataGetter:
         self.real_cc = cc
         self.gv = gv
         self.cc = self.cc if not self.cc.is_lang() else self.real_cc
-        self.metadata = self.get_metadata()
-        if self.metadata is not None:
-            self.all_versions = self.get_versions(self.metadata)
-            self.url = self.metadata.get("base_url")
-        else:
-            self.all_versions = None
-            self.url = None
+        self.version, exact_match = self.find_gv(self.cc, gv)
 
-        if self.all_versions is None:
-            self.version = None
-            self.filepath = None
-        else:
+        self.all_versions = None
+        self.url = None
+        self.filepath = None
+
+        if exact_match:
+            return
+
+        self.metadata = self.get_metadata()
+        if self.metadata is None:
+            return
+        self.all_versions = self.get_versions(self.metadata)
+        self.url = self.metadata.get("base_url")
+        if self.all_versions is not None:
             self.version, self.filepath = self.get_version(self.all_versions, self.cc)
+
+    def find_gv(
+        self, cc: core.CountryCode, gv: core.GameVersion
+    ) -> tuple[str | None, bool]:
+        versions = GameDataGetter.get_all_downloaded_versions().get(cc.get_code())
+        if versions is None:
+            return None, False
+
+        versions_int = [
+            core.GameVersion.from_string(version).game_version for version in versions
+        ]
+
+        versions_int.sort()
+
+        for version in versions_int:
+            if version >= gv.game_version:
+                return core.GameVersion(version).to_string(), version == gv.game_version
+        return None, False
 
     def does_save_version_match(self, save_file: core.SaveFile) -> bool:
         if self.version is None:
@@ -51,9 +72,14 @@ class GameDataGetter:
         gv_string = self.gv.to_string()
         if gv_string not in cc_versions:
             cc_version_keys = list(cc_versions.keys())
-            cc_version_keys.sort(reverse=True)
-            # TODO: do closest version rather than always latest version
-            return cc_version_keys[0], cc_versions[cc_version_keys[0]]
+            cc_version_keys.sort()
+            for version in cc_version_keys:
+                if (
+                    core.GameVersion.from_string(version).game_version
+                    >= self.gv.game_version
+                ):
+                    return version, cc_versions[version]
+            return cc_version_keys[-1], cc_versions[cc_version_keys[-1]]
         return gv_string, cc_versions[gv_string]
 
     def get_metadata(self) -> dict[str, Any] | None:

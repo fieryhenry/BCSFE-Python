@@ -2,7 +2,6 @@ from __future__ import annotations
 import glob
 import os
 import shutil
-import typing
 
 from bcsfe import core
 import re
@@ -92,8 +91,8 @@ class Path:
         if not self.exists():
             try:
                 self.__make_dirs()
-            except OSError:
-                pass
+            except OSError as e:
+                print(e)
         return self
 
     def create(self) -> Path:

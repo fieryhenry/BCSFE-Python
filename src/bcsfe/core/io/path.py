@@ -87,12 +87,17 @@ class Path:
         path.generate_dirs()
         return path
 
+    def is_empty(self) -> bool:
+        return self.path == ""
+
     def generate_dirs(self: Path) -> Path:
+        if self.is_empty():
+            return self
         if not self.exists():
             try:
                 self.__make_dirs()
             except OSError as e:
-                print(e)
+                print(e, self)
         return self
 
     def create(self) -> Path:

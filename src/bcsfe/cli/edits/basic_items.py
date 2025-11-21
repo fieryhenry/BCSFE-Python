@@ -194,6 +194,10 @@ class BasicItems:
         save_file.battle_items.edit(save_file)
 
     @staticmethod
+    def edit_battle_items_endless(save_file: core.SaveFile):
+        save_file.battle_items.edit_endless_items(save_file)
+
+    @staticmethod
     def edit_catamins(save_file: core.SaveFile):
         names_o = core.core_data.get_gatya_item_names(save_file)
         items = core.core_data.get_gatya_item_buy(save_file).get_by_category(6)

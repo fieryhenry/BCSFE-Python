@@ -58,6 +58,7 @@ class FeatureHandler:
                 "np": edits.basic_items.BasicItems.edit_np,
                 "leadership": edits.basic_items.BasicItems.edit_leadership,
                 "battle_items": edits.basic_items.BasicItems.edit_battle_items,
+                "battle_items_endless": edits.basic_items.BasicItems.edit_battle_items_endless,
                 "catseyes": edits.basic_items.BasicItems.edit_catseyes,
                 "catfruit": edits.basic_items.BasicItems.edit_catfruit,
                 "talent_orbs": core.game.catbase.talent_orbs.SaveOrbs.edit_talent_orbs,

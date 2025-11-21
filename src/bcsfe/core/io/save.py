@@ -794,15 +794,7 @@ class SaveFile:
             assert self.data.read_int() == 100100
 
         if self.game_version >= 100300:
-            self.utl2: list[tuple[bool, bool, int, float, float]] = []
-            length = 6
-            for _ in range(length):
-                b1 = self.data.read_bool()
-                b2 = self.data.read_bool()
-                i1 = self.data.read_byte()
-                f1 = self.data.read_double()
-                f2 = self.data.read_double()
-                self.utl2.append((b1, b2, i1, f1, f2))
+            self.battle_items.read_endless_items(self.data)
 
             assert self.data.read_int() == 100300
 
@@ -1881,30 +1873,7 @@ class SaveFile:
             self.data.write_int(100100)
 
         if self.game_version >= 100300:
-            for i in range(6):
-                try:
-                    item = self.utl2[i]
-                except IndexError:
-                    item = (False, False, 0, 0.0, 0.0)
-
-                tuple_len = len(item)
-                b1, b2, i1, f1, f2 = False, False, 0, 0.0, 0.0
-                if tuple_len >= 1:
-                    b1 = item[0]
-                if tuple_len >= 2:
-                    b2 = item[1]
-                if tuple_len >= 3:
-                    i1 = item[2]
-                if tuple_len >= 4:
-                    f1 = item[3]
-                if tuple_len >= 5:
-                    f2 = item[4]
-
-                self.data.write_bool(b1)
-                self.data.write_bool(b2)
-                self.data.write_byte(i1)
-                self.data.write_double(f1)
-                self.data.write_double(f2)
+            self.battle_items.write_endless_items(self.data)
 
             self.data.write_int(100300)
 
@@ -2504,7 +2473,6 @@ class SaveFile:
             "ud8": self.ud8,
             "ud9": self.ud9,
             "date_int": self.date_int,
-            "utl2": self.utl2,
             "event_capsules_2": self.event_capsules_2,
             "two_battle_lines": self.two_battle_lines,
             "ud10": self.ud10,
@@ -2884,7 +2852,6 @@ class SaveFile:
         save_file.ud8 = data.get("ud8", 0.0)
         save_file.ud9 = data.get("ud9", 0.0)
         save_file.date_int = data.get("date_int", 0)
-        save_file.utl2 = data.get("utl2", [(False, False, 0, 0.0, 0.0)] * 6)
         save_file.event_capsules_2 = data.get("event_capsules_2", [])
         save_file.two_battle_lines = data.get("two_battle_lines", False)
         save_file.ud10 = data.get("ud10", 0.0)
@@ -3205,7 +3172,6 @@ class SaveFile:
         self.ushl6 = []
 
         self.utl1 = []
-        self.utl2 = [(False, False, 0, 0.0, 0.0)] * 6
         self.utl3 = []
         self.utl4 = []
 

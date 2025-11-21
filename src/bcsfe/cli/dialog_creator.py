@@ -588,9 +588,7 @@ class SingleEditor:
         self.signed = signed
 
     def edit(self, escape_text: bool = True) -> int:
-        max_value = self.max_value
-        if max_value is None:
-            max_value = IntInput.get_max_value(max_value, self.signed)
+        max_value = IntInput.get_max_value(self.max_value, self.signed)
         if self.max_value is None:
             dialog = "input_non_max"
         elif self.min_value != 0:

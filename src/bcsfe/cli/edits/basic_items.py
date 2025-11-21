@@ -165,6 +165,8 @@ class BasicItems:
             core.core_data.max_value_manager.get("platinum_tickets")
             - platinum_ticket_amount
         ) * 10 + 9
+
+        max_value = max(0, max_value)
         save_file.platinum_shards = dialog_creator.SingleEditor(
             BasicItems.get_name(name, "platinum_shards"),
             save_file.platinum_shards,

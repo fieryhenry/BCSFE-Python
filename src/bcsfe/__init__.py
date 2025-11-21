@@ -1,4 +1,4 @@
-__version__ = "3.2.0b3"
+__version__ = "3.2.0"
 
 from bcsfe import core, cli
 

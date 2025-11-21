@@ -150,7 +150,7 @@ class ListOutput:
     def __init__(
         self,
         strings: list[str],
-        ints: list[int],
+        ints: list[int] | list[str],
         dialog: str | None = None,
         perameters: dict[str, Any] | None = None,
         start_index: int = 1,
@@ -210,7 +210,7 @@ class ChoiceInput:
         self,
         items: list[str],
         strings: list[str],
-        ints: list[int],
+        ints: list[int] | list[str],
         perameters: dict[str, int | str],
         dialog: str,
         single_choice: bool = False,
@@ -233,7 +233,7 @@ class ChoiceInput:
     @staticmethod
     def from_reduced(
         items: list[str],
-        ints: list[int] | None = None,
+        ints: list[int] | list[str] | None = None,
         perameters: dict[str, int | str] | None = None,
         dialog: str | None = None,
         single_choice: bool = False,
@@ -482,7 +482,7 @@ class MultiEditor:
         choices, all_at_once = ChoiceInput(
             self.items,
             self.strings,
-            self.ints or [],
+            self.ints or [],  # type: ignore
             self.perameters,
             "select_edit",
         ).get()

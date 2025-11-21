@@ -253,7 +253,7 @@ class BasicItems:
         if items is None:
             return
         names: list[str] = []
-        for item in items:
+        for item in items[: len(save_file.treasure_chests)]:
             name = names_o.get_name(item.id)
             if name is None:
                 name = core.core_data.local_manager.get_key(

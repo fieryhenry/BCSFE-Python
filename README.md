@@ -269,13 +269,16 @@ pip uninstall bcsfe
 ```
 ## Terms of Use
 
+I don't like that I have to have Terms of use but these terms are designed to prevent scams and the
+exploitation of users.
+
 By using the editor you agree to the following:
 
 If you are using the editor to run a paid service that profits off of the editor
 (e.g a service to provide people with hacked accounts, or a paid discord bot to edit people's accounts,
 etc) you must make it very clear that you are using this save editor.
 
-This should be done by linking this GitHub page, and explicitly stating that the tool you are
+This should be done by linking this Codeberg page, and explicitly stating that the tool you are
 using is available for free and that they don't need to use your service to hack their account.
 
 This information needs to be visible and something the customer agrees to **before** any payment is made.
@@ -288,8 +291,6 @@ Free services / derivative works (such as a third party discord bot or editor gu
 the editor under the hood as long as you abide by the [License](#license). Basically if you are
 distributing a program which uses the editor, you need to license your own program under the GPL
 or a compatible license (basically make it open source / free software too).
-
-These terms are designed to prevent scams and the exploitation of users.
 
 Also if you **are** profiting from the editor, it would be greatly appreciated if you could
 give back something and support me.
@@ -400,13 +401,13 @@ You'll need to collect the catfood in-game after each clear though
 
 ### Install from source
 
-If you want the latest features then you can install the editor from the github.
+If you want the latest features then you can install the editor from the git repo.
 
 1. Download git:
-    1. Windows: [Git](https://git-scm.com/downloads)
-    2. Linux: (use package manager, e.g `sudo apt-get install git` or `sudo pacman -S git`)
-    3. Android: Termux: `pkg install git`
-    4. iOS: a-Shell should already include it
+    - Windows: [Git](https://git-scm.com/downloads)
+    - Linux: (use package manager, e.g `sudo apt-get install git` or `sudo pacman -S git`)
+    - Android: Termux: `pkg install git`
+    - iOS: a-Shell should already include it
 
 2. Run the following commands: (You may have to replace `py` with `python` or `python3`)
 

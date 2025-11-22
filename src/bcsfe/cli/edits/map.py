@@ -12,6 +12,12 @@ ChaptersType = Union[
 ]
 
 
+def get_total_maps(chapters: ChaptersType) -> int:
+    if isinstance(chapters, core.EventChapters):
+        return chapters.get_lengths()[1]
+    return len(chapters.chapters)
+
+
 def unclear_stage(
     chapters: ChaptersType,
     map: int,
@@ -98,7 +104,11 @@ def edit_chapters(
     map_names = core.MapNames(
         save_file, letter_code, no_r_prefix=no_r_prefix, base_index=base_index
     )
-    names = map_names.map_names
+    names: dict[int, str | None] = {}
+    for id, name in map_names.map_names.items():
+        if id >= get_total_maps(chapters):
+            continue
+        names[id] = name
 
     choice = dialog_creator.ChoiceInput.from_reduced(
         ["clear_stages", "unclear_stages"],

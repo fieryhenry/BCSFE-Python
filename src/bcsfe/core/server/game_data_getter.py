@@ -328,4 +328,5 @@ class GameDataGetter:
                 pack_name=packname,
                 country_code=self.cc.get_code(),
                 version=self.version,
+                url=self.url,
             )

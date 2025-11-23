@@ -362,10 +362,10 @@ class LegendQuestChapters:
     @staticmethod
     def edit_legend_quest(save_file: core.SaveFile):
         legend_quest = save_file.legend_quest
-        legend_quest.edit_chapters(save_file, "D")
+        legend_quest.edit_chapters(save_file, "D", base_index=16000)
 
-    def edit_chapters(self, save_file: core.SaveFile, letter_code: str):
-        edits.map.edit_chapters(save_file, self, letter_code)
+    def edit_chapters(self, save_file: core.SaveFile, letter_code: str, base_index: int | None = None):
+        edits.map.edit_chapters(save_file, self, letter_code, base_index=base_index)
 
     def unclear_rest(self, stages: list[int], stars: int, id: int):
         if not stages:

@@ -45,7 +45,7 @@ class UncannyChapters:
     @staticmethod
     def edit_uncanny(save_file: core.SaveFile):
         uncanny = save_file.uncanny
-        uncanny.chapters.edit_chapters(save_file, "NA")
+        uncanny.chapters.edit_chapters(save_file, "NA", 13000)
 
     @staticmethod
     def edit_catamin_stages(save_file: core.SaveFile):
@@ -96,7 +96,7 @@ class UncannyChapters:
 
         elif choice == 2:
             completed_chapters = save_file.catamin_stages.chapters.edit_chapters(
-                save_file, "B"
+                save_file, "B", 14000
             )
             if completed_chapters is None:
                 return None

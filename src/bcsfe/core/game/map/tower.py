@@ -65,4 +65,4 @@ class TowerChapters:
     @staticmethod
     def edit_towers(save_file: core.SaveFile):
         towers = save_file.tower
-        towers.chapters.edit_chapters(save_file, "V")
+        towers.chapters.edit_chapters(save_file, "V", 7000)

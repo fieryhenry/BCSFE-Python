@@ -779,15 +779,15 @@ class EventChapters:
 
     @staticmethod
     def edit_sol_chapters(save_file: core.SaveFile):
-        EventChapters.edit_chapters(save_file, 0, "N")
+        EventChapters.edit_chapters(save_file, 0, "N", 0)
 
     @staticmethod
     def edit_event_chapters(save_file: core.SaveFile):
-        EventChapters.edit_chapters(save_file, 1, "S")
+        EventChapters.edit_chapters(save_file, 1, "S", 1000)
 
     @staticmethod
     def edit_collab_chapters(save_file: core.SaveFile):
-        EventChapters.edit_chapters(save_file, 2, "C")
+        EventChapters.edit_chapters(save_file, 2, "C", 2000)
 
     @staticmethod
     def select_map_names(names_dict: dict[int, str | None]) -> list[int] | None:
@@ -882,8 +882,8 @@ class EventChapters:
         color.ColoredText.localize("current_sol_chapter", name=name, id=id)
 
     @staticmethod
-    def edit_chapters(save_file: core.SaveFile, type: int, letter_code: str):
-        edits.map.edit_chapters(save_file, save_file.event_stages, letter_code, type)
+    def edit_chapters(save_file: core.SaveFile, type: int, letter_code: str, base_index: int | None = None):
+        edits.map.edit_chapters(save_file, save_file.event_stages, letter_code, type, base_index=base_index)
 
     def unclear_rest(
         self,

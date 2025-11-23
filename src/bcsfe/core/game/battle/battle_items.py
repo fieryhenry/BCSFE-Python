@@ -272,6 +272,9 @@ class BattleItems:
                     val = float(val)
                 except ValueError:
                     return
+
+            for item in self.items:
+                item.endless_item.set_duration_mins(val, 0)
         else:
             for opt in options:
                 val = dialog_creator.StringInput().get_input_locale_while(

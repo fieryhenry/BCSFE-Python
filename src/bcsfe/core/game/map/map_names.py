@@ -82,12 +82,15 @@ class MapNames:
         names: dict[int, str | None] = {}
         for row in csv:
             id = row[0].to_int()
-            name = row[1].to_str()
+            name = row[1].to_str().strip()
 
             for i in range(total_stages):
                 index = i + base_index
                 if id == index:
-                    names[i] = name
+                    if name:
+                        names[i] = name
+                    else:
+                        names[i] = None
                     break
 
         return names

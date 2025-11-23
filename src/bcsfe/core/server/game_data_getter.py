@@ -141,6 +141,8 @@ class GameDataGetter:
 
         archive.extractall(outdir.path)
 
+        outdir.add("downloaded").write(core.Data())
+
         return True
 
     def get_version_path(self) -> core.Path | None:
@@ -150,11 +152,11 @@ class GameDataGetter:
             GameDataGetter.get_game_data_dir().add(self.cc.get_code()).add(self.version)
         ).generate_dirs()
 
-    def is_missing(self) -> bool:
+    def has_downloaded(self) -> bool:
         path = self.get_version_path()
         if path is None:
             return False
-        return len(path.add("DataLocal").get_files()) != 0
+        return path.add("downloaded").exists()
 
     def get_file(self, pack_name: str, file_name: str) -> core.Data | bool:
         path = self.get_file_path(pack_name, file_name)
@@ -164,7 +166,7 @@ class GameDataGetter:
         if path.exists():
             return path.read()
         else:
-            if self.is_missing():
+            if self.has_downloaded():
                 return True
             if self.download_version_data() is None:
                 return False
@@ -175,7 +177,7 @@ class GameDataGetter:
 
             if path.exists():
                 return path.read()
-            return self.is_missing()
+            return self.has_downloaded()
 
     def save_file(self, pack_name: str, file_name: str) -> core.Data | bool:
         pack_name = self.get_packname(pack_name)
@@ -243,7 +245,7 @@ class GameDataGetter:
                 self.print_no_file(pack_name, file_name)
             return None
 
-        if display_text and not self.is_missing():
+        if display_text and not self.has_downloaded():
             color.ColoredText.localize(
                 "downloading",
                 file_name=file_name,

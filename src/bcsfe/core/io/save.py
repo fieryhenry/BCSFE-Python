@@ -617,7 +617,7 @@ class SaveFile:
             assert self.data.read_int() == 80300
 
         if self.game_version >= 80500:
-            self.uil5 = self.data.read_int_list()
+            self.stage_ids_10s = self.data.read_int_list()
 
             assert self.data.read_int() == 80500
 
@@ -1709,7 +1709,7 @@ class SaveFile:
             self.data.write_int(80300)
 
         if self.game_version >= 80500:
-            self.data.write_int_list(self.uil5)
+            self.data.write_int_list(self.stage_ids_10s)
             self.data.write_int(80500)
 
         if self.game_version >= 80600:
@@ -2422,7 +2422,7 @@ class SaveFile:
             "leadership": self.leadership,
             "filibuster_stage_id": self.filibuster_stage_id,
             "filibuster_stage_enabled": self.filibuster_stage_enabled,
-            "uil5": self.uil5,
+            "stage_ids_10s": self.stage_ids_10s,
             "uil6": self.uil6,
             "legend_quest": self.legend_quest.serialize(),
             "ush1": self.ush1,
@@ -2789,7 +2789,7 @@ class SaveFile:
         save_file.leadership = data.get("leadership", 0)
         save_file.filibuster_stage_id = data.get("filibuster_stage_id", 0)
         save_file.filibuster_stage_enabled = data.get("filibuster_stage_enabled", False)
-        save_file.uil5 = data.get("uil5", [])
+        save_file.stage_ids_10s = data.get("stage_ids_10s", [])
         save_file.uil6 = data.get("uil6", [])
         save_file.legend_quest = core.LegendQuestChapters.deserialize(
             data.get("legend_quest", {})
@@ -3140,7 +3140,7 @@ class SaveFile:
         self.uil2 = [0] * 7
         self.uil3 = [0] * 7
         self.uil4 = [0] * 7
-        self.uil5 = []
+        self.stage_ids_10s = []
         self.uil6 = []
         self.uil7 = []
         self.event_capsules_2 = []

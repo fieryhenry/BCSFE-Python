@@ -69,15 +69,52 @@ def unclear_rest(
         chapters.unclear_rest(stages, stars, id)
 
 
-def get_total_stars(chapters: ChaptersType, id: int, type: int | None = None):
+def get_total_stars(
+    map_option: core.MapOption,
+    base_index: int,
+    chapters: ChaptersType,
+    id: int,
+    type: int | None = None,
+) -> int:
+
+    max_stars = get_max_stars(chapters, id, type)
+
+    map_option_stars = map_option.get_map(base_index + id)
+    if map_option_stars is not None:
+        return min(max_stars, map_option_stars.crown_count)
+    return max_stars
+
+
+def get_max_max_stars(
+    map_option: core.MapOption,
+    base_index: int,
+    ids: list[int],
+    chapters: ChaptersType,
+    type: int | None = None,
+) -> int:
+    m = 0
+    for id in ids:
+        val = get_total_stars(map_option, base_index, chapters, id, type)
+        if val > m:
+            m = val
+
+    return m
+
+
+def get_max_stars(
+    chapters: ChaptersType,
+    id: int,
+    type: int | None = None,
+) -> int:
+
     if isinstance(chapters, core.EventChapters):
         if type is None:
             raise ValueError("Type must be specified for EventChapters!")
-        total_stars = chapters.get_total_stars(type, id)
+        max_stars = chapters.get_total_stars(type, id)
     else:
-        total_stars = chapters.get_total_stars(id)
+        max_stars = chapters.get_total_stars(id)
 
-    return total_stars
+    return max_stars
 
 
 def get_total_stages(
@@ -143,12 +180,19 @@ def edit_chapters(
         return None
     clear_type_choice -= 1
 
-    if len(map_choices) > 1:
+    map_option = core.MapOption.from_save(save_file)
+    if map_option is None:
+        return None
+
+    if (
+        len(map_choices) > 1
+        and get_max_max_stars(map_option, base_index, map_choices, chapters, type) > 1
+    ):
         stars_type_choice = dialog_creator.YesNoInput().get_input_once(
             "custom_star_count_per_chapter_yn"
         )
     else:
-        stars_type_choice = False
+        stars_type_choice = True
 
     if stars_type_choice is None:
         return None
@@ -183,12 +227,14 @@ def edit_chapters(
             if clear_amount is None:
                 return None
 
+    stars_max = 0
+
     if not stars_type_choice:
-        stars = core.EventChapters.ask_stars(
-            get_total_stars(chapters, 0, type),
+        stars_max = core.EventChapters.ask_stars(
+            get_max_max_stars(map_option, base_index, map_choices, chapters, type),
             prompt=star_prompt,
         )
-        if stars is None:
+        if stars_max is None:
             return None
     else:
         stars = 0
@@ -211,13 +257,21 @@ def edit_chapters(
         else:
             chapters.set_total_stages(id, total_stages)
 
-        color.ColoredText.localize("current_sol_chapter", name=map_name, id=id)
+        total_stars = get_total_stars(map_option, base_index, chapters, id, type)
+        if total_stars > 1 or clear_amount_type == 0:
+            color.ColoredText.localize("current_sol_chapter", name=map_name, id=id)
         if stars_type_choice:
             stars = core.EventChapters.ask_stars(
-                get_total_stars(chapters, id, type), prompt=star_prompt
+                total_stars,
+                prompt=star_prompt,
             )
             if stars is None:
                 return None
+        else:
+            stars = stars_max
+            val = map_option.get_map(base_index + id)
+            if val is not None:
+                stars = min(stars, val.crown_count)
         if clear_type_choice:
             stages = core.EventChapters.ask_stages(map_names, id)
             if stages is None:
@@ -232,7 +286,7 @@ def edit_chapters(
 
         if not clear:
             start = stars - 1
-            end = get_total_stars(chapters, id, type)
+            end = get_total_stars(map_option, base_index, chapters, id, type)
         else:
             start = 0
             end = stars

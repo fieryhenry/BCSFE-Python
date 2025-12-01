@@ -355,9 +355,11 @@ class Chapters:
                 self.chapters[id].chapters[star].clear_progress = 0
 
     def edit_chapters(
-        self, save_file: core.SaveFile, letter_code: str, base_index: int | None = None
+        self, save_file: core.SaveFile, letter_code: str, base_index: int
     ) -> dict[int, bool] | None:
-        return edits.map.edit_chapters(save_file, self, letter_code, base_index=base_index)
+        return edits.map.edit_chapters(
+            save_file, self, letter_code, base_index=base_index
+        )
 
     def set_total_stages(self, map: int, total_stages: int):
         for chapter in self.chapters[map].chapters:

@@ -338,7 +338,9 @@ class GauntletChapters:
     def edit_enigma_stages(save_file: core.SaveFile):
         save_file.enigma_clears.edit_chapters(save_file, "H", 25000)
 
-    def edit_chapters(self, save_file: core.SaveFile, letter_code: str, base_index: int | None = None):
+    def edit_chapters(
+        self, save_file: core.SaveFile, letter_code: str, base_index: int
+    ):
         edits.map.edit_chapters(save_file, self, letter_code, base_index=base_index)
 
     def unclear_rest(self, stages: list[int], stars: int, id: int):

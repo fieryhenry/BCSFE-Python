@@ -882,8 +882,16 @@ class EventChapters:
         color.ColoredText.localize("current_sol_chapter", name=name, id=id)
 
     @staticmethod
-    def edit_chapters(save_file: core.SaveFile, type: int, letter_code: str, base_index: int | None = None):
-        edits.map.edit_chapters(save_file, save_file.event_stages, letter_code, type, base_index=base_index)
+    def edit_chapters(
+        save_file: core.SaveFile, type: int, letter_code: str, base_index: int
+    ):
+        edits.map.edit_chapters(
+            save_file,
+            save_file.event_stages,
+            letter_code,
+            type=type,
+            base_index=base_index,
+        )
 
     def unclear_rest(
         self,

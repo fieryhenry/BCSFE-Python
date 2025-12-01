@@ -17,6 +17,7 @@ from bcsfe.core.game.map import (
     zero_legends,
     chapters,
     map_names,
+    map_option,
 )
 
 __all__ = [
@@ -38,4 +39,5 @@ __all__ = [
     "zero_legends",
     "chapters",
     "map_names",
+    "map_option",
 ]

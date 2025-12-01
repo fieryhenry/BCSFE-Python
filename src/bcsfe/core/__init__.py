@@ -124,6 +124,7 @@ from bcsfe.core.game.map.tower import TowerChapters
 from bcsfe.core.game.map.uncanny import UncannyChapters
 from bcsfe.core.game.map.zero_legends import ZeroLegendsChapters
 from bcsfe.core.game.map.map_names import MapNames
+from bcsfe.core.game.map.map_option import MapOption
 from bcsfe.core.game_version import GameVersion
 from bcsfe.core.io.adb_handler import AdbHandler, AdbNotInstalled
 from bcsfe.core.io.waydroid import WayDroidHandler
@@ -390,4 +391,5 @@ __all__ = [
     "StorageItem",
     "OfficerPass",
     "LocalManager",
+    "MapOption",
 ]

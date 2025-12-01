@@ -34,9 +34,7 @@ class CatShrine:
         shrine_gone = stream.read_bool()
         flags = stream.read_byte_list(length=stream.read_byte())
         xp_offering = stream.read_long()
-        return CatShrine(
-            unknown, stamp_1, stamp_2, shrine_gone, flags, xp_offering
-        )
+        return CatShrine(unknown, stamp_1, stamp_2, shrine_gone, flags, xp_offering)
 
     def write(self, stream: core.Data):
         stream.write_bool(self.unknown)
@@ -96,7 +94,12 @@ class CatShrine:
     @staticmethod
     def edit_catshrine(save_file: core.SaveFile):
         shrine = save_file.cat_shrine
-        options = ["shrine_level", "shrine_xp"]
+        options = [
+            "shrine_level",
+            "shrine_xp",
+            "make_catshrine_appear",
+            "make_catshrine_disappear",
+        ]
         choice = dialog_creator.ChoiceInput.from_reduced(
             options, dialog="cat_shrine_choice_dialog", single_choice=True
         ).single_choice()
@@ -104,14 +107,21 @@ class CatShrine:
             return
         choice -= 1
 
+        if choice == 2:
+            shrine.shrine_gone = False
+            color.ColoredText.localize("cat_shrine_edited")
+            return
+        elif choice == 3:
+            shrine.shrine_gone = True
+            color.ColoredText.localize("cat_shrine_edited")
+            return
+
         data = core.core_data.get_cat_shrine_levels(save_file)
 
         xp = shrine.xp_offering
         level = data.get_level_from_xp(xp)
 
-        color.ColoredText.localize(
-            "current_shrine_xp_level", level=level, xp=xp
-        )
+        color.ColoredText.localize("current_shrine_xp_level", level=level, xp=xp)
 
         if choice == 0:
             max_level = data.get_max_level()
@@ -119,9 +129,7 @@ class CatShrine:
                 return
             level = dialog_creator.IntInput(
                 min=1, max=max_level
-            ).get_input_locale_while(
-                "shrine_level_dialog", {"max_level": max_level}
-            )
+            ).get_input_locale_while("shrine_level_dialog", {"max_level": max_level})
             if level is None:
                 return
             shrine.xp_offering = data.get_xp_from_level(level)
@@ -129,9 +137,9 @@ class CatShrine:
             max_xp = data.get_max_xp()
             if max_xp is None:
                 return
-            xp = dialog_creator.IntInput(
-                min=0, max=max_xp
-            ).get_input_locale_while("shrine_xp_dialog", {"max_xp": max_xp})
+            xp = dialog_creator.IntInput(min=0, max=max_xp).get_input_locale_while(
+                "shrine_xp_dialog", {"max_xp": max_xp}
+            )
             if xp is None:
                 return
             shrine.xp_offering = xp
@@ -148,9 +156,7 @@ class CatShrine:
         shrine.stamp_1 = 0.0
         shrine.stamp_2 = 0.0
 
-        color.ColoredText.localize(
-            "current_shrine_xp_level", level=level, xp=xp
-        )
+        color.ColoredText.localize("current_shrine_xp_level", level=level, xp=xp)
 
         color.ColoredText.localize("cat_shrine_edited")
 

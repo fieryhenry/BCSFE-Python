@@ -726,6 +726,8 @@ class EventChapters:
     def ask_stars(
         max_stars: int, prompt: str = "custom_star_count_per_chapter"
     ) -> int | None:
+        if max_stars <= 1:
+            return max_stars
         stars = dialog_creator.IntInput(min=0, max=max_stars).get_basic_input_locale(
             prompt, {"max": max_stars}
         )

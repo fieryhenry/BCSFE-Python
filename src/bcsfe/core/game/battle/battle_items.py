@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 import datetime
-from math import inf
+from math import inf, isnan
+import math
 from typing import Any
 from bcsfe import core
 from bcsfe.cli import dialog_creator, color
@@ -62,6 +63,8 @@ class EndlessItem:
             return datetime.timedelta()
 
         if self.end == inf:
+            return None
+        if math.isnan(self.end) or math.isnan(self.start):
             return None
 
         return datetime.timedelta(

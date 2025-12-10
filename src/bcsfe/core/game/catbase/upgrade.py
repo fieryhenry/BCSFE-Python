@@ -179,8 +179,14 @@ class Upgrade:
             plus_int = (min_plus + max_plus) // 2
 
         upgrade = Upgrade(plus_int, base_int)
-        upgrade.base_range = (min_base or base_int, max_base or base_int)
-        upgrade.plus_range = (min_plus or plus_int, max_plus or plus_int)
+        upgrade.base_range = (
+            max(0, min(min_base or base_int, max_pos_base)),
+            max(0, min(max_base or base_int, max_pos_base)),
+        )
+        upgrade.plus_range = (
+            max(0, min(min_plus or plus_int, max_pos_plus)),
+            max(0, min(max_plus or plus_int, max_pos_plus)),
+        )
         return upgrade, False
 
     def copy(self) -> Upgrade:

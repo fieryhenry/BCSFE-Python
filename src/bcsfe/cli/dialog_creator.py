@@ -72,19 +72,20 @@ class IntInput:
         min: int = 0,
         default: int | None = None,
         signed: bool = True,
+        bit_count: int = 32,
     ):
         self.signed = signed
-        self.max = self.get_max_value(max, signed)
+        self.bit_count = bit_count
+        self.max = self.get_max_value(max, signed, bit_count)
         self.min = min
         self.default = default
 
     @staticmethod
-    def get_max_value(max: int | None, signed: bool = True) -> int:
+    def get_max_value(max: int | None, signed: bool = True, bit_count: int = 32) -> int:
         disable_maxes = core.core_data.config.get_bool(core.ConfigKey.DISABLE_MAXES)
         if signed:
-            max_int = 2**31 - 1
-        else:
-            max_int = 2**32 - 1
+            bit_count -= 1
+        max_int = (2**bit_count) - 1
         if disable_maxes or max is None:
             return max_int
         return min(max, max_int)
@@ -417,10 +418,12 @@ class MultiEditor:
         signed: bool = True,
         group_name_localized: bool = False,
         cumulative_max: bool = False,
+        bit_count: int = 32,
     ):
         self.items = items
         self.strings = strings
         self.ints = ints
+        self.bit_count = bit_count
         if self.ints is not None:
             total_ints = len(self.ints)
         else:
@@ -502,7 +505,9 @@ class MultiEditor:
             else:
                 max_value = self.max_values[choice]
             if max_value is None:
-                max_value = IntInput.get_max_value(max_value, self.signed)
+                max_value = IntInput.get_max_value(
+                    max_value, self.signed, self.bit_count
+                )
             max_max_value = max(max_max_value, max_value)
         if self.cumulative_max:
             max_max_value = max_max_value // len(choices)
@@ -522,7 +527,7 @@ class MultiEditor:
                 max_value = None
             else:
                 max_value = self.max_values[choice]
-            max_value = IntInput.get_max_value(max_value, self.signed)
+            max_value = IntInput.get_max_value(max_value, self.signed, self.bit_count)
             value = min(usr_input, max_value)
             ints[choice] = value
             if self.ints is not None:
@@ -543,7 +548,9 @@ class MultiEditor:
             else:
                 max_value = self.max_values[choice]
             if max_value is None:
-                max_value = IntInput.get_max_value(max_value, self.signed)
+                max_value = IntInput.get_max_value(
+                    max_value, self.signed, self.bit_count
+                )
 
             if self.cumulative_max:
                 max_value -= sum(ints) - ints[choice]
@@ -576,6 +583,7 @@ class SingleEditor:
         signed: bool = True,
         localized_item: bool = False,
         remove_alias: bool = False,
+        bit_count: int = 32,
     ):
         if localized_item:
             item = core.core_data.local_manager.get_key(item)
@@ -586,9 +594,10 @@ class SingleEditor:
         self.max_value = max_value
         self.min_value = min_value
         self.signed = signed
+        self.bit_count = bit_count
 
     def edit(self, escape_text: bool = True) -> int:
-        max_value = IntInput.get_max_value(self.max_value, self.signed)
+        max_value = IntInput.get_max_value(self.max_value, self.signed, self.bit_count)
         if self.max_value is None:
             dialog = "input_non_max"
         elif self.min_value != 0:
@@ -596,7 +605,11 @@ class SingleEditor:
         else:
             dialog = "input"
         usr_input = IntInput(
-            max_value, self.min_value, default=self.value, signed=self.signed
+            max_value,
+            self.min_value,
+            default=self.value,
+            signed=self.signed,
+            bit_count=self.bit_count,
         ).get_input_locale_while(
             dialog,
             {

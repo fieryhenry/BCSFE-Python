@@ -586,7 +586,7 @@ class SaveManagement:
         )
         try:
             gv = core.GameVersion.from_string(
-                color.ColoredInput().localize("game_version_dialog")
+                color.ColoredInput().localize("game_version_dialog").strip()
             )
         except ValueError:
             color.ColoredText.localize("invalid_game_version")

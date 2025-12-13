@@ -206,7 +206,7 @@ class FeatureHandler:
             features.insert(0, "go_back")
         self.display_features(features)
         print()
-        usr_input = color.ColoredInput().localize("select_features")
+        usr_input = color.ColoredInput().localize("select_features").strip()
         selected_features: list[str] = []
         if usr_input.isdigit():
             usr_input = int(usr_input)

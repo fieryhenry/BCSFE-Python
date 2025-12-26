@@ -3,6 +3,7 @@ import enum
 from typing import Any
 from bcsfe import core
 from bcsfe.cli import color, dialog_creator
+import requests
 
 
 class ConfigKey(enum.Enum):
@@ -231,6 +232,20 @@ class Config:
             "game_data_repo_dialog", {}
         )
         if value is None:
+            return
+        color.ColoredText.localize("validating_game_repo")
+        try:
+            resp = core.RequestHandler(value).get()
+        except requests.exceptions.MissingSchema:
+            color.ColoredText.localize("invalid_url")
+            return
+        if resp is None:
+            color.ColoredText.localize("no_internet_or_connection_error")
+            return
+        if resp.status_code != 200:
+            color.ColoredText.localize(
+                "invalid_response", response_code=resp.status_code
+            )
             return
         self.set(ConfigKey.GAME_DATA_REPO, value)
         color.ColoredText.localize(

@@ -89,7 +89,11 @@ from bcsfe.core.game.catbase.talent_orbs import (
     SaveOrb,
     SaveOrbs,
 )
-from bcsfe.core.game.catbase.unlock_popups import UnlockPopups
+from bcsfe.core.game.catbase.unlock_popups import (
+    UnlockPopups,
+    UnlockPopupData,
+    UnlockPopupLine,
+)
 from bcsfe.core.game.catbase.upgrade import Upgrade
 from bcsfe.core.game.catbase.user_rank_rewards import (
     UserRankRewards,
@@ -392,4 +396,7 @@ __all__ = [
     "OfficerPass",
     "LocalManager",
     "MapOption",
+    "CantDetectSaveCCError",
+    "UnlockPopupData",
+    "UnlockPopupLine",
 ]

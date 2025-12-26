@@ -57,7 +57,7 @@ class UncannyChapters:
             return None
 
         if choice == 1:
-            names = core.MapNames(save_file, "B")
+            names = core.MapNames(save_file, "B", base_index=14000)
             map_ids = core.EventChapters.select_map_names(names.map_names)
             if map_ids is None:
                 return None

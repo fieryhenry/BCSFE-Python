@@ -452,7 +452,8 @@ class StoryChapters:
     @staticmethod
     def ask_clear_count() -> int | None:
         clear_count = dialog_creator.IntInput(
-            min=0, max=core.core_data.max_value_manager.get("stage_clear_count")
+            min=0,
+            max=core.core_data.max_value_manager.get("stage_clear_count"),
         ).get_input_locale_while("edit_stage_clear_count", {})
 
         return clear_count

@@ -41,16 +41,23 @@ def clear_stage(
     clear_amount: int = 1,
     overwrite_clear_progress: bool = False,
     type: int | None = None,
+    ensure_cleared_only: bool = False,
 ) -> bool:
     if isinstance(chapters, core.EventChapters):
         if type is None:
             raise ValueError("Type must be specified for EventChapters!")
+
         return chapters.clear_stage(
             type, map, star, stage, clear_amount, overwrite_clear_progress
         )
     else:
         return chapters.clear_stage(
-            map, star, stage, clear_amount, overwrite_clear_progress
+            map,
+            star,
+            stage,
+            clear_amount,
+            overwrite_clear_progress,
+            ensure_cleared_only=ensure_cleared_only,
         )
 
 
@@ -130,14 +137,13 @@ def get_total_stages(
     return total_stars
 
 
-def edit_chapters(
+def select_maps(
     save_file: core.SaveFile,
     chapters: ChaptersType,
     letter_code: str,
     base_index: int,
-    type: int | None = None,
     no_r_prefix: bool = False,
-) -> dict[int, bool] | None:
+) -> list[int] | None:
     map_names = core.MapNames(
         save_file, letter_code, no_r_prefix=no_r_prefix, base_index=base_index
     )
@@ -147,183 +153,392 @@ def edit_chapters(
             continue
         names[id] = name
 
-    choice = dialog_creator.ChoiceInput.from_reduced(
-        ["clear_stages", "unclear_stages"],
-        dialog="clear_unclear_q",
-        single_choice=True,
-    ).single_choice()
-    if choice is None:
+    return core.EventChapters.select_map_names(names)
+
+
+def select_maps_stars(
+    save_file: core.SaveFile,
+    map_option: core.MapOption,
+    chapters: ChaptersType,
+    letter_code: str,
+    base_index: int,
+    type: int | None = None,
+    no_r_prefix: bool = False,
+) -> list[tuple[int, int]] | None:
+    map_names = core.MapNames(
+        save_file, letter_code, no_r_prefix=no_r_prefix, base_index=base_index
+    )
+    names: dict[int, str | None] = {}
+    for id, name in map_names.map_names.items():
+        if id >= get_total_maps(chapters):
+            continue
+
+        for star in range(get_total_stars(map_option, base_index, chapters, id, type)):
+            names[id * 10 + star] = core.localize(
+                "map_name_star", name=name, star=star + 1
+            )
+
+    ids = core.EventChapters.select_map_names(names)
+    if ids is None:
         return None
 
-    choice -= 1
+    new_ids: list[tuple[int, int]] = []
 
-    clear = choice == 0
+    for id in ids:
+        map_id = id // 10
+        star_index = id % 10
 
-    choice -= 1
+        new_ids.append((map_id, star_index))
 
-    if clear:
-        clear_txt = "clear"
-        star_prompt = "custom_star_count_per_chapter"
-    else:
-        clear_txt = "unclear"
-        star_prompt = "custom_star_count_per_chapter_unclear"
+    return new_ids
 
-    map_choices = core.EventChapters.select_map_names(names)
-    if not map_choices:
-        return None
-    clear_type_choice = dialog_creator.ChoiceInput.from_reduced(
-        [f"{clear_txt}_whole_chapters", f"{clear_txt}_specific_stages"],
-        dialog=f"select_{clear_txt}_type",
-        single_choice=True,
-    ).single_choice()
-    if clear_type_choice is None:
-        return None
-    clear_type_choice -= 1
+
+def edit_chapters2_clear_count(
+    save_file: core.SaveFile,
+    chapters: ChaptersType,
+    letter_code: str,
+    base_index: int,
+    type: int | None = None,
+    no_r_prefix: bool = False,
+):
+
+    map_names = core.MapNames(
+        save_file, letter_code, no_r_prefix=no_r_prefix, base_index=base_index
+    )
 
     map_option = core.MapOption.from_save(save_file)
     if map_option is None:
         return None
 
-    if (
-        len(map_choices) > 1
-        and get_max_max_stars(map_option, base_index, map_choices, chapters, type) > 1
-    ):
-        stars_type_choice = dialog_creator.YesNoInput().get_input_once(
-            "custom_star_count_per_chapter_yn"
-        )
-    else:
-        stars_type_choice = True
-
-    if stars_type_choice is None:
+    map_choices = select_maps_stars(
+        save_file, map_option, chapters, letter_code, base_index, type, no_r_prefix
+    )
+    if map_choices is None:
         return None
 
-    if clear:
-        modify_clear_amounts = dialog_creator.YesNoInput().get_input_once(
-            "modify_clear_amounts"
-        )
-    else:
-        modify_clear_amounts = False
-
-    if modify_clear_amounts is None:
+    clear_all = edit_all_or_handle_ind(len(map_choices))
+    if clear_all is None:
         return None
 
-    clear_amount = 1
-    clear_amount_type = -1
-    if modify_clear_amounts:
-        if len(map_choices) > 1:
-            options = ["clear_amount_chapter", "clear_amount_all"]
-            if clear_type_choice == 1:
-                options.append("clear_amount_stages")
-            clear_amount_type = dialog_creator.ChoiceInput.from_reduced(
-                options, dialog="select_clear_amount_type", single_choice=True
-            ).single_choice()
-            if clear_amount_type is None:
-                return None
-            clear_amount_type -= 1
-        else:
-            clear_amount_type = 0
-        if clear_amount_type == 1:
-            clear_amount = core.EventChapters.ask_clear_amount()
-            if clear_amount is None:
-                return None
-
-    stars_max = 0
-
-    if not stars_type_choice:
-        stars_max = core.EventChapters.ask_stars(
-            get_max_max_stars(map_option, base_index, map_choices, chapters, type),
-            prompt=star_prompt,
-        )
-        if stars_max is None:
+    if clear_all == 0:
+        clear_count = core.EventChapters.ask_clear_amount()
+        if clear_count is None:
             return None
+
+        for local_map_id, star in map_choices:
+            total_stages = get_total_stages(chapters, local_map_id, star, type)
+            for stage in range(total_stages):
+                clear_stage(chapters, local_map_id, star, stage, clear_count, type=type)
     else:
-        stars = 0
-
-    completed_chapters: dict[int, bool] = {}
-
-    for id in map_choices:
-        map_name = names[id]
-        stage_names = map_names.stage_names.get(id)
-        stage_names = [
-            stage_name
-            for stage_name in stage_names or []
-            if stage_name and stage_name != "＠"
-        ]
-        total_stages = len(stage_names)
-        if isinstance(chapters, core.EventChapters):
-            if type is None:
-                raise ValueError("Type must be specified for EventChapters!")
-            chapters.set_total_stages(id, type, total_stages)
-        else:
-            chapters.set_total_stages(id, total_stages)
-
-        total_stars = get_total_stars(map_option, base_index, chapters, id, type)
-        if total_stars > 1 or clear_amount_type == 0:
-            color.ColoredText.localize("current_sol_chapter", name=map_name, id=id)
-        if stars_type_choice:
-            stars = core.EventChapters.ask_stars(
-                total_stars,
-                prompt=star_prompt,
+        for local_map_id, star in map_choices:
+            print()
+            core.EventChapters.print_current_chapter(
+                core.localize(
+                    "map_name_star",
+                    star=star,
+                    name=map_names.map_names.get(local_map_id),
+                ),
+                local_map_id,
             )
-            if stars is None:
-                return None
-        else:
-            stars = stars_max
-            val = map_option.get_map(base_index + id)
-            if val is not None:
-                stars = min(stars, val.crown_count)
-        if clear_type_choice:
-            stages = core.EventChapters.ask_stages(map_names, id)
-            if stages is None:
-                return None
-        else:
-            stages = list(range(get_total_stages(chapters, id, 0, type)))
-
-        if clear_amount_type == 0:
-            clear_amount = core.EventChapters.ask_clear_amount()
-            if clear_amount is None:
+            clear_whole = dialog_creator.ChoiceInput.from_reduced(
+                ["edit_whole_chapter", "edit_specific_stages"], dialog="edit_chapter_q"
+            ).single_choice()
+            if clear_whole is None:
                 return None
 
-        if not clear:
-            start = stars - 1
-            end = get_total_stars(map_option, base_index, chapters, id, type)
-        else:
-            start = 0
-            end = stars
-            unclear_rest(chapters, stages, stars, id, type)
+            clear_whole -= 1
 
-        for star in range(start, end):
-            if clear_amount_type == 2:
-                color.ColoredText.localize("current_sol_star", star=star + 1)
-            for stage in stages:
-                if clear_amount_type == 2:
-                    stage_name = stage_names[stage]
-                    color.ColoredText.localize(
-                        "current_sol_stage", name=stage_name, id=stage
-                    )
-
-                if clear_amount_type == 2:
-                    clear_amount = core.EventChapters.ask_clear_amount()
-                if clear_amount is None:
+            if clear_whole == 0:
+                clear_count = core.EventChapters.ask_clear_amount()
+                if clear_count is None:
                     return None
-                if clear:
-                    finished = clear_stage(
+
+                for stage in range(
+                    get_total_stages(chapters, local_map_id, star, type)
+                ):
+                    clear_stage(
+                        chapters, local_map_id, star, stage, clear_count, type=type
+                    )
+            else:
+                stage_ids = core.EventChapters.ask_stages(map_names, local_map_id)
+
+                if stage_ids is None:
+                    return None
+
+                all_selected_stages = dialog_creator.ChoiceInput.from_reduced(
+                    ["each_stage_individually", "stage_all_at_once"],
+                    dialog="set_clear_count_stage_q",
+                ).single_choice()
+                if all_selected_stages is None:
+                    return None
+
+                all_selected_stages -= 1
+
+                stage_names = core.EventChapters.get_stage_names(
+                    map_names, local_map_id
+                )
+                if stage_names is None:
+                    stage_names = []
+                if all_selected_stages == 0:
+                    for stage in stage_ids:
+                        print()
+                        if stage < len(stage_names):
+                            stage_name = stage_names[stage]
+                        else:
+                            stage_name = None
+                        core.EventChapters.print_current_stage(stage_name, stage)
+                        clear_count = core.EventChapters.ask_clear_amount()
+                        if clear_count is None:
+                            return None
+                        clear_stage(
+                            chapters, local_map_id, star, stage, clear_count, type=type
+                        )
+                else:
+                    clear_count = core.EventChapters.ask_clear_amount()
+                    if clear_count is None:
+                        return None
+                    for stage in stage_ids:
+                        clear_stage(
+                            chapters, local_map_id, star, stage, clear_count, type=type
+                        )
+
+
+def clear_all_or_handle_ind(map_choices_len: int) -> int | None:
+    if map_choices_len <= 1:
+        clear_all = 1
+    else:
+        clear_all = dialog_creator.ChoiceInput.from_reduced(
+            ["clear_all", "handle_individually"], dialog="clear_chapters_q"
+        ).single_choice()
+        if clear_all is None:
+            return None
+
+        clear_all -= 1
+
+    return clear_all
+
+
+def unclear_all_or_handle_ind(map_choices_len: int) -> int | None:
+    if map_choices_len <= 1:
+        clear_all = 1
+    else:
+        clear_all = dialog_creator.ChoiceInput.from_reduced(
+            ["unclear_all", "handle_individually"], dialog="unclear_chapters_q"
+        ).single_choice()
+        if clear_all is None:
+            return None
+
+        clear_all -= 1
+
+    return clear_all
+
+
+def edit_all_or_handle_ind(map_choices_len: int) -> int | None:
+    if map_choices_len <= 1:
+        clear_all = 1
+    else:
+        clear_all = dialog_creator.ChoiceInput.from_reduced(
+            ["edit_map_all", "handle_individually"], dialog="edit_chapters_q_all"
+        ).single_choice()
+        if clear_all is None:
+            return None
+
+        clear_all -= 1
+
+    return clear_all
+
+
+def edit_chapters2_progress(
+    save_file: core.SaveFile,
+    chapters: ChaptersType,
+    letter_code: str,
+    base_index: int,
+    type: int | None = None,
+    no_r_prefix: bool = False,
+    allow_unclear: bool = False,
+):
+    map_names = core.MapNames(
+        save_file, letter_code, no_r_prefix=no_r_prefix, base_index=base_index
+    )
+
+    map_choices = select_maps(save_file, chapters, letter_code, base_index, no_r_prefix)
+    if map_choices is None:
+        return None
+
+    clear_all = clear_all_or_handle_ind(len(map_choices))
+    if clear_all is None:
+        return None
+
+    map_option = core.MapOption.from_save(save_file)
+    if map_option is None:
+        return None
+
+    if clear_all == 0:
+        max_stars = get_max_max_stars(
+            map_option, base_index, map_choices, chapters, type
+        )
+        if allow_unclear:
+            stars = core.EventChapters.ask_stars_unclear(max_stars, "max_stars")
+        else:
+            stars = core.EventChapters.ask_stars(max_stars, "max_stars")
+        if stars is None:
+            return None
+        for local_map_id in map_choices:
+            unclear_rest(
+                chapters,
+                [0],
+                max(0, stars - 1),
+                local_map_id,
+                type,
+            )
+            for star in range(stars):
+                total_stages = get_total_stages(chapters, local_map_id, star, type)
+                for stage in range(total_stages):
+                    clear_stage(
                         chapters,
-                        id,
+                        local_map_id,
                         star,
                         stage,
-                        overwrite_clear_progress=True,
-                        clear_amount=clear_amount,
                         type=type,
+                        ensure_cleared_only=True,
                     )
-                    if finished:
-                        completed_chapters[id] = True
 
-                else:
-                    finished = unclear_stage(chapters, id, star, stage, type)
-                    if finished:
-                        completed_chapters[id] = False
+        return map_choices
 
+    for local_map_id in map_choices:
+        name = map_names.map_names.get(local_map_id)
+        core.EventChapters.print_current_chapter(name, local_map_id)
+        clear_whole = dialog_creator.ChoiceInput.from_reduced(
+            ["clear_whole_chapter", "clear_to_specific_stage"], dialog="clear_whole_q"
+        ).single_choice()
+        if clear_whole is None:
+            return None
+
+        clear_whole -= 1
+
+        if clear_whole == 0:
+            max_stars = get_total_stars(
+                map_option, base_index, chapters, local_map_id, type
+            )
+            if allow_unclear:
+                stars = core.EventChapters.ask_stars_unclear(max_stars)
+            else:
+                stars = core.EventChapters.ask_stars(max_stars)
+            if stars is None:
+                return None
+
+            unclear_rest(
+                chapters,
+                [0],
+                max(stars - 1, 0),
+                local_map_id,
+                type,
+            )
+
+            for star in range(stars):
+                total_stages = get_total_stages(chapters, local_map_id, star, type)
+                for stage in range(total_stages):
+                    clear_stage(
+                        chapters,
+                        local_map_id,
+                        star,
+                        stage,
+                        type=type,
+                        ensure_cleared_only=True,
+                    )
+
+        else:
+            stage_names = map_names.stage_names.get(local_map_id)
+            stage_names = [
+                stage_name
+                for stage_name in stage_names or []
+                if stage_name and stage_name != "＠"
+            ]
+            stage_id = core.EventChapters.ask_stages_stage_names_one(stage_names)
+            if stage_id is None:
+                return None
+
+            max_stars = get_total_stars(
+                map_option, base_index, chapters, local_map_id, type
+            )
+
+            if allow_unclear:
+                stars = core.EventChapters.ask_stars_unclear(max_stars)
+            else:
+                stars = core.EventChapters.ask_stars(max_stars)
+            if stars is None:
+                return None
+
+            unclear_rest(
+                chapters, list(range(stage_id)), max(stars - 1, 0), local_map_id, type
+            )
+
+            for star in range(stars - 1):
+                total_stages = get_total_stages(chapters, local_map_id, star, type)
+                for stage in range(total_stages):
+                    clear_stage(
+                        chapters,
+                        local_map_id,
+                        star,
+                        stage,
+                        type=type,
+                        ensure_cleared_only=True,
+                    )
+
+            for stage in range(stage_id + 1):
+                clear_stage(
+                    chapters,
+                    local_map_id,
+                    stars - 1,
+                    stage,
+                    type=type,
+                    ensure_cleared_only=True,
+                )
+
+
+def edit_chapters(
+    save_file: core.SaveFile,
+    chapters: ChaptersType,
+    letter_code: str,
+    base_index: int,
+    type: int | None = None,
+    no_r_prefix: bool = False,
+) -> dict[int, bool] | None:
+    while True:
+        choice = dialog_creator.ChoiceInput.from_reduced(
+            [
+                "edit_progress_clear",
+                "edit_progress_unclear",
+                "edit_clear_counts",
+                "finish",
+            ],
+            dialog="edit_chapters_q",
+        ).single_choice()
+        if choice is None:
+            return None
+        choice -= 1
+
+        if choice == 0:
+            edit_chapters2_progress(
+                save_file, chapters, letter_code, base_index, type, no_r_prefix
+            )
+        elif choice == 1:
+            edit_chapters2_progress(
+                save_file,
+                chapters,
+                letter_code,
+                base_index,
+                type,
+                no_r_prefix,
+                allow_unclear=True,
+            )
+        elif choice == 2:
+            edit_chapters2_clear_count(
+                save_file, chapters, letter_code, base_index, type, no_r_prefix
+            )
+        else:
+            break
+        color.ColoredText.localize("map_chapters_edited")
     color.ColoredText.localize("map_chapters_edited")
 
-    return completed_chapters
+    return None

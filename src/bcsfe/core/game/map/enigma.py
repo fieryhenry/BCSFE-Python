@@ -165,7 +165,7 @@ class Enigma:
         return self.__repr__()
 
     def edit_enigma(self, save_file: core.SaveFile):
-        names = core.MapNames(save_file, "H").map_names
+        names = core.MapNames(save_file, "H", base_index=25000).map_names
         names_list: list[str] = []
         keys = list(names.keys())
         keys.sort()

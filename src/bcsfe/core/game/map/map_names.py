@@ -1,9 +1,6 @@
 from __future__ import annotations
-from typing import Any, Callable
 
-import bs4
 from bcsfe import core
-from bcsfe.cli import color
 
 
 class MapNames:
@@ -11,9 +8,9 @@ class MapNames:
         self,
         save_file: core.SaveFile,
         code: str,
+        base_index: int,
         output: bool = True,
         no_r_prefix: bool = False,
-        base_index: int | None = None,
     ):
         self.save_file = save_file
         self.out = output
@@ -24,49 +21,6 @@ class MapNames:
         self.map_names: dict[int, str | None] = {}
         self.stage_names: dict[int, list[str]] = {}
         self.get_map_names()
-        self.save_map_names()
-
-    def get_file_path(self) -> core.Path:
-        return (
-            core.Path("map_names", True)
-            .add(self.code)
-            .generate_dirs()
-            .add(f"{self.gdg.cc.get_code()}.json")
-        )
-
-    def read_map_names(self) -> dict[int, str | None]:
-        file_path = self.get_file_path()
-        if file_path.exists():
-            names = core.JsonFile(file_path.read()).to_object()
-            for id in names.keys():
-                self.map_names[int(id)] = names[id]
-            return names
-        return {}
-
-    def download_map_name(self, id: int):
-        file_name = f"{self.code}{str(id).zfill(3)}.html"
-        if self.gdg.cc != core.CountryCodeType.JP:
-            url = f"https://ponosgames.com/information/appli/battlecats/stage/{self.gdg.cc.get_code()}/{file_name}"
-        else:
-            url = (
-                f"https://ponosgames.com/information/appli/battlecats/stage/{file_name}"
-            )
-        data = core.RequestHandler(url).get()
-        if data is None:
-            return None
-        if data.status_code != 200:
-            return None
-        html = data.content.decode("utf-8")
-        bs = bs4.BeautifulSoup(html, "html.parser")
-        name = bs.find("h2")
-        if name is None:
-            return None
-        name = name.text.strip()
-        if name:
-            self.map_names[id] = name
-        else:
-            self.map_names[id] = None
-        return name
 
     def get_map_names_in_game(
         self, base_index: int, total_stages: int
@@ -114,28 +68,45 @@ class MapNames:
                 continue
             self.stage_names[i] = stage_names_row
 
-        if self.base_index is None:
-            names = self.read_map_names()
-            total_downloaded = len(names)
-            funcs: list[Callable[..., Any]] = []
-            args: list[tuple[Any]] = []
-            for i in range(len(csv)):
-                if i < total_downloaded:
-                    continue
-                funcs.append(self.download_map_name)
-                args.append((i,))
-
-            if self.out:
-                color.ColoredText.localize("downloading_map_names", code=self.code)
-            core.thread_run_many(funcs, args)
-        else:
-            names = self.get_map_names_in_game(self.base_index, len(self.stage_names))
-            if names is None:
-                return None
-            self.map_names = names
+        names = self.get_map_names_in_game(self.base_index, len(self.stage_names))
+        if names is None:
+            return None
+        self.map_names = names
         return self.map_names
 
-    def save_map_names(self):
-        file_path = self.get_file_path()
-        self.map_names = dict(sorted(self.map_names.items(), key=lambda item: item[0]))
-        core.JsonFile.from_object(self.map_names).to_file(file_path)
+    @staticmethod
+    def get_code_from_id(id: int) -> str | None:
+        base_id = id // 1000
+
+        ids = {
+            0: "RN",
+            1: "RS",
+            2: "RC",
+            4: "EX",
+            6: "RT",
+            7: "RV",
+            11: "RR",
+            12: "RM",
+            13: "RNA",
+            14: "RB",
+            16: "RD",
+            20: "Z",
+            21: "Z",
+            22: "Z",
+            24: "RA",
+            25: "RH",
+            27: "RCA",
+            30: "DM",
+            31: "RQ",
+            32: "L",
+            34: "RND",
+        }
+
+        return ids.get(base_id)
+
+    @staticmethod
+    def from_id(id: int, save_file: core.SaveFile) -> MapNames | None:
+        code = MapNames.get_code_from_id(id)
+        if code is None:
+            return None
+        return MapNames(save_file, code, id, no_r_prefix=True)

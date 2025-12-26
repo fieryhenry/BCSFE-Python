@@ -35,8 +35,11 @@ class Stage:
     def __str__(self):
         return self.__repr__()
 
-    def clear_stage(self, clear_amount: int = 1):
-        self.clear_times = clear_amount
+    def clear_stage(self, clear_amount: int = 1, ensure_cleared_only: bool = False):
+        if ensure_cleared_only:
+            self.clear_times = self.clear_times or clear_amount
+        else:
+            self.clear_times = clear_amount
 
     def unclear_stage(self):
         self.clear_times = 0
@@ -62,12 +65,13 @@ class Chapter:
         index: int,
         clear_amount: int = 1,
         overwrite_clear_progress: bool = False,
+        ensure_cleared_only: bool = False,
     ) -> bool:
         if overwrite_clear_progress:
             self.clear_progress = index + 1
         else:
             self.clear_progress = max(self.clear_progress, index + 1)
-        self.stages[index].clear_stage(clear_amount)
+        self.stages[index].clear_stage(clear_amount, ensure_cleared_only)
         self.chapter_unlock_state = 3
         if index == self.total_stages - 1:
             return True
@@ -139,9 +143,10 @@ class ChaptersStars:
         stage: int,
         clear_amount: int = 1,
         overwrite_clear_progress: bool = False,
+        ensure_cleared_only: bool = False,
     ) -> bool:
         finished = self.chapters[star].clear_stage(
-            stage, clear_amount, overwrite_clear_progress
+            stage, clear_amount, overwrite_clear_progress, ensure_cleared_only
         )
         if finished:
             if star + 1 < len(self.chapters):
@@ -206,10 +211,11 @@ class ZeroLegendsChapters:
         stage: int,
         clear_amount: int = 1,
         overwrite_clear_progress: bool = False,
+        ensure_cleared_only: bool = False,
     ) -> bool:
         self.create(map)
         finished = self.chapters[map].clear_stage(
-            star, stage, clear_amount, overwrite_clear_progress
+            star, stage, clear_amount, overwrite_clear_progress, ensure_cleared_only
         )
         if finished and map + 1 < len(self.chapters):
             self.chapters[map + 1].chapters[0].chapter_unlock_state = 1

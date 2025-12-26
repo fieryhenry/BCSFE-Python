@@ -510,26 +510,38 @@ class SaveManagement:
     ) -> core.SaveFile | None:
         color.ColoredText.localize("save_file_found", path=save_path)
 
+        data = save_path.read()
         try:
-            save_file = core.SaveFile(save_path.read(), cc, package_name=package_name)
+            save_file = core.SaveFile(data, cc, package_name=package_name)
         except core.CantDetectSaveCCError:
             color.ColoredText.localize("cant_detect_cc")
             cc = core.CountryCode.select()
             if cc is None:
                 return None
             try:
-                save_file = core.SaveFile(save_path.read(), cc)
+                save_file = core.SaveFile(data, cc)
             except Exception:
                 tb = core.core_data.logger.get_traceback()
+                data.reset_pos()
                 color.ColoredText.localize(
-                    "parse_save_error", error=tb, version=bcsfe.__version__
+                    "parse_save_error",
+                    error=tb,
+                    version=bcsfe.__version__,
+                    game_version=data.read_int(),
+                    country_code=cc.get_code(),
                 )
                 return None
 
         except Exception:
             tb = core.core_data.logger.get_traceback()
+            save_file2 = core.SaveFile(data, cc, load=False)
+            data.reset_pos()
             color.ColoredText.localize(
-                "parse_save_error", error=tb, version=bcsfe.__version__
+                "parse_save_error",
+                error=tb,
+                version=bcsfe.__version__,
+                game_version=data.read_int(),
+                country_code=save_file2.cc,
             )
             return None
 

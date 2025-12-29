@@ -236,7 +236,7 @@ class Config:
         color.ColoredText.localize("validating_game_repo")
         try:
             resp = core.RequestHandler(value).get()
-        except requests.exceptions.MissingSchema:
+        except (requests.exceptions.MissingSchema, requests.exceptions.InvalidSchema):
             color.ColoredText.localize("invalid_url")
             return
         if resp is None:

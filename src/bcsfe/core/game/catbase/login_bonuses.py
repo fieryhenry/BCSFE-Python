@@ -133,11 +133,12 @@ class LoginBonus:
             return LoginBonus(logins=logins)
 
     def write(self, stream: core.Data, gv: core.GameVersion):
-        if gv < 80000 and self.old_logins is not None:
-            self.old_logins.write(stream)
-        elif gv >= 80000 and self.logins is not None:
-            stream.write_int(len(self.logins))
-            for id, login in self.logins.items():
+        if gv < 80000:
+            (self.old_logins or LoginSets([])).write(stream)
+        elif gv >= 80000:
+            logins = self.logins or {}
+            stream.write_int(len(logins))
+            for id, login in logins.items():
                 stream.write_int(id)
                 login.write(stream)
 

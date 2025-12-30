@@ -73,16 +73,25 @@ class IntInput:
         default: int | None = None,
         signed: bool = True,
         bit_count: int = 32,
+        ensure_max: bool = False,
     ):
         self.signed = signed
         self.bit_count = bit_count
-        self.max = self.get_max_value(max, signed, bit_count)
+        self.max = self.get_max_value(max, signed, bit_count, ensure_max)
         self.min = min
         self.default = default
 
     @staticmethod
-    def get_max_value(max: int | None, signed: bool = True, bit_count: int = 32) -> int:
-        disable_maxes = core.core_data.config.get_bool(core.ConfigKey.DISABLE_MAXES)
+    def get_max_value(
+        max: int | None,
+        signed: bool = True,
+        bit_count: int = 32,
+        ensure_max: bool = False,
+    ) -> int:
+        disable_maxes = (
+            core.core_data.config.get_bool(core.ConfigKey.DISABLE_MAXES)
+            and not ensure_max
+        )
         if signed:
             bit_count -= 1
         max_int = (2**bit_count) - 1
@@ -273,9 +282,9 @@ class ChoiceInput:
             start_index=self.start_index,
             localize_elements=self.localize_options,
         ).display_locale(self.remove_alias)
-        return IntInput(self.get_max_value(), self.get_min_value()).get_input_locale(
-            self.dialog, self.perameters
-        )
+        return IntInput(
+            self.get_max_value(), self.get_min_value(), ensure_max=True
+        ).get_input_locale(self.dialog, self.perameters)
 
     def get_input_while(self) -> int | None:
         if len(self.strings) == 0:

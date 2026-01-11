@@ -1208,6 +1208,8 @@ class Cats:
         for _ in range(total_cats):
             cat_id = stream.read_int()
             if cat_id < 0 or cat_id >= len(self.cats):
+                cat = Cat.init(cat_id)
+                cat.read_talents(stream)
                 continue
             self.cats[cat_id].read_talents(stream)
 

@@ -88,7 +88,7 @@ class RequestHandler:
                 stream=stream,
                 files=None if self.form is None else self.form.into_files(),
             )
-        except requests.exceptions.ConnectionError:
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
             return None
 
     def post(self, no_timeout: bool = False) -> requests.Response | None:

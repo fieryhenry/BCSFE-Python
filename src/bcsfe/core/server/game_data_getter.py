@@ -2,7 +2,7 @@ from __future__ import annotations
 from io import BytesIO
 from typing import Any, Callable
 
-from bcsfe.cli import color
+from bcsfe.cli import color, dialog_creator
 
 import tarfile
 
@@ -82,9 +82,26 @@ class GameDataGetter:
             return cc_version_keys[-1], cc_versions[cc_version_keys[-1]]
         return gv_string, cc_versions[gv_string]
 
-    def get_metadata(self) -> dict[str, Any] | None:
+    def get_metadata(self, show_alt: bool = True) -> dict[str, Any] | None:
         response = core.RequestHandler(self.repo_url).get()
         if response is None:
+            if (
+                self.repo_url
+                == core.core_data.config.get_default(core.ConfigKey.GAME_DATA_REPO)
+                and show_alt
+            ):
+                alt = "https://gitlab.com/fieryhenry/bcdata/-/raw/main/metadata.json"
+                res = dialog_creator.YesNoInput().get_input_once(
+                    "use_alternative_repo",
+                    {
+                        "repo": "https://gitlab.com/fieryhenry/bcdata/-/raw/main/metadata.json"
+                    },
+                )
+                if res:
+                    core.core_data.config.set(core.ConfigKey.GAME_DATA_REPO, alt)
+                    self.repo_url = alt
+                    return self.get_metadata(show_alt=False)
+
             return None
         try:
             data = response.json()

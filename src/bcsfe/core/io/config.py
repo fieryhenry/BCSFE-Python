@@ -232,7 +232,7 @@ class Config:
             "game_data_repo_dialog", {}
         )
         if value is None:
-            return
+            value = self.get_default(ConfigKey.GAME_DATA_REPO)
         color.ColoredText.localize("validating_game_repo")
         try:
             resp = core.RequestHandler(value).get()

@@ -128,6 +128,7 @@ class RecentSaves:
                     name=save.name,
                 )
             )
+        items.reverse()
 
         resp = dialog_creator.ChoiceInput.from_reduced(
             items, localize_options=False, dialog="select_recent"
@@ -135,6 +136,6 @@ class RecentSaves:
         if resp is None:
             return None
 
-        resp -= 1
+        resp = len(self.saves) - resp
 
         return self.saves[resp]

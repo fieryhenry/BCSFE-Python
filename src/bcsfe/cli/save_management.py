@@ -1,8 +1,9 @@
 from __future__ import annotations
+import datetime
 from bcsfe import core
 import bcsfe
 from bcsfe.core import io
-from bcsfe.cli import main, color, dialog_creator, server_cli
+from bcsfe.cli import main, color, dialog_creator, server_cli, recent_saves
 from bcsfe.core.country_code import CountryCode
 from bcsfe.core.io.config import ConfigKey
 
@@ -350,7 +351,7 @@ class SaveManagement:
             )
             if file is None:
                 return (None, True)
-            return (file, False)
+            return (file[0], False)
 
         options = [
             "download_save",
@@ -358,6 +359,7 @@ class SaveManagement:
             "load_from_documents",
             "adb_pull_save",
             "load_save_data_json",
+            "load_recent_saves",
             # "create_new_save",
         ]
         if starting_options:
@@ -463,6 +465,14 @@ class SaveManagement:
                 save_path, cc = data
             else:
                 save_path = None
+        elif choice == 5:
+            recent_save = recent_saves.RecentSaves.read_default().select()
+            if recent_save is None:
+                save_path = None
+            else:
+                save_path = recent_save.path
+                cc = recent_save.cc
+
         # elif choice == 5:
         #     color.ColoredText.localize("create_new_save_warning")
         #     cc = core.CountryCode.select()
@@ -494,10 +504,30 @@ class SaveManagement:
         if save_path is None or not save_path.exists():
             return None, False
 
+        save = SaveManagement.load_save_file_path(
+            save_path, cc, used_storage, package_name
+        )
+
+        if save is None:
+            return (None, False)
+
+        save, backup_path = save
+
+        if choice != 5:
+            recent_s = recent_saves.RecentSaves.read_default()
+            recent_s.saves.append(
+                recent_saves.RecentSave(
+                    backup_path,
+                    save.cc,
+                    save.game_version,
+                    save.inquiry_code,
+                    datetime.datetime.now(),
+                    save_path,
+                )
+            )
+            recent_s.save_default()
         return (
-            SaveManagement.load_save_file_path(
-                save_path, cc, used_storage, package_name
-            ),
+            save,
             False,
         )
 
@@ -507,7 +537,7 @@ class SaveManagement:
         cc: CountryCode | None,
         used_storage: bool,
         package_name: str | None = None,
-    ) -> core.SaveFile | None:
+    ) -> tuple[core.SaveFile, core.Path] | None:
         color.ColoredText.localize("save_file_found", path=save_path)
 
         data = save_path.read()
@@ -546,10 +576,11 @@ class SaveManagement:
             return None
 
         save_file.save_path = save_path
-        save_file.save_path.copy_thread(save_file.get_default_path())
+        backup_path = save_file.get_default_path()
+        save_file.save_path.copy_thread(backup_path)
         save_file.used_storage = used_storage
 
-        return save_file
+        return save_file, backup_path
 
     @staticmethod
     def select_package_name(package_names: list[str]) -> str | None:

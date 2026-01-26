@@ -7,6 +7,7 @@ from bcsfe.cli import (
     save_management,
     server_cli,
     edits,
+    recent_saves,
 )
 
 __all__ = [
@@ -18,4 +19,5 @@ __all__ = [
     "save_management",
     "server_cli",
     "edits",
+    "recent_saves",
 ]

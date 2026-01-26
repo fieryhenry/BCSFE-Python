@@ -1219,7 +1219,7 @@ class Cats:
             total_talents += 1 if cat.talents is not None else 0
         stream.write_int(total_talents)
         for cat in self.cats:
-            if not cat.talents:
+            if cat.talents is None:
                 continue
             stream.write_int(cat.id)
             cat.write_talents(stream)

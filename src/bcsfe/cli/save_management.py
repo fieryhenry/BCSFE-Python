@@ -494,11 +494,11 @@ class SaveManagement:
         #     save.to_file(save_path)
         #     color.ColoredText.localize("create_new_save_success")
 
-        elif choice == 5 and starting_options:
-            core.core_data.config.edit_config()
         elif choice == 6 and starting_options:
-            core.update_external_content()
+            core.core_data.config.edit_config()
         elif choice == 7 and starting_options:
+            core.update_external_content()
+        elif choice == 8 and starting_options:
             main.Main.exit_editor(check_temp=False)
 
         if save_path is None or not save_path.exists():

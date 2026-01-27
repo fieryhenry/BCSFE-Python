@@ -109,6 +109,9 @@ class CatShrine:
 
         if choice == 2:
             shrine.shrine_gone = False
+
+            shrine.stamp_1 = 0.0
+            shrine.stamp_2 = 0.0
             color.ColoredText.localize("cat_shrine_edited")
             return
         elif choice == 3:

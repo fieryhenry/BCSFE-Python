@@ -168,6 +168,15 @@ class Main:
             return stop
         self.save_file = save_file
 
+        color.ColoredText.localize(
+            "current_save",
+            inquiry_code=save_file.inquiry_code[:4]
+            + "***"
+            + save_file.inquiry_code[-2:],
+            gv=save_file.game_version,
+            cc=save_file.cc,
+        )
+
         self.feature_handler()
         return False
 

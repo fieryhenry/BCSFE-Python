@@ -451,30 +451,30 @@ def color_from_grade(grade_id: int) -> str:
 
 
 def color_from_effect(effect_id: int):
-    if effect_id == 0:
-        return color.ColorHex.RED
-    elif effect_id == 1:
-        return color.ColorHex.GREEN
-    elif effect_id == 2:
-        return color.ColorHex.DARK_GREY
-    elif effect_id == 3:
-        return color.ColorHex.LIGHT_GREY
-    elif effect_id == 4:
-        return color.ColorHex.YELLOW
-    elif effect_id == 5:
-        return color.ColorHex.BLUE
-    elif effect_id == 6:
-        return color.ColorHex.MAGENTA
-    elif effect_id == 7:
-        return color.ColorHex.DARK_GREEN
-    elif effect_id == 8:
-        return color.ColorHex.WHITE
-    elif effect_id == 9:
-        return color.ColorHex.DARK_MAGENTA
-    elif effect_id == 10:
-        return color.ColorHex.ORANGE
+    # if effect_id == 0:
+    #     return color.ColorHex.RED
+    # elif effect_id == 1:
+    #     return color.ColorHex.GREEN
+    # elif effect_id == 2:
+    #     return color.ColorHex.DARK_GREY
+    # elif effect_id == 3:
+    #     return color.ColorHex.LIGHT_GREY
+    # elif effect_id == 4:
+    #     return color.ColorHex.YELLOW
+    # elif effect_id == 5:
+    #     return color.ColorHex.BLUE
+    # elif effect_id == 6:
+    #     return color.ColorHex.MAGENTA
+    # elif effect_id == 7:
+    #     return color.ColorHex.DARK_GREEN
+    # elif effect_id == 8:
+    #     return color.ColorHex.WHITE
+    # elif effect_id == 9:
+    #     return color.ColorHex.DARK_MAGENTA
+    # elif effect_id == 10:
+    #     return color.ColorHex.ORANGE
 
-    return color.ColorHex.BLACK
+    return "@t"
 
 
 class SaveOrbs:
@@ -556,23 +556,23 @@ class SaveOrbs:
         all_effects = self.orb_info_list.get_all_effects()
         all_effects.sort()
         all_effects_str = [
-            effect.lower().replace("%@", "").replace(":", "").strip() + f" ({i})"
+            effect.lower().replace("%@", "").replace(":", "").strip() + f" <@s>({i})</>"
             for (i, effect) in enumerate(all_effects)
         ]
         all_effect_ids = [i for i in range(len(all_effects))]
 
-        all_grades_str = "".join(
-            f"<{color_from_grade(self.orb_info_list.get_all_grades().index(grade))}>{grade}</>,"
+        all_grades_str = ",".join(
+            f"<{color_from_grade(self.orb_info_list.get_all_grades().index(grade))}>{grade}</>"
             for grade in all_grades
         )
 
-        all_attributes_str = "".join(
-            f"<{color_from_enemy_type(self.orb_info_list.get_all_attributes().index(attribute))}>{attribute}</>,"
+        all_attributes_str = ",".join(
+            f"<{color_from_enemy_type(self.orb_info_list.get_all_attributes().index(attribute))}>{attribute}</>"
             for attribute in all_attributes
         )
 
-        all_effects_str = "".join(
-            f"<{color_from_effect(self.orb_info_list.get_all_effects().index(effect))}>{effect_str}</>,"
+        all_effects_str = ", ".join(
+            f"<{color_from_effect(self.orb_info_list.get_all_effects().index(effect))}>{effect_str}</>"
             for effect_str, effect in zip(all_effects_str, all_effects)
         )
 

@@ -40,6 +40,26 @@ class Main:
             if stop:
                 break
 
+    def version_check(self, v1: str, v2: str) -> bool:
+        v1_p = v1.split(".")
+        v2_p = v2.split(".")
+
+        for p1, p2 in zip(v1_p, v2_p):
+            if p1.isdigit():
+                p1 = int(p1)
+            else:
+                continue
+            if p2.isdigit():
+                p2 = int(p2)
+            else:
+                continue
+            if p1 > p2:
+                return True
+            if p1 < p2:
+                return False
+
+        return len(v1_p) > len(v2_p)
+
     def check_update(self):
         """Check for updates."""
 
@@ -64,16 +84,19 @@ class Main:
         local_no_beta = local_version.split("b")[0]
         latest_no_beta = latest_version.split("b")[0]
 
-        if latest_no_beta > local_no_beta:
+        if self.version_check(latest_no_beta, local_no_beta):
             update_needed = True
-        elif latest_no_beta < local_no_beta:
+        elif self.version_check(local_no_beta, latest_no_beta):
             update_needed = False
         else:
             if latest_version == local_version:
                 update_needed = False
             else:
                 if is_local_beta and is_latest_beta:
-                    update_needed = latest_version > local_version
+                    update_needed = self.version_check(
+                        latest_version.replace("b", "."),
+                        local_version.replace("b", "."),
+                    )
                 elif is_local_beta:
                     update_needed = True
                 else:

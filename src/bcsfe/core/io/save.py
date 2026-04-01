@@ -1234,6 +1234,10 @@ class SaveFile:
                 val = self.data.read_byte()
                 self.uil11.append(val)
 
+            if self.game_version >= 150300:
+                self.ui24 = self.data.read_int()
+                self.ub38 = self.data.read_bool()
+
             self.ub36 = self.data.read_bool()
 
             length = self.data.read_byte()
@@ -2206,6 +2210,10 @@ class SaveFile:
             for val in self.uil11:
                 self.data.write_byte(val)
 
+            if self.game_version >= 150300:
+                self.data.write_int(self.ui24)
+                self.data.write_bool(self.ub38)
+
             self.data.write_bool(self.ub36)
 
             self.data.write_byte(len(self.treasure_chests))
@@ -2574,6 +2582,8 @@ class SaveFile:
             "ui23": self.ui23,
             "uil13": self.uil13,
             "ub37": self.ub37,
+            "ub38": self.ub38,
+            "ui24": self.ui24,
             "remaining_data": base64.b64encode(self.remaining_data).decode("utf-8"),
         }
         return data
@@ -2960,6 +2970,8 @@ class SaveFile:
         save_file.ui23 = data.get("ui23", 0)
         save_file.uil13 = data.get("uil13", [])
         save_file.ub37 = data.get("ub37", False)
+        save_file.ub38 = data.get("ub38", False)
+        save_file.ui24 = data.get("ui24", 0)
 
         save_file.remaining_data = base64.b64decode(data.get("remaining_data", ""))
 
@@ -3011,6 +3023,7 @@ class SaveFile:
         self.ub35 = False
         self.ub36 = False
         self.ub37 = False
+        self.ub38 = False
 
         self.mute_bgm = False
         self.mute_se = False
@@ -3050,6 +3063,7 @@ class SaveFile:
         self.ui21 = 0
         self.ui22 = 0
         self.ui23 = 0
+        self.ui24 = 0
 
         self.catfood = 0
         self.current_energy = 0

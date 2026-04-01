@@ -1,5 +1,27 @@
 # Changelog
 
+## [3.3.0] - 2026-04-01
+
+### Added
+
+- Display basic save info when a save is loaded (region, version, partial inquiry code)
+
+- Prompt to ask if you want to change game data repo to gitlab if battlecatsmodding.org is not loading
+
+### Fixed
+
+- JP 15.3.0 save parsing
+
+- Version checking for version numbers >= 10
+
+- Talent orb effect colours being broken on some terminals
+
+- Maybe fixed cat shrine not appearing when using the feature to make it appear
+
+- Some issues when reading/writing invalid cat talents
+
+- Editor crashing when inputing an option too high if disable maxes is enabled
+
 ## [3.2.2] - 2025-12-29
 
 ### Added

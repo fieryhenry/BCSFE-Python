@@ -300,11 +300,17 @@ config_path = None
 print_config_err = True
 log_path = None
 transfer_backup_path = None
+game_data_path = None
 
 
 def set_config_path(path: Path):
     global config_path
     config_path = path
+
+
+def set_game_data_path(path: Path):
+    global game_data_path
+    game_data_path = path
 
 
 def set_log_path(path: Path):
@@ -319,6 +325,10 @@ def set_transfer_backup_path(path: Path):
 
 def get_transfer_backup_path() -> Path | None:
     return transfer_backup_path
+
+
+def get_game_data_path() -> Path | None:
+    return game_data_path
 
 
 def update_external_content(_: Any = None):

@@ -64,7 +64,13 @@ class ServerCLI:
         if path is None:
             return None
 
-        save_file.to_file(path)
+        try:
+            save_file.to_file(path)
+        except OSError as e:
+            print(
+                f"failed to write save file to: {path} due to: {e}. Skipping writing the save file to disk"
+            )
+            input("press enter to continue anyway")
 
         color.ColoredText.localize("save_downloaded", path=path.to_str())
 

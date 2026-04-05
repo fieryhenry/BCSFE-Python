@@ -27,7 +27,11 @@ class SaveManagement:
         if save_file.save_path is None:
             return
 
-        save_file.to_file(save_file.save_path)
+        try:
+            save_file.to_file(save_file.save_path)
+        except OSError as e:
+            print(e)
+            return
 
         color.ColoredText.localize("save_success", path=save_file.save_path)
 
@@ -577,7 +581,10 @@ class SaveManagement:
 
         save_file.save_path = save_path
         backup_path = save_file.get_default_path()
-        save_file.save_path.copy_thread(backup_path)
+        try:
+            save_file.save_path.copy_thread(backup_path)
+        except Exception as e:
+            print(e)
         save_file.used_storage = used_storage
 
         return save_file, backup_path

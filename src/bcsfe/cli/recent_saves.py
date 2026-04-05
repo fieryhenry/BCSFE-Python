@@ -89,7 +89,10 @@ class RecentSaves:
     def to_path(self, path: core.Path):
         data = json.dumps(self.to_json(), indent=4)
 
-        path.write(core.Data(data))
+        try:
+            path.write(core.Data(data))
+        except Exception as e:
+            print(e)
 
     @staticmethod
     def read_default() -> RecentSaves:

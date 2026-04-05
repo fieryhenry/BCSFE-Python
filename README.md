@@ -301,7 +301,7 @@ Once you have installed and ran the editor, you can now begin to edit your save 
 
 1. In `The Battle Cats` enter the `Change Account / Device` menu in the `Settings` on the main menu.
 
-2. Then enter the `Begin Data Transfer` menu.
+2. Then enter the `Change Device` -> `Retrieve Data from Old Device` menu.
 
 3. Then click / tap `Save Data to Server`, this should give you a transfer code and a confirmation
 code.
@@ -330,8 +330,8 @@ may also fail, if it does then try again.
 11. Back in-game, tap the `Close Game` button, then tap `Cancel Data Transfer` (and also possibly
 `Start Game From Beginning`)
 
-12. Go back into the `Change Account / Device` menu and then go into the `Resume Data Transfer`
-menu
+12. Go back into the `Change Account / Device` menu and then go into the `Resume Data Transfer` ->
+`Transfer Data to New Device` menu
 
 13. Enter the new codes, and tap `Resume Transfer`
 

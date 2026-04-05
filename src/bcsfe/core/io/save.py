@@ -2254,7 +2254,10 @@ class SaveFile:
     def to_file(self, path: core.Path) -> None:
         path.parent().generate_dirs()
         dt = self.to_data()
-        dt.to_file(path)
+        try:
+            dt.to_file(path)
+        except Exception as e:
+            print(e)
 
     @staticmethod
     def get_temp_path() -> core.Path:

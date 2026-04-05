@@ -299,6 +299,7 @@ class CoreData:
 config_path = None
 print_config_err = True
 log_path = None
+transfer_backup_path = None
 
 
 def set_config_path(path: Path):
@@ -309,6 +310,15 @@ def set_config_path(path: Path):
 def set_log_path(path: Path):
     global log_path
     log_path = path
+
+
+def set_transfer_backup_path(path: Path):
+    global transfer_backup_path
+    transfer_backup_path = path
+
+
+def get_transfer_backup_path() -> Path | None:
+    return transfer_backup_path
 
 
 def update_external_content(_: Any = None):

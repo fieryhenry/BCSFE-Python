@@ -548,12 +548,14 @@ class ServerHandler:
         save_data = response.content
 
         if save_backup:
-            temp_path = (
-                core.Path.get_documents_folder()
-                .add("saves")
-                .generate_dirs()
-                .add("transfer_backup")
-            )
+            temp_path = core.get_transfer_backup_path()
+            if temp_path is None:
+                temp_path = (
+                    core.Path.get_documents_folder()
+                    .add("saves")
+                    .generate_dirs()
+                    .add("transfer_backup")
+                )
             try:
                 temp_path.write(core.Data(save_data))
             except Exception as e:

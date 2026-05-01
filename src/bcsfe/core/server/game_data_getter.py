@@ -94,7 +94,7 @@ class GameDataGetter:
                 res = dialog_creator.YesNoInput().get_input_once(
                     "use_alternative_repo",
                     {
-                        "repo": "https://gitlab.com/fieryhenry/bcdata/-/raw/main/metadata.json"
+                        "repo": alt
                     },
                 )
                 if res:
@@ -106,7 +106,7 @@ class GameDataGetter:
         try:
             data = response.json()
         except core.JSONDecodeError as e:
-            print(e)
+            print(e, f"Data:\n{response.text}")
             return None
         return data
 

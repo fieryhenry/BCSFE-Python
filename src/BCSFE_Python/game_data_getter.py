@@ -14,7 +14,7 @@ def download_file(
     file_name: str,
     get_data: bool = True,
     print_progress: bool = True,
-) -> bytes:
+) -> Optional[bytes]:
     """
     Downloads the file.
 
@@ -43,7 +43,21 @@ def download_file(
             helper.WHITE,
         )
     url = URL + game_version + "/" + pack_name + "/" + file_name
-    response = requests.get(url)
+    try:
+        response = requests.get(url)
+    except requests.exceptions.ConnectionError:
+        helper.colored_text(
+            f"Failed to download game data &{file_name}&: no internet connection.",
+            helper.RED,
+        )
+        return None
+
+    if response.status_code != 200:
+        helper.colored_text(
+            f"Failed to download game data &{file_name}& from &{pack_name}& (HTTP {response.status_code}). The file may not exist for version &{game_version}&.",
+            helper.RED,
+        )
+        return None
 
     helper.create_dirs(path)
     helper.write_file_bytes(file_path, response.content)

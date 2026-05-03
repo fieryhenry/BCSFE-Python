@@ -291,10 +291,8 @@ class Main:
             return None
         try:
             json_data = core.JsonFile.from_data(path.read()).to_object()
-        except core.JSONDecodeError:
-            color.ColoredText.localize(
-                "load_json_fail", error=core.core_data.logger.get_traceback()
-            )
+        except (core.JSONDecodeError, UnicodeDecodeError):
+            color.ColoredText.localize("parse_json_fail")
             return None
         try:
             save_file = core.SaveFile.from_dict(json_data)

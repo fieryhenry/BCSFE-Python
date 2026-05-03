@@ -27,6 +27,8 @@ test/develop new features
 
 - HungJoesifer for Vietnamese localization
 
+- LinYuAn for Traditional Chinese localization
+
 ### Themes
 
 - HungJoesifer for the `discord` inspired theme

@@ -8,7 +8,7 @@ class FeatureHandler:
     def __init__(self, save_file: core.SaveFile):
         self.save_file = save_file
 
-    def get_features(self):
+    def get_features(self) -> dict[str, Any]:
         cat_features = {"cats": edits.cat_editor.CatEditor.edit_cats}
         if core.core_data.config.get_bool(core.ConfigKey.SEPARATE_CAT_EDIT_OPTIONS):
             cat_features = {
@@ -142,8 +142,7 @@ class FeatureHandler:
         }
         return features
 
-    def get_feature(self, feature_name: str):
-        feature_path = feature_name.split(".")
+    def get_feature(self, feature_path: list[str]):
         feature_dict = self.get_features()
         feature = feature_dict
         for path in feature_path:
@@ -154,10 +153,10 @@ class FeatureHandler:
     def search_features(
         self,
         name: str,
-        parent_path: str = "",
+        current_path: list[str],
         features: dict[str, Any] | None = None,
-        found_features: dict[str, int] | None = None,
-    ) -> dict[str, int]:
+        found_features: dict[tuple[str, ...], int] | None = None,
+    ) -> dict[tuple[str, ...], int]:
         name = name.lower()
         if features is None:
             features = self.get_features()
@@ -166,9 +165,8 @@ class FeatureHandler:
 
         for feature_name_key, feature in features.items():
             feature_name = core.core_data.local_manager.get_key(feature_name_key)
-            path = (
-                f"{parent_path}.{feature_name_key}" if parent_path else feature_name_key
-            )
+            path = current_path.copy()
+            path.append(feature_name_key)
             if isinstance(feature, dict):
                 found_features.update(
                     self.search_features(
@@ -180,34 +178,36 @@ class FeatureHandler:
                 )
             for alias in core.LocalManager.get_all_aliases(feature_name):
                 if not name:
-                    found_features[path] = 100
+                    found_features[*path] = 100
                     break
                 alias = alias.lower()
 
                 name = name.replace(" ", "")
                 alias = alias.replace(" ", "")
                 if alias in name or name in alias:
-                    found_features[path] = 100
+                    found_features[*path] = 100
                 break
 
         return found_features
 
-    def display_features(self, features: list[str]):
+    def display_features(self, features: list[list[str]]):
         feature_names: list[str] = []
         for feature_name in features:
-            feature_names.append(feature_name.split(".")[-1])
+            feature_names.append(feature_name[-1])
         print()
         dialog_creator.ListOutput(feature_names, [], "features", {}).display_locale(
             remove_alias=True
         )
 
-    def select_features(self, features: list[str], parent_path: str = "") -> list[str]:
+    def select_features(
+        self, features: list[list[str]], current_path: list[str]
+    ) -> list[list[str]]:
         if features != list(self.get_features().keys()):
-            features.insert(0, "go_back")
+            features.insert(0, ["go_back"])
         self.display_features(features)
         print()
         usr_input = color.ColoredInput().localize("select_features").strip()
-        selected_features: list[str] = []
+        selected_features: list[list[str]] = []
         if usr_input.isdigit():
             usr_input = int(usr_input)
             if usr_input > len(features):
@@ -216,59 +216,53 @@ class FeatureHandler:
                 color.ColoredText.localize("invalid_input")
             else:
                 feature_name_top = features[usr_input - 1]
-                if feature_name_top == "go_back":
-                    return list(self.get_features().keys())
+                if feature_name_top == ["go_back"]:
+                    return [[k] for k in self.get_features().keys()]
                 feature = self.get_feature(feature_name_top)
                 if isinstance(feature, dict):
                     for feature_name in feature.keys():  # type: ignore
-                        feature_path = (
-                            f"{parent_path}.{feature_name_top}.{feature_name}"
-                            if parent_path
-                            else f"{feature_name_top}.{feature_name}"
-                        )
+                        feature_path: list[str] = current_path.copy()
+                        feature_path.extend(feature_name_top + [feature_name])
                         selected_features.append(feature_path)
 
                 else:
-                    feature_path = (
-                        f"{parent_path}.{feature_name_top}"
-                        if parent_path
-                        else feature_name_top
-                    )
+                    feature_path = current_path.copy()
+                    feature_path.extend(feature_name_top)
                     selected_features.append(feature_path)
 
         else:
-            feats = self.search_features(usr_input)
+            feats = self.search_features(usr_input, [])
             if not feats:
                 color.ColoredText.localize("no_feature_with_name", name=usr_input)
             kv_map = list(feats.items())
             kv_map.sort(key=lambda v: v[1], reverse=True)
-            selected_features = [v[0] for v in kv_map]
+            selected_features = [list(v[0]) for v in kv_map]
 
         return selected_features
 
     def select_features_run(self):
-        features = self.get_features()
-        features = list(features.keys())
+        features_dict = self.get_features()
+        features: list[list[str]] = [[k] for k in features_dict.keys()]
         self.save_file.to_file_thread(self.save_file.get_temp_path())
         edits.clear_tutorial.clear_tutorial(self.save_file, False)
         self.save_file.show_ban_message = False
 
         while True:
-            features = self.select_features(features)
+            features = self.select_features(features, [])
 
-            new_features: list[str] = []
+            new_features: list[list[str]] = []
             found_strs: list[str] = []
             for feature_ in features:
-                if feature_.split(".")[-1] in found_strs:
+                if feature_[-1] in found_strs:
                     continue
-                found_strs.append(feature_.split(".")[-1])
+                found_strs.append(feature_[-1])
                 new_features.append(feature_)
 
             features = new_features
             feature = None
             if len(features) == 1:
                 feature = features[0]
-            if len(features) == 2 and features[0] == "go_back":
+            if len(features) == 2 and features[0] == ["go_back"]:
                 feature = features[1]
 
             if not feature:
@@ -283,8 +277,8 @@ class FeatureHandler:
 
                 self.save_file.to_file_thread(self.save_file.get_temp_path())
 
-                features = self.get_features()
-                features = list(features.keys())
+                features_dict = self.get_features()
+                features = [[k] for k in features_dict.keys()]
 
                 core.core_data.game_data_getter = None  # reset game data getter so that if an old version is removed, it will download the new version
 

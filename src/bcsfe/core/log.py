@@ -12,16 +12,19 @@ class Logger:
         Initializes a Logger object
         """
         if path is None:
-            path = core.Path.get_documents_folder().add("bcsfe.log")
+            path = Logger.get_log_path()
         self.log_file = path
         try:
             self.log_data = self.log_file.read(True).split(b"\n")
-        except Exception as e:
+        except Exception as _:
             self.log_data = None
+
+    @staticmethod
+    def get_log_path() -> core.Path:
+        return core.Path.get_state_folder().add("bcsfe.log")
 
     def is_log_enabled(self) -> bool:
         return self.log_data is not None
-        
 
     def get_time(self) -> str:
         """
@@ -41,9 +44,7 @@ class Logger:
         """
         if self.log_data is None:
             return
-        self.log_data.append(
-            core.Data(f"[DEBUG]::{self.get_time()} - {message}")
-        )
+        self.log_data.append(core.Data(f"[DEBUG]::{self.get_time()} - {message}"))
         self.write()
 
     def log_info(self, message: str):
@@ -55,9 +56,7 @@ class Logger:
         """
         if self.log_data is None:
             return
-        self.log_data.append(
-            core.Data(f"[INFO]::{self.get_time()} - {message}")
-        )
+        self.log_data.append(core.Data(f"[INFO]::{self.get_time()} - {message}"))
         self.write()
 
     def log_warning(self, message: str):
@@ -69,9 +68,7 @@ class Logger:
         """
         if self.log_data is None:
             return
-        self.log_data.append(
-            core.Data(f"[WARNING]::{self.get_time()} - {message}")
-        )
+        self.log_data.append(core.Data(f"[WARNING]::{self.get_time()} - {message}"))
         self.write()
 
     def log_error(self, message: str):
@@ -83,9 +80,7 @@ class Logger:
         """
         if self.log_data is None:
             return
-        self.log_data.append(
-            core.Data(f"[ERROR]::{self.get_time()} - {message}")
-        )
+        self.log_data.append(core.Data(f"[ERROR]::{self.get_time()} - {message}"))
         self.write()
 
     def log_exception(self, exception: Exception, extra_msg: str = ""):
@@ -106,9 +101,7 @@ class Logger:
         """
         if self.log_data is None:
             return
-        self.log_file.write(
-            core.Data.from_many(self.log_data, core.Data("\n")).strip()
-        )
+        self.log_file.write(core.Data.from_many(self.log_data, core.Data("\n")).strip())
 
     def log_no_file_found(self, file_name: str):
         """

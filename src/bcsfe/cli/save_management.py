@@ -52,14 +52,14 @@ class SaveManagement:
         color.ColoredText.localize("save_success", path=save_file.save_path)
 
     @staticmethod
-    def save_save_documents(save_file: core.SaveFile):
-        """Save the save file to the documents folder.
+    def save_save_data_dir(save_file: core.SaveFile):
+        """Save the save file to the data folder.
 
         Args:
             save_file (core.SaveFile): The save file to save.
         """
         SaveManagement.upload_items_checker(save_file)
-        save_file.save_path = core.SaveFile.get_saves_path().add("SAVE_DATA")
+        save_file.save_path = core.SaveFile.get_save_path()
         save_file.to_file(save_file.save_path)
         color.ColoredText.localize("save_success", path=save_file.save_path)
 
@@ -360,11 +360,9 @@ class SaveManagement:
         options = [
             "download_save",
             "select_save_file",
-            "load_from_documents",
+            core.localize("load_from_documents", path=core.SaveFile.get_save_path()),
             "adb_pull_save",
             "load_save_data_json",
-            # "load_recent_saves",
-            # "create_new_save",
         ]
         if starting_options:
             options.append("edit_config")

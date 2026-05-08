@@ -103,7 +103,7 @@ class RecentSaves:
 
     @staticmethod
     def get_path() -> core.Path:
-        return core.Path.get_documents_folder().add("recent_saves.json")
+        return core.Path.get_data_folder().add("recent_saves.json")
 
     def save_default(self):
         path = RecentSaves.get_path()

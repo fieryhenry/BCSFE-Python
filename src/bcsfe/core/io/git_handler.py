@@ -52,9 +52,7 @@ class Repo:
         except FileNotFoundError:
             return None
 
-    def get_temp_file(
-        self, temp_folder: core.Path, file_path: core.Path
-    ) -> core.Data:
+    def get_temp_file(self, temp_folder: core.Path, file_path: core.Path) -> core.Data:
         path = temp_folder.add(file_path)
         return path.read()
 
@@ -74,7 +72,7 @@ class Repo:
 class GitHandler:
     @staticmethod
     def get_repo_folder() -> core.Path:
-        repo_folder = core.Path.get_documents_folder().add("repos")
+        repo_folder = core.Path.get_data_folder().add("repos")
         repo_folder.generate_dirs()
         return repo_folder
 

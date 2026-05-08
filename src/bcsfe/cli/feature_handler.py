@@ -33,7 +33,9 @@ class FeatureHandler:
                 "save_save": save_management.SaveManagement.save_save,
                 "save_upload": save_management.SaveManagement.save_upload,
                 "save_save_file": save_management.SaveManagement.save_save_dialog,
-                "save_save_documents": save_management.SaveManagement.save_save_documents,
+                core.localize(
+                    "save_save_documents", path=core.SaveFile.get_save_path()
+                ): save_management.SaveManagement.save_save_data_dir,
                 "waydroid_push": save_management.SaveManagement.waydroid_push,
                 "waydroid_push_rerun": save_management.SaveManagement.waydroid_push_rerun,
                 "adb_push": save_management.SaveManagement.adb_push,

@@ -235,7 +235,7 @@ class GatyaInfo:
 
     def get_file_path(self) -> core.Path:
         return (
-            core.Path.get_documents_folder()
+            core.Path.get_data_folder()
             .add("other_game_data")
             .add(self.cc.get_code())
             .add("gatya_info")

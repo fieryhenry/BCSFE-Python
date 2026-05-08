@@ -74,16 +74,46 @@ class Path:
         return self.path.replace("\\", "/")
 
     @staticmethod
-    def get_documents_folder(app_name: str = "bcsfe") -> Path:
+    def get_data_folder(app_name: str = "bcsfe") -> Path:
         os_name = os.name
         if os_name == "nt":
             path = Path.join(os.environ["USERPROFILE"], "Documents", app_name)
         elif os_name == "posix":
-            path = Path.join(os.environ["HOME"], "Documents", app_name)
+            data_home = os.environ.get("XDG_DATA_HOME")
+            if data_home is None:
+                path = Path.join(os.environ["HOME"], ".local", "share", app_name)
+            else:
+                path = Path.join(data_home, app_name)
         elif os_name == "mac":
             path = Path.join(os.environ["HOME"], "Documents", app_name)
         else:
             raise OSError("Unknown OS")
+        path.generate_dirs()
+        return path
+
+    @staticmethod
+    def get_config_folder(app_name: str = "bcsfe") -> Path:
+        os_name = os.name
+        if os_name != "posix":
+            return Path.get_data_folder()
+        data_home = os.environ.get("XDG_CONFIG_HOME")
+        if data_home is None:
+            path = Path.join(os.environ["HOME"], ".config", app_name)
+        else:
+            path = Path.join(data_home, app_name)
+        path.generate_dirs()
+        return path
+
+    @staticmethod
+    def get_state_folder(app_name: str = "bcsfe") -> Path:
+        os_name = os.name
+        if os_name != "posix":
+            return Path.get_data_folder()
+        data_home = os.environ.get("XDG_STATE_HOME")
+        if data_home is None:
+            path = Path.join(os.environ["HOME"], ".local", "state", app_name)
+        else:
+            path = Path.join(data_home, app_name)
         path.generate_dirs()
         return path
 

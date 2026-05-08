@@ -93,9 +93,7 @@ class GameDataGetter:
                 alt = "https://gitlab.com/fieryhenry/bcdata/-/raw/main/metadata.json"
                 res = dialog_creator.YesNoInput().get_input_once(
                     "use_alternative_repo",
-                    {
-                        "repo": alt
-                    },
+                    {"repo": alt},
                 )
                 if res:
                     core.core_data.config.set(core.ConfigKey.GAME_DATA_REPO, alt)
@@ -127,7 +125,7 @@ class GameDataGetter:
     def get_game_data_dir() -> core.Path:
         path = core.get_game_data_path()
         if path is None:
-            return core.Path.get_documents_folder().add("game_data")
+            return core.Path.get_data_folder().add("game_data")
         return path
 
     def get_file_path(self, pack_name: str, file_name: str) -> core.Path | None:

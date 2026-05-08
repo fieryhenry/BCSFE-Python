@@ -551,7 +551,7 @@ class ServerHandler:
             temp_path = core.get_transfer_backup_path()
             if temp_path is None:
                 temp_path = (
-                    core.Path.get_documents_folder()
+                    core.Path.get_data_folder()
                     .add("saves")
                     .generate_dirs()
                     .add("transfer_backup")

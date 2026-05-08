@@ -78,7 +78,7 @@ class RootHandler:
         self, local_path: core.Path | None = None
     ) -> tuple[core.Path | None, core.CommandResult]:
         if local_path is None:
-            local_path = core.Path.get_documents_folder().add("saves").add("SAVE_DATA")
+            local_path = core.Path.get_data_folder().add("saves").add("SAVE_DATA")
         local_path.parent().generate_dirs()
         result = self.save_battlecats_save(local_path)
         if not result.success:

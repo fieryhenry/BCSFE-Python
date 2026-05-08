@@ -31,14 +31,14 @@ def main():
         "-c",
         type=str,
         default=None,
-        help="path to the config file. If unspecified defaults to Documents/bcsfe/config.yaml",
+        help=f"path to the config file. If unspecified defaults to {core.Config.get_config_path()}",
     )
     parser.add_argument(
         "--log-path",
         "-l",
         type=str,
         default=None,
-        help="path to the log file. If unspecified defaults to Documents/bcsfe/bcsfe.log",
+        help=f"path to the log file. If unspecified defaults to {core.Logger.get_log_path()}",
     )
 
     args = parser.parse_args()

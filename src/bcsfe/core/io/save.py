@@ -2261,7 +2261,7 @@ class SaveFile:
 
     @staticmethod
     def get_temp_path() -> core.Path:
-        save_temp_path = core.Path.get_documents_folder().add("save.temp")
+        save_temp_path = core.Path.get_data_folder().add("save.temp")
         save_temp_path.parent().generate_dirs()
         return save_temp_path
 
@@ -3481,7 +3481,11 @@ class SaveFile:
 
     @staticmethod
     def get_saves_path() -> core.Path:
-        return core.Path.get_documents_folder().add("saves").generate_dirs()
+        return core.Path.get_data_folder().add("saves").generate_dirs()
+
+    @staticmethod
+    def get_save_path() -> core.Path:
+        return SaveFile.get_saves_path().add("SAVE_DATA")
 
     def get_default_path(self) -> core.Path:
         core.Thread("check-backups", SaveFile.check_backups, []).start()

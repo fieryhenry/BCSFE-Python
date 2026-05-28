@@ -413,8 +413,9 @@ class CatEditor:
                 if should_exit:
                     return
                 if upgrade is not None:
-                    power_up.reset_upgrade()
-                    power_up.upgrade_by(upgrade.base)
+                    if upgrade.base != -1:
+                        power_up.reset_upgrade()
+                        power_up.upgrade_by(upgrade.base)
                     cat.set_upgrade(self.save_file, upgrade, True)
                     color.ColoredText.localize(
                         "selected_cat_upgraded",
@@ -435,8 +436,9 @@ class CatEditor:
             success = True
             for cat in cats:
                 power_up = core.PowerUpHelper(cat, self.save_file)
-                power_up.reset_upgrade()
-                power_up.upgrade_by(upgrade.base)
+                if upgrade.base != -1:
+                    power_up.reset_upgrade()
+                    power_up.upgrade_by(upgrade.base)
                 cat.set_upgrade(self.save_file, upgrade, True)
         if success:
             color.ColoredText.localize("upgrade_success")

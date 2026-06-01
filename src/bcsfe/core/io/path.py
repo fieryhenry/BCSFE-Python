@@ -84,6 +84,12 @@ class Path:
                 path = Path.join(os.environ["HOME"], ".local", "share", app_name)
             else:
                 path = Path.join(data_home, app_name)
+
+            # migrate old data
+            if path.is_empty():
+                orig = Path.join(os.environ["HOME"], "Documents", app_name)
+                orig.copy(path)
+
         elif os_name == "mac":
             path = Path.join(os.environ["HOME"], "Documents", app_name)
         else:
@@ -96,12 +102,19 @@ class Path:
         os_name = os.name
         if os_name != "posix":
             return Path.get_data_folder()
+
         data_home = os.environ.get("XDG_CONFIG_HOME")
         if data_home is None:
             path = Path.join(os.environ["HOME"], ".config", app_name)
         else:
             path = Path.join(data_home, app_name)
         path.generate_dirs()
+
+        # migrate from old Documents location
+        if path.is_empty():
+            orig = Path.join(os.environ["HOME"], "Documents", app_name, "config.yaml")
+            if orig.exists():
+                orig.copy(path.join("config.yaml"))
         return path
 
     @staticmethod
@@ -115,6 +128,8 @@ class Path:
         else:
             path = Path.join(data_home, app_name)
         path.generate_dirs()
+
+        # no need to migrate log file really
         return path
 
     def is_empty(self) -> bool:
@@ -128,11 +143,6 @@ class Path:
                 self.__make_dirs()
             except OSError as e:
                 print(e, self)
-        return self
-
-    def create(self) -> Path:
-        if not self.exists():
-            self.write(core.Data("test"))
         return self
 
     def exists(self) -> bool:

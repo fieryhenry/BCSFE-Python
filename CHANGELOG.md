@@ -1,5 +1,29 @@
 # Changelog
 
+## [3.4.0] - 2026-06-01
+
+### Added
+
+- Traditional Chinese translation by LinYuAn
+
+- You can now change the amount of a certain cat / item to add to the storage, rather than 1
+
+- Command line argument to set the game data directory and transfer backup path
+
+### Changed
+
+- On Linux, (and Android and maybe iOS i'm not sure) files stored by the editor now follow the
+XDG_DATA_DIRS specification. ie config is now in $XDG_CONFIG_HOME/bcsfe (defaults to ~/.config/bcsfe),
+game data is stored in $XDG_DATA_HOME/bcsfe (defaults to ~/.local/share/bcsfe). The editor should
+migrate old data from ~/Documents/bcsfe into these folders.
+
+### Fixed
+
+- Issue with upgrading that meant the base level was always set to 1 when ignoring the base level,
+e.g doing +10 would set the level to 1+10, now it should leave it as it was
+
+- The editor will avoid crashing when it fails to write certain files
+
 ## [3.3.0] - 2026-04-01
 
 ### Added

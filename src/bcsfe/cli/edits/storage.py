@@ -128,6 +128,23 @@ def edit_loop(save_file: core.SaveFile) -> bool:
         if editor is None:
             return False
 
+        new_cats: list[core.Cat] = []
+        for cat in cats:
+            names = cat.get_names_cls(save_file)
+            if names is None or not names:
+                name = core.localize("unknown")
+            else:
+                name = names[0]
+            quantity, _ = dialog_creator.IntInput(default=1).get_input_locale(
+                "cat_quantity", {"name": name, "id": cat.id}
+            )
+            if quantity is None:
+                return False
+            for _ in range(quantity):
+                new_cats.append(cat)
+
+        cats = new_cats
+
         space = get_storage_space(storage)
         if len(cats) > len(storage):
             color.ColoredText.localize(
@@ -164,6 +181,19 @@ def edit_loop(save_file: core.SaveFile) -> bool:
         if options is None:
             return False
 
+        items: list[core.StorageItem] = []
+
+        for id in options:
+            item = core.StorageItem.from_special_skill(id)
+
+            quantity, _ = dialog_creator.IntInput(default=1).get_input_locale(
+                "skill_quantity", {"name": skill_names[id]}
+            )
+            if quantity is None:
+                return False
+            for _ in range(quantity):
+                items.append(item)
+
         space = get_storage_space(storage)
         if len(options) > len(storage):
             color.ColoredText.localize(
@@ -177,8 +207,7 @@ def edit_loop(save_file: core.SaveFile) -> bool:
             return False
 
         color.ColoredText.localize("added_special_skills")
-        for choice in options:
-            item = core.StorageItem.from_special_skill(choice)
+        for item in items:
             add_item(storage, item)
             display_item(item, save_file)
 

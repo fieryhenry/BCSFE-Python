@@ -19,6 +19,31 @@ class WayDroidHandler(io.root_handler.RootHandler):
 
         self.package_name = None
 
+    @staticmethod
+    def get_waydroid_ip() -> str | None:
+        cmd = "waydroid status"
+        res = io.command.Command(cmd).run()
+        if not res.success:
+            return None
+
+        ip_address = None
+        for line in res.result.splitlines():
+            key, value = line.split(":", 1)
+            if key == "IP address":
+                ip_address = value
+                break
+
+        return ip_address
+
+    @staticmethod
+    def is_waydroid(device: str) -> bool:
+        waydroid_ip = WayDroidHandler.get_waydroid_ip()
+        if waydroid_ip is None:
+            return False
+
+        ip, _ = device.split(":", 1)
+        return ip == waydroid_ip.strip()
+
     def set_package_name(self, package_name: str):
         self.package_name = package_name
         self.adb_handler.set_package_name(self.package_name)

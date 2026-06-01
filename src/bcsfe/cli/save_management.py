@@ -5,7 +5,6 @@ import bcsfe
 from bcsfe.core import io
 from bcsfe.cli import main, color, dialog_creator, server_cli, recent_saves
 from bcsfe.core.country_code import CountryCode
-from bcsfe.core.io.config import ConfigKey
 
 
 class SaveManagement:
@@ -116,56 +115,9 @@ class SaveManagement:
             color.ColoredText.localize("create_new_account_fail")
 
     @staticmethod
-    def waydroid_push(save_file: core.SaveFile) -> core.WayDroidHandler | None:
-        SaveManagement.save_save(save_file)
-        try:
-            waydroid_handler = core.WayDroidHandler()
-        except core.AdbNotInstalled as e:
-            core.AdbHandler.display_no_adb_error(e)
-            return None
-        except core.io.waydroid.WayDroidNotInstalledError as e:
-            core.WayDroidHandler.display_waydroid_not_installed(e)
-            return None
-
-        if not waydroid_handler.adb_handler.select_device():
-            return None
-
-        if save_file.used_storage and save_file.package_name is not None:
-            waydroid_handler.set_package_name(save_file.package_name)
-        else:
-            packages = waydroid_handler.get_battlecats_packages()
-            package_name = SaveManagement.select_package_name(packages)
-            if package_name is None:
-                color.ColoredText.localize("no_package_name_error")
-                return waydroid_handler
-            waydroid_handler.set_package_name(package_name)
-
-        if save_file.save_path is None:
-            return waydroid_handler
-
-        result = waydroid_handler.load_battlecats_save(save_file.save_path)
-        if result.success:
-            color.ColoredText.localize("waydroid_push_success")
-        else:
-            color.ColoredText.localize("waydroid_push_fail", error=result.result)
-
-        return waydroid_handler
-
-    @staticmethod
-    def waydroid_push_rerun(save_file: core.SaveFile) -> core.AdbHandler | None:
-        waydroid_handler = SaveManagement.waydroid_push(save_file)
-        if not waydroid_handler:
-            return
-        if waydroid_handler.package_name is None:
-            return
-        result = waydroid_handler.rerun_game()
-        if result.success:
-            color.ColoredText.localize("waydroid_rerun_success")
-        else:
-            color.ColoredText.localize("waydroid_rerun_fail", error=result.result)
-
-    @staticmethod
-    def adb_push(save_file: core.SaveFile) -> core.AdbHandler | None:
+    def adb_push(
+        save_file: core.SaveFile,
+    ) -> core.AdbHandler | core.WayDroidHandler | None:
         """Push the save file to the device.
 
         Args:
@@ -183,6 +135,10 @@ class SaveManagement:
         success = adb_handler.select_device()
         if not success:
             return adb_handler
+        device_id = adb_handler.get_device()
+        if core.WayDroidHandler.is_waydroid(device_id):
+            adb_handler = core.WayDroidHandler()
+            adb_handler.adb_handler.set_device(device_id)
         if save_file.used_storage and save_file.package_name is not None:
             adb_handler.set_package_name(save_file.package_name)
         else:
@@ -369,10 +325,6 @@ class SaveManagement:
             options.append("update_external")
             options.append("exit")
 
-        use_waydroid = core.core_data.config.get_bool(ConfigKey.USE_WAYDROID)
-        if use_waydroid:
-            options[3] = "waydroid_pull_save"
-
         root_handler = io.root_handler.RootHandler()
 
         if root_handler.is_android():
@@ -406,25 +358,19 @@ class SaveManagement:
         elif choice == 3:
             handler = root_handler
             if not root_handler.is_android():
-                if use_waydroid:
-                    try:
-                        handler = core.WayDroidHandler()
-                    except core.AdbNotInstalled as e:
-                        core.AdbHandler.display_no_adb_error(e)
-                        return None, False
-                    except core.io.waydroid.WayDroidNotInstalledError as e:
-                        core.WayDroidHandler.display_waydroid_not_installed(e)
-                        return None, False
-                    if not handler.adb_handler.select_device():
-                        return None, False
-                else:
-                    try:
-                        handler = core.AdbHandler()
-                    except core.AdbNotInstalled as e:
-                        core.AdbHandler.display_no_adb_error(e)
-                        return None, False
-                    if not handler.select_device():
-                        return None, False
+                try:
+                    handler = core.AdbHandler()
+                except core.AdbNotInstalled as e:
+                    core.AdbHandler.display_no_adb_error(e)
+                    return None, False
+                if not handler.select_device():
+                    return None, False
+
+                device_id = handler.get_device()
+
+                if core.WayDroidHandler.is_waydroid(device_id):
+                    handler = core.WayDroidHandler()
+                    handler.adb_handler.set_device(device_id)
 
             elif not root_handler.is_rooted():
                 color.ColoredText.localize("not_rooted_error")
@@ -440,20 +386,14 @@ class SaveManagement:
             if root_handler.is_android():
                 key = "storage_pulling"
             else:
-                if use_waydroid:
-                    key = "waydroid_pulling"
-                else:
-                    key = "adb_pulling"
+                key = "adb_pulling"
             color.ColoredText.localize(key, package_name=package_name)
             save_path, result = handler.save_locally()
             if save_path is None:
                 if root_handler.is_android():
                     key = "storage_pull_fail"
                 else:
-                    if use_waydroid:
-                        key = "waydroid_pull_fail"
-                    else:
-                        key = "adb_pull_fail"
+                    key = "adb_pull_fail"
                 color.ColoredText.localize(
                     key,
                     package_name=package_name,

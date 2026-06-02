@@ -443,7 +443,7 @@ class Config:
         features = list(ConfigKey)
 
         choice = dialog_creator.basic_pick_key_index(
-            [key.value for key in features],
+            [core.localize(key.value) for key in features],
             "config_dialog",
         )
         if choice is None:

@@ -83,8 +83,8 @@ class Actions[T]:
     def get_rebase(self, index: int) -> tuple[Action[T], int] | None:
         current = 0
         for action in self.actions:
-            if current >= index:
-                return action, current - index
+            if index < current + action.len():
+                return action, index - current
             current += action.len()
         return None
 
@@ -133,13 +133,10 @@ def display_options_raw(options: list[str], dialog: str):
 
 
 def yes_no_raw(dialog: str) -> bool | None:
-    return single_select_raw(
-        Actions[bool]
-        .new()
-        .add_new_key("yes", lambda _: True)
-        .add_new_key("no", lambda _: False),
-        dialog,
-    )
+    inp = str_input_raw(dialog)
+    if inp is None:
+        return None
+    return inp.lower().strip() == core.localize("yes_key").strip().lower()
 
 
 def range_multi_input_key(
@@ -279,7 +276,10 @@ def multi_select_entries_raw(
 
         for inp in inps:
             if not inp.isdigit():
-                print(core.localize("invalid_integer"))
+                color.ColoredText.localize(
+                    "invalid_input_int", min=min, max=actions.max()
+                )
+                continue
 
             inp_i = int(inp)
             inp_i -= offset
@@ -304,6 +304,8 @@ def multi_select_entries_raw(
 def single_select_raw(actions: Actions[T], dialog: str) -> T | None:
     offset = 1
 
+    min = offset
+
     quit_key = core.localize("quit_key")
 
     while True:
@@ -312,7 +314,12 @@ def single_select_raw(actions: Actions[T], dialog: str) -> T | None:
         if inp == quit_key:
             return None
         if not inp.isdigit():
-            print(core.localize("invalid_integer"))
+            for act in actions.actions:
+                for i, o in enumerate(act.options):
+                    if o.lower().strip() == inp.lower().strip():
+                        return act.run(i)
+            color.ColoredText.localize("invalid_input_int", min=min, max=actions.max())
+            continue
 
         inp_i = int(inp)
         inp_i -= offset

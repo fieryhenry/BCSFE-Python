@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any
+from typing import Any, Optional
 from bcsfe import core
 from bcsfe.cli import color, dialog_creator
 
@@ -679,7 +679,7 @@ class StoryChapters:
             return None
 
         return dialog_creator.single_select_key(
-            dialog_creator.Actions[int | None]
+            dialog_creator.Actions[Optional[int]]
             .new()
             .add_new_key("no_treasure", lambda _: 0)
             .add_new_raw(treasure_text[:3], lambda v: v + 1)
@@ -766,7 +766,7 @@ class StoryChapters:
     @staticmethod
     def select_stages(save_file: core.SaveFile, chapter_id: int) -> list[int] | None:
         return dialog_creator.single_select_key(
-            dialog_creator.Actions[list[int] | None]
+            dialog_creator.Actions[Optional[list[int]]]
             .new()
             .add_new_key(
                 "select_stage_by_id", lambda _: StoryChapters.select_stages_by_id()

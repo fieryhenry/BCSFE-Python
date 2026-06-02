@@ -1,5 +1,6 @@
 from __future__ import annotations
 import enum
+from typing import Optional
 
 from bcsfe import core
 from bcsfe.cli import color, dialog_creator
@@ -59,7 +60,7 @@ class CatEditor:
         if current_cats is None:
             current_cats = []
         actions = (
-            dialog_creator.Actions[tuple[list[core.Cat] | None, bool]]
+            dialog_creator.Actions[tuple[Optional[list[core.Cat]], bool]]
             .new()
             .add_new_key(
                 "select_cats_all", lambda _: (self.save_file.cats.get_all_cats(), False)
@@ -320,7 +321,7 @@ class CatEditor:
             return None
 
         gatya_ids = dialog_creator.single_select_key(
-            dialog_creator.Actions[list[int] | None]
+            dialog_creator.Actions[Optional[list[int]]]
             .new()
             .add_new_key(
                 "by_id",
@@ -756,7 +757,7 @@ class CatEditor:
     ) -> tuple[bool, list[core.Cat]]:
         self.print_selected_cats(cats)
         res = dialog_creator.single_select_key(
-            dialog_creator.Actions[tuple[list[core.Cat] | None, bool]]
+            dialog_creator.Actions[tuple[Optional[list[core.Cat]], bool]]
             .new()
             .add_new_key(
                 "select_cats_again", lambda _: (self.select(cats, False)[0], False)

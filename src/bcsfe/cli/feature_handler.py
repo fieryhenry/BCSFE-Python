@@ -178,14 +178,14 @@ class FeatureHandler:
                 )
             for alias in core.LocalManager.get_all_aliases(feature_name):
                 if not name:
-                    found_features[*path] = 100
+                    found_features[tuple(path)] = 100
                     break
                 alias = alias.lower()
 
                 name = name.replace(" ", "")
                 alias = alias.replace(" ", "")
                 if alias in name or name in alias:
-                    found_features[*path] = 100
+                    found_features[tuple(path)] = 100
                     break
 
         return found_features

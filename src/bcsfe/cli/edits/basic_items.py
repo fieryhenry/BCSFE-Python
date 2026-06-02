@@ -1,5 +1,6 @@
 from __future__ import annotations
 import random
+from typing import Optional
 from bcsfe import core
 from bcsfe.cli import dialog_creator, color, edits
 from bcsfe.core.game.catbase.gatya_item import GatyaItemCategory
@@ -72,7 +73,7 @@ class BasicItems:
         safe_feature_name = core.core_data.local_manager.get_key(safe_feature_name)
 
         return dialog_creator.single_select_key(
-            dialog_creator.Actions[bool | None]
+            dialog_creator.Actions[Optional[bool]]
             .new()
             .add_new_key("continue_editing", lambda _: False, feature_name=feature_name)
             .add_new_key(

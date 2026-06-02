@@ -1,6 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Optional
 from bcsfe import core
 from bcsfe.cli import color, dialog_creator
 
@@ -404,7 +404,7 @@ class Gamatoto:
             "gamatoto_level_current", level=current_level.level, xp=xp
         )
         res = dialog_creator.single_select_key(
-            dialog_creator.Actions[tuple[int | None, GamatotoLevel | None]]
+            dialog_creator.Actions[tuple[Optional[int], Optional[GamatotoLevel]]]
             .new()
             .add_new_key(
                 "enter_raw_gamatoto_xp", lambda _: self.edit_raw_xp(gamatoto_levels)

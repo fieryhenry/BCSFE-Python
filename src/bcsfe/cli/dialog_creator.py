@@ -1,6 +1,6 @@
 from __future__ import annotations
 from collections.abc import Callable, Sequence
-from typing import Any, TypeVar
+from typing import Any, Generic, TypeVar
 
 from bcsfe import core
 from bcsfe.cli import color
@@ -15,7 +15,7 @@ class NoAssignedActionException(Exception):
         super().__init__(f"No assigned action to index {index}")
 
 
-class Action[T]:
+class Action(Generic[T]):
     def __init__(self, options: list[str], func: ActionFunc[T]):
         self.options = options
         self.func = func
@@ -47,7 +47,7 @@ class Action[T]:
         return self.func(index)
 
 
-class Actions[T]:
+class Actions(Generic[T]):
     def __init__(self, actions: list[Action[T]]):
         self.actions = actions
 

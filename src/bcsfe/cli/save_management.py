@@ -1,4 +1,5 @@
 from __future__ import annotations
+from typing import Optional
 from bcsfe import core
 import bcsfe
 from bcsfe.core import io
@@ -354,7 +355,7 @@ class SaveManagement:
         root_handler = io.root_handler.RootHandler()
 
         root_action = dialog_creator.Action[
-            tuple[core.SaveFile, core.Path] | None
+            Optional[tuple[core.SaveFile, core.Path]]
         ].new_key(
             "adb_pull_save",
             lambda _: core.map_opt(
@@ -363,7 +364,7 @@ class SaveManagement:
         )
         if root_handler.is_android():
             root_action = dialog_creator.Action[
-                tuple[core.SaveFile, core.Path] | None
+                Optional[tuple[core.SaveFile, core.Path]]
             ].new_key(
                 "root_storage_pull",
                 lambda _: core.map_opt(
@@ -373,7 +374,7 @@ class SaveManagement:
             )
 
         actions = (
-            dialog_creator.Actions[tuple[core.SaveFile, core.Path] | None]
+            dialog_creator.Actions[Optional[tuple[core.SaveFile, core.Path]]]
             .new()
             .add_new_key(
                 "download_save",

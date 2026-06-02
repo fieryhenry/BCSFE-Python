@@ -131,11 +131,11 @@ def display_options_key(
 def display_options_raw(options: list[str], dialog: str):
     lines: list[str] = []
 
+    color.ColoredText(dialog)
     for i, opt in enumerate(options):
         lines.append(f" {i + 1}. <@t>{opt}</>")
 
     color.ColoredText("\n".join(lines))
-    color.ColoredText(dialog)
 
 
 def yes_no_raw(dialog: str) -> bool | None:
@@ -440,7 +440,9 @@ def edit_int_raw(item_name: str, current_value: int, max: MaxValue | int) -> int
 
     dialog = core.localize(key, name=item_name, value=current_value, max=max.max)
 
-    val = int_input_raw(dialog, max) or current_value
+    val = int_input_raw(dialog, max, auto_clamp=True)
+    if val is None:
+        val = current_value
     color.ColoredText.localize("value_changed", name=item_name, value=val)
     return val
 
@@ -458,10 +460,13 @@ def int_input_key(
     _max: MaxValue | int,
     min: int = 0,
     default: int | None = None,
+    auto_clamp: bool = False,
     escape: bool = True,
     **kwargs: Any,
 ) -> int | None:
-    return int_input_raw(core.localize(dialog, escape, **kwargs), _max, min, default)
+    return int_input_raw(
+        core.localize(dialog, escape, **kwargs), _max, min, default, auto_clamp
+    )
 
 
 def str_input_key(dialog: str, escape: bool = True, **kwargs: Any) -> str | None:
@@ -469,10 +474,14 @@ def str_input_key(dialog: str, escape: bool = True, **kwargs: Any) -> str | None
 
 
 def int_input_raw(
-    dialog: str, max: MaxValue | int, min: int = 0, default: int | None = None
+    dialog: str,
+    _max: MaxValue | int,
+    _min: int = 0,
+    default: int | None = None,
+    auto_clamp: bool = False,
 ) -> int | None:
-    if isinstance(max, int):
-        max = MaxValue.specific(max)
+    if isinstance(_max, int):
+        _max = MaxValue.specific(_max)
     quit_key = core.localize("quit_key")
     while True:
         inp = color.ColoredInput("").get(dialog)
@@ -483,12 +492,15 @@ def int_input_raw(
         try:
             inp_i = int(inp)
         except ValueError:
-            color.ColoredText.localize("invalid_input_int", max=max.max, min=min)
+            color.ColoredText.localize("invalid_input_int", max=_max.max, min=_min)
             continue
 
-        if inp_i < min or inp_i > max.max:
-            color.ColoredText.localize("invalid_input_int", max=max.max, min=min)
-            continue
+        if inp_i < _min or inp_i > _max.max:
+            if auto_clamp:
+                inp_i = min(max(_min, inp_i), _max.max)
+            else:
+                color.ColoredText.localize("invalid_input_int", max=_max.max, min=_min)
+                continue
 
         return inp_i
 
@@ -573,7 +585,7 @@ def edit_ints_raw(
     current_values: list[int],
     max: MultiMax | CumulativeMax | MaxValue | int,
 ) -> list[int]:
-    entries = multi_select_entries_key(
+    entries = multi_select_indexes_key(
         [
             core.localize("value", name=name, value=value)
             for name, value in zip(item_names, current_values)
@@ -586,22 +598,55 @@ def edit_ints_raw(
     if not entries:
         return current_values
 
-    individual = len(entries) == 1
-
     if isinstance(max, (MultiMax, CumulativeMax)):
-        raise NotImplementedError()
+        raise NotImplementedError
 
-    if individual:
-        for id, name in entries:
-            new_val = edit_int_raw(name, current_values[id], max)
-            current_values[id] = new_val
-    else:
-        val = int_input_key("input_generic", max, name=group_name)
-        if val is None:
-            return current_values
+    if len(entries) == 1:
+        edit_individual(current_values, max, entries, item_names)
 
-        for id, name in entries:
-            current_values[id] = val
-            color.ColoredText.localize("value_changed", name=name, value=val)
+    single_select_key(
+        Actions[None]
+        .new()
+        .add_new_key(
+            "individually",
+            lambda _: edit_individual(current_values, max, entries, item_names),
+        )
+        .add_new_key(
+            "edit_all_at_once",
+            lambda _: edit_many(current_values, max, entries, group_name, item_names),
+        ),
+        "individual_or_all_at_once",
+        group=group_name,
+    )
 
     return current_values
+
+
+def edit_individual(
+    current_values: list[int], max: MaxValue | int, entries: list[int], names: list[str]
+):
+    for id in entries:
+        new_val = edit_int_raw(names[id], current_values[id], max)
+        current_values[id] = new_val
+
+
+def edit_many(
+    current_values: list[int],
+    max: MaxValue | int,
+    entries: list[int],
+    group_name: str,
+    names: list[str],
+):
+    if isinstance(max, int):
+        max = MaxValue.specific(max)
+    val = int_input_key(
+        "input_generic", max, name=group_name, auto_clamp=True, max=max.max
+    )
+    if val is None:
+        return
+
+    for id in entries:
+        current_values[id] = val
+        color.ColoredText.localize(
+            "value_changed", name=names[id], value=val, escape=False
+        )

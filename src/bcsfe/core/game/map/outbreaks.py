@@ -217,7 +217,7 @@ class Outbreaks:
             return
 
         options = ["clear", "unclear"]
-        choice = dialog_creator.basic_pick_key_index(
+        choice = dialog_creator.basic_keys_pick_key_index(
             options,
             dialog="clear_unclear_outbreaks",
         )

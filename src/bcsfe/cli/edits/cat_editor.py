@@ -603,7 +603,10 @@ class CatEditor:
         dialog_creator.single_select_key(
             dialog_creator.Actions[None]
             .new()
-            .add_new_key("unlock_cats", lambda _: cat_editor.unlock_cats(current_cats))
+            .add_new_raw(
+                core.localize_no_alias("unlock_cats"),
+                lambda _: cat_editor.unlock_cats(current_cats),
+            )
             .add_new_key("remove_cats", lambda _: cat_editor.remove_cats(current_cats)),
             "unlock_remove_q",
         )

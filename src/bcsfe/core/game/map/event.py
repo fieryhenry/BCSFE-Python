@@ -903,7 +903,7 @@ class EventChapters:
                 name = names_dict[id]
                 EventChapters.print_current_chapter(name, id)
 
-            option = dialog_creator.basic_pick_key_index(
+            option = dialog_creator.basic_keys_pick_key_index(
                 ["keep_selecting", "remove_selection", "finish_selection"],
                 dialog="map_selection_q",
             )

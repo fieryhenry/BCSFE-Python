@@ -456,7 +456,7 @@ class Ototo:
         all_at_once = False
 
         if len(cannon_ids) > 1:
-            choice = dialog_creator.basic_pick_key_index(
+            choice = dialog_creator.basic_keys_pick_key_index(
                 ["individual", "edit_all_at_once"],
                 dialog="cannon_edit_type",
             )
@@ -468,7 +468,7 @@ class Ototo:
                 all_at_once = True
 
         if len(cannon_ids) > 1 or (len(cannon_ids) == 1 and cannon_ids[0] != 0):
-            choice = dialog_creator.basic_pick_key_index(
+            choice = dialog_creator.basic_keys_pick_key_index(
                 ["development_o", "level_o"],
                 dialog="cannon_dev_level_q",
             )
@@ -486,7 +486,7 @@ class Ototo:
         self.display_current_cannons(save_file)
 
     def select_development(self) -> int | None:
-        return dialog_creator.basic_pick_key_index(
+        return dialog_creator.basic_keys_pick_key_index(
             ["none", "foundation", "style", "effect"],
             dialog="select_development",
         )
@@ -545,7 +545,11 @@ class Ototo:
                 return
             levels = dialog_creator.edit_ints_key(
                 "cannon_level",
-                ["effect", "improved_foundation", "improved_style"],
+                [
+                    core.localize("effect"),
+                    core.localize("improved_foundation"),
+                    core.localize("improved_style"),
+                ],
                 [0, 0, 0],
                 max=dialog_creator.MultiMax.new(
                     [
@@ -597,9 +601,11 @@ class Ototo:
                 ):
                     return
 
-                levels = dialog_creator.edit_ints_key(
+                color.ColoredText(cannon_desc.get_cannon_name())
+
+                levels = dialog_creator.edit_ints_raw(
                     cannon_desc.get_cannon_name(),
-                    names,
+                    [core.localize(n) for n in names],
                     levels,
                     max=dialog_creator.MultiMax.new(
                         [

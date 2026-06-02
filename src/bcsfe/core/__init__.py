@@ -379,6 +379,12 @@ def localize(key: str, escape: bool = True, **kwargs: Any) -> str:
     return core_data.local_manager.get_key(key, escape=escape, **kwargs)
 
 
+def localize_no_alias(key: str, escape: bool = True, **kwargs: Any) -> str:
+    return core_data.local_manager.get_all_aliases(
+        core_data.local_manager.get_key(key, escape=escape, **kwargs)
+    )[0]
+
+
 __all__ = [
     "server",
     "io",

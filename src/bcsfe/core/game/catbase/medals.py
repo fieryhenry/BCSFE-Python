@@ -94,7 +94,7 @@ class Medals:
         if medal_names.medal_names is None:
             return
         options = ["add_medals", "remove_medals"]
-        choice = dialog_creator.basic_pick_key_index(
+        choice = dialog_creator.basic_keys_pick_key_index(
             options, dialog="medal_add_remove_dialog"
         )
         if choice is None:

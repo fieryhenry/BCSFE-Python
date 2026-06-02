@@ -259,8 +259,12 @@ def multi_select_entries_key(
 def multi_select_entries_raw(
     options: list[str], dialog: str
 ) -> list[tuple[int, str]] | None:
-    offset = 1
+    if not options:
+        return None
+    if len(options) == 1:
+        return [(0, options[0])]
 
+    offset = 1
     actions = (
         Actions[list[tuple[int, str]]]
         .new()
@@ -393,6 +397,30 @@ def basic_pick_key(
     return basic_pick_raw(items, core.localize(dialog, escape, **kwargs))
 
 
+def basic_keys_pick_key(
+    keys: list[str], dialog: str, escape: bool = True, **kwargs: Any
+) -> str | None:
+    return basic_pick_key(
+        [core.localize(key) for key in keys], dialog, escape, **kwargs
+    )
+
+
+def basic_keys_pick_key_index(
+    keys: list[str], dialog: str, escape: bool = True, **kwargs: Any
+) -> int | None:
+    return basic_pick_key_index(
+        [core.localize(key) for key in keys], dialog, escape, **kwargs
+    )
+
+
+def basic_keys_pick_key_entry(
+    keys: list[str], dialog: str, escape: bool = True, **kwargs: Any
+) -> tuple[int, str] | None:
+    return basic_pick_key_entry(
+        [core.localize(key) for key in keys], dialog, escape, **kwargs
+    )
+
+
 class MaxValue:
     def __init__(self, max: int, show: bool = True):
         self.max = max
@@ -438,12 +466,14 @@ def edit_int_raw(item_name: str, current_value: int, max: MaxValue | int) -> int
     else:
         key = "input_no_max"
 
-    dialog = core.localize(key, name=item_name, value=current_value, max=max.max)
+    dialog = core.localize(
+        key, name=item_name, value=current_value, max=max.max, escape=False
+    )
 
     val = int_input_raw(dialog, max, auto_clamp=True)
     if val is None:
         val = current_value
-    color.ColoredText.localize("value_changed", name=item_name, value=val)
+    color.ColoredText.localize("value_changed", name=item_name, value=val, escape=False)
     return val
 
 
@@ -548,6 +578,16 @@ class CumulativeMax:
             return CumulativeMax.specific(max)
         return CumulativeMax(max)
 
+    def get(self, current_values: list[int], ids: list[int] | int) -> MaxValue:
+        if isinstance(ids, int):
+            ids = [ids]
+
+        v = 0
+        for id in ids:
+            v += current_values[id]
+
+        return MaxValue.specific(self.max.max - sum(current_values) + v)
+
 
 class MultiMax:
     def __init__(self, maxes: list[MaxValue]):
@@ -564,6 +604,22 @@ class MultiMax:
                 new.append(m)
 
         return MultiMax(new)
+
+    def get(self, id: int) -> MaxValue | None:
+        if id < 0 or id >= len(self.maxes):
+            return None
+        return self.maxes[id]
+
+    def maximal(self, ids: list[int]) -> MaxValue:
+        m = MaxValue.specific(0)
+        for id in ids:
+            m_v = self.get(id)
+            if m_v is None:
+                continue
+            if m_v.max > m.max:
+                m = m_v
+
+        return m
 
 
 def edit_ints_key(
@@ -598,11 +654,9 @@ def edit_ints_raw(
     if not entries:
         return current_values
 
-    if isinstance(max, (MultiMax, CumulativeMax)):
-        raise NotImplementedError
-
     if len(entries) == 1:
         edit_individual(current_values, max, entries, item_names)
+        return current_values
 
     single_select_key(
         Actions[None]
@@ -623,30 +677,56 @@ def edit_ints_raw(
 
 
 def edit_individual(
-    current_values: list[int], max: MaxValue | int, entries: list[int], names: list[str]
+    current_values: list[int],
+    max: MaxValue | MultiMax | CumulativeMax | int,
+    entries: list[int],
+    names: list[str],
 ):
+    entries_c = entries.copy()
     for id in entries:
-        new_val = edit_int_raw(names[id], current_values[id], max)
+        if isinstance(max, MultiMax):
+            _max = max.get(id)
+            if _max is None:
+                return
+        elif isinstance(max, CumulativeMax):
+            _max = max.get(current_values, entries_c)
+        else:
+            _max = max
+        new_val = edit_int_raw(names[id], current_values[id], _max)
         current_values[id] = new_val
+        entries_c.pop(0)
 
 
 def edit_many(
     current_values: list[int],
-    max: MaxValue | int,
+    max: MaxValue | MultiMax | CumulativeMax | int,
     entries: list[int],
     group_name: str,
     names: list[str],
 ):
     if isinstance(max, int):
         max = MaxValue.specific(max)
+
+    if isinstance(max, MultiMax):
+        _max = max.maximal(entries)
+    elif isinstance(max, CumulativeMax):
+        _max = MaxValue.specific(max.get(current_values, entries).max // len(entries))
+    else:
+        _max = max
     val = int_input_key(
-        "input_generic", max, name=group_name, auto_clamp=True, max=max.max
+        "input_generic", _max, name=group_name, auto_clamp=True, max=_max.max
     )
     if val is None:
         return
 
     for id in entries:
-        current_values[id] = val
+        if isinstance(max, MultiMax):
+            maxm = max.get(id)
+            if maxm is None:
+                continue
+            _max = maxm
+        val_ = _max.clamp(val)
+        current_values[id] = val_
         color.ColoredText.localize(
-            "value_changed", name=names[id], value=val, escape=False
+            "value_changed", name=names[id], value=val_, escape=False
         )

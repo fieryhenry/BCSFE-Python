@@ -251,7 +251,7 @@ class BattleItems:
 
         options = dialog_creator.multi_select_indexes_key(
             [
-                core.localize("endless_item_item", item=item, int=val)
+                core.localize("endless_item_item", item=item, int=val, escape=False)
                 for item, val in zip(item_names, current_values)
             ],
             "select_option",
@@ -260,7 +260,7 @@ class BattleItems:
         if options is None:
             return
 
-        individual = dialog_creator.basic_pick_key_index(
+        individual = dialog_creator.basic_keys_pick_key_index(
             ["individual", "all_at_once"], "edit_endless_q"
         )
         if individual is None:

@@ -442,8 +442,8 @@ class Config:
         config = core.core_data.config
         features = list(ConfigKey)
 
-        choice = dialog_creator.basic_pick_key_index(
-            [core.localize(key.value) for key in features],
+        choice = dialog_creator.basic_keys_pick_key_index(
+            [key.value for key in features],
             "config_dialog",
         )
         if choice is None:

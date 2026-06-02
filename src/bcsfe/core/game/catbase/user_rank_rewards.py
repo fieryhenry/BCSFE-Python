@@ -186,7 +186,7 @@ class UserRankRewards:
         self.rewards[index].claimed = claimed
 
     def edit(self, save_file: core.SaveFile):
-        claim_choice = dialog_creator.basic_pick_key_index(
+        claim_choice = dialog_creator.basic_keys_pick_key_index(
             ["claim", "unclaim", "fix_claimed"],
             dialog="claim_or_unclaim_ur",
         )

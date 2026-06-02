@@ -220,7 +220,7 @@ class Missions:
                 options.append(name)
                 mssion_ids.append(mission_id)
 
-        re_claim = dialog_creator.basic_pick_key_index(
+        re_claim = dialog_creator.basic_keys_pick_key_index(
             ["complete_reward", "complete_claim", "uncomplete"],
             dialog="select_mission_claim",
         )

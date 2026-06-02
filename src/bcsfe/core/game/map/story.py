@@ -563,7 +563,7 @@ class StoryChapters:
         if not map_choices:
             return
 
-        clear_type_choice = dialog_creator.basic_pick_key_index(
+        clear_type_choice = dialog_creator.basic_keys_pick_key_index(
             ["clear_whole_chapters", "clear_specific_stages"],
             dialog="select_clear_type",
         )
@@ -582,7 +582,7 @@ class StoryChapters:
                 options = ["clear_amount_chapter", "clear_amount_all"]
                 if clear_type_choice == 1:
                     options.append("clear_amount_stages")
-                clear_amount_type = dialog_creator.basic_pick_key_index(
+                clear_amount_type = dialog_creator.basic_keys_pick_key_index(
                     options,
                     dialog="select_clear_amount_type",
                 )

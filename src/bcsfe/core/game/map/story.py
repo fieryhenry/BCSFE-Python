@@ -682,7 +682,7 @@ class StoryChapters:
             dialog_creator.Actions[int | None]
             .new()
             .add_new_key("no_treasure", lambda _: 0)
-            .add_new_raw(treasure_text, lambda v: v + 1)
+            .add_new_raw(treasure_text[:3], lambda v: v + 1)
             .add_new_key(
                 "custom_treasure_level", lambda _: StoryChapters.custom_treasure_level()
             ),

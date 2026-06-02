@@ -75,7 +75,6 @@ class FileDialog:
         return self.select_files_in_dir(path_obj, ignore_json)
 
     def use_tk(self) -> bool:
-        return False
         return (
             self.tk is not None
             and self.filedialog is not None

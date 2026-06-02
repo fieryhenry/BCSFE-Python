@@ -51,6 +51,12 @@ class Actions[T]:
     def __init__(self, actions: list[Action[T]]):
         self.actions = actions
 
+    def len(self) -> int:
+        return len(self.actions)
+
+    def is_empty(self) -> bool:
+        return self.len() == 0
+
     @staticmethod
     def new() -> Actions[T]:
         return Actions([])
@@ -302,6 +308,10 @@ def multi_select_entries_raw(
 
 
 def single_select_raw(actions: Actions[T], dialog: str) -> T | None:
+    if actions.max() == 0:
+        return None
+    if actions.len() == 1 and actions.actions[0].len() == 1:
+        return actions.actions[0].run(0)
     offset = 1
 
     min = offset

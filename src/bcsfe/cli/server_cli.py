@@ -36,16 +36,18 @@ class ServerCLI:
         )
         if server_handler is None and result is not None:
             color.ColoredText.localize("invalid_codes_error")
-            if dialog_creator.yes_no_key("display_response_debug_info_q"):
-                if result.response is not None:
-                    color.ColoredText.localize(
-                        "response_text_display",
-                        url=result.url,
-                        request_headers=result.headers,
-                        request_body=result.data,
-                        response_headers=result.response.headers,
-                        response_body=result.response.text,
-                    )
+            if cc == "jp":
+                color.ColoredText.localize("jp_tw_mixup")
+            # if dialog_creator.yes_no_key("display_response_debug_info_q"):
+            #     if result.response is not None:
+            #         color.ColoredText.localize(
+            #             "response_text_display",
+            #             url=result.url,
+            #             request_headers=result.headers,
+            #             request_body=result.data,
+            #             response_headers=result.response.headers,
+            #             response_body=result.response.text,
+            #         )
             return
         if server_handler is None:
             return

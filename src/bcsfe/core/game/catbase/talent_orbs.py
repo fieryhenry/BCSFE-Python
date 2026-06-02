@@ -539,6 +539,31 @@ class SaveOrbs:
         if attribute is not None:
             return attribute
 
+    def edit_ind(self, orb_selection: list[OrbInfo], max_orbs: int):
+        for orb in orb_selection:
+            orb_id = orb.raw_orb_info.orb_id
+            try:
+                orb_count = self.orbs[orb_id].count
+            except KeyError:
+                orb_count = 0
+
+            orb_count = dialog_creator.edit_int_raw(
+                orb.to_colortext(), orb_count, max_orbs
+            )
+
+            self.orbs[orb_id] = SaveOrb(orb, orb_count)
+
+    def edit_many(self, max_orbs: int, orb_selection: list[OrbInfo]):
+        orb_count = dialog_creator.int_input_key(
+            "edit_orbs_all", _max=max_orbs, max=max_orbs, escape=False
+        )
+        if orb_count is None:
+            return
+        orb_count = dialog_creator.MaxValue.specific(max_orbs).clamp(orb_count)
+        for orb in orb_selection:
+            orb_id = orb.raw_orb_info.orb_id
+            self.orbs[orb_id] = SaveOrb(orb, orb_count)
+
     def edit(self):
         """Edit the orbs"""
         # this code sucks quit a lot, but it works and i can't be bothered making it better atm
@@ -647,41 +672,20 @@ class SaveOrbs:
         if len(orb_selection) == 0:
             return
         if len(orb_selection) == 1:
-            individual = True
+            self.edit_ind(orb_selection, max_orbs)
         else:
-            individual = dialog_creator.ChoiceInput.from_reduced(
-                ["individual", "edit_all_at_once"],
-                dialog="edit_orbs_individually",
-                single_choice=True,
-            ).single_choice()
-            if individual is None:
-                return
-            individual = True if individual == 1 else False
-        if individual:
-            for orb in orb_selection:
-                orb_id = orb.raw_orb_info.orb_id
-                try:
-                    orb_count = self.orbs[orb_id].count
-                except KeyError:
-                    orb_count = 0
-
-                orb_count = dialog_creator.SingleEditor(
-                    orb.to_colortext(), orb_count, max_orbs
-                ).edit(escape_text=False)
-
-                self.orbs[orb_id] = SaveOrb(orb, orb_count)
-
-        else:
-            int_input = dialog_creator.IntInput(max_orbs)
-            orb_count = int_input.get_input_locale_while(
-                "edit_orbs_all", {"max": max_orbs}, escape=False
+            dialog_creator.single_select_key(
+                dialog_creator.Actions[None]
+                .new()
+                .add_new_key(
+                    "individual", lambda _: self.edit_ind(orb_selection, max_orbs)
+                )
+                .add_new_key(
+                    "edit_all_at_once",
+                    lambda _: self.edit_many(max_orbs, orb_selection),
+                ),
+                "edit_orbs_individually",
             )
-            if orb_count is None:
-                return
-            orb_count = int_input.clamp_value(orb_count)
-            for orb in orb_selection:
-                orb_id = orb.raw_orb_info.orb_id
-                self.orbs[orb_id] = SaveOrb(orb, orb_count)
 
         self.print()
 

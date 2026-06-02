@@ -217,12 +217,12 @@ class Outbreaks:
             return
 
         options = ["clear", "unclear"]
-        choice = dialog_creator.ChoiceInput.from_reduced(
-            options, dialog="clear_unclear_outbreaks", single_choice=True
-        ).single_choice()
+        choice = dialog_creator.basic_pick_key_index(
+            options,
+            dialog="clear_unclear_outbreaks",
+        )
         if choice is None:
             return
-        choice -= 1
 
         clear = choice == 0
 
@@ -232,10 +232,10 @@ class Outbreaks:
         if not selected_ids:
             return
 
-        choice = core.StoryChapters.get_per_chapter(selected_ids)
-        if choice is None:
+        is_per_chapter = core.StoryChapters.is_per_chapter(selected_ids)
+        if is_per_chapter is None:
             return
-        if choice == 0:
+        if is_per_chapter:
             for chapter_id in selected_ids:
                 stages = core.StoryChapters.select_stages(save_file, chapter_id)
                 if not stages:

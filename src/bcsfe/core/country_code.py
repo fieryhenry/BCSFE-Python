@@ -61,25 +61,23 @@ class CountryCode:
 
     @staticmethod
     def select() -> CountryCode | None:
-        index = dialog_creator.ChoiceInput.from_reduced(
+        index = dialog_creator.basic_pick_key_index(
             CountryCode.get_all_str(),
             dialog="country_code_select",
-            single_choice=True,
-        ).single_choice()
+        )
         if index is None:
             return None
-        return CountryCode.get_all()[index - 1]
+        return CountryCode.get_all()[index]
 
     @staticmethod
     def select_from_ccs(ccs: list[CountryCode]) -> CountryCode | None:
-        index = dialog_creator.ChoiceInput.from_reduced(
+        index = dialog_creator.basic_pick_key_index(
             [cc.get_code() for cc in ccs],
             dialog="country_code_select",
-            single_choice=True,
-        ).single_choice()
+        )
         if index is None:
             return None
-        return ccs[index - 1]
+        return ccs[index]
 
     def __eq__(self, o: object) -> bool:
         if isinstance(o, CountryCode):

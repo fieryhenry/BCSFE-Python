@@ -348,12 +348,11 @@ class Dojo:
 
     def edit_score(self):
         stage = self.chapters.get_stage(0, 0)
-        stage.score = dialog_creator.SingleEditor(
+        stage.score = dialog_creator.edit_int_key(
             "dojo_score",
             stage.score,
-            None,
-            localized_item=True,
-        ).edit()
+            dialog_creator.MaxValue.i32().hide_max(),
+        )
 
 
 def edit_dojo_score(save_file: core.SaveFile):

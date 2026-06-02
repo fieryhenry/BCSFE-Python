@@ -28,9 +28,7 @@ class FileDialog:
             self.root.withdraw()
             self.root.wm_attributes("-topmost", 1)  # type: ignore
 
-    def select_files_in_dir(
-        self, path: core.Path, ignore_json: bool
-    ) -> str | None:
+    def select_files_in_dir(self, path: core.Path, ignore_json: bool) -> str | None:
         """Print current files in directory.
 
         Args:
@@ -49,33 +47,34 @@ class FileDialog:
             files = [file for file in files if file.get_extension() != "json"]
 
         files_str_ls = [file.basename() for file in files]
-        options = files_str_ls + [core.localize("other_dir"), core.localize("another_path")]
 
-        choice = dialog_creator.ChoiceInput.from_reduced(
-            options,
-            dialog="select_files_dir",
-            single_choice=True,
-            localize_options=False,
-        ).single_choice()
-        if choice is None:
-            return
+        dialog_creator.single_select_key(
+            dialog_creator.Actions[str | None]
+            .new()
+            .add_new_raw(files_str_ls, lambda index: files[index].to_str())
+            .add_new_key(
+                "other_dir", lambda _: self.select_other_dir(path, ignore_json)
+            )
+            .add_new_key("another_path", lambda _: self.select_another_path()),
+            "select_files_dir",
+        )
 
-        choice -= 1
-        if choice == len(files):
-            path_input = color.ColoredInput().localize("enter_path_dir")
-            path_obj = core.Path(path_input)
-            if path_obj.is_relative():
-                path_obj = path.add(path_obj)
-            if not path_obj.exists():
-                color.ColoredText.localize("path_not_exists", path=path_obj)
-                return self.select_files_in_dir(path, ignore_json)
-            return self.select_files_in_dir(path_obj, ignore_json)
-        if choice == len(files) + 1:
-            path_input = color.ColoredInput().localize("enter_path")
-            return path_input or None
-        return files[choice].to_str()
+    def select_another_path(self):
+        path_input = color.ColoredInput().localize("enter_path")
+        return path_input or None
+
+    def select_other_dir(self, path: core.Path, ignore_json: bool) -> str | None:
+        path_input = color.ColoredInput().localize("enter_path_dir")
+        path_obj = core.Path(path_input)
+        if path_obj.is_relative():
+            path_obj = path.add(path_obj)
+        if not path_obj.exists():
+            color.ColoredText.localize("path_not_exists", path=path_obj)
+            return self.select_files_in_dir(path, ignore_json)
+        return self.select_files_in_dir(path_obj, ignore_json)
 
     def use_tk(self) -> bool:
+        return False
         return (
             self.tk is not None
             and self.filedialog is not None
@@ -139,9 +138,7 @@ class FileDialog:
         color.ColoredText.localize(title)
         if not self.use_tk():
             def_path = core.Path(initialdir).add(initialfile).to_str()
-            path = color.ColoredInput().localize(
-                "enter_path_default", default=def_path
-            )
+            path = color.ColoredInput().localize("enter_path_default", default=def_path)
             return path.strip().strip("'").strip('"') if path else def_path
         return (
             self.filedialog.asksaveasfilename(  # type: ignore

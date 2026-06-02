@@ -91,10 +91,7 @@ class GameDataGetter:
                 and show_alt
             ):
                 alt = "https://gitlab.com/fieryhenry/bcdata/-/raw/main/metadata.json"
-                res = dialog_creator.YesNoInput().get_input_once(
-                    "use_alternative_repo",
-                    {"repo": alt},
-                )
+                res = dialog_creator.yes_no_key("use_alternative_repo", repo=alt)
                 if res:
                     core.core_data.config.set(core.ConfigKey.GAME_DATA_REPO, alt)
                     self.repo_url = alt

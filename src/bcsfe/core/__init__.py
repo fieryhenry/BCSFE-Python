@@ -1,5 +1,6 @@
 from __future__ import annotations
-from typing import Any
+from collections.abc import Callable
+from typing import Any, TypeVar
 
 from requests.exceptions import ConnectionError
 from requests import Response
@@ -175,6 +176,24 @@ from bcsfe.core.theme_handler import (
 from bcsfe.core.max_value_helper import MaxValueHelper, MaxValueType
 
 
+T = TypeVar("T")
+R = TypeVar("R")
+
+
+def map_opt(v: T | None, func: Callable[[T], R]) -> R | None:
+    if v is None:
+        return None
+    return func(v)
+
+
+def consume(v1: None, v2: T) -> T:
+    return v2
+
+
+def first_tuple(v: tuple[T, Any] | None) -> T | None:
+    return map_opt(v, lambda x: x[0])
+
+
 class CoreData:
     def init_data(self):
         self.config = Config(config_path, print_config_err)
@@ -340,7 +359,7 @@ def update_external_content(_: Any = None):
     ExternalLocaleManager.update_all_external_locales()
     core_data.init_data()
 
-    clear_game_data = dialog_creator.YesNoInput().get_input_once("clear_game_data_q")
+    clear_game_data = dialog_creator.yes_no_key("clear_game_data_q")
     if clear_game_data is None:
         return
 
@@ -419,4 +438,6 @@ __all__ = [
     "CantDetectSaveCCError",
     "UnlockPopupData",
     "UnlockPopupLine",
+    "Localizable",
+    "Delimeter",
 ]

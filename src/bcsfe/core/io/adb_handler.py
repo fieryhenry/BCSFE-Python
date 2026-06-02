@@ -170,12 +170,10 @@ class AdbHandler(io.root_handler.RootHandler):
 
     def select_device(self) -> bool:
         devices = self.get_connected_devices()
-        device = dialog_creator.ChoiceInput.from_reduced(
-            devices, dialog="select_device", single_choice=True
-        ).single_choice()
-        if not device:
+        device = dialog_creator.basic_pick_key(devices, dialog="select_device")
+        if device is None:
             color.ColoredText.localize("no_device_error")
             return False
 
-        self.set_device(devices[device - 1])
+        self.set_device(device)
         return True

@@ -104,13 +104,12 @@ class EventTickets:
                 event_names.append(base_msg)
                 values.append(current_amount)
 
-        values = cli.dialog_creator.MultiEditor.from_reduced(
+        values = cli.dialog_creator.edit_ints_key(
             "event_tickets",
             event_names,
-            ints=values,
-            max_values=core.core_data.max_value_manager.get("event_tickets"),
-            group_name_localized=True,
-        ).edit()
+            values,
+            max=core.core_data.max_value_manager.get("event_tickets"),
+        )
 
         for (event_item, gset, gatya_item), value in zip(event_ticket_items, values):
             event_tickets.edit_ticket(gatya_item.id, value)

@@ -191,7 +191,7 @@ class Enigma:
             )
 
         if self.stages:
-            wipe = dialog_creator.YesNoInput().get_input_once("wipe_enigma")
+            wipe = dialog_creator.yes_no_key("wipe_enigma")
             if wipe is None:
                 return
             if wipe:
@@ -200,13 +200,10 @@ class Enigma:
                     save_file.event_stages.chapter_completion_count[id] = 0
                 self.stages = []
 
-        ids, _ = dialog_creator.ChoiceInput(
+        ids = dialog_creator.multi_select_indexes_key(
             names_list,
-            names_list,
-            [],
-            {},
             "enigma_select",
-        ).multiple_choice()
+        )
         if ids is None:
             return
 

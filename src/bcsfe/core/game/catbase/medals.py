@@ -94,12 +94,11 @@ class Medals:
         if medal_names.medal_names is None:
             return
         options = ["add_medals", "remove_medals"]
-        choice = dialog_creator.ChoiceInput.from_reduced(
-            options, dialog="medal_add_remove_dialog", single_choice=True
-        ).single_choice()
+        choice = dialog_creator.basic_pick_key_index(
+            options, dialog="medal_add_remove_dialog"
+        )
         if choice is None:
             return
-        choice -= 1
         add_medals = choice == 0
 
         medals_to_choose_from: list[tuple[int, str]] = []
@@ -116,9 +115,9 @@ class Medals:
         if len(medals_to_choose_from) == 0:
             return
         options = [medal[1] for medal in medals_to_choose_from]
-        choices, _ = dialog_creator.ChoiceInput.from_reduced(
+        choices = dialog_creator.multi_select_indexes_key(
             options, dialog="select_medals"
-        ).multiple_choice()
+        )
         if choices is None:
             return
         for choice in choices:

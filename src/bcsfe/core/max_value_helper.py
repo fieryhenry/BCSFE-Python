@@ -2,6 +2,7 @@ from __future__ import annotations
 import enum
 from typing import Any
 from bcsfe import core
+from bcsfe.cli import dialog_creator
 
 
 class MaxValueType(enum.Enum):
@@ -52,6 +53,9 @@ class MaxValueHelper:
             return int(self.max_value_data.get(self.convert_val_code(value_code), 0))
         except ValueError:
             return 0
+
+    def get_as_max(self, value_code: str | MaxValueType) -> dialog_creator.MaxValue:
+        return dialog_creator.MaxValue.specific(self.get(value_code))
 
     def get_property(self, value_code: str | MaxValueType, property: str) -> int:
         try:

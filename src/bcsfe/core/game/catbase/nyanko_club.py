@@ -164,17 +164,14 @@ class NyankoClub:
     def __str__(self):
         return f"NyankoClub {self.officer_id}"
 
-    def get_gold_pass(
-        self, officer_id: int, total_days: int, save_file: core.SaveFile
-    ):
+    def get_gold_pass(self, officer_id: int, total_days: int, save_file: core.SaveFile):
         self.officer_id = officer_id
         start_date_now = int(time.time())
         end_date_now = (
             start_date_now + datetime.timedelta(days=total_days).total_seconds()
         )
         end_date_total = (
-            start_date_now
-            + datetime.timedelta(days=total_days * 2).total_seconds()
+            start_date_now + datetime.timedelta(days=total_days * 2).total_seconds()
         )
 
         self.total_renewal_times = 2
@@ -244,7 +241,7 @@ class NyankoClub:
                 officer_id = int(officer_id)
             except ValueError:
                 officer_id = NyankoClub.get_random_officer_id()
-            officer_id = dialog_creator.IntInput().clamp_value(officer_id)
+            officer_id = dialog_creator.MaxValue.i32().clamp(officer_id)
 
         if officer_id == -1:
             club.remove_gold_pass(save_file)

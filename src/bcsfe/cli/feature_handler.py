@@ -186,7 +186,7 @@ class FeatureHandler:
                 alias = alias.replace(" ", "")
                 if alias in name or name in alias:
                     found_features[*path] = 100
-                break
+                    break
 
         return found_features
 
@@ -195,8 +195,12 @@ class FeatureHandler:
         for feature_name in features:
             feature_names.append(feature_name[-1])
         print()
-        dialog_creator.ListOutput(feature_names, [], "features", {}).display_locale(
-            remove_alias=True
+        dialog_creator.display_options_key(
+            [
+                core.core_data.local_manager.get_all_aliases(core.localize(f))[0]
+                for f in feature_names
+            ],
+            "features",
         )
 
     def select_features(

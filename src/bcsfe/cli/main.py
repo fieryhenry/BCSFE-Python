@@ -107,8 +107,8 @@ class Main:
             update_needed = False
 
         if update_needed:
-            update = dialog_creator.YesNoInput(True).get_input_once(
-                "update_available", {"latest_version": latest_version}
+            update = dialog_creator.yes_no_key(
+                "update_available", latest_version=latest_version
             )
             if update is None:
                 return
@@ -120,9 +120,7 @@ class Main:
                     color.ColoredText.localize("update_fail")
                 sys.exit()
             else:
-                disable_message = dialog_creator.YesNoInput(False).get_input_once(
-                    "disable_update_message"
-                )
+                disable_message = dialog_creator.yes_no_key("disable_update_message")
                 if disable_message is None:
                     return
 

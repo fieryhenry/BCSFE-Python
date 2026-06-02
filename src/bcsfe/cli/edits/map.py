@@ -563,7 +563,7 @@ def edit_chapters(
             dialog_creator.Actions[Optional[bool]]
             .new()
             .add_new_key(
-                "edit_chapters_clear",
+                "edit_progress_clear",
                 lambda _: edit_chapters2_progress(
                     save_file, chapters, letter_code, base_index, type, no_r_prefix
                 ),
@@ -581,7 +581,7 @@ def edit_chapters(
                 ),
             )
             .add_new_key(
-                "edit_progress_counts",
+                "edit_clear_counts",
                 lambda _: edit_chapters2_clear_count(
                     save_file, chapters, letter_code, base_index, type, no_r_prefix
                 ),

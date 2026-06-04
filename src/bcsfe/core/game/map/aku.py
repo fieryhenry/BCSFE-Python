@@ -209,7 +209,7 @@ class AkuChapters:
                 return
             for i, stage in enumerate(chapter.stages[:clear_progress]):
                 stage_name = stage_names[i]
-                color.ColoredText.localize(
+                color.color_print_key(
                     "aku_current_stage", name=stage_name, id=i
                 )
                 clear_count = core.StoryChapters.ask_clear_count()
@@ -226,4 +226,4 @@ class AkuChapters:
         for i in range(clear_progress, len(chapter.stages)):
             chapter.stages[i].clear_stage(clear_count=0)
 
-        color.ColoredText.localize("aku_clear_success")
+        color.color_print_key("aku_clear_success")

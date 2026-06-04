@@ -138,29 +138,29 @@ class SchemeItems:
             string = string.replace("<br>", "\n\t")
             options.append(string)
 
-        choice = dialog_creator.ChoiceInput.from_reduced(
-            ["gain_scheme_items", "remove_scheme_items"],
-            dialog="gain_remove_scheme_items",
-        ).single_choice()
-        if choice is None:
-            return
-
-        choice -= 1
-
-        if choice == 0:
-            self.add_scheme_items(options, scheme_items)
-        elif choice == 1:
-            self.remove_scheme_items(options, scheme_items)
+        dialog_creator.single_select_key(
+            dialog_creator.Actions[None]
+            .new()
+            .add_new_key(
+                "gain_scheme_items",
+                lambda _: self.add_scheme_items(options, scheme_items),
+            )
+            .add_new_key(
+                "remove_scheme_items",
+                lambda _: self.remove_scheme_items(options, scheme_items),
+            ),
+            "gain_remove_scheme_items",
+        )
 
     def add_scheme_items(
         self,
         options: list[str],
         scheme_items: dict[int, SchemeDataItem],
     ):
-        scheme_ids, _ = dialog_creator.ChoiceInput.from_reduced(
+        scheme_ids = dialog_creator.multi_select_indexes_key(
             options,
             dialog="scheme_items_select_gain",
-        ).multiple_choice()
+        )
         if scheme_ids is None:
             return
         for option_id in scheme_ids:
@@ -170,17 +170,17 @@ class SchemeItems:
             if scheme_id in self.received:
                 self.received.remove(scheme_id)
 
-        color.ColoredText.localize("scheme_items_edit_success")
+        color.color_print_key("scheme_items_edit_success")
 
     def remove_scheme_items(
         self,
         options: list[str],
         scheme_items: dict[int, SchemeDataItem],
     ):
-        scheme_ids, _ = dialog_creator.ChoiceInput.from_reduced(
+        scheme_ids = dialog_creator.multi_select_indexes_key(
             options,
             dialog="scheme_items_select_remove",
-        ).multiple_choice()
+        )
         if scheme_ids is None:
             return
         for option_id in scheme_ids:
@@ -190,4 +190,4 @@ class SchemeItems:
             if scheme_id in self.received:
                 self.received.remove(scheme_id)
 
-        color.ColoredText.localize("scheme_items_edit_success")
+        color.color_print_key("scheme_items_edit_success")

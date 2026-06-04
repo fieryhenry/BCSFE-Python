@@ -739,9 +739,9 @@ class EventChapters:
     ) -> int | None:
         if max_stars <= 1:
             return max_stars
-        stars = dialog_creator.IntInput(min=1, max=max_stars).get_input_locale(
-            prompt, {"max": max_stars}
-        )[0]
+        stars = dialog_creator.int_input_key(
+            prompt, min=1, _max=max_stars, max=max_stars
+        )
         if stars is None:
             return None
         return stars
@@ -750,9 +750,9 @@ class EventChapters:
     def ask_stars_unclear(
         max_stars: int, prompt: str = "custom_star_count_per_chapter"
     ) -> int | None:
-        stars = dialog_creator.IntInput(min=0, max=max_stars).get_input_locale(
-            prompt, {"max": max_stars}
-        )[0]
+        stars = dialog_creator.int_input_key(
+            prompt, _max=max_stars, min=0, max=max_stars
+        )
         if stars is None:
             return None
         return stars
@@ -775,12 +775,10 @@ class EventChapters:
         if stage_names is None:
             return None
 
-        dialog_creator.ListOutput(
-            stage_names, ints=[], dialog="select_stage", localize_elements=False
-        ).display_locale()
+        dialog_creator.display_options_key(stage_names, "select_stage")
 
-        choices = dialog_creator.RangeInput(len(stage_names), 1).get_input_locale(
-            "stages_select", {}
+        choices = dialog_creator.range_multi_input_key(
+            "stages_select", len(stage_names), 1
         )
         if choices is None:
             return None
@@ -801,18 +799,20 @@ class EventChapters:
                 continue
             new_stage_names.append(stage)
         stage_names = new_stage_names
-        choice = dialog_creator.ChoiceInput.from_reduced(
-            stage_names, dialog="select_stage_progress", single_choice=True
-        ).single_choice()
+        choice = dialog_creator.basic_pick_key_index(
+            stage_names,
+            dialog="select_stage_progress",
+        )
         if choice is None:
             return None
-        return choice - 1
+        return choice
 
     @staticmethod
     def ask_clear_amount() -> int | None:
-        val = dialog_creator.IntInput(
-            max=core.core_data.max_value_manager.get("stage_clear_count"), bit_count=16
-        ).get_input_locale("clear_amount_enter", {})[0]
+        val = dialog_creator.int_input_key(
+            "clear_amount_enter",
+            core.core_data.max_value_manager.stage_clear_count,
+        )
 
         return val
 
@@ -846,23 +846,22 @@ class EventChapters:
             names_list.append(map_name)
 
         while True:
-            dialog_creator.ListOutput(
-                names_list, [], "select_map", localize_elements=False
-            ).display_locale()
+            dialog_creator.display_options_key(names_list, "select_map")
             if names_list:
                 example_name = names_list[0]
             else:
                 example_name = ""
             usr_input = (
-                color.ColoredInput()
-                .localize("select_map_dialog", example=example_name, escape=False)
+                color.color_input_key(
+                    "select_map_dialog", example=example_name, escape=False
+                )
                 .lower()
                 .strip()
             )
             if usr_input == "q":
                 return None
-            usr_ids = dialog_creator.RangeInput(max=len(names_list), min=1).parse(
-                usr_input
+            usr_ids = dialog_creator.range_basic_parse(
+                usr_input, max=len(names_list), min=1
             )
             if not usr_ids:
                 found_names: list[tuple[int, str]] = []
@@ -874,17 +873,17 @@ class EventChapters:
                         found_names.append((i, name))
 
                 if len(found_names) == 0:
-                    color.ColoredText.localize("no_map_found", name=usr_input)
+                    color.color_print_key("no_map_found", name=usr_input)
                 elif len(found_names) == 1:
                     id = found_names[0][0]
                     true_id = ids[id]
                     if true_id not in map_ids:
                         map_ids.append(true_id)
                 else:
-                    selected_ids, _ = dialog_creator.ChoiceInput.from_reduced(
+                    selected_ids = dialog_creator.multi_select_indexes_key(
                         [name for _, name in found_names],
                         dialog="select_map_from_names",
-                    ).multiple_choice(False)
+                    )
                     if selected_ids is None:
                         continue
                     for i in selected_ids:
@@ -899,20 +898,18 @@ class EventChapters:
                     if true_id not in map_ids:
                         map_ids.append(true_id)
 
-            color.ColoredText.localize("current_maps", maps=map_ids)
+            color.color_print_key("current_maps", maps=map_ids)
 
             for id in map_ids:
                 name = names_dict[id]
                 EventChapters.print_current_chapter(name, id)
 
-            option = dialog_creator.ChoiceInput.from_reduced(
+            option = dialog_creator.basic_keys_pick_key_index(
                 ["keep_selecting", "remove_selection", "finish_selection"],
                 dialog="map_selection_q",
-            ).single_choice()
+            )
             if option is None:
                 return None
-
-            option -= 1
             if option == 0:
                 continue
             if option == 1:
@@ -925,9 +922,7 @@ class EventChapters:
     def print_current_chapter(name: str | None, id: int):
         if name is None:
             name = core.core_data.local_manager.get_key("unknown_map_name", id=id)
-        color.ColoredText.localize(
-            "current_sol_chapter", escape=False, name=name, id=id
-        )
+        color.color_print_key("current_sol_chapter", escape=False, name=name, id=id)
 
     @staticmethod
     def print_current_stage(name: str | None, index: int):
@@ -935,7 +930,7 @@ class EventChapters:
             name = core.core_data.local_manager.get_key(
                 "unknown_stage_name", index=index
             )
-        color.ColoredText.localize("current_stage_map", name=name, index=index)
+        color.color_print_key("current_stage_map", name=name, index=index)
 
     @staticmethod
     def edit_chapters(

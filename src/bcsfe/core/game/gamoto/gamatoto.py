@@ -1,6 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Optional
 from bcsfe import core
 from bcsfe.cli import color, dialog_creator
 
@@ -66,9 +66,7 @@ class GamatotoMembersName:
 
         return [member for member in self.members if member.rarity == rarity]
 
-    def get_members_from_helpers(
-        self, helpers: Helpers
-    ) -> list[MemberName | None]:
+    def get_members_from_helpers(self, helpers: Helpers) -> list[MemberName | None]:
         return self.get_members_from_ids(
             [helper.id for helper in helpers.helpers if helper.is_valid()]
         )
@@ -125,9 +123,7 @@ class GamatotoLevels:
             return None
         csv = core.CSV(data)
         line = csv[0]
-        return GamatotoLimit(
-            line[0].to_int(), line[1].to_int(), line[2].to_int()
-        )
+        return GamatotoLimit(line[0].to_int(), line[1].to_int(), line[2].to_int())
 
     def get_level(self, level: int) -> GamatotoLevel | None:
         if self.levels is None:
@@ -379,6 +375,24 @@ class Gamatoto:
     def __str__(self):
         return self.__repr__()
 
+    def edit_raw_xp(self, gamatoto_levels: GamatotoLevels):
+        xp = dialog_creator.edit_int_key(
+            "gamatoto_xp", self.xp, dialog_creator.MaxValue.i32().hide_max()
+        )
+        current_level = gamatoto_levels.get_level_from_xp(xp)
+
+        return xp, current_level
+
+    def edit_level(self, current_level: GamatotoLevel, gamatoto_levels: GamatotoLevels):
+        max_v = gamatoto_levels.get_max_level()
+        value = dialog_creator.edit_int_key(
+            "gamatoto_level",
+            current_level.level,
+            max_v or dialog_creator.MaxValue.i32().hide_max(),
+        )
+        xp = gamatoto_levels.get_xp_from_level(value)
+        return xp, gamatoto_levels.get_level(value)
+
     def edit_xp(self, save_file: core.SaveFile):
         gamatoto_levels = core.core_data.get_gamatoto_levels(save_file)
         current_level = gamatoto_levels.get_level_from_xp(self.xp)
@@ -386,35 +400,24 @@ class Gamatoto:
             return
         xp = self.xp
 
-        color.ColoredText.localize(
+        color.color_print_key(
             "gamatoto_level_current", level=current_level.level, xp=xp
         )
-        choice = dialog_creator.ChoiceInput(
-            ["enter_raw_gamatoto_xp", "enter_gamatoto_level"],
-            ["enter_raw_gamatoto_xp", "enter_gamatoto_level"],
-            [],
-            {},
+        res = dialog_creator.single_select_key(
+            dialog_creator.Actions[tuple[Optional[int], Optional[GamatotoLevel]]]
+            .new()
+            .add_new_key(
+                "enter_raw_gamatoto_xp", lambda _: self.edit_raw_xp(gamatoto_levels)
+            )
+            .add_new_key(
+                "enter_gamatoto_level",
+                lambda _: self.edit_level(current_level, gamatoto_levels),  # type: ignore
+            ),
             "edit_gamatoto_level_q",
-            single_choice=True,
-        ).single_choice()
-        if choice is None:
+        )
+        if res is None:
             return
-        choice -= 1
-
-        if choice == 0:
-            xp = dialog_creator.SingleEditor(
-                "gamatoto_xp", self.xp, None, localized_item=True
-            ).edit()
-            current_level = gamatoto_levels.get_level_from_xp(xp)
-        elif choice == 1:
-            value = dialog_creator.SingleEditor(
-                "gamatoto_level",
-                current_level.level,
-                gamatoto_levels.get_max_level(),
-                localized_item=True,
-            ).edit()
-            xp = gamatoto_levels.get_xp_from_level(value)
-            current_level = gamatoto_levels.get_level(value)
+        xp, current_level = res
 
         if xp is None:
             return
@@ -424,7 +427,7 @@ class Gamatoto:
         if current_level is None:
             return
 
-        color.ColoredText.localize(
+        color.color_print_key(
             "gamatoto_level_success", level=current_level.level, xp=xp
         )
 
@@ -435,11 +438,11 @@ class Gamatoto:
         max_helpers = gamatoto_levels.get_total_helpers()
 
         members = members_name.get_members_from_helpers(self.helpers)
-        color.ColoredText.localize("current_gamatoto_helpers")
+        color.color_print_key("current_gamatoto_helpers")
         for member in members:
             if member is None:
                 continue
-            color.ColoredText.localize(
+            color.color_print_key(
                 "gamatoto_helper",
                 name=member.name,
                 rarity_name=member.rarity_name,
@@ -457,14 +460,14 @@ class Gamatoto:
                 continue
             total_rarity_amounts[member.rarity] += 1
 
-        rarity_amounts = dialog_creator.MultiEditor.from_reduced(
+        rarity_amounts = dialog_creator.edit_ints_key(
             "gamatoto_helpers",
             rarity_names,
             total_rarity_amounts,
-            max_helpers,
-            group_name_localized=True,
-            cumulative_max=True,
-        ).edit()
+            dialog_creator.CumulativeMax.new(
+                max_helpers or dialog_creator.MaxValue.i32().hide_max()
+            ),
+        )
 
         helpers: list[Helper] = []
         for i, rarity_amount in enumerate(rarity_amounts):
@@ -477,11 +480,11 @@ class Gamatoto:
         self.helpers = Helpers(helpers)
 
         members = members_name.get_members_from_helpers(self.helpers)
-        color.ColoredText.localize("new_gamatoto_helpers")
+        color.color_print_key("new_gamatoto_helpers")
         for member in members:
             if member is None:
                 continue
-            color.ColoredText.localize(
+            color.color_print_key(
                 "gamatoto_helper",
                 name=member.name,
                 rarity_name=member.rarity_name,

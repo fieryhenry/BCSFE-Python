@@ -8,6 +8,7 @@ from bcsfe.cli import (
     server_cli,
     edits,
     recent_saves,
+    color_hex,
 )
 
 __all__ = [
@@ -18,6 +19,7 @@ __all__ = [
     "feature_handler",
     "save_management",
     "server_cli",
+    "color_hex",
     "edits",
     "recent_saves",
 ]

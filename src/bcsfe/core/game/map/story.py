@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any
+from typing import Any, Optional
 from bcsfe import core
 from bcsfe.cli import color, dialog_creator
 
@@ -387,17 +387,17 @@ class StoryChapters:
         if chapter_names is None:
             return None
 
-        selected_chapters, _ = dialog_creator.ChoiceInput.from_reduced(
-            chapter_names, dialog="select_story_chapters"
-        ).multiple_choice(localized_options=False)
+        selected_chapters = dialog_creator.multi_select_indexes_key(
+            chapter_names, "select_story_chapters"
+        )
 
         return selected_chapters
 
     @staticmethod
     def get_selected_chapter_progress(max_stages: int = 48) -> int | None:
-        progress = dialog_creator.IntInput(
-            min=0, max=max_stages
-        ).get_input_locale_while("edit_chapter_progress_all", {"max": max_stages})
+        progress = dialog_creator.int_input_key(
+            min=0, _max=max_stages, dialog="edit_chapter_progress_all", max=max_stages
+        )
         if progress is None:
             return None
 
@@ -413,11 +413,12 @@ class StoryChapters:
     ) -> bool:
         max_stages = 48
         chapter = save_file.story.get_real_chapters()[chapter_id]
-        progress = dialog_creator.IntInput(
-            min=0, max=max_stages
-        ).get_input_locale_while(
+        progress = dialog_creator.int_input_key(
             "edit_chapter_progress",
-            {"max": max_stages, "chapter_name": chapter_name},
+            min=0,
+            _max=max_stages,
+            max=max_stages,
+            chapter_name=chapter_name,
         )
         if progress is None:
             return False
@@ -451,23 +452,23 @@ class StoryChapters:
 
     @staticmethod
     def ask_clear_count() -> int | None:
-        clear_count = dialog_creator.IntInput(
+        clear_count = dialog_creator.int_input_key(
+            "edit_stage_clear_count",
             min=0,
-            max=core.core_data.max_value_manager.get("stage_clear_count"),
-        ).get_input_locale_while("edit_stage_clear_count", {})
+            _max=core.core_data.max_value_manager.stage_clear_count,
+        )
 
         return clear_count
 
     @staticmethod
     def ask_if_individual_clear_counts() -> bool | None:
-        options = ["individual_clear_counts", "all_clear_counts"]
-        choice = dialog_creator.ChoiceInput.from_reduced(
-            options, dialog="individual_clear_counts_dialog", single_choice=True
-        ).single_choice()
-        if choice is None:
-            return None
-        choice -= 1
-        return choice == 0
+        return dialog_creator.single_select_key(
+            dialog_creator.Actions[bool]
+            .new()
+            .add_new_key("individual_clear_counts", lambda _: True)
+            .add_new_key("all_clear_counts", lambda _: False),
+            "individual_clear_counts_dialog",
+        )
 
     @staticmethod
     def edit_stage_clear_count(
@@ -527,7 +528,7 @@ class StoryChapters:
         if chapter_names is None:
             return
         chapter_name = chapter_names[chapter_id]
-        color.ColoredText.localize("current_chapter", chapter_name=chapter_name)
+        color.color_print_key("current_chapter", chapter_name=chapter_name)
 
     @staticmethod
     def print_current_treasure_group(
@@ -541,7 +542,7 @@ class StoryChapters:
         if treasure_group_names is None:
             return
         treasure_group_name = treasure_group_names[treasure_group_id]
-        color.ColoredText.localize(
+        color.color_print_key(
             "current_treasure_group", treasure_group_name=treasure_group_name
         )
 
@@ -562,18 +563,14 @@ class StoryChapters:
         if not map_choices:
             return
 
-        clear_type_choice = dialog_creator.ChoiceInput.from_reduced(
+        clear_type_choice = dialog_creator.basic_keys_pick_key_index(
             ["clear_whole_chapters", "clear_specific_stages"],
             dialog="select_clear_type",
-            single_choice=True,
-        ).single_choice()
+        )
         if clear_type_choice is None:
             return
-        clear_type_choice -= 1
 
-        modify_clear_amounts = dialog_creator.YesNoInput().get_input_once(
-            "modify_clear_amounts"
-        )
+        modify_clear_amounts = dialog_creator.yes_no_key("modify_clear_amounts")
         if modify_clear_amounts is None:
             return
         clear_amount = 1
@@ -585,12 +582,12 @@ class StoryChapters:
                 options = ["clear_amount_chapter", "clear_amount_all"]
                 if clear_type_choice == 1:
                     options.append("clear_amount_stages")
-                clear_amount_type = dialog_creator.ChoiceInput.from_reduced(
-                    options, dialog="select_clear_amount_type", single_choice=True
-                ).single_choice()
+                clear_amount_type = dialog_creator.basic_keys_pick_key_index(
+                    options,
+                    dialog="select_clear_amount_type",
+                )
                 if clear_amount_type is None:
                     return
-                clear_amount_type -= 1
 
             if clear_amount_type == 1:
                 clear_amount = core.EventChapters.ask_clear_amount()
@@ -611,7 +608,7 @@ class StoryChapters:
                 new_stage_names.append(stage_names[index_stage_id])
             stage_names = new_stage_names
             map_name = names[id]
-            color.ColoredText.localize("current_sol_chapter", name=map_name, id=id)
+            color.color_print_key("current_sol_chapter", name=map_name, id=id)
             if clear_type_choice:
                 stages = core.EventChapters.ask_stages_stage_names(stage_names)
                 if stages is None:
@@ -634,9 +631,7 @@ class StoryChapters:
                     could_unclear_stages = True
 
             if could_unclear_stages:
-                unclear_other_stages = dialog_creator.YesNoInput().get_input_once(
-                    "unclear_other_stages"
-                )
+                unclear_other_stages = dialog_creator.yes_no_key("unclear_other_stages")
                 if unclear_other_stages is None:
                     return
             else:
@@ -650,7 +645,7 @@ class StoryChapters:
             for stage in stages:
                 if clear_amount_type == 2:
                     stage_name = stage_names[stage]
-                    color.ColoredText.localize(
+                    color.color_print_key(
                         "current_sol_stage", name=stage_name, id=stage
                     )
                 if clear_amount_type == 2:
@@ -665,62 +660,55 @@ class StoryChapters:
                     chapters=chapters,
                 )
 
-        color.ColoredText.localize("map_chapters_edited")
+        color.color_print_key("map_chapters_edited")
+
+    @staticmethod
+    def custom_treasure_level() -> int | None:
+        max_treasure_level = core.core_data.max_value_manager.treasure_level
+        treasure_level = dialog_creator.int_input_key(
+            "custom_treasure_level_dialog", min=0, _max=max_treasure_level
+        )
+        if treasure_level is None:
+            return None
+        return treasure_level
 
     @staticmethod
     def ask_treasure_level(save_file: core.SaveFile) -> int | None:
         treasure_text = core.core_data.get_treasure_text(save_file).treasure_text
         if treasure_text is None:
             return None
-        if len(treasure_text) < 3:
-            return None
-        options = [
-            "no_treasure",
-            treasure_text[0],
-            treasure_text[1],
-            treasure_text[2],
-            "custom_treasure_level",
-        ]
-        choice = dialog_creator.ChoiceInput.from_reduced(
-            options, dialog="treasure_level_dialog", single_choice=True
-        ).single_choice()
-        if choice is None:
-            return None
-        choice -= 1
 
-        max_treasure_level = core.core_data.max_value_manager.get("treasure_level")
-
-        if choice == 4:
-            treasure_level = dialog_creator.IntInput(
-                min=0, max=max_treasure_level
-            ).get_input_locale_while("custom_treasure_level_dialog", {})
-            if treasure_level is None:
-                return None
-            return treasure_level
-
-        return choice
+        return dialog_creator.single_select_key(
+            dialog_creator.Actions[Optional[int]]
+            .new()
+            .add_new_key("no_treasure", lambda _: 0)
+            .add_new_raw(treasure_text[:3], lambda v: v + 1)
+            .add_new_key(
+                "custom_treasure_level", lambda _: StoryChapters.custom_treasure_level()
+            ),
+            "treasure_level_dialog",
+        )
 
     @staticmethod
-    def get_per_chapter(chapters: list[int]) -> int | None:
+    def is_per_chapter(chapters: list[int]) -> bool | None:
         if len(chapters) == 1:
-            return 0
+            return True
 
-        options = ["per_chapter", "all_selected_chapters"]
-        choice = dialog_creator.ChoiceInput.from_reduced(
-            options, dialog="edit_per_chapter", single_choice=True
-        ).single_choice()
-        if choice is None:
-            return None
-        choice -= 1
-        return choice
+        return dialog_creator.single_select_key(
+            dialog_creator.Actions[bool]
+            .new()
+            .add_new_key("per_chapter", lambda _: True)
+            .add_new_key("all_selected_chapters", lambda _: False),
+            "edit_per_chapter",
+        )
 
     @staticmethod
     def edit_treasures_whole_chapters(save_file: core.SaveFile, chapters: list[int]):
-        choice = StoryChapters.get_per_chapter(chapters)
-        if choice is None:
+        is_per_chapter = StoryChapters.is_per_chapter(chapters)
+        if is_per_chapter is None:
             return
 
-        if choice == 0:
+        if is_per_chapter:
             for chapter_id in chapters:
                 StoryChapters.print_current_chapter(save_file, chapter_id)
                 chapter = save_file.story.get_real_chapters()[chapter_id]
@@ -747,24 +735,17 @@ class StoryChapters:
         return 2
 
     @staticmethod
-    def select_stages(save_file: core.SaveFile, chapter_id: int) -> list[int] | None:
-        options = ["select_stage_by_id", "select_stage_by_name"]
-        choice = dialog_creator.ChoiceInput.from_reduced(
-            options, dialog="select_stage_dialog", single_choice=True
-        ).single_choice()
-        if choice is None:
+    def select_stages_by_id() -> list[int] | None:
+        stage_ids = dialog_creator.range_multi_input_key("select_stage_id", 48, 1)
+        if stage_ids is None:
             return None
-        choice -= 1
+        stage_ids = [stage_id - 1 for stage_id in stage_ids]
+        return stage_ids
 
-        if choice == 0:
-            stage_ids = dialog_creator.RangeInput(48, 1).get_input_locale(
-                "select_stage_id", {}
-            )
-            if stage_ids is None:
-                return None
-            stage_ids = [stage_id - 1 for stage_id in stage_ids]
-            return stage_ids
-
+    @staticmethod
+    def select_stage_by_name(
+        save_file: core.SaveFile, chapter_id: int
+    ) -> list[int] | None:
         chapter_type = StoryChapters.get_chapter_type_from_index(chapter_id)
         stage_names = StageNames(save_file, str(chapter_type)).stage_names
         if not stage_names:
@@ -773,9 +754,9 @@ class StoryChapters:
         for i in range(48):
             index_stage_id = StoryChapters.convert_stage_id(i)
             new_stage_names.append(stage_names[index_stage_id])
-        selected_stages, _ = dialog_creator.ChoiceInput.from_reduced(
+        selected_stages = dialog_creator.multi_select_indexes_key(
             new_stage_names, dialog="select_stages_name"
-        ).multiple_choice(localized_options=False)
+        )
 
         if not selected_stages:
             return None
@@ -783,11 +764,26 @@ class StoryChapters:
         return selected_stages
 
     @staticmethod
+    def select_stages(save_file: core.SaveFile, chapter_id: int) -> list[int] | None:
+        return dialog_creator.single_select_key(
+            dialog_creator.Actions[Optional[list[int]]]
+            .new()
+            .add_new_key(
+                "select_stage_by_id", lambda _: StoryChapters.select_stages_by_id()
+            )
+            .add_new_key(
+                "select_stage_by_name",
+                lambda _: StoryChapters.select_stage_by_name(save_file, chapter_id),
+            ),
+            "select_stage_dialog",
+        )
+
+    @staticmethod
     def edit_treasures_individual_stages(save_file: core.SaveFile, chapters: list[int]):
-        choice = StoryChapters.get_per_chapter(chapters)
-        if choice is None:
+        is_per_chapter = StoryChapters.is_per_chapter(chapters)
+        if is_per_chapter is None:
             return
-        if choice == 0:
+        if is_per_chapter:
             for chapter_id in chapters:
                 StoryChapters.print_current_chapter(save_file, chapter_id)
                 chapter = save_file.story.get_real_chapters()[chapter_id]
@@ -814,6 +810,41 @@ class StoryChapters:
                     chapter.set_treasure(real_stage_id, treasure_level)
 
     @staticmethod
+    def edit_treasure_group_ind(
+        save_file: core.SaveFile,
+        chapter_id: int,
+        treasure_group_data: list[list[int]],
+        chapter: Chapter,
+        selected_treasure_groups: list[int],
+    ):
+        for treasure_group_id in selected_treasure_groups:
+            StoryChapters.print_current_treasure_group(
+                save_file, chapter_id, treasure_group_id
+            )
+            treasure_level = StoryChapters.ask_treasure_level(save_file)
+            if treasure_level is None:
+                return
+            treasure_group = treasure_group_data[treasure_group_id]
+            for stage_id in treasure_group:
+                chapter.set_treasure(stage_id, treasure_level)
+
+    @staticmethod
+    def edit_treasure_group_many(
+        save_file: core.SaveFile,
+        treasure_group_data: list[list[int]],
+        chapter: Chapter,
+        selected_treasure_groups: list[int],
+    ):
+        treasure_level = StoryChapters.ask_treasure_level(save_file)
+        if treasure_level is None:
+            return
+
+        for treasure_group_id in selected_treasure_groups:
+            treasure_group = treasure_group_data[treasure_group_id]
+            for stage_id in treasure_group:
+                chapter.set_treasure(stage_id, treasure_level)
+
+    @staticmethod
     def edit_treasures_groups(save_file: core.SaveFile, chapters: list[int]):
         for chapter_id in chapters:
             StoryChapters.print_current_chapter(save_file, chapter_id)
@@ -825,70 +856,74 @@ class StoryChapters:
             treasure_group_names = TreasureGroupNames(
                 save_file, chapter_type
             ).treasure_group_names
-            if not treasure_group_data or not treasure_group_names:
+            if treasure_group_data is None or treasure_group_names is None:
                 return
             treasure_group_names_new: list[str] = []
             for i in range(len(treasure_group_data)):
                 treasure_group_names_new.append(treasure_group_names[i])
 
-            selected_treasure_groups, _ = dialog_creator.ChoiceInput.from_reduced(
+            selected_treasure_groups = dialog_creator.multi_select_indexes_key(
                 treasure_group_names_new, dialog="select_treasure_groups"
-            ).multiple_choice(localized_options=False)
+            )
 
-            if not selected_treasure_groups:
+            if selected_treasure_groups is None:
                 return
 
-            options = ["group_individual", "group_all_at_once"]
-            choice = dialog_creator.ChoiceInput.from_reduced(
-                options, dialog="select_treasure_groups_individual"
-            ).single_choice()
-            if choice is None:
-                return
-            choice -= 1
-
-            if choice == 0:
-                for treasure_group_id in selected_treasure_groups:
-                    StoryChapters.print_current_treasure_group(
-                        save_file, chapter_id, treasure_group_id
-                    )
-                    treasure_level = StoryChapters.ask_treasure_level(save_file)
-                    if treasure_level is None:
-                        return
-                    treasure_group = treasure_group_data[treasure_group_id]
-                    for stage_id in treasure_group:
-                        chapter.set_treasure(stage_id, treasure_level)
-
-            else:
-                treasure_level = StoryChapters.ask_treasure_level(save_file)
-                if treasure_level is None:
-                    return
-
-                for treasure_group_id in selected_treasure_groups:
-                    treasure_group = treasure_group_data[treasure_group_id]
-                    for stage_id in treasure_group:
-                        chapter.set_treasure(stage_id, treasure_level)
+            dialog_creator.single_select_key(
+                dialog_creator.Actions[None]
+                .new()
+                .add_new_key(
+                    "group_individual",
+                    lambda _: StoryChapters.edit_treasure_group_ind(
+                        save_file,
+                        chapter_id,
+                        treasure_group_data,  # type: ignore
+                        chapter,
+                        selected_treasure_groups,  # type: ignore
+                    ),
+                )
+                .add_new_key(
+                    "group_all_at_once",
+                    lambda _: StoryChapters.edit_treasure_group_many(
+                        save_file,
+                        treasure_group_data,  # type: ignore
+                        chapter,
+                        selected_treasure_groups,  # type: ignore
+                    ),
+                ),
+                "select_treasure_groups_individual",
+            )
 
     @staticmethod
     def edit_treasures(save_file: core.SaveFile):
         selected_chapters = StoryChapters.select_story_chapters(save_file)
         if not selected_chapters:
             return
-        options = ["whole_chapters", "individual_stages", "treasure_groups"]
-        choice = dialog_creator.ChoiceInput.from_reduced(
-            options, dialog="treasure_dialog", single_choice=True
-        ).single_choice()
-        if choice is None:
-            return
-        choice -= 1
+        dialog_creator.single_select_key(
+            dialog_creator.Actions[None]
+            .new()
+            .add_new_key(
+                "whole_chapters",
+                lambda _: StoryChapters.edit_treasures_whole_chapters(
+                    save_file, selected_chapters
+                ),
+            )
+            .add_new_key(
+                "individual_stages",
+                lambda _: StoryChapters.edit_treasures_individual_stages(
+                    save_file, selected_chapters
+                ),
+            )
+            .add_new_key(
+                "treasure_groups",
+                lambda _: StoryChapters.edit_treasures_groups(
+                    save_file, selected_chapters
+                ),
+            ),
+            "treasure_dialog",
+        )
 
-        if choice == 0:
-            StoryChapters.edit_treasures_whole_chapters(save_file, selected_chapters)
-        elif choice == 1:
-            StoryChapters.edit_treasures_individual_stages(save_file, selected_chapters)
-        elif choice == 2:
-            StoryChapters.edit_treasures_groups(save_file, selected_chapters)
-
-        color.ColoredText.localize("treasures_edited")
+        color.color_print_key("treasures_edited")
 
     @staticmethod
     def edit_itf_timed_scores(save_file: core.SaveFile):
@@ -897,53 +932,55 @@ class StoryChapters:
         )
         if not selected_chapters:
             return
-        options = ["whole_chapters", "individual_stages"]
-        choice = dialog_creator.ChoiceInput.from_reduced(
-            options, dialog="itf_timed_scores_dialog", single_choice=True
-        ).single_choice()
-        if choice is None:
-            return
-        choice -= 1
-
         selected_chapters = [chapter_id + 3 for chapter_id in selected_chapters]
-
-        if choice == 0:
-            StoryChapters.edit_itf_timed_scores_whole_chapters(
-                save_file, selected_chapters
+        dialog_creator.single_select_key(
+            dialog_creator.Actions[None]
+            .new()
+            .add_new_key(
+                "whole_chapters",
+                lambda _: StoryChapters.edit_itf_timed_scores_whole_chapters(
+                    save_file, selected_chapters
+                ),
             )
-        elif choice == 1:
-            StoryChapters.edit_itf_timed_scores_individual_stages(
-                save_file, selected_chapters
-            )
+            .add_new_key(
+                "individual_stages",
+                lambda _: StoryChapters.edit_itf_timed_scores_individual_stages(
+                    save_file, selected_chapters
+                ),
+            ),
+            "itf_timed_scores_dialog",
+        )
 
-        color.ColoredText.localize("itf_timed_scores_edited")
+        color.color_print_key("itf_timed_scores_edited")
 
     @staticmethod
     def edit_itf_timed_scores_whole_chapters(
         save_file: core.SaveFile, chapters: list[int]
     ):
-        choice = StoryChapters.get_per_chapter(chapters)
-        if choice is None:
+        is_per_chapter = StoryChapters.is_per_chapter(chapters)
+        if is_per_chapter is None:
             return
 
-        if choice == 0:
+        if is_per_chapter:
             for chapter_id in chapters:
                 print(chapter_id)
                 StoryChapters.print_current_chapter(save_file, chapter_id)
                 chapter = save_file.story.get_real_chapters()[chapter_id]
-                score = dialog_creator.IntInput(
+                score = dialog_creator.int_input_key(
+                    "itf_timed_score",
                     min=0,
-                    max=core.core_data.max_value_manager.get("itf_timed_score"),
-                ).get_input_locale_while("itf_timed_score_dialog", {})
+                    _max=core.core_data.max_value_manager.itf_timed_score,
+                )
                 if score is None:
                     return
                 for stage in chapter.get_valid_treasure_stages():
                     stage.itf_timed_score = score
         else:
-            score = dialog_creator.IntInput(
+            score = dialog_creator.int_input_key(
+                "itf_timed_score_dialog",
                 min=0,
-                max=core.core_data.max_value_manager.get("itf_timed_score"),
-            ).get_input_locale_while("itf_timed_score_dialog", {})
+                _max=core.core_data.max_value_manager.itf_timed_score,
+            )
             if score is None:
                 return
             for chapter_id in chapters:
@@ -963,83 +1000,118 @@ class StoryChapters:
             return
         stage_id = StoryChapters.convert_stage_id(stage_id)
         stage_name = stage_names[stage_id]
-        color.ColoredText.localize(
+        color.color_print_key(
             "current_stage", chapter_name=chapter_name, stage_name=stage_name
         )
+
+    @staticmethod
+    def edit_itf_timed_scores_ind_per_chapter_ind(
+        save_file: core.SaveFile,
+        chapter: Chapter,
+        chapter_id: int,
+        stage_ids: list[int],
+    ):
+        for stage_id in stage_ids:
+            StoryChapters.print_current_stage(save_file, chapter_id, stage_id)
+
+            score = dialog_creator.int_input_key(
+                "itf_timed_score_dialog",
+                min=0,
+                _max=core.core_data.max_value_manager.itf_timed_score,
+            )
+            if score is None:
+                return
+            chapter.stages[stage_id].itf_timed_score = score
+
+    @staticmethod
+    def edit_itf_timed_scores_ind_per_chapter_many(
+        chapter: Chapter, stage_ids: list[int]
+    ):
+        score = dialog_creator.int_input_key(
+            "itf_timed_score_dialog",
+            min=0,
+            _max=core.core_data.max_value_manager.itf_timed_score,
+        )
+        if score is None:
+            return
+        for stage_id in stage_ids:
+            chapter.stages[stage_id].itf_timed_score = score
+
+    @staticmethod
+    def edit_itf_timed_scores_ind_per_chapter(
+        save_file: core.SaveFile, chapters: list[int], is_ind: bool
+    ):
+        for chapter_id in chapters:
+            StoryChapters.print_current_chapter(save_file, chapter_id)
+            chapter = save_file.story.get_real_chapters()[chapter_id]
+            stage_ids = StoryChapters.select_stages(save_file, chapter_id)
+            if stage_ids is None:
+                return
+            if is_ind:
+                StoryChapters.edit_itf_timed_scores_ind_per_chapter_ind(
+                    save_file, chapter, chapter_id, stage_ids
+                )
+            else:
+                StoryChapters.edit_itf_timed_scores_ind_per_chapter_many(
+                    chapter, stage_ids
+                )
+
+    @staticmethod
+    def edit_itf_timed_scores_ind_many(
+        save_file: core.SaveFile, chapters: list[int], is_ind: bool
+    ):
+        stage_ids = StoryChapters.select_stages(save_file, 3)
+        if stage_ids is None:
+            return
+        if is_ind:
+            for stage_id in stage_ids:
+                StoryChapters.print_current_stage(save_file, 3, stage_id)
+                score = dialog_creator.int_input_key(
+                    "itf_timed_score_dialog",
+                    min=0,
+                    _max=core.core_data.max_value_manager.itf_timed_score,
+                )
+                if score is None:
+                    return
+                for chapter_id in chapters:
+                    chapter = save_file.story.get_real_chapters()[chapter_id]
+                    chapter.stages[stage_id].itf_timed_score = score
+        else:
+            score = dialog_creator.int_input_key(
+                "itf_timed_score",
+                min=0,
+                _max=core.core_data.max_value_manager.itf_timed_score,
+            )
+            if score is None:
+                return
+            for chapter_id in chapters:
+                chapter = save_file.story.get_real_chapters()[chapter_id]
+                for stage_id in stage_ids:
+                    chapter.stages[stage_id].itf_timed_score = score
 
     @staticmethod
     def edit_itf_timed_scores_individual_stages(
         save_file: core.SaveFile, chapters: list[int]
     ):
-        choice = StoryChapters.get_per_chapter(chapters)
-        if choice is None:
+        is_per_chapter = StoryChapters.is_per_chapter(chapters)
+        if is_per_chapter is None:
             return
-        options = ["individual_stages", "all_selected_stages"]
-        choice2 = dialog_creator.ChoiceInput.from_reduced(
-            options,
-            dialog="itf_timed_scores_individual_dialog",
-            single_choice=True,
-        ).single_choice()
-        if choice2 is None:
+        is_ind = dialog_creator.single_select_key(
+            dialog_creator.Actions[bool]
+            .new()
+            .add_new_key("individual_stages", lambda _: True)
+            .add_new_key("all_selected_stages", lambda _: False),
+            "itf_timed_scores_individual_dialog",
+        )
+        if is_ind is None:
             return
-        choice2 -= 1
 
-        if choice == 0:
-            for chapter_id in chapters:
-                StoryChapters.print_current_chapter(save_file, chapter_id)
-                chapter = save_file.story.get_real_chapters()[chapter_id]
-                stage_ids = StoryChapters.select_stages(save_file, chapter_id)
-                if stage_ids is None:
-                    return
-                if choice2 == 0:
-                    for stage_id in stage_ids:
-                        StoryChapters.print_current_stage(
-                            save_file, chapter_id, stage_id
-                        )
-
-                        score = dialog_creator.IntInput(
-                            min=0,
-                            max=core.core_data.max_value_manager.get("itf_timed_score"),
-                        ).get_input_locale_while("itf_timed_score_dialog", {})
-                        if score is None:
-                            return
-                        chapter.stages[stage_id].itf_timed_score = score
-                elif choice2 == 1:
-                    score = dialog_creator.IntInput(
-                        min=0,
-                        max=core.core_data.max_value_manager.get("itf_timed_score"),
-                    ).get_input_locale_while("itf_timed_score_dialog", {})
-                    if score is None:
-                        return
-                    for stage_id in stage_ids:
-                        chapter.stages[stage_id].itf_timed_score = score
+        if is_per_chapter:
+            StoryChapters.edit_itf_timed_scores_ind_per_chapter(
+                save_file, chapters, is_ind
+            )
         else:
-            stage_ids = StoryChapters.select_stages(save_file, 3)
-            if stage_ids is None:
-                return
-            if choice2 == 0:
-                for stage_id in stage_ids:
-                    StoryChapters.print_current_stage(save_file, 3, stage_id)
-                    score = dialog_creator.IntInput(
-                        min=0,
-                        max=core.core_data.max_value_manager.get("itf_timed_score"),
-                    ).get_input_locale_while("itf_timed_score_dialog", {})
-                    if score is None:
-                        return
-                    for chapter_id in chapters:
-                        chapter = save_file.story.get_real_chapters()[chapter_id]
-                        chapter.stages[stage_id].itf_timed_score = score
-            elif choice2 == 1:
-                score = dialog_creator.IntInput(
-                    min=0,
-                    max=core.core_data.max_value_manager.get("itf_timed_score"),
-                ).get_input_locale_while("itf_timed_score_dialog", {})
-                if score is None:
-                    return
-                for chapter_id in chapters:
-                    chapter = save_file.story.get_real_chapters()[chapter_id]
-                    for stage_id in stage_ids:
-                        chapter.stages[stage_id].itf_timed_score = score
+            StoryChapters.edit_itf_timed_scores_ind_many(save_file, chapters, is_ind)
 
 
 class StageNames:

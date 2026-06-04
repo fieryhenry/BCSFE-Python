@@ -8,4 +8,4 @@ def unlock_aku_realm(save_file: core.SaveFile):
     for stage_id in stage_ids:
         save_file.event_stages.clear_map(1, stage_id, 0, False)
 
-    color.ColoredText.localize("aku_realm_unlocked")
+    color.color_print_key("aku_realm_unlocked")

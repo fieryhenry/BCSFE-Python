@@ -4,7 +4,6 @@ from typing import Any
 from bcsfe import core, __version__, cli
 import datetime
 
-from bcsfe.cli.color import ColoredText
 from bcsfe.core.io.config import ConfigKey
 
 
@@ -146,7 +145,7 @@ class SaveFile:
             else:
                 from traceback import format_exc
 
-                ColoredText.localize("parse_ignored_error", error=format_exc())
+                cli.color.color_print_key("parse_ignored_error", error=format_exc())
 
     def set_gv(self, gv: core.GameVersion):
         self.game_version = gv
@@ -2595,7 +2594,7 @@ class SaveFile:
     def from_dict(data: dict[str, Any], warn: bool = True) -> SaveFile:
         editor_version = data.get("editor_version", "0.0.0")
         if editor_version != __version__ and warn:
-            cli.color.ColoredText.localize(
+            cli.color.color_print_key(
                 "editor_version_mismatch",
                 json_version=editor_version,
                 editor_version=__version__,
@@ -3488,7 +3487,6 @@ class SaveFile:
         return SaveFile.get_saves_path().add("SAVE_DATA")
 
     def get_default_path(self) -> core.Path:
-        core.Thread("check-backups", SaveFile.check_backups, []).start()
         date = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         local_path = (
             self.get_saves_path()
@@ -3498,6 +3496,7 @@ class SaveFile:
         )
         local_path.generate_dirs()
         local_path = local_path.add(date)
+        core.Thread("check-backups", SaveFile.check_backups, []).start()
 
         return local_path
 

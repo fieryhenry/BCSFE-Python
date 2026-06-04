@@ -1,5 +1,6 @@
 from __future__ import annotations
 from typing import Any
+import json
 from bcsfe import core
 from bcsfe.cli import color, dialog_creator
 
@@ -125,8 +126,8 @@ class OrbInfo:
         Returns:
             str: The string representation of the OrbInfo
         """
-        target_color = color_from_enemy_type(self.raw_orb_info.target_id)
-        rank_color = color_from_grade(self.raw_orb_info.rank_id)
+        target_color = color_from_enemy_type(self.raw_orb_info.target_id).value
+        rank_color = color_from_grade(self.raw_orb_info.rank_id).value
         effect_color = color_from_effect(self.raw_orb_info.effect_id)
         effect_text = self.effect.replace("%@", "{}")
         effect_text = f"<{effect_color}>{effect_text}</>"
@@ -220,8 +221,8 @@ class OrbInfoList:
             list[RawOrbInfo]: The list of RawOrbInfo
         """
         try:
-            data: dict[str, Any] = core.JsonFile.from_data(json_data).to_object()
-        except core.JSONDecodeError:
+            data: dict[str, Any] = core.JsonFile.from_data(json_data).as_object()
+        except json.JSONDecodeError:
             return None
         orb_info_list: list[RawOrbInfo] = []
         for id, orb in enumerate(data["ID"]):
@@ -406,7 +407,7 @@ class SaveOrb:
         self.orb = orb
 
 
-def color_from_enemy_type(target_id: int | None) -> str:
+def color_from_enemy_type(target_id: int | None) -> color.ColorHex:
     if target_id is None:
         return color.ColorHex.WHITE
     if target_id == 0:
@@ -436,7 +437,7 @@ def color_from_enemy_type(target_id: int | None) -> str:
     return color.ColorHex.BLACK
 
 
-def color_from_grade(grade_id: int) -> str:
+def color_from_grade(grade_id: int) -> color.ColorHex:
     if grade_id == 0:
         return color.ColorHex.RED
     elif grade_id == 1:
@@ -450,7 +451,7 @@ def color_from_grade(grade_id: int) -> str:
     return color.ColorHex.BLACK
 
 
-def color_from_effect(effect_id: int):
+def color_from_effect(effect_id: int) -> str:
     # if effect_id == 0:
     #     return color.ColorHex.RED
     # elif effect_id == 1:
@@ -519,13 +520,11 @@ class SaveOrbs:
         """Print the orbs as a formatted list"""
         self.sort_orbs()
         total_orbs = sum([orb.count for orb in self.orbs.values()])
-        color.ColoredText.localize("total_current_orbs", total_orbs=total_orbs)
-        color.ColoredText.localize(
-            "total_current_orb_types", total_types=len(self.orbs)
-        )
-        color.ColoredText.localize("current_orbs")
+        color.color_print_key("total_current_orbs", total_orbs=total_orbs)
+        color.color_print_key("total_current_orb_types", total_types=len(self.orbs))
+        color.color_print_key("current_orbs")
         for orb in self.orbs.values():
-            color.ColoredText(f"<@q>{orb.count}</> {orb.orb.to_colortext()}")
+            color.color_print(f"<@q>{orb.count}</> {orb.orb.to_colortext()}")
 
     def sort_orbs(self):
         """Sort the orbs by attribute, effect, grade and id in that order with attribute being the most important"""
@@ -538,6 +537,31 @@ class SaveOrbs:
     def localize_attribute(self, attribute: str | None) -> str | None:
         if attribute is not None:
             return attribute
+
+    def edit_ind(self, orb_selection: list[OrbInfo], max_orbs: int):
+        for orb in orb_selection:
+            orb_id = orb.raw_orb_info.orb_id
+            try:
+                orb_count = self.orbs[orb_id].count
+            except KeyError:
+                orb_count = 0
+
+            orb_count = dialog_creator.edit_int_raw(
+                orb.to_colortext(), orb_count, max_orbs
+            )
+
+            self.orbs[orb_id] = SaveOrb(orb, orb_count)
+
+    def edit_many(self, max_orbs: int, orb_selection: list[OrbInfo]):
+        orb_count = dialog_creator.int_input_key(
+            "edit_orbs_all", _max=max_orbs, max=max_orbs, escape=False
+        )
+        if orb_count is None:
+            return
+        orb_count = dialog_creator.MaxValue.specific(max_orbs).clamp(orb_count)
+        for orb in orb_selection:
+            orb_id = orb.raw_orb_info.orb_id
+            self.orbs[orb_id] = SaveOrb(orb, orb_count)
 
     def edit(self):
         """Edit the orbs"""
@@ -576,7 +600,7 @@ class SaveOrbs:
             for effect_str, effect in zip(all_effects_str, all_effects)
         )
 
-        color.ColoredText.localize(
+        color.color_print_key(
             "edit_orbs_help",
             escape=False,
             all_grades_str=all_grades_str,
@@ -585,8 +609,7 @@ class SaveOrbs:
         )
 
         orb_input_selection = (
-            color.ColoredInput()
-            .localize("orb_select")
+            color.color_input_key("orb_select")
             .lower()
             .replace("angle", "angel")
             .split(",")
@@ -637,51 +660,30 @@ class SaveOrbs:
         orb_selection.sort(key=lambda orb: orb.raw_orb_info.effect_id)
         orb_selection.sort(key=lambda orb: orb.raw_orb_info.target_id or -1)
 
-        color.ColoredText.localize("selected_orbs")
+        color.color_print_key("selected_orbs")
 
         for orb in orb_selection:
-            color.ColoredText(orb.to_colortext())
+            color.color_print(orb.to_colortext())
 
-        max_orbs = core.core_data.max_value_manager.get("talent_orbs")
+        max_orbs = core.core_data.max_value_manager.talent_orbs
 
         if len(orb_selection) == 0:
             return
         if len(orb_selection) == 1:
-            individual = True
+            self.edit_ind(orb_selection, max_orbs)
         else:
-            individual = dialog_creator.ChoiceInput.from_reduced(
-                ["individual", "edit_all_at_once"],
-                dialog="edit_orbs_individually",
-                single_choice=True,
-            ).single_choice()
-            if individual is None:
-                return
-            individual = True if individual == 1 else False
-        if individual:
-            for orb in orb_selection:
-                orb_id = orb.raw_orb_info.orb_id
-                try:
-                    orb_count = self.orbs[orb_id].count
-                except KeyError:
-                    orb_count = 0
-
-                orb_count = dialog_creator.SingleEditor(
-                    orb.to_colortext(), orb_count, max_orbs
-                ).edit(escape_text=False)
-
-                self.orbs[orb_id] = SaveOrb(orb, orb_count)
-
-        else:
-            int_input = dialog_creator.IntInput(max_orbs)
-            orb_count = int_input.get_input_locale_while(
-                "edit_orbs_all", {"max": max_orbs}, escape=False
+            dialog_creator.single_select_key(
+                dialog_creator.Actions[None]
+                .new()
+                .add_new_key(
+                    "individual", lambda _: self.edit_ind(orb_selection, max_orbs)
+                )
+                .add_new_key(
+                    "edit_all_at_once",
+                    lambda _: self.edit_many(max_orbs, orb_selection),
+                ),
+                "edit_orbs_individually",
             )
-            if orb_count is None:
-                return
-            orb_count = int_input.clamp_value(orb_count)
-            for orb in orb_selection:
-                orb_id = orb.raw_orb_info.orb_id
-                self.orbs[orb_id] = SaveOrb(orb, orb_count)
 
         self.print()
 
@@ -704,7 +706,7 @@ class SaveOrbs:
         """
         save_orbs = SaveOrbs.from_save_file(save_file)
         if save_orbs is None:
-            color.ColoredText.localize("failed_to_load_orbs")
+            color.color_print_key("failed_to_load_orbs")
             return None
         save_orbs.edit()
         save_orbs.save(save_file)

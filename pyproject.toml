@@ -17,15 +17,7 @@ classifiers = [
   "Programming Language :: Python :: 3.9",
   "Operating System :: OS Independent",
 ]
-dependencies = [
-  "aenum",
-  "colored==1.4.4",
-  "pyjwt",
-  "requests",
-  "pyyaml",
-  "beautifulsoup4",
-  "argparse",
-]
+dependencies = ["pyjwt", "requests", "pyyaml", "argparse"]
 dynamic = ["version"]
 keywords = ["battle cats", "save editor", "hacking"]
 

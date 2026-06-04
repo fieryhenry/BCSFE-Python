@@ -10,14 +10,10 @@ class ServerCLI:
     def download_save(
         self,
     ) -> tuple[core.Path, core.CountryCode] | None:
-        transfer_code = dialog_creator.StringInput().get_input_locale_while(
-            "enter_transfer_code", {}
-        )
+        transfer_code = dialog_creator.str_input_key("enter_transfer_code")
         if transfer_code is None:
             return None
-        confirmation_code = dialog_creator.StringInput().get_input_locale_while(
-            "enter_confirmation_code", {}
-        )
+        confirmation_code = dialog_creator.str_input_key("enter_confirmation_code")
         if confirmation_code is None:
             return None
         cc = core.CountryCode.select()
@@ -25,7 +21,7 @@ class ServerCLI:
             return None
         gv = core.GameVersion(120200)  # not important
 
-        color.ColoredText.localize(
+        color.color_print_key(
             "downloading_save_file",
             transfer_code=transfer_code,
             confirmation_code=confirmation_code,
@@ -39,19 +35,19 @@ class ServerCLI:
             gv,
         )
         if server_handler is None and result is not None:
-            color.ColoredText.localize("invalid_codes_error")
-            if dialog_creator.YesNoInput().get_input_once(
-                "display_response_debug_info_q"
-            ):
-                if result.response is not None:
-                    color.ColoredText.localize(
-                        "response_text_display",
-                        url=result.url,
-                        request_headers=result.headers,
-                        request_body=result.data,
-                        response_headers=result.response.headers,
-                        response_body=result.response.text,
-                    )
+            color.color_print_key("invalid_codes_error")
+            if cc == "jp":
+                color.color_print_key("jp_tw_mixup")
+            # if dialog_creator.yes_no_key("display_response_debug_info_q"):
+            #     if result.response is not None:
+            #         color.color_print_key(
+            #             "response_text_display",
+            #             url=result.url,
+            #             request_headers=result.headers,
+            #             request_body=result.data,
+            #             response_headers=result.response.headers,
+            #             response_body=result.response.text,
+            #         )
             return
         if server_handler is None:
             return
@@ -72,6 +68,6 @@ class ServerCLI:
             )
             input("press enter to continue anyway")
 
-        color.ColoredText.localize("save_downloaded", path=path.to_str())
+        color.color_print_key("save_downloaded", path=path.to_str())
 
         return path, cc

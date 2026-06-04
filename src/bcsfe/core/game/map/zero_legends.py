@@ -281,7 +281,7 @@ class ZeroLegendsChapters:
 
     @staticmethod
     def edit_zero_legends(save_file: core.SaveFile):
-        color.ColoredText.localize("zero_legends_warning")
+        color.color_print_key("zero_legends_warning")
         zero_legends_chapters = save_file.zero_legends
         zero_legends_chapters.edit_chapters(save_file, "ND", base_index=34000)
 

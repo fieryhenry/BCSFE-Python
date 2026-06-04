@@ -191,10 +191,8 @@ class LineUps:
         return self.__repr__()
 
     def edit_unlocked_slots(self):
-        self.unlocked_slots = dialog_creator.SingleEditor(
+        self.unlocked_slots = dialog_creator.edit_int_key(
             "unlocked_slots",
             self.unlocked_slots,
             self.slot_names_length,
-            localized_item=True,
-            remove_alias=True,
-        ).edit()
+        )

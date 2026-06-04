@@ -216,24 +216,20 @@ class Missions:
                     continue
                 name = name.replace("%d", str(condition.progress_count))
                 if "%@" in name and len(condition.conditions_value) > 2:
-                    name = name.replace(
-                        "%@", str(condition.conditions_value[2])
-                    )
+                    name = name.replace("%@", str(condition.conditions_value[2]))
                 options.append(name)
                 mssion_ids.append(mission_id)
 
-        re_claim = dialog_creator.ChoiceInput.from_reduced(
+        re_claim = dialog_creator.basic_keys_pick_key_index(
             ["complete_reward", "complete_claim", "uncomplete"],
             dialog="select_mission_claim",
-            single_choice=True,
-        ).single_choice()
+        )
         if re_claim is None:
             return
-        re_claim -= 1
 
-        choices, _ = dialog_creator.ChoiceInput.from_reduced(
+        choices = dialog_creator.multi_select_indexes_key(
             options, dialog="select_missions"
-        ).multiple_choice(localized_options=False)
+        )
         if choices is None:
             return
         for choice in choices:
@@ -253,7 +249,7 @@ class Missions:
                 if mission_id in missions.requirements:
                     missions.requirements[mission_id] = 0
 
-        color.ColoredText.localize("missions_edited")
+        color.color_print_key("missions_edited")
 
 
 class MissionCondition:

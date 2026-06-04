@@ -178,15 +178,15 @@ class FeatureHandler:
                 )
             for alias in core.LocalManager.get_all_aliases(feature_name):
                 if not name:
-                    found_features[*path] = 100
+                    found_features[tuple(path)] = 100
                     break
                 alias = alias.lower()
 
                 name = name.replace(" ", "")
                 alias = alias.replace(" ", "")
                 if alias in name or name in alias:
-                    found_features[*path] = 100
-                break
+                    found_features[tuple(path)] = 100
+                    break
 
         return found_features
 
@@ -195,8 +195,12 @@ class FeatureHandler:
         for feature_name in features:
             feature_names.append(feature_name[-1])
         print()
-        dialog_creator.ListOutput(feature_names, [], "features", {}).display_locale(
-            remove_alias=True
+        dialog_creator.display_options_key(
+            [
+                core.core_data.local_manager.get_all_aliases(core.localize(f))[0]
+                for f in feature_names
+            ],
+            "features",
         )
 
     def select_features(
@@ -206,14 +210,14 @@ class FeatureHandler:
             features.insert(0, ["go_back"])
         self.display_features(features)
         print()
-        usr_input = color.ColoredInput().localize("select_features").strip()
+        usr_input = color.color_input_key("select_features").strip()
         selected_features: list[list[str]] = []
         if usr_input.isdigit():
             usr_input = int(usr_input)
             if usr_input > len(features):
-                color.ColoredText.localize("invalid_input")
+                color.color_print_key("invalid_input")
             elif usr_input < 1:
-                color.ColoredText.localize("invalid_input")
+                color.color_print_key("invalid_input")
             else:
                 feature_name_top = features[usr_input - 1]
                 if feature_name_top == ["go_back"]:
@@ -233,7 +237,7 @@ class FeatureHandler:
         else:
             feats = self.search_features(usr_input, [])
             if not feats:
-                color.ColoredText.localize("no_feature_with_name", name=usr_input)
+                color.color_print_key("no_feature_with_name", name=usr_input)
             kv_map = list(feats.items())
             kv_map.sort(key=lambda v: v[1], reverse=True)
             selected_features = [list(v[0]) for v in kv_map]

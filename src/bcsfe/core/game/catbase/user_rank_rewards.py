@@ -4,16 +4,12 @@ from bcsfe.cli import dialog_creator, color
 
 
 class RankGift:
-    def __init__(
-        self, index: int, threshold: int, rewards: list[tuple[int, int]]
-    ):
+    def __init__(self, index: int, threshold: int, rewards: list[tuple[int, int]]):
         self.index = index
         self.threshold = threshold
         self.rewards = rewards
 
-    def get_name(
-        self, rank_gift_descriptions: RankGiftDescriptions
-    ) -> str | None:
+    def get_name(self, rank_gift_descriptions: RankGiftDescriptions) -> str | None:
         return rank_gift_descriptions.get_name(self.threshold)
 
 
@@ -190,16 +186,13 @@ class UserRankRewards:
         self.rewards[index].claimed = claimed
 
     def edit(self, save_file: core.SaveFile):
-        claim_choice = dialog_creator.ChoiceInput.from_reduced(
+        claim_choice = dialog_creator.basic_keys_pick_key_index(
             ["claim", "unclaim", "fix_claimed"],
             dialog="claim_or_unclaim_ur",
-            single_choice=True,
-        ).single_choice()
+        )
 
         if claim_choice is None:
             return
-
-        claim_choice -= 1
 
         rank_gifts = core.core_data.get_rank_gifts(save_file)
         if rank_gifts.rank_gift is None:
@@ -213,7 +206,7 @@ class UserRankRewards:
                 if rank_gift.threshold > user_rank:
                     reward.claimed = False
 
-            color.ColoredText.localize("ur_fix_claimed_success")
+            color.color_print_key("ur_fix_claimed_success")
             return
 
         selected_rank_gifts: list[RankGift] = rank_gifts.rank_gift.copy()
@@ -256,9 +249,9 @@ class UserRankRewards:
                 )
             )
 
-        ids, _ = dialog_creator.ChoiceInput.from_reduced(
+        ids = dialog_creator.multi_select_indexes_key(
             selected_descriptions, dialog="select_ur"
-        ).multiple_choice(localized_options=False)
+        )
         if ids is None:
             return
         for id in ids:
@@ -266,9 +259,9 @@ class UserRankRewards:
             self.set_claimed(index, claim_choice == 0)
 
         if claim_choice == 0:
-            color.ColoredText.localize("ur_claimed_success")
+            color.color_print_key("ur_claimed_success")
         else:
-            color.ColoredText.localize("ur_unclaimed_success")
+            color.color_print_key("ur_unclaimed_success")
 
 
 def edit_user_rank_rewards(save_file: core.SaveFile):

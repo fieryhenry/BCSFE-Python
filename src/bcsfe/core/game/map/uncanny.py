@@ -48,57 +48,83 @@ class UncannyChapters:
         uncanny.chapters.edit_chapters(save_file, "NA", 13000)
 
     @staticmethod
-    def edit_catamin_stages(save_file: core.SaveFile):
-        choice = dialog_creator.ChoiceInput.from_reduced(
-            ["change_clear_amount_catamin", "clear_unclear_stage_catamin"],
-            dialog="catamin_stage_clear_q",
-        ).single_choice()
-        if choice is None:
+    def catamin_clear_count_individual(save_file: core.SaveFile, map_ids: list[int]):
+        clear_amount = dialog_creator.int_input_key(
+            "enter_clear_amount_catamin", dialog_creator.MaxValue.i32()
+        )
+        if clear_amount is None:
+            return None
+        for map_id in map_ids:
+            save_file.event_stages.chapter_completion_count[14_000 + map_id] = (
+                clear_amount
+            )
+
+    @staticmethod
+    def catamin_clear_count_many(
+        save_file: core.SaveFile, map_ids: list[int], names: core.MapNames
+    ):
+        for map_id in map_ids:
+            name = names.map_names.get(map_id) or core.localize("unknown_map")
+            clear_amount = dialog_creator.int_input_key(
+                "enter_clear_amount_catamin_map",
+                dialog_creator.MaxValue.i32(),
+                name=name,
+                id=map_id,
+            )
+            if clear_amount is None:
+                return None
+            save_file.event_stages.chapter_completion_count[14_000 + map_id] = (
+                clear_amount
+            )
+
+    @staticmethod
+    def change_clear_amount_catamin(save_file: core.SaveFile):
+        names = core.MapNames(save_file, "B", base_index=14000)
+        map_ids = core.EventChapters.select_map_names(names.map_names)
+        if map_ids is None:
+            return None
+        if len(map_ids) >= 2:
+            dialog_creator.single_select_key(
+                dialog_creator.Actions[None]
+                .new()
+                .add_new_key(
+                    "individual",
+                    lambda _: UncannyChapters.catamin_clear_count_individual(
+                        save_file, map_ids
+                    ),
+                )
+                .add_new_key(
+                    "all_at_once",
+                    lambda _: UncannyChapters.catamin_clear_count_many(
+                        save_file, map_ids, names
+                    ),
+                ),
+                "catamin_clear_amounts_q",
+            )
+        else:
+            UncannyChapters.catamin_clear_count_individual(save_file, map_ids)
+        color.color_print_key("catamin_stage_success")
+
+    @staticmethod
+    def clear_unclear_catamin_stage(save_file: core.SaveFile):
+        completed_chapters = save_file.catamin_stages.chapters.edit_chapters(
+            save_file, "B", 14000
+        )
+        if completed_chapters is None:
             return None
 
-        if choice == 1:
-            names = core.MapNames(save_file, "B", base_index=14000)
-            map_ids = core.EventChapters.select_map_names(names.map_names)
-            if map_ids is None:
-                return None
-            if len(map_ids) >= 2:
-                choice2 = dialog_creator.ChoiceInput.from_reduced(
-                    ["individual", "all_at_once"], dialog="catamin_clear_amounts_q"
-                ).single_choice()
-                if choice2 is None:
-                    return None
-            else:
-                choice2 = 1
-
-            if choice2 == 2:
-                clear_amount = dialog_creator.IntInput().get_input(
-                    "enter_clear_amount_catamin", {}
-                )[0]
-                if clear_amount is None:
-                    return None
-                for map_id in map_ids:
-                    save_file.event_stages.chapter_completion_count[14_000 + map_id] = (
-                        clear_amount
-                    )
-            elif choice == 1:
-                for map_id in map_ids:
-                    name = names.map_names.get(map_id) or core.localize("unknown_map")
-                    clear_amount = dialog_creator.IntInput().get_input(
-                        "enter_clear_amount_catamin_map", {"name": name, "id": map_id}
-                    )[0]
-                    if clear_amount is None:
-                        return None
-                    save_file.event_stages.chapter_completion_count[14_000 + map_id] = (
-                        clear_amount
-                    )
-
-            color.ColoredText.localize("catamin_stage_success")
-
-        elif choice == 2:
-            completed_chapters = save_file.catamin_stages.chapters.edit_chapters(
-                save_file, "B", 14000
+    @staticmethod
+    def edit_catamin_stages(save_file: core.SaveFile):
+        dialog_creator.single_select_key(
+            dialog_creator.Actions[None]
+            .new()
+            .add_new_key(
+                "change_clear_amount_catamin",
+                lambda _: UncannyChapters.change_clear_amount_catamin(save_file),
             )
-            if completed_chapters is None:
-                return None
-
-            # TODO: maybe in the future ask if the user wants to modify the chapter clear amounts
+            .add_new_key(
+                "clear_unclear_stage_catamin",
+                lambda _: UncannyChapters.clear_unclear_catamin_stage(save_file),
+            ),
+            "catamin_stage_clear_q",
+        )

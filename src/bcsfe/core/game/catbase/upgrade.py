@@ -91,10 +91,10 @@ class Upgrade:
         if disable_maxes:
             max_pos_base = 50_000
             max_pos_plus = 50_000
-        color.ColoredText.localize(
+        color.color_print_key(
             "max_upgrade", max_base=max_pos_base + 1, max_plus=max_pos_plus
         )
-        usr_input = color.ColoredInput().localize("upgrade_input")
+        usr_input = color.color_input_key("upgrade_input")
         if usr_input == core.core_data.local_manager.get_key("quit_key"):
             return None, True
         # example:
@@ -133,14 +133,14 @@ class Upgrade:
                         min_base = int(range_parts[0]) - 1
                         max_base = min_base
                     except ValueError:
-                        color.ColoredText.localize("invalid_upgrade_base", base=base)
+                        color.color_print_key("invalid_upgrade_base", base=base)
                         return None, False
             else:
                 try:
                     min_base = int(range_parts[0]) - 1
                     max_base = int(range_parts[1]) - 1
                 except ValueError:
-                    color.ColoredText.localize(
+                    color.color_print_key(
                         "invalid_upgrade_base_random",
                         min=range_parts[0],
                         max=range_parts[1],
@@ -162,14 +162,14 @@ class Upgrade:
                         min_plus = int(range_parts[0])
                         max_plus = min_plus
                     except ValueError:
-                        color.ColoredText.localize("invalid_upgrade_plus", plus=plus)
+                        color.color_print_key("invalid_upgrade_plus", plus=plus)
                         return None, False
             else:
                 try:
                     min_plus = int(range_parts[0])
                     max_plus = int(range_parts[1])
                 except ValueError:
-                    color.ColoredText.localize(
+                    color.color_print_key(
                         "invalid_upgrade_plus_random",
                         min=range_parts[0],
                         max=range_parts[1],

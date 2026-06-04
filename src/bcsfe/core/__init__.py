@@ -1,5 +1,7 @@
 from __future__ import annotations
-from typing import Any
+from collections.abc import Callable
+from typing import Any, TypeVar
+from importlib import resources
 
 from requests.exceptions import ConnectionError
 from requests import Response
@@ -172,7 +174,25 @@ from bcsfe.core.theme_handler import (
     ExternalTheme,
     ExternalThemeManager,
 )
-from bcsfe.core.max_value_helper import MaxValueHelper, MaxValueType
+from bcsfe.core.max_value_helper import MaxValueHelper
+
+
+T = TypeVar("T")
+R = TypeVar("R")
+
+
+def map_opt(v: T | None, func: Callable[[T], R]) -> R | None:
+    if v is None:
+        return None
+    return func(v)
+
+
+def consume(v1: None, v2: T) -> T:
+    return v2
+
+
+def first_tuple(v: tuple[T, Any] | None) -> T | None:
+    return map_opt(v, lambda x: x[0])
 
 
 class CoreData:
@@ -181,7 +201,7 @@ class CoreData:
         self.logger = Logger(log_path)
         self.local_manager = LocalManager()
         self.theme_manager = ThemeHandler()
-        self.max_value_manager = MaxValueHelper()
+        self.max_value_manager = MaxValueHelper.from_file()
         self.game_data_getter: GameDataGetter | None = None
         self.gatya_item_names: GatyaItemNames | None = None
         self.gatya_item_buy: GatyaItemBuy | None = None
@@ -334,23 +354,23 @@ def get_game_data_path() -> Path | None:
 def update_external_content(_: Any = None):
     """Updates external content."""
 
-    color.ColoredText.localize("updating_external_content")
+    color.color_print_key("updating_external_content")
     print()
     ExternalThemeManager.update_all_external_themes()
     ExternalLocaleManager.update_all_external_locales()
     core_data.init_data()
 
-    clear_game_data = dialog_creator.YesNoInput().get_input_once("clear_game_data_q")
+    clear_game_data = dialog_creator.yes_no_key("clear_game_data_q")
     if clear_game_data is None:
         return
 
     if clear_game_data:
         GameDataGetter.delete_old_versions(0)
-        color.ColoredText.localize("cleared_game_data")
+        color.color_print_key("cleared_game_data")
 
 
 def print_no_internet():
-    color.ColoredText.localize("no_internet")
+    color.color_print_key("no_internet")
 
 
 core_data = CoreData()
@@ -358,6 +378,12 @@ core_data = CoreData()
 
 def localize(key: str, escape: bool = True, **kwargs: Any) -> str:
     return core_data.local_manager.get_key(key, escape=escape, **kwargs)
+
+
+def localize_no_alias(key: str, escape: bool = True, **kwargs: Any) -> str:
+    return core_data.local_manager.get_all_aliases(
+        core_data.local_manager.get_key(key, escape=escape, **kwargs)
+    )[0]
 
 
 __all__ = [
@@ -408,7 +434,6 @@ __all__ = [
     "ServerGatyaDataItem",
     "GatyaDataOptionSet",
     "GatyaDataOption",
-    "MaxValueType",
     "GamblingEvent",
     "UnitBuy",
     "NyankoPictureBook",
@@ -419,4 +444,14 @@ __all__ = [
     "CantDetectSaveCCError",
     "UnlockPopupData",
     "UnlockPopupLine",
+    "Localizable",
+    "Delimeter",
+    "Matatabi",
+    "GitHandler",
+    "EventChapters",
+    "MapNames",
+    "Command",
+    "RequestHandler",
+    "CommandResult",
+    "Thread",
 ]

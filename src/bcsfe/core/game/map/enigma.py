@@ -179,19 +179,19 @@ class Enigma:
 
         base_level = 25000
 
-        color.ColoredText.localize("current_enigma_stages")
+        color.color_print_key("current_enigma_stages")
         for stage in self.stages:
             name = names[stage.stage_id - base_level]
             if name is None:
                 name = core.core_data.local_manager.get_key(
                     "unknown_enigma_name", id=stage.stage_id
                 )
-            color.ColoredText.localize(
+            color.color_print_key(
                 "enigma_stage", name=name, id=stage.stage_id - base_level
             )
 
         if self.stages:
-            wipe = dialog_creator.YesNoInput().get_input_once("wipe_enigma")
+            wipe = dialog_creator.yes_no_key("wipe_enigma")
             if wipe is None:
                 return
             if wipe:
@@ -200,13 +200,10 @@ class Enigma:
                     save_file.event_stages.chapter_completion_count[id] = 0
                 self.stages = []
 
-        ids, _ = dialog_creator.ChoiceInput(
+        ids = dialog_creator.multi_select_indexes_key(
             names_list,
-            names_list,
-            [],
-            {},
             "enigma_select",
-        ).multiple_choice()
+        )
         if ids is None:
             return
 
@@ -217,7 +214,7 @@ class Enigma:
             stage = Stage(3, abs_id, 2, int(time.time()))
             self.stages.append(stage)
 
-        color.ColoredText.localize("enigma_success")
+        color.color_print_key("enigma_success")
 
 
 def edit_enigma(save_file: core.SaveFile):

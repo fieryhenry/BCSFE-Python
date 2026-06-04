@@ -1,16 +1,31 @@
 from __future__ import annotations
 import traceback
 
-from bcsfe import cli
+from bcsfe import cli, copy_to_data_dir
 
-from bcsfe import core
+from bcsfe import core, __app_name__, __version__
 
 import bcsfe
 import argparse
 
+from importlib import resources
+
+
+def migrate(force: bool):
+    v_path = core.Path.get_data_folder().add("version.txt")
+    if not v_path.exists():
+        v_path.write(core.Data(__version__))
+        vers = None
+    else:
+        vers = v_path.read().to_str().strip()
+    if vers != __version__ or force:
+        p = resources.files(__app_name__).joinpath("files")
+        copy_to_data_dir(p, p)
+        v_path.write(core.Data(__version__))
+
 
 def main():
-    parser = argparse.ArgumentParser("bcsfe")
+    parser = argparse.ArgumentParser(bcsfe.__app_name__)
 
     parser.add_argument(
         "--version", "-v", action="store_true", help="display the version and exit"
@@ -40,6 +55,11 @@ def main():
         default=None,
         help=f"path to the log file. If unspecified defaults to {core.Logger.get_log_path()}",
     )
+    parser.add_argument(
+        "--force-migrate",
+        action="store_true",
+        help=f"copy all data from bcsfe/src/files to {core.Path.get_data_folder()}",
+    )
 
     args = parser.parse_args()
     if args.version:
@@ -58,6 +78,8 @@ def main():
     if args.game_data_dir is not None:
         core.set_game_data_path(core.Path(args.game_data_dir))
 
+    migrate(args.force_migrate)
+
     core.core_data.init_data()
 
     try:
@@ -66,7 +88,7 @@ def main():
         cli.main.Main.leave()
     except Exception as e:
         tb = traceback.format_exc()
-        cli.color.ColoredText.localize(
+        cli.color.color_print_key(
             "error", error=e, version=bcsfe.__version__, traceback=tb
         )
         try:

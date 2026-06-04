@@ -156,9 +156,7 @@ class CannonDescriptions:
 
         return cannon_descriptions
 
-    def get_cannon_description(
-        self, cannon_id: int
-    ) -> CannonDescription | None:
+    def get_cannon_description(self, cannon_id: int) -> CannonDescription | None:
         if self.cannon_descriptions is None:
             return None
         for cannon_description in self.cannon_descriptions:
@@ -218,15 +216,13 @@ class Cannon:
 
 
 class Cannons:
-    def __init__(
-        self, cannons: dict[int, Cannon], selected_parts: list[list[int]]
-    ):
+    def __init__(self, cannons: dict[int, Cannon], selected_parts: list[list[int]]):
         self.cannons = cannons
         self.selected_parts = selected_parts
 
     @staticmethod
     def init(gv: core.GameVersion) -> Cannons:
-        cannnons = {}
+        cannnons: dict[int, Cannon] = {}
         if gv < 80200:
             selected_parts = [[0, 0, 0]]
         else:
@@ -266,9 +262,7 @@ class Cannons:
             stream.write_int(cannon_id)
             cannon.write(stream)
         if gv < 80200:
-            stream.write_int_list(
-                self.selected_parts[0], write_length=False, length=3
-            )
+            stream.write_int_list(self.selected_parts[0], write_length=False, length=3)
         else:
             if gv > 90699:
                 stream.write_byte(len(self.selected_parts))
@@ -356,9 +350,7 @@ class Ototo:
 
     @staticmethod
     def deserialize(data: dict[str, Any]) -> Ototo:
-        ototo = Ototo(
-            core.BaseMaterials.deserialize(data.get("base_materials", []))
-        )
+        ototo = Ototo(core.BaseMaterials.deserialize(data.get("base_materials", [])))
         ototo.remaining_seconds = data.get("remaining_seconds", 0.0)
         ototo.return_flag = data.get("return_flag", False)
         ototo.improve_id = data.get("improve_id", 0)
@@ -385,24 +377,18 @@ class Ototo:
     def edit_engineers(self, save_file: core.SaveFile):
         name = core.core_data.get_gatya_item_names(save_file).get_name(92)
         if name is None:
-            name = "engineers"
-            localized_item = True
-        else:
-            localized_item = False
-        self.engineers = dialog_creator.SingleEditor(
+            name = core.localize("engineers")
+        self.engineers = dialog_creator.edit_int_raw(
             name,
             self.engineers,
             Ototo.get_max_engineers(save_file),
-            localized_item=localized_item,
-        ).edit()
+        )
 
-    def display_current_cannons(
-        self, save_file: core.SaveFile
-    ) -> list[str] | None:
+    def display_current_cannons(self, save_file: core.SaveFile) -> list[str] | None:
         descriptions = CannonDescriptions(save_file)
         recipe_unlocks = CastleRecipeUnlock(save_file)
 
-        color.ColoredText.localize("current_cannon_stats")
+        color.color_print_key("current_cannon_stats")
 
         if self.cannons is None:
             self.cannons = Cannons.init(save_file.game_version)
@@ -440,9 +426,7 @@ class Ototo:
                 text += "\n"
                 text += "        "
                 buffer = " " * (
-                    longest_part_name
-                    - len(description.get_part_name(part_id))
-                    + 2
+                    longest_part_name - len(description.get_part_name(part_id)) + 2
                 )
                 name = description.get_part_name(part_id)
                 text += core.core_data.local_manager.get_key(
@@ -451,7 +435,7 @@ class Ototo:
 
             text += "\n"
 
-            color.ColoredText.localize("cannon_stats", parts=text, escape=False)
+            color.color_print_key("cannon_stats", parts=text, escape=False)
 
         return names
 
@@ -463,35 +447,33 @@ class Ototo:
         if names is None:
             return
 
-        cannon_ids, all_at_once = dialog_creator.ChoiceInput.from_reduced(
+        cannon_ids = dialog_creator.multi_select_indexes_key(
             names, dialog="select_cannon"
-        ).multiple_choice()
+        )
         if cannon_ids is None:
             return
 
-        if len(cannon_ids) > 1 and not all_at_once:
-            choice = dialog_creator.ChoiceInput.from_reduced(
+        all_at_once = False
+
+        if len(cannon_ids) > 1:
+            choice = dialog_creator.basic_keys_pick_key_index(
                 ["individual", "edit_all_at_once"],
                 dialog="cannon_edit_type",
-                single_choice=True,
-            ).single_choice()
+            )
             if choice is None:
                 return
-            choice -= 1
             if choice == 0:
                 all_at_once = False
             else:
                 all_at_once = True
 
         if len(cannon_ids) > 1 or (len(cannon_ids) == 1 and cannon_ids[0] != 0):
-            choice = dialog_creator.ChoiceInput.from_reduced(
+            choice = dialog_creator.basic_keys_pick_key_index(
                 ["development_o", "level_o"],
                 dialog="cannon_dev_level_q",
-                single_choice=True,
-            ).single_choice()
+            )
             if choice is None:
                 return
-            choice -= 1
         else:
             choice = 1
         if choice == 0:
@@ -499,16 +481,15 @@ class Ototo:
         elif choice == 1:
             self.edit_cannon_level(save_file, all_at_once, cannon_ids)
 
-        color.ColoredText.localize("cannon_success")
+        color.color_print_key("cannon_success")
 
         self.display_current_cannons(save_file)
 
     def select_development(self) -> int | None:
-        return dialog_creator.ChoiceInput.from_reduced(
+        return dialog_creator.basic_keys_pick_key_index(
             ["none", "foundation", "style", "effect"],
             dialog="select_development",
-            single_choice=True,
-        ).single_choice()
+        )
 
     def edit_cannon_development(
         self, save_file: core.SaveFile, all_at_once: bool, cannon_ids: list[int]
@@ -522,7 +503,7 @@ class Ototo:
             for cannon_id in cannon_ids:
                 if cannon_id == 0:
                     continue
-                self.cannons.cannons[cannon_id].development = development - 1
+                self.cannons.cannons[cannon_id].development = development
         else:
             for cannon_id in cannon_ids:
                 if cannon_id == 0:
@@ -532,11 +513,9 @@ class Ototo:
                 ).get_cannon_description(cannon_id)
                 if cannon_description is None:
                     continue
-                current_development = self.cannons.cannons[
-                    cannon_id
-                ].development
+                current_development = self.cannons.cannons[cannon_id].development
 
-                color.ColoredText.localize(
+                color.color_print_key(
                     "selected_cannon_stage",
                     name=cannon_description.get_cannon_name(),
                     stage=Ototo.get_stage_name(current_development),
@@ -545,7 +524,7 @@ class Ototo:
                 development = self.select_development()
                 if development is None:
                     return
-                self.cannons.cannons[cannon_id].development = development - 1
+                self.cannons.cannons[cannon_id].development = development
 
     def edit_cannon_level(
         self, save_file: core.SaveFile, all_at_once: bool, cannon_ids: list[int]
@@ -564,18 +543,22 @@ class Ototo:
                 or max_part_level_2 is None
             ):
                 return
-            levels = dialog_creator.MultiEditor.from_reduced(
+            levels = dialog_creator.edit_ints_key(
                 "cannon_level",
-                ["effect", "improved_foundation", "improved_style"],
-                None,
-                max_values=[
-                    max_part_level_0,
-                    max_part_level_1,
-                    max_part_level_2,
+                [
+                    core.localize("effect"),
+                    core.localize("improved_foundation"),
+                    core.localize("improved_style"),
                 ],
-                group_name_localized=True,
-                items_localized=True,
-            ).edit()
+                [0, 0, 0],
+                max=dialog_creator.MultiMax.new(
+                    [
+                        max_part_level_0,
+                        max_part_level_1,
+                        max_part_level_2,
+                    ]
+                ),
+            )
             if not levels:
                 return
             for cannon_id in cannon_ids:
@@ -600,9 +583,7 @@ class Ototo:
                     continue
                 cannon.development = max(cannon.development, 3)
 
-                cannon_desc = cannon_descriptions.get_cannon_description(
-                    cannon_id
-                )
+                cannon_desc = cannon_descriptions.get_cannon_description(cannon_id)
                 if cannon_desc is None:
                     continue
                 levels = cannon.levels
@@ -620,17 +601,20 @@ class Ototo:
                 ):
                     return
 
-                levels = dialog_creator.MultiEditor.from_reduced(
+                color.color_print(cannon_desc.get_cannon_name())
+
+                levels = dialog_creator.edit_ints_raw(
                     cannon_desc.get_cannon_name(),
-                    names,
+                    [core.localize(n) for n in names],
                     levels,
-                    max_values=[
-                        max_part_level_0,
-                        max_part_level_1,
-                        max_part_level_2,
-                    ],
-                    items_localized=True,
-                ).edit()
+                    max=dialog_creator.MultiMax.new(
+                        [
+                            max_part_level_0,
+                            max_part_level_1,
+                            max_part_level_2,
+                        ]
+                    ),
+                )
                 for part_id, level in enumerate(levels):
                     if part_id == 0:
                         level -= 1
@@ -651,9 +635,7 @@ class Ototo:
             return core.core_data.local_manager.get_key("style")
         if development == 3:
             return core.core_data.local_manager.get_key("effect")
-        return core.core_data.local_manager.get_key(
-            "unknown_stage", stage=development
-        )
+        return core.core_data.local_manager.get_key("unknown_stage", stage=development)
 
 
 def edit_cannon(save_file: core.SaveFile):

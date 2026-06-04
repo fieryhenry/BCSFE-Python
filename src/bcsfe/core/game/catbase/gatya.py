@@ -139,31 +139,19 @@ class Gatya:
         return f"Gatya({self.serialize()})"
 
     def edit_rare_gatya_seed(self):
-        self.rare_seed = dialog_creator.SingleEditor(
-            "rare_gatya_seed",
-            self.rare_seed,
-            None,
-            localized_item=True,
-            signed=False,
-        ).edit()
+        self.rare_seed = dialog_creator.edit_int_key(
+            "rare_gatya_seed", self.rare_seed, dialog_creator.MaxValue.u32()
+        )
 
     def edit_normal_gatya_seed(self):
-        self.normal_seed = dialog_creator.SingleEditor(
-            "normal_gatya_seed",
-            self.normal_seed,
-            None,
-            localized_item=True,
-            signed=False,
-        ).edit()
+        self.normal_seed = dialog_creator.edit_int_key(
+            "normal_gatya_seed", self.normal_seed, dialog_creator.MaxValue.u32()
+        )
 
     def edit_event_gatya_seed(self):
-        self.event_seed = dialog_creator.SingleEditor(
-            "event_gatya_seed",
-            self.event_seed,
-            None,
-            localized_item=True,
-            signed=False,
-        ).edit()
+        self.event_seed = dialog_creator.edit_int_key(
+            "event_gatya_seed", self.event_seed, dialog_creator.MaxValue.u32()
+        )
 
     def read_gatya_data_set(self, save_file: core.SaveFile) -> GatyaDataSet:
         if self.gatya_data_set is not None:
@@ -247,7 +235,7 @@ class GatyaInfo:
         try:
             data.to_file(self.get_file_path())
         except Exception as e:
-            color.ColoredText.localize("save_gatya_error", error=e)
+            color.color_print_key("save_gatya_error", error=e)
         self.data = data
 
     def load_data_from_file(self) -> core.Data | None:
@@ -322,7 +310,7 @@ class GatyaInfos:
 
     def get(self, gatya_id: int, print_progress: bool):
         if print_progress:
-            color.ColoredText.localize(
+            color.color_print_key(
                 "gatya_info_progress",
                 current=len(self.infos or []) + 1,
                 total=len(self.gatya_data_set or []),

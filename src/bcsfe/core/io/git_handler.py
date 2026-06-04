@@ -21,7 +21,7 @@ class Repo:
         result = core.Command(cmd).run()
         success = result.exit_code == 0
         if not success and self.output_error:
-            color.ColoredText.localize("failed_to_run_git_cmd", cmd=cmd)
+            color.color_print_key("failed_to_run_git_cmd", cmd=cmd)
         return success
 
     def clone_to_temp(self, path: core.Path) -> bool:
@@ -81,7 +81,7 @@ class GitHandler:
         if repo.success:
             return repo
         if output_error:
-            color.ColoredText.localize("failed_to_get_repo", url=repo_url)
+            color.color_print_key("failed_to_get_repo", url=repo_url)
         return None
 
     @staticmethod

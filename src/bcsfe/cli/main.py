@@ -69,10 +69,10 @@ class Main:
         latest_version = updater.get_latest_version(has_pre_release)
 
         if latest_version is None:
-            color.ColoredText.localize("update_check_fail")
+            color.color_print_key("update_check_fail")
             return
 
-        color.ColoredText.localize(
+        color.color_print_key(
             "version_line",
             local_version=local_version,
             latest_version=latest_version,
@@ -107,22 +107,20 @@ class Main:
             update_needed = False
 
         if update_needed:
-            update = dialog_creator.YesNoInput(True).get_input_once(
-                "update_available", {"latest_version": latest_version}
+            update = dialog_creator.yes_no_key(
+                "update_available", latest_version=latest_version
             )
             if update is None:
                 return
 
             if update:
                 if updater.update(latest_version):
-                    color.ColoredText.localize("update_success")
+                    color.color_print_key("update_success")
                 else:
-                    color.ColoredText.localize("update_fail")
+                    color.color_print_key("update_fail")
                 sys.exit()
             else:
-                disable_message = dialog_creator.YesNoInput(False).get_input_once(
-                    "disable_update_message"
-                )
+                disable_message = dialog_creator.yes_no_key("disable_update_message")
                 if disable_message is None:
                     return
 
@@ -175,7 +173,7 @@ class Main:
                 ),
                 escape=False,
             )
-        color.ColoredText.localize(
+        color.color_print_key(
             "welcome",
             config_path=core.core_data.config.get_config_path(),
             locale_text=locale_text,
@@ -191,7 +189,7 @@ class Main:
             return stop
         self.save_file = save_file
 
-        color.ColoredText.localize(
+        color.color_print_key(
             "current_save",
             inquiry_code=save_file.inquiry_code[:4]
             + "***"
@@ -290,14 +288,14 @@ class Main:
         if not path.exists():
             return None
         try:
-            json_data = core.JsonFile.from_data(path.read()).to_object()
+            json_data = core.JsonFile.from_data(path.read()).as_object()
         except (core.JSONDecodeError, UnicodeDecodeError):
-            color.ColoredText.localize("parse_json_fail")
+            color.color_print_key("parse_json_fail")
             return None
         try:
             save_file = core.SaveFile.from_dict(json_data)
         except core.SaveError:
-            color.ColoredText.localize(
+            color.color_print_key(
                 "load_json_fail", error=core.core_data.logger.get_traceback()
             )
             return None
@@ -320,23 +318,21 @@ class Main:
                     save_file_temp = core.SaveFile(temp_path.read())
                 except core.SaveError as e:
                     tb = traceback.format_exc()
-                    color.ColoredText.localize(
-                        "save_temp_fail", error=str(e), traceback=tb
-                    )
+                    color.color_print_key("save_temp_fail", error=str(e), traceback=tb)
                     Main.leave()
 
         if save_file is None:
             save_file = save_file_temp
         if save_file is None:
             if check_temp:
-                color.ColoredText.localize("save_temp_not_found")
+                color.color_print_key("save_temp_not_found")
             Main.leave()
         if save_file_temp is None:
             save_file_temp = save_file
 
         try:
             print()
-            color.ColoredText.localize("checking_for_changes")
+            color.color_print_key("checking_for_changes")
             if save_file.save_path is None:
                 same = False
             else:
@@ -345,18 +341,18 @@ class Main:
             same = False
 
         if not same:
-            color.ColoredText.localize("changes_found")
+            color.color_print_key("changes_found")
             print()
-            save = color.ColoredInput().localize("save_before_exit") == "y"
+            save = color.color_input_key("save_before_exit") == "y"
             if save:
                 save_management.SaveManagement.save_save(save_file)
         else:
-            color.ColoredText.localize("no_changes")
+            color.color_print_key("no_changes")
 
         Main.leave()
 
     @staticmethod
     def leave() -> NoReturn:
         """Leave the editor."""
-        color.ColoredText.localize("leave")
+        color.color_print_key("leave")
         sys.exit()

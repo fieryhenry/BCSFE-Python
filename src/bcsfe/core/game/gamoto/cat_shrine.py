@@ -91,77 +91,66 @@ class CatShrine:
     def __str__(self):
         return self.__repr__()
 
+    def appear(self):
+        self.shrine_gone = False
+        self.stamp_1 = 0.0
+        self.stamp_2 = 0.0
+
+    def disappear(self):
+        self.shrine_gone = True
+
+    @staticmethod
+    def edit_level(save_file: core.SaveFile):
+        data = core.core_data.get_cat_shrine_levels(save_file)
+        max_level = data.get_max_level()
+        if max_level is None:
+            return
+        level = dialog_creator.int_input_key(
+            "shrine_level_dialog", min=1, _max=max_level, max_level=max_level
+        )
+        if level is None:
+            return
+        save_file.cat_shrine.xp_offering = data.get_xp_from_level(level)
+
+    @staticmethod
+    def edit_xp(save_file: core.SaveFile):
+        data = core.core_data.get_cat_shrine_levels(save_file)
+        max_xp = data.get_max_xp()
+        if max_xp is None:
+            return
+        xp = dialog_creator.int_input_key(
+            "shrine_xp_dialog", min=0, _max=max_xp, max_xp=max_xp
+        )
+        if xp is None:
+            return
+        save_file.cat_shrine.xp_offering = xp
+
     @staticmethod
     def edit_catshrine(save_file: core.SaveFile):
         shrine = save_file.cat_shrine
-        options = [
-            "shrine_level",
-            "shrine_xp",
-            "make_catshrine_appear",
-            "make_catshrine_disappear",
-        ]
-        choice = dialog_creator.ChoiceInput.from_reduced(
-            options, dialog="cat_shrine_choice_dialog", single_choice=True
-        ).single_choice()
-        if choice is None:
-            return
-        choice -= 1
-
-        if choice == 2:
-            shrine.shrine_gone = False
-
-            shrine.stamp_1 = 0.0
-            shrine.stamp_2 = 0.0
-            color.ColoredText.localize("cat_shrine_edited")
-            return
-        elif choice == 3:
-            shrine.shrine_gone = True
-            color.ColoredText.localize("cat_shrine_edited")
-            return
-
+        xp = shrine.xp_offering
         data = core.core_data.get_cat_shrine_levels(save_file)
-
-        xp = shrine.xp_offering
         level = data.get_level_from_xp(xp)
-
-        color.ColoredText.localize("current_shrine_xp_level", level=level, xp=xp)
-
-        if choice == 0:
-            max_level = data.get_max_level()
-            if max_level is None:
-                return
-            level = dialog_creator.IntInput(
-                min=1, max=max_level
-            ).get_input_locale_while("shrine_level_dialog", {"max_level": max_level})
-            if level is None:
-                return
-            shrine.xp_offering = data.get_xp_from_level(level)
-        elif choice == 1:
-            max_xp = data.get_max_xp()
-            if max_xp is None:
-                return
-            xp = dialog_creator.IntInput(min=0, max=max_xp).get_input_locale_while(
-                "shrine_xp_dialog", {"max_xp": max_xp}
-            )
-            if xp is None:
-                return
-            shrine.xp_offering = xp
+        color.color_print_key("current_shrine_xp_level", level=level, xp=xp)
+        dialog_creator.single_select_key(
+            dialog_creator.Actions[None]
+            .new()
+            .add_new_key("shrine_level", lambda _: CatShrine.edit_level(save_file))
+            .add_new_key("shrine_xp", lambda _: CatShrine.edit_xp(save_file))
+            .add_new_key("make_catshrine_appear", lambda _: shrine.appear())
+            .add_new_key("make_catshrine_disappear", lambda _: shrine.disappear()),
+            "cat_shrine_choice_dialog",
+        )
 
         xp = shrine.xp_offering
-        if xp is None:
-            return
         level = data.get_level_from_xp(xp)
         if level is None:
             return
 
         shrine.dialogs = level - 1
-        shrine.shrine_gone = False
-        shrine.stamp_1 = 0.0
-        shrine.stamp_2 = 0.0
 
-        color.ColoredText.localize("current_shrine_xp_level", level=level, xp=xp)
-
-        color.ColoredText.localize("cat_shrine_edited")
+        color.color_print_key("current_shrine_xp_level", level=level, xp=xp)
+        color.color_print_key("cat_shrine_edited")
 
 
 class CatShrineLevels:

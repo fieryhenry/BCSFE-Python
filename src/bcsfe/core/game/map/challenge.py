@@ -62,9 +62,11 @@ class ChallengeChapters:
     def edit_score(self):
         if not self.scores:
             self.scores = [0]
-        self.scores[0] = dialog_creator.SingleEditor(
-            "challenge_score", self.scores[0], None, localized_item=True
-        ).edit()
+        self.scores[0] = dialog_creator.edit_int_key(
+            "challenge_score",
+            self.scores[0],
+            dialog_creator.MaxValue.i32().hide_max(),
+        )
         self.shown_popup = True
         self.chapters.clear_stage(0, 0, 0, False)
 

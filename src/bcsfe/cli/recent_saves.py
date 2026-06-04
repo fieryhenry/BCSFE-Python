@@ -111,7 +111,7 @@ class RecentSaves:
 
     def select(self) -> RecentSave | None:
         if not self.saves:
-            color.ColoredText.localize("no_recent_saves")
+            color.color_print_key("no_recent_saves")
             return None
         items: list[str] = []
         for save in self.saves:
@@ -133,12 +133,10 @@ class RecentSaves:
             )
         items.reverse()
 
-        resp = dialog_creator.ChoiceInput.from_reduced(
-            items, localize_options=False, dialog="select_recent"
-        ).single_choice()
+        resp = dialog_creator.basic_pick_key_index(items, dialog="select_recent")
         if resp is None:
             return None
 
-        resp = len(self.saves) - resp
+        resp = len(self.saves) - (resp + 1)
 
         return self.saves[resp]

@@ -185,7 +185,7 @@ class LocalManager:
         metadata_path = self.path.add("metadata.json")
 
         if metadata_path.exists():
-            data = core.JsonFile.from_path(metadata_path)
+            data = core.JsonFile.from_path(metadata_path).as_object()
             self.authors = data.get("authors") or ["fieryhenry"]
             self.name = data.get("name") or "English"
 
@@ -449,7 +449,7 @@ class LocalManager:
         Returns:
             core.Path: Path to the locales folder.
         """
-        return core.Path("locales", True)
+        return core.Path.get_data_folder().add("locales")
 
     @staticmethod
     def get_external_locales_folder() -> core.Path:
@@ -540,7 +540,7 @@ class ExternalLocale:
         locale_json = repo.get_file(core.Path("locale.json"))
         if locale_json is None:
             return None
-        json_data = core.JsonFile.from_data(locale_json).to_object()
+        json_data = core.JsonFile.from_data(locale_json).as_object()
         json_data["git_repo"] = git_repo
         return ExternalLocale.from_json(json_data)
 
@@ -632,7 +632,7 @@ class ExternalLocaleManager:
         """
         if not path.exists():
             return None
-        json_data = core.JsonFile.from_data(path.add("locale.json").read()).to_object()
+        json_data = core.JsonFile.from_data(path.add("locale.json").read()).as_object()
         return ExternalLocale.from_json(json_data)
 
     @staticmethod
@@ -644,19 +644,19 @@ class ExternalLocaleManager:
         """
         if external_locale.git_repo is None:
             return
-        color.ColoredText.localize(
+        color.color_print_key(
             "checking_for_locale_updates",
             locale_name=external_locale.name,
         )
         updated = external_locale.get_new_version()
         if updated:
-            color.ColoredText.localize(
+            color.color_print_key(
                 "external_locale_updated",
                 locale_name=external_locale.name,
                 version=external_locale.version,
             )
         else:
-            color.ColoredText.localize(
+            color.color_print_key(
                 "external_locale_no_update",
                 locale_name=external_locale.name,
                 version=external_locale.version,
@@ -668,12 +668,12 @@ class ExternalLocaleManager:
         """Updates all external locales."""
         dirs = LocalManager.get_external_locales_folder().get_dirs()
         if not dirs:
-            color.ColoredText.localize(
+            color.color_print_key(
                 "no_external_locales",
             )
             return
         if not core.GitHandler.is_git_installed():
-            color.ColoredText.localize(
+            color.color_print_key(
                 "git_not_installed",
             )
             return

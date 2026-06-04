@@ -1,721 +1,724 @@
 from __future__ import annotations
-from typing import Any
+from collections.abc import Callable, Sequence
+from typing import Any, Generic, TypeVar
+
 from bcsfe import core
 from bcsfe.cli import color
 
+T = TypeVar("T")
 
-class RangeInput:
-    def __init__(self, max: int | None = None, min: int = 0):
+ActionFunc = Callable[[int], T]
+
+
+class NoAssignedActionException(Exception):
+    def __init__(self, index: int):
+        super().__init__(f"No assigned action to index {index}")
+
+
+class Action(Generic[T]):
+    def __init__(self, options: list[str], func: ActionFunc[T]):
+        self.options = options
+        self.func = func
+
+    def len(self) -> int:
+        return len(self.options)
+
+    @staticmethod
+    def new_raw(options: str | list[str], func: ActionFunc[T]) -> Action[T]:
+        if isinstance(options, str):
+            options = [options]
+        return Action(options, func)
+
+    @staticmethod
+    def new_key(
+        options: str | list[str],
+        func: ActionFunc[T],
+        escape: bool = True,
+        **kwargs: Any,
+    ) -> Action[T]:
+        if isinstance(options, str):
+            options = [options]
+
+        options_ls = [core.localize(opt, escape, **kwargs) for opt in options]
+
+        return Action[T].new_raw(options_ls, func)
+
+    def run(self, index: int) -> T:
+        return self.func(index)
+
+
+class Actions(Generic[T]):
+    def __init__(self, actions: list[Action[T]]):
+        self.actions = actions
+
+    def len(self) -> int:
+        return len(self.actions)
+
+    def is_empty(self) -> bool:
+        return self.len() == 0
+
+    @staticmethod
+    def new() -> Actions[T]:
+        return Actions([])
+
+    def add(self, action: Action[T]) -> Actions[T]:
+        self.actions.append(action)
+
+        return self
+
+    def add_new_raw(self, options: str | list[str], func: ActionFunc[T]) -> Actions[T]:
+        return self.add(Action[T].new_raw(options, func))
+
+    def add_new_key(
+        self,
+        options: str | list[str],
+        func: ActionFunc[T],
+        escape: bool = True,
+        **kwargs: Any,
+    ) -> Actions[T]:
+        return self.add(Action[T].new_key(options, func, escape, **kwargs))
+
+    def get(self, index: int) -> Action[T] | None:
+        current = 0
+        for action in self.actions:
+            if current >= index:
+                return action
+            current += action.len()
+        return None
+
+    def get_rebase(self, index: int) -> tuple[Action[T], int] | None:
+        current = 0
+        for action in self.actions:
+            if index < current + action.len():
+                return action, index - current
+            current += action.len()
+        return None
+
+    def max(self) -> int:
+        current = 0
+        for action in self.actions:
+            current += action.len()
+        return current
+
+    def run(self, index: int) -> T:
+        action = self.get(index)
+        if action is None:
+            raise NoAssignedActionException(index)
+
+        return action.run(index)
+
+    def to_string(self) -> str:
+        lines: list[str] = []
+
+        i = 1
+        for action in self.actions:
+            for opt in action.options:
+                lines.append(f" {i}. <@t>{opt}</>")
+                i += 1
+
+        return "\n".join(lines)
+
+    def display(self):
+        color.color_print(self.to_string())
+
+
+def display_options_key(
+    options: list[str], dialog: str, escape: bool = True, **kwargs: Any
+):
+    display_options_raw(options, core.localize(dialog, escape, **kwargs))
+
+
+def display_options_raw(options: list[str], dialog: str):
+    lines: list[str] = []
+
+    color.color_print(dialog)
+    for i, opt in enumerate(options):
+        lines.append(f" {i + 1}. <@t>{opt}</>")
+
+    color.color_print("\n".join(lines))
+
+
+def yes_no_raw(dialog: str) -> bool | None:
+    inp = str_input_raw(dialog)
+    if inp is None:
+        return None
+    return inp.lower().strip() == core.localize("yes_key").strip().lower()
+
+
+def range_multi_input_key(
+    dialog: str, max: MaxValue | int, min: int = 0, escape: bool = True, **kwargs: Any
+) -> list[int] | None:
+    return range_multi_input_raw(core.localize(dialog, escape, **kwargs), max, min)
+
+
+def range_basic_parse(
+    usr_input: str, max: MaxValue | int, min: int = 0
+) -> list[int] | None:
+    if isinstance(max, int):
+        max = MaxValue.specific(max)
+    nums: list[int] = []
+    for part in usr_input.split(" "):
+        if part.isdigit():
+            int_i = int(part)
+            if int_i > max.max or int_i < min:
+                color.color_print_key("invalid_input_int", min=min, max=max.max)
+                return None
+            nums.append(int(part))
+        elif "," in part:
+            min_v, max_v = part.split(",", 1)
+            if not min_v.isdigit() or not max_v.isdigit():
+                return None
+            min_i = int(min_v)
+            max_i = int(max_v)
+            if max_i < min_i:
+                return None
+            if max_i > max.max or min_i < min:
+                return None
+
+            nums.extend(list(range(min_i, max_i + 1)))
+        else:
+            return None
+
+    return nums
+
+
+def range_multi_input_raw(
+    dialog: str, max: MaxValue | int, min: int = 0
+) -> list[int] | None:
+    if isinstance(max, int):
+        max = MaxValue.specific(max)
+    usr_input = color.color_input(dialog)
+    if usr_input == core.localize("quit_key"):
+        return None
+
+    nums: list[int] = []
+    for part in usr_input.split(" "):
+        if part.isdigit():
+            int_i = int(part)
+            if int_i > max.max or int_i < min:
+                color.color_print_key("invalid_input_int", min=min, max=max.max)
+                continue
+            nums.append(int(part))
+        elif "," in part:
+            min_v, max_v = part.split(",", 1)
+            if not min_v.isdigit() or not max_v.isdigit():
+                color.color_print_key("invalid_range", val=part)
+                continue
+            min_i = int(min_v)
+            max_i = int(max_v)
+            if max_i < min_i:
+                color.color_print_key("invalid_range", val=part)
+                continue
+            if max_i > max.max or min_i < min:
+                color.color_print_key("invalid_input_int", min=min, max=max.max)
+                continue
+
+            nums.extend(list(range(min_i, max_i + 1)))
+        else:
+            color.color_print_key("invalid_range", val=part)
+
+    return nums
+
+
+def yes_no_key(dialog: str, escape: bool = False, **kwargs: Any) -> bool | None:
+    return yes_no_raw(core.localize(dialog, escape, **kwargs))
+
+
+def multi_select_raw(options: list[str], dialog: str) -> list[str] | None:
+    out = multi_select_entries_raw(options, dialog)
+    if out is None:
+        return None
+    return [v[1] for v in out]
+
+
+def multi_select_indexes_raw(options: list[str], dialog: str) -> list[int] | None:
+    out = multi_select_entries_raw(options, dialog)
+    if out is None:
+        return None
+    return [v[0] for v in out]
+
+
+def multi_select_key(
+    options: list[str], dialog: str, escape: bool = True, **kwargs: Any
+) -> list[str] | None:
+    return multi_select_raw(options, core.localize(dialog, escape, **kwargs))
+
+
+def multi_select_indexes_key(
+    options: list[str], dialog: str, escape: bool = True, **kwargs: Any
+) -> list[int] | None:
+    return multi_select_indexes_raw(options, core.localize(dialog, escape, **kwargs))
+
+
+def multi_select_entries_key(
+    options: list[str], dialog: str, escape: bool = True, **kwargs: Any
+) -> list[tuple[int, str]] | None:
+    return multi_select_entries_raw(options, core.localize(dialog, escape, **kwargs))
+
+
+def multi_select_entries_raw(
+    options: list[str], dialog: str
+) -> list[tuple[int, str]] | None:
+    if not options:
+        return None
+    if len(options) == 1:
+        return [(0, options[0])]
+
+    offset = 1
+    actions = (
+        Actions[list[tuple[int, str]]]
+        .new()
+        .add_new_raw(options, lambda v: [(v, options[v])])
+        .add_new_key("all", lambda _: list(enumerate(options)))
+    )
+
+    ids: list[tuple[int, str]] = []
+
+    quit_key = core.localize("quit_key")
+
+    while True:
+        actions.display()
+        inp = color.color_input(dialog)
+        if inp == quit_key:
+            return None
+
+        inps = inp.split(" ")
+
+        for inp in inps:
+            if not inp.isdigit():
+                color.color_print_key("invalid_input_int", min=min, max=actions.max())
+                continue
+
+            inp_i = int(inp)
+            inp_i -= offset
+            if inp_i < 0:
+                color.color_print_key("invalid_input_int", min=min, max=actions.max())
+                break
+
+            action = actions.get_rebase(inp_i)
+            if action is None:
+                color.color_print_key("invalid_input_int", min=min, max=actions.max())
+                break
+
+            ids.extend(action[0].run(action[1]))
+        else:
+            return ids
+
+
+def single_select_raw(actions: Actions[T], dialog: str) -> T | None:
+    if actions.max() == 0:
+        return None
+    if actions.len() == 1 and actions.actions[0].len() == 1:
+        return actions.actions[0].run(0)
+    offset = 1
+
+    min = offset
+
+    quit_key = core.localize("quit_key")
+
+    while True:
+        actions.display()
+        inp = color.color_input(dialog)
+        if inp == quit_key:
+            return None
+        if not inp.isdigit():
+            for act in actions.actions:
+                for i, o in enumerate(act.options):
+                    if o.lower().strip() == inp.lower().strip():
+                        return act.run(i)
+            color.color_print_key("invalid_input_int", min=min, max=actions.max())
+            continue
+
+        inp_i = int(inp)
+        inp_i -= offset
+        if inp_i < 0:
+            color.color_print_key("invalid_input_int", min=min, max=actions.max())
+            continue
+
+        action = actions.get_rebase(inp_i)
+        if action is None:
+            color.color_print_key("invalid_input_int", min=min, max=actions.max())
+            continue
+
+        return action[0].run(action[1])
+
+
+def single_select_key(
+    actions: Actions[T],
+    dialog_key: str,
+    escape: bool = True,
+    **kwargs: Any,
+) -> T | None:
+    return single_select_raw(actions, core.localize(dialog_key, escape, **kwargs))
+
+
+def basic_pick_raw_entry(items: list[str], dialog: str) -> tuple[int, str] | None:
+    return single_select_raw(
+        Actions[tuple[int, str]].new().add_new_raw(items, lambda v: (v, items[v])),
+        dialog,
+    )
+
+
+def basic_pick_raw_index(items: list[str], dialog: str) -> int | None:
+    return single_select_raw(
+        Actions[int].new().add_new_raw(items, lambda v: v),
+        dialog,
+    )
+
+
+def basic_pick_raw(items: list[str], dialog: str) -> str | None:
+    return single_select_raw(
+        Actions[str].new().add_new_raw(items, lambda v: items[v]),
+        dialog,
+    )
+
+
+def basic_pick_key_entry(
+    items: list[str], dialog: str, escape: bool = True, **kwargs: Any
+) -> tuple[int, str] | None:
+    return basic_pick_raw_entry(items, core.localize(dialog, escape, **kwargs))
+
+
+def basic_pick_key_index(
+    items: list[str], dialog: str, escape: bool = True, **kwargs: Any
+) -> int | None:
+    return basic_pick_raw_index(items, core.localize(dialog, escape, **kwargs))
+
+
+def basic_pick_key(
+    items: list[str], dialog: str, escape: bool = True, **kwargs: Any
+) -> str | None:
+    return basic_pick_raw(items, core.localize(dialog, escape, **kwargs))
+
+
+def basic_keys_pick_key(
+    keys: list[str], dialog: str, escape: bool = True, **kwargs: Any
+) -> str | None:
+    return basic_pick_key(
+        [core.localize(key) for key in keys], dialog, escape, **kwargs
+    )
+
+
+def basic_keys_pick_key_index(
+    keys: list[str], dialog: str, escape: bool = True, **kwargs: Any
+) -> int | None:
+    return basic_pick_key_index(
+        [core.localize(key) for key in keys], dialog, escape, **kwargs
+    )
+
+
+def basic_keys_pick_key_entry(
+    keys: list[str], dialog: str, escape: bool = True, **kwargs: Any
+) -> tuple[int, str] | None:
+    return basic_pick_key_entry(
+        [core.localize(key) for key in keys], dialog, escape, **kwargs
+    )
+
+
+class MaxValue:
+    def __init__(self, max: int, show: bool = True):
         self.max = max
-        self.min = min
+        self.show = show
 
-    def clamp_value(self, value: int) -> int:
-        if self.max is None:
-            return max(value, self.min)
-        return max(min(value, self.max), self.min)
-
-    def get_input_locale(
-        self,
-        dialog: str,
-        perameters: dict[str, int | str],
-        escape: bool = True,
-    ) -> list[int] | None:
-        user_input = color.ColoredInput(end="").localize(
-            dialog, escape=escape, **perameters
-        )
-        return self.parse(user_input)
-
-    def parse(self, user_input: str) -> list[int] | None:
-        if user_input == "":
-            return []
-        if user_input == core.core_data.local_manager.get_key("quit_key"):
-            return None
-        parts = user_input.split(" ")
-        ids: list[int] = []
-        all_text = core.core_data.local_manager.get_key("all")
-        for part in parts:
-            if "-" in part and len(part.split("-")) == 2:
-                lower, upper = part.split("-")
-                try:
-                    lower = int(lower)
-                    upper = int(upper)
-                except ValueError:
-                    continue
-                if lower > upper:
-                    lower, upper = upper, lower
-                if self.max is not None:
-                    lower = max(lower, self.min)
-                    upper = min(upper, self.max)
-                else:
-                    lower = max(lower, self.min)
-                ids.extend(range(lower, upper + 1))
-            elif part.lower() == all_text.lower() and self.max is not None:
-                ids.extend(range(self.min, self.max + 1))
-            else:
-                try:
-                    part = int(part)
-                except ValueError:
-                    continue
-                if self.max is not None:
-                    part = max(part, self.min)
-                    part = min(part, self.max)
-                else:
-                    part = max(part, self.min)
-                ids.append(part)
-        return ids
-
-
-class IntInput:
-    def __init__(
-        self,
-        max: int | None = None,
-        min: int = 0,
-        default: int | None = None,
-        signed: bool = True,
-        bit_count: int = 32,
-        ensure_max: bool = False,
-    ):
-        self.signed = signed
-        self.bit_count = bit_count
-        self.max = self.get_max_value(max, signed, bit_count, ensure_max)
-        self.min = min
-        self.default = default
+    def hide_max(self) -> MaxValue:
+        self.show = False
+        return self
 
     @staticmethod
-    def get_max_value(
-        max: int | None,
-        signed: bool = True,
-        bit_count: int = 32,
-        ensure_max: bool = False,
-    ) -> int:
-        disable_maxes = (
-            core.core_data.config.get_bool(core.ConfigKey.DISABLE_MAXES)
-            and not ensure_max
-        )
-        if signed:
-            bit_count -= 1
-        max_int = (2**bit_count) - 1
-        if disable_maxes or max is None:
-            return max_int
-        return min(max, max_int)
+    def specific(max: int) -> MaxValue:
+        return MaxValue(max)
 
-    def clamp_value(self, value: int) -> int:
-        return max(min(value, self.max), self.min)
+    @staticmethod
+    def none(bits: int) -> MaxValue:
+        return MaxValue((2**bits) - 1)
 
-    def get_input(
-        self,
-        localization_key: str,
-        perameters: dict[str, int | str],
-        escape: bool = True,
-    ) -> tuple[int | None, str]:
-        user_input = color.ColoredInput(end="").localize(
-            localization_key, escape=escape, **perameters
-        )
-        if user_input == "" and self.default is not None:
-            return self.default, user_input
+    @staticmethod
+    def i32() -> MaxValue:
+        return MaxValue.none(31)
+
+    @staticmethod
+    def u32() -> MaxValue:
+        return MaxValue.none(32)
+
+    @staticmethod
+    def i16() -> MaxValue:
+        return MaxValue.none(15)
+
+    @staticmethod
+    def u16() -> MaxValue:
+        return MaxValue.none(16)
+
+    def clamp(self, v: int) -> int:
+        return min(self.max, v)
+
+
+def edit_int_raw(item_name: str, current_value: int, max: MaxValue | int) -> int:
+    if isinstance(max, int):
+        max = MaxValue.specific(max)
+    if max.show:
+        key = "input"
+    else:
+        key = "input_no_max"
+
+    dialog = core.localize(
+        key, name=item_name, value=current_value, max=max.max, escape=False
+    )
+
+    val = int_input_raw(dialog, max, auto_clamp=True)
+    if val is None:
+        val = current_value
+    color.color_print_key("value_changed", name=item_name, value=val, escape=False)
+    return val
+
+
+def edit_str_raw(item_name: str, current_value: str) -> str:
+    dialog = core.localize("input_no_max", name=item_name, value=current_value)
+
+    val = str_input_raw(dialog) or current_value
+    color.color_print_key("value_changed", name=item_name, value=val)
+    return val
+
+
+def int_input_key(
+    dialog: str,
+    _max: MaxValue | int,
+    min: int = 0,
+    default: int | None = None,
+    auto_clamp: bool = False,
+    escape: bool = True,
+    **kwargs: Any,
+) -> int | None:
+    return int_input_raw(
+        core.localize(dialog, escape, **kwargs), _max, min, default, auto_clamp
+    )
+
+
+def str_input_key(dialog: str, escape: bool = True, **kwargs: Any) -> str | None:
+    return str_input_raw(core.localize(dialog, escape, **kwargs))
+
+
+def int_input_raw(
+    dialog: str,
+    _max: MaxValue | int,
+    _min: int = 0,
+    default: int | None = None,
+    auto_clamp: bool = False,
+) -> int | None:
+    if isinstance(_max, int):
+        _max = MaxValue.specific(_max)
+    quit_key = core.localize("quit_key")
+    while True:
+        inp = color.color_input(dialog)
+        if not inp and default is not None:
+            return default
+        if inp == quit_key:
+            return None
         try:
-            user_input_i = int(user_input)
+            inp_i = int(inp)
         except ValueError:
-            return None, user_input
+            color.color_print_key("invalid_input_int", max=_max.max, min=_min)
+            continue
 
-        return self.clamp_value(user_input_i), user_input
-
-    def get_input_locale_while(
-        self, dialog: str, perameters: dict[str, int | str], escape: bool = True
-    ) -> int | None:
-        while True:
-            int_val, user_input = self.get_input(dialog, perameters, escape=escape)
-            if int_val is not None:
-                return int_val
-            if user_input == core.core_data.local_manager.get_key("quit_key"):
-                return None
-
-    def get_input_locale(
-        self, localization_key: str | None, perameters: dict[str, int | str]
-    ) -> tuple[int | None, str]:
-        if localization_key is None:
-            if self.default is not None:
-                perameters = {
-                    "min": self.min,
-                    "max": self.max,
-                    "default": self.default,
-                }
-                localization_key = "input_int_default"
+        if inp_i < _min or inp_i > _max.max:
+            if auto_clamp:
+                inp_i = min(max(_min, inp_i), _max.max)
             else:
-                perameters = {"min": self.min, "max": self.max}
-                localization_key = "input_int"
-        return self.get_input(localization_key, perameters)
+                color.color_print_key("invalid_input_int", max=_max.max, min=_min)
+                continue
 
-    def get_basic_input_locale(self, localization_key: str, perameters: dict[str, Any]):
-        try:
-            user_input = int(
-                color.ColoredInput(end="").localize(localization_key, **perameters)
-            )
-        except ValueError:
-            return None
-        return user_input
+        return inp_i
 
 
-class ListOutput:
-    def __init__(
-        self,
-        strings: list[str],
-        ints: list[int] | list[str],
-        dialog: str | None = None,
-        perameters: dict[str, Any] | None = None,
-        start_index: int = 1,
-        localize_elements: bool = True,
-    ):
-        self.strings = strings
-        self.ints = ints
-        self.dialog = dialog
-        if perameters is None:
-            perameters = {}
-        self.perameters = perameters
-        self.start_index = start_index
-        self.localize_elements = localize_elements
-
-    def get_output(self, dialog: str | None, strings: list[str]) -> str:
-        end_string = ""
-        if dialog is not None:
-            end_string = core.core_data.local_manager.get_key(dialog, **self.perameters)
-        end_string += "\n"
-        for i, string in enumerate(strings):
-            try:
-                int_string = str(self.ints[i])
-            except IndexError:
-                int_string = ""
-
-            string = string.replace("{int}", int_string)
-            end_string += f" <@s>{i + self.start_index}.</> <@t>{string}</>\n"
-        end_string = end_string.strip("\n")
-        return end_string
-
-    def display(self, dialog: str | None, strings: list[str]) -> None:
-        output = self.get_output(dialog, strings)
-        color.ColoredText(output)
-
-    def display_locale(self, remove_alias: bool = False) -> None:
-        dialog = ""
-        if self.dialog is not None:
-            dialog = core.core_data.local_manager.get_key(self.dialog)
-        new_strings: list[str] = []
-        for string in self.strings:
-            if self.localize_elements:
-                string_ = core.core_data.local_manager.get_key(string)
-            else:
-                string_ = string
-            if remove_alias:
-                string_ = core.core_data.local_manager.get_all_aliases(string_)[0]
-            new_strings.append(string_)
-
-        self.display(dialog, new_strings)
-
-    def display_non_locale(self) -> None:
-        self.display(self.dialog, self.strings)
+def str_input_raw(dialog: str) -> str | None:
+    quit_key = core.localize("quit_key")
+    inp = color.color_input(dialog)
+    if inp == quit_key:
+        return None
+    if inp == f"\\{quit_key}":
+        inp = quit_key
+    return inp
 
 
-class ChoiceInput:
-    def __init__(
-        self,
-        items: list[str],
-        strings: list[str],
-        ints: list[int] | list[str],
-        perameters: dict[str, int | str],
-        dialog: str,
-        single_choice: bool = False,
-        remove_alias: bool = False,
-        display_all_at_once: bool = True,
-        start_index: int = 1,
-        localize_options: bool = True,
-    ):
-        self.items = items
-        self.strings = strings
-        self.ints = ints
-        self.perameters = perameters
-        self.dialog = dialog
-        self.is_single_choice = single_choice
-        self.remove_alias = remove_alias
-        self.display_all_at_once = display_all_at_once
-        self.start_index = start_index
-        self.localize_options = localize_options
+def edit_int_key(
+    item_key: str,
+    current_value: int,
+    max: MaxValue | int,
+    escape: bool = True,
+    **kwargs: Any,
+) -> int:
+    return edit_int_raw(core.localize(item_key, escape, **kwargs), current_value, max)
+
+
+def edit_str_key(
+    item_key: str,
+    current_value: str,
+    escape: bool = True,
+    **kwargs: Any,
+) -> str:
+    return edit_str_raw(core.localize(item_key, escape, **kwargs), current_value)
+
+
+class CumulativeMax:
+    def __init__(self, max: MaxValue):
+        self.max = max
 
     @staticmethod
-    def from_reduced(
-        items: list[str],
-        ints: list[int] | list[str] | None = None,
-        perameters: dict[str, int | str] | None = None,
-        dialog: str | None = None,
-        single_choice: bool = False,
-        remove_alias: bool = False,
-        display_all_at_once: bool = True,
-        start_index: int = 1,
-        localize_options: bool = True,
-    ) -> ChoiceInput:
-        if perameters is None:
-            perameters = {}
-        if ints is None:
-            ints = []
-        if dialog is None:
-            dialog = ""
-        return ChoiceInput(
-            items.copy(),
-            items.copy(),
-            ints.copy(),
-            perameters.copy(),
-            dialog,
-            single_choice,
-            remove_alias,
-            display_all_at_once,
-            start_index,
-            localize_options,
-        )
-
-    def get_input(self) -> tuple[int | None, str]:
-        if len(self.strings) == 0:
-            return None, ""
-        if len(self.strings) == 1:
-            return self.get_min_value(), ""
-        ListOutput(
-            self.strings,
-            self.ints,
-            start_index=self.start_index,
-            localize_elements=self.localize_options,
-        ).display_locale(self.remove_alias)
-        return IntInput(
-            self.get_max_value(), self.get_min_value(), ensure_max=True
-        ).get_input_locale(self.dialog, self.perameters)
-
-    def get_input_while(self) -> int | None:
-        if len(self.strings) == 0:
-            return None
-        while True:
-            int_val, user_input = self.get_input()
-            if int_val is not None:
-                return int_val
-            if user_input == core.core_data.local_manager.get_key("quit_key"):
-                return None
-            for i, string in enumerate(self.strings):
-                if self.localize_options:
-                    string = core.core_data.local_manager.get_key(string)
-                if string.lower().strip() == user_input.lower().strip():
-                    return i + self.start_index
-
-    def get_max_value(self) -> int:
-        return len(self.strings) + self.start_index - 1
-
-    def get_min_value(self) -> int:
-        return self.start_index
-
-    def get_input_locale(self, localized: bool = True) -> tuple[list[int] | None, bool]:
-        if len(self.strings) == 0:
-            return [], False
-        if len(self.strings) == 1:
-            return [self.get_min_value()], False
-        if not self.is_single_choice and self.display_all_at_once:
-            if localized:
-                self.strings.append("all_at_once")
-            else:
-                self.strings.append(core.core_data.local_manager.get_key("all_at_once"))
-        if localized:
-            ListOutput(
-                self.strings,
-                self.ints,
-                start_index=self.start_index,
-                localize_elements=self.localize_options,
-            ).display_locale()
-        else:
-            ListOutput(
-                self.strings,
-                self.ints,
-                start_index=self.start_index,
-                localize_elements=self.localize_options,
-            ).display_non_locale()
-        key = "input_many"
-        if self.is_single_choice:
-            key = "input_single"
-        dialog = core.core_data.local_manager.get_key(key).format(
-            min=self.get_min_value(), max=self.get_max_value()
-        )
-        usr_input = color.ColoredInput().get(dialog).strip().split(" ")
-        int_vals: list[int] = []
-        for inp in usr_input:
-            try:
-                value = int(inp)
-                if value > self.get_max_value() or value < self.get_min_value():
-                    raise ValueError
-                int_vals.append(value)
-            except ValueError:
-                if inp == core.core_data.local_manager.get_key("quit_key"):
-                    return None, False
-
-                cont = False
-                for i, string in enumerate(self.strings):
-                    if self.localize_options:
-                        string = core.core_data.local_manager.get_key(string)
-                    if string.lower().strip() == inp.lower().strip():
-                        int_vals.append(i + self.start_index)
-                        cont = True
-                        break
-
-                if cont:
-                    continue
-
-                color.ColoredText.localize(
-                    "invalid_input_int",
-                    min=self.get_min_value(),
-                    max=self.get_max_value(),
-                )
-        if (
-            self.get_max_value() in int_vals
-            and not self.is_single_choice
-            and self.display_all_at_once
-        ):
-            return list(range(self.get_min_value(), self.get_max_value())), True
-
-        if self.is_single_choice and len(int_vals) > 1:
-            int_vals = [int_vals[0]]
-
-        return int_vals, False
-
-    def get_input_locale_while(self) -> list[int] | None:
-        if len(self.strings) == 0:
-            return []
-        if len(self.strings) == 1:
-            return [self.get_min_value()]
-        while True:
-            int_vals, all_at_once = self.get_input_locale()
-            if int_vals is None:
-                return None
-            if all_at_once:
-                return int_vals
-            if len(int_vals) == 0:
-                continue
-            if len(int_vals) == 1 and int_vals[0] == 0:
-                return []
-            return int_vals
-
-    def multiple_choice(
-        self, localized_options: bool = True
-    ) -> tuple[list[int] | None, bool]:
-        color.ColoredText.localize(self.dialog, True, **self.perameters)
-        user_input, all_at_once = self.get_input_locale(localized_options)
-        if user_input is None:
-            return None, all_at_once
-        return [i - self.start_index for i in user_input], all_at_once
-
-    def single_choice(self) -> int | None:
-        return self.get_input_while()
-
-    def get(self) -> tuple[int | None | list[int], bool]:
-        if self.is_single_choice:
-            return self.single_choice(), False
-        return self.multiple_choice()
-
-
-class MultiEditor:
-    def __init__(
-        self,
-        group_name: str,
-        items: list[str],
-        strings: list[str],
-        ints: list[int] | None,
-        max_values: list[int] | int | None,
-        perameters: dict[str, int | str] | None,
-        dialog: str,
-        single_choice: bool = False,
-        signed: bool = True,
-        group_name_localized: bool = False,
-        cumulative_max: bool = False,
-        bit_count: int = 32,
-    ):
-        self.items = items
-        self.strings = strings
-        self.ints = ints
-        self.bit_count = bit_count
-        if self.ints is not None:
-            total_ints = len(self.ints)
-        else:
-            total_ints = len(self.strings)
-        if max_values is None:
-            max_values_ = [None] * total_ints
-        elif isinstance(max_values, int):
-            max_values_ = [max_values] * total_ints
-        else:
-            max_values_ = max_values
-        self.max_values = max_values_
-        if perameters is None:
-            perameters = {}
-        self.perameters = perameters
-        if group_name_localized:
-            self.perameters["group_name"] = core.core_data.local_manager.get_key(
-                group_name
-            )
-        else:
-            self.perameters["group_name"] = group_name
-        self.dialog = dialog
-        self.is_single_choice = single_choice
-        self.signed = signed
-        self.cumulative_max = cumulative_max
+    def specific(max: int) -> CumulativeMax:
+        return CumulativeMax(MaxValue.specific(max))
 
     @staticmethod
-    def from_reduced(
-        group_name: str,
-        items: list[str],
-        ints: list[int] | None,
-        max_values: list[int] | int | None,
-        group_name_localized: bool = False,
-        dialog: str = "input",
-        cumulative_max: bool = False,
-        items_localized: bool = False,
-    ):
-        if items_localized:
-            for i, item in enumerate(items):
-                items[i] = core.core_data.local_manager.get_key(item)
-        text: list[str] = []
-        for item_name in items:
-            if ints is not None:
-                text.append(f"{item_name} <@q>: {{int}}</>")
+    def new(max: int | MaxValue):
+        if isinstance(max, int):
+            return CumulativeMax.specific(max)
+        return CumulativeMax(max)
+
+    def get(self, current_values: list[int], ids: list[int] | int) -> MaxValue:
+        if isinstance(ids, int):
+            ids = [ids]
+
+        v = 0
+        for id in ids:
+            v += current_values[id]
+
+        return MaxValue.specific(self.max.max - sum(current_values) + v)
+
+
+class MultiMax:
+    def __init__(self, maxes: list[MaxValue]):
+        self.maxes = maxes
+
+    @staticmethod
+    def new(maxes: Sequence[MaxValue | int]) -> MultiMax:
+        new: list[MaxValue] = []
+
+        for m in maxes:
+            if isinstance(m, int):
+                new.append(MaxValue.specific(m))
             else:
-                text.append(f"{item_name}")
-        return MultiEditor(
-            group_name,
-            items,
-            text,
-            ints,
-            max_values,
-            None,
-            dialog,
-            group_name_localized=group_name_localized,
-            cumulative_max=cumulative_max,
-        )
+                new.append(m)
 
-    def edit(self) -> list[int]:
-        choices, all_at_once = ChoiceInput(
-            self.items,
-            self.strings,
-            self.ints or [],  # type: ignore
-            self.perameters,
-            "select_edit",
-        ).get()
-        if choices is None:
-            return self.ints or []
-        if isinstance(choices, int):
-            choices = [choices]
-        if all_at_once:
-            return self.edit_all(choices)
-        return self.edit_one(choices)
+        return MultiMax(new)
 
-    def edit_all(self, choices: list[int]) -> list[int]:
-        max_max_value = 0
-        for choice in choices:
-            if choice >= len(self.max_values):
-                max_value = None
-            else:
-                max_value = self.max_values[choice]
-            if max_value is None:
-                max_value = IntInput.get_max_value(
-                    max_value, self.signed, self.bit_count
-                )
-            max_max_value = max(max_max_value, max_value)
-        if self.cumulative_max:
-            max_max_value = max_max_value // len(choices)
-        usr_input = IntInput(max_max_value, default=None).get_input_locale_while(
-            self.dialog + "_all",
-            {
-                "name": self.perameters["group_name"],
-                "max": max_max_value,
-            },
-        )
-        if usr_input is None:
-            return self.ints or []
-        ints = self.ints or [0] * len(self.strings)
+    def get(self, id: int) -> MaxValue | None:
+        if id < 0 or id >= len(self.maxes):
+            return None
+        return self.maxes[id]
 
-        for choice in choices:
-            if choice >= len(self.max_values):
-                max_value = None
-            else:
-                max_value = self.max_values[choice]
-            max_value = IntInput.get_max_value(max_value, self.signed, self.bit_count)
-            value = min(usr_input, max_value)
-            ints[choice] = value
-            if self.ints is not None:
-                color.ColoredText.localize(
-                    "value_changed",
-                    name=self.items[choice],
-                    value=value,
-                )
-
-        return ints
-
-    def edit_one(self, choices: list[int]) -> list[int]:
-        ints = self.ints or [0] * len(self.strings)
-
-        for choice in choices:
-            if choice >= len(self.max_values):
-                max_value = None
-            else:
-                max_value = self.max_values[choice]
-            if max_value is None:
-                max_value = IntInput.get_max_value(
-                    max_value, self.signed, self.bit_count
-                )
-
-            if self.cumulative_max:
-                max_value -= sum(ints) - ints[choice]
-                max_value = max(max_value, 0)
-
-            item = self.items[choice]
-            usr_input = IntInput(
-                max_value, default=ints[choice]
-            ).get_input_locale_while(
-                self.dialog,
-                {"name": item, "value": ints[choice], "max": max_value},
-                escape=False,
-            )
-            if usr_input is None:
+    def maximal(self, ids: list[int]) -> MaxValue:
+        m = MaxValue.specific(0)
+        for id in ids:
+            m_v = self.get(id)
+            if m_v is None:
                 continue
-            ints[choice] = usr_input
-            color.ColoredText.localize(
-                "value_changed", name=item, value=ints[choice], escape=False
-            )
-        return ints
+            if m_v.max > m.max:
+                m = m_v
+
+        return m
 
 
-class SingleEditor:
-    def __init__(
-        self,
-        item: str,
-        value: int,
-        max_value: int | None = None,
-        min_value: int = 0,
-        signed: bool = True,
-        localized_item: bool = False,
-        remove_alias: bool = False,
-        bit_count: int = 32,
-    ):
-        if localized_item:
-            item = core.core_data.local_manager.get_key(item)
-        if remove_alias:
-            item = core.core_data.local_manager.get_all_aliases(item)[0]
-        self.item = item
-        self.value = value
-        self.max_value = max_value
-        self.min_value = min_value
-        self.signed = signed
-        self.bit_count = bit_count
+def edit_ints_key(
+    group_name: str,
+    item_names: list[str],
+    current_values: list[int],
+    max: MultiMax | CumulativeMax | MaxValue | int,
+    escape: bool = True,
+    **kwargs: Any,
+) -> list[int]:
+    return edit_ints_raw(
+        core.localize(group_name, escape, **kwargs), item_names, current_values, max
+    )
 
-    def edit(self, escape_text: bool = True) -> int:
-        max_value = IntInput.get_max_value(self.max_value, self.signed, self.bit_count)
-        if self.max_value is None:
-            dialog = "input_non_max"
-        elif self.min_value != 0:
-            dialog = "input_min"
+
+def edit_ints_raw(
+    group_name: str,
+    item_names: list[str],
+    current_values: list[int],
+    max: MultiMax | CumulativeMax | MaxValue | int,
+) -> list[int]:
+    entries = multi_select_indexes_key(
+        [
+            core.localize("value", name=name, value=value)
+            for name, value in zip(item_names, current_values)
+        ],
+        "input_many",
+        min=1,
+        max=len(item_names) + 1,
+    )
+
+    if not entries:
+        return current_values
+
+    if len(entries) == 1:
+        edit_individual(current_values, max, entries, item_names)
+        return current_values
+
+    single_select_key(
+        Actions[None]
+        .new()
+        .add_new_key(
+            "individually",
+            lambda _: edit_individual(current_values, max, entries, item_names),
+        )
+        .add_new_key(
+            "edit_all_at_once",
+            lambda _: edit_many(current_values, max, entries, group_name, item_names),
+        ),
+        "individual_or_all_at_once",
+        group=group_name,
+    )
+
+    return current_values
+
+
+def edit_individual(
+    current_values: list[int],
+    max: MaxValue | MultiMax | CumulativeMax | int,
+    entries: list[int],
+    names: list[str],
+):
+    entries_c = entries.copy()
+    for id in entries:
+        if isinstance(max, MultiMax):
+            _max = max.get(id)
+            if _max is None:
+                return
+        elif isinstance(max, CumulativeMax):
+            _max = max.get(current_values, entries_c)
         else:
-            dialog = "input"
-        usr_input = IntInput(
-            max_value,
-            self.min_value,
-            default=self.value,
-            signed=self.signed,
-            bit_count=self.bit_count,
-        ).get_input_locale_while(
-            dialog,
-            {
-                "name": self.item,
-                "value": self.value,
-                "max": max_value,
-                "min": self.min_value,
-            },
-            escape=escape_text,
-        )
-        if usr_input is None:
-            return self.value
-        print()
-        color.ColoredText.localize(
-            "value_changed", name=self.item, value=usr_input, escape=escape_text
-        )
-        return usr_input
+            _max = max
+        new_val = edit_int_raw(names[id], current_values[id], _max)
+        current_values[id] = new_val
+        entries_c.pop(0)
 
 
-class StringInput:
-    def __init__(self, default: str = ""):
-        self.default = default
+def edit_many(
+    current_values: list[int],
+    max: MaxValue | MultiMax | CumulativeMax | int,
+    entries: list[int],
+    group_name: str,
+    names: list[str],
+):
+    if isinstance(max, int):
+        max = MaxValue.specific(max)
 
-    def get_input_locale_while(
-        self, key: str, perameters: dict[str, Any]
-    ) -> str | None:
-        while True:
-            usr_input = self.get_input_locale(key, perameters)
-            if usr_input is None:
-                return None
-            if usr_input == "":
-                return self.default
-            if usr_input == " ":
+    if isinstance(max, MultiMax):
+        _max = max.maximal(entries)
+    elif isinstance(max, CumulativeMax):
+        _max = MaxValue.specific(max.get(current_values, entries).max // len(entries))
+    else:
+        _max = max
+    val = int_input_key(
+        "input_generic", _max, name=group_name, auto_clamp=True, max=_max.max
+    )
+    if val is None:
+        return
+
+    for id in entries:
+        if isinstance(max, MultiMax):
+            maxm = max.get(id)
+            if maxm is None:
                 continue
-            return usr_input
-
-    def get_input_locale(
-        self,
-        key: str,
-        perameters: dict[str, Any] | None = None,
-        escape: bool = True,
-    ) -> str | None:
-        if perameters is None:
-            perameters = {}
-        usr_input = color.ColoredInput().localize(key, escape, **perameters)
-        quit_key = core.core_data.local_manager.get_key("quit_key")
-        if usr_input == "" or usr_input == quit_key:
-            return None
-        if usr_input == f"\\{quit_key}":
-            return quit_key
-        return usr_input
-
-
-class StringEditor:
-    def __init__(self, item: str, value: str, item_localized: bool = False):
-        if item_localized:
-            item = core.core_data.local_manager.get_key(item)
-        self.item = item
-        self.value = value
-
-    def edit(self) -> str:
-        usr_input = StringInput(default=self.value).get_input_locale_while(
-            "input_non_max",
-            {"name": self.item, "value": self.value},
-        )
-        if usr_input is None:
-            return self.value
-        color.ColoredText.localize(
-            "value_changed",
-            name=self.item,
-            value=usr_input,
-        )
-        return usr_input
-
-
-class YesNoInput:
-    def __init__(self, default: bool = False):
-        self.default = default
-
-    def get_input_once(
-        self, key: str, perameters: dict[str, Any] | None = None
-    ) -> bool | None:
-        if perameters is None:
-            perameters = {}
-        usr_input = color.ColoredInput().localize(key, **perameters)
-        if usr_input == "":
-            return self.default
-
-        if usr_input == core.core_data.local_manager.get_key("quit_key"):
-            return None
-        return (
-            usr_input == core.core_data.local_manager.get_key("yes_key")
-            or usr_input.lower().strip()
-            == core.core_data.local_manager.get_key("yes").lower().strip()
-        )
-
-
-class DialogBuilder:
-    def __init__(self, dialog_structure: dict[Any, Any]):
-        self.dialog_structure = dialog_structure
+            _max = maxm
+        val_ = _max.clamp(val)
+        current_values[id] = val_
+        color.color_print_key("value_changed", name=names[id], value=val_, escape=False)

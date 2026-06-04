@@ -83,7 +83,7 @@ class ServerHandler:
         if policy is None:
             return False
         policy = base64.b64decode(policy)
-        json_policy = core.JsonFile.from_data(core.Data(policy)).to_object()
+        json_policy = core.JsonFile.from_data(core.Data(policy)).as_object()
         expiration = json_policy.get("expiration")
         if expiration is None:
             return False
@@ -382,7 +382,7 @@ class ServerHandler:
 
     def print_key(self, key: str, **kwargs: Any):
         if self.print:
-            color.ColoredText.localize(key, **kwargs)
+            color.color_print_key(key, **kwargs)
 
     def get_codes(self, upload_managed_items: bool = True) -> tuple[str, str] | None:
         self.save_file.show_ban_message = False
@@ -559,12 +559,12 @@ class ServerHandler:
             try:
                 temp_path.write(core.Data(save_data))
             except Exception as e:
-                color.ColoredText.localize(
+                color.color_print_key(
                     "transfer_backup_fail", path=str(temp_path), error=e
                 )
             else:
                 if print:
-                    color.ColoredText.localize("transfer_backup", path=str(temp_path))
+                    color.color_print_key("transfer_backup", path=str(temp_path))
 
         save_file = core.SaveFile(core.Data(save_data), cc=cc)
 

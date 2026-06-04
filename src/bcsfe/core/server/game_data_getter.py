@@ -91,10 +91,7 @@ class GameDataGetter:
                 and show_alt
             ):
                 alt = "https://gitlab.com/fieryhenry/bcdata/-/raw/main/metadata.json"
-                res = dialog_creator.YesNoInput().get_input_once(
-                    "use_alternative_repo",
-                    {"repo": alt},
-                )
+                res = dialog_creator.yes_no_key("use_alternative_repo", repo=alt)
                 if res:
                     core.core_data.config.set(core.ConfigKey.GAME_DATA_REPO, alt)
                     self.repo_url = alt
@@ -141,12 +138,12 @@ class GameDataGetter:
         url = self.url + self.filepath
 
         if self.print:
-            color.ColoredText.localize("downloading_compressed_data", url=url)
+            color.color_print_key("downloading_compressed_data", url=url)
 
         downloaded_data = core.RequestHandler(url).get()
         if downloaded_data is None:
             if self.print:
-                color.ColoredText.localize("no_internet")
+                color.color_print_key("no_internet")
             return None
 
         archive = tarfile.open(
@@ -264,7 +261,7 @@ class GameDataGetter:
             return None
 
         if display_text and not self.has_downloaded():
-            color.ColoredText.localize(
+            color.color_print_key(
                 "downloading",
                 file_name=file_name,
                 pack_name=pack_name,
@@ -340,9 +337,9 @@ class GameDataGetter:
 
     def print_no_file(self, packname: str, file_name: str) -> None:
         if self.version is None:
-            color.ColoredText.localize("failed_to_get_game_versions")
+            color.color_print_key("failed_to_get_game_versions")
         else:
-            color.ColoredText.localize(
+            color.color_print_key(
                 "failed_to_download_game_data",
                 file_name=file_name,
                 pack_name=packname,

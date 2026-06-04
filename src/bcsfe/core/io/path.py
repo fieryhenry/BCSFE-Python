@@ -3,16 +3,14 @@ import glob
 import os
 import shutil
 
-from bcsfe import core
+from bcsfe import core, __app_name__
 import re
 
 
 class Path:
-    def __init__(self, path: str = "", is_relative: bool = False):
+    def __init__(self, path: str = ""):
         if isinstance(path, Path):
-            path = path.path
-        if is_relative:
-            self.path = self.get_relative_path(path)
+            self.path = path.path
         else:
             self.path = path
 
@@ -22,18 +20,6 @@ class Path:
     @staticmethod
     def get_root() -> Path:
         return Path(os.sep)
-
-    def get_relative_path(self, path: str) -> str:
-        return os.path.join(self.get_files_folder().path, path)
-
-    @staticmethod
-    def get_files_folder() -> Path:
-        file = Path(os.path.realpath(__file__))
-        if file.get_extension() == "pyc":
-            path = file.parent().parent().parent().parent().add("files")
-        else:
-            path = file.parent().parent().parent().add("files")
-        return path
 
     def strip_trailing_slash(self) -> Path:
         return Path(self.path.rstrip("/"))
@@ -74,59 +60,61 @@ class Path:
         return self.path.replace("\\", "/")
 
     @staticmethod
-    def get_data_folder(app_name: str = "bcsfe") -> Path:
+    def get_data_folder() -> Path:
         os_name = os.name
         if os_name == "nt":
-            path = Path.join(os.environ["USERPROFILE"], "Documents", app_name)
+            path = Path.join(os.environ["USERPROFILE"], "Documents", __app_name__)
         elif os_name == "posix":
             data_home = os.environ.get("XDG_DATA_HOME")
             if data_home is None:
-                path = Path.join(os.environ["HOME"], ".local", "share", app_name)
+                path = Path.join(os.environ["HOME"], ".local", "share", __app_name__)
             else:
-                path = Path.join(data_home, app_name)
+                path = Path.join(data_home, __app_name__)
 
             # migrate old data
             if path.is_empty():
-                orig = Path.join(os.environ["HOME"], "Documents", app_name)
+                orig = Path.join(os.environ["HOME"], "Documents", __app_name__)
                 orig.copy(path)
 
         elif os_name == "mac":
-            path = Path.join(os.environ["HOME"], "Documents", app_name)
+            path = Path.join(os.environ["HOME"], "Documents", __app_name__)
         else:
             raise OSError("Unknown OS")
         path.generate_dirs()
         return path
 
     @staticmethod
-    def get_config_folder(app_name: str = "bcsfe") -> Path:
+    def get_config_folder(__app_name__: str = "bcsfe") -> Path:
         os_name = os.name
         if os_name != "posix":
             return Path.get_data_folder()
 
         data_home = os.environ.get("XDG_CONFIG_HOME")
         if data_home is None:
-            path = Path.join(os.environ["HOME"], ".config", app_name)
+            path = Path.join(os.environ["HOME"], ".config", __app_name__)
         else:
-            path = Path.join(data_home, app_name)
+            path = Path.join(data_home, __app_name__)
         path.generate_dirs()
 
         # migrate from old Documents location
         if path.is_empty():
-            orig = Path.join(os.environ["HOME"], "Documents", app_name, "config.yaml")
+            orig = Path.join(
+                os.environ["HOME"], "Documents", __app_name__, "config.yaml"
+            )
             if orig.exists():
                 orig.copy(path.join("config.yaml"))
         return path
 
     @staticmethod
-    def get_state_folder(app_name: str = "bcsfe") -> Path:
+    def get_state_folder(__app_name__: str = "bcsfe") -> Path:
         os_name = os.name
         if os_name != "posix":
             return Path.get_data_folder()
         data_home = os.environ.get("XDG_STATE_HOME")
         if data_home is None:
-            path = Path.join(os.environ["HOME"], ".local", "state", app_name)
+            path = Path.join(os.environ["HOME"], ".local", "state", __app_name__)
         else:
-            path = Path.join(data_home, app_name)
+            path = Path.join(data_home, __app_name__)
         path.generate_dirs()
 
         # no need to migrate log file really

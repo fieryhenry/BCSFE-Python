@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import datetime
-from math import inf, isnan
+from math import inf
 import math
 from typing import Any
 from bcsfe import core
@@ -231,12 +231,12 @@ class BattleItems:
         if item_names is None:
             return
         current_values = [item.amount for item in self.items]
-        values = dialog_creator.MultiEditor.from_reduced(
+        values = dialog_creator.edit_ints_raw(
             group_name,
             item_names,
             current_values,
-            core.core_data.max_value_manager.get("battle_items"),
-        ).edit()
+            core.core_data.max_value_manager.battle_items,
+        )
         for i, value in enumerate(values):
             self.items[i].amount = value
 
@@ -249,22 +249,29 @@ class BattleItems:
             item.endless_item.get_endless_duration_formatted() for item in self.items
         ]
 
-        (options, all_at_once) = dialog_creator.ChoiceInput.from_reduced(
-            [core.localize("endless_item_item", item=item) for item in item_names],
-            current_values,
-            localize_options=False,
-            dialog="select_option",
-        ).multiple_choice(False)
+        options = dialog_creator.multi_select_indexes_key(
+            [
+                core.localize("endless_item_item", item=item, int=val, escape=False)
+                for item, val in zip(item_names, current_values)
+            ],
+            "select_option",
+        )
 
         if options is None:
             return
 
+        individual = dialog_creator.basic_keys_pick_key_index(
+            ["individual", "all_at_once"], "edit_endless_q"
+        )
+        if individual is None:
+            return
+
+        all_at_once = individual == 1
+
         infinity_str = core.localize("infinity")
 
         if all_at_once:
-            val = dialog_creator.StringInput().get_input_locale_while(
-                "enter_duration_minutes", {}
-            )
+            val = dialog_creator.str_input_key("enter_duration_minutes")
             if val is None:
                 return
 
@@ -280,8 +287,8 @@ class BattleItems:
                 item.endless_item.set_duration_mins(val, 0)
         else:
             for opt in options:
-                val = dialog_creator.StringInput().get_input_locale_while(
-                    "enter_duration_minutes_item", {"item": item_names[opt]}
+                val = dialog_creator.str_input_key(
+                    "enter_duration_minutes_item", item=item_names[opt]
                 )
                 if val is None:
                     return
@@ -292,9 +299,9 @@ class BattleItems:
                     try:
                         val = float(val)
                     except ValueError:
-                        color.ColoredText.localize("invalid_minute_count")
+                        color.color_print_key("invalid_minute_count")
                         continue
 
                 self.items[opt].endless_item.set_duration_mins(val, 0)
 
-        color.ColoredText.localize("endless_items_success")
+        color.color_print_key("endless_items_success")

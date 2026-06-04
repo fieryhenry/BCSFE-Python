@@ -1,13 +1,12 @@
 from __future__ import annotations
 import sys
 from typing import Any
-from bcsfe import core
+import json
+from bcsfe import core, __app_name__
 import bcsfe
 
 
 class Updater:
-    package_name = "bcsfe"
-
     def __init__(self):
         pass
 
@@ -15,7 +14,7 @@ class Updater:
         return bcsfe.__version__
 
     def get_pypi_json(self) -> dict[str, Any] | None:
-        url = f"https://pypi.org/pypi/{self.package_name}/json"
+        url = f"https://pypi.org/pypi/{__app_name__}/json"
         # add a User-Agent since pypi started to block the default requests user-agent
         # this probably won't be needed in the future as i assume this block is temporary
         response = core.RequestHandler(
@@ -25,7 +24,7 @@ class Updater:
             return None
         try:
             return response.json()
-        except core.JSONDecodeError:
+        except json.JSONDecodeError:
             return None
 
     def get_releases(self) -> list[str] | None:
@@ -66,14 +65,14 @@ class Updater:
         binary = sys.orig_argv[0]
         python_aliases = [binary, "py", "python", "python3"]
         for python_alias in python_aliases:
-            cmd = f"{python_alias} -m pip install --upgrade {self.package_name}=={target_version}"
+            cmd = f"{python_alias} -m pip install --upgrade {__app_name__}=={target_version}"
             result = core.Path().run(cmd)
             if result.exit_code == 0:
                 break
         else:
             pip_aliases = ["pip", "pip3"]
             for pip_alias in pip_aliases:
-                cmd = f"{pip_alias} install --upgrade {self.package_name}=={target_version}"
+                cmd = f"{pip_alias} install --upgrade {__app_name__}=={target_version}"
                 result = core.Path().run(cmd)
                 if result.exit_code == 0:
                     break

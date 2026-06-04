@@ -1,6 +1,6 @@
 from __future__ import annotations
 import enum
-from typing import Any, Callable
+from typing import Optional
 
 from bcsfe import core
 from bcsfe.cli import color, dialog_creator
@@ -46,52 +46,75 @@ class CatEditor:
 
     def print_selected_cats(self, current_cats: list[core.Cat]):
         if len(current_cats) > 50:
-            color.ColoredText.localize("total_selected_cats", total=len(current_cats))
+            color.color_print_key("total_selected_cats", total=len(current_cats))
         else:
             for cat in current_cats:
                 names = cat.get_names_cls(self.save_file)
                 if not names:
                     names = [str(cat.id)]
-                color.ColoredText.localize("selected_cat", id=cat.id, name=names[0])
+                color.color_print_key("selected_cat", id=cat.id, name=names[0])
 
     def select(
         self, current_cats: list[core.Cat] | None = None, finish_option: bool = True
     ) -> tuple[list[core.Cat], bool]:
         if current_cats is None:
             current_cats = []
-        options: dict[str, Callable[[], Any]] = {
-            "select_cats_all": self.save_file.cats.get_all_cats,
-            "select_cats_current": self.get_current_cats,
-            "select_cats_obtainable": self.get_cats_obtainable,
-            "select_cats_id": self.select_id,
-            "select_cats_name": self.select_name,
-            "select_cats_rarity": self.select_rarity,
-            "select_cats_gatya_banner": self.select_gatya_banner,
-            "select_cats_not_unlocked": self.get_non_unlocked_cats,
-            "select_cats_not_obtainable": self.get_cats_unobtainable,
-            "select_cats_non_gatya": self.get_non_gacha_cats,
-            "select_cats_game_version": self.select_cats_game_version,
-        }
+        actions = (
+            dialog_creator.Actions[tuple[Optional[list[core.Cat]], bool]]
+            .new()
+            .add_new_key(
+                "select_cats_all", lambda _: (self.save_file.cats.get_all_cats(), False)
+            )
+            .add_new_key(
+                "select_cats_current", lambda _: (self.get_current_cats(), False)
+            )
+            .add_new_key(
+                "select_cats_obtainable", lambda _: (self.get_cats_obtainable(), False)
+            )
+            .add_new_key("select_cats_id", lambda _: (self.select_id(), False))
+            .add_new_key("select_cats_name", lambda _: (self.select_name(), False))
+            .add_new_key("select_cats_rarity", lambda _: (self.select_rarity(), False))
+            .add_new_key(
+                "select_cats_gatya_banner",
+                lambda _: (self.select_gatya_banner(), False),
+            )
+            .add_new_key(
+                "select_cats_not_unlocked",
+                lambda _: (self.get_non_unlocked_cats(), False),
+            )
+            .add_new_key(
+                "select_cats_not_obtainable",
+                lambda _: (self.get_cats_unobtainable(), False),
+            )
+            .add_new_key(
+                "select_cats_non_gatya", lambda _: (self.get_non_gacha_cats(), False)
+            )
+            .add_new_key(
+                "select_cats_game_version",
+                lambda _: (self.select_cats_game_version(), False),
+            )
+        )
         if finish_option:
-            options["finish"] = lambda: None
-        option_id = dialog_creator.ChoiceInput(
-            list(options), list(options), [], {}, "select_cats", True
-        ).single_choice()
-        if option_id is None:
-            return current_cats, False
-        option_id -= 1
+            actions.add_new_key("finish", lambda _: (None, True))
 
-        if option_id == len(options) - 1 and finish_option:
+        res = dialog_creator.single_select_key(
+            actions,
+            "select_cats",
+        )
+
+        if res is None:
             return current_cats, True
 
-        func = options[list(options)[option_id]]
-        new_cats = func()
+        new_cats, end = res
+
+        if end:
+            return current_cats, True
 
         if new_cats is None:
             return current_cats, False
 
         if current_cats:
-            mode_id = dialog_creator.IntInput().get_basic_input_locale("and_mode_q", {})
+            mode_id = dialog_creator.int_input_key("and_mode_q", 3)
             if mode_id is None:
                 mode = SelectMode.OR
             elif mode_id == 1:
@@ -114,9 +137,9 @@ class CatEditor:
         return new_cats, False
 
     def select_id(self) -> list[core.Cat] | None:
-        cat_ids = dialog_creator.RangeInput(
-            len(self.save_file.cats.cats) - 1
-        ).get_input_locale("enter_cat_ids", {})
+        cat_ids = dialog_creator.range_multi_input_key(
+            "enter_cat_ids", len(self.save_file.cats.cats) - 1
+        )
         if cat_ids is None:
             return None
         return self.save_file.cats.get_cats_by_ids(cat_ids)
@@ -138,7 +161,7 @@ class CatEditor:
         versions = list(versions_set)
         versions.sort()
 
-        color.ColoredText.localize("possible_gvs")
+        color.color_print_key("possible_gvs")
 
         cur_major_v = -1
         for version in versions:
@@ -149,12 +172,12 @@ class CatEditor:
                     print()
                 cur_major_v = major_v
             else:
-                color.ColoredText(", ", end="")
-            color.ColoredText(f"<@t>{gv.format()}</>", end="")
+                color.color_print(", ", end="")
+            color.color_print(f"<@t>{gv.format()}</>", end="")
 
         print()
 
-        usr_input = dialog_creator.StringInput().get_input_locale("select_gv")
+        usr_input = dialog_creator.str_input_key("select_gv")
         if usr_input is None:
             return None
         chunks = usr_input.split(" ")
@@ -181,7 +204,7 @@ class CatEditor:
                 valid_versions.add(version)
 
         if not valid_versions:
-            color.ColoredText.localize("no_valid_gvs_entered")
+            color.color_print_key("no_valid_gvs_entered")
 
         cats: list[core.Cat] = []
         for cat in self.save_file.cats.cats:
@@ -195,9 +218,9 @@ class CatEditor:
 
     def select_rarity(self) -> list[core.Cat] | None:
         rarity_names = self.save_file.cats.get_rarity_names(self.save_file)
-        rarity_ids, _ = dialog_creator.ChoiceInput(
-            rarity_names, rarity_names, [], {}, "select_rarity"
-        ).multiple_choice()
+        rarity_ids = dialog_creator.multi_select_indexes_key(
+            rarity_names, "select_rarity"
+        )
         if rarity_ids is None:
             return None
         cats: list[core.Cat] = []
@@ -207,12 +230,12 @@ class CatEditor:
         return cats
 
     def select_name(self) -> list[core.Cat] | None:
-        usr_name = dialog_creator.StringInput().get_input_locale("enter_name", {})
+        usr_name = dialog_creator.str_input_key("enter_name")
         if usr_name is None:
             return []
         cats = self.get_cats_name(usr_name)
         if not cats:
-            color.ColoredText.localize("no_cats_found_name", name=usr_name)
+            color.color_print_key("no_cats_found_name", name=usr_name)
             return None
         cat_names: list[str] = []
         cat_list: list[core.Cat] = []
@@ -226,10 +249,10 @@ class CatEditor:
                     cat_list.append(cat)
                     break
         if len(cat_names) == 1:
-            color.ColoredText(f"<@t>{cat_names[0]}</>")
-        cat_option_ids, _ = dialog_creator.ChoiceInput(
-            cat_names, cat_names, [], {}, "select_name"
-        ).multiple_choice()
+            color.color_print(f"<@t>{cat_names[0]}</>")
+        cat_option_ids = dialog_creator.multi_select_indexes_key(
+            cat_names, "select_name"
+        )
         if cat_option_ids is None:
             return None
         cats_selected: list[core.Cat] = []
@@ -241,8 +264,7 @@ class CatEditor:
         return self.get_cats_obtainable()
 
     def select_gatya_banner_name(self) -> list[int] | None:
-
-        filter_down = dialog_creator.YesNoInput().get_input_once("filter_down_q_gatya")
+        filter_down = dialog_creator.yes_no_key("filter_down_q_gatya")
         if filter_down is None:
             return None
 
@@ -280,12 +302,11 @@ class CatEditor:
                 "banner_txt", name=name
             )
             formatted_names.append(formatted_name)
-        gatya_option_ids, _ = dialog_creator.ChoiceInput.from_reduced(
+        # TODO: include ids?
+        gatya_option_ids = dialog_creator.multi_select_indexes_key(
             formatted_names,
-            ints=ids,
             dialog="select_gatya_banner",
-            start_index=0,
-        ).multiple_choice(False)
+        )
         if gatya_option_ids is None:
             return None
         gatya_ids: list[int] = []
@@ -299,20 +320,21 @@ class CatEditor:
         if gset is None:
             return None
 
-        by_id = dialog_creator.ChoiceInput.from_reduced(
-            ["by_id", "by_name"], dialog="gatya_by_id_q"
-        ).single_choice()
-        if by_id is None:
-            return None
-
-        if by_id == 1:
-            gatya_ids = dialog_creator.RangeInput(len(gset) - 1).get_input_locale(
-                "select_gatya_banner", {}
+        gatya_ids = dialog_creator.single_select_key(
+            dialog_creator.Actions[Optional[list[int]]]
+            .new()
+            .add_new_key(
+                "by_id",
+                lambda _: dialog_creator.range_multi_input_key(
+                    "select_gatya_banner", len(gset) - 1
+                ),
             )
-        else:
-            gatya_ids = self.select_gatya_banner_name()
+            .add_new_key("by_name", lambda _: self.select_gatya_banner_name()),
+            "gatya_by_id_q",
+        )
         if gatya_ids is None:
             return None
+
         cats: list[core.Cat] = []
         for gatya_id in gatya_ids:
             gatya_cats = self.get_cats_gatya_banner(gatya_id)
@@ -325,14 +347,14 @@ class CatEditor:
         cats = self.get_save_cats(cats)
         for cat in cats:
             cat.unlock(self.save_file)
-        color.ColoredText.localize("unlock_success")
+        color.color_print_key("unlock_success")
 
     def remove_cats(self, cats: list[core.Cat]):
         reset = core.core_data.config.get_bool(core.ConfigKey.RESET_CAT_DATA)
         cats = self.get_save_cats(cats)
         for cat in cats:
             cat.remove(reset=reset, save_file=self.save_file)
-        color.ColoredText.localize("remove_success")
+        color.color_print_key("remove_success")
 
     def get_save_cats(self, cats: list[core.Cat]):
         ct_cats: list[core.Cat] = []
@@ -351,7 +373,7 @@ class CatEditor:
         self.save_file.cats.true_form_cats(
             self.save_file, cats, force, set_current_forms
         )
-        color.ColoredText.localize("true_form_success")
+        color.color_print_key("true_form_success")
 
     def fourth_form_cats(self, cats: list[core.Cat], force: bool = False):
         cats = self.get_save_cats(cats)
@@ -361,87 +383,92 @@ class CatEditor:
         self.save_file.cats.fourth_form_cats(
             self.save_file, cats, force, set_current_forms
         )
-        color.ColoredText.localize("fourth_form_success")
+        color.color_print_key("fourth_form_success")
 
     def remove_true_form_cats(self, cats: list[core.Cat]):
         cats = self.get_save_cats(cats)
         for cat in cats:
             cat.remove_true_form()
-        color.ColoredText.localize("remove_true_form_success")
+        color.color_print_key("remove_true_form_success")
 
     def remove_fourth_form_cats(self, cats: list[core.Cat]):
         cats = self.get_save_cats(cats)
         for cat in cats:
             cat.remove_fourth_form()
-        color.ColoredText.localize("remove_fourth_form_success")
+        color.color_print_key("remove_fourth_form_success")
 
     def upgrade_cats(self, cats: list[core.Cat]):
         cats = self.get_save_cats(cats)
         if not cats:
             return
         if len(cats) == 1:
-            option_id = 0
+            success = self.upgrade_individual(cats)
         else:
-            options: list[str] = [
-                "upgrade_individual",
-                "upgrade_all",
-            ]
-            option_id = dialog_creator.ChoiceInput(
-                options, options, [], {}, "upgrade_cats_select_mod", True
-            ).single_choice()
-            if option_id is None:
-                return
-            option_id -= 1
-        success = False
-        if option_id == 0:
-            for cat in cats:
-                names = cat.get_names_cls(self.save_file)
-                if not names:
-                    names = [str(cat.id)]
-                color.ColoredText.localize(
-                    "selected_cat_upgrades",
-                    name=names[0],
-                    id=cat.id,
-                    base_level=cat.upgrade.base + 1,
-                    plus_level=cat.upgrade.plus,
+            success = dialog_creator.single_select_key(
+                dialog_creator.Actions[bool]
+                .new()
+                .add_new_key(
+                    "upgrade_individual", lambda _: self.upgrade_individual(cats)
                 )
-                power_up = core.PowerUpHelper(cat, self.save_file)
-                upgrade, should_exit = core.Upgrade.get_user_upgrade(
-                    power_up.get_max_possible_base() - 1,
-                    power_up.get_max_possible_plus(),
-                )
-                if should_exit:
-                    return
-                if upgrade is not None:
-                    if upgrade.base != -1:
-                        power_up.reset_upgrade()
-                        power_up.upgrade_by(upgrade.base)
-                    cat.set_upgrade(self.save_file, upgrade, True)
-                    color.ColoredText.localize(
-                        "selected_cat_upgraded",
-                        name=names[0],
-                        id=cat.id,
-                        base_level=cat.upgrade.base + 1,
-                        plus_level=cat.upgrade.plus,
-                    )
-                    success = True
-        else:
-            power_up = core.PowerUpHelper(cats[0], self.save_file)
-            upgrade, should_exit = core.Upgrade.get_user_upgrade(
-                power_up.get_max_max_base_upgrade_level() - 1,
-                power_up.get_max_max_plus_upgrade_level(),
+                .add_new_key("upgrade_all", lambda _: self.upgrade_many(cats)),
+                "upgrade_cats_select_mod",
             )
-            if upgrade is None or should_exit:
+            if success is None:
                 return
-            success = True
-            for cat in cats:
-                power_up = core.PowerUpHelper(cat, self.save_file)
-                if upgrade.base != -1:
-                    power_up.reset_upgrade()
-                    power_up.upgrade_by(upgrade.base)
-                cat.set_upgrade(self.save_file, upgrade, True)
         if success:
-            color.ColoredText.localize("upgrade_success")
+            color.color_print_key("upgrade_success")
+
+    def upgrade_many(self, cats: list[core.Cat]) -> bool:
+        power_up = core.PowerUpHelper(cats[0], self.save_file)
+        upgrade, should_exit = core.Upgrade.get_user_upgrade(
+            power_up.get_max_max_base_upgrade_level() - 1,
+            power_up.get_max_max_plus_upgrade_level(),
+        )
+        if upgrade is None or should_exit:
+            return False
+        for cat in cats:
+            power_up = core.PowerUpHelper(cat, self.save_file)
+            if upgrade.base != -1:
+                power_up.reset_upgrade()
+                power_up.upgrade_by(upgrade.base)
+            cat.set_upgrade(self.save_file, upgrade, True)
+
+        return True
+
+    def upgrade_individual(self, cats: list[core.Cat]) -> bool:
+        for cat in cats:
+            names = cat.get_names_cls(self.save_file)
+            if not names:
+                names = [str(cat.id)]
+            color.color_print_key(
+                "selected_cat_upgrades",
+                name=names[0],
+                id=cat.id,
+                base_level=cat.upgrade.base + 1,
+                plus_level=cat.upgrade.plus,
+            )
+            power_up = core.PowerUpHelper(cat, self.save_file)
+            upgrade, should_exit = core.Upgrade.get_user_upgrade(
+                power_up.get_max_possible_base() - 1,
+                power_up.get_max_possible_plus(),
+            )
+            if should_exit:
+                return False
+            if upgrade is None:
+                continue
+            if upgrade.base != -1:
+                power_up.reset_upgrade()
+                power_up.upgrade_by(upgrade.base)
+
+            cat.set_upgrade(self.save_file, upgrade, True)
+            color.color_print_key(
+                "selected_cat_upgraded",
+                name=names[0],
+                id=cat.id,
+                base_level=cat.upgrade.base + 1,
+                plus_level=cat.upgrade.plus,
+            )
+        return True
 
     def remove_talents_cats(self, cats: list[core.Cat]):
         for cat in cats:
@@ -449,19 +476,19 @@ class CatEditor:
                 continue
             for talent in cat.talents:
                 talent.level = 0
-        color.ColoredText.localize("talents_remove_success")
+        color.color_print_key("talents_remove_success")
 
     def unlock_cat_guide(self, cats: list[core.Cat]):
         for cat in cats:
             if core.core_data.config.get_bool(core.ConfigKey.UNLOCK_CAT_ON_EDIT):
                 cat.unlock(self.save_file)
             cat.catguide_collected = True
-        color.ColoredText.localize("unlock_cat_guide_success")
+        color.color_print_key("unlock_cat_guide_success")
 
     def remove_cat_guide(self, cats: list[core.Cat]):
         for cat in cats:
             cat.catguide_collected = False
-        color.ColoredText.localize("remove_cat_guide_success")
+        color.color_print_key("remove_cat_guide_success")
 
     def upgrade_talents_cats(self, cats: list[core.Cat]):
         cats = self.get_save_cats(cats)
@@ -472,82 +499,85 @@ class CatEditor:
         if not is_good_version:
             data_version = gdg.version
             if data_version is None:
-                color.ColoredText.localize("no_data_version")
+                color.color_print_key("no_data_version")
                 return
-            color.ColoredText.localize(
+            color.color_print_key(
                 "talents_version_warning",
                 save_version=self.save_file.game_version.to_string(),
                 data_version=data_version,
             )
-            should_stay = dialog_creator.YesNoInput().get_input_once("continue_q")
+            should_stay = dialog_creator.yes_no_key("continue_q")
             if not should_stay:
                 return
 
         if len(cats) == 1:
-            option_id = 0
+            self.edit_talent_individual(cats)
         else:
-            options: list[str] = [
-                "talents_individual",
-                "talents_all",
-            ]
-            option_id = dialog_creator.ChoiceInput(
-                options, options, [], {}, "upgrade_talents_select_mod", True
-            ).single_choice()
-            if option_id is None:
-                return
-            option_id -= 1
+            dialog_creator.single_select_key(
+                dialog_creator.Actions[None]
+                .new()
+                .add_new_key(
+                    "talents_individual", lambda _: self.edit_talent_individual(cats)
+                )
+                .add_new_key("talents_all", lambda _: self.edit_talent_many(cats)),
+                "upgrade_talents_select_mod",
+            )
 
+        color.color_print_key("talents_success")
+
+    def edit_talent_many(self, cats: list[core.Cat]):
         talent_data = self.save_file.cats.read_talent_data(self.save_file)
         if talent_data is None:
             return
-        if option_id == 0:
-            for cat in cats:
-                if cat.talents is None:
+        for cat in cats:
+            if cat.talents is None:
+                continue
+            data = talent_data.get_cat_talents(cat)
+            if data is None:
+                continue
+            if core.core_data.config.get_bool(core.ConfigKey.UNLOCK_CAT_ON_EDIT):
+                cat.unlock(self.save_file)
+            _, max_levels, _, ids = data
+            for i, id in enumerate(ids):
+                talent = cat.get_talent_from_id(id)
+                if talent is None:
                     continue
-                names = cat.get_names_cls(self.save_file)
-                if not names:
-                    names = [str(cat.id)]
-                color.ColoredText.localize(
-                    "selected_cat",
-                    name=names[0],
-                    id=cat.id,
-                )
-                data = talent_data.get_cat_talents(cat)
-                if data is None:
-                    color.ColoredText.localize("no_talent_data", id=cat.id)
+                talent.level = max_levels[i]
+
+    def edit_talent_individual(self, cats: list[core.Cat]):
+        talent_data = self.save_file.cats.read_talent_data(self.save_file)
+        if talent_data is None:
+            return
+        for cat in cats:
+            if cat.talents is None:
+                continue
+            names = cat.get_names_cls(self.save_file)
+            if not names:
+                names = [str(cat.id)]
+            color.color_print_key(
+                "selected_cat",
+                name=names[0],
+                id=cat.id,
+            )
+            data = talent_data.get_cat_talents(cat)
+            if data is None:
+                color.color_print_key("no_talent_data", id=cat.id)
+                continue
+            if core.core_data.config.get_bool(core.ConfigKey.UNLOCK_CAT_ON_EDIT):
+                cat.unlock(self.save_file)
+            talent_names, max_levels, current_levels, ids = data
+            values = dialog_creator.edit_ints_key(
+                "talents",
+                talent_names,
+                current_levels,
+                dialog_creator.MultiMax.new(max_levels),
+            )
+            current_levels = values
+            for i, id in enumerate(ids):
+                talent = cat.get_talent_from_id(id)
+                if talent is None:
                     continue
-                if core.core_data.config.get_bool(core.ConfigKey.UNLOCK_CAT_ON_EDIT):
-                    cat.unlock(self.save_file)
-                talent_names, max_levels, current_levels, ids = data
-                values = dialog_creator.MultiEditor.from_reduced(
-                    "talents",
-                    talent_names,
-                    current_levels,
-                    max_levels,
-                    group_name_localized=True,
-                ).edit()
-                current_levels = values
-                for i, id in enumerate(ids):
-                    talent = cat.get_talent_from_id(id)
-                    if talent is None:
-                        continue
-                    talent.level = current_levels[i]
-        else:
-            for cat in cats:
-                if cat.talents is None:
-                    continue
-                data = talent_data.get_cat_talents(cat)
-                if data is None:
-                    continue
-                if core.core_data.config.get_bool(core.ConfigKey.UNLOCK_CAT_ON_EDIT):
-                    cat.unlock(self.save_file)
-                talent_names, max_levels, current_levels, ids = data
-                for i, id in enumerate(ids):
-                    talent = cat.get_talent_from_id(id)
-                    if talent is None:
-                        continue
-                    talent.level = max_levels[i]
-        color.ColoredText.localize("talents_success")
+                talent.level = current_levels[i]
 
     @staticmethod
     def edit_cats(save_file: core.SaveFile):
@@ -569,22 +599,17 @@ class CatEditor:
             cat_editor, current_cats = CatEditor.from_save_file(save_file)
         if cat_editor is None:
             return
-        choice = dialog_creator.ChoiceInput(
-            ["unlock_cats", "remove_cats"],
-            ["unlock_cats", "remove_cats"],
-            [],
-            {},
+
+        dialog_creator.single_select_key(
+            dialog_creator.Actions[None]
+            .new()
+            .add_new_raw(
+                core.localize_no_alias("unlock_cats"),
+                lambda _: cat_editor.unlock_cats(current_cats),
+            )
+            .add_new_key("remove_cats", lambda _: cat_editor.remove_cats(current_cats)),
             "unlock_remove_q",
-            True,
-            remove_alias=True,
-        ).single_choice()
-        if choice is None:
-            return
-        choice -= 1
-        if choice == 0:
-            cat_editor.unlock_cats(current_cats)
-        elif choice == 1:
-            cat_editor.remove_cats(current_cats)
+        )
         CatEditor.set_rank_up_sale(save_file)
 
     @staticmethod
@@ -597,18 +622,19 @@ class CatEditor:
             cat_editor, current_cats = CatEditor.from_save_file(save_file)
         if cat_editor is None:
             return
-        choice = dialog_creator.ChoiceInput.from_reduced(
-            ["true_form_cats", "remove_true_form_cats"],
-            dialog="true_form_remove_form_q",
-            single_choice=True,
-        ).single_choice()
-        if choice is None:
-            return
-        choice -= 1
-        if choice == 0:
-            cat_editor.true_form_cats(current_cats)
-        elif choice == 1:
-            cat_editor.remove_true_form_cats(current_cats)
+
+        dialog_creator.single_select_key(
+            dialog_creator.Actions[None]
+            .new()
+            .add_new_key(
+                "true_form_cats", lambda _: cat_editor.true_form_cats(current_cats)
+            )
+            .add_new_key(
+                "remove_true_form_cats",
+                lambda _: cat_editor.remove_true_form_cats(current_cats),
+            ),
+            "true_form_remove_form_q",
+        )
 
     @staticmethod
     def fourth_form_remove_form_cats_run(
@@ -620,22 +646,23 @@ class CatEditor:
             cat_editor, current_cats = CatEditor.from_save_file(save_file)
         if cat_editor is None:
             return
-        choice = dialog_creator.ChoiceInput.from_reduced(
-            ["fourth_form_cats", "remove_fourth_form_cats"],
-            dialog="fourth_form_remove_form_q",
-            single_choice=True,
-        ).single_choice()
-        if choice is None:
-            return
-        choice -= 1
-        if choice == 0:
-            cat_editor.fourth_form_cats(current_cats)
-        elif choice == 1:
-            cat_editor.remove_fourth_form_cats(current_cats)
+
+        dialog_creator.single_select_key(
+            dialog_creator.Actions[None]
+            .new()
+            .add_new_key(
+                "fourth_form_cats", lambda _: cat_editor.fourth_form_cats(current_cats)
+            )
+            .add_new_key(
+                "remove_fourth_form_cats",
+                lambda _: cat_editor.remove_fourth_form_cats(current_cats),
+            ),
+            "fourth_form_remove_form_q",
+        )
 
     @staticmethod
     def force_true_form_cats_run(save_file: core.SaveFile):
-        color.ColoredText.localize("force_true_form_cats_warning")
+        color.color_print_key("force_true_form_cats_warning")
         cat_editor, current_cats = CatEditor.from_save_file(save_file)
         if cat_editor is None:
             return
@@ -643,7 +670,7 @@ class CatEditor:
 
     @staticmethod
     def force_fourth_form_cats_run(save_file: core.SaveFile):
-        color.ColoredText.localize("force_fourth_form_cats_warning")
+        color.color_print_key("force_fourth_form_cats_warning")
         cat_editor, current_cats = CatEditor.from_save_file(save_file)
         if cat_editor is None:
             return
@@ -667,21 +694,20 @@ class CatEditor:
             cat_editor, current_cats = CatEditor.from_save_file(save_file)
         if cat_editor is None:
             return
-        choice = dialog_creator.ChoiceInput(
-            ["upgrade_talents_cats", "remove_talents_cats"],
-            ["upgrade_talents_cats", "remove_talents_cats"],
-            [],
-            {},
+
+        dialog_creator.single_select_key(
+            dialog_creator.Actions[None]
+            .new()
+            .add_new_key(
+                "upgrade_talent_cats",
+                lambda _: cat_editor.upgrade_talents_cats(current_cats),
+            )
+            .add_new_key(
+                "remove_talents_cats",
+                lambda _: cat_editor.remove_talents_cats(current_cats),
+            ),
             "upgrade_talents_remove_talents_q",
-            True,
-        ).single_choice()
-        if choice is None:
-            return
-        choice -= 1
-        if choice == 0:
-            cat_editor.upgrade_talents_cats(current_cats)
-        elif choice == 1:
-            cat_editor.remove_talents_cats(current_cats)
+        )
 
     @staticmethod
     def unlock_cat_guide_remove_guide_run(
@@ -693,21 +719,20 @@ class CatEditor:
             cat_editor, current_cats = CatEditor.from_save_file(save_file)
         if cat_editor is None:
             return
-        choice = dialog_creator.ChoiceInput(
-            ["unlock_cat_guide", "remove_cat_guide"],
-            ["unlock_cat_guide", "remove_cat_guide"],
-            [],
-            {},
+
+        dialog_creator.single_select_key(
+            dialog_creator.Actions[None]
+            .new()
+            .add_new_key(
+                "unlock_cat_guide",
+                lambda _: cat_editor.unlock_cat_guide(current_cats),
+            )
+            .add_new_key(
+                "remove_cat_guide",
+                lambda _: cat_editor.remove_cat_guide(current_cats),
+            ),
             "unlock_cat_guide_remove_guide_q",
-            True,
-        ).single_choice()
-        if choice is None:
-            return
-        choice -= 1
-        if choice == 0:
-            cat_editor.unlock_cat_guide(current_cats)
-        elif choice == 1:
-            cat_editor.remove_cat_guide(current_cats)
+        )
 
     @staticmethod
     def from_save_file(
@@ -723,9 +748,7 @@ class CatEditor:
             if finished:
                 stop = True
                 continue
-            finished = dialog_creator.YesNoInput().get_input_once(
-                "finished_cats_selection"
-            )
+            finished = dialog_creator.yes_no_key("finished_cats_selection")
             if finished is None:
                 return None, []
             stop = finished
@@ -736,55 +759,80 @@ class CatEditor:
         cats: list[core.Cat],
     ) -> tuple[bool, list[core.Cat]]:
         self.print_selected_cats(cats)
-        options: list[str] = [
-            "select_cats_again",
-            "unlock_remove_cats",
-            "upgrade_cats",
-            "true_form_remove_form_cats",
-            "force_true_form_cats",
-            "fourth_form_remove_form_cats",
-            "force_fourth_form_cats",
-            "upgrade_talents_remove_talents_cats",
-            "unlock_remove_cat_guide",
-            "finish_edit_cats",
-        ]
-        option_id = dialog_creator.ChoiceInput(
-            options,
-            options,
-            [],
-            {},
+        res = dialog_creator.single_select_key(
+            dialog_creator.Actions[tuple[Optional[list[core.Cat]], bool]]
+            .new()
+            .add_new_key(
+                "select_cats_again", lambda _: (self.select(cats, False)[0], False)
+            )
+            .add_new_key(
+                "unlock_remove_cats",
+                lambda _: (
+                    self.unlock_remove_cats_run(self.save_file, cats, self),
+                    False,
+                ),
+            )
+            .add_new_key(
+                "upgrade_cats",
+                lambda _: (
+                    self.upgrade_cats(cats),
+                    False,
+                ),
+            )
+            .add_new_key(
+                "true_form_remove_form_cats",
+                lambda _: (
+                    self.true_form_remove_form_cats_run(self.save_file, cats, self),
+                    False,
+                ),
+            )
+            .add_new_key(
+                "force_true_form_cats",
+                lambda _: (
+                    self.true_form_cats(cats, force=True),
+                    False,
+                ),
+            )
+            .add_new_key(
+                "fourth_form_remove_form_cats",
+                lambda _: (
+                    self.fourth_form_remove_form_cats_run(self.save_file, cats, self),
+                    False,
+                ),
+            )
+            .add_new_key(
+                "force_fourth_form_cats",
+                lambda _: (
+                    self.fourth_form_cats(cats, force=True),
+                    False,
+                ),
+            )
+            .add_new_key(
+                "upgrade_talents_remove_talents_cats",
+                lambda _: (
+                    self.upgrade_talents_remove_talents_cats_run(
+                        self.save_file, cats, self
+                    ),
+                    False,
+                ),
+            )
+            .add_new_key(
+                "unlock_remove_cat_guide",
+                lambda _: (
+                    self.unlock_cat_guide_remove_guide_run(self.save_file, cats, self),
+                    False,
+                ),
+            )
+            .add_new_key("finish_edit_cats", lambda _: (None, True)),
             "select_edit_cats_option",
-            True,
-            remove_alias=True,
-        ).single_choice()
-        if option_id is None:
+        )
+        if res is None:
             return False, cats
-        option_id -= 1
-        if option_id == 0:
-            cats_, _ = self.select(cats, False)
-            cats = cats_
-        elif option_id == 1:
-            self.unlock_remove_cats_run(self.save_file, cats, self)
-        elif option_id == 2:
-            self.upgrade_cats(cats)
-        elif option_id == 3:
-            self.true_form_remove_form_cats_run(self.save_file, cats, self)
-        elif option_id == 4:
-            color.ColoredText.localize("force_true_form_cats_warning")
-            self.true_form_cats(cats, force=True)
-        elif option_id == 5:
-            self.fourth_form_remove_form_cats_run(self.save_file, cats, self)
-        elif option_id == 6:
-            color.ColoredText.localize("force_fourth_form_cats_warning")
-            self.fourth_form_cats(cats, force=True)
-        elif option_id == 7:
-            self.upgrade_talents_remove_talents_cats_run(self.save_file, cats, self)
-        elif option_id == 8:
-            self.unlock_cat_guide_remove_guide_run(self.save_file, cats, self)
+        _cats, ret = res
+        if _cats is not None:
+            cats = _cats
         CatEditor.set_rank_up_sale(self.save_file)
-        if option_id == 9:
-            return True, cats
-        return False, cats
+        return ret, cats
 
     @staticmethod
     def set_rank_up_sale(save_file: core.SaveFile):

@@ -1,6 +1,6 @@
 from __future__ import annotations
 import enum
-from typing import Any
+from typing import Any, Optional
 from bcsfe import core
 from bcsfe.cli import color, dialog_creator
 import requests
@@ -173,31 +173,25 @@ class Config:
 
     def edit_bool(self, key: ConfigKey):
         value = self.get_bool(key)
-        color.ColoredText(
+        color.color_print(
             self.get_full_input_localized(
                 key,
                 self.get_bool_text(value),
                 self.get_bool_text(self.get_default(key)),
             ),
         )
-        choice = dialog_creator.ChoiceInput(
-            ["enable", "disable"],
-            ["enable", "disable"],
-            [],
-            {},
+        value = dialog_creator.single_select_key(
+            dialog_creator.Actions[bool]
+            .new()
+            .add_new_key("enable", lambda _: True)
+            .add_new_key("disable", lambda _: False),
             "enable_disable_dialog",
-            True,
-        ).single_choice()
-        if choice is None:
+        )
+        if value is None:
             return
-        choice -= 1
-        if choice == 0:
-            value = True
-        elif choice == 1:
-            value = False
         self.set(key, value)
         print()
-        color.ColoredText.localize(
+        color.color_print_key(
             "config_success",
         )
 
@@ -209,13 +203,13 @@ class Config:
         text = self.get_full_input_localized(
             key, str(self.get_int(key)), str(self.get_default(key))
         )
-        color.ColoredText.localize(text)
-        value = dialog_creator.SingleEditor(
-            key.value, self.get_int(key), signed=False, localized_item=True
-        ).edit()
+        color.color_print_key(text)
+        value = dialog_creator.edit_int_key(
+            key.value, self.get_int(key), dialog_creator.MaxValue.i32().hide_max()
+        )
         self.set(key, value)
 
-        color.ColoredText.localize(
+        color.color_print_key(
             "config_success",
         )
 
@@ -225,28 +219,24 @@ class Config:
             self.get_str(ConfigKey.GAME_DATA_REPO),
             self.get_default(ConfigKey.GAME_DATA_REPO),
         )
-        color.ColoredText.localize(text)
-        value = dialog_creator.StringInput().get_input_locale(
-            "game_data_repo_dialog", {}
-        )
+        color.color_print_key(text)
+        value = dialog_creator.str_input_key("game_data_repo_dialog")
         if value is None:
             value = self.get_default(ConfigKey.GAME_DATA_REPO)
-        color.ColoredText.localize("validating_game_repo")
+        color.color_print_key("validating_game_repo")
         try:
             resp = core.RequestHandler(value).get()
         except (requests.exceptions.MissingSchema, requests.exceptions.InvalidSchema):
-            color.ColoredText.localize("invalid_url")
+            color.color_print_key("invalid_url")
             return
         if resp is None:
-            color.ColoredText.localize("no_internet_or_connection_error")
+            color.color_print_key("no_internet_or_connection_error")
             return
         if resp.status_code != 200:
-            color.ColoredText.localize(
-                "invalid_response", response_code=resp.status_code
-            )
+            color.color_print_key("invalid_response", response_code=resp.status_code)
             return
         self.set(ConfigKey.GAME_DATA_REPO, value)
-        color.ColoredText.localize(
+        color.color_print_key(
             "config_success",
         )
 
@@ -257,18 +247,109 @@ class Config:
             self.get_default(key),
         )
 
-        color.ColoredText.localize(text)
+        color.color_print_key(text)
 
         str_val = core.core_data.local_manager.get_key(key.value)
 
-        value = dialog_creator.StringInput().get_input_locale(
-            "string_config_dialog", {"val": str_val}
-        )
+        value = dialog_creator.str_input_key("string_config_dialog", val=str_val)
         if value is None:
             return
 
         self.set(key, value)
-        color.ColoredText.localize("config_success")
+        color.color_print_key("config_success")
+
+    def add_locale(self):
+        all_locales = core.LocalManager.get_all_locales()
+        if not core.GitHandler.is_git_installed():
+            color.color_print_key(
+                "git_not_installed",
+            )
+            return
+        git_repo = color.color_input_key("enter_locale_git_repo").strip()
+        external_locale = core.ExternalLocale.from_git_repo(git_repo)
+        if external_locale is None:
+            color.color_print_key(
+                "invalid_git_repo",
+            )
+            return
+        locale_name = external_locale.get_full_name()
+        if locale_name in all_locales:
+            if not dialog_creator.yes_no_key(
+                "locale_already_exists",
+                locale_name=locale_name,
+            ):
+                color.color_print_key(
+                    "locale_cancelled",
+                )
+                return
+
+        external_locale.save()
+
+        color.color_print_key(
+            "locale_added",
+        )
+        return locale_name
+
+    def remove_locale(self):
+        all_locales = core.LocalManager.get_all_locales()
+        options: list[str] = []
+        for locale in all_locales:
+            if locale.startswith("ext-"):
+                options.append(locale)
+
+        if not options:
+            color.color_print_key(
+                "no_external_locales",
+            )
+            return
+
+        options.append("cancel")
+
+        choices = dialog_creator.multi_select_entries_key(
+            options, dialog="locale_remove_dialog"
+        )
+        if choices is None:
+            return
+        for id, choice in choices:
+            if id == len(options) - 1:
+                return
+            core.LocalManager.remove_locale(choice)
+            color.color_print_key(
+                "locale_removed",
+                locale_name=choice,
+            )
+
+    def new_locale(self) -> str | None:
+        code = dialog_creator.str_input_key("enter_locale_code")
+        if code is None:
+            return None
+
+        author = dialog_creator.str_input_key("enter_author_name")
+        if author is None:
+            return None
+
+        lang_name = dialog_creator.str_input_key("enter_language_name_true")
+        lang_name_eng = dialog_creator.str_input_key("enter_language_eng")
+
+        if lang_name is None or lang_name_eng is None:
+            return None
+
+        metadata = {
+            "authors": [author],
+            "name": f"{lang_name} ({lang_name_eng})",
+        }
+
+        path = core.LocalManager.get_locale_folder(code)
+
+        en_path = core.LocalManager.get_locale_folder("en")
+
+        en_path.copy(path)
+
+        core.JsonFile.from_object(metadata).to_file(path.add("metadata.json"))
+
+        color.color_print_key("created_locale_at", path=path)
+
+        return code
 
     def edit_locale(self):
         text = self.get_full_input_localized(
@@ -276,85 +357,89 @@ class Config:
             self.get_str(ConfigKey.LOCALE),
             self.get_default(ConfigKey.LOCALE),
         )
-        color.ColoredText.localize(text)
+        color.color_print_key(text)
         all_locales = core.LocalManager.get_all_locales()
-        options = all_locales.copy() + ["add_locale", "remove_locale"]
-        value = dialog_creator.ChoiceInput.from_reduced(
-            options,
-            dialog="locale_dialog",
-            single_choice=True,
-        ).single_choice()
+        value = dialog_creator.single_select_key(
+            dialog_creator.Actions[Optional[str]]
+            .new()
+            .add_new_raw(all_locales, lambda v: all_locales[v])
+            .add_new_key("add_locale", lambda _: self.add_locale())
+            .add_new_key("new_locale", lambda _: self.new_locale())
+            .add_new_key("remove_locale", lambda _: self.remove_locale()),
+            "locale_dialog",
+        )
         if value is None:
             return
-        value -= 1
-        if value == len(all_locales) + 1:  # remove_locale
-            options: list[str] = []
-            for locale in all_locales:
-                if locale.startswith("ext-"):
-                    options.append(locale)
-
-            if not options:
-                color.ColoredText.localize(
-                    "no_external_locales",
-                )
-                return
-
-            options.append("cancel")
-
-            choices, _ = dialog_creator.ChoiceInput.from_reduced(
-                options, dialog="locale_remove_dialog"
-            ).multiple_choice()
-            if choices is None:
-                return
-            for choice in choices:
-                if choice == len(options) - 1:
-                    return
-                core.LocalManager.remove_locale(options[choice])
-                color.ColoredText.localize(
-                    "locale_removed",
-                    locale_name=options[choice],
-                )
-            return
-        elif value == len(all_locales):  # add_locale
-            if not core.GitHandler.is_git_installed():
-                color.ColoredText.localize(
-                    "git_not_installed",
-                )
-                return
-            git_repo = color.ColoredInput().localize("enter_locale_git_repo").strip()
-            external_locale = core.ExternalLocale.from_git_repo(git_repo)
-            if external_locale is None:
-                color.ColoredText.localize(
-                    "invalid_git_repo",
-                )
-                return
-            locale_name = external_locale.get_full_name()
-            if locale_name in all_locales:
-                if not dialog_creator.YesNoInput().get_input_once(
-                    "locale_already_exists",
-                    {"locale_name": locale_name},
-                ):
-                    color.ColoredText.localize(
-                        "locale_cancelled",
-                    )
-                    return
-
-            external_locale.save()
-
-            value = locale_name
-            color.ColoredText.localize(
-                "locale_added",
-            )
-        else:
-            value = all_locales[value]
         self.set(ConfigKey.LOCALE, value)
-        color.ColoredText.localize(
+        color.color_print_key(
             "locale_changed",
             locale_name=value,
         )
-        color.ColoredText.localize(
+        color.color_print_key(
             "config_success",
         )
+
+    def remove_theme(self):
+        themes = core.ThemeHandler.get_all_themes()
+        options: list[str] = []
+        for theme in themes:
+            if theme.startswith("ext-"):
+                options.append(theme)
+
+        if not options:
+            color.color_print_key(
+                "no_external_themes",
+            )
+            return
+
+        options.append("cancel")
+
+        choices = dialog_creator.multi_select_entries_key(
+            options, dialog="theme_remove_dialog"
+        )
+        if choices is None:
+            return
+        for id, choice in choices:
+            if id == len(options) - 1:
+                return
+            core.ThemeHandler.remove_theme(choice)
+            color.color_print_key(
+                "theme_removed",
+                theme_name=choice,
+            )
+
+    def add_theme(self):
+        themes = core.ThemeHandler.get_all_themes()
+        if not core.GitHandler.is_git_installed():
+            color.color_print_key(
+                "git_not_installed",
+            )
+            return
+        git_repo = color.color_input_key("enter_theme_git_repo").strip()
+        external_theme = core.ExternalTheme.from_git_repo(git_repo)
+        if external_theme is None:
+            color.color_print_key(
+                "invalid_git_repo",
+            )
+            return
+        theme_name = external_theme.get_full_name()
+        if theme_name in themes:
+            if not dialog_creator.yes_no_key(
+                "theme_already_exists",
+                theme_name=theme_name,
+            ):
+                color.color_print_key(
+                    "theme_cancelled",
+                )
+                return
+
+        external_theme.save()
+
+        color.color_print_key(
+            "theme_added",
+        )
+
+        return theme_name
 
     def edit_theme(self):
         themes = core.ThemeHandler.get_all_themes()
@@ -366,95 +451,34 @@ class Config:
             current_theme,
             self.get_default(ConfigKey.THEME),
         )
-        color.ColoredText.localize(text)
-        options = themes.copy() + ["add_theme", "remove_theme"]
-        value = dialog_creator.ChoiceInput.from_reduced(
-            options,
-            dialog="theme_dialog",
-            single_choice=True,
-        ).single_choice()
+        color.color_print_key(text)
+        value = dialog_creator.single_select_key(
+            dialog_creator.Actions[Optional[str]]
+            .new()
+            .add_new_raw(themes, lambda v: themes[v])
+            .add_new_key("add_theme", lambda _: self.add_theme())
+            .add_new_key("remove_theme", lambda _: self.remove_theme()),
+            "theme_dialog",
+        )
         if value is None:
             return
-        value -= 1
-        if value == len(themes) + 1:  # remove_theme
-            options: list[str] = []
-            for theme in themes:
-                if theme.startswith("ext-"):
-                    options.append(theme)
-
-            if not options:
-                color.ColoredText.localize(
-                    "no_external_themes",
-                )
-                return
-
-            options.append("cancel")
-
-            choices, _ = dialog_creator.ChoiceInput.from_reduced(
-                options, dialog="theme_remove_dialog"
-            ).multiple_choice()
-            if choices is None:
-                return
-            for choice in choices:
-                if choice == len(options) - 1:
-                    return
-                core.ThemeHandler.remove_theme(options[choice])
-                color.ColoredText.localize(
-                    "theme_removed",
-                    theme_name=options[choice],
-                )
-            return
-        elif value == len(themes):  # add_theme
-            if not core.GitHandler.is_git_installed():
-                color.ColoredText.localize(
-                    "git_not_installed",
-                )
-                return
-            git_repo = color.ColoredInput().localize("enter_theme_git_repo").strip()
-            external_theme = core.ExternalTheme.from_git_repo(git_repo)
-            if external_theme is None:
-                color.ColoredText.localize(
-                    "invalid_git_repo",
-                )
-                return
-            theme_name = external_theme.get_full_name()
-            if theme_name in themes:
-                if not dialog_creator.YesNoInput().get_input_once(
-                    "theme_already_exists",
-                    {"theme_name": theme_name},
-                ):
-                    color.ColoredText.localize(
-                        "theme_cancelled",
-                    )
-                    return
-
-            external_theme.save()
-
-            value = theme_name
-            color.ColoredText.localize(
-                "theme_added",
-            )
-        else:
-            value = themes[value]
         self.set(ConfigKey.THEME, value)
-        color.ColoredText.localize(
+        color.color_print_key(
             "theme_changed",
             theme_name=value,
         )
 
     @staticmethod
-    def edit_config(_: Any = None):
+    def edit_config(_: Any = None) -> None:
         config = core.core_data.config
         features = list(ConfigKey)
 
-        choice = dialog_creator.ChoiceInput.from_reduced(
+        choice = dialog_creator.basic_keys_pick_key_index(
             [key.value for key in features],
-            dialog="config_dialog",
-            single_choice=True,
-        ).single_choice()
+            "config_dialog",
+        )
         if choice is None:
             return
-        choice -= 1
         feature = features[choice]
         print()
         if isinstance(config.get(feature), bool):

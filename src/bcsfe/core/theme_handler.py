@@ -3,6 +3,7 @@ import dataclasses
 import tempfile
 from typing import Any
 from bcsfe import core
+import json
 from bcsfe.cli import color
 
 
@@ -17,7 +18,7 @@ class ThemeHandler:
 
     @staticmethod
     def get_themes_folder() -> core.Path:
-        return core.Path("themes", True).generate_dirs()
+        return core.Path.get_data_folder().add("themes")
 
     @staticmethod
     def get_external_themes_folder() -> core.Path:
@@ -34,8 +35,8 @@ class ThemeHandler:
         if not file_path.exists():
             return {}
         try:
-            return core.JsonFile.from_data(file_path.read()).to_object()
-        except core.JSONDecodeError:
+            return core.JsonFile.from_data(file_path.read()).as_object()
+        except json.JSONDecodeError:
             return {}
 
     def get_short_name(self) -> str:
@@ -138,7 +139,7 @@ class ExternalTheme:
         theme_json = repo.get_file(core.Path("theme.json"))
         if theme_json is None:
             return None
-        json_data = core.JsonFile.from_data(theme_json).to_object()
+        json_data = core.JsonFile.from_data(theme_json).as_object()
         json_data["git_repo"] = git_repo
         return ExternalTheme.from_json(json_data)
 
@@ -219,7 +220,7 @@ class ExternalThemeManager:
         Returns:
             ExternalTheme: External theme.
         """
-        json_data = core.JsonFile.from_data(path.read()).to_object()
+        json_data = core.JsonFile.from_data(path.read()).as_object()
         return ExternalTheme.from_json(json_data)
 
     @staticmethod
@@ -231,19 +232,19 @@ class ExternalThemeManager:
         """
         if external_theme.git_repo is None:
             return
-        color.ColoredText.localize(
+        color.color_print_key(
             "checking_for_theme_updates",
             theme_name=external_theme.name,
         )
         updated = external_theme.get_new_version()
         if updated:
-            color.ColoredText.localize(
+            color.color_print_key(
                 "external_theme_updated",
                 theme_name=external_theme.name,
                 version=external_theme.version,
             )
         else:
-            color.ColoredText.localize(
+            color.color_print_key(
                 "external_theme_no_update",
                 theme_name=external_theme.name,
                 version=external_theme.version,
@@ -255,12 +256,12 @@ class ExternalThemeManager:
         """Updates all external themes."""
         files = ThemeHandler.get_external_themes_folder().get_paths_dir()
         if not files:
-            color.ColoredText.localize(
+            color.color_print_key(
                 "no_external_themes",
             )
             return
         if not core.GitHandler.is_git_installed():
-            color.ColoredText.localize(
+            color.color_print_key(
                 "git_not_installed",
             )
             return

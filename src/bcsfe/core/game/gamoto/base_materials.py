@@ -80,6 +80,6 @@ class BaseMaterials:
             "base_materials",
             names,
             base_materials,
-            core.core_data.max_value_manager.get("base_materials"),
+            core.core_data.max_value_manager.base_materials,
         )
         self.materials = [Material(value) for value in values]

@@ -1,5 +1,6 @@
 from __future__ import annotations
 from typing import Any
+import json
 from bcsfe import core
 from bcsfe.cli import color, dialog_creator
 
@@ -220,8 +221,8 @@ class OrbInfoList:
             list[RawOrbInfo]: The list of RawOrbInfo
         """
         try:
-            data: dict[str, Any] = core.JsonFile.from_data(json_data).to_object()
-        except core.JSONDecodeError:
+            data: dict[str, Any] = core.JsonFile.from_data(json_data).as_object()
+        except json.JSONDecodeError:
             return None
         orb_info_list: list[RawOrbInfo] = []
         for id, orb in enumerate(data["ID"]):
@@ -667,7 +668,7 @@ class SaveOrbs:
         for orb in orb_selection:
             color.ColoredText(orb.to_colortext())
 
-        max_orbs = core.core_data.max_value_manager.get("talent_orbs")
+        max_orbs = core.core_data.max_value_manager.talent_orbs
 
         if len(orb_selection) == 0:
             return

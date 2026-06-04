@@ -185,7 +185,7 @@ class LocalManager:
         metadata_path = self.path.add("metadata.json")
 
         if metadata_path.exists():
-            data = core.JsonFile.from_path(metadata_path)
+            data = core.JsonFile.from_path(metadata_path).as_object()
             self.authors = data.get("authors") or ["fieryhenry"]
             self.name = data.get("name") or "English"
 
@@ -540,7 +540,7 @@ class ExternalLocale:
         locale_json = repo.get_file(core.Path("locale.json"))
         if locale_json is None:
             return None
-        json_data = core.JsonFile.from_data(locale_json).to_object()
+        json_data = core.JsonFile.from_data(locale_json).as_object()
         json_data["git_repo"] = git_repo
         return ExternalLocale.from_json(json_data)
 
@@ -632,7 +632,7 @@ class ExternalLocaleManager:
         """
         if not path.exists():
             return None
-        json_data = core.JsonFile.from_data(path.add("locale.json").read()).to_object()
+        json_data = core.JsonFile.from_data(path.add("locale.json").read()).as_object()
         return ExternalLocale.from_json(json_data)
 
     @staticmethod

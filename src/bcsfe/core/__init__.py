@@ -173,7 +173,7 @@ from bcsfe.core.theme_handler import (
     ExternalTheme,
     ExternalThemeManager,
 )
-from bcsfe.core.max_value_helper import MaxValueHelper, MaxValueType
+from bcsfe.core.max_value_helper import MaxValueHelper
 
 
 T = TypeVar("T")
@@ -200,7 +200,7 @@ class CoreData:
         self.logger = Logger(log_path)
         self.local_manager = LocalManager()
         self.theme_manager = ThemeHandler()
-        self.max_value_manager = MaxValueHelper()
+        self.max_value_manager = MaxValueHelper.from_file()
         self.game_data_getter: GameDataGetter | None = None
         self.gatya_item_names: GatyaItemNames | None = None
         self.gatya_item_buy: GatyaItemBuy | None = None
@@ -433,7 +433,6 @@ __all__ = [
     "ServerGatyaDataItem",
     "GatyaDataOptionSet",
     "GatyaDataOption",
-    "MaxValueType",
     "GamblingEvent",
     "UnitBuy",
     "NyankoPictureBook",
@@ -446,4 +445,8 @@ __all__ = [
     "UnlockPopupLine",
     "Localizable",
     "Delimeter",
+    "Matatabi",
+    "GitHandler",
+    "EventChapters",
+    "MapNames",
 ]

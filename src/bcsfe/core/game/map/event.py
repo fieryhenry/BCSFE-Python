@@ -811,7 +811,7 @@ class EventChapters:
     def ask_clear_amount() -> int | None:
         val = dialog_creator.int_input_key(
             "clear_amount_enter",
-            core.core_data.max_value_manager.get("stage_clear_count"),
+            core.core_data.max_value_manager.stage_clear_count,
         )
 
         return val

@@ -288,7 +288,7 @@ class Main:
         if not path.exists():
             return None
         try:
-            json_data = core.JsonFile.from_data(path.read()).to_object()
+            json_data = core.JsonFile.from_data(path.read()).as_object()
         except (core.JSONDecodeError, UnicodeDecodeError):
             color.ColoredText.localize("parse_json_fail")
             return None

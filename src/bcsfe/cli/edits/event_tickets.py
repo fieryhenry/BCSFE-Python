@@ -108,7 +108,7 @@ class EventTickets:
             "event_tickets",
             event_names,
             values,
-            max=core.core_data.max_value_manager.get("event_tickets"),
+            max=core.core_data.max_value_manager.event_tickets,
         )
 
         for (event_item, gset, gatya_item), value in zip(event_ticket_items, values):

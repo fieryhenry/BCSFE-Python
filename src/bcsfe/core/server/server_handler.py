@@ -83,7 +83,7 @@ class ServerHandler:
         if policy is None:
             return False
         policy = base64.b64decode(policy)
-        json_policy = core.JsonFile.from_data(core.Data(policy)).to_object()
+        json_policy = core.JsonFile.from_data(core.Data(policy)).as_object()
         expiration = json_policy.get("expiration")
         if expiration is None:
             return False

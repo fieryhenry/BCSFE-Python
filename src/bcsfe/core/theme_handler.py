@@ -3,6 +3,7 @@ import dataclasses
 import tempfile
 from typing import Any
 from bcsfe import core
+import json
 from bcsfe.cli import color
 
 
@@ -34,8 +35,8 @@ class ThemeHandler:
         if not file_path.exists():
             return {}
         try:
-            return core.JsonFile.from_data(file_path.read()).to_object()
-        except core.JSONDecodeError:
+            return core.JsonFile.from_data(file_path.read()).as_object()
+        except json.JSONDecodeError:
             return {}
 
     def get_short_name(self) -> str:
@@ -138,7 +139,7 @@ class ExternalTheme:
         theme_json = repo.get_file(core.Path("theme.json"))
         if theme_json is None:
             return None
-        json_data = core.JsonFile.from_data(theme_json).to_object()
+        json_data = core.JsonFile.from_data(theme_json).as_object()
         json_data["git_repo"] = git_repo
         return ExternalTheme.from_json(json_data)
 
@@ -219,7 +220,7 @@ class ExternalThemeManager:
         Returns:
             ExternalTheme: External theme.
         """
-        json_data = core.JsonFile.from_data(path.read()).to_object()
+        json_data = core.JsonFile.from_data(path.read()).as_object()
         return ExternalTheme.from_json(json_data)
 
     @staticmethod

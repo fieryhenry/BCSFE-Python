@@ -170,7 +170,7 @@ class SchemeItems:
             if scheme_id in self.received:
                 self.received.remove(scheme_id)
 
-        color.ColoredText.localize("scheme_items_edit_success")
+        color.color_print_key("scheme_items_edit_success")
 
     def remove_scheme_items(
         self,
@@ -190,4 +190,4 @@ class SchemeItems:
             if scheme_id in self.received:
                 self.received.remove(scheme_id)
 
-        color.ColoredText.localize("scheme_items_edit_success")
+        color.color_print_key("scheme_items_edit_success")

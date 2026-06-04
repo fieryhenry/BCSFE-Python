@@ -175,7 +175,7 @@ class SpecialSkills:
         if ability_data.ability_data is None:
             return
         for id in ids:
-            color.ColoredText.localize(
+            color.color_print_key(
                 "selected_skill_upgrades",
                 name=names[id],
                 base_level=skills[id].upgrade.base + 1,
@@ -191,7 +191,7 @@ class SpecialSkills:
                 return
             if upgrade is not None:
                 self.set_upgrade(id, upgrade)
-                color.ColoredText.localize(
+                color.color_print_key(
                     "selected_skill_upgraded",
                     name=names[id],
                     base_level=skills[id].upgrade.base + 1,
@@ -229,7 +229,7 @@ class SpecialSkills:
                 max_plus=max_plus_level,
             )
 
-            color.ColoredText.localize(
+            color.color_print_key(
                 "selected_skill_upgraded",
                 name=names[id],
                 base_level=skills[id].upgrade.base + 1,
@@ -267,7 +267,7 @@ class SpecialSkills:
                 "upgrade_skills_select_mod",
             )
 
-        color.ColoredText.localize("skills_edited")
+        color.color_print_key("skills_edited")
 
     def get_from_id(self, id: int, only_valid: bool = True) -> SpecialSkill | None:
         if only_valid:

@@ -19,15 +19,15 @@ class EventTickets:
             self.save_file, GatyaEventType.EVENT
         )
 
-        cli.color.ColoredText.localize("downloading_gatya_data")
+        cli.color.color_print_key("downloading_gatya_data")
         temp_save_file = core.SaveFile(cc=save_file.cc, gv=save_file.game_version)
         gatya_event_data = core.ServerHandler(temp_save_file).download_gatya_data()
 
         if gatya_event_data is None:
-            cli.color.ColoredText.localize("download_gatya_data_fail")
+            cli.color.color_print_key("download_gatya_data_fail")
             self.gatya_event_data = None
         else:
-            cli.color.ColoredText.localize("download_gatya_data_success")
+            cli.color.color_print_key("download_gatya_data_success")
             self.gatya_event_data = core.ServerGatyaData.from_data(gatya_event_data)
 
     @staticmethod

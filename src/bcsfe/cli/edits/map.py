@@ -613,7 +613,7 @@ def edit_chapters(
             )
         else:
             break
-        color.ColoredText.localize("map_chapters_edited")
-    color.ColoredText.localize("map_chapters_edited")
+        color.color_print_key("map_chapters_edited")
+    color.color_print_key("map_chapters_edited")
 
     return None

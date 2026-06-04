@@ -230,7 +230,7 @@ class NyankoClub:
     def edit_gold_pass(save_file: core.SaveFile):
         club = save_file.officer_pass.gold_pass
 
-        officer_id = color.ColoredInput().localize("gold_pass_dialog").strip()
+        officer_id = color.color_input_key("gold_pass_dialog").strip()
         if not officer_id:
             officer_id = NyankoClub.get_random_officer_id()
 
@@ -245,7 +245,7 @@ class NyankoClub:
 
         if officer_id == -1:
             club.remove_gold_pass(save_file)
-            color.ColoredText.localize("gold_pass_remove_success")
+            color.color_print_key("gold_pass_remove_success")
         else:
             club.get_gold_pass(officer_id, 30, save_file)
-            color.ColoredText.localize("gold_pass_get_success", id=officer_id)
+            color.color_print_key("gold_pass_get_success", id=officer_id)

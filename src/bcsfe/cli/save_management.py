@@ -32,7 +32,7 @@ class SaveManagement:
             print(e)
             return
 
-        color.ColoredText.localize("save_success", path=save_file.save_path)
+        color.color_print_key("save_success", path=save_file.save_path)
 
     @staticmethod
     def save_save_dialog(save_file: core.SaveFile):
@@ -48,7 +48,7 @@ class SaveManagement:
 
         save_file.to_file(save_file.save_path)
 
-        color.ColoredText.localize("save_success", path=save_file.save_path)
+        color.color_print_key("save_success", path=save_file.save_path)
 
     @staticmethod
     def save_save_data_dir(save_file: core.SaveFile):
@@ -60,7 +60,7 @@ class SaveManagement:
         SaveManagement.upload_items_checker(save_file)
         save_file.save_path = core.SaveFile.get_save_path()
         save_file.to_file(save_file.save_path)
-        color.ColoredText.localize("save_success", path=save_file.save_path)
+        color.color_print_key("save_success", path=save_file.save_path)
 
     @staticmethod
     def save_upload(save_file: core.SaveFile):
@@ -70,20 +70,20 @@ class SaveManagement:
             save_file (core.SaveFile): The save file to save.
         """
         if core.core_data.config.get_bool(core.ConfigKey.STRICT_BAN_PREVENTION):
-            color.ColoredText.localize("strict_ban_prevention_enabled")
+            color.color_print_key("strict_ban_prevention_enabled")
             SaveManagement.create_new_account(save_file)
 
         result = core.ServerHandler(save_file).get_codes()
         if result is not None:
             SaveManagement.save_save(save_file, check_strict=False)
             transfer_code, confirmation_code = result
-            color.ColoredText.localize(
+            color.color_print_key(
                 "upload_result",
                 transfer_code=transfer_code,
                 confirmation_code=confirmation_code,
             )
         else:
-            color.ColoredText.localize("upload_fail")
+            color.color_print_key("upload_fail")
             SaveManagement.save_save(save_file, check_strict=False)
 
     @staticmethod
@@ -96,9 +96,9 @@ class SaveManagement:
         server_handler = core.ServerHandler(save_file)
         success = server_handler.create_new_account()
         if success:
-            color.ColoredText.localize("unban_success")
+            color.color_print_key("unban_success")
         else:
-            color.ColoredText.localize("unban_fail")
+            color.color_print_key("unban_fail")
 
     @staticmethod
     def create_new_account(save_file: core.SaveFile):
@@ -110,9 +110,9 @@ class SaveManagement:
         server_handler = core.ServerHandler(save_file)
         success = server_handler.create_new_account()
         if success:
-            color.ColoredText.localize("create_new_account_success")
+            color.color_print_key("create_new_account_success")
         else:
-            color.ColoredText.localize("create_new_account_fail")
+            color.color_print_key("create_new_account_fail")
 
     @staticmethod
     def adb_push(
@@ -145,16 +145,16 @@ class SaveManagement:
             packages = adb_handler.get_battlecats_packages()
             package_name = SaveManagement.select_package_name(packages)
             if package_name is None:
-                color.ColoredText.localize("no_package_name_error")
+                color.color_print_key("no_package_name_error")
                 return adb_handler
             adb_handler.set_package_name(package_name)
         if save_file.save_path is None:
             return adb_handler
         result = adb_handler.load_battlecats_save(save_file.save_path)
         if result.success:
-            color.ColoredText.localize("adb_push_success")
+            color.color_print_key("adb_push_success")
         else:
-            color.ColoredText.localize("adb_push_fail", error=result.result)
+            color.color_print_key("adb_push_fail", error=result.result)
 
         return adb_handler
 
@@ -171,10 +171,10 @@ class SaveManagement:
         SaveManagement.save_save(save_file)
         root_handler = core.RootHandler()
         if not root_handler.is_android():
-            color.ColoredText.localize("root_push_not_android_error")
+            color.color_print_key("root_push_not_android_error")
             return None
         if not root_handler.is_rooted():
-            color.ColoredText.localize("not_rooted_error")
+            color.color_print_key("not_rooted_error")
             return None
         if save_file.used_storage and save_file.package_name is not None:
             root_handler.set_package_name(save_file.package_name)
@@ -182,16 +182,16 @@ class SaveManagement:
             packages = root_handler.get_battlecats_packages()
             package_name = SaveManagement.select_package_name(packages)
             if package_name is None:
-                color.ColoredText.localize("no_package_name_error")
+                color.color_print_key("no_package_name_error")
                 return root_handler
             root_handler.set_package_name(package_name)
         if save_file.save_path is None:
             return root_handler
         result = root_handler.load_battlecats_save(save_file.save_path)
         if result.success:
-            color.ColoredText.localize("root_push_success")
+            color.color_print_key("root_push_success")
         else:
-            color.ColoredText.localize("root_push_fail", error=result.result)
+            color.color_print_key("root_push_fail", error=result.result)
 
         return root_handler
 
@@ -209,9 +209,9 @@ class SaveManagement:
             return
         result = adb_handler.rerun_game()
         if result.success:
-            color.ColoredText.localize("adb_rerun_success")
+            color.color_print_key("adb_rerun_success")
         else:
-            color.ColoredText.localize("adb_rerun_fail", error=result.result)
+            color.color_print_key("adb_rerun_fail", error=result.result)
 
     @staticmethod
     def root_push_rerun(save_file: core.SaveFile):
@@ -227,9 +227,9 @@ class SaveManagement:
             return
         result = root_handler.rerun_game()
         if result.success:
-            color.ColoredText.localize("root_rerun_success")
+            color.color_print_key("root_rerun_success")
         else:
-            color.ColoredText.localize("root_rerun_fail", error=result.result)
+            color.color_print_key("root_rerun_fail", error=result.result)
 
     @staticmethod
     def export_save(save_file: core.SaveFile):
@@ -244,7 +244,7 @@ class SaveManagement:
             return
         data = core.JsonFile.from_object(data).to_data()
         data.to_file(path)
-        color.ColoredText.localize("export_success", path=path)
+        color.color_print_key("export_success", path=path)
 
     @staticmethod
     def upload_items(save_file: core.SaveFile, check_strict: bool = True):
@@ -257,15 +257,15 @@ class SaveManagement:
             core.core_data.config.get_bool(core.ConfigKey.STRICT_BAN_PREVENTION)
             and check_strict
         ):
-            color.ColoredText.localize("strict_ban_prevention_enabled")
+            color.color_print_key("strict_ban_prevention_enabled")
             SaveManagement.create_new_account(save_file)
 
         server_handler = core.ServerHandler(save_file)
         success = server_handler.upload_meta_data()
         if success:
-            color.ColoredText.localize("upload_items_success")
+            color.color_print_key("upload_items_success")
         else:
-            color.ColoredText.localize("upload_items_fail")
+            color.color_print_key("upload_items_fail")
 
     @staticmethod
     def upload_items_checker(save_file: core.SaveFile, check_strict: bool = True):
@@ -281,7 +281,7 @@ class SaveManagement:
     @staticmethod
     def pull_android(root_handler: core.RootHandler):
         if not root_handler.is_rooted():
-            color.ColoredText.localize("not_rooted_error")
+            color.color_print_key("not_rooted_error")
             return None
 
         return SaveManagement.pull_root(root_handler)
@@ -310,21 +310,21 @@ class SaveManagement:
 
         package_name = SaveManagement.select_package_name(package_names)
         if package_name is None:
-            color.ColoredText.localize("no_package_name_error")
+            color.color_print_key("no_package_name_error")
             return None
         handler.set_package_name(package_name)
         if handler.is_android():
             key = "storage_pulling"
         else:
             key = "adb_pulling"
-        color.ColoredText.localize(key, package_name=package_name)
+        color.color_print_key(key, package_name=package_name)
         save_path, result = handler.save_locally()
         if save_path is None:
             if handler.is_android():
                 key = "storage_pull_fail"
             else:
                 key = "adb_pull_fail"
-            color.ColoredText.localize(
+            color.color_print_key(
                 key,
                 package_name=package_name,
                 error=result.result,
@@ -440,13 +440,13 @@ class SaveManagement:
         used_storage: bool = False,
         package_name: str | None = None,
     ) -> tuple[core.SaveFile, core.Path] | None:
-        color.ColoredText.localize("save_file_found", path=save_path)
+        color.color_print_key("save_file_found", path=save_path)
 
         data = save_path.read()
         try:
             save_file = core.SaveFile(data, cc, package_name=package_name)
         except core.CantDetectSaveCCError:
-            color.ColoredText.localize("cant_detect_cc")
+            color.color_print_key("cant_detect_cc")
             cc = core.CountryCode.select()
             if cc is None:
                 return None
@@ -455,7 +455,7 @@ class SaveManagement:
             except Exception:
                 tb = core.core_data.logger.get_traceback()
                 data.reset_pos()
-                color.ColoredText.localize(
+                color.color_print_key(
                     "parse_save_error",
                     error=tb,
                     version=bcsfe.__version__,
@@ -468,7 +468,7 @@ class SaveManagement:
             tb = core.core_data.logger.get_traceback()
             save_file2 = core.SaveFile(data, cc, load=False)
             data.reset_pos()
-            color.ColoredText.localize(
+            color.color_print_key(
                 "parse_save_error",
                 error=tb,
                 version=bcsfe.__version__,
@@ -504,12 +504,12 @@ class SaveManagement:
             return stop
         save_file.load_save_file(new_save_file)
         core.core_data.init_data()
-        color.ColoredText.localize("load_save_success")
+        color.color_print_key("load_save_success")
         return False
 
     @staticmethod
     def convert_save_cc(save_file: core.SaveFile):
-        color.ColoredText.localize("cc_warning", current=save_file.cc)
+        color.color_print_key("cc_warning", current=save_file.cc)
         ccs_to_select = core.CountryCode.get_all()
         cc = core.CountryCode.select_from_ccs(ccs_to_select)
         if cc is None:
@@ -517,20 +517,18 @@ class SaveManagement:
         save_file.set_cc(cc)
         core.ServerHandler(save_file).create_new_account()
         core.core_data.init_data()
-        color.ColoredText.localize("country_code_set", cc=cc)
+        color.color_print_key("country_code_set", cc=cc)
 
     @staticmethod
     def convert_save_gv(save_file: core.SaveFile):
-        color.ColoredText.localize(
-            "gv_warning", current=save_file.game_version.to_string()
-        )
+        color.color_print_key("gv_warning", current=save_file.game_version.to_string())
         try:
             gv = core.GameVersion.from_string(
-                color.ColoredInput().localize("game_version_dialog").strip()
+                color.color_input_key("game_version_dialog").strip()
             )
         except ValueError:
-            color.ColoredText.localize("invalid_game_version")
+            color.color_print_key("invalid_game_version")
             return
         save_file.set_gv(gv)
         core.core_data.init_data()
-        color.ColoredText.localize("game_version_set", version=gv.to_string())
+        color.color_print_key("game_version_set", version=gv.to_string())

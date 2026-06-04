@@ -131,7 +131,7 @@ class CatShrine:
         xp = shrine.xp_offering
         data = core.core_data.get_cat_shrine_levels(save_file)
         level = data.get_level_from_xp(xp)
-        color.ColoredText.localize("current_shrine_xp_level", level=level, xp=xp)
+        color.color_print_key("current_shrine_xp_level", level=level, xp=xp)
         dialog_creator.single_select_key(
             dialog_creator.Actions[None]
             .new()
@@ -149,8 +149,8 @@ class CatShrine:
 
         shrine.dialogs = level - 1
 
-        color.ColoredText.localize("current_shrine_xp_level", level=level, xp=xp)
-        color.ColoredText.localize("cat_shrine_edited")
+        color.color_print_key("current_shrine_xp_level", level=level, xp=xp)
+        color.color_print_key("cat_shrine_edited")
 
 
 class CatShrineLevels:

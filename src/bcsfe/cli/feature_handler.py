@@ -210,14 +210,14 @@ class FeatureHandler:
             features.insert(0, ["go_back"])
         self.display_features(features)
         print()
-        usr_input = color.ColoredInput().localize("select_features").strip()
+        usr_input = color.color_input_key("select_features").strip()
         selected_features: list[list[str]] = []
         if usr_input.isdigit():
             usr_input = int(usr_input)
             if usr_input > len(features):
-                color.ColoredText.localize("invalid_input")
+                color.color_print_key("invalid_input")
             elif usr_input < 1:
-                color.ColoredText.localize("invalid_input")
+                color.color_print_key("invalid_input")
             else:
                 feature_name_top = features[usr_input - 1]
                 if feature_name_top == ["go_back"]:
@@ -237,7 +237,7 @@ class FeatureHandler:
         else:
             feats = self.search_features(usr_input, [])
             if not feats:
-                color.ColoredText.localize("no_feature_with_name", name=usr_input)
+                color.color_print_key("no_feature_with_name", name=usr_input)
             kv_map = list(feats.items())
             kv_map.sort(key=lambda v: v[1], reverse=True)
             selected_features = [list(v[0]) for v in kv_map]

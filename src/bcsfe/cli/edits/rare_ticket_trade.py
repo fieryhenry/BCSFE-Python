@@ -13,7 +13,7 @@ class RareTicketTrade:
             0,
         )
         if max_amount == 0:
-            color.ColoredText.localize("rare_ticket_trade_maxed")
+            color.color_print_key("rare_ticket_trade_maxed")
             return
         to_add = dialog_creator.int_input_key(
             "rare_ticket_trade_enter",
@@ -35,12 +35,12 @@ class RareTicketTrade:
                 break
 
         if not space:
-            color.ColoredText.localize("rare_ticket_trade_storage_full")
+            color.color_print_key("rare_ticket_trade_storage_full")
             return
 
         amount = to_add * 5
         save_file.gatya.trade_progress = amount
 
-        color.ColoredText.localize(
+        color.color_print_key(
             "rare_ticket_successfully_traded", rare_ticket_count=to_add
         )

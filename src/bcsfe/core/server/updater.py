@@ -65,14 +65,14 @@ class Updater:
         binary = sys.orig_argv[0]
         python_aliases = [binary, "py", "python", "python3"]
         for python_alias in python_aliases:
-            cmd = f"{python_alias} -m pip install --upgrade {self.package_name}=={target_version}"
+            cmd = f"{python_alias} -m pip install --upgrade {__app_name__}=={target_version}"
             result = core.Path().run(cmd)
             if result.exit_code == 0:
                 break
         else:
             pip_aliases = ["pip", "pip3"]
             for pip_alias in pip_aliases:
-                cmd = f"{pip_alias} install --upgrade {self.package_name}=={target_version}"
+                cmd = f"{pip_alias} install --upgrade {__app_name__}=={target_version}"
                 result = core.Path().run(cmd)
                 if result.exit_code == 0:
                     break

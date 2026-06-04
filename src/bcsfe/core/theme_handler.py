@@ -232,19 +232,19 @@ class ExternalThemeManager:
         """
         if external_theme.git_repo is None:
             return
-        color.ColoredText.localize(
+        color.color_print_key(
             "checking_for_theme_updates",
             theme_name=external_theme.name,
         )
         updated = external_theme.get_new_version()
         if updated:
-            color.ColoredText.localize(
+            color.color_print_key(
                 "external_theme_updated",
                 theme_name=external_theme.name,
                 version=external_theme.version,
             )
         else:
-            color.ColoredText.localize(
+            color.color_print_key(
                 "external_theme_no_update",
                 theme_name=external_theme.name,
                 version=external_theme.version,
@@ -256,12 +256,12 @@ class ExternalThemeManager:
         """Updates all external themes."""
         files = ThemeHandler.get_external_themes_folder().get_paths_dir()
         if not files:
-            color.ColoredText.localize(
+            color.color_print_key(
                 "no_external_themes",
             )
             return
         if not core.GitHandler.is_git_installed():
-            color.ColoredText.localize(
+            color.color_print_key(
                 "git_not_installed",
             )
             return

@@ -249,7 +249,7 @@ class Missions:
                 if mission_id in missions.requirements:
                     missions.requirements[mission_id] = 0
 
-        color.ColoredText.localize("missions_edited")
+        color.color_print_key("missions_edited")
 
 
 class MissionCondition:

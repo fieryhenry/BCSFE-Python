@@ -119,7 +119,7 @@ class Actions(Generic[T]):
         return "\n".join(lines)
 
     def display(self):
-        color.ColoredText(self.to_string())
+        color.color_print(self.to_string())
 
 
 def display_options_key(
@@ -131,11 +131,11 @@ def display_options_key(
 def display_options_raw(options: list[str], dialog: str):
     lines: list[str] = []
 
-    color.ColoredText(dialog)
+    color.color_print(dialog)
     for i, opt in enumerate(options):
         lines.append(f" {i + 1}. <@t>{opt}</>")
 
-    color.ColoredText("\n".join(lines))
+    color.color_print("\n".join(lines))
 
 
 def yes_no_raw(dialog: str) -> bool | None:
@@ -161,7 +161,7 @@ def range_basic_parse(
         if part.isdigit():
             int_i = int(part)
             if int_i > max.max or int_i < min:
-                color.ColoredText.localize("invalid_input_int", min=min, max=max.max)
+                color.color_print_key("invalid_input_int", min=min, max=max.max)
                 return None
             nums.append(int(part))
         elif "," in part:
@@ -187,7 +187,7 @@ def range_multi_input_raw(
 ) -> list[int] | None:
     if isinstance(max, int):
         max = MaxValue.specific(max)
-    usr_input = color.ColoredInput().get(dialog)
+    usr_input = color.color_input(dialog)
     if usr_input == core.localize("quit_key"):
         return None
 
@@ -196,26 +196,26 @@ def range_multi_input_raw(
         if part.isdigit():
             int_i = int(part)
             if int_i > max.max or int_i < min:
-                color.ColoredText.localize("invalid_input_int", min=min, max=max.max)
+                color.color_print_key("invalid_input_int", min=min, max=max.max)
                 continue
             nums.append(int(part))
         elif "," in part:
             min_v, max_v = part.split(",", 1)
             if not min_v.isdigit() or not max_v.isdigit():
-                color.ColoredText.localize("invalid_range", val=part)
+                color.color_print_key("invalid_range", val=part)
                 continue
             min_i = int(min_v)
             max_i = int(max_v)
             if max_i < min_i:
-                color.ColoredText.localize("invalid_range", val=part)
+                color.color_print_key("invalid_range", val=part)
                 continue
             if max_i > max.max or min_i < min:
-                color.ColoredText.localize("invalid_input_int", min=min, max=max.max)
+                color.color_print_key("invalid_input_int", min=min, max=max.max)
                 continue
 
             nums.extend(list(range(min_i, max_i + 1)))
         else:
-            color.ColoredText.localize("invalid_range", val=part)
+            color.color_print_key("invalid_range", val=part)
 
     return nums
 
@@ -278,7 +278,7 @@ def multi_select_entries_raw(
 
     while True:
         actions.display()
-        inp = color.ColoredInput("").get(dialog)
+        inp = color.color_input(dialog)
         if inp == quit_key:
             return None
 
@@ -286,24 +286,18 @@ def multi_select_entries_raw(
 
         for inp in inps:
             if not inp.isdigit():
-                color.ColoredText.localize(
-                    "invalid_input_int", min=min, max=actions.max()
-                )
+                color.color_print_key("invalid_input_int", min=min, max=actions.max())
                 continue
 
             inp_i = int(inp)
             inp_i -= offset
             if inp_i < 0:
-                color.ColoredText.localize(
-                    "invalid_input_int", min=min, max=actions.max()
-                )
+                color.color_print_key("invalid_input_int", min=min, max=actions.max())
                 break
 
             action = actions.get_rebase(inp_i)
             if action is None:
-                color.ColoredText.localize(
-                    "invalid_input_int", min=min, max=actions.max()
-                )
+                color.color_print_key("invalid_input_int", min=min, max=actions.max())
                 break
 
             ids.extend(action[0].run(action[1]))
@@ -324,7 +318,7 @@ def single_select_raw(actions: Actions[T], dialog: str) -> T | None:
 
     while True:
         actions.display()
-        inp = color.ColoredInput("").get(dialog)
+        inp = color.color_input(dialog)
         if inp == quit_key:
             return None
         if not inp.isdigit():
@@ -332,18 +326,18 @@ def single_select_raw(actions: Actions[T], dialog: str) -> T | None:
                 for i, o in enumerate(act.options):
                     if o.lower().strip() == inp.lower().strip():
                         return act.run(i)
-            color.ColoredText.localize("invalid_input_int", min=min, max=actions.max())
+            color.color_print_key("invalid_input_int", min=min, max=actions.max())
             continue
 
         inp_i = int(inp)
         inp_i -= offset
         if inp_i < 0:
-            color.ColoredText.localize("invalid_input_int", min=min, max=actions.max())
+            color.color_print_key("invalid_input_int", min=min, max=actions.max())
             continue
 
         action = actions.get_rebase(inp_i)
         if action is None:
-            color.ColoredText.localize("invalid_input_int", min=min, max=actions.max())
+            color.color_print_key("invalid_input_int", min=min, max=actions.max())
             continue
 
         return action[0].run(action[1])
@@ -473,7 +467,7 @@ def edit_int_raw(item_name: str, current_value: int, max: MaxValue | int) -> int
     val = int_input_raw(dialog, max, auto_clamp=True)
     if val is None:
         val = current_value
-    color.ColoredText.localize("value_changed", name=item_name, value=val, escape=False)
+    color.color_print_key("value_changed", name=item_name, value=val, escape=False)
     return val
 
 
@@ -481,7 +475,7 @@ def edit_str_raw(item_name: str, current_value: str) -> str:
     dialog = core.localize("input_no_max", name=item_name, value=current_value)
 
     val = str_input_raw(dialog) or current_value
-    color.ColoredText.localize("value_changed", name=item_name, value=val)
+    color.color_print_key("value_changed", name=item_name, value=val)
     return val
 
 
@@ -514,7 +508,7 @@ def int_input_raw(
         _max = MaxValue.specific(_max)
     quit_key = core.localize("quit_key")
     while True:
-        inp = color.ColoredInput("").get(dialog)
+        inp = color.color_input(dialog)
         if not inp and default is not None:
             return default
         if inp == quit_key:
@@ -522,14 +516,14 @@ def int_input_raw(
         try:
             inp_i = int(inp)
         except ValueError:
-            color.ColoredText.localize("invalid_input_int", max=_max.max, min=_min)
+            color.color_print_key("invalid_input_int", max=_max.max, min=_min)
             continue
 
         if inp_i < _min or inp_i > _max.max:
             if auto_clamp:
                 inp_i = min(max(_min, inp_i), _max.max)
             else:
-                color.ColoredText.localize("invalid_input_int", max=_max.max, min=_min)
+                color.color_print_key("invalid_input_int", max=_max.max, min=_min)
                 continue
 
         return inp_i
@@ -537,7 +531,7 @@ def int_input_raw(
 
 def str_input_raw(dialog: str) -> str | None:
     quit_key = core.localize("quit_key")
-    inp = color.ColoredInput("").get(dialog)
+    inp = color.color_input(dialog)
     if inp == quit_key:
         return None
     if inp == f"\\{quit_key}":
@@ -727,6 +721,4 @@ def edit_many(
             _max = maxm
         val_ = _max.clamp(val)
         current_values[id] = val_
-        color.ColoredText.localize(
-            "value_changed", name=names[id], value=val_, escape=False
-        )
+        color.color_print_key("value_changed", name=names[id], value=val_, escape=False)

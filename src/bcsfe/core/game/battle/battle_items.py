@@ -299,9 +299,9 @@ class BattleItems:
                     try:
                         val = float(val)
                     except ValueError:
-                        color.ColoredText.localize("invalid_minute_count")
+                        color.color_print_key("invalid_minute_count")
                         continue
 
                 self.items[opt].endless_item.set_duration_mins(val, 0)
 
-        color.ColoredText.localize("endless_items_success")
+        color.color_print_key("endless_items_success")

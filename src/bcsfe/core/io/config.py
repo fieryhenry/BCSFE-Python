@@ -173,7 +173,7 @@ class Config:
 
     def edit_bool(self, key: ConfigKey):
         value = self.get_bool(key)
-        color.ColoredText(
+        color.color_print(
             self.get_full_input_localized(
                 key,
                 self.get_bool_text(value),
@@ -191,7 +191,7 @@ class Config:
             return
         self.set(key, value)
         print()
-        color.ColoredText.localize(
+        color.color_print_key(
             "config_success",
         )
 
@@ -203,13 +203,13 @@ class Config:
         text = self.get_full_input_localized(
             key, str(self.get_int(key)), str(self.get_default(key))
         )
-        color.ColoredText.localize(text)
+        color.color_print_key(text)
         value = dialog_creator.edit_int_key(
             key.value, self.get_int(key), dialog_creator.MaxValue.i32().hide_max()
         )
         self.set(key, value)
 
-        color.ColoredText.localize(
+        color.color_print_key(
             "config_success",
         )
 
@@ -219,26 +219,24 @@ class Config:
             self.get_str(ConfigKey.GAME_DATA_REPO),
             self.get_default(ConfigKey.GAME_DATA_REPO),
         )
-        color.ColoredText.localize(text)
+        color.color_print_key(text)
         value = dialog_creator.str_input_key("game_data_repo_dialog")
         if value is None:
             value = self.get_default(ConfigKey.GAME_DATA_REPO)
-        color.ColoredText.localize("validating_game_repo")
+        color.color_print_key("validating_game_repo")
         try:
             resp = core.RequestHandler(value).get()
         except (requests.exceptions.MissingSchema, requests.exceptions.InvalidSchema):
-            color.ColoredText.localize("invalid_url")
+            color.color_print_key("invalid_url")
             return
         if resp is None:
-            color.ColoredText.localize("no_internet_or_connection_error")
+            color.color_print_key("no_internet_or_connection_error")
             return
         if resp.status_code != 200:
-            color.ColoredText.localize(
-                "invalid_response", response_code=resp.status_code
-            )
+            color.color_print_key("invalid_response", response_code=resp.status_code)
             return
         self.set(ConfigKey.GAME_DATA_REPO, value)
-        color.ColoredText.localize(
+        color.color_print_key(
             "config_success",
         )
 
@@ -249,7 +247,7 @@ class Config:
             self.get_default(key),
         )
 
-        color.ColoredText.localize(text)
+        color.color_print_key(text)
 
         str_val = core.core_data.local_manager.get_key(key.value)
 
@@ -258,19 +256,19 @@ class Config:
             return
 
         self.set(key, value)
-        color.ColoredText.localize("config_success")
+        color.color_print_key("config_success")
 
     def add_locale(self):
         all_locales = core.LocalManager.get_all_locales()
         if not core.GitHandler.is_git_installed():
-            color.ColoredText.localize(
+            color.color_print_key(
                 "git_not_installed",
             )
             return
-        git_repo = color.ColoredInput().localize("enter_locale_git_repo").strip()
+        git_repo = color.color_input_key("enter_locale_git_repo").strip()
         external_locale = core.ExternalLocale.from_git_repo(git_repo)
         if external_locale is None:
-            color.ColoredText.localize(
+            color.color_print_key(
                 "invalid_git_repo",
             )
             return
@@ -280,14 +278,14 @@ class Config:
                 "locale_already_exists",
                 locale_name=locale_name,
             ):
-                color.ColoredText.localize(
+                color.color_print_key(
                     "locale_cancelled",
                 )
                 return
 
         external_locale.save()
 
-        color.ColoredText.localize(
+        color.color_print_key(
             "locale_added",
         )
         return locale_name
@@ -300,7 +298,7 @@ class Config:
                 options.append(locale)
 
         if not options:
-            color.ColoredText.localize(
+            color.color_print_key(
                 "no_external_locales",
             )
             return
@@ -316,7 +314,7 @@ class Config:
             if id == len(options) - 1:
                 return
             core.LocalManager.remove_locale(choice)
-            color.ColoredText.localize(
+            color.color_print_key(
                 "locale_removed",
                 locale_name=choice,
             )
@@ -349,7 +347,7 @@ class Config:
 
         core.JsonFile.from_object(metadata).to_file(path.add("metadata.json"))
 
-        color.ColoredText.localize("created_locale_at", path=path)
+        color.color_print_key("created_locale_at", path=path)
 
         return code
 
@@ -359,7 +357,7 @@ class Config:
             self.get_str(ConfigKey.LOCALE),
             self.get_default(ConfigKey.LOCALE),
         )
-        color.ColoredText.localize(text)
+        color.color_print_key(text)
         all_locales = core.LocalManager.get_all_locales()
         value = dialog_creator.single_select_key(
             dialog_creator.Actions[Optional[str]]
@@ -373,11 +371,11 @@ class Config:
         if value is None:
             return
         self.set(ConfigKey.LOCALE, value)
-        color.ColoredText.localize(
+        color.color_print_key(
             "locale_changed",
             locale_name=value,
         )
-        color.ColoredText.localize(
+        color.color_print_key(
             "config_success",
         )
 
@@ -389,7 +387,7 @@ class Config:
                 options.append(theme)
 
         if not options:
-            color.ColoredText.localize(
+            color.color_print_key(
                 "no_external_themes",
             )
             return
@@ -405,7 +403,7 @@ class Config:
             if id == len(options) - 1:
                 return
             core.ThemeHandler.remove_theme(choice)
-            color.ColoredText.localize(
+            color.color_print_key(
                 "theme_removed",
                 theme_name=choice,
             )
@@ -413,14 +411,14 @@ class Config:
     def add_theme(self):
         themes = core.ThemeHandler.get_all_themes()
         if not core.GitHandler.is_git_installed():
-            color.ColoredText.localize(
+            color.color_print_key(
                 "git_not_installed",
             )
             return
-        git_repo = color.ColoredInput().localize("enter_theme_git_repo").strip()
+        git_repo = color.color_input_key("enter_theme_git_repo").strip()
         external_theme = core.ExternalTheme.from_git_repo(git_repo)
         if external_theme is None:
-            color.ColoredText.localize(
+            color.color_print_key(
                 "invalid_git_repo",
             )
             return
@@ -430,14 +428,14 @@ class Config:
                 "theme_already_exists",
                 theme_name=theme_name,
             ):
-                color.ColoredText.localize(
+                color.color_print_key(
                     "theme_cancelled",
                 )
                 return
 
         external_theme.save()
 
-        color.ColoredText.localize(
+        color.color_print_key(
             "theme_added",
         )
 
@@ -453,7 +451,7 @@ class Config:
             current_theme,
             self.get_default(ConfigKey.THEME),
         )
-        color.ColoredText.localize(text)
+        color.color_print_key(text)
         value = dialog_creator.single_select_key(
             dialog_creator.Actions[Optional[str]]
             .new()
@@ -465,7 +463,7 @@ class Config:
         if value is None:
             return
         self.set(ConfigKey.THEME, value)
-        color.ColoredText.localize(
+        color.color_print_key(
             "theme_changed",
             theme_name=value,
         )

@@ -33,7 +33,7 @@ class YamlFile:
                 yaml.dump(self.yaml, f)
         except FileNotFoundError:
             if print_err:
-                cli.color.ColoredText.localize("yaml_create_error", path=self.path.path)
+                cli.color.color_print_key("yaml_create_error", path=self.path.path)
 
     def __getitem__(self, key: str) -> Any:
         return self.yaml[key]

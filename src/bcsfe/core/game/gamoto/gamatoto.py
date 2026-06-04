@@ -400,7 +400,7 @@ class Gamatoto:
             return
         xp = self.xp
 
-        color.ColoredText.localize(
+        color.color_print_key(
             "gamatoto_level_current", level=current_level.level, xp=xp
         )
         res = dialog_creator.single_select_key(
@@ -427,7 +427,7 @@ class Gamatoto:
         if current_level is None:
             return
 
-        color.ColoredText.localize(
+        color.color_print_key(
             "gamatoto_level_success", level=current_level.level, xp=xp
         )
 
@@ -438,11 +438,11 @@ class Gamatoto:
         max_helpers = gamatoto_levels.get_total_helpers()
 
         members = members_name.get_members_from_helpers(self.helpers)
-        color.ColoredText.localize("current_gamatoto_helpers")
+        color.color_print_key("current_gamatoto_helpers")
         for member in members:
             if member is None:
                 continue
-            color.ColoredText.localize(
+            color.color_print_key(
                 "gamatoto_helper",
                 name=member.name,
                 rarity_name=member.rarity_name,
@@ -480,11 +480,11 @@ class Gamatoto:
         self.helpers = Helpers(helpers)
 
         members = members_name.get_members_from_helpers(self.helpers)
-        color.ColoredText.localize("new_gamatoto_helpers")
+        color.color_print_key("new_gamatoto_helpers")
         for member in members:
             if member is None:
                 continue
-            color.ColoredText.localize(
+            color.color_print_key(
                 "gamatoto_helper",
                 name=member.name,
                 rarity_name=member.rarity_name,

@@ -5,26 +5,26 @@ from bcsfe.cli.edits import cat_editor
 
 
 def display_storage(save_file: core.SaveFile, storage: list[core.StorageItem]):
-    color.ColoredText.localize("current_storage_items")
+    color.color_print_key("current_storage_items")
     index = 0
     for item in storage:
         if item.item_type == 0:
             continue
 
         index += 1
-        color.ColoredText(f"{index}. ", end="")
+        color.color_print(f"{index}. ", end="")
         display_item(item, save_file)
 
     if index == 0:
-        color.ColoredText.localize("storage_is_empty")
+        color.color_print_key("storage_is_empty")
 
     available_slots = len(storage) - index
 
-    color.ColoredText.localize("available_storage", slots=available_slots)
+    color.color_print_key("available_storage", slots=available_slots)
 
 
 def display_item(item: core.StorageItem, save_file: core.SaveFile):
-    color.ColoredText(get_item_str(item, save_file))
+    color.color_print(get_item_str(item, save_file))
 
 
 def get_item_str(item: core.StorageItem, save_file: core.SaveFile) -> str:
@@ -96,7 +96,7 @@ def edit_storage(save_file: core.SaveFile):
     while not exit:
         exit = edit_loop(save_file)
 
-    color.ColoredText.localize("storage_success")
+    color.color_print_key("storage_success")
 
 
 def add_cats(save_file: core.SaveFile):
@@ -128,17 +128,17 @@ def add_cats(save_file: core.SaveFile):
 
     space = get_storage_space(storage)
     if len(cats) > len(storage):
-        color.ColoredText.localize(
+        color.color_print_key(
             "too_many_cats_selected", max=len(storage), current=len(cats)
         )
         return
 
     needs = len(cats) - space
     if needs > 0:
-        color.ColoredText.localize("need_x_more_space", needs=needs)
+        color.color_print_key("need_x_more_space", needs=needs)
         return
 
-    color.ColoredText.localize("added_cats")
+    color.color_print_key("added_cats")
     for cat in cats:
         item = core.StorageItem.from_cat(cat.id)
         add_item(storage, item)
@@ -182,17 +182,17 @@ def add_special_skills(save_file: core.SaveFile):
 
     space = get_storage_space(storage)
     if len(options) > len(storage):
-        color.ColoredText.localize(
+        color.color_print_key(
             "too_many_skills_selected", max=len(storage), current=len(options)
         )
         return
 
     needs = len(options) - space
     if needs > 0:
-        color.ColoredText.localize("need_x_more_space", needs=needs)
+        color.color_print_key("need_x_more_space", needs=needs)
         return
 
-    color.ColoredText.localize("added_special_skills")
+    color.color_print_key("added_special_skills")
     for item in items:
         add_item(storage, item)
         display_item(item, save_file)
@@ -210,7 +210,7 @@ def remove_items(save_file: core.SaveFile):
     if choices is None:
         return
 
-    color.ColoredText.localize("removed_items")
+    color.color_print_key("removed_items")
     index = 0
     for item in storage:
         if item.item_type == 0:

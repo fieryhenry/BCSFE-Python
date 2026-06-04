@@ -76,4 +76,4 @@ class OfficerPass:
         officer_pass = save_file.officer_pass
         officer_pass.reset(save_file)
 
-        color.ColoredText.localize("officer_pass_fixed")
+        color.color_print_key("officer_pass_fixed")

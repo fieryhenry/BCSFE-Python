@@ -88,7 +88,7 @@ def main():
         cli.main.Main.leave()
     except Exception as e:
         tb = traceback.format_exc()
-        cli.color.ColoredText.localize(
+        cli.color.color_print_key(
             "error", error=e, version=bcsfe.__version__, traceback=tb
         )
         try:

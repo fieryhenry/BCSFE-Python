@@ -235,7 +235,7 @@ class GatyaInfo:
         try:
             data.to_file(self.get_file_path())
         except Exception as e:
-            color.ColoredText.localize("save_gatya_error", error=e)
+            color.color_print_key("save_gatya_error", error=e)
         self.data = data
 
     def load_data_from_file(self) -> core.Data | None:
@@ -310,7 +310,7 @@ class GatyaInfos:
 
     def get(self, gatya_id: int, print_progress: bool):
         if print_progress:
-            color.ColoredText.localize(
+            color.color_print_key(
                 "gatya_info_progress",
                 current=len(self.infos or []) + 1,
                 total=len(self.gatya_data_set or []),

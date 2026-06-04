@@ -50,7 +50,7 @@ class WayDroidHandler(io.root_handler.RootHandler):
 
     @staticmethod
     def display_waydroid_not_installed(e: WayDroidNotInstalledError):
-        color.ColoredText.localize("waydroid_not_installed", error=e)
+        color.color_print_key("waydroid_not_installed", error=e)
         return
 
     @staticmethod

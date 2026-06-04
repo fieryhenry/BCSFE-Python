@@ -388,7 +388,7 @@ class Ototo:
         descriptions = CannonDescriptions(save_file)
         recipe_unlocks = CastleRecipeUnlock(save_file)
 
-        color.ColoredText.localize("current_cannon_stats")
+        color.color_print_key("current_cannon_stats")
 
         if self.cannons is None:
             self.cannons = Cannons.init(save_file.game_version)
@@ -435,7 +435,7 @@ class Ototo:
 
             text += "\n"
 
-            color.ColoredText.localize("cannon_stats", parts=text, escape=False)
+            color.color_print_key("cannon_stats", parts=text, escape=False)
 
         return names
 
@@ -481,7 +481,7 @@ class Ototo:
         elif choice == 1:
             self.edit_cannon_level(save_file, all_at_once, cannon_ids)
 
-        color.ColoredText.localize("cannon_success")
+        color.color_print_key("cannon_success")
 
         self.display_current_cannons(save_file)
 
@@ -515,7 +515,7 @@ class Ototo:
                     continue
                 current_development = self.cannons.cannons[cannon_id].development
 
-                color.ColoredText.localize(
+                color.color_print_key(
                     "selected_cannon_stage",
                     name=cannon_description.get_cannon_name(),
                     stage=Ototo.get_stage_name(current_development),
@@ -601,7 +601,7 @@ class Ototo:
                 ):
                     return
 
-                color.ColoredText(cannon_desc.get_cannon_name())
+                color.color_print(cannon_desc.get_cannon_name())
 
                 levels = dialog_creator.edit_ints_raw(
                     cannon_desc.get_cannon_name(),

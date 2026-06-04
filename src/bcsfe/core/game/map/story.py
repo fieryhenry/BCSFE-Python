@@ -528,7 +528,7 @@ class StoryChapters:
         if chapter_names is None:
             return
         chapter_name = chapter_names[chapter_id]
-        color.ColoredText.localize("current_chapter", chapter_name=chapter_name)
+        color.color_print_key("current_chapter", chapter_name=chapter_name)
 
     @staticmethod
     def print_current_treasure_group(
@@ -542,7 +542,7 @@ class StoryChapters:
         if treasure_group_names is None:
             return
         treasure_group_name = treasure_group_names[treasure_group_id]
-        color.ColoredText.localize(
+        color.color_print_key(
             "current_treasure_group", treasure_group_name=treasure_group_name
         )
 
@@ -608,7 +608,7 @@ class StoryChapters:
                 new_stage_names.append(stage_names[index_stage_id])
             stage_names = new_stage_names
             map_name = names[id]
-            color.ColoredText.localize("current_sol_chapter", name=map_name, id=id)
+            color.color_print_key("current_sol_chapter", name=map_name, id=id)
             if clear_type_choice:
                 stages = core.EventChapters.ask_stages_stage_names(stage_names)
                 if stages is None:
@@ -645,7 +645,7 @@ class StoryChapters:
             for stage in stages:
                 if clear_amount_type == 2:
                     stage_name = stage_names[stage]
-                    color.ColoredText.localize(
+                    color.color_print_key(
                         "current_sol_stage", name=stage_name, id=stage
                     )
                 if clear_amount_type == 2:
@@ -660,7 +660,7 @@ class StoryChapters:
                     chapters=chapters,
                 )
 
-        color.ColoredText.localize("map_chapters_edited")
+        color.color_print_key("map_chapters_edited")
 
     @staticmethod
     def custom_treasure_level() -> int | None:
@@ -923,7 +923,7 @@ class StoryChapters:
             "treasure_dialog",
         )
 
-        color.ColoredText.localize("treasures_edited")
+        color.color_print_key("treasures_edited")
 
     @staticmethod
     def edit_itf_timed_scores(save_file: core.SaveFile):
@@ -951,7 +951,7 @@ class StoryChapters:
             "itf_timed_scores_dialog",
         )
 
-        color.ColoredText.localize("itf_timed_scores_edited")
+        color.color_print_key("itf_timed_scores_edited")
 
     @staticmethod
     def edit_itf_timed_scores_whole_chapters(
@@ -1000,7 +1000,7 @@ class StoryChapters:
             return
         stage_id = StoryChapters.convert_stage_id(stage_id)
         stage_name = stage_names[stage_id]
-        color.ColoredText.localize(
+        color.color_print_key(
             "current_stage", chapter_name=chapter_name, stage_name=stage_name
         )
 

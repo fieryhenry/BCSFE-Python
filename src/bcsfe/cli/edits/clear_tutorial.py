@@ -8,4 +8,4 @@ def clear_tutorial(
 ):
     core.StoryChapters.clear_tutorial(save_file)
     if display_already_cleared:
-        color.ColoredText.localize("tutorial_cleared")
+        color.color_print_key("tutorial_cleared")

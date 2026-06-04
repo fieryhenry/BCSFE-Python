@@ -644,19 +644,19 @@ class ExternalLocaleManager:
         """
         if external_locale.git_repo is None:
             return
-        color.ColoredText.localize(
+        color.color_print_key(
             "checking_for_locale_updates",
             locale_name=external_locale.name,
         )
         updated = external_locale.get_new_version()
         if updated:
-            color.ColoredText.localize(
+            color.color_print_key(
                 "external_locale_updated",
                 locale_name=external_locale.name,
                 version=external_locale.version,
             )
         else:
-            color.ColoredText.localize(
+            color.color_print_key(
                 "external_locale_no_update",
                 locale_name=external_locale.name,
                 version=external_locale.version,
@@ -668,12 +668,12 @@ class ExternalLocaleManager:
         """Updates all external locales."""
         dirs = LocalManager.get_external_locales_folder().get_dirs()
         if not dirs:
-            color.ColoredText.localize(
+            color.color_print_key(
                 "no_external_locales",
             )
             return
         if not core.GitHandler.is_git_installed():
-            color.ColoredText.localize(
+            color.color_print_key(
                 "git_not_installed",
             )
             return

@@ -852,8 +852,9 @@ class EventChapters:
             else:
                 example_name = ""
             usr_input = (
-                color.ColoredInput()
-                .localize("select_map_dialog", example=example_name, escape=False)
+                color.color_input_key(
+                    "select_map_dialog", example=example_name, escape=False
+                )
                 .lower()
                 .strip()
             )
@@ -872,7 +873,7 @@ class EventChapters:
                         found_names.append((i, name))
 
                 if len(found_names) == 0:
-                    color.ColoredText.localize("no_map_found", name=usr_input)
+                    color.color_print_key("no_map_found", name=usr_input)
                 elif len(found_names) == 1:
                     id = found_names[0][0]
                     true_id = ids[id]
@@ -897,7 +898,7 @@ class EventChapters:
                     if true_id not in map_ids:
                         map_ids.append(true_id)
 
-            color.ColoredText.localize("current_maps", maps=map_ids)
+            color.color_print_key("current_maps", maps=map_ids)
 
             for id in map_ids:
                 name = names_dict[id]
@@ -921,9 +922,7 @@ class EventChapters:
     def print_current_chapter(name: str | None, id: int):
         if name is None:
             name = core.core_data.local_manager.get_key("unknown_map_name", id=id)
-        color.ColoredText.localize(
-            "current_sol_chapter", escape=False, name=name, id=id
-        )
+        color.color_print_key("current_sol_chapter", escape=False, name=name, id=id)
 
     @staticmethod
     def print_current_stage(name: str | None, index: int):
@@ -931,7 +930,7 @@ class EventChapters:
             name = core.core_data.local_manager.get_key(
                 "unknown_stage_name", index=index
             )
-        color.ColoredText.localize("current_stage_map", name=name, index=index)
+        color.color_print_key("current_stage_map", name=name, index=index)
 
     @staticmethod
     def edit_chapters(

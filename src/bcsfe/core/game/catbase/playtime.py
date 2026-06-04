@@ -63,7 +63,7 @@ class PlayTime:
 
 def edit(save_file: core.SaveFile):
     play_time = PlayTime(save_file.officer_pass.play_time)
-    color.ColoredText.localize(
+    color.color_print_key(
         "playtime_current",
         hours=play_time.hours,
         minutes=play_time.just_minutes,
@@ -88,7 +88,7 @@ def edit(save_file: core.SaveFile):
 
     play_time = PlayTime.from_hours_mins_secs(hours, minutes, seconds)
     save_file.officer_pass.play_time = play_time.frames
-    color.ColoredText.localize(
+    color.color_print_key(
         "playtime_edited",
         hours=play_time.hours,
         minutes=play_time.just_minutes,

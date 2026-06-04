@@ -103,7 +103,7 @@ class UncannyChapters:
             )
         else:
             UncannyChapters.catamin_clear_count_individual(save_file, map_ids)
-        color.ColoredText.localize("catamin_stage_success")
+        color.color_print_key("catamin_stage_success")
 
     @staticmethod
     def clear_unclear_catamin_stage(save_file: core.SaveFile):

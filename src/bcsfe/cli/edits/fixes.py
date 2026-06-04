@@ -9,14 +9,14 @@ class Fixes:
     def fix_gamatoto_crash(save_file: core.SaveFile):
         save_file.gamatoto.skin = 2
 
-        color.ColoredText.localize("fix_gamatoto_crash_success")
+        color.color_print_key("fix_gamatoto_crash_success")
 
     @staticmethod
     def fix_ototo_crash(save_file: core.SaveFile):
         save_file.ototo.cannons = core.game.gamoto.ototo.Cannons.init(
             save_file.game_version
         )
-        color.ColoredText.localize("fix_ototo_crash_success")
+        color.color_print_key("fix_ototo_crash_success")
 
     @staticmethod
     def fix_time_errors(save_file: core.SaveFile):
@@ -24,7 +24,7 @@ class Fixes:
         save_file.timestamp = datetime.datetime.now().timestamp()
         save_file.energy_penalty_timestamp = datetime.datetime.now().timestamp()
 
-        color.ColoredText.localize("fix_time_errors_success")
+        color.color_print_key("fix_time_errors_success")
 
         # 10 = 62 / hgt1 = ahead by too much
         # 11 = 63 / hgt0 = behind by too much

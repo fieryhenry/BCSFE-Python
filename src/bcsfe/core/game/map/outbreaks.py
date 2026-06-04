@@ -213,7 +213,7 @@ class Outbreaks:
         outbreaks = save_file.outbreaks
         chapters = outbreaks.chapters
         if not chapters:
-            color.ColoredText.localize("no_valid_outbreaks")
+            color.color_print_key("no_valid_outbreaks")
             return
 
         options = ["clear", "unclear"]
@@ -251,6 +251,6 @@ class Outbreaks:
                     outbreaks.clear_outbreak(chapter_id, stage, clear)
 
         if clear:
-            color.ColoredText.localize("clear_outbreaks_success")
+            color.color_print_key("clear_outbreaks_success")
         else:
-            color.ColoredText.localize("unclear_outbreaks_success")
+            color.color_print_key("unclear_outbreaks_success")

@@ -21,7 +21,7 @@ class ServerCLI:
             return None
         gv = core.GameVersion(120200)  # not important
 
-        color.ColoredText.localize(
+        color.color_print_key(
             "downloading_save_file",
             transfer_code=transfer_code,
             confirmation_code=confirmation_code,
@@ -35,12 +35,12 @@ class ServerCLI:
             gv,
         )
         if server_handler is None and result is not None:
-            color.ColoredText.localize("invalid_codes_error")
+            color.color_print_key("invalid_codes_error")
             if cc == "jp":
-                color.ColoredText.localize("jp_tw_mixup")
+                color.color_print_key("jp_tw_mixup")
             # if dialog_creator.yes_no_key("display_response_debug_info_q"):
             #     if result.response is not None:
-            #         color.ColoredText.localize(
+            #         color.color_print_key(
             #             "response_text_display",
             #             url=result.url,
             #             request_headers=result.headers,
@@ -68,6 +68,6 @@ class ServerCLI:
             )
             input("press enter to continue anyway")
 
-        color.ColoredText.localize("save_downloaded", path=path.to_str())
+        color.color_print_key("save_downloaded", path=path.to_str())
 
         return path, cc

@@ -126,8 +126,8 @@ class OrbInfo:
         Returns:
             str: The string representation of the OrbInfo
         """
-        target_color = color_from_enemy_type(self.raw_orb_info.target_id)
-        rank_color = color_from_grade(self.raw_orb_info.rank_id)
+        target_color = color_from_enemy_type(self.raw_orb_info.target_id).value
+        rank_color = color_from_grade(self.raw_orb_info.rank_id).value
         effect_color = color_from_effect(self.raw_orb_info.effect_id)
         effect_text = self.effect.replace("%@", "{}")
         effect_text = f"<{effect_color}>{effect_text}</>"
@@ -407,7 +407,7 @@ class SaveOrb:
         self.orb = orb
 
 
-def color_from_enemy_type(target_id: int | None) -> str:
+def color_from_enemy_type(target_id: int | None) -> color.ColorHex:
     if target_id is None:
         return color.ColorHex.WHITE
     if target_id == 0:
@@ -437,7 +437,7 @@ def color_from_enemy_type(target_id: int | None) -> str:
     return color.ColorHex.BLACK
 
 
-def color_from_grade(grade_id: int) -> str:
+def color_from_grade(grade_id: int) -> color.ColorHex:
     if grade_id == 0:
         return color.ColorHex.RED
     elif grade_id == 1:
@@ -451,7 +451,7 @@ def color_from_grade(grade_id: int) -> str:
     return color.ColorHex.BLACK
 
 
-def color_from_effect(effect_id: int):
+def color_from_effect(effect_id: int) -> str:
     # if effect_id == 0:
     #     return color.ColorHex.RED
     # elif effect_id == 1:
@@ -520,13 +520,11 @@ class SaveOrbs:
         """Print the orbs as a formatted list"""
         self.sort_orbs()
         total_orbs = sum([orb.count for orb in self.orbs.values()])
-        color.ColoredText.localize("total_current_orbs", total_orbs=total_orbs)
-        color.ColoredText.localize(
-            "total_current_orb_types", total_types=len(self.orbs)
-        )
-        color.ColoredText.localize("current_orbs")
+        color.color_print_key("total_current_orbs", total_orbs=total_orbs)
+        color.color_print_key("total_current_orb_types", total_types=len(self.orbs))
+        color.color_print_key("current_orbs")
         for orb in self.orbs.values():
-            color.ColoredText(f"<@q>{orb.count}</> {orb.orb.to_colortext()}")
+            color.color_print(f"<@q>{orb.count}</> {orb.orb.to_colortext()}")
 
     def sort_orbs(self):
         """Sort the orbs by attribute, effect, grade and id in that order with attribute being the most important"""
@@ -602,7 +600,7 @@ class SaveOrbs:
             for effect_str, effect in zip(all_effects_str, all_effects)
         )
 
-        color.ColoredText.localize(
+        color.color_print_key(
             "edit_orbs_help",
             escape=False,
             all_grades_str=all_grades_str,
@@ -611,8 +609,7 @@ class SaveOrbs:
         )
 
         orb_input_selection = (
-            color.ColoredInput()
-            .localize("orb_select")
+            color.color_input_key("orb_select")
             .lower()
             .replace("angle", "angel")
             .split(",")
@@ -663,10 +660,10 @@ class SaveOrbs:
         orb_selection.sort(key=lambda orb: orb.raw_orb_info.effect_id)
         orb_selection.sort(key=lambda orb: orb.raw_orb_info.target_id or -1)
 
-        color.ColoredText.localize("selected_orbs")
+        color.color_print_key("selected_orbs")
 
         for orb in orb_selection:
-            color.ColoredText(orb.to_colortext())
+            color.color_print(orb.to_colortext())
 
         max_orbs = core.core_data.max_value_manager.talent_orbs
 
@@ -709,7 +706,7 @@ class SaveOrbs:
         """
         save_orbs = SaveOrbs.from_save_file(save_file)
         if save_orbs is None:
-            color.ColoredText.localize("failed_to_load_orbs")
+            color.color_print_key("failed_to_load_orbs")
             return None
         save_orbs.edit()
         save_orbs.save(save_file)

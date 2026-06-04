@@ -206,7 +206,7 @@ class UserRankRewards:
                 if rank_gift.threshold > user_rank:
                     reward.claimed = False
 
-            color.ColoredText.localize("ur_fix_claimed_success")
+            color.color_print_key("ur_fix_claimed_success")
             return
 
         selected_rank_gifts: list[RankGift] = rank_gifts.rank_gift.copy()
@@ -259,9 +259,9 @@ class UserRankRewards:
             self.set_claimed(index, claim_choice == 0)
 
         if claim_choice == 0:
-            color.ColoredText.localize("ur_claimed_success")
+            color.color_print_key("ur_claimed_success")
         else:
-            color.ColoredText.localize("ur_unclaimed_success")
+            color.color_print_key("ur_unclaimed_success")
 
 
 def edit_user_rank_rewards(save_file: core.SaveFile):

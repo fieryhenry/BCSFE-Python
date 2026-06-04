@@ -128,9 +128,9 @@ class Medals:
                 medals.remove_medal(medal_id)
 
         if add_medals:
-            color.ColoredText.localize("medals_added")
+            color.color_print_key("medals_added")
         else:
-            color.ColoredText.localize("medals_removed")
+            color.color_print_key("medals_removed")
 
     def add_medal(self, medal_id: int) -> None:
         if self.has_medal(medal_id):

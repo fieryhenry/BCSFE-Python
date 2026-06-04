@@ -179,14 +179,14 @@ class Enigma:
 
         base_level = 25000
 
-        color.ColoredText.localize("current_enigma_stages")
+        color.color_print_key("current_enigma_stages")
         for stage in self.stages:
             name = names[stage.stage_id - base_level]
             if name is None:
                 name = core.core_data.local_manager.get_key(
                     "unknown_enigma_name", id=stage.stage_id
                 )
-            color.ColoredText.localize(
+            color.color_print_key(
                 "enigma_stage", name=name, id=stage.stage_id - base_level
             )
 
@@ -214,7 +214,7 @@ class Enigma:
             stage = Stage(3, abs_id, 2, int(time.time()))
             self.stages.append(stage)
 
-        color.ColoredText.localize("enigma_success")
+        color.color_print_key("enigma_success")
 
 
 def edit_enigma(save_file: core.SaveFile):

@@ -1,11 +1,11 @@
 from __future__ import annotations
 from typing import Any
-from aenum import NamedConstant  # type: ignore
-import colored  # type: ignore
 from bcsfe import core
+from bcsfe.cli import color_hex
+import enum
 
 
-class ColorHex(NamedConstant):
+class ColorHex(enum.Enum):
     GREEN = "#008000"
     G = GREEN
     RED = "#FF0000"
@@ -43,137 +43,136 @@ class ColorHex(NamedConstant):
 
     @staticmethod
     def from_name(name: str) -> str:
-        if name == "":
+        if not name:
             return ""
-        return getattr(ColorHex, name.upper())
-
-
-class ColorHelper:
-    def __init__(self):
-        self.theme_handler = core.core_data.theme_manager
-
-    def get_color(self, color_name: str) -> str:
         try:
-            first_char = color_name[0]
-        except IndexError:
-            return ""
-        if first_char == "#":
-            return color_name
-        if first_char == "@":
-            try:
-                second_char = color_name[1]
-            except IndexError:
-                return ""
-            try:
-                third_char = color_name[2]
-            except IndexError:
-                third_char = ""
-            if second_char == "p":
-                return self.theme_handler.get_primary_color()
-            if second_char == "s" and third_char != "u":
-                return self.theme_handler.get_secondary_color()
-            if second_char == "t":
-                return self.theme_handler.get_tertiary_color()
-            if second_char == "q":
-                return self.theme_handler.get_quaternary_color()
-            if second_char == "e":
-                return self.theme_handler.get_error_color()
-            if second_char == "w":
-                return self.theme_handler.get_warning_color()
-            if second_char == "s" and third_char == "u":
-                return self.theme_handler.get_success_color()
-            return self.theme_handler.get_theme_color(color_name[1:])
-        try:
-            return ColorHex.from_name(color_name)
+            return getattr(ColorHex, name.upper()).value
         except AttributeError:
             return ""
 
 
-class ColoredText:
-    def __init__(self, string: str, end: str = "\n") -> None:
-        string = string.replace("\\n", "\n")
-        self.string = string
-        self.end = end
-        self.color_helper = ColorHelper()
-        self.display(string)
+def __parse_color(color_name: str) -> str:
+    if not color_name:
+        return ""
+    first_char = color_name[0]
+    if first_char == "#":
+        return color_name
+    if first_char != "@":
+        return ColorHex.from_name(color_name)
 
-    def display(self, string: str) -> None:
-        text_data = self.parse(string)
-        for i, (text, color) in enumerate(text_data):
-            if i == len(text_data) - 1:
-                text += self.end
-            if color == "":
-                print(text, end="")
-            else:
-                try:
-                    fg = colored.fg(color)  # type: ignore
-                except Exception:
-                    print(text, end="")
-                    continue
-                print(colored.stylize(text, fg), end="")  # type: ignore
+    if len(color_name) < 2:
+        return ""
+    second_char = color_name[1]
+    if len(color_name) >= 3:
+        third_char = color_name[2]
+    else:
+        third_char = ""
+    theme_handler = core.core_data.theme_manager
+    if second_char == "p":
+        return theme_handler.get_primary_color()
+    if second_char == "s" and third_char != "u":
+        return theme_handler.get_secondary_color()
+    if second_char == "t":
+        return theme_handler.get_tertiary_color()
+    if second_char == "q":
+        return theme_handler.get_quaternary_color()
+    if second_char == "e":
+        return theme_handler.get_error_color()
+    if second_char == "w":
+        return theme_handler.get_warning_color()
+    if second_char == "s" and third_char == "u":
+        return theme_handler.get_success_color()
+    return theme_handler.get_theme_color(color_name[1:])
 
-    @staticmethod
-    def localize(string: str, escape: bool = True, **kwargs: Any) -> ColoredText:
-        return ColoredText(
-            core.core_data.local_manager.get_key(string, escape=escape, **kwargs)
-        )
 
-    def parse(self, txt: str) -> list[tuple[str, str]]:
-        txt = "<@p>" + txt + "</>"
-        output: list[tuple[str, str]] = []
-        i = 0
-        tags: list[str] = []
-        inside_tag = False
-        in_closing_tag = False
-        tag_text = ""
-        text = ""
-        special_chars = core.LocalManager.get_special_chars()
-        while i < len(txt):
-            char = txt[i]
-            if char == "\\" and i + 1 < len(txt) and txt[i + 1] in special_chars:
-                i += 1
-                char = txt[i]
-                text += char
-                i += 1
-                continue
-            if tags:
-                tag = tags[-1]
-            else:
-                tag = ""
-            if char == ">" and inside_tag:
-                inside_tag = False
-                if not in_closing_tag:
-                    tags.append(tag_text)
-                if in_closing_tag:
-                    in_closing_tag = False
-                tag_text = ""
-            if char == "<" and not inside_tag:
-                inside_tag = True
-                if text:
-                    color = self.color_helper.get_color(tag)
-                    output.append((text, color))
-                    text = ""
-                    tag_text = ""
-            if char == "/" and inside_tag:
-                in_closing_tag = True
-                if tags:
-                    tags.pop()
-            if not inside_tag and char != ">" and char != "<":
-                text += char
-            if inside_tag and char != "<" and char != ">":
-                tag_text += char
+def __parse(text: str) -> list[tuple[str, str]]:
+    txt = "<@p>" + text + "</>"
+    output: list[tuple[str, str]] = []
+    i = 0
+    tags: list[str] = []
+    inside_tag = False
+    in_closing_tag = False
+    tag_text = ""
+    text = ""
+    special_chars = core.LocalManager.get_special_chars()
+    while i < len(txt):
+        char = txt[i]
+        if char == "\\" and i + 1 < len(txt) and txt[i + 1] in special_chars:
             i += 1
-        return output
+            char = txt[i]
+            text += char
+            i += 1
+            continue
+        if tags:
+            tag = tags[-1]
+        else:
+            tag = ""
+        if char == ">" and inside_tag:
+            inside_tag = False
+            if not in_closing_tag:
+                tags.append(tag_text)
+            if in_closing_tag:
+                in_closing_tag = False
+            tag_text = ""
+        if char == "<" and not inside_tag:
+            inside_tag = True
+            if text:
+                color = __parse_color(tag)
+                output.append((text, color))
+                text = ""
+                tag_text = ""
+        if char == "/" and inside_tag:
+            in_closing_tag = True
+            if tags:
+                tags.pop()
+        if not inside_tag and char != ">" and char != "<":
+            text += char
+        if inside_tag and char != "<" and char != ">":
+            tag_text += char
+        i += 1
+    return output
 
 
-class ColoredInput:
-    def __init__(self, end: str = "") -> None:
-        self.end = end
+def color_print(text: str, end: str = "\n"):
+    print(colorize(text), end=end)
 
-    def get(self, display_string: str) -> str:
-        ColoredText(display_string, end=self.end)
-        return input()
 
-    def localize(self, string: str, escape: bool = True, **kwargs: Any) -> str:
-        text = core.core_data.local_manager.get_key(string, escape=escape, **kwargs)
-        return self.get(text)
+def color_print_key(key: str, end: str = "\n", escape: bool = True, **kwargs: Any):
+    color_print(core.localize(key, escape=escape, **kwargs), end)
+
+
+def __fg(color: str):
+    color = color_hex.hex_to_ansi(color)
+    esc = "\x1b["
+    code = esc + "38;5;"
+    end = "m"
+    return code + color.lower() + end
+
+
+def __stylize(text: str, style: str):
+    esc = "\x1b["
+    end = "m"
+    terminator = esc + "0" + end
+    return style + f"{text}{terminator}"
+
+
+def colorize(text: str) -> str:
+    text_data = __parse(text)
+    out: str = ""
+
+    for txt, color in text_data:
+        if not color:
+            out += txt
+            continue
+
+        out += __stylize(txt, __fg(color))
+
+    return out
+
+
+def color_input(text: str) -> str:
+    return input(colorize(text))
+
+
+def color_input_key(key: str, escape: bool = True, **kwargs: Any) -> str:
+    return color_input(core.localize(key, escape, **kwargs))

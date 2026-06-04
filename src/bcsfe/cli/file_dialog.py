@@ -35,11 +35,11 @@ class FileDialog:
         Args:
             path (core.Path): Path to directory.
         """
-        color.ColoredText.localize("current_files_dir", dir=path)
+        color.color_print_key("current_files_dir", dir=path)
         path.generate_dirs()
         files = path.get_files()
         if not files:
-            color.ColoredText.localize("no_files_dir")
+            color.color_print_key("no_files_dir")
 
         files.sort(key=lambda file: file.basename())
 
@@ -61,16 +61,16 @@ class FileDialog:
         )
 
     def select_another_path(self):
-        path_input = color.ColoredInput().localize("enter_path")
+        path_input = color.color_input_key("enter_path")
         return path_input or None
 
     def select_other_dir(self, path: core.Path, ignore_json: bool) -> str | None:
-        path_input = color.ColoredInput().localize("enter_path_dir")
+        path_input = color.color_input_key("enter_path_dir")
         path_obj = core.Path(path_input)
         if path_obj.is_relative():
             path_obj = path.add(path_obj)
         if not path_obj.exists():
-            color.ColoredText.localize("path_not_exists", path=path_obj)
+            color.color_print_key("path_not_exists", path=path_obj)
             return self.select_files_in_dir(path, ignore_json)
         return self.select_files_in_dir(path_obj, ignore_json)
 
@@ -92,7 +92,7 @@ class FileDialog:
         if filetypes is None:
             filetypes = []
         title = core.core_data.local_manager.get_key(title)
-        color.ColoredText.localize(title)
+        color.color_print_key(title)
         if not self.use_tk():
             curr_path = core.Path(initialdir).add(initialfile)
             file = self.select_files_in_dir(curr_path.parent(), ignore_json)
@@ -101,7 +101,7 @@ class FileDialog:
             path_obj = core.Path(file)
             if path_obj.exists():
                 return file
-            color.ColoredText.localize("path_not_exists", path=path_obj)
+            color.color_print_key("path_not_exists", path=path_obj)
             return None
 
         return (
@@ -135,10 +135,10 @@ class FileDialog:
         if filetypes is None:
             filetypes = []
         title = core.core_data.local_manager.get_key(title)
-        color.ColoredText.localize(title)
+        color.color_print_key(title)
         if not self.use_tk():
             def_path = core.Path(initialdir).add(initialfile).to_str()
-            path = color.ColoredInput().localize("enter_path_default", default=def_path)
+            path = color.color_input_key("enter_path_default", default=def_path)
             return path.strip().strip("'").strip('"') if path else def_path
         return (
             self.filedialog.asksaveasfilename(  # type: ignore

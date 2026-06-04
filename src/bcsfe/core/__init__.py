@@ -354,7 +354,7 @@ def get_game_data_path() -> Path | None:
 def update_external_content(_: Any = None):
     """Updates external content."""
 
-    color.ColoredText.localize("updating_external_content")
+    color.color_print_key("updating_external_content")
     print()
     ExternalThemeManager.update_all_external_themes()
     ExternalLocaleManager.update_all_external_locales()
@@ -366,11 +366,11 @@ def update_external_content(_: Any = None):
 
     if clear_game_data:
         GameDataGetter.delete_old_versions(0)
-        color.ColoredText.localize("cleared_game_data")
+        color.color_print_key("cleared_game_data")
 
 
 def print_no_internet():
-    color.ColoredText.localize("no_internet")
+    color.color_print_key("no_internet")
 
 
 core_data = CoreData()

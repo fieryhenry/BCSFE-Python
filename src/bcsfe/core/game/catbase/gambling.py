@@ -106,6 +106,6 @@ class GamblingEvent:
     @staticmethod
     def reset_events(save_file: core.SaveFile):
         save_file.wildcat_slots.reset()
-        color.ColoredText.localize("reset_wildcat_slots")
+        color.color_print_key("reset_wildcat_slots")
         save_file.cat_scratcher.reset()
-        color.ColoredText.localize("reset_cat_scratcher")
+        color.color_print_key("reset_cat_scratcher")

@@ -13,22 +13,22 @@ class EnemyEditor:
         for enemy in enemies:
             enemy.unlock_enemy_guide(self.save_file)
 
-        color.ColoredText.localize("unlock_enemy_guide_success")
+        color.color_print_key("unlock_enemy_guide_success")
 
     def remove_enemy_guide(self, enemies: list[core.Enemy]):
         for enemy in enemies:
             enemy.reset_enemy_guide(self.save_file)
 
-        color.ColoredText.localize("remove_enemy_guide_success")
+        color.color_print_key("remove_enemy_guide_success")
 
     def print_selected_enemies(self, enemies: list[core.Enemy]):
         if not enemies:
             return
         if len(enemies) > 50:
-            color.ColoredText.localize("total_selected_enemies", total=len(enemies))
+            color.color_print_key("total_selected_enemies", total=len(enemies))
         else:
             for enemy in enemies:
-                color.ColoredText.localize(
+                color.color_print_key(
                     "selected_enemy",
                     id=enemy.id,
                     name=enemy.get_name(self.save_file),
@@ -121,7 +121,7 @@ class EnemyEditor:
             return None
         enemies = self.get_enemies_by_name(usr_name)
         if not enemies:
-            color.ColoredText.localize("enemy_not_found_name", name=usr_name)
+            color.color_print_key("enemy_not_found_name", name=usr_name)
             return None
 
         enemy_names = [enemy.get_name(self.save_file) for enemy in enemies]

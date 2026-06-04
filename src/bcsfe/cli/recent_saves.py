@@ -111,7 +111,7 @@ class RecentSaves:
 
     def select(self) -> RecentSave | None:
         if not self.saves:
-            color.ColoredText.localize("no_recent_saves")
+            color.color_print_key("no_recent_saves")
             return None
         items: list[str] = []
         for save in self.saves:

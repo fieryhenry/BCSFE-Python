@@ -42,6 +42,9 @@ in the `metadata.json` file in the opening text
 
 12. If everything is correct you shouldn't see any missing keys (extra keys are fine).
 
-13. Once done, you can either copy the files to src/files/locales/<locale> in a fork of the editor and submit a pull request
+13. Once done, you can either copy the files to `src/files/locales/<locale>` in a fork of the editor and submit a pull request
 to the codeberg repo. Alternatively you can just zip your locale folder and send it to me or in
 the #localization channel on discord. (or [matrix](https://matrix.to/#/@fieryhenry:matrix.battlecatsmodding.org))
+
+14. Note that if you make changes to anything in `src/files/`, you will need to run the editor with
+the `--force-migrate` flag to copy them to the correct folder

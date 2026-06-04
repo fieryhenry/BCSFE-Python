@@ -56,7 +56,7 @@ def main():
         help=f"path to the log file. If unspecified defaults to {core.Logger.get_log_path()}",
     )
     parser.add_argument(
-        "--force-update-data",
+        "--force-migrate",
         action="store_true",
         help=f"copy all data from bcsfe/src/files to {core.Path.get_data_folder()}",
     )
@@ -78,7 +78,7 @@ def main():
     if args.game_data_dir is not None:
         core.set_game_data_path(core.Path(args.game_data_dir))
 
-    migrate(args.force_update_data)
+    migrate(args.force_migrate)
 
     core.core_data.init_data()
 

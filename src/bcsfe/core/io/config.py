@@ -321,6 +321,38 @@ class Config:
                 locale_name=choice,
             )
 
+    def new_locale(self) -> str | None:
+        code = dialog_creator.str_input_key("enter_locale_code")
+        if code is None:
+            return None
+
+        author = dialog_creator.str_input_key("enter_author_name")
+        if author is None:
+            return None
+
+        lang_name = dialog_creator.str_input_key("enter_language_name_true")
+        lang_name_eng = dialog_creator.str_input_key("enter_language_eng")
+
+        if lang_name is None or lang_name_eng is None:
+            return None
+
+        metadata = {
+            "authors": [author],
+            "name": f"{lang_name} ({lang_name_eng})",
+        }
+
+        path = core.LocalManager.get_locale_folder(code)
+
+        en_path = core.LocalManager.get_locale_folder("en")
+
+        en_path.copy(path)
+
+        core.JsonFile.from_object(metadata).to_file(path.add("metadata.json"))
+
+        color.ColoredText.localize("created_locale_at", path=path)
+
+        return code
+
     def edit_locale(self):
         text = self.get_full_input_localized(
             ConfigKey.LOCALE,
@@ -334,6 +366,7 @@ class Config:
             .new()
             .add_new_raw(all_locales, lambda v: all_locales[v])
             .add_new_key("add_locale", lambda _: self.add_locale())
+            .add_new_key("new_locale", lambda _: self.new_locale())
             .add_new_key("remove_locale", lambda _: self.remove_locale()),
             "locale_dialog",
         )

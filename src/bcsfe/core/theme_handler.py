@@ -18,7 +18,7 @@ class ThemeHandler:
 
     @staticmethod
     def get_themes_folder() -> core.Path:
-        return core.Path("themes", True).generate_dirs()
+        return core.Path.get_data_folder().add("themes")
 
     @staticmethod
     def get_external_themes_folder() -> core.Path:

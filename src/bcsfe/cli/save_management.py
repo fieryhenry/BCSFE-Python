@@ -391,21 +391,22 @@ class SaveManagement:
                     main.Main.load_save_file(), SaveManagement.load_save_file_path
                 ),
             )
-            .add_new_key(
+        )
+        if core.SaveFile.get_save_path().exists():
+            actions.add_new_key(
                 "load_from_documents",
                 lambda _: core.map_opt(
                     core.SaveFile.get_save_path(), SaveManagement.load_save_file_path
                 ),
                 path=core.SaveFile.get_save_path(),
             )
-            .add(root_action)
-            .add_new_key(
-                "load_save_data_json",
-                lambda _: core.map_opt(
-                    main.Main.load_save_data_json(),
-                    lambda v: SaveManagement.load_save_file_path(v[0], v[1]),
-                ),
-            )
+
+        actions.add(root_action).add_new_key(
+            "load_save_data_json",
+            lambda _: core.map_opt(
+                main.Main.load_save_data_json(),
+                lambda v: SaveManagement.load_save_file_path(v[0], v[1]),
+            ),
         )
         if starting_options:
             actions = (

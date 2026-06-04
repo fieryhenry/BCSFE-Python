@@ -449,7 +449,7 @@ class LocalManager:
         Returns:
             core.Path: Path to the locales folder.
         """
-        return core.Path("locales", True)
+        return core.Path.get_data_folder().add("locales")
 
     @staticmethod
     def get_external_locales_folder() -> core.Path:

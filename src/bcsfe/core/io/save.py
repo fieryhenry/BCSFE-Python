@@ -3488,7 +3488,6 @@ class SaveFile:
         return SaveFile.get_saves_path().add("SAVE_DATA")
 
     def get_default_path(self) -> core.Path:
-        core.Thread("check-backups", SaveFile.check_backups, []).start()
         date = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         local_path = (
             self.get_saves_path()
@@ -3498,6 +3497,7 @@ class SaveFile:
         )
         local_path.generate_dirs()
         local_path = local_path.add(date)
+        core.Thread("check-backups", SaveFile.check_backups, []).start()
 
         return local_path
 

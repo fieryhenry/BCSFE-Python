@@ -1,13 +1,12 @@
 from __future__ import annotations
 import sys
 from typing import Any
-from bcsfe import core
+import json
+from bcsfe import core, __app_name__
 import bcsfe
 
 
 class Updater:
-    package_name = "bcsfe"
-
     def __init__(self):
         pass
 
@@ -15,7 +14,7 @@ class Updater:
         return bcsfe.__version__
 
     def get_pypi_json(self) -> dict[str, Any] | None:
-        url = f"https://pypi.org/pypi/{self.package_name}/json"
+        url = f"https://pypi.org/pypi/{__app_name__}/json"
         # add a User-Agent since pypi started to block the default requests user-agent
         # this probably won't be needed in the future as i assume this block is temporary
         response = core.RequestHandler(
@@ -25,7 +24,7 @@ class Updater:
             return None
         try:
             return response.json()
-        except core.JSONDecodeError:
+        except json.JSONDecodeError:
             return None
 
     def get_releases(self) -> list[str] | None:

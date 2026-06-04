@@ -1,6 +1,7 @@
 from __future__ import annotations
 from collections.abc import Callable
 from typing import Any, TypeVar
+from importlib import resources
 
 from requests.exceptions import ConnectionError
 from requests import Response
@@ -449,4 +450,8 @@ __all__ = [
     "GitHandler",
     "EventChapters",
     "MapNames",
+    "Command",
+    "RequestHandler",
+    "CommandResult",
+    "Thread",
 ]

@@ -16,7 +16,11 @@ def copy_to_data_dir(base_path: Traversable, path: Traversable):
             copy_to_data_dir(base_path, item)
     else:
         to_add = str(path).replace(str(base_path), "")
+        # macOS / Linux
         if to_add.startswith("/"):
+            to_add = to_add[1:]
+        # Windows
+        if to_add.startswith("\\"):
             to_add = to_add[1:]
         new_path = core.Path.get_data_folder().add(to_add)
         data = path.read_bytes()

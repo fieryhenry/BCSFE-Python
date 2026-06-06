@@ -6,7 +6,6 @@ from importlib.resources.abc import Traversable
 
 from bcsfe import core, cli
 
-
 __all__ = ["core", "cli"]
 
 
@@ -15,13 +14,13 @@ def copy_to_data_dir(base_path: Traversable, path: Traversable):
         for item in path.iterdir():
             copy_to_data_dir(base_path, item)
     else:
-        to_add = str(path).replace(str(base_path), "")
-        # macOS / Linux
-        if to_add.startswith("/"):
+        to_add = str(path)
+        base_s = str(base_path)
+        if to_add.startswith(base_s):
+            to_add = to_add[len(base_s) :]
+        if to_add.startswith("/") or to_add.startswith("\\"):
             to_add = to_add[1:]
-        # Windows
-        if to_add.startswith("\\"):
-            to_add = to_add[1:]
+
         new_path = core.Path.get_data_folder().add(to_add)
         data = path.read_bytes()
 

@@ -581,7 +581,7 @@ class Cat:
         set_current_form: bool = True,
         fourth_form: bool = False,
     ):
-        if total_forms == 4 and self.unlocked_forms == 3 and fourth_form:
+        if total_forms == 4 and fourth_form:
             self.unlock_fourth_form(save_file, set_current_form)
         elif total_forms >= 3:
             self.true_form(save_file, set_current_form)
@@ -602,6 +602,7 @@ class Cat:
     ):
         if set_current_form:
             self.current_form = 3
+        self.unlocked_forms = 3
         if core.core_data.config.get_bool(core.ConfigKey.UNLOCK_CAT_ON_EDIT):
             self.unlock(save_file)
         self.fourth_form = 2

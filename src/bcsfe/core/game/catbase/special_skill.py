@@ -1,5 +1,5 @@
 from __future__ import annotations, division
-from bcsfe import core
+from bcsfe import core, cli
 
 from typing import Any
 
@@ -266,6 +266,8 @@ class SpecialSkills:
                 ),
                 "upgrade_skills_select_mod",
             )
+
+        cli.edits.cat_editor.CatEditor.set_rank_up_sale(save_file)
 
         color.color_print_key("skills_edited")
 

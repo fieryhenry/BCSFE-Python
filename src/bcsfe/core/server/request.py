@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import requests
 
-from bcsfe import core
+from bcsfe import core, cli
 
 
 class MultiPartFile:
@@ -89,6 +89,9 @@ class RequestHandler:
                 files=None if self.form is None else self.form.into_files(),
             )
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
+            return None
+        except OverflowError:
+            cli.color.color_print_key("timeout_too_large")
             return None
 
     def post(self, no_timeout: bool = False) -> requests.Response | None:

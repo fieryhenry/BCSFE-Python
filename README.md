@@ -6,6 +6,8 @@
 
 BCSFE is a python command line save editor for The Battle Cats.
 
+Please submit issues and pull requests on [codeberg](https://codeberg.org/fieryhenry/BCSFE-Python)
+
 Join the [discord server](https://discord.gg/DvmMgvn5ZB) if you want to suggest
 new features, report bugs or get help on how to use the editor (please read the
 below tutorials first before asking for help).

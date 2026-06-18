@@ -199,14 +199,14 @@ class Config:
     def get_desc_key(key: ConfigKey) -> str:
         return key.value + "_desc"
 
-    def edit_int(self, key: ConfigKey):
+    def edit_int(self, key: ConfigKey, max: dialog_creator.MaxValue | None = None):
+        if max is None:
+            max = dialog_creator.MaxValue.i32().hide_max()
         text = self.get_full_input_localized(
             key, str(self.get_int(key)), str(self.get_default(key))
         )
         color.color_print_key(text)
-        value = dialog_creator.edit_int_key(
-            key.value, self.get_int(key), dialog_creator.MaxValue.i32().hide_max()
-        )
+        value = dialog_creator.edit_int_key(key.value, self.get_int(key), max)
         self.set(key, value)
 
         color.color_print_key(
@@ -484,7 +484,11 @@ class Config:
         if isinstance(config.get(feature), bool):
             core.core_data.config.edit_bool(feature)
         elif isinstance(config.get(feature), int):
-            core.core_data.config.edit_int(feature)
+            if feature == ConfigKey.MAX_REQUEST_TIMEOUT:
+                max = dialog_creator.MaxValue.specific(1000).hide_max()
+            else:
+                max = None
+            core.core_data.config.edit_int(feature, max)
         elif feature == ConfigKey.LOCALE:
             core.core_data.config.edit_locale()
         elif feature == ConfigKey.THEME:

@@ -84,7 +84,7 @@ class Path:
         return path
 
     @staticmethod
-    def get_config_folder(__app_name__: str = "bcsfe") -> Path:
+    def get_config_folder() -> Path:
         os_name = os.name
         if os_name != "posix":
             return Path.get_data_folder()
@@ -106,7 +106,7 @@ class Path:
         return path
 
     @staticmethod
-    def get_state_folder(__app_name__: str = "bcsfe") -> Path:
+    def get_state_folder() -> Path:
         os_name = os.name
         if os_name != "posix":
             return Path.get_data_folder()

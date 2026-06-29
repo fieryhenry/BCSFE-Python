@@ -1,5 +1,41 @@
 # Changelog
 
+## [3.5.0] - 2026-06-29
+
+### Added
+
+- A small message telling the user they may have mixed up jp and tw if the editor fails to download
+your save file from transfer codes
+
+- Feature in the locale config editor to create an empty new locale directly in the editor
+
+### Changed
+
+- Waydroid is now treated like another adb device so it no longer needs separate features and
+options for it
+
+- Reworked how user input dialog works in the backend so it's easier to program. **This may have
+caused issues for certain features - please report any issues**
+
+- Built-in locales and themes are copied to an external directory, this also means the editor should
+still work as a python wheel.
+
+
+### Removed
+
+- `USE_WAYDROID` config flag, no longer needed - waydroid will be used only if you select a waydroid device
+- `colored` as a dependency, no longer needed - the required code from that library is now directly included
+in the editor
+
+### Fixed
+
+- JP 15.5.0 save parsing
+
+- Issue with the rank-up sale showing hundreds of times if you set base upgrades very high
+
+- Editor crash if you set your request timeout too high
+
+
 ## [3.4.0] - 2026-06-01
 
 ### Added

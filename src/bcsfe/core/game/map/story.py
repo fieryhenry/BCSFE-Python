@@ -396,7 +396,10 @@ class StoryChapters:
     @staticmethod
     def get_selected_chapter_progress(max_stages: int = 48) -> int | None:
         progress = dialog_creator.int_input_key(
-            min=0, _max=max_stages, dialog="edit_chapter_progress_all", max=max_stages
+            min=0,
+            _max=dialog_creator.MaxValue.always_cap(max_stages),
+            dialog="edit_chapter_progress_all",
+            max=max_stages,
         )
         if progress is None:
             return None
@@ -416,7 +419,7 @@ class StoryChapters:
         progress = dialog_creator.int_input_key(
             "edit_chapter_progress",
             min=0,
-            _max=max_stages,
+            _max=dialog_creator.MaxValue.always_cap(max_stages),
             max=max_stages,
             chapter_name=chapter_name,
         )
@@ -455,7 +458,9 @@ class StoryChapters:
         clear_count = dialog_creator.int_input_key(
             "edit_stage_clear_count",
             min=0,
-            _max=core.core_data.max_value_manager.stage_clear_count,
+            _max=dialog_creator.MaxValue.i16(
+                core.core_data.max_value_manager.stage_clear_count
+            ),
         )
 
         return clear_count
@@ -666,7 +671,9 @@ class StoryChapters:
     def custom_treasure_level() -> int | None:
         max_treasure_level = core.core_data.max_value_manager.treasure_level
         treasure_level = dialog_creator.int_input_key(
-            "custom_treasure_level_dialog", min=0, _max=max_treasure_level
+            "custom_treasure_level_dialog",
+            min=0,
+            _max=dialog_creator.MaxValue.i32(max_treasure_level),
         )
         if treasure_level is None:
             return None
@@ -736,7 +743,9 @@ class StoryChapters:
 
     @staticmethod
     def select_stages_by_id() -> list[int] | None:
-        stage_ids = dialog_creator.range_multi_input_key("select_stage_id", 48, 1)
+        stage_ids = dialog_creator.range_multi_input_key(
+            "select_stage_id", dialog_creator.MaxValue.always_cap(48), 1
+        )
         if stage_ids is None:
             return None
         stage_ids = [stage_id - 1 for stage_id in stage_ids]
@@ -969,7 +978,9 @@ class StoryChapters:
                 score = dialog_creator.int_input_key(
                     "itf_timed_score",
                     min=0,
-                    _max=core.core_data.max_value_manager.itf_timed_score,
+                    _max=dialog_creator.MaxValue.i32(
+                        core.core_data.max_value_manager.itf_timed_score
+                    ),
                 )
                 if score is None:
                     return
@@ -979,7 +990,9 @@ class StoryChapters:
             score = dialog_creator.int_input_key(
                 "itf_timed_score_dialog",
                 min=0,
-                _max=core.core_data.max_value_manager.itf_timed_score,
+                _max=dialog_creator.MaxValue.i32(
+                    core.core_data.max_value_manager.itf_timed_score
+                ),
             )
             if score is None:
                 return
@@ -1017,7 +1030,9 @@ class StoryChapters:
             score = dialog_creator.int_input_key(
                 "itf_timed_score_dialog",
                 min=0,
-                _max=core.core_data.max_value_manager.itf_timed_score,
+                _max=dialog_creator.MaxValue.i32(
+                    core.core_data.max_value_manager.itf_timed_score
+                ),
             )
             if score is None:
                 return
@@ -1030,7 +1045,9 @@ class StoryChapters:
         score = dialog_creator.int_input_key(
             "itf_timed_score_dialog",
             min=0,
-            _max=core.core_data.max_value_manager.itf_timed_score,
+            _max=dialog_creator.MaxValue.i32(
+                core.core_data.max_value_manager.itf_timed_score
+            ),
         )
         if score is None:
             return
@@ -1069,7 +1086,9 @@ class StoryChapters:
                 score = dialog_creator.int_input_key(
                     "itf_timed_score_dialog",
                     min=0,
-                    _max=core.core_data.max_value_manager.itf_timed_score,
+                    _max=dialog_creator.MaxValue.i32(
+                        core.core_data.max_value_manager.itf_timed_score
+                    ),
                 )
                 if score is None:
                     return
@@ -1080,7 +1099,9 @@ class StoryChapters:
             score = dialog_creator.int_input_key(
                 "itf_timed_score",
                 min=0,
-                _max=core.core_data.max_value_manager.itf_timed_score,
+                _max=dialog_creator.MaxValue.i32(
+                    core.core_data.max_value_manager.itf_timed_score
+                ),
             )
             if score is None:
                 return

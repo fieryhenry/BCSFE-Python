@@ -194,5 +194,5 @@ class LineUps:
         self.unlocked_slots = dialog_creator.edit_int_key(
             "unlocked_slots",
             self.unlocked_slots,
-            self.slot_names_length,
+            dialog_creator.MaxValue.i8(self.slot_names_length),
         )

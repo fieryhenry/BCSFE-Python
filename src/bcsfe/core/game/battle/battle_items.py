@@ -235,7 +235,7 @@ class BattleItems:
             group_name,
             item_names,
             current_values,
-            core.core_data.max_value_manager.battle_items,
+            dialog_creator.MaxValue.i32(core.core_data.max_value_manager.battle_items),
         )
         for i, value in enumerate(values):
             self.items[i].amount = value

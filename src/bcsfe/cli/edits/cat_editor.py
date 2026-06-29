@@ -114,7 +114,9 @@ class CatEditor:
             return current_cats, False
 
         if current_cats:
-            mode_id = dialog_creator.int_input_key("and_mode_q", 3)
+            mode_id = dialog_creator.int_input_key(
+                "and_mode_q", dialog_creator.MaxValue.always_cap(3)
+            )
             if mode_id is None:
                 mode = SelectMode.OR
             elif mode_id == 1:
@@ -138,7 +140,8 @@ class CatEditor:
 
     def select_id(self) -> list[core.Cat] | None:
         cat_ids = dialog_creator.range_multi_input_key(
-            "enter_cat_ids", len(self.save_file.cats.cats) - 1
+            "enter_cat_ids",
+            dialog_creator.MaxValue.always_cap(len(self.save_file.cats.cats) - 1),
         )
         if cat_ids is None:
             return None
@@ -326,7 +329,8 @@ class CatEditor:
             .add_new_key(
                 "by_id",
                 lambda _: dialog_creator.range_multi_input_key(
-                    "select_gatya_banner", len(gset) - 1
+                    "select_gatya_banner",
+                    dialog_creator.MaxValue.always_cap(len(gset) - 1),
                 ),
             )
             .add_new_key("by_name", lambda _: self.select_gatya_banner_name()),
@@ -570,7 +574,9 @@ class CatEditor:
                 "talents",
                 talent_names,
                 current_levels,
-                dialog_creator.MultiMax.new(max_levels),
+                dialog_creator.MultiMax.new(
+                    [dialog_creator.MaxValue.i32(max_level) for max_level in max_levels]
+                ),
             )
             current_levels = values
             for i, id in enumerate(ids):

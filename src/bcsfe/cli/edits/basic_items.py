@@ -30,7 +30,7 @@ class BasicItems:
         save_file.catfood = dialog_creator.edit_int_raw(
             BasicItems.get_name(name, "catfood"),
             save_file.catfood,
-            core.core_data.max_value_manager.catfood,
+            dialog_creator.MaxValue.i32(core.core_data.max_value_manager.catfood),
         )
         change = save_file.catfood - original_amount
         core.BackupMetaData(save_file).add_managed_item(
@@ -43,7 +43,7 @@ class BasicItems:
         save_file.xp = dialog_creator.edit_int_raw(
             BasicItems.get_name(name, "xp"),
             save_file.xp,
-            core.core_data.max_value_manager.xp,
+            dialog_creator.MaxValue.i32(core.core_data.max_value_manager.xp),
         )
 
     @staticmethod
@@ -52,7 +52,9 @@ class BasicItems:
         save_file.normal_tickets = dialog_creator.edit_int_raw(
             BasicItems.get_name(name, "normal_tickets"),
             save_file.normal_tickets,
-            core.core_data.max_value_manager.normal_tickets,
+            dialog_creator.MaxValue.i32(
+                core.core_data.max_value_manager.normal_tickets
+            ),
         )
 
     @staticmethod
@@ -62,7 +64,9 @@ class BasicItems:
         save_file.hundred_million_ticket = dialog_creator.edit_int_raw(
             BasicItems.get_name(name, "100_million_tickets"),
             save_file.hundred_million_ticket,
-            core.core_data.max_value_manager.hundred_million_tickets,
+            dialog_creator.MaxValue.i32(
+                core.core_data.max_value_manager.hundred_million_tickets
+            ),
         )
 
     @staticmethod
@@ -102,7 +106,7 @@ class BasicItems:
         save_file.rare_tickets = dialog_creator.edit_int_raw(
             BasicItems.get_name(name, "rare_tickets"),
             save_file.rare_tickets,
-            core.core_data.max_value_manager.rare_tickets,
+            dialog_creator.MaxValue.i32(core.core_data.max_value_manager.rare_tickets),
         )
         change = save_file.rare_tickets - original_amount
         core.BackupMetaData(save_file).add_managed_item(
@@ -125,7 +129,9 @@ class BasicItems:
         save_file.platinum_tickets = dialog_creator.edit_int_raw(
             BasicItems.get_name(name, "platinum_tickets"),
             save_file.platinum_tickets,
-            core.core_data.max_value_manager.platinum_tickets,
+            dialog_creator.MaxValue.i32(
+                core.core_data.max_value_manager.platinum_tickets
+            ),
         )
         change = save_file.platinum_tickets - original_amount
         core.BackupMetaData(save_file).add_managed_item(
@@ -142,7 +148,9 @@ class BasicItems:
         save_file.legend_tickets = dialog_creator.edit_int_raw(
             BasicItems.get_name(name, "legend_tickets"),
             save_file.legend_tickets,
-            core.core_data.max_value_manager.legend_tickets,
+            dialog_creator.MaxValue.i32(
+                core.core_data.max_value_manager.legend_tickets
+            ),
         )
         change = save_file.legend_tickets - original_amount
         core.BackupMetaData(save_file).add_managed_item(
@@ -161,7 +169,7 @@ class BasicItems:
         save_file.platinum_shards = dialog_creator.edit_int_raw(
             BasicItems.get_name(name, "platinum_shards"),
             save_file.platinum_shards,
-            max_value,
+            dialog_creator.MaxValue.i32(max_value),
         )
 
     @staticmethod
@@ -170,7 +178,7 @@ class BasicItems:
         save_file.np = dialog_creator.edit_int_raw(
             BasicItems.get_name(name, "np"),
             save_file.np,
-            core.core_data.max_value_manager.np,
+            dialog_creator.MaxValue.i32(core.core_data.max_value_manager.np),
         )
 
     @staticmethod
@@ -179,7 +187,7 @@ class BasicItems:
         save_file.leadership = dialog_creator.edit_int_raw(
             BasicItems.get_name(name, "leadership"),
             save_file.leadership,
-            core.core_data.max_value_manager.leadership,
+            dialog_creator.MaxValue.i16(core.core_data.max_value_manager.leadership),
         )
 
     @staticmethod
@@ -208,7 +216,7 @@ class BasicItems:
             "catamins",
             names,
             save_file.catamins,
-            core.core_data.max_value_manager.catamins,
+            dialog_creator.MaxValue.i32(core.core_data.max_value_manager.catamins),
         )
         save_file.catamins = values
 
@@ -231,7 +239,7 @@ class BasicItems:
             "catseyes",
             names,
             save_file.catseyes,
-            core.core_data.max_value_manager.catseyes,
+            dialog_creator.MaxValue.i32(core.core_data.max_value_manager.catseyes),
         )
         save_file.catseyes = values
 
@@ -256,7 +264,9 @@ class BasicItems:
             "treasure_chests",
             names,
             save_file.treasure_chests,
-            core.core_data.max_value_manager.treasure_chests,
+            dialog_creator.MaxValue.i32(
+                core.core_data.max_value_manager.treasure_chests
+            ),
         )
         save_file.treasure_chests = values
 
@@ -285,9 +295,13 @@ class BasicItems:
 
         if save_file.game_version < 110400:
             max_value = core.core_data.max_value_manager.catfruit_old
-            max = dialog_creator.CumulativeMax.new(max_value)
+            max = dialog_creator.CumulativeMax.new(
+                dialog_creator.MaxValue.i32(max_value)
+            )
         else:
-            max_value = core.core_data.max_value_manager.catfruit_new
+            max_value = dialog_creator.MaxValue.i32(
+                core.core_data.max_value_manager.catfruit_new
+            )
             max = max_value
 
         names = names[: len(save_file.catfruit)]
@@ -371,7 +385,9 @@ class BasicItems:
             "labyrinth_medals",
             names,
             save_file.labyrinth_medals,
-            core.core_data.max_value_manager.labyrinth_medals,
+            dialog_creator.MaxValue.i32(
+                core.core_data.max_value_manager.labyrinth_medals
+            ),
         )
         save_file.labyrinth_medals = values
 

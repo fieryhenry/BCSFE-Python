@@ -381,7 +381,7 @@ class Ototo:
         self.engineers = dialog_creator.edit_int_raw(
             name,
             self.engineers,
-            Ototo.get_max_engineers(save_file),
+            dialog_creator.MaxValue.i32(Ototo.get_max_engineers(save_file)),
         )
 
     def display_current_cannons(self, save_file: core.SaveFile) -> list[str] | None:
@@ -553,9 +553,9 @@ class Ototo:
                 [0, 0, 0],
                 max=dialog_creator.MultiMax.new(
                     [
-                        max_part_level_0,
-                        max_part_level_1,
-                        max_part_level_2,
+                        dialog_creator.MaxValue.i32(max_part_level_0),
+                        dialog_creator.MaxValue.i32(max_part_level_1),
+                        dialog_creator.MaxValue.i32(max_part_level_2),
                     ]
                 ),
             )
@@ -609,9 +609,9 @@ class Ototo:
                     levels,
                     max=dialog_creator.MultiMax.new(
                         [
-                            max_part_level_0,
-                            max_part_level_1,
-                            max_part_level_2,
+                            dialog_creator.MaxValue.i32(max_part_level_0),
+                            dialog_creator.MaxValue.i32(max_part_level_1),
+                            dialog_creator.MaxValue.i32(max_part_level_2),
                         ]
                     ),
                 )

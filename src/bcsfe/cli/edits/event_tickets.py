@@ -1,5 +1,6 @@
 from __future__ import annotations
 from bcsfe import cli, core
+from bcsfe.cli import dialog_creator
 from bcsfe.core.game.catbase.gatya import GatyaEventType
 from bcsfe.core.server.event_data import split_hhmm, split_yyyymmdd
 
@@ -108,7 +109,9 @@ class EventTickets:
             "event_tickets",
             event_names,
             values,
-            max=core.core_data.max_value_manager.event_tickets,
+            max=dialog_creator.MaxValue.i32(
+                core.core_data.max_value_manager.event_tickets
+            ),
         )
 
         for (event_item, gset, gatya_item), value in zip(event_ticket_items, values):

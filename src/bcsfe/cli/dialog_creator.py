@@ -1,5 +1,5 @@
 from __future__ import annotations
-from collections.abc import Callable, Sequence
+from collections.abc import Callable
 from typing import Any, Generic, TypeVar
 
 from bcsfe import core
@@ -146,16 +146,12 @@ def yes_no_raw(dialog: str) -> bool | None:
 
 
 def range_multi_input_key(
-    dialog: str, max: MaxValue | int, min: int = 0, escape: bool = True, **kwargs: Any
+    dialog: str, max: MaxValue, min: int = 0, escape: bool = True, **kwargs: Any
 ) -> list[int] | None:
     return range_multi_input_raw(core.localize(dialog, escape, **kwargs), max, min)
 
 
-def range_basic_parse(
-    usr_input: str, max: MaxValue | int, min: int = 0
-) -> list[int] | None:
-    if isinstance(max, int):
-        max = MaxValue.specific(max)
+def range_basic_parse(usr_input: str, max: MaxValue, min: int = 0) -> list[int] | None:
     nums: list[int] = []
     for part in usr_input.split(" "):
         if part.isdigit():
@@ -182,11 +178,7 @@ def range_basic_parse(
     return nums
 
 
-def range_multi_input_raw(
-    dialog: str, max: MaxValue | int, min: int = 0
-) -> list[int] | None:
-    if isinstance(max, int):
-        max = MaxValue.specific(max)
+def range_multi_input_raw(dialog: str, max: MaxValue, min: int = 0) -> list[int] | None:
     usr_input = color.color_input(dialog)
     if usr_input == core.localize("quit_key"):
         return None
@@ -416,45 +408,64 @@ def basic_keys_pick_key_entry(
 
 
 class MaxValue:
-    def __init__(self, max: int, show: bool = True):
+    def __init__(self, max: int, bits: int, show: bool = True):
         self.max = max
         self.show = show
+        self.bits = bits
 
     def hide_max(self) -> MaxValue:
         self.show = False
         return self
 
     @staticmethod
-    def specific(max: int) -> MaxValue:
-        return MaxValue(max)
+    def always_cap(max: int) -> MaxValue:
+        return MaxValue(max, 32)
+
+    @staticmethod
+    def specific(max: int, bits: int) -> MaxValue:
+        if core.core_data.config.get_bool(core.ConfigKey.DISABLE_MAXES):
+            return MaxValue.none(bits).hide_max()
+        return MaxValue(max, bits)
 
     @staticmethod
     def none(bits: int) -> MaxValue:
-        return MaxValue((2**bits) - 1)
+        return MaxValue((2**bits) - 1, bits)
 
     @staticmethod
-    def i32() -> MaxValue:
-        return MaxValue.none(31)
+    def new_bits(max: int | None, bits: int) -> MaxValue:
+        if max is None:
+            return MaxValue.none(bits)
+        return MaxValue.specific(max, bits)
 
     @staticmethod
-    def u32() -> MaxValue:
-        return MaxValue.none(32)
+    def i32(max: int | None = None) -> MaxValue:
+        return MaxValue.new_bits(max, 31)
 
     @staticmethod
-    def i16() -> MaxValue:
-        return MaxValue.none(15)
+    def u32(max: int | None = None) -> MaxValue:
+        return MaxValue.new_bits(max, 32)
 
     @staticmethod
-    def u16() -> MaxValue:
-        return MaxValue.none(16)
+    def i16(max: int | None = None) -> MaxValue:
+        return MaxValue.new_bits(max, 15)
+
+    @staticmethod
+    def u16(max: int | None = None) -> MaxValue:
+        return MaxValue.new_bits(max, 16)
+
+    @staticmethod
+    def i8(max: int | None = None) -> MaxValue:
+        return MaxValue.new_bits(max, 7)
+
+    @staticmethod
+    def u8(max: int | None = None) -> MaxValue:
+        return MaxValue.new_bits(max, 8)
 
     def clamp(self, v: int) -> int:
         return min(self.max, v)
 
 
-def edit_int_raw(item_name: str, current_value: int, max: MaxValue | int) -> int:
-    if isinstance(max, int):
-        max = MaxValue.specific(max)
+def edit_int_raw(item_name: str, current_value: int, max: MaxValue) -> int:
     if max.show:
         key = "input"
     else:
@@ -481,7 +492,7 @@ def edit_str_raw(item_name: str, current_value: str) -> str:
 
 def int_input_key(
     dialog: str,
-    _max: MaxValue | int,
+    _max: MaxValue,
     min: int = 0,
     default: int | None = None,
     auto_clamp: bool = False,
@@ -499,13 +510,11 @@ def str_input_key(dialog: str, escape: bool = True, **kwargs: Any) -> str | None
 
 def int_input_raw(
     dialog: str,
-    _max: MaxValue | int,
+    _max: MaxValue,
     _min: int = 0,
     default: int | None = None,
     auto_clamp: bool = False,
 ) -> int | None:
-    if isinstance(_max, int):
-        _max = MaxValue.specific(_max)
     quit_key = core.localize("quit_key")
     while True:
         inp = color.color_input(dialog)
@@ -542,7 +551,7 @@ def str_input_raw(dialog: str) -> str | None:
 def edit_int_key(
     item_key: str,
     current_value: int,
-    max: MaxValue | int,
+    max: MaxValue,
     escape: bool = True,
     **kwargs: Any,
 ) -> int:
@@ -563,13 +572,11 @@ class CumulativeMax:
         self.max = max
 
     @staticmethod
-    def specific(max: int) -> CumulativeMax:
-        return CumulativeMax(MaxValue.specific(max))
+    def specific(max: int, bits: int) -> CumulativeMax:
+        return CumulativeMax(MaxValue.specific(max, bits))
 
     @staticmethod
-    def new(max: int | MaxValue):
-        if isinstance(max, int):
-            return CumulativeMax.specific(max)
+    def new(max: MaxValue):
         return CumulativeMax(max)
 
     def get(self, current_values: list[int], ids: list[int] | int) -> MaxValue:
@@ -580,7 +587,7 @@ class CumulativeMax:
         for id in ids:
             v += current_values[id]
 
-        return MaxValue.specific(self.max.max - sum(current_values) + v)
+        return MaxValue.specific(self.max.max - sum(current_values) + v, self.max.bits)
 
 
 class MultiMax:
@@ -588,16 +595,8 @@ class MultiMax:
         self.maxes = maxes
 
     @staticmethod
-    def new(maxes: Sequence[MaxValue | int]) -> MultiMax:
-        new: list[MaxValue] = []
-
-        for m in maxes:
-            if isinstance(m, int):
-                new.append(MaxValue.specific(m))
-            else:
-                new.append(m)
-
-        return MultiMax(new)
+    def new(maxes: list[MaxValue]) -> MultiMax:
+        return MultiMax(maxes)
 
     def get(self, id: int) -> MaxValue | None:
         if id < 0 or id >= len(self.maxes):
@@ -605,7 +604,7 @@ class MultiMax:
         return self.maxes[id]
 
     def maximal(self, ids: list[int]) -> MaxValue:
-        m = MaxValue.specific(0)
+        m = MaxValue.specific(0, 0)
         for id in ids:
             m_v = self.get(id)
             if m_v is None:
@@ -620,7 +619,7 @@ def edit_ints_key(
     group_name: str,
     item_names: list[str],
     current_values: list[int],
-    max: MultiMax | CumulativeMax | MaxValue | int,
+    max: MultiMax | CumulativeMax | MaxValue,
     escape: bool = True,
     **kwargs: Any,
 ) -> list[int]:
@@ -633,7 +632,7 @@ def edit_ints_raw(
     group_name: str,
     item_names: list[str],
     current_values: list[int],
-    max: MultiMax | CumulativeMax | MaxValue | int,
+    max: MultiMax | CumulativeMax | MaxValue,
 ) -> list[int]:
     entries = multi_select_indexes_key(
         [
@@ -672,7 +671,7 @@ def edit_ints_raw(
 
 def edit_individual(
     current_values: list[int],
-    max: MaxValue | MultiMax | CumulativeMax | int,
+    max: MaxValue | MultiMax | CumulativeMax,
     entries: list[int],
     names: list[str],
 ):
@@ -693,18 +692,17 @@ def edit_individual(
 
 def edit_many(
     current_values: list[int],
-    max: MaxValue | MultiMax | CumulativeMax | int,
+    max: MaxValue | MultiMax | CumulativeMax,
     entries: list[int],
     group_name: str,
     names: list[str],
 ):
-    if isinstance(max, int):
-        max = MaxValue.specific(max)
-
     if isinstance(max, MultiMax):
         _max = max.maximal(entries)
     elif isinstance(max, CumulativeMax):
-        _max = MaxValue.specific(max.get(current_values, entries).max // len(entries))
+        _max = MaxValue.specific(
+            max.get(current_values, entries).max // len(entries), max.max.bits
+        )
     else:
         _max = max
     val = int_input_key(

@@ -388,7 +388,11 @@ class Gamatoto:
         value = dialog_creator.edit_int_key(
             "gamatoto_level",
             current_level.level,
-            max_v or dialog_creator.MaxValue.i32().hide_max(),
+            (
+                dialog_creator.MaxValue.i32(max_v)
+                if max_v is not None
+                else dialog_creator.MaxValue.i32().hide_max()
+            ),
         )
         xp = gamatoto_levels.get_xp_from_level(value)
         return xp, gamatoto_levels.get_level(value)
@@ -465,7 +469,9 @@ class Gamatoto:
             rarity_names,
             total_rarity_amounts,
             dialog_creator.CumulativeMax.new(
-                max_helpers or dialog_creator.MaxValue.i32().hide_max()
+                dialog_creator.MaxValue.i32(max_helpers)
+                if max_helpers is not None
+                else dialog_creator.MaxValue.i32().hide_max()
             ),
         )
 

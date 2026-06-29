@@ -740,7 +740,10 @@ class EventChapters:
         if max_stars <= 1:
             return max_stars
         stars = dialog_creator.int_input_key(
-            prompt, min=1, _max=max_stars, max=max_stars
+            prompt,
+            min=1,
+            _max=dialog_creator.MaxValue.always_cap(max_stars),
+            max=max_stars,
         )
         if stars is None:
             return None
@@ -751,7 +754,10 @@ class EventChapters:
         max_stars: int, prompt: str = "custom_star_count_per_chapter"
     ) -> int | None:
         stars = dialog_creator.int_input_key(
-            prompt, _max=max_stars, min=0, max=max_stars
+            prompt,
+            _max=dialog_creator.MaxValue.always_cap(max_stars),
+            min=0,
+            max=max_stars,
         )
         if stars is None:
             return None
@@ -778,7 +784,7 @@ class EventChapters:
         dialog_creator.display_options_key(stage_names, "select_stage")
 
         choices = dialog_creator.range_multi_input_key(
-            "stages_select", len(stage_names), 1
+            "stages_select", dialog_creator.MaxValue.always_cap(len(stage_names)), 1
         )
         if choices is None:
             return None
@@ -811,7 +817,9 @@ class EventChapters:
     def ask_clear_amount() -> int | None:
         val = dialog_creator.int_input_key(
             "clear_amount_enter",
-            core.core_data.max_value_manager.stage_clear_count,
+            dialog_creator.MaxValue.i16(
+                core.core_data.max_value_manager.stage_clear_count
+            ),
         )
 
         return val
@@ -858,10 +866,14 @@ class EventChapters:
                 .lower()
                 .strip()
             )
-            if usr_input == "q":
+            if usr_input == core.localize("quit_key"):
                 return None
+            if usr_input.lower() == core.localize("all").lower():
+                return list(range(0, len(names_list)))
             usr_ids = dialog_creator.range_basic_parse(
-                usr_input, max=len(names_list), min=1
+                usr_input,
+                max=dialog_creator.MaxValue.always_cap(len(names_list)),
+                min=1,
             )
             if not usr_ids:
                 found_names: list[tuple[int, str]] = []

@@ -17,7 +17,7 @@ class RareTicketTrade:
             return
         to_add = dialog_creator.int_input_key(
             "rare_ticket_trade_enter",
-            max_amount,
+            dialog_creator.MaxValue.i32(max_amount),
             max=max_amount,
             current=current_amount,
         )

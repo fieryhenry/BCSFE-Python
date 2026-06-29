@@ -55,7 +55,9 @@ class EnemyEditor:
             return None
 
         if current_enemies:
-            mode_id = dialog_creator.int_input_key("and_mode_q", 3)
+            mode_id = dialog_creator.int_input_key(
+                "and_mode_q", dialog_creator.MaxValue.always_cap(3)
+            )
             if mode_id is None:
                 mode = SelectMode.OR
             elif mode_id == 1:
@@ -101,7 +103,8 @@ class EnemyEditor:
 
     def select_id(self) -> list[core.Enemy] | None:
         enemy_ids = dialog_creator.range_multi_input_key(
-            "enter_enemy_ids", len(self.save_file.enemy_guide) - 1
+            "enter_enemy_ids",
+            dialog_creator.MaxValue.always_cap(len(self.save_file.enemy_guide) - 1),
         )
         if enemy_ids is None:
             return None

@@ -106,7 +106,10 @@ class CatShrine:
         if max_level is None:
             return
         level = dialog_creator.int_input_key(
-            "shrine_level_dialog", min=1, _max=max_level, max_level=max_level
+            "shrine_level_dialog",
+            min=1,
+            _max=dialog_creator.MaxValue.i32(max_level),
+            max_level=max_level,
         )
         if level is None:
             return
@@ -119,7 +122,10 @@ class CatShrine:
         if max_xp is None:
             return
         xp = dialog_creator.int_input_key(
-            "shrine_xp_dialog", min=0, _max=max_xp, max_xp=max_xp
+            "shrine_xp_dialog",
+            min=0,
+            _max=dialog_creator.MaxValue.i32(max_xp),
+            max_xp=max_xp,
         )
         if xp is None:
             return

@@ -485,7 +485,7 @@ class Config:
             core.core_data.config.edit_bool(feature)
         elif isinstance(config.get(feature), int):
             if feature == ConfigKey.MAX_REQUEST_TIMEOUT:
-                max = dialog_creator.MaxValue.specific(1000).hide_max()
+                max = dialog_creator.MaxValue.always_cap(1000).hide_max()
             else:
                 max = None
             core.core_data.config.edit_int(feature, max)

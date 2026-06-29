@@ -139,7 +139,7 @@ class SaveManagement:
         if core.WayDroidHandler.is_waydroid(device_id):
             adb_handler = core.WayDroidHandler()
             adb_handler.adb_handler.set_device(device_id)
-        if save_file.used_storage and save_file.package_name is not None:
+        if save_file.package_name is not None:
             adb_handler.set_package_name(save_file.package_name)
         else:
             packages = adb_handler.get_battlecats_packages()
@@ -176,7 +176,7 @@ class SaveManagement:
         if not root_handler.is_rooted():
             color.color_print_key("not_rooted_error")
             return None
-        if save_file.used_storage and save_file.package_name is not None:
+        if save_file.package_name is not None:
             root_handler.set_package_name(save_file.package_name)
         else:
             packages = root_handler.get_battlecats_packages()
@@ -329,7 +329,10 @@ class SaveManagement:
                 package_name=package_name,
                 error=result.result,
             )
-        return save_path
+            return
+        return SaveManagement.load_save_file_path(
+            save_path, package_name=handler.get_package_name()
+        )
 
     @staticmethod
     def select_save(
@@ -345,9 +348,7 @@ class SaveManagement:
             core.SaveFile | None: The save file.
         """
         if input_file is not None:
-            file = SaveManagement.load_save_file_path(
-                core.Path(input_file), None, False, None
-            )
+            file = SaveManagement.load_save_file_path(core.Path(input_file), None, None)
             if file is None:
                 return (None, True)
             return (file[0], False)
@@ -358,19 +359,14 @@ class SaveManagement:
             Optional[tuple[core.SaveFile, core.Path]]
         ].new_key(
             "adb_pull_save",
-            lambda _: core.map_opt(
-                SaveManagement.pull_adb(), SaveManagement.load_save_file_path
-            ),
+            lambda _: SaveManagement.pull_adb(),
         )
         if root_handler.is_android():
             root_action = dialog_creator.Action[
                 Optional[tuple[core.SaveFile, core.Path]]
             ].new_key(
                 "root_storage_pull",
-                lambda _: core.map_opt(
-                    SaveManagement.pull_android(root_handler),
-                    lambda v: SaveManagement.load_save_file_path(v, used_storage=True),
-                ),
+                lambda _: SaveManagement.pull_android(root_handler),
             )
 
         actions = (
@@ -380,9 +376,7 @@ class SaveManagement:
                 "download_save",
                 lambda _: core.map_opt(
                     server_cli.ServerCLI().download_save(),
-                    lambda vaaa: SaveManagement.load_save_file_path(
-                        vaaa[0], vaaa[1], False
-                    ),
+                    lambda vaaa: SaveManagement.load_save_file_path(vaaa[0], vaaa[1]),
                 ),
             )
             .add_new_key(
@@ -437,7 +431,6 @@ class SaveManagement:
     def load_save_file_path(
         save_path: core.Path,
         cc: CountryCode | None = None,
-        used_storage: bool = False,
         package_name: str | None = None,
     ) -> tuple[core.SaveFile, core.Path] | None:
         color.color_print_key("save_file_found", path=save_path)
@@ -483,7 +476,6 @@ class SaveManagement:
             save_file.save_path.copy_thread(backup_path)
         except Exception as e:
             print(e)
-        save_file.used_storage = used_storage
 
         return save_file, backup_path
 

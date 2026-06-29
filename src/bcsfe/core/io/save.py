@@ -52,8 +52,6 @@ class SaveFile:
         else:
             self.cc = detected_cc
 
-        self.used_storage = False
-
         self.localizable: core.Localizable | None = None
 
         self.init_save(gv)

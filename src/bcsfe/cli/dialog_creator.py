@@ -164,8 +164,8 @@ def range_basic_parse(
                 color.color_print_key("invalid_input_int", min=min, max=max.max)
                 return None
             nums.append(int(part))
-        elif "," in part:
-            min_v, max_v = part.split(",", 1)
+        elif "-" in part:
+            min_v, max_v = part.split("-", 1)
             if not min_v.isdigit() or not max_v.isdigit():
                 return None
             min_i = int(min_v)
@@ -199,8 +199,8 @@ def range_multi_input_raw(
                 color.color_print_key("invalid_input_int", min=min, max=max.max)
                 continue
             nums.append(int(part))
-        elif "," in part:
-            min_v, max_v = part.split(",", 1)
+        elif "-" in part:
+            min_v, max_v = part.split("-", 1)
             if not min_v.isdigit() or not max_v.isdigit():
                 color.color_print_key("invalid_range", val=part)
                 continue

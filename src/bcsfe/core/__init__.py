@@ -454,4 +454,10 @@ __all__ = [
     "RequestHandler",
     "CommandResult",
     "Thread",
+    "Enemy",
+    "GatyaInfos",
+    "YamlFile",
+    "ExternalLocale",
+    "ThemeHandler",
+    "ExternalTheme",
 ]

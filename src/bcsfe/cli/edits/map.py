@@ -490,7 +490,7 @@ def edit_chapters2_progress(
     if map_option is None:
         return None
 
-    if clear_all == 0:
+    if clear_all:
         max_stars = get_max_max_stars(
             map_option, base_index, map_choices, chapters, type
         )

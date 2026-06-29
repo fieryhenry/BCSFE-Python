@@ -33,5 +33,8 @@ version = { attr = "bcsfe.__version__" }
 [tool.setuptools]
 package-dir = { "" = "src" }
 
+[tool.pyright]
+typeCheckingMode = "strict"
+
 [project.scripts]
 bcsfe = "bcsfe:run"

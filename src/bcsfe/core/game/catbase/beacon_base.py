@@ -20,9 +20,9 @@ class BeaconEventListScene:
 
     @staticmethod
     def read(stream: core.Data) -> BeaconEventListScene:
-        int_dict = {}
-        str_dict = {}
-        bool_dict = {}
+        int_dict: dict[int, int] = {}
+        str_dict: dict[int, list[str]] = {}
+        bool_dict: dict[int, bool] = {}
         for _ in range(stream.read_int()):
             int_dict[stream.read_int()] = stream.read_int()
         for _ in range(stream.read_int()):

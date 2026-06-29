@@ -5,6 +5,7 @@ from typing import Any, Callable
 from bcsfe.cli import color, dialog_creator
 
 import tarfile
+import json
 
 from bcsfe import core
 
@@ -100,7 +101,7 @@ class GameDataGetter:
             return None
         try:
             data = response.json()
-        except core.JSONDecodeError as e:
+        except json.JSONDecodeError as e:
             print(e, f"Data:\n{response.text}")
             return None
         return data

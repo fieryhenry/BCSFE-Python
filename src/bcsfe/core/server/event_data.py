@@ -1,6 +1,6 @@
 from __future__ import annotations
 from collections.abc import Callable
-from typing import Type, TypeVar
+from typing import TypeVar
 
 from bcsfe import core
 

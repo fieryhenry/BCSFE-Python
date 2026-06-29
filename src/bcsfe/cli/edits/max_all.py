@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from collections.abc import Callable
 from bcsfe import core
 
 
@@ -104,23 +103,23 @@ def max_normal_tickets(save_file: core.SaveFile):
     save_file.normal_tickets = core.core_data.max_value_manager.normal_tickets
 
 
-def max_all(save_file: core.SaveFile):
-    maxes = core.core_data.max_value_manager
-    features: dict[str, Callable[[core.SaveFile], None]] = {
-        "catfood": max_catfood,
-        "xp": max_xp,
-        "normal_tickets": max_normal_tickets,
-        "rare_tickets": max_rare_tickets,
-        "platinum_tickets": max_plat_tickets,
-        "legend_tickets": max_legend_tickets,
-        "platinum_shards": max_plat_shards,
-        "np": max_np,
-        "leadership": max_leadership,
-        "battle_items": max_battle_items,
-        "catseyes": max_catseyes,
-        "catamins": max_catamins,
-        "labyrinth_medals": max_labyrinth_medals,
-        "100_million_ticket": max_100_million_ticket,
-        "treasure_chests": max_treasure_chests,
-    }
-    # TODO: finish
+# def max_all(save_file: core.SaveFile):
+# maxes = core.core_data.max_value_manager
+# features: dict[str, Callable[[core.SaveFile], None]] = {
+#     "catfood": max_catfood,
+#     "xp": max_xp,
+#     "normal_tickets": max_normal_tickets,
+#     "rare_tickets": max_rare_tickets,
+#     "platinum_tickets": max_plat_tickets,
+#     "legend_tickets": max_legend_tickets,
+#     "platinum_shards": max_plat_shards,
+#     "np": max_np,
+#     "leadership": max_leadership,
+#     "battle_items": max_battle_items,
+#     "catseyes": max_catseyes,
+#     "catamins": max_catamins,
+#     "labyrinth_medals": max_labyrinth_medals,
+#     "100_million_ticket": max_100_million_ticket,
+#     "treasure_chests": max_treasure_chests,
+# }
+# TODO: finish

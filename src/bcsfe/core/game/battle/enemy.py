@@ -86,7 +86,7 @@ class EnemyDescriptions:
         csv = core.CSV(data, core.Delimeter.from_country_code_res(self.save_file.cc))
         descriptions: list[EnemyDescription] = []
 
-        for i, row in enumerate(csv):
+        for _, row in enumerate(csv):
             if len(row) == 1:
                 descriptions.append(EnemyDescription(row[0].to_str(), None))
             else:

@@ -13,6 +13,7 @@ from bcsfe.cli import (
     dialog_creator,
 )
 from bcsfe import core
+import json
 
 
 class Main:
@@ -289,7 +290,7 @@ class Main:
             return None
         try:
             json_data = core.JsonFile.from_data(path.read()).as_object()
-        except (core.JSONDecodeError, UnicodeDecodeError):
+        except (json.JSONDecodeError, UnicodeDecodeError):
             color.color_print_key("parse_json_fail")
             return None
         try:

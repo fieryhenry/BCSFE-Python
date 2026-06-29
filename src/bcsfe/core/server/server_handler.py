@@ -7,13 +7,14 @@ from bcsfe import core
 import jwt
 
 from bcsfe.cli import color
+import requests
 
 
 class RequestResult:
     def __init__(
         self,
         url: str,
-        response: core.Response | None,
+        response: requests.Response | None,
         headers: dict[str, str],
         data: str,
         payload: dict[str, Any] | None = None,
@@ -350,9 +351,6 @@ class ServerHandler:
         self.print_key("uploading_save_file")
 
         form = self.get_upload_request_form(save_key)
-        if form is None:
-            self.remove_stored_save_key_data()
-            return False
         url = save_key.get("url")
         if url is None:
             url = f"{self.aws_url}/"

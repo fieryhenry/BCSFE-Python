@@ -15,17 +15,17 @@ class MySale:
     @staticmethod
     def read_bonus_hash(stream: core.Data):
         variable_length = stream.read_variable_length_int()
-        dict_1 = {}
+        dict_1: dict[int, int] = {}
         for _ in range(variable_length):
             key = stream.read_variable_length_int()
             value = stream.read_variable_length_int()
             dict_1[key] = value
 
         variable_length = stream.read_variable_length_int()
-        dict_2 = {}
+        dict_2: dict[int, bool] = {}
         for _ in range(variable_length):
             key = stream.read_variable_length_int()
-            value = stream.read_byte()
+            value = stream.read_bool()
             dict_2[key] = value
 
         return MySale(dict_1, dict_2)

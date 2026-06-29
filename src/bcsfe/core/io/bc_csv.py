@@ -208,8 +208,8 @@ class CSV:
         if not isinstance(line, list):
             line = [line]
         new_line: list[core.Data] = []
-        for item in line:
-            new_line.append(core.Data(str(item)))
+        for item in line:  # type: ignore
+            new_line.append(core.Data(str(item)))  # type: ignore
         self.lines.append(Row.from_list(new_line))
 
     def set_line(self, index: int, line: list[Any]):

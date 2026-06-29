@@ -19,7 +19,7 @@ class MultipartForm:
     def into_files(
         self,
     ) -> dict[str, tuple[str | None, bytes, str]]:
-        out = {}
+        out: dict[str, tuple[str | None, bytes, str]] = {}
         for name, data in self.data.items():
             out[name] = (data.filename, data.content, data.content_type)
 

@@ -140,17 +140,17 @@ class Gatya:
 
     def edit_rare_gatya_seed(self):
         self.rare_seed = dialog_creator.edit_int_key(
-            "rare_gatya_seed", self.rare_seed, dialog_creator.MaxValue.u32()
+            "rare_gatya_seed", self.rare_seed, dialog_creator.MaxValue.u32().hide_max()
         )
 
     def edit_normal_gatya_seed(self):
         self.normal_seed = dialog_creator.edit_int_key(
-            "normal_gatya_seed", self.normal_seed, dialog_creator.MaxValue.u32()
+            "normal_gatya_seed", self.normal_seed, dialog_creator.MaxValue.u32().hide_max()
         )
 
     def edit_event_gatya_seed(self):
         self.event_seed = dialog_creator.edit_int_key(
-            "event_gatya_seed", self.event_seed, dialog_creator.MaxValue.u32()
+            "event_gatya_seed", self.event_seed, dialog_creator.MaxValue.u32().hide_max()
         )
 
     def read_gatya_data_set(self, save_file: core.SaveFile) -> GatyaDataSet:

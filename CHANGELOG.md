@@ -1,5 +1,17 @@
 # Changelog
 
+## [3.5.1] - 2026-06-29
+
+### Fixed
+
+- Colors not displaying correctly in some Windows terminals
+
+- DISABLE_MAXES config option having no effect
+
+- Range input using `,` instead of `-`
+
+- Clear all at once for map clearing
+
 ## [3.5.0] - 2026-06-29
 
 ### Added

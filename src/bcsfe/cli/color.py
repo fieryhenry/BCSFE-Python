@@ -3,6 +3,10 @@ from typing import Any
 from bcsfe import core
 from bcsfe.cli import color_hex
 import enum
+import os
+
+if os.name == "nt":
+    os.system("color")
 
 
 class ColorHex(enum.Enum):

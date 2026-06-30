@@ -10,8 +10,8 @@ class Upgrade:
         self.plus = plus
         self.base = base
 
-        self.base_range = None
-        self.plus_range = None
+        self.base_range: tuple[int, int] | None = None
+        self.plus_range: tuple[int, int] | None = None
 
     def get_base(self) -> int:
         return self.base + 1

@@ -49,7 +49,7 @@ class FileDialog:
 
         files_str_ls = [file.basename() for file in files]
 
-        dialog_creator.single_select_key(
+        return dialog_creator.single_select_key(
             dialog_creator.Actions[Optional[str]]
             .new()
             .add_new_raw(files_str_ls, lambda index: files[index].to_str())

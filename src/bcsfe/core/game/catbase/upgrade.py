@@ -34,7 +34,9 @@ class Upgrade:
     def get_random_base(self, max_base: int | None = None) -> int:
         if self.base_range is None:
             return self.base
-        base = random.randint(self.base_range[0], self.base_range[1])
+        min_b = min(self.base_range)
+        max_b = max(self.base_range)
+        base = random.randint(min_b, max_b)
         if max_base is not None:
             base = min(base, max_base)
         return base
@@ -42,7 +44,9 @@ class Upgrade:
     def get_random_plus(self, max_plus: int | None = None) -> int:
         if self.plus_range is None:
             return self.plus
-        plus = random.randint(self.plus_range[0], self.plus_range[1])
+        min_p = min(self.plus_range)
+        max_p = max(self.plus_range)
+        plus = random.randint(min_p, max_p)
         if max_plus is not None:
             plus = min(plus, max_plus)
         return plus

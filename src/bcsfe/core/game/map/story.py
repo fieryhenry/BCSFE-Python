@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import Any, Optional
 from bcsfe import core
 from bcsfe.cli import color, dialog_creator
+import random
 
 
 class Stage:
@@ -963,6 +964,27 @@ class StoryChapters:
         color.color_print_key("itf_timed_scores_edited")
 
     @staticmethod
+    def itf_timed_score_input() -> tuple[int, int] | None:
+        inp = dialog_creator.str_input_key("itf_timed_score_dialog")
+        if inp is None:
+            return None
+
+        parts = inp.split("-", maxsplit=1)
+
+        parts_i: list[int] = []
+        for part in parts:
+            if not part.isdigit():
+                return StoryChapters.itf_timed_score_input()
+            score = int(part)
+            mx = dialog_creator.MaxValue.i32(
+                core.core_data.max_value_manager.itf_timed_score
+            )
+            score = mx.clamp(score)
+            parts_i.append(score)
+
+        return min(parts_i), max(parts_i)
+
+    @staticmethod
     def edit_itf_timed_scores_whole_chapters(
         save_file: core.SaveFile, chapters: list[int]
     ):
@@ -972,34 +994,21 @@ class StoryChapters:
 
         if is_per_chapter:
             for chapter_id in chapters:
-                print(chapter_id)
                 StoryChapters.print_current_chapter(save_file, chapter_id)
                 chapter = save_file.story.get_real_chapters()[chapter_id]
-                score = dialog_creator.int_input_key(
-                    "itf_timed_score",
-                    min=0,
-                    _max=dialog_creator.MaxValue.i32(
-                        core.core_data.max_value_manager.itf_timed_score
-                    ),
-                )
+                score = StoryChapters.itf_timed_score_input()
                 if score is None:
                     return
                 for stage in chapter.get_valid_treasure_stages():
-                    stage.itf_timed_score = score
+                    stage.itf_timed_score = random.randrange(score[0], score[1])
         else:
-            score = dialog_creator.int_input_key(
-                "itf_timed_score_dialog",
-                min=0,
-                _max=dialog_creator.MaxValue.i32(
-                    core.core_data.max_value_manager.itf_timed_score
-                ),
-            )
+            score = StoryChapters.itf_timed_score_input()
             if score is None:
                 return
             for chapter_id in chapters:
                 chapter = save_file.story.get_real_chapters()[chapter_id]
                 for stage in chapter.get_valid_treasure_stages():
-                    stage.itf_timed_score = score
+                    stage.itf_timed_score = random.randrange(score[0], score[1])
 
     @staticmethod
     def print_current_stage(save_file: core.SaveFile, chapter_id: int, stage_id: int):
@@ -1027,32 +1036,25 @@ class StoryChapters:
         for stage_id in stage_ids:
             StoryChapters.print_current_stage(save_file, chapter_id, stage_id)
 
-            score = dialog_creator.int_input_key(
-                "itf_timed_score_dialog",
-                min=0,
-                _max=dialog_creator.MaxValue.i32(
-                    core.core_data.max_value_manager.itf_timed_score
-                ),
-            )
+            score = StoryChapters.itf_timed_score_input()
+
             if score is None:
                 return
-            chapter.stages[stage_id].itf_timed_score = score
+            chapter.stages[stage_id].itf_timed_score = random.randrange(
+                score[0], score[1]
+            )
 
     @staticmethod
     def edit_itf_timed_scores_ind_per_chapter_many(
         chapter: Chapter, stage_ids: list[int]
     ):
-        score = dialog_creator.int_input_key(
-            "itf_timed_score_dialog",
-            min=0,
-            _max=dialog_creator.MaxValue.i32(
-                core.core_data.max_value_manager.itf_timed_score
-            ),
-        )
+        score = StoryChapters.itf_timed_score_input()
         if score is None:
             return
         for stage_id in stage_ids:
-            chapter.stages[stage_id].itf_timed_score = score
+            chapter.stages[stage_id].itf_timed_score = random.randrange(
+                score[0], score[1]
+            )
 
     @staticmethod
     def edit_itf_timed_scores_ind_per_chapter(
@@ -1083,32 +1085,24 @@ class StoryChapters:
         if is_ind:
             for stage_id in stage_ids:
                 StoryChapters.print_current_stage(save_file, 3, stage_id)
-                score = dialog_creator.int_input_key(
-                    "itf_timed_score_dialog",
-                    min=0,
-                    _max=dialog_creator.MaxValue.i32(
-                        core.core_data.max_value_manager.itf_timed_score
-                    ),
-                )
+                score = StoryChapters.itf_timed_score_input()
                 if score is None:
                     return
                 for chapter_id in chapters:
                     chapter = save_file.story.get_real_chapters()[chapter_id]
-                    chapter.stages[stage_id].itf_timed_score = score
+                    chapter.stages[stage_id].itf_timed_score = random.randrange(
+                        score[0], score[1]
+                    )
         else:
-            score = dialog_creator.int_input_key(
-                "itf_timed_score",
-                min=0,
-                _max=dialog_creator.MaxValue.i32(
-                    core.core_data.max_value_manager.itf_timed_score
-                ),
-            )
+            score = StoryChapters.itf_timed_score_input()
             if score is None:
                 return
             for chapter_id in chapters:
                 chapter = save_file.story.get_real_chapters()[chapter_id]
                 for stage_id in stage_ids:
-                    chapter.stages[stage_id].itf_timed_score = score
+                    chapter.stages[stage_id].itf_timed_score = random.randrange(
+                        score[0], score[1]
+                    )
 
     @staticmethod
     def edit_itf_timed_scores_individual_stages(

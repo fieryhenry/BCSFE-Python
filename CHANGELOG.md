@@ -1,5 +1,24 @@
 # Changelog
 
+## [3.5.2] - 2026-07-06
+
+### Added
+
+- Ability to randomize timed scores within a range
+
+### Changed
+
+- On a-shell, save data and other files are stored back in ~/Documents to allow the native files
+app to read it
+
+### Fixed
+
+- Selecting a save file from a filepath
+
+- Crash if a range is inputted as max-min rather than min-max
+
+- Support for Python 3.9 and 3.10
+
 ## [3.5.1] - 2026-06-29
 
 ### Fixed

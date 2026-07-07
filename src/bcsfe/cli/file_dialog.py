@@ -6,6 +6,9 @@ from bcsfe.cli import color, dialog_creator
 
 class FileDialog:
     def load_tk(self):
+        if not core.core_data.config.get_bool(core.ConfigKey.USE_FILE_DIALOG):
+            self.tk = None
+            self.filedialog = None
         try:
             import tkinter as tk
             from tkinter import filedialog

@@ -982,7 +982,7 @@ class StoryChapters:
             score = mx.clamp(score)
             parts_i.append(score)
 
-        return min(parts_i), max(parts_i)
+        return min(parts_i), max(parts_i) + 1
 
     @staticmethod
     def edit_itf_timed_scores_whole_chapters(

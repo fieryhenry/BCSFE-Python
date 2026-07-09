@@ -317,6 +317,7 @@ print_config_err = True
 log_path = None
 transfer_backup_path = None
 game_data_path = None
+data_dir_path: Path | None = None
 
 
 def set_config_path(path: Path):
@@ -327,6 +328,11 @@ def set_config_path(path: Path):
 def set_game_data_path(path: Path):
     global game_data_path
     game_data_path = path
+
+
+def set_data_dir_path(path: Path):
+    global data_dir_path
+    data_dir_path = path
 
 
 def set_log_path(path: Path):
@@ -520,4 +526,6 @@ __all__ = [
     "GameDataGetter",
     "ExternalThemeManager",
     "ExternalLocaleManager",
+    "Config",
+    "Logger",
 ]

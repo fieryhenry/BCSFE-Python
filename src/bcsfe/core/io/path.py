@@ -5,6 +5,7 @@ import shutil
 
 from bcsfe import core, __app_name__
 import re
+import sys  # type: ignore maybe fix issue with windows not creating dirs, idk someone said this on stackoverflow
 
 
 class Path:
@@ -65,6 +66,9 @@ class Path:
 
     @staticmethod
     def get_data_folder() -> Path:
+        dd = core.data_dir_path
+        if dd is not None:
+            return dd
         os_name = os.name
         if os_name == "nt":
             path = Path.join(os.environ["USERPROFILE"], "Documents", __app_name__)

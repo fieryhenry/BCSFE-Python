@@ -14,7 +14,14 @@ from importlib import resources
 def migrate(force: bool):
     v_path = core.Path.get_data_folder().add("version.txt")
     if not v_path.exists():
-        v_path.write(core.Data(__version__))
+        try:
+            v_path.write(core.Data(__version__))
+        except FileNotFoundError:
+            print(
+                "Failed to create data folder. Something is wrong with your user's permissions or anti-virus software"
+            )
+            print("Please set the --data-dir flag to something the editor can write to")
+            pass
         vers = None
     else:
         vers = v_path.read().to_str().strip()
@@ -35,6 +42,9 @@ def main():
     )
     parser.add_argument(
         "--game-data-dir", "-g", type=str, help="path to store the game data to"
+    )
+    parser.add_argument(
+        "--data-dir", "-d", type=str, help="path to store editor data to"
     )
     parser.add_argument(
         "--transfer-backup-path",
@@ -77,6 +87,9 @@ def main():
 
     if args.game_data_dir is not None:
         core.set_game_data_path(core.Path(args.game_data_dir))
+
+    if args.data_dir is not None:
+        core.set_data_dir_path(core.Path(args.data_dir))
 
     migrate(args.force_migrate)
 

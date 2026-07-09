@@ -2,8 +2,11 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import Any, TypeVar
 
+from bcsfe import __app_name__
+
 from bcsfe.cli import color, dialog_creator
 
+from bcsfe.cli.main import Main
 from bcsfe.core import (
     country_code,
     crypto,
@@ -356,11 +359,18 @@ def get_game_data_path() -> Path | None:
 def update_external_content(_: Any = None):
     """Updates external content."""
 
+    color.color_print_key("checking_bcsfe_update", app_name=__app_name__)
+    Main.check_update()
+
+    print()
+
     color.color_print_key("updating_external_content")
     print()
     ExternalThemeManager.update_all_external_themes()
     ExternalLocaleManager.update_all_external_locales()
     core_data.init_data()
+
+    print()
 
     clear_game_data = dialog_creator.yes_no_key("clear_game_data_q")
     if clear_game_data is None:

@@ -12,7 +12,7 @@ from bcsfe.cli import (
     save_management,
     dialog_creator,
 )
-from bcsfe import core
+from bcsfe import core, __app_name__
 import json
 
 
@@ -33,7 +33,7 @@ class Main:
         """Main function for the CLI."""
         self.wipe_temp_save()
         core.GameDataGetter.delete_old_versions(5)
-        self.check_update()
+        self.print_locale_version()
         print()
         self.print_start_text()
         while not self.exit:
@@ -41,7 +41,17 @@ class Main:
             if stop:
                 break
 
-    def version_check(self, v1: str, v2: str) -> bool:
+    def print_locale_version(self):
+        updater = core.Updater()
+        local_version = updater.get_local_version()
+
+        color.color_print_key(
+            "local_version",
+            local_version=local_version,
+        )
+
+    @staticmethod
+    def version_check(v1: str, v2: str) -> bool:
         v1_p = v1.split(".")
         v2_p = v2.split(".")
 
@@ -61,7 +71,8 @@ class Main:
 
         return len(v1_p) > len(v2_p)
 
-    def check_update(self):
+    @staticmethod
+    def check_update():
         """Check for updates."""
 
         updater = core.Updater()
@@ -85,16 +96,16 @@ class Main:
         local_no_beta = local_version.split("b")[0]
         latest_no_beta = latest_version.split("b")[0]
 
-        if self.version_check(latest_no_beta, local_no_beta):
+        if Main.version_check(latest_no_beta, local_no_beta):
             update_needed = True
-        elif self.version_check(local_no_beta, latest_no_beta):
+        elif Main.version_check(local_no_beta, latest_no_beta):
             update_needed = False
         else:
             if latest_version == local_version:
                 update_needed = False
             else:
                 if is_local_beta and is_latest_beta:
-                    update_needed = self.version_check(
+                    update_needed = Main.version_check(
                         latest_version.replace("b", "."),
                         local_version.replace("b", "."),
                     )
@@ -102,10 +113,6 @@ class Main:
                     update_needed = True
                 else:
                     update_needed = False
-
-        show_message = core.core_data.config.get(core.ConfigKey.SHOW_UPDATE_MESSAGE)
-        if not show_message:
-            update_needed = False
 
         if update_needed:
             update = dialog_creator.yes_no_key(
@@ -120,14 +127,8 @@ class Main:
                 else:
                     color.color_print_key("update_fail")
                 sys.exit()
-            else:
-                disable_message = dialog_creator.yes_no_key("disable_update_message")
-                if disable_message is None:
-                    return
-
-                core.core_data.config.set(
-                    core.ConfigKey.SHOW_UPDATE_MESSAGE, not disable_message
-                )
+        else:
+            color.color_print_key("no_update_required", app_name=__app_name__)
 
     def print_start_text(self):
         external_theme = core.ExternalThemeManager.get_external_theme_config()

@@ -8,7 +8,6 @@ import requests
 
 class ConfigKey(enum.Enum):
     UPDATE_TO_BETA = "update_to_beta"
-    SHOW_UPDATE_MESSAGE = "show_update_message"
     LOCALE = "locale"
     SHOW_MISSING_LOCALE_KEYS = "show_missing_locale_keys"
     DISABLE_MAXES = "disable_maxes"
@@ -62,7 +61,6 @@ class Config:
     def get_defaults() -> dict[ConfigKey, Any]:
         initial_values = {
             ConfigKey.UPDATE_TO_BETA: False,
-            ConfigKey.SHOW_UPDATE_MESSAGE: True,
             ConfigKey.LOCALE: "en",
             ConfigKey.SHOW_MISSING_LOCALE_KEYS: False,
             ConfigKey.DISABLE_MAXES: False,

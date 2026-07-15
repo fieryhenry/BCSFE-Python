@@ -329,14 +329,23 @@ class GameDataGetter:
         return versions
 
     @staticmethod
+    def delete(cc: core.CountryCode, gv: core.GameVersion):
+        path = GameDataGetter.get_game_data_dir().add(cc.get_code()).add(gv.to_string())
+        path.remove()
+
+    @staticmethod
+    def delete_region(cc: core.CountryCode):
+        path = GameDataGetter.get_game_data_dir().add(cc.get_code())
+        path.remove()
+
+    @staticmethod
     def delete_old_versions(to_keep: int) -> None:
         versions = GameDataGetter.get_all_downloaded_versions()
         for cc, cc_versions in versions.items():
             cc_versions.sort(reverse=True)
             to_keep = min(to_keep, len(cc_versions))
             for version in cc_versions[to_keep:]:
-                path = GameDataGetter.get_game_data_dir().add(cc).add(version)
-                path.remove()
+                GameDataGetter.delete(cc, version)
 
     def print_no_file(self, packname: str, file_name: str) -> None:
         if self.version is None:

@@ -91,10 +91,10 @@ class CountryCode:
     def __hash__(self) -> int:
         return hash(self.get_code())
 
-    def get_cc_lang(self) -> core.CountryCode:
+    def get_cc_lang(self) -> CountryCode:
         if core.core_data.config.get_bool(core.ConfigKey.FORCE_LANG_GAME_DATA):
             locale = core.core_data.config.get_str(core.ConfigKey.LOCALE)
-            return core.CountryCode.from_code(locale)
+            return CountryCode.from_code(locale)
         return self
 
     @staticmethod

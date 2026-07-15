@@ -1,6 +1,6 @@
 from __future__ import annotations
 from collections.abc import Callable
-from typing import Any, TypeVar
+from typing import Any, Optional, TypeVar
 
 from bcsfe import __app_name__
 
@@ -372,13 +372,96 @@ def update_external_content(_: Any = None):
 
     print()
 
-    clear_game_data = dialog_creator.yes_no_key("clear_game_data_q")
-    if clear_game_data is None:
-        return
 
-    if clear_game_data:
-        GameDataGetter.delete_old_versions(0)
-        color.color_print_key("cleared_game_data")
+def manage_game_data(_: Any = None):
+    cc2 = CountryCode.select()
+    if cc2 is None:
+        return
+    cc = cc2
+
+    should_exit = False
+    while not should_exit:
+        color.color_print_key("cc_game_data", cc=cc)
+        items = GameDataGetter.get_downloaded_versions_region(cc)
+        items.sort(reverse=True)
+        actions = (
+            dialog_creator.Actions[tuple[Optional[GameVersion], bool, bool]]
+            .new()
+            .add_new_raw(
+                [ver.to_string() for ver in items],
+                lambda i: (items[i], False, False),
+            )
+            .add_new_key(
+                "add_version", lambda _, region=cc: (add_version(region), False, False)
+            )
+            .add_new_key(
+                "remove_all",
+                lambda _, region=cc: (
+                    GameDataGetter.delete_region(region),
+                    False,
+                    False,
+                ),
+            )
+            .add_new_key("change_cc", lambda _: (None, False, True))
+            .add_new_key("exit", lambda _: (None, True, False))
+        )
+        resp = dialog_creator.single_select_key(actions, "select_option")
+        if resp is None:
+            return
+        gv2, should_exit, change_cc = resp
+        if change_cc:
+            cc2 = CountryCode.select()
+            if cc2 is None:
+                return
+            cc = cc2
+
+        if gv2 is None:
+            continue
+
+        gv = gv2
+
+        color.color_print_key(
+            "gv_path",
+            path=GameDataGetter.get_game_data_dir()
+            .add(cc.get_code())
+            .add(gv.to_string()),
+        )
+
+        actions = (
+            dialog_creator.Actions[bool]
+            .new()
+            .add_new_key("remove_gv", lambda _: GameDataGetter.delete(cc, gv) or False)
+            .add_new_key("go_back", lambda _: False)
+        )
+        resp = dialog_creator.single_select_key(actions, "select_option")
+        if resp is None:
+            return
+
+
+def add_version(cc: CountryCode) -> GameVersion | None:
+    versions = GameDataGetter.possible_versions(cc)
+    if versions is None:
+        return None
+    actions = (
+        dialog_creator.Actions[Optional[str]]
+        .new()
+        .add_new_raw(versions, lambda i: versions[i])
+        .add_new_key("none", lambda _: None)
+    )
+
+    version = dialog_creator.single_select_key(
+        actions,
+        "select_option",
+    )
+
+    if version is None:
+        return None
+    version = GameVersion.from_string(version)
+    res = GameDataGetter(cc, version).try_download()
+    if res is False:
+        return None
+
+    return version
 
 
 def print_no_internet():

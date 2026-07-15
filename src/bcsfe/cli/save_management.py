@@ -410,6 +410,7 @@ class SaveManagement:
                 .add_new_key(
                     "update_external", lambda _: core.update_external_content()
                 )
+                .add_new_key("manage_game_data", lambda _: core.manage_game_data())
                 .add_new_key("exit", lambda _: main.Main.exit_editor(check_temp=False))
             )
 

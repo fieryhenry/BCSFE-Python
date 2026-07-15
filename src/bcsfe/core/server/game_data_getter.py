@@ -33,13 +33,12 @@ class GameDataGetter:
         if exact_match:
             return
 
-        self.metadata = self.get_metadata()
+        self.metadata = GameDataGetter.get_metadata()
         if self.metadata is None:
             return
-        self.all_versions = self.get_versions(self.metadata)
+        self.all_versions = GameDataGetter.get_versions(self.metadata)
         self.url = self.metadata.get("base_url")
-        if self.all_versions is not None:
-            self.version, self.filepath = self.get_version(self.all_versions, self.cc)
+        self.version, self.filepath = self.get_version(self.all_versions, self.cc)
 
     def find_gv(
         self, cc: core.CountryCode, gv: core.GameVersion
@@ -82,8 +81,9 @@ class GameDataGetter:
             return cc_version_keys[-1], cc_versions[cc_version_keys[-1]]
         return gv_string, cc_versions[gv_string]
 
-    def get_metadata(self, show_alt: bool = True) -> dict[str, Any] | None:
-        response = core.RequestHandler(self.repo_url).get()
+    @staticmethod
+    def get_metadata(show_alt: bool = True) -> dict[str, Any] | None:
+        response = core.RequestHandler(GameDataGetter.repo_url()).get()
         if response is None:
             if (
                 GameDataGetter.repo_url()
@@ -104,8 +104,9 @@ class GameDataGetter:
             return None
         return data
 
-    def get_versions(self, metdata: dict[str, Any]) -> dict[str, dict[str, str]] | None:
-        return metdata.get("versions")
+    @staticmethod
+    def get_versions(metdata: dict[str, Any]) -> dict[str, dict[str, str]]:
+        return metdata.get("versions", {})
 
     def get_packname(self, packname: str) -> str:
         if packname != "resLocal":

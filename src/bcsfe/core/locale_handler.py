@@ -166,7 +166,7 @@ class LocalManager:
                 print(f"current value: {key[5]}")
                 print(f"{key[3]} args: {{{keystr}}}")
                 print()
-            if not extra:
+            if not modified:
                 print(self.get_key("none"))
 
     def get_missing_keys(self) -> list[tuple[str, str, str]]:

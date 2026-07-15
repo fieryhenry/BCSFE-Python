@@ -82,6 +82,17 @@ class GameDataGetter:
         return gv_string, cc_versions[gv_string]
 
     @staticmethod
+    def possible_versions(cc: core.CountryCode) -> list[str] | None:
+        metadata = GameDataGetter.get_metadata()
+
+        if metadata is None:
+            return None
+
+        return [
+            gv for gv in GameDataGetter.get_versions(metadata).get(cc.get_code(), {})
+        ]
+
+    @staticmethod
     def get_metadata(show_alt: bool = True) -> dict[str, Any] | None:
         response = core.RequestHandler(GameDataGetter.repo_url()).get()
         if response is None:

@@ -382,21 +382,26 @@ class ServerHandler:
         if self.print:
             color.color_print_key(key, **kwargs)
 
-    def get_codes(self, upload_managed_items: bool = True) -> tuple[str, str] | None:
+    def get_codes(
+        self, upload_managed_items: bool = True, tries: int = 3
+    ) -> tuple[str, str] | None:
+        if tries == 0:
+            return None
+        tries -= 1
         self.save_file.show_ban_message = False
 
         auth_token = self.get_auth_token()
         if auth_token is None:
-            return None
+            return self.get_codes(upload_managed_items, tries)
 
         save_key = self.get_save_key()
 
         if save_key is None:
             self.remove_stored_save_key_data()
-            return None
+            return self.get_codes(upload_managed_items, tries)
 
         if not self.upload_save_data(save_key):
-            return None
+            return self.get_codes(upload_managed_items, tries)
 
         self.print_key("getting_codes")
 
@@ -419,7 +424,7 @@ class ServerHandler:
                 RequestResult(url, response, headers, meta_data),
             )
             self.remove_stored_auth_token()
-            return None
+            return self.get_codes(upload_managed_items, tries)
         payload = json.get("payload", {})
         transfer_code = payload.get("transferCode", None)
         confirmation_code = payload.get("pin", None)
@@ -429,7 +434,7 @@ class ServerHandler:
                 RequestResult(url, response, headers, ""),
             )
             self.remove_stored_auth_token()
-            return None
+            return self.get_codes(upload_managed_items, tries)
         bmd.remove_managed_items()
         if self.print:
             print()
@@ -485,10 +490,13 @@ class ServerHandler:
         iq = data["accountId"]
         return iq
 
-    def create_new_account(self) -> bool:
+    def create_new_account(self, tries: int = 3) -> bool:
+        if tries == 0:
+            return False
+        tries -= 1
         new_iq = self.get_new_inquiry_code()
         if new_iq is None:
-            return False
+            return self.create_new_account(tries)
         self.save_file.inquiry_code = new_iq
         self.remove_stored_auth_token()
         self.remove_stored_save_key_data()
@@ -505,7 +513,7 @@ class ServerHandler:
         self.update_managed_items()
         self.save_file.show_ban_message = False
         if password is None or auth_token is None or save_key_data is None:
-            return False
+            return self.create_new_account(tries)
         return True
 
     @staticmethod

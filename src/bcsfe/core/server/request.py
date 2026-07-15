@@ -114,5 +114,7 @@ class RequestHandler:
                 ),
                 files=None if self.form is None else self.form.into_files(),
             )
-        except requests.exceptions.ConnectionError:
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
             return None
+        except OverflowError:
+            cli.color.color_print_key("timeout_too_large")

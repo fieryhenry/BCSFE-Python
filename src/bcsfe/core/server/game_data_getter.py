@@ -44,19 +44,15 @@ class GameDataGetter:
     def find_gv(
         self, cc: core.CountryCode, gv: core.GameVersion
     ) -> tuple[str | None, bool]:
-        versions = GameDataGetter.get_all_downloaded_versions().get(cc.get_code())
+        versions = GameDataGetter.get_all_downloaded_versions().get(cc)
         if versions is None:
             return None, False
 
-        versions_int = [
-            core.GameVersion.from_string(version).game_version for version in versions
-        ]
+        versions.sort()
 
-        versions_int.sort()
-
-        for version in versions_int:
-            if version >= gv.game_version:
-                return core.GameVersion(version).to_string(), version == gv.game_version
+        for version in versions:
+            if version >= gv:
+                return version.to_string(), version == gv
         return None, False
 
     def does_save_version_match(self, save_file: core.SaveFile) -> bool:
@@ -314,21 +310,26 @@ class GameDataGetter:
         return data_list
 
     @staticmethod
-    def get_all_downloaded_versions() -> dict[str, list[str]]:
-        versions: dict[str, list[str]] = {}
-        for cc in core.CountryCode.get_all_str():
-            dir = GameDataGetter.get_game_data_dir().add(cc)
-            if not dir.exists():
+    def get_downloaded_versions_region(cc: core.CountryCode) -> list[core.GameVersion]:
+        versions: list[core.GameVersion] = []
+        cc_str = cc.get_code()
+        dir = GameDataGetter.get_game_data_dir().add(cc_str)
+        if not dir.exists():
+            return versions
+        for version in GameDataGetter.get_game_data_dir().add(cc_str).get_dirs():
+            if not version.exists():
                 continue
-            for version in GameDataGetter.get_game_data_dir().add(cc).get_dirs():
-                if not version.exists():
-                    continue
-                if not version.add("downloaded").exists():
-                    continue
-                if cc in versions:
-                    versions[cc].append(version.basename())
-                else:
-                    versions[cc] = [version.basename()]
+            if not version.add("downloaded").exists():
+                continue
+            versions.append(core.GameVersion.from_string(version.basename()))
+
+        return versions
+
+    @staticmethod
+    def get_all_downloaded_versions() -> dict[core.CountryCode, list[core.GameVersion]]:
+        versions: dict[core.CountryCode, list[core.GameVersion]] = {}
+        for cc in core.CountryCode.get_all():
+            versions[cc] = GameDataGetter.get_downloaded_versions_region(cc)
 
         return versions
 

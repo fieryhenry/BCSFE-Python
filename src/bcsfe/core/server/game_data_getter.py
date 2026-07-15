@@ -11,10 +11,13 @@ from bcsfe import core
 
 
 class GameDataGetter:
+    @staticmethod
+    def repo_url() -> str:
+        return core.core_data.config.get_game_data_repo()
+
     def __init__(
         self, cc: core.CountryCode, gv: core.GameVersion, do_print: bool = True
     ):
-        self.repo_url = core.core_data.config.get_game_data_repo()
         self.print = do_print
         self.lang = core.core_data.config.get_str(core.ConfigKey.LOCALE)
         self.cc = cc.get_cc_lang()
@@ -87,7 +90,7 @@ class GameDataGetter:
         response = core.RequestHandler(self.repo_url).get()
         if response is None:
             if (
-                self.repo_url
+                GameDataGetter.repo_url()
                 == core.core_data.config.get_default(core.ConfigKey.GAME_DATA_REPO)
                 and show_alt
             ):
@@ -95,8 +98,7 @@ class GameDataGetter:
                 res = dialog_creator.yes_no_key("use_alternative_repo", repo=alt)
                 if res:
                     core.core_data.config.set(core.ConfigKey.GAME_DATA_REPO, alt)
-                    self.repo_url = alt
-                    return self.get_metadata(show_alt=False)
+                    return GameDataGetter.get_metadata(show_alt=False)
 
             return None
         try:

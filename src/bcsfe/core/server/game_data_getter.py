@@ -184,11 +184,9 @@ class GameDataGetter:
         if path.exists():
             return path.read()
         else:
-            if self.has_downloaded():
-                return True
-            if self.download_version_data() is None:
-                return False
-
+            res = self.try_download()
+            if res is not None:
+                return res
             path = self.get_file_path(pack_name, file_name)
             if path is None:
                 return False
@@ -196,6 +194,12 @@ class GameDataGetter:
             if path.exists():
                 return path.read()
             return self.has_downloaded()
+
+    def try_download(self) -> bool | None:
+        if self.has_downloaded():
+            return True
+        if self.download_version_data() is None:
+            return False
 
     def save_file(self, pack_name: str, file_name: str) -> core.Data | bool:
         pack_name = self.get_packname(pack_name)

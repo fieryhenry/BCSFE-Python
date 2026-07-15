@@ -136,8 +136,10 @@ class FeatureHandler:
                 "medals": core.game.catbase.medals.Medals.edit_medals,
                 "missions": core.game.catbase.mission.Missions.edit_missions,
             },
-            "config": core.core_data.config.edit_config,
-            "update_external": core.update_external_content,
+            "editor": {
+                "config": core.core_data.config.edit_config,
+                "update_external": core.update_external_content,
+            },
             "exit": main.Main.exit_editor,
         }
         return features

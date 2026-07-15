@@ -150,7 +150,7 @@ class GameDataGetter:
             return None
 
         archive = tarfile.open(
-            name=self.filepath, fileobj=BytesIO(downloaded_data.content)
+            name=None, mode="r:xz", fileobj=BytesIO(downloaded_data.content)
         )
 
         outdir = (

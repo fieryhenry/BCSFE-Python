@@ -132,6 +132,8 @@ class LocalManager:
             print(key)
             print()
             missing = self.get_missing_keys()
+            missing.sort(key=lambda i: i[0])
+            missing.sort(key=lambda i: i[2])
             for key in missing:
                 print(f"{key[2]}\n{key[0]}={key[1]}\n")
             if not missing:
@@ -143,6 +145,8 @@ class LocalManager:
             print(key)
             print()
             extra = self.get_extra_keys()
+            extra.sort(key=lambda i: i[0])
+            extra.sort(key=lambda i: i[2])
             for key in extra:
                 print(f"{key[2]}\n{key[0]}={key[1]}\n")
             if not extra:

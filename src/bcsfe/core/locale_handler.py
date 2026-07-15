@@ -154,6 +154,21 @@ class LocalManager:
 
             print()
 
+            key = self.get_key("modified_locale_keys")
+            print(key)
+            print()
+            modified = self.get_modified_keys()
+            modified.sort(key=lambda i: i[0])
+            modified.sort(key=lambda i: i[2])
+            for key in modified:
+                print(f"{key[2]}\n{key[0]}={key[1]}")
+                keystr = "},{".join(key[4])
+                print(f"current value: {key[5]}")
+                print(f"{key[3]} args: {{{keystr}}}")
+                print()
+            if not extra:
+                print(self.get_key("none"))
+
     def get_missing_keys(self) -> list[tuple[str, str, str]]:
         missing = set(self.en_properties.keys()) - set(self.all_properties.keys())
 
@@ -165,6 +180,65 @@ class LocalManager:
             )
             for key in missing
         ]
+
+    def get_modified_keys(self) -> list[tuple[str, str, str, str, list[str], str]]:
+        modified: list[tuple[str, str, str, str, list[str], str]] = []
+        for key in self.en_properties.keys():
+            en_value = self.get_key_recursive(key, {}, properties=self.en_properties)
+            if key not in self.all_properties:
+                continue
+            other_value = self.get_key_recursive(key, {})
+
+            en_keys = set(LocalManager.get_kwarg_keys(en_value))
+            other_keys = set(LocalManager.get_kwarg_keys(other_value))
+
+            missing_keys = en_keys - other_keys
+            extra_keys = other_keys - en_keys
+
+            if missing_keys:
+                modified.append(
+                    (
+                        key,
+                        en_value,
+                        self.en_properties[key][1] + ".properties",
+                        "missing",
+                        list(missing_keys),
+                        other_value,
+                    )
+                )
+            if extra_keys:
+                modified.append(
+                    (
+                        key,
+                        en_value,
+                        self.en_properties[key][1] + ".properties",
+                        "extra",
+                        list(extra_keys),
+                        other_value,
+                    )
+                )
+
+        return modified
+
+    @staticmethod
+    def get_kwarg_keys(value: str) -> list[str]:
+        kwarg_keys: list[str] = []
+        kwarg_key = ""
+        in_key = False
+        for i, char in enumerate(value):
+            if char == "{":
+                if i > 0 and value[i - 1] == "\\":
+                    continue
+                in_key = True
+            elif char == "}":
+                if i > 0 and value[i - 1] == "\\":
+                    continue
+                in_key = False
+                kwarg_keys.append(kwarg_key)
+                kwarg_key = ""
+            elif in_key:
+                kwarg_key += char
+        return kwarg_keys
 
     def get_extra_keys(self) -> list[tuple[str, str, str]]:
         extra = set(self.all_properties.keys()) - set(self.en_properties.keys())
@@ -358,8 +432,11 @@ class LocalManager:
         key: str,
         kwargs: dict[str, Any],
         escape: bool = True,
+        properties: dict[str, tuple[str, str]] | None = None,
     ) -> str:
-        value = self.all_properties.get(key)
+        if properties is None:
+            properties = self.all_properties
+        value = properties.get(key)
         if value is None:
             value = self.en_properties.get(key, (key, key))
         value = value[0].replace("\\n", "\n").replace("\\t", "\t")

@@ -869,12 +869,13 @@ class EventChapters:
             if usr_input == core.localize("quit_key"):
                 return None
             if usr_input.lower() == core.localize("all").lower():
-                return list(range(0, len(names_list)))
-            usr_ids = dialog_creator.range_basic_parse(
-                usr_input,
-                max=dialog_creator.MaxValue.always_cap(len(names_list)),
-                min=1,
-            )
+                usr_ids = list(range(1, len(names_list) + 1))
+            else:
+                usr_ids = dialog_creator.range_basic_parse(
+                    usr_input,
+                    max=dialog_creator.MaxValue.always_cap(len(names_list)),
+                    min=1,
+                )
             if not usr_ids:
                 found_names: list[tuple[int, str]] = []
                 for i, name in enumerate(names_list):
@@ -882,7 +883,7 @@ class EventChapters:
                         " ", "_"
                     ):
                         true_id = ids[i]
-                        found_names.append((i, name))
+                        found_names.append((true_id, name))
 
                 if len(found_names) == 0:
                     color.color_print_key("no_map_found", name=usr_input)

@@ -64,6 +64,14 @@ class RequestHandler:
         self.data = data
         self.form = form
 
+    @staticmethod
+    def timeout() -> int:
+        tm = core.core_data.config.get_int(core.ConfigKey.MAX_REQUEST_TIMEOUT)
+        if tm <= 0:
+            cli.color.color_print_key("timeout_too_small")
+            tm = core.core_data.config.get_default(core.ConfigKey.MAX_REQUEST_TIMEOUT)
+        return tm
+
     def get(
         self,
         stream: bool = False,
@@ -78,13 +86,7 @@ class RequestHandler:
             return requests.get(
                 self.url,
                 headers=self.headers,
-                timeout=(
-                    None
-                    if no_timeout
-                    else core.core_data.config.get_int(
-                        core.ConfigKey.MAX_REQUEST_TIMEOUT
-                    )
-                ),
+                timeout=(None if no_timeout else self.timeout()),
                 stream=stream,
                 files=None if self.form is None else self.form.into_files(),
             )
@@ -105,16 +107,11 @@ class RequestHandler:
                 self.url,
                 headers=self.headers,
                 data=self.data.data,
-                timeout=(
-                    None
-                    if no_timeout
-                    else core.core_data.config.get_int(
-                        core.ConfigKey.MAX_REQUEST_TIMEOUT
-                    )
-                ),
+                timeout=(None if no_timeout else self.timeout()),
                 files=None if self.form is None else self.form.into_files(),
             )
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
             return None
         except OverflowError:
             cli.color.color_print_key("timeout_too_large")
+            return None
